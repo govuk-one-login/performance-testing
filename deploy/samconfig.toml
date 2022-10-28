@@ -1,0 +1,12 @@
+version = 0.1
+[build]
+[build.deploy]
+[build.deploy.parameters]
+stack_name = "andyperf"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-oesu6guijt9u"
+s3_prefix = "andyperf"
+region = "eu-west-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_NAMED_IAM"
+parameter_overrides = "Environment=\"build\" PermissionsBoundary=\"none\""
+image_repositories = []

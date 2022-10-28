@@ -1,0 +1,184 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  di-devplatform-performance
+
+  Performance Testing Framework for Load Testing
+
+Conditions:
+  UsePermissionsBoundary:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref PermissionsBoundary
+          - "none"
+
+Mappings:
+  LoadTesters:
+    AllEnvironments:
+      principals: 
+        - "arn:aws:iam::622626885786:user/thomas.dann@digital.cabinet-office.gov.uk"
+        - "arn:aws:iam::622626885786:user/andrew.loughran@digital.cabinet-office.gov.uk"
+Parameters:
+  Environment:
+    Description: "The name of the environment to deploy to"
+    Type: "String"
+    AllowedValues:
+      - build
+      - staging
+  PermissionsBoundary:
+    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
+    Type: String
+    Default: "none"
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+# Globals:
+
+Resources:
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-PerformanceTester"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              AWS: !FindInMap [LoadTesters, AllEnvironments, principals]
+            Condition:
+              Bool:
+                aws:MultiFactorAuthPresent: true
+          - Effect: "Allow"
+            Principal:
+              Service: "codebuild.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
+        # - arn:aws:iam::aws:policy/AWSCodeBuildAdminAccess (can revisit if required)
+      PermissionsBoundary: !If [
+          UsePermissionsBoundary,
+          !Ref PermissionsBoundary,
+          !Ref AWS::NoValue,
+        ]
+      
+
+  CodeBuildServicePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${AWS::StackName}-CodeBuildServicePolicy-${Environment}
+      Roles:
+        - !Ref CodeBuildServiceRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: "arn:aws:logs:*:*:*"
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:PutObject
+              - s3:GetBucketAcl
+              - s3:GetBucketLocation
+            Resource:
+              - !Sub "arn:aws:s3:::codepipeline-${AWS::Region}-*/*"
+          - Effect: Allow
+            Action:
+              - codecommit:GitPull
+            Resource: !Sub "arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${AWS::StackName}"
+          - Effect: Allow
+            Action:
+              - ecr:GetAuthorizationToken
+              - ecr:BatchCheckLayerAvailability
+              - ecr:GetDownloadUrlForLayer
+              - ecr:BatchGetImage
+              - ecr:CompleteLayerUpload
+              - ecr:InitiateLayerUpload
+              - ecr:PutImage
+              - ecr:UploadLayerPart
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - ecs:RegisterTaskDefinition
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - codebuild:CreateReportGroup
+              - codebuild:CreateReport
+              - codebuild:UpdateReport
+              - codebuild:BatchPutTestCases
+            Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-${Environment}-*"
+          - Effect: Allow
+            Action:
+              - iam:PassRole
+            Resource: !GetAtt CodeBuildServiceRole.Arn
+          - Effect: Allow
+            Action:
+              - ec2:DescribeSecurityGroups
+              - ec2:DescribeVpcs
+              - ec2:DescribeSubnets
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DeleteNetworkInterface
+              - ec2:CreateNetworkInterface
+              - ec2:DescribeDhcpOptions
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - ec2:CreateNetworkInterfacePermission
+            Resource: !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"
+            Condition:
+              StringLike:
+                ec2:Subnet:
+                  - !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*"
+                ec2:AuthorizedService: codebuild.amazonaws.com
+
+
+
+  LoadTestCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub "LoadTest-${AWS::StackName}"
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: "NO_ARTIFACTS"
+      Environment:
+        ComputeType: "BUILD_GENERAL1_SMALL"
+        Image: "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
+        Type: "LINUX_CONTAINER"
+      Source:
+        Type: "NO_SOURCE"
+        BuildSpec: |
+          version: 0.2
+          phases:
+            pre_build:
+              commands:
+                - echo Pull loadimpact/k6 image..
+                - docker pull loadimpact/k6
+            build:
+              commands:
+                - echo Run performance test
+                - docker run -i loadimpact/k6 run - <scripts/test.js
+            post_build:
+              commands:
+                - echo Performance test complete
+      Tags:
+        - Key: "Name"
+          Value: !Join
+            - "-"
+            - - !Ref AWS::StackName
+              - "LoadTestCodeBuildProject"
+        - Key: "Service"
+          Value: "ci/cd"
+        - Key: "Source"
+          Value: "alphagov/di-devplatform-performance"
+
+
+Outputs:
+  PerformanceRoleArn:
+    Description: "The RoleArn for performance testers to trigger CodeBuild tests."
+    Value: !Ref CodeBuildServiceRole

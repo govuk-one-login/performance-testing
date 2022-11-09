@@ -48,6 +48,7 @@ Resources:
             Condition:
               Bool:
                 aws:MultiFactorAuthPresent: true
+              # Also add a condition to check that you're on the GDS VPN.
           - Effect: "Allow"
             Principal:
               Service: "codebuild.amazonaws.com"
@@ -145,24 +146,31 @@ Resources:
       Name: !Sub "LoadTest-${AWS::StackName}"
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Artifacts:
-        Type: "NO_ARTIFACTS"
+        Type: "SOURCE" # Needs changing to GH in build, and promote bucket in staging.
       Environment:
         ComputeType: "BUILD_GENERAL1_SMALL"
-        Image: "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
+        Image: "loadimpact/k6" # Replace this with the ECR repo for this SAM container pipeline.
+        ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
       Source:
         Type: "NO_SOURCE"
         BuildSpec: |
           version: 0.2
+         
+          env:
+            variables:
+              TEST_REPORT_DIR: results
+              BACKEND_API_URL: !ImportValue backend-api-gateway-url # Need to check how this works.
+              FE_URL: !ImportValue frontend-url # Need to check how this works.
+          
           phases:
             pre_build:
               commands:
-                - echo Pull loadimpact/k6 image..
-                - docker pull loadimpact/k6
+                - mkdir -p "$TEST_REPORT_DIR"
             build:
               commands:
                 - echo Run performance test
-                - docker run -i loadimpact/k6 run - <scripts/test.js
+                - k6 run - <scripts/suite2/test.js
             post_build:
               commands:
                 - echo Performance test complete

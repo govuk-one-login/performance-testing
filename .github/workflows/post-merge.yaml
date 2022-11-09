@@ -42,10 +42,10 @@ jobs:
         uses: alphagov/di-devplatform-upload-action-ecr@1.0.2
         with:
           artifact-bucket-name: ${{ secrets.ARTIFACT_BUCKET_NAME }}
-          container-sign-kms-key-arn: ${{ secrets.SIGNING_PROFILE_NAME }}
+          container-sign-kms-key-arn: ${{ secrets.CONTAINER_SIGN_KMS_KEY }}
           working-directory: ./deploy
           template-file: template.yaml
-          role-to-assume-arn: ${{ secrets.ROLE_TO_ASSUME }}
+          role-to-assume-arn: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
             
       - name: SAM Validate
         run: sam validate --region ${{ env.AWS_REGION }} -t deploy/template.yaml

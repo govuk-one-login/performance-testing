@@ -45,7 +45,7 @@ jobs:
           container-sign-kms-key-arn: ${{ secrets.SIGNING_PROFILE_NAME }}
           working-directory: ./deploy
           template-file: template.yaml
-          role-to-assume-arn: ${{ secrets.ROLE_TO_ASSUME }}}
+          role-to-assume-arn: ${{ secrets.ROLE_TO_ASSUME }}
             
       - name: SAM Validate
         run: sam validate --region ${{ env.AWS_REGION }} -t deploy/template.yaml

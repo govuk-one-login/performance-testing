@@ -1,0 +1,63 @@
+name: Main CI
+on:
+  workflow_run:
+    workflows: ["Performance Test Upload & Docker Build"]
+    branches: [main]
+    types: [completed]
+
+  workflow_dispatch:
+    inputs: 
+      environment:
+        type: choice
+        description: Environment
+        options:
+          - build
+        required: true
+        default: build
+
+jobs:
+  dockerBuildAndPush:
+    name: Docker build and push
+    runs-on: ubuntu-latest
+    
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+
+      - name: Set up AWS creds
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Deploy SAM app to ECR
+        uses: alphagov/di-devplatform-upload-action-ecr@2
+          artifact-bucket-name: ${{ secrets.ARTIFACT_BUCKET_NAME }}
+          container-sign-kms-key-arn: ${{ secrets.SIGNING_PROFILE_NAME }}
+          working-directory: ./deploy
+          template-file: template.yaml
+          role-to-assume-arn: ${{ secrets.ROLE_TO_ASSUME }}}
+          
+      - name: SAM Validate
+        run: sam validate --region ${{ env.AWS_REGION }} -t deploy/template.yaml
+
+      - name: Create cf-template.yaml and zip
+        run: |
+          cd ${GITHUB_WORKSPACE}/deploy || exit 1
+          sam build
+          mv .aws-sam/build/template.yaml cf-template.yaml
+          zip template.zip cf-template.yaml
+      - name: Upload CloudFormation artifacts to S3
+        env:
+          ARTIFACT_BUCKET: ${{ secrets.BUILD_ARTIFACT_BUCKET }}
+        run: |
+          cd ${GITHUB_WORKSPACE}/deploy || exit 1
+          aws s3 cp template.zip "s3://$ARTIFACT_BUCKET/template.zip" --metadata "repository=$GITHUB_REPOSITORY,commitsha=$GITHUB_SHA"

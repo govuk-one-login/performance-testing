@@ -39,7 +39,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Deploy SAM app to ECR
-        uses: alphagov/di-devplatform-upload-action-ecr@2
+        uses: alphagov/di-devplatform-upload-action-ecr@1.0.2
           artifact-bucket-name: ${{ secrets.ARTIFACT_BUCKET_NAME }}
           container-sign-kms-key-arn: ${{ secrets.SIGNING_PROFILE_NAME }}
           working-directory: ./deploy

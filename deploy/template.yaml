@@ -150,10 +150,10 @@ Resources:
       Name: !Sub "LoadTest-${AWS::StackName}"
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Artifacts:
-        Type: "SOURCE" # Needs changing to GH in build, and promote bucket in staging.
+        Type: "NO_ARTIFACTS" # Needs changing to GH in build, and promote bucket in staging.
       Environment:
         ComputeType: "BUILD_GENERAL1_SMALL"
-        Image: "loadimpact/k6" # Replace this with the ECR repo for this SAM container pipeline.
+        Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
       Source:
@@ -174,7 +174,7 @@ Resources:
             build:
               commands:
                 - echo Run performance test
-                - k6 run - <scripts/suite2/test.js
+                - k6 run - <scripts/test.js
             post_build:
               commands:
                 - echo Performance test complete

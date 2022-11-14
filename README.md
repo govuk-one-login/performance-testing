@@ -21,7 +21,7 @@ The performance stack is independent of the application stacks, they should only
 
 ### Product Level Load Testing
 
-Where we're testing against a deployed 'product' in an environment.  
+Where we're testing against a deployed 'product' in an environment.
 
 ### Stack Level Load Testing
 

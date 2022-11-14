@@ -174,7 +174,7 @@ Resources:
             build:
               commands:
                 - echo Run performance test
-                - k6 run - <scripts/test.js
+                - k6 run - </home/k6/scripts/test.js
             post_build:
               commands:
                 - echo Performance test complete

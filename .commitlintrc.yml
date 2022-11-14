@@ -1,0 +1,14 @@
+---
+# See: https://commitlint.js.org/#/reference-rules
+rules:
+  body-leading-blank: [2, 'always']
+  footer-leading-blank: [2, 'always']
+  header-case: [1, 'always', 'sentence-case']
+  header-full-stop: [2, 'never']
+  header-max-length: [2, 'always', 50]
+  references-empty: [1, 'never']
+  trailer-exists: [1, 'always', 'Co-authored-by:']
+parserPreset:
+  parserOpts:
+    # sets the prefix that references-empty will look for
+    issuePrefixes: ['PLAT-']

@@ -1,0 +1,5 @@
+---
+- search: /artefact/
+  insensitive: true
+  description: >
+    British spelling of "artefact" is not used, use "artifact" instead.

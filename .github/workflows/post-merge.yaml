@@ -6,7 +6,7 @@ on:
     types: [completed]
 
   workflow_dispatch:
-    inputs: 
+    inputs:
       environment:
         type: choice
         description: Environment
@@ -19,7 +19,7 @@ jobs:
   dockerBuildAndPush:
     name: Docker build and push
     runs-on: ubuntu-latest
-    
+
     permissions:
       id-token: write
       contents: read
@@ -46,8 +46,8 @@ jobs:
           working-directory: ./deploy
           template-file: template.yaml
           role-to-assume-arn: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
-          ecr-repo-name: ${{ secrets.ECR_REPOSITORY }}          
-            
+          ecr-repo-name: ${{ secrets.ECR_REPOSITORY }}
+
       # - name: SAM Validate
       #   run: sam validate --region ${{ env.AWS_REGION }} -t deploy/template.yaml
 

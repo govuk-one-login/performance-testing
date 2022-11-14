@@ -15,9 +15,10 @@ Conditions:
 Mappings:
   LoadTesters:
     AllEnvironments:
-      principals: 
+      principals:
         - "arn:aws:iam::622626885786:user/thomas.dann@digital.cabinet-office.gov.uk"
         - "arn:aws:iam::622626885786:user/andrew.loughran@digital.cabinet-office.gov.uk"
+        - "arn:aws:iam::622626885786:user/monjurul.haque@digital.cabinet-office.gov.uk"
 Parameters:
   Environment:
     Description: "The name of the environment to deploy to"
@@ -62,7 +63,7 @@ Resources:
           !Ref PermissionsBoundary,
           !Ref AWS::NoValue,
         ]
-      
+
 
   CodeBuildServicePolicy:
     Type: AWS::IAM::Policy
@@ -113,7 +114,7 @@ Resources:
               - codebuild:CreateReport
               - codebuild:UpdateReport
               - codebuild:BatchPutTestCases
-            Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-${Environment}-*"
+            Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${LoadTestCodeBuildProject}-*"
           - Effect: Allow
             Action:
               - iam:PassRole
@@ -139,7 +140,7 @@ Resources:
                 ec2:AuthorizedService: codebuild.amazonaws.com
           - Effect: Allow
             Action:
-              - cloudformation:ListStacks 
+              - cloudformation:ListStacks
             Resource: "*"
 
 
@@ -160,13 +161,13 @@ Resources:
         Type: "NO_SOURCE"
         BuildSpec: |
           version: 0.2
-         
+
           env:
             variables:
               TEST_REPORT_DIR: results
               BACKEND_API_URL: !ImportValue backend-api-gateway-url # Need to check how this works.
               FE_URL: !ImportValue frontend-url # Need to check how this works.
-          
+
           phases:
             pre_build:
               commands:
@@ -174,10 +175,16 @@ Resources:
             build:
               commands:
                 - echo Run performance test
-                - k6 run - </home/k6/scripts/test.js
+                - k6 run --out json=$TEST_REPORT_DIR/report.json  - </home/k6/scripts/test.js
             post_build:
               commands:
                 - echo Performance test complete
+
+          reports:
+            TestReports:
+              files:
+                - results/**/*
+              file-format: CUCUMBERJSON
       Tags:
         - Key: "Name"
           Value: !Join

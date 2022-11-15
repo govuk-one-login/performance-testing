@@ -180,11 +180,6 @@ Resources:
               commands:
                 - echo Performance test complete
 
-          reports:
-            TestReports:
-              files:
-                - results/**/*
-              file-format: CUCUMBERJSON
       Tags:
         - Key: "Name"
           Value: !Join

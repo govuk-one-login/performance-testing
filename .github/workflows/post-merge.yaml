@@ -1,19 +1,9 @@
-name: Main CI
-on:
-  workflow_run:
-    workflows: ["Performance Test Upload & Docker Build"]
-    branches: [main]
-    types: [completed]
+name: Publish
 
-  workflow_dispatch:
-    inputs:
-      environment:
-        type: choice
-        description: Environment
-        options:
-          - build
-        required: true
-        default: build
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   dockerBuildAndPush:
@@ -47,19 +37,3 @@ jobs:
           template-file: template.yaml
           role-to-assume-arn: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
           ecr-repo-name: ${{ secrets.ECR_REPOSITORY }}
-
-      # - name: SAM Validate
-      #   run: sam validate --region ${{ env.AWS_REGION }} -t deploy/template.yaml
-
-      # - name: Create cf-template.yaml and zip
-      #   run: |
-      #     cd ${GITHUB_WORKSPACE}/deploy || exit 1
-      #     sam build
-      #     mv .aws-sam/build/template.yaml cf-template.yaml
-      #     zip template.zip cf-template.yaml
-      # - name: Upload CloudFormation artifacts to S3
-      #   env:
-      #     ARTIFACT_BUCKET: ${{ secrets.BUILD_ARTIFACT_BUCKET }}
-      #   run: |
-      #     cd ${GITHUB_WORKSPACE}/deploy || exit 1
-      #     aws s3 cp template.zip "s3://$ARTIFACT_BUCKET/template.zip" --metadata "repository=$GITHUB_REPOSITORY,commitsha=$GITHUB_SHA"

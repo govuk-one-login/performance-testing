@@ -35,6 +35,7 @@ jobs:
 
       - name: Transpile TypeScript test scripts
         run: |
+          cd scripts
           node ./build.js
           cp -R ../scripts/dist/. ../deploy/scripts/
 

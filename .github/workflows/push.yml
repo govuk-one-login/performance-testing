@@ -29,4 +29,4 @@ jobs:
       - name: Run local k6 unit test script
         uses: grafana/k6-action@v0.2.0
         with:
-          filename: ./dist/unit-tests.js
+          filename: .scripts/dist/unit-tests.js

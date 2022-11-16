@@ -23,6 +23,7 @@ jobs:
 
       - name: Transpile TypeScript test scripts
         run: |
+          cd scripts
           node ./build.js
 
       - name: Run local k6 unit test script

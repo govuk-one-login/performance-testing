@@ -15,7 +15,7 @@ build({
     minify: false,
     external: ["k6*", "https://*"],
 })
-.then(res => {
+.then(() => {
     console.log("Transpiled files generated:");
     glob.sync(outdir + '/*').forEach(file => {
         console.log(`+ \x1b[32m${file}\x1b[0m`)

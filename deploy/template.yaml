@@ -19,6 +19,9 @@ Mappings:
         - "arn:aws:iam::622626885786:user/thomas.dann@digital.cabinet-office.gov.uk"
         - "arn:aws:iam::622626885786:user/andrew.loughran@digital.cabinet-office.gov.uk"
         - "arn:aws:iam::622626885786:user/monjurul.haque@digital.cabinet-office.gov.uk"
+        - "arn:aws:iam::622626885786:user/abhinay.srivastava@digital.cabinet-office.gov.uk"
+        - "arn:aws:iam::622626885786:user/paul.flood@digital.cabinet-office.gov.uk"
+
 Parameters:
   Environment:
     Description: "The name of the environment to deploy to"

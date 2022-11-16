@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install dependencies
         run: |
           cd scripts
@@ -29,4 +29,4 @@ jobs:
       - name: Run local k6 unit test script
         uses: grafana/k6-action@v0.2.0
         with:
-          filename: .scripts/dist/unit-tests.js
+          filename: ./scripts/dist/unit-tests.js

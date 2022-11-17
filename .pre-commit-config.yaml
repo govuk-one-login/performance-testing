@@ -38,6 +38,11 @@ repos:
         stages: [commit-msg]
         args: ['--verbose']
         verbose: true
+  - repo: https://github.com/aws-cloudformation/cfn-python-lint
+    rev: v0.65.1
+    hooks:
+      - id: cfn-python-lint
+        files: ^(?!\..*).*/template\.(json|yml|yaml)$
   - repo: https://github.com/bridgecrewio/checkov.git
     rev: '2.0.1100'
     hooks:

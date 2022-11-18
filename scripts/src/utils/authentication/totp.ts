@@ -54,7 +54,7 @@ function decToHex(d: number) {
 
 // Converts a (RFC 4648) base32 string to a byte array
 function base32ToBytes(base32: string) {
-    let base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",
+    let base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567", //pragma: allowlist secret
         bits = "",
         bytes: number[] = [];
 

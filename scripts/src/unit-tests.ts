@@ -1,5 +1,5 @@
 import { check, group } from 'k6';
-import TOTP from './utils/totp';
+import TOTP from './utils/authentication/totp';
 
 export const options = {
   vus: 1,

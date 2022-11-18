@@ -29,15 +29,17 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Install dependencies
+        working-directory: ./scripts
+        shell: bash
         run: |
-          cd scripts
-          npm i
+          npm install
 
       - name: Transpile TypeScript test scripts
+        working-directory: ./scripts
+        shell: bash
         run: |
-          cd scripts
           node ./build.js
-          cp -R ../scripts/dist/. ../deploy/scripts/
+          cp -R ./dist/. ../deploy/scripts/
 
       - name: Deploy SAM app to ECR
         uses: alphagov/di-devplatform-upload-action-ecr@1.0.2

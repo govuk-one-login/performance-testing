@@ -1,7 +1,8 @@
 import http from 'k6/http';
+import { Options } from 'k6/options';
 import { sleep } from 'k6';
 
-export const options = {
+export const options: Options = {
   duration: '1m',
   vus: 50,
   thresholds: {

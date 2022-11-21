@@ -14,7 +14,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
 
@@ -27,6 +27,19 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Install dependencies
+        working-directory: ./scripts
+        shell: bash
+        run: |
+          npm install
+
+      - name: Transpile TypeScript test scripts
+        working-directory: ./scripts
+        shell: bash
+        run: |
+          node ./build.js
+          cp -R ./dist/. ../deploy/scripts/
 
       - name: Deploy SAM app to ECR
         uses: alphagov/di-devplatform-upload-action-ecr@1.0.2

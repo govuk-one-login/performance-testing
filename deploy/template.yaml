@@ -145,6 +145,8 @@ Resources:
 
           env:
             variables:
+              WORK_DIR: /home/k6
+              TEST_SCRIPT: scripts/test.js
               TEST_REPORT_DIR: results
               BACKEND_API_URL: !ImportValue backend-api-gateway-url # Need to check how this works.
               FE_URL: !ImportValue frontend-url # Need to check how this works.
@@ -156,7 +158,7 @@ Resources:
             build:
               commands:
                 - echo Run performance test
-                - k6 run --out json=$TEST_REPORT_DIR/report.json  - </home/k6/scripts/test.js
+                - k6 run $WORK_DIR/$TEST_SCRIPT --out json=$TEST_REPORT_DIR/report.json
             post_build:
               commands:
                 - echo Performance test complete

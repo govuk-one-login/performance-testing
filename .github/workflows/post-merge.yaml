@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./deploy
+
 jobs:
   dockerBuildAndPush:
     name: Docker build and push
@@ -14,34 +19,6 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: '0'
-
-      - name: Set up AWS creds
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
-          aws-region: eu-west-2
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Install dependencies
-        working-directory: ./scripts
-        shell: bash
-        run: |
-          npm install
-
-      - name: Transpile TypeScript test scripts
-        working-directory: ./scripts
-        shell: bash
-        run: |
-          node ./build.js
-          cp -R ./dist/. ../deploy/scripts/
-          ls -l ../deploy/scripts/
-
       - name: Deploy SAM app to ECR
         uses: alphagov/di-devplatform-upload-action-ecr@1.0.2
         with:

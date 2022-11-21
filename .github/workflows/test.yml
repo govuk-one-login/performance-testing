@@ -43,4 +43,5 @@ jobs:
 
       - name: test
         shell: bash
+        working-directory: ./deploy
         run: find . -type f

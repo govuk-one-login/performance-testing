@@ -1,0 +1,35 @@
+name: Unit Test
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  k6_unit_test:
+    name: Run k6 unit test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: '0'
+
+      - name: Install dependencies
+        run: |
+          cd scripts
+          npm i
+
+      - name: Transpile TypeScript test scripts
+        run: |
+          cd scripts
+          node ./build.js
+
+      - name: Run local k6 unit test script
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: ./scripts/dist/unit-tests.js

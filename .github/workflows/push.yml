@@ -4,6 +4,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./deploy
+
 jobs:
   k6_unit_test:
     name: Run k6 unit test
@@ -28,4 +33,4 @@ jobs:
       - name: Run local k6 unit test script
         uses: grafana/k6-action@v0.2.0
         with:
-          filename: ./scripts/dist/unit-tests.js
+          filename: ./deploy/scripts/dist/unit-tests.js

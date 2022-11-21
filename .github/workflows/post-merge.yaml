@@ -40,6 +40,7 @@ jobs:
         run: |
           node ./build.js
           cp -R ./dist/. ../deploy/scripts/
+          ls -l ../deploy/scripts/
 
       - name: Deploy SAM app to ECR
         uses: alphagov/di-devplatform-upload-action-ecr@1.0.2

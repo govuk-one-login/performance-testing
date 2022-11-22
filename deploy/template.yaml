@@ -125,6 +125,16 @@ Resources:
             Action:
               - iam:PassRole
             Resource: !GetAtt CodeBuildServiceRole.Arn
+          - Effect: "Allow"
+            Action:
+              - "s3:ListAllMyBuckets"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::*"
+              - !Sub "arn:${AWS::Partition}:s3:::*/*"
+            Condition:
+              StringEquals:
+                "s3:ResourceAccount":
+                  - !Sub "${AWS::AccountId}"
 
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project

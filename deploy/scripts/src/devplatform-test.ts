@@ -1,11 +1,9 @@
 import http, { Response } from 'k6/http';
-import { Options, Scenario } from 'k6/options';
+import { Options } from 'k6/options';
 import { check, group, sleep } from 'k6';
+import { selectProfile, ProfileList, describeProfile } from './utils/config/load-profiles';
 
-type ScenarioList = { [name: string]: Scenario };
-type Profiles = { [name: string]: ScenarioList };
-
-const profiles: Profiles = {
+const profiles: ProfileList = {
   smoke: {
     demo_sam_app: {
       executor: 'ramping-arrival-rate',
@@ -33,25 +31,19 @@ const profiles: Profiles = {
     },
   }
 }
-
-// Scenarios specified in --env SCENARIO flag (e.g. --env SCENARIO=sign_in,sign_up)
-// Are added to the executed scenarios, otherwise all scenarios are run
-let allScenarios = profiles['smoke'];
-let enabledScenarios: { [name: string]: Scenario } = {};
-if (__ENV.SCENARIO == null) {
-  enabledScenarios = allScenarios;
-}
-else {
-  __ENV.SCENARIO.split(',').forEach(scenario => enabledScenarios[scenario] = allScenarios[scenario]);
-}
+let loadProfile = selectProfile(profiles);
 
 export const options: Options = {
-  scenarios: enabledScenarios,
+  scenarios: loadProfile.scenarios,
   thresholds: {
     http_req_duration: ['p(95)<500'], // 95th percntile response time <500ms
     http_req_failed: ['rate<0.05'],   // Error rate <5%
   },
 };
+
+export function setup() {
+  describeProfile(loadProfile);
+}
 
 export function demo_sam_app() {
   let res: Response;

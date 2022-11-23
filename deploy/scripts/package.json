@@ -8,6 +8,7 @@
     "@types/k6": "^0.41.0",
     "core-js": "^3.26.1",
     "esbuild": "^0.15.14",
+    "esbuild-plugin-copy": "^2.0.1",
     "glob": "^8.0.3",
     "k6": "0.0.0",
     "typescript": "^4.8.4"

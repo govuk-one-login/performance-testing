@@ -1,16 +1,20 @@
+[![Publish](https://github.com/alphagov/di-devplatform-performance/actions/workflows/post-merge.yaml/badge.svg?branch=main)](https://github.com/alphagov/di-devplatform-performance/actions/workflows/post-merge.yaml)
+
 # Performance Testing Framework
 
 The following is an example performance test framework.
 
-## K6.io
+## k6.io
 
-This framework is setup to execute K6.io against stacks _in the same account_ as this performance test application.
+This framework is setup to execute [k6](k6.io) against stacks _in the same account_ as this performance test application.
 
 ## Environment Variables
 
 This will run against one or more stacks.  To understand the environment, the K6 container will have the following env variables exposed:
 
+```
 $CFN_$StackName_$Output
+```
 
 The tests should aim to be 100% blackbox testing.
 If the developers require further access, this should be exposed via a specific permission on the performance application roles/pipelines.  The application stacks themselves should not need to be modified at anything other than environment specific config.

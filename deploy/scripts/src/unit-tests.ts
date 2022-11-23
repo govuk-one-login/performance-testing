@@ -1,6 +1,6 @@
 import { check, group } from 'k6';
 import TOTP from './utils/authentication/totp';
-import { ProfileList, selectProfile } from './utils/config/load-profiles';
+import { Profile, ProfileList, selectProfile } from './utils/config/load-profiles';
 
 export const options = {
   vus: 1,
@@ -56,38 +56,22 @@ export default () => {
       }
     }
 
-    let noFlags = selectProfile(profiles)
-    let profileOnly = selectProfile(profiles, { profile: 'stress' })
-    let singleScenario = selectProfile(profiles, { profile: 'smoke', scenario: 'scenario-1b' })
-    let multiScenario = selectProfile(profiles, { profile: 'stress', scenario: 'scenario-2a,scenario-2b' })
-    let scenarioBlank = selectProfile(profiles, { profile: 'smoke', scenario: '' })
+    let noFlags = selectProfile(profiles);
+    let profileOnly = selectProfile(profiles, { profile: 'stress' });
+    let singleScenario = selectProfile(profiles, { profile: 'smoke', scenario: 'scenario-1b' });
+    let multiScenario = selectProfile(profiles, { profile: 'stress', scenario: 'scenario-2a,scenario-2b' });
+    let scenarioBlank = selectProfile(profiles, { profile: 'stress', scenario: '' });
 
-    check(noFlags, {
-      'No Flags': p =>
-        p.name == 'smoke' &&
-        'scenario-1a' in p.scenarios &&
-        'scenario-1b' in p.scenarios
-    });
-    check(profileOnly, {
-      'Profile Only': p =>
-        p.name == 'stress' &&
-        Object.keys(p.scenarios).length == 3
-    });
-    check(singleScenario, {
-      'Single Scenario': p =>
-        p.name == 'smoke' &&
-        !('scenario-1a' in p.scenarios) &&
-        'scenario-1b' in p.scenarios
-    });
-    check(multiScenario, {
-      'Multi Scenario': p =>
-        p.name == 'stress' &&
-        Object.keys(p.scenarios).length == 2
-    });
-    check(scenarioBlank, {
-      'Scenario Empty String': p =>
-        p.name == 'smoke' &&
-        Object.keys(p.scenarios).length == 2,
+    function checkProfile(profile: Profile, name: String, scenarioCount: number): boolean {
+      return profile.name == name && Object.keys(profile.scenarios).length == scenarioCount;
+    }
+
+    check(null, {
+      'No Flags             ': () => checkProfile(noFlags, 'smoke', 2),         // Default profile is smoke
+      'Profile Only         ': () => checkProfile(profileOnly, 'stress', 3),    // All scenarios for given profile enabled
+      'Single Scenario      ': () => checkProfile(singleScenario, 'smoke', 1),  // Only specified scenario enabled
+      'Multi Scenario       ': () => checkProfile(multiScenario, 'stress', 2),  // Only specified scenarios enabled
+      'Scenario Empty String': () => checkProfile(scenarioBlank, 'stress', 3),  // All scenarios enabled
     });
   });
 }

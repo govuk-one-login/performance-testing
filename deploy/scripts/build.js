@@ -1,4 +1,5 @@
 const { build } = require("esbuild");
+const { copy } =  require("esbuild-plugin-copy");
 const glob = require('glob');
 const outbase = './src';
 const outdir = './dist';
@@ -14,6 +15,14 @@ build({
     watch: false,
     minify: false,
     external: ["k6*", "https://*"],
+    plugins: [
+        copy({
+          assets: {
+            from: [outbase + '/data/*'],
+            to: ['./data'],
+          },
+        }),
+      ],
 })
 .then(() => {
     console.log("Transpiled files generated:");

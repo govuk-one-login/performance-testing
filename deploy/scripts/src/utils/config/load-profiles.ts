@@ -8,7 +8,7 @@ export type Profile = {
 }
 export type ProfileConfig = {
     profile: string,
-    scenario: string,
+    scenario?: string,
 }
 
 // Returns a single load profile from a list of load profiles
@@ -27,9 +27,9 @@ export function getProfile(profiles: ProfileList, profileName: string): Profile 
 // Returns a subset of scenarios based on a comma seperated list of selections
 // Intended to work with CLI flags e.g. '--env SCENARIO=sign_in,sign_up'
 // If selections parameter is not specified then all scenarios are enabled
-export function getScenarios(scenarios: ScenarioList, selections: string): ScenarioList {
+export function getScenarios(scenarios: ScenarioList, selections: string | undefined): ScenarioList {
     let enabled: ScenarioList = {};
-    selections == null ?
+    selections == null || selections == '' ?
         enabled = scenarios :
         selections.split(',').forEach(scenario => enabled[scenario] = scenarios[scenario]);
     return enabled;

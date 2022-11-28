@@ -135,6 +135,11 @@ Resources:
               StringEquals:
                 "s3:ResourceAccount":
                   - !Sub "${AWS::AccountId}"
+          - Effect: "Allow"
+            Action:
+              - "cloudformation:DescribeStacks"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*/*"
 
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project
@@ -150,7 +155,7 @@ Resources:
         Type: "LINUX_CONTAINER"
       Source:
         Type: "NO_SOURCE"
-        BuildSpec: |
+        BuildSpec: !Sub |
           version: 0.2
 
           env:
@@ -160,8 +165,8 @@ Resources:
               TEST_REPORT_DIR: results
               PROFILE: smoke
               SCENARIO: all
-              BACKEND_API_URL: !ImportValue backend-api-gateway-url # Need to check how this works.
-              FE_URL: !ImportValue frontend-url # Need to check how this works.
+              BACKEND_STACK_NAME: demo-sam-app
+              FRONTEND_STACK_NAME: node-app
 
           phases:
             pre_build:
@@ -169,6 +174,18 @@ Resources:
                 - mkdir -p "$TEST_REPORT_DIR"
             build:
               commands:
+                - |
+                  echo "Importing output from $BACKEND_STACK_NAME"
+                - |
+                  aws cloudformation describe-stacks --stack-name "$BACKEND_STACK_NAME" --region "${AWS::Region}" --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt
+                - |
+                  eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
+                - |
+                  echo "Importing output from $FRONTEND_STACK_NAME"
+                - |
+                  aws cloudformation describe-stacks --stack-name "$FRONTEND_STACK_NAME" --region "${AWS::Region}" --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt
+                - |
+                  eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
                 - echo Run performance test
                 - k6 run $WORK_DIR/$TEST_SCRIPT --out json=$TEST_REPORT_DIR/report.json
             post_build:

@@ -29,7 +29,7 @@ export function getProfile(profiles: ProfileList, profileName: string): Profile 
 // If selections parameter is not specified then all scenarios are enabled
 export function getScenarios(scenarios: ScenarioList, selections: string | undefined): ScenarioList {
     let enabled: ScenarioList = {};
-    selections == null || selections == '' ?
+    selections == null || selections == '' || selections.toLowerCase() == 'all' ?   // Enable all scenarios is selection string is null, empty or set to 'all'
         enabled = scenarios :
         selections.split(',').forEach(scenario => enabled[scenario] = scenarios[scenario]);
     return enabled;
@@ -40,7 +40,7 @@ export function getScenarios(scenarios: ScenarioList, selections: string | undef
 // '--env SCENARIO' specifies which scenarios within the load profile to use, defaults to all
 let defaultConfig: ProfileConfig = {
     profile: __ENV.PROFILE ?? 'smoke',
-    scenario: __ENV.SCENARIO,
+    scenario: __ENV.SCENARIO ?? 'all',
 };
 export function selectProfile(profiles: ProfileList, config: typeof defaultConfig = defaultConfig): Profile {
     let profile = getProfile(profiles, config.profile);

@@ -60,6 +60,7 @@ export default () => {
     let profileOnly = selectProfile(profiles, { profile: 'stress' });
     let singleScenario = selectProfile(profiles, { profile: 'smoke', scenario: 'scenario-1b' });
     let multiScenario = selectProfile(profiles, { profile: 'stress', scenario: 'scenario-2a,scenario-2b' });
+    let scenarioAll = selectProfile(profiles, { profile: 'smoke', scenario: 'all' });
     let scenarioBlank = selectProfile(profiles, { profile: 'stress', scenario: '' });
 
     function checkProfile(profile: Profile, name: String, scenarioCount: number): boolean {
@@ -71,6 +72,7 @@ export default () => {
       'Profile Only         ': () => checkProfile(profileOnly, 'stress', 3),    // All scenarios for given profile enabled
       'Single Scenario      ': () => checkProfile(singleScenario, 'smoke', 1),  // Only specified scenario enabled
       'Multi Scenario       ': () => checkProfile(multiScenario, 'stress', 2),  // Only specified scenarios enabled
+      'Scenario "all" String': () => checkProfile(scenarioAll, 'smoke', 2),     // All scenarios enabled
       'Scenario Empty String': () => checkProfile(scenarioBlank, 'stress', 3),  // All scenarios enabled
     });
   });

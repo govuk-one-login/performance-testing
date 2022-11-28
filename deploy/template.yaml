@@ -148,8 +148,8 @@ Resources:
               WORK_DIR: /home/k6
               TEST_SCRIPT: scripts/test.js
               TEST_REPORT_DIR: results
-              PROFILE: ""
-              SCENARIO: ""
+              PROFILE: smoke
+              SCENARIO: all
               BACKEND_API_URL: !ImportValue backend-api-gateway-url # Need to check how this works.
               FE_URL: !ImportValue frontend-url # Need to check how this works.
 

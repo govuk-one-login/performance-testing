@@ -1,5 +1,6 @@
 import { check, group } from 'k6';
 import TOTP from './utils/authentication/totp';
+import { Profile, ProfileList, selectProfile } from './utils/config/load-profiles';
 
 export const options = {
   vus: 1,
@@ -10,7 +11,7 @@ export const options = {
 }
 
 export default () => {
-  group("totp", () => {
+  group("authentication/totp", () => {
     // Examples from https://www.rfc-editor.org/rfc/rfc6238
     let sha1seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'; //Ascii string "12345678901234567890" in base32
     let sha256seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZA====';  // 32 byte seed
@@ -26,6 +27,53 @@ export default () => {
       '| SHA1   | T+1234567890  |': () => sha1otp.generateTOTP(1234567890 * 1000) === '89005924',
       '| SHA256 | T+2000000000  |': () => sha256otp.generateTOTP(2000000000 * 1000) === '90698825',
       '| SHA512 | T+20000000000 |': () => sha512otp.generateTOTP(20000000000 * 1000) === '47863826',
+    });
+  });
+
+  group("config/load-profiles", () => {
+    let profiles: ProfileList = {
+      'smoke': {
+        'scenario-1a': {
+          executor: 'constant-vus',
+          duration: '1s',
+        },
+        'scenario-1b': {
+          executor: 'shared-iterations',
+        }
+      },
+      'stress': {
+        'scenario-2a': {
+          executor: 'ramping-vus',
+          stages: [],
+        },
+        'scenario-2b': {
+          executor: 'externally-controlled',
+          duration: '2s',
+        },
+        'scenario-2c': {
+          executor: 'per-vu-iterations',
+        }
+      }
+    }
+
+    let noFlags = selectProfile(profiles);
+    let profileOnly = selectProfile(profiles, { profile: 'stress' });
+    let singleScenario = selectProfile(profiles, { profile: 'smoke', scenario: 'scenario-1b' });
+    let multiScenario = selectProfile(profiles, { profile: 'stress', scenario: 'scenario-2a,scenario-2b' });
+    let scenarioAll = selectProfile(profiles, { profile: 'smoke', scenario: 'all' });
+    let scenarioBlank = selectProfile(profiles, { profile: 'stress', scenario: '' });
+
+    function checkProfile(profile: Profile, name: String, scenarioCount: number): boolean {
+      return profile.name == name && Object.keys(profile.scenarios).length == scenarioCount;
+    }
+
+    check(null, {
+      'No Flags             ': () => checkProfile(noFlags, 'smoke', 2),         // Default profile is smoke
+      'Profile Only         ': () => checkProfile(profileOnly, 'stress', 3),    // All scenarios for given profile enabled
+      'Single Scenario      ': () => checkProfile(singleScenario, 'smoke', 1),  // Only specified scenario enabled
+      'Multi Scenario       ': () => checkProfile(multiScenario, 'stress', 2),  // Only specified scenarios enabled
+      'Scenario "all" String': () => checkProfile(scenarioAll, 'smoke', 2),     // All scenarios enabled
+      'Scenario Empty String': () => checkProfile(scenarioBlank, 'stress', 3),  // All scenarios enabled
     });
   });
 }

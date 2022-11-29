@@ -160,8 +160,8 @@ Resources:
 
           env:
             variables:
-              WORK_DIR: /home/k6
-              TEST_SCRIPT: scripts/test.js
+              WORK_DIR: /home/k6/scripts
+              TEST_SCRIPT: test.js
               TEST_REPORT_DIR: results
               PROFILE: smoke
               SCENARIO: all

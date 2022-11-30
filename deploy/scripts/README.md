@@ -39,8 +39,8 @@ Unit tests to validate the TypeScript utility files are contained in the [`src/u
 
 This unit test also runs when raising pull requests as a [github action](../../.github/workflows/push.yml). If adding an additional utility in the `src/utils` folder, add another `group` to the test script with `checks` to validate the behaviour.
 
-## Running Performance Tests
-1. Login to [`gds-users`](https://gds-users.signin.aws.amazon.com/console) AWS account
+## Running Performance Tests in CodeBuild
+1.  Login to [`gds-users`](https://gds-users.signin.aws.amazon.com/console) AWS account
 
 2. Switch to the relevant Performance Tester role.
 
@@ -68,3 +68,4 @@ This unit test also runs when raising pull requests as a [github action](../../.
 
 5. Click 'Start Build'
 
+6. Build progress and the stdout results summary are printed in the 'Build logs'

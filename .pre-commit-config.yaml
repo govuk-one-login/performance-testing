@@ -16,9 +16,9 @@ repos:
       - id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
         exclude: .*/keys/.*|
-              (?x)(
-                     ^package-lock.json$/|
-                     ^Pipfile/|
+              (
+                     ^package-lock.json$|
+                     ^Pipfile|
                      ^pyproject.toml
               )
   - repo: https://github.com/Lucas-C/pre-commit-hooks

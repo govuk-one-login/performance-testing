@@ -44,7 +44,7 @@ repos:
       - id: cfn-python-lint
         files: ^(?!\..*).*/template\.(json|yml|yaml)$
   - repo: https://github.com/bridgecrewio/checkov.git
-    rev: '2.0.1100'
+    rev: '2.2.130'
     hooks:
       - id: checkov
         args: ['--framework', 'cloudformation', '--quiet']

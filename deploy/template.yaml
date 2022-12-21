@@ -140,6 +140,12 @@ Resources:
               - "cloudformation:DescribeStacks"
             Resource:
               - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*/*"
+          - Effect: "Allow"
+            Action:
+              - "ssm:GetParameters",
+              - "ssm:GetParametersByPath"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path            
 
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project
@@ -167,6 +173,9 @@ Resources:
               SCENARIO: all
               BACKEND_STACK_NAME: demo-sam-app
               FRONTEND_STACK_NAME: node-app
+            parameter-store:
+              APP_PASSWORD: "/perfTest/testUserPassword"
+              AUTH_APP_KEY: "/perfTest/authAppKey"
 
           phases:
             pre_build:

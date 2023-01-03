@@ -142,10 +142,10 @@ Resources:
               - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*/*"
           - Effect: "Allow"
             Action:
-              - "ssm:GetParameters",
+              - "ssm:GetParameters"
               - "ssm:GetParametersByPath"
             Resource:
-              - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path            
+              - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path
 
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project

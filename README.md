@@ -4,6 +4,15 @@
 
 The following is an example performance test framework.
 
+## Getting Started
+
+Developer tools required:
+
+* AWS CLI with credentials to your target AWS account
+* AWS SAM CLI (`brew tap aws/tap && brew install aws-sam-cli`)
+* pre-commit (`brew install pre-commit && pre-commit install && pre-commit install -tprepare-commit-msg -tcommit-msg`)
+* GDS CLI (`brew tap alphagov/gds && brew install gds-cli`)
+
 ## k6.io
 
 This framework is setup to execute [k6](k6.io) against stacks _in the same account_ as this performance test application.

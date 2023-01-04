@@ -198,7 +198,7 @@ Resources:
                 - |
                   eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
                 - echo Run performance test
-                - k6 run $WORK_DIR/$TEST_SCRIPT --out json=$TEST_REPORT_DIR/report.json
+                - k6 run $WORK_DIR/$TEST_SCRIPT --out json=$TEST_REPORT_DIR/report.json --out output-dynatrace
             post_build:
               commands:
                 - echo Performance test complete

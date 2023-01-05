@@ -176,8 +176,8 @@ Resources:
             parameter-store:
               APP_PASSWORD: "/perfTest/testUserPassword"
               AUTH_APP_KEY: "/perfTest/authAppKey"
-              K6_DYNATRACE_URL: "/dynatrace/url"
-              K6_DYNATRACE_APITOKEN: "/dynatrace/apiToken"
+              K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
+              K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"
 
           phases:
             pre_build:

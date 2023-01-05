@@ -1,4 +1,4 @@
-[![Publish](https://github.com/alphagov/di-devplatform-performance/actions/workflows/post-merge.yaml/badge.svg?branch=main)](https://github.com/alphagov/di-devplatform-performance/actions/workflows/post-merge.yaml)
+[![Publish](https://github.com/alphagov/di-accounts-performance/actions/workflows/post-merge.yaml/badge.svg?branch=main)](https://github.com/alphagov/di-accounts-performance/actions/workflows/post-merge.yaml)
 
 # Performance Testing Framework
 

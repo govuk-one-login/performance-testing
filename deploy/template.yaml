@@ -166,7 +166,7 @@ Resources:
         Service: "ci/cd"
         Source: "alphagov/di-accounts-performance"
   
-    AuthAppParameter:
+  AuthAppParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Description: "Perf Auth App Secret"

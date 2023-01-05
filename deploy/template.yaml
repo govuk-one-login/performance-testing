@@ -20,6 +20,10 @@ Mappings:
         - "arn:aws:iam::622626885786:user/thomas.dann@digital.cabinet-office.gov.uk"
         - "arn:aws:iam::622626885786:user/andrew.loughran@digital.cabinet-office.gov.uk"
         - "arn:aws:iam::622626885786:user/monjurul.haque@digital.cabinet-office.gov.uk"
+        - "arn:aws:iam::622626885786:user/taher.kapasi@digital.cabinet-office.gov.uk"
+        - "arn:aws:iam::622626885786:user/abhinay.srivastava@digital.cabinet-office.gov.uk"
+        - "arn:aws:iam::622626885786:user/domantas.miliauskas@digital.cabinet-office.gov.uk"
+        - "arn:aws:iam::622626885786:user/chris.bates@digital.cabinet-office.gov.uk"
 
 # The IP address blocks below are referenced from here:
 # https://sites.google.com/a/digital.cabinet-office.gov.uk/gds/working-at-gds/gds-internal-it/gds-internal-it-network-public-ip-addresses
@@ -147,6 +151,36 @@ Resources:
             Resource:
               - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path
 
+  TestUserPasswordParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: "Perf Test User Password"
+      Name: "/perfTest/testUserPassword"
+      Type: String
+      Value: " "
+      Tags:
+        Name: !Join
+          - "-"
+          - - !Ref AWS::StackName
+            - "LoadTestCodeBuildProject"
+        Service: "ci/cd"
+        Source: "alphagov/di-accounts-performance"
+  
+    AuthAppParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: "Perf Auth App Secret"
+      Name: "/perfTest/authAppKey"
+      Type: String
+      Value: " "
+      Tags:
+        Name: !Join
+          - "-"
+          - - !Ref AWS::StackName
+            - "LoadTestCodeBuildProject"
+        Service: "ci/cd"
+        Source: "alphagov/di-accounts-performance"
+
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -176,6 +210,8 @@ Resources:
             parameter-store:
               APP_PASSWORD: "/perfTest/testUserPassword"
               AUTH_APP_KEY: "/perfTest/authAppKey"
+              K6_DYNATRACE_URL: "/dynatrace/url"
+              K6_DYNATRACE_APITOKEN: "/dynatrace/apiToken"
 
           phases:
             pre_build:
@@ -196,7 +232,7 @@ Resources:
                 - |
                   eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
                 - echo Run performance test
-                - k6 run $WORK_DIR/$TEST_SCRIPT --out json=$TEST_REPORT_DIR/report.json
+                - k6 run $WORK_DIR/$TEST_SCRIPT --out json=$TEST_REPORT_DIR/report.json --out output-dynatrace
             post_build:
               commands:
                 - echo Performance test complete
@@ -210,7 +246,7 @@ Resources:
         - Key: "Service"
           Value: "ci/cd"
         - Key: "Source"
-          Value: "alphagov/di-devplatform-performance"
+          Value: "alphagov/di-accounts-performance"
 
 
 Outputs:

@@ -149,6 +149,7 @@ const csvData1: UserEmailChange[] = new SharedArray("csvEmailChange",function ()
 type UserPasswordChange = {
   currEmail: string;
 };
+
 const csvData2: UserPasswordChange[] = new SharedArray("csvPasswordChange",function () {
     return open("./data/changePassword_TestData.csv").split("\n").slice(1).map((s) => {
         let data = s.split(",");
@@ -182,6 +183,7 @@ const csvData3: UserPhoneNumberChange[] = new SharedArray("csvPhoneNumChange",fu
 );
 
 type UserDeleteAccount = { currEmail: string; currEmailOTP: string };
+
 const csvData4: UserDeleteAccount[] = new SharedArray("csvDelAccount",function () {
     return open("./data/deleteAccount_TestData.csv").split("\n").slice(1).map((s) => {
         let data = s.split(",");
@@ -254,55 +256,55 @@ export function changeEmail() {
 
   sleep(Math.random() * 3);
 
-  group(`03 - POST Enter Email ID`, () => {
-    res = http.post(
-      env.baseUrl + "/enter-email",
-      {
-        _csrf: csrfToken,
-        email: user1.currEmail,
-      },
-      {
-        tags: { reqName: "03_EnterEmailID" },
-      }
-    );
+    group(`03 - POST Enter Email ID`, () => {
+      res = http.post(
+        env.baseUrl + "/enter-email",
+        {
+          _csrf: csrfToken,
+          email: user1.currEmail,
+        },
+        {
+          tags: { reqName: "03_EnterEmailID" },
+        }
+      );
 
-    check(res, {
-      "is status 200": (r) => r.status === 200,
-      "verify page content": (r) =>
-        (r.body as String).includes("Enter your password"),
-    })
-      ? transactionDuration.add(res.timings.duration)
-      : fail("Response Validation Failed");
+      check(res, {
+        "is status 200": (r) => r.status === 200,
+        "verify page content": (r) =>
+          (r.body as String).includes("Enter your password"),
+      })
+        ? transactionDuration.add(res.timings.duration)
+        : fail("Response Validation Failed");
 
-    csrfToken = getCSRF(res);
-  });
+      csrfToken = getCSRF(res);
+    });
 
   sleep(Math.random() * 3);
 
-  group(`04 - POST Enter Sign in Password`, () => {
-    res = http.post(
-      env.baseUrl + "/enter-password",
-      {
-        _csrf: csrfToken,
-        password: credentials.currPassword,
-      },
-      {
-        tags: { reqName: "04_EnterLoginPassword" },
-      }
-    );
+      group(`04 - POST Enter Sign in Password`, () => {
+        res = http.post(
+          env.baseUrl + "/enter-password",
+          {
+            _csrf: csrfToken,
+            password: credentials.currPassword,
+          },
+          {
+            tags: { reqName: "04_EnterLoginPassword" },
+          }
+        );
 
-    check(res, {
-      "is status 200": (r) => r.status === 200,
-      "verify page content": (r) =>
-        (r.body as String).includes(
-          "We sent a code to the phone number linked to your account"
-        ),
-    })
-      ? transactionDuration.add(res.timings.duration)
-      : fail("Response Validation Failed");
+        check(res, {
+          "is status 200": (r) => r.status === 200,
+          "verify page content": (r) =>
+            (r.body as String).includes(
+              "We sent a code to the phone number linked to your account"
+            ),
+        })
+          ? transactionDuration.add(res.timings.duration)
+          : fail("Response Validation Failed");
 
-    csrfToken = getCSRF(res);
-  });
+        csrfToken = getCSRF(res);
+      });
 
   sleep(2);
 
@@ -319,20 +321,33 @@ export function changeEmail() {
   
           check(res, {
               'is status 200': r => r.status === 200,
-              'verify page content': r => (r.body as String).includes('Delete your GOV.UK account'),
+              'verify page content': r => (r.body as String).includes('Your services'),
           })
           ? transactionDuration.add(res.timings.duration) : fail("Respone Validation Failed");
       });
-      
+
+      sleep(Math.random() * 3);  
+
+      group(`06 - GET Click Settings Tab`, () => {
+        res = http.get(env.launchURL + "/settings", {
+          tags: { reqName: "06_ClickSettingsTab" },
+        });
+  
+        check(res, {
+            'is status 200': r => r.status === 200,
+            'verify page content': r => (r.body as String).includes('Delete your GOV.UK account'),
+        })
+        ? transactionDuration.add(res.timings.duration) : fail("Response Validation Failed");
+     });
 
   sleep(Math.random() * 3);
 
   function changeEmailSteps(loopCount: number) {
     for (let i = 1; i <= loopCount; i++) {
 
-      group(`06 - GET Click Change Email Link`, function () {
+      group(`07 - GET Click Change Email Link`, function () {
         res = http.get(env.launchURL + "/enter-password?type=changeEmail", {
-          tags: { reqName: "06_ClickChangeEmailLink" },
+          tags: { reqName: "07_ClickChangeEmailLink" },
         });
 
         check(res, {
@@ -348,7 +363,7 @@ export function changeEmail() {
 
       sleep(Math.random() * 3);
 
-      group(`07 - POST Enter Current Password`, () => {
+      group(`08 - POST Enter Current Password`, () => {
         res = http.post(
           env.launchURL + "/enter-password",
           {
@@ -357,7 +372,7 @@ export function changeEmail() {
             password: credentials.currPassword,
           },
           {
-            tags: { reqName: "07_EnterCurrentPassword" },
+            tags: { reqName: "08_EnterCurrentPassword" },
           }
         );
 
@@ -374,7 +389,7 @@ export function changeEmail() {
 
       sleep(Math.random() * 3);
 
-      group(`08 - POST Enter new email ID`, () => {
+      group(`09 - POST Enter new email ID`, () => {
         res = http.post(
           env.launchURL + "/change-email",
           {
@@ -382,7 +397,7 @@ export function changeEmail() {
             email: user1.newEmail,
           },
           {
-            tags: { reqName: "08_EnterNewEmailID" },
+            tags: { reqName: "09_EnterNewEmailID" },
           }
         );
 
@@ -399,7 +414,7 @@ export function changeEmail() {
 
       sleep(Math.random() * 3);
 
-      group(`09 - POST Enter email OTP`, () => {
+      group(`10 - POST Enter email OTP`, () => {
         res = http.post(
           env.launchURL + "/check-your-email",
           {
@@ -408,7 +423,7 @@ export function changeEmail() {
             code: user1.newEmailOTP,
           },
           {
-            tags: { reqName: "09_EnterEmailOTP" },
+            tags: { reqName: "10_EnterEmailOTP" },
           }
         );
 
@@ -425,9 +440,9 @@ export function changeEmail() {
 
       sleep(Math.random() * 3);
 
-      group(`10 - GET Click Back to my account`, function () {
+      group(`11 - GET Click Back to my account`, function () {
         res = http.get(env.launchURL + "/manage-your-account", {
-          tags: { reqName: "10_ClickBackToMyAccount" },
+          tags: { reqName: "11_ClickBackToMyAccount" },
         });
 
         check(res, {
@@ -450,9 +465,9 @@ export function changeEmail() {
 
   changeEmailSteps(2);  //Calling the email change function
 
-  group(`11 - GET SignOut`, function () {
+  group(`12 - GET SignOut`, function () {
     res = http.get(env.launchURL + "/sign-out", {
-      tags: { reqName: "11_SignOut" },
+      tags: { reqName: "12_SignOut" },
     });
 
     check(res, {
@@ -561,7 +576,7 @@ export function changePassword() {
   
     sleep(Math.random() * 3);
   
-   group(`05 - POST Enter Auth OTP Sign In`, () => {
+    group(`05 - POST Enter Auth OTP Sign In`, () => {
           res = http.post(env.baseUrl + '/enter-authenticator-app-code',
               {
                   _csrf: csrfToken,
@@ -574,20 +589,33 @@ export function changePassword() {
   
           check(res, {
               'is status 200': r => r.status === 200,
-              'verify page content': r => (r.body as String).includes('Delete your GOV.UK account'),
+              'verify page content': r => (r.body as String).includes('Your services'),
           })
           ? transactionDuration.add(res.timings.duration) : fail("Response Validation Failed");
       });
-      
+    
+    sleep(Math.random() * 3);  
+
+    group(`06 - GET Click Settings Tab`, () => {
+      res = http.get(env.launchURL + "/settings", {
+        tags: { reqName: "06_ClickSettingsTab" },
+      });
+
+      check(res, {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as String).includes('Delete your GOV.UK account'),
+      })
+      ? transactionDuration.add(res.timings.duration) : fail("Response Validation Failed");
+   });
   
     sleep(Math.random() * 3);
   
     function changePassSteps(loopCount: number) {
       for (let i = 1; i <= loopCount; i++) {
   
-        group(`06 - GET Click Change Password Link`, function () {
+        group(`07 - GET Click Change Password Link`, function () {
           res = http.get(env.launchURL + "/enter-password?type=changePassword", {
-            tags: { reqName: "06_ClickChangePasswordLink" },
+            tags: { reqName: "07_ClickChangePasswordLink" },
           });
   
           check(res, {
@@ -603,7 +631,7 @@ export function changePassword() {
   
         sleep(Math.random() * 3);
   
-        group(`07 - POST Enter Current Password`, () => {
+        group(`08 - POST Enter Current Password`, () => {
           res = http.post(
             env.launchURL + "/enter-password",
             {
@@ -612,7 +640,7 @@ export function changePassword() {
               password: credentials.currPassword,
             },
             {
-              tags: { reqName: "07_EnterCurrentPassword" },
+              tags: { reqName: "08_EnterCurrentPassword" },
             }
           );
   
@@ -629,7 +657,7 @@ export function changePassword() {
   
         sleep(Math.random() * 3);
   
-        group(`08 - POST Enter and confirm new password`, () => {
+        group(`09 - POST Enter and confirm new password`, () => {
           res = http.post(
             env.launchURL + "/change-password",
             {
@@ -638,7 +666,7 @@ export function changePassword() {
               "confirm-password": credentials.newPassword,
             },
             {
-              tags: { reqName: "08_EnterNewPassword" },
+              tags: { reqName: "09_EnterNewPassword" },
             }
           );
   
@@ -655,9 +683,9 @@ export function changePassword() {
   
         sleep(Math.random() * 3);
   
-        group(`09 - GET Click Back to my account`, function () {
+        group(`10 - GET Click Back to my account`, function () {
           res = http.get(env.launchURL + "/manage-your-account", {
-            tags: { reqName: "09_ClickBackToMyAccounts" },
+            tags: { reqName: "10_ClickBackToMyAccounts" },
           });
   
           check(res, {
@@ -677,9 +705,9 @@ export function changePassword() {
   
     changePassSteps(2); //Calling the password change function
   
-    group(`10 - GET SignOut`, function () {
+    group(`11 - GET SignOut`, function () {
       res = http.get(env.launchURL + "/sign-out", {
-        tags: { reqName: "10_SignOut" },
+        tags: { reqName: "11_SignOut" },
       });
   
       check(res, {
@@ -804,22 +832,36 @@ export function changePhone() {
       check(res, {
         "is status 200": (r) => r.status === 200,
         "verify page content": (r) =>
-          (r.body as String).includes("Delete your GOV.UK account"),
+          (r.body as String).includes("Your services"),
       })
         ? transactionDuration.add(res.timings.duration)
         : fail("Response Validation Failed");
     });
+
+    sleep(Math.random() * 3);  
+
+    group(`06 - GET Click Settings Tab`, () => {
+      res = http.get(env.launchURL + "/settings", {
+        tags: { reqName: "06_ClickSettingsTab" },
+      });
+
+      check(res, {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as String).includes('Delete your GOV.UK account'),
+      })
+      ? transactionDuration.add(res.timings.duration) : fail("Response Validation Failed");
+   });
   
     sleep(Math.random() * 3);
   
     function changePhoneSteps(loopCount: number) {
       for (let i = 1; i <= loopCount; i++) {
   
-        group(`06 - GET Click Change Phone Number Link`, function () {
+        group(`07 - GET Click Change Phone Number Link`, function () {
           res = http.get(
             env.launchURL + "/enter-password?type=changePhoneNumber",
             {
-              tags: { reqName: "06_ClickChangePhoneNumber" },
+              tags: { reqName: "07_ClickChangePhoneNumber" },
             }
           );
   
@@ -836,7 +878,7 @@ export function changePhone() {
   
         sleep(Math.random() * 3);
   
-        group(`07 - POST Enter Current Password`, () => {
+        group(`08 - POST Enter Current Password`, () => {
           res = http.post(
             env.launchURL + "/enter-password",
             {
@@ -845,7 +887,7 @@ export function changePhone() {
               password: credentials.currPassword,
             },
             {
-              tags: { reqName: "07_EnterCurrentPassword" },
+              tags: { reqName: "08_EnterCurrentPassword" },
             }
           );
   
@@ -862,7 +904,7 @@ export function changePhone() {
   
         sleep(Math.random() * 3);
   
-        group(`08 - POST Enter new phone number`, () => {
+        group(`09 - POST Enter new phone number`, () => {
           res = http.post(
             env.launchURL + "/change-phone-number",
             {
@@ -871,7 +913,7 @@ export function changePhone() {
               phoneNumber: user3.newPhone,
             },
             {
-              tags: { reqName: "08_EnterNewPhoneNumber" },
+              tags: { reqName: "09_EnterNewPhoneNumber" },
             }
           );
   
@@ -889,7 +931,7 @@ export function changePhone() {
   
         sleep(Math.random() * 3);
   
-        group(`09 - POST Enter New Phone Num OTP`, () => {
+        group(`10 - POST Enter New Phone Num OTP`, () => {
           res = http.post(
             env.launchURL + "/check-your-phone",
             {
@@ -898,7 +940,7 @@ export function changePhone() {
               code: user3.newPhoneOTP,
             },
             {
-              tags: { reqName: "09_EnteNewPhoneOTP" },
+              tags: { reqName: "10_EnteNewPhoneOTP" },
             }
           );
   
@@ -915,9 +957,9 @@ export function changePhone() {
   
         sleep(Math.random() * 3);
   
-        group(`10 - GET Click Back to my account`, function () {
+        group(`11 - GET Click Back to my account`, function () {
           res = http.get(env.launchURL + "/manage-your-account", {
-            tags: { reqName: "10_ClickBackToMyAccounts" },
+            tags: { reqName: "11_ClickBackToMyAccounts" },
           });
   
           check(res, {
@@ -939,9 +981,9 @@ export function changePhone() {
   
     changePhoneSteps(2);  //Calling the password change function
   
-    group(`11 - GET SignOut`, function () {
+    group(`12 - GET SignOut`, function () {
       res = http.get(env.launchURL + "/sign-out", {
-        tags: { reqName: "11_SignOut" },
+        tags: { reqName: "12_SignOut" },
       });
   
       check(res, {
@@ -1065,16 +1107,30 @@ export function deleteAccount() {
   
           check(res, {
               'is status 200': r => r.status === 200,
-              'verify page content': r => (r.body as String).includes('Delete your GOV.UK account'),
+              'verify page content': r => (r.body as String).includes('Your services'),
           })
           ? transactionDuration.add(res.timings.duration) : fail("Respone Validation Failed");
       });
+    
+    sleep(Math.random() * 3);  
+
+    group(`06 - GET Click Settings Tab`, () => {
+      res = http.get(env.launchURL + "/settings", {
+        tags: { reqName: "06_ClickSettingsTab" },
+      });
+
+      check(res, {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as String).includes('Delete your GOV.UK account'),
+      })
+      ? transactionDuration.add(res.timings.duration) : fail("Response Validation Failed");
+    });
   
     sleep(Math.random() * 3);
   
-    group(`06 - GET Click Delete Account Link`, function () {
+    group(`07 - GET Click Delete Account Link`, function () {
       res = http.get(env.launchURL + "/enter-password?type=deleteAccount", {
-        tags: { reqName: "06_ClickDeleteAccountLink" },
+        tags: { reqName: "07_ClickDeleteAccountLink" },
       });
   
       check(res, {
@@ -1090,7 +1146,7 @@ export function deleteAccount() {
   
     sleep(Math.random() * 3);
   
-    group(`07 - POST Enter Password to confirm account deletion`, () => {
+    group(`08 - POST Enter Password to confirm account deletion`, () => {
       res = http.post(
         env.launchURL + "/enter-password",
         {
@@ -1099,7 +1155,7 @@ export function deleteAccount() {
           password: credentials.currPassword,
         },
         {
-          tags: { reqName: "07_EnterCurrentPassword" },
+          tags: { reqName: "08_EnterCurrentPassword" },
         }
       );
   
@@ -1118,14 +1174,14 @@ export function deleteAccount() {
   
     sleep(Math.random() * 3);
   
-    group(`08 - POST Click Delete your account button`, () => {
+    group(`09 - POST Click Delete your account button`, () => {
       res = http.post(
         env.launchURL + "/delete-account",
         {
           _csrf: csrfToken,
         },
         {
-          tags: { reqName: "08_DeleteAccountConfirm" },
+          tags: { reqName: "09_DeleteAccountConfirm" },
         }
       );
   

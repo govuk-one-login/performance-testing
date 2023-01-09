@@ -186,7 +186,8 @@ Resources:
             build:
               commands:
                 - echo "Importing output from $BACKEND_STACK_NAME"
-                - "aws cloudformation describe-stacks --stack-name \"$BACKEND_STACK_NAME\" --region '${AWS::Region}' --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt"
+                - |
+                  aws cloudformation describe-stacks --stack-name "$BACKEND_STACK_NAME" --region "${AWS::Region}" --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt
                 - eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
                 - echo "Importing output from $FRONTEND_STACK_NAME"
                 - "aws cloudformation describe-stacks --stack-name \"$FRONTEND_STACK_NAME\" --region '${AWS::Region}' --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt"

@@ -208,6 +208,8 @@ Resources:
             parameter-store:
               APP_PASSWORD: "/perfTest/testUserPassword"
               AUTH_APP_KEY: "/perfTest/authAppKey"
+              APP_PASSWORD_NEW: "/perfTest/testUserNewPassword"
+
 
           phases:
             pre_build:

@@ -703,7 +703,7 @@ export function changePassword() {
       }
     }
   
-    changePassSteps(2); //Calling the password change function
+    changePassSteps(2); //Calling the password change function twice to change the password back to the original one
   
     group(`11 - GET SignOut`, function () {
       res = http.get(env.launchURL + "/sign-out", {

@@ -166,6 +166,22 @@ Resources:
         Service: "ci/cd"
         Source: "alphagov/di-accounts-performance"
   
+
+  TestUserNewPasswordParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: "Perf Test User New Password"
+      Name: "/perfTest/testUserNewPassword"
+      Type: String
+      Value: " "
+      Tags:
+        Name: !Join
+          - "-"
+          - - !Ref AWS::StackName
+            - "LoadTestCodeBuildProject"
+        Service: "ci/cd"
+        Source: "alphagov/di-accounts-performance"
+  
   AuthAppParameter:
     Type: AWS::SSM::Parameter
     Properties:

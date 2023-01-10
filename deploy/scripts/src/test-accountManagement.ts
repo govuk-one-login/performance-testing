@@ -120,6 +120,7 @@ let loadProfile = selectProfile(profiles);
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
+  httpDebug:'full',
   thresholds: {
     http_req_duration: ["p(95)<1000"],
     http_req_failed: ["rate<0.05"], // Error rate <5%

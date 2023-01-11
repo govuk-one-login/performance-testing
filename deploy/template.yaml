@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  di-devplatform-performance
+  di-authentication-performance
 
   Performance Testing Framework for Load Testing
 
@@ -17,6 +17,7 @@ Mappings:
   LoadTesters:
     AllEnvironments:
       principals:
+        - "arn:aws:iam::622626885786:user/***REMOVED***"
         - "arn:aws:iam::622626885786:user/***REMOVED***"
         - "arn:aws:iam::622626885786:user/***REMOVED***"
         - "arn:aws:iam::622626885786:user/***REMOVED***"
@@ -171,8 +172,6 @@ Resources:
               TEST_REPORT_DIR: results
               PROFILE: smoke
               SCENARIO: all
-              BACKEND_STACK_NAME: demo-sam-app
-              FRONTEND_STACK_NAME: node-app
             parameter-store:
               APP_PASSWORD: "/perfTest/testUserPassword"
               AUTH_APP_KEY: "/perfTest/authAppKey"
@@ -185,14 +184,6 @@ Resources:
                 - mkdir -p "$TEST_REPORT_DIR"
             build:
               commands:
-                - echo "Importing output from $BACKEND_STACK_NAME"
-                - |
-                  aws cloudformation describe-stacks --stack-name "$BACKEND_STACK_NAME" --region "${AWS::Region}" --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt
-                - eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
-                - echo "Importing output from $FRONTEND_STACK_NAME"
-                - |
-                  aws cloudformation describe-stacks --stack-name "$FRONTEND_STACK_NAME" --region '${AWS::Region}' --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt
-                - eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
                 - echo "Run performance test"
                 - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out output-dynatrace
             post_build:
@@ -208,7 +199,7 @@ Resources:
         - Key: "Service"
           Value: "ci/cd"
         - Key: "Source"
-          Value: "alphagov/di-devplatform-performance"
+          Value: "alphagov/di-authentication-performance"
 
 
 Outputs:

@@ -5,7 +5,6 @@ import TOTP from './utils/authentication/totp';
 import { selectProfile, ProfileList, describeProfile } from './utils/config/load-profiles';
 import { SharedArray } from 'k6/data';
 import execution from 'k6/execution';
-import test from './test';
 
 const profiles: ProfileList = {
     smoke: {
@@ -47,8 +46,20 @@ export function setup() {
     describeProfile(loadProfile);
 }
 
-const csv: string[] = new SharedArray("csv", () =>
-    open("./data/sign_in.csv").split('\n').slice(1)
+type mfaType = "SMS" | "AUTH_APP";
+type signInData = {
+    email: string,
+    mfaOption: mfaType,
+}
+const csv_sign_in: signInData[] = new SharedArray("csv", () =>
+    open("./data/sign_in.csv").split('\n').slice(1).map(line => {
+        const data = line.split(',');
+        return {
+            email: data[0],
+            mfaOption: (data[1] as mfaType),
+        };
+    }
+    )
 );
 
 const env = {
@@ -66,13 +77,12 @@ const credentials = {
 export function sign_up() {
     let res: Response;
     let csrfToken: string;
-    const timestamp = new Date().toISOString().slice(2,16).replace(/[-:]/g,''); // YYMMDDTHHmm
+    const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, ''); // YYMMDDTHHmm
     const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0');
     const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`;
     const phoneNumber = '07700900000';
     let secretKey: string;
     let totp: TOTP;
-    type mfaType = "SMS" | "AUTH_APP";
     let mfaOption: mfaType = (Math.random() <= 0.5) ? "SMS" : "AUTH_APP";
     console.log(testEmail);
 
@@ -209,7 +219,6 @@ export function sign_up() {
                 secretKey = res.html().find("input[name='_secretKey']").val() || '';
                 totp = new TOTP(secretKey);
                 csrfToken = getCSRF(res);
-                console.log(testEmail, secretKey);
             });
 
             sleep(1);
@@ -252,6 +261,7 @@ export function sign_up() {
 
             sleep(1);
 
+            let censoredPhoneNumber = '';
             group('POST - /enter-phone-number', () => {
                 res = http.post(env.baseUrl + '/enter-phone-number',
                     {
@@ -266,7 +276,7 @@ export function sign_up() {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Check your phone'),
                 });
-
+                censoredPhoneNumber = getPhoneNumber(res);
                 csrfToken = getCSRF(res);
             });
 
@@ -276,7 +286,7 @@ export function sign_up() {
                 res = http.post(env.baseUrl + '/check-your-phone',
                     {
                         _csrf: csrfToken,
-                        phoneNumber: '*'.repeat(7) + phoneNumber.slice(-4),
+                        phoneNumber: censoredPhoneNumber,
                         code: credentials.phoneOTP,
                     }
                 );
@@ -330,8 +340,7 @@ export function sign_up() {
 export function sign_in() {
     let res: Response;
     let csrfToken: string;
-    const testEmail = csv[execution.scenario.iterationInInstance % csv.length];
-    let totp = new TOTP(credentials.authAppKey);
+    const userData = csv_sign_in[execution.scenario.iterationInInstance % csv_sign_in.length];
 
     group('GET - {RP Stub}', function () {
         res = http.get(env.rpStub);
@@ -386,7 +395,7 @@ export function sign_in() {
         res = http.post(env.baseUrl + '/enter-email',
             {
                 _csrf: csrfToken,
-                email: testEmail,
+                email: userData.email,
             }
         );
 
@@ -400,38 +409,76 @@ export function sign_in() {
 
     sleep(1);
 
-    group('POST - /enter-password', () => {
-        res = http.post(env.baseUrl + '/enter-password',
-            {
-                _csrf: csrfToken,
-                password: credentials.password,
-            }
-        );
+    switch (userData.mfaOption) {
+        case "AUTH_APP": {
+            group('POST - /enter-password', () => {
+                res = http.post(env.baseUrl + '/enter-password',
+                    {
+                        _csrf: csrfToken,
+                        password: credentials.password,
+                    }
+                );
+                check(res, {
+                    'is status 200': r => r.status === 200,
+                    'verify page content': r => (r.body as String).includes('Enter the 6 digit security code shown in your authenticator app'),
+                });
+                csrfToken = getCSRF(res);
+            });
 
-        check(res, {
-            'is status 200': r => r.status === 200,
-            'verify page content': r => (r.body as String).includes('Enter the 6 digit security code shown in your authenticator app'),
-        });
+            sleep(1);
 
-        csrfToken = getCSRF(res);
-    });
+            group('POST - /enter-authenticator-app-code', () => {
+                let totp = new TOTP(credentials.authAppKey);
+                res = http.post(env.baseUrl + '/enter-authenticator-app-code',
+                    {
+                        _csrf: csrfToken,
+                        code: totp.generateTOTP(),
+                    }
+                );
+                check(res, {
+                    'is status 200': r => r.status === 200,
+                    'verify page content': r => (r.body as String).includes('User information'),
+                });
+                csrfToken = getCSRF(res);
+            });
+            break;
+        }
+        case "SMS": {
+            let phoneNumber = '';
+            group('POST - /enter-password', () => {
+                res = http.post(env.baseUrl + '/enter-password',
+                    {
+                        _csrf: csrfToken,
+                        password: credentials.password,
+                    }
+                );
+                check(res, {
+                    'is status 200': r => r.status === 200,
+                    'verify page content': r => (r.body as String).includes('Check your phone'),
+                });
+                phoneNumber = getPhoneNumber(res);
+                csrfToken = getCSRF(res);
+            });
 
-    sleep(1);
+            sleep(1);
 
-    group('POST - /enter-authenticator-app-code', () => {
-        res = http.post(env.baseUrl + '/enter-authenticator-app-code',
-            {
-                _csrf: csrfToken,
-                code: totp.generateTOTP(),
-            }
-        );
-        check(res, {
-            'is status 200': r => r.status === 200,
-            'verify page content': r => (r.body as String).includes('User information'),
-        });
-
-        csrfToken = getCSRF(res);
-    });
+            group('POST - /enter-code', () => {
+                res = http.post(env.baseUrl + '/enter-code',
+                    {
+                        _csrf: csrfToken,
+                        phoneNumber,
+                        code: credentials.phoneOTP,
+                    }
+                );
+                check(res, {
+                    'is status 200': r => r.status === 200,
+                    'verify page content': r => (r.body as String).includes('User information'),
+                });
+                csrfToken = getCSRF(res);
+            });
+            break;
+        }
+    }
 
     // 25% of users logout
     if (Math.random() <= 0.25) {
@@ -454,4 +501,8 @@ export function sign_in() {
 
 function getCSRF(r: Response): string {
     return r.html().find("input[name='_csrf']").val() || '';
+}
+
+function getPhoneNumber(r: Response): string {
+    return r.html().find("input[name='phoneNumber']").val() || '';
 }

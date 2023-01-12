@@ -1,10 +1,11 @@
-import { sleep, group, check } from 'k6';
+import { sleep, group, check, fail } from 'k6';
 import { Options } from 'k6/options';
 import http, { Response } from 'k6/http';
 import TOTP from './utils/authentication/totp';
 import { selectProfile, ProfileList, describeProfile } from './utils/config/load-profiles';
 import { SharedArray } from 'k6/data';
 import execution from 'k6/execution';
+import { Trend } from 'k6/metrics';
 
 const profiles: ProfileList = {
     smoke: {
@@ -44,13 +45,13 @@ export const options: Options = {
 
 export function setup() {
     describeProfile(loadProfile);
-}
+};
 
 type mfaType = "SMS" | "AUTH_APP";
 type signInData = {
     email: string,
     mfaOption: mfaType,
-}
+};
 const csv_sign_in: signInData[] = new SharedArray("csv", () =>
     open("./data/sign_in.csv").split('\n').slice(1).map(line => {
         const data = line.split(',');
@@ -61,18 +62,17 @@ const csv_sign_in: signInData[] = new SharedArray("csv", () =>
     }
     )
 );
-
 const env = {
     rpStub: __ENV.RP_STUB,
     baseUrl: __ENV.BASE_URL,
-}
-
+};
 const credentials = {
     authAppKey: __ENV.AUTH_APP_KEY,
     password: __ENV.USER_PASSWORD,
     emailOTP: __ENV.EMAIL_OTP,
     phoneOTP: __ENV.PHONE_OTP,
-}
+};
+const durations = new Trend("duration");
 
 export function sign_up() {
     let res: Response;
@@ -88,14 +88,13 @@ export function sign_up() {
 
     group('GET - {RP Stub}', function () {
         res = http.get(env.rpStub);
-
         const jar = http.cookieJar();
         const cookies = jar.cookiesForURL(env.rpStub);
         check(res, {
             "is status 200": r => r.status === 200,
             "has cookie 'JSESSIONID'": () => cookies.JSESSIONID.length > 0,
             "has cookie '__VCAP_ID__'": () => cookies.__VCAP_ID__.length > 0 && cookies.__VCAP_ID__[0].length === 28,
-        });
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
     });
 
     sleep(1);
@@ -114,12 +113,10 @@ export function sign_up() {
                 'lng': '',
             }
         );
-
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Create a GOV.UK account or sign in'),
-        });
-
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
@@ -133,12 +130,10 @@ export function sign_up() {
                 optionSelected: 'create',
             }
         );
-
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Enter your email address'),
-        });
-
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
@@ -151,12 +146,10 @@ export function sign_up() {
                 email: testEmail,
             }
         );
-
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Check your email'),
-        });
-
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
@@ -170,12 +163,10 @@ export function sign_up() {
                 code: credentials.emailOTP,
             }
         );
-
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Create your password'),
-        });
-
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
@@ -189,12 +180,10 @@ export function sign_up() {
                 'confirm-password': credentials.password,
             }
         );
-
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Choose how to get security codes'),
-        });
-
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
@@ -210,12 +199,10 @@ export function sign_up() {
                         mfaOptions: mfaOption,
                     }
                 );
-
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Set up an authenticator app'),
-                });
-
+                }) ? durations.add(res.timings.duration) : fail("Checks failed");
                 secretKey = res.html().find("input[name='_secretKey']").val() || '';
                 totp = new TOTP(secretKey);
                 csrfToken = getCSRF(res);
@@ -231,12 +218,10 @@ export function sign_up() {
                         code: totp.generateTOTP(),
                     }
                 );
-
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('You&#39;ve created your GOV.UK account'),
-                });
-
+                }) ? durations.add(res.timings.duration) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
             break;
@@ -250,12 +235,10 @@ export function sign_up() {
                         mfaOptions: mfaOption,
                     }
                 );
-
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Enter your mobile phone number'),
-                });
-
+                }) ? durations.add(res.timings.duration) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
 
@@ -271,11 +254,10 @@ export function sign_up() {
                         phoneNumber,
                     }
                 );
-
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Check your phone'),
-                });
+                }) ? durations.add(res.timings.duration) : fail("Checks failed");
                 censoredPhoneNumber = getPhoneNumber(res);
                 csrfToken = getCSRF(res);
             });
@@ -290,12 +272,10 @@ export function sign_up() {
                         code: credentials.phoneOTP,
                     }
                 );
-
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('You&#39;ve created your GOV.UK account'),
-                });
-
+                }) ? durations.add(res.timings.duration) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
             break;
@@ -311,11 +291,10 @@ export function sign_up() {
                 phoneNumber: '',
             }
         );
-
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('User information'),
-        });
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
     });
 
     // 25% of users logout
@@ -328,11 +307,10 @@ export function sign_up() {
                     logout: '',
                 }
             );
-
             check(res, {
                 'is status 200': r => r.status === 200,
                 'verify page content': r => (r.body as String).includes('Successfully signed out'),
-            });
+            }) ? durations.add(res.timings.duration) : fail("Checks failed");
         });
     };
 };
@@ -344,14 +322,13 @@ export function sign_in() {
 
     group('GET - {RP Stub}', function () {
         res = http.get(env.rpStub);
-
         const jar = http.cookieJar();
         const cookies = jar.cookiesForURL(env.rpStub);
         check(res, {
             "is status 200": r => r.status === 200,
             "has cookie 'JSESSIONID'": () => cookies.JSESSIONID.length > 0,
             "has cookie '__VCAP_ID__'": () => cookies.__VCAP_ID__.length > 0 && cookies.__VCAP_ID__[0].length === 28,
-        });
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
     });
 
     sleep(1);
@@ -369,11 +346,10 @@ export function sign_in() {
                 lng: '',
             }
         );
-
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Create a GOV.UK account or sign in'),
-        });
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
     });
 
     sleep(1);
@@ -398,12 +374,10 @@ export function sign_in() {
                 email: userData.email,
             }
         );
-
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Enter your password'),
-        });
-
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
@@ -421,7 +395,7 @@ export function sign_in() {
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Enter the 6 digit security code shown in your authenticator app'),
-                });
+                }) ? durations.add(res.timings.duration) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
 
@@ -438,7 +412,7 @@ export function sign_in() {
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('User information'),
-                });
+                }) ? durations.add(res.timings.duration) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
             break;
@@ -455,7 +429,7 @@ export function sign_in() {
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Check your phone'),
-                });
+                }) ? durations.add(res.timings.duration) : fail("Checks failed");
                 phoneNumber = getPhoneNumber(res);
                 csrfToken = getCSRF(res);
             });
@@ -473,7 +447,7 @@ export function sign_in() {
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('User information'),
-                });
+                }) ? durations.add(res.timings.duration) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
             break;
@@ -490,11 +464,10 @@ export function sign_in() {
                     logout: '',
                 }
             );
-
             check(res, {
                 'is status 200': r => r.status === 200,
                 'verify page content': r => (r.body as String).includes('Successfully signed out'),
-            });
+            }) ? durations.add(res.timings.duration) : fail("Checks failed");
         });
     };
 }

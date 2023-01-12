@@ -53,8 +53,8 @@ This unit test also runs when raising pull requests as a [github action](../../.
 
     !['Start build with overrides' button](docs/start-build-with-overrides.png)
 
-    - [Build link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/372033887444/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
-    - [Staging link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/223594937353/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
+    - [Build link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/622942135269/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
+    - [Staging link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/758531536632/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
 
 4. Update environment variables in the 'Environment variables override' section. All environment variables are available in test scripts in the `__ENV` variable (see [k6 docs](https://k6.io/docs/using-k6/environment-variables/))
 

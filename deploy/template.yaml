@@ -178,6 +178,7 @@ Resources:
               AUTH_APP_KEY: "/perfTest/authAppKey"
               K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
               K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"
+              K6_DYNATRACE_DASHBOARD_ID: "/perfTest/dynatraceDashboardId"
 
           phases:
             pre_build:
@@ -185,6 +186,7 @@ Resources:
                 - mkdir -p "$TEST_REPORT_DIR"
             build:
               commands:
+                - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - echo "Importing output from $BACKEND_STACK_NAME"
                 - |
                   aws cloudformation describe-stacks --stack-name "$BACKEND_STACK_NAME" --region "${AWS::Region}" --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt
@@ -194,7 +196,10 @@ Resources:
                   aws cloudformation describe-stacks --stack-name "$FRONTEND_STACK_NAME" --region '${AWS::Region}' --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt
                 - eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
                 - echo "Run performance test"
-                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out output-dynatrace
+                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --tag build_id=$CODEBUILD_BUILD_ID --out output-dynatrace
+                - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
+                - |
+                  echo Dashboard link: "$K6_DYNATRACE_URL"/#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID"
             post_build:
               commands:
                 - echo Performance test complete

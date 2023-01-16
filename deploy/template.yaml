@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  di-devplatform-performance
+  di-lime-performance
 
   Performance Testing Framework for Load Testing
 
@@ -20,6 +20,7 @@ Mappings:
         - "arn:aws:iam::622626885786:user/thomas.dann@digital.cabinet-office.gov.uk"
         - "arn:aws:iam::622626885786:user/andrew.loughran@digital.cabinet-office.gov.uk"
         - "arn:aws:iam::622626885786:user/monjurul.haque@digital.cabinet-office.gov.uk"
+        - "arn:aws:iam::622626885786:user/abhinay.srivastava@digital.cabinet-office.gov.uk"
 
 # The IP address blocks below are referenced from here:
 # https://sites.google.com/a/digital.cabinet-office.gov.uk/gds/working-at-gds/gds-internal-it/gds-internal-it-network-public-ip-addresses
@@ -171,8 +172,6 @@ Resources:
               TEST_REPORT_DIR: results
               PROFILE: smoke
               SCENARIO: all
-              BACKEND_STACK_NAME: demo-sam-app
-              FRONTEND_STACK_NAME: node-app
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
             parameter-store:
               APP_PASSWORD: "/perfTest/testUserPassword"
@@ -187,14 +186,6 @@ Resources:
             build:
               commands:
                 - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
-                - echo "Importing output from $BACKEND_STACK_NAME"
-                - |
-                  aws cloudformation describe-stacks --stack-name "$BACKEND_STACK_NAME" --region "${AWS::Region}" --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt
-                - eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
-                - echo "Importing output from $FRONTEND_STACK_NAME"
-                - |
-                  aws cloudformation describe-stacks --stack-name "$FRONTEND_STACK_NAME" --region '${AWS::Region}' --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt
-                - eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
                 - echo "Run performance test"
                 - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --tag build_id=$CODEBUILD_BUILD_ID --out output-dynatrace
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
@@ -213,7 +204,7 @@ Resources:
         - Key: "Service"
           Value: "ci/cd"
         - Key: "Source"
-          Value: "alphagov/di-devplatform-performance"
+          Value: "alphagov/di-lime-performance"
 
 
 Outputs:

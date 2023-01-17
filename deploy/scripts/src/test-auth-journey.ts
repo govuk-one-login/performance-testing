@@ -52,16 +52,19 @@ type signInData = {
     email: string,
     mfaOption: mfaType,
 };
-const csv_sign_in: signInData[] = new SharedArray("csv", () =>
-    open("./data/sign_in.csv").split('\n').slice(1).map(line => {
-        const data = line.split(',');
-        return {
-            email: data[0],
-            mfaOption: (data[1] as mfaType),
-        };
+const data_sign_in: signInData[] = new SharedArray("data", () => Array.from({ length: 10000 },
+    (_, i) => {
+        const id: string = Math.floor((i / 2) + 1).toString().padStart(5, '0');
+        if (i % 2 == 0) return {
+            email: `perftestAuth1_${id}@digital.cabinet-office.gov.uk`,
+            mfaOption: "AUTH_APP" as mfaType,
+        }
+        else return {
+            email: `perftestAuth2_${id}@digital.cabinet-office.gov.uk`,
+            mfaOption: "SMS" as mfaType,
+        }
     }
-    )
-);
+));
 const env = {
     rpStub: __ENV.RP_STUB,
     baseUrl: __ENV.BASE_URL,
@@ -318,7 +321,7 @@ export function sign_up() {
 export function sign_in() {
     let res: Response;
     let csrfToken: string;
-    const userData = csv_sign_in[execution.scenario.iterationInInstance % csv_sign_in.length];
+    const userData = data_sign_in[execution.scenario.iterationInInstance % data_sign_in.length];
 
     group('GET - {RP Stub}', function () {
         res = http.get(env.rpStub);

@@ -12,10 +12,20 @@ RUN cd scripts && \
     npm install && \
     node ./build.js
 
+# -------------------------------
+# Build k6 binary with extensions
+# -------------------------------
+FROM golang:1.18-alpine as k6-build
+WORKDIR $GOPATH/src/go.k6.io/k6
+
+RUN go install go.k6.io/xk6/cmd/xk6@latest
+RUN xk6 build v0.40.0 --with github.com/henrikrexed/xk6-output-dynatrace@latest --output /k6
+
 # ---
 # Run
 # ---
 FROM loadimpact/k6
+COPY --from=k6-build /k6 /usr/bin/k6
 ENV WORKDIR=/home/k6
 
 WORKDIR ${WORKDIR}

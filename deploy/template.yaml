@@ -221,11 +221,15 @@ Resources:
               TEST_REPORT_DIR: results
               PROFILE: smoke
               SCENARIO: all
+              BACKEND_STACK_NAME: demo-sam-app
+              FRONTEND_STACK_NAME: node-app
+              K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
             parameter-store:
               APP_PASSWORD: "/perfTest/testUserPassword"
               AUTH_APP_KEY: "/perfTest/authAppKey"
               APP_PASSWORD_NEW: "/perfTest/testUserNewPassword"
-
+              K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
+              K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"
 
           phases:
             pre_build:
@@ -233,8 +237,12 @@ Resources:
                 - mkdir -p "$TEST_REPORT_DIR"
             build:
               commands:
-                - echo Run performance test
-                - k6 run $WORK_DIR/$TEST_SCRIPT --out json=$TEST_REPORT_DIR/report.json
+                - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
+                - echo "Run performance test"
+                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --tag build_id=$CODEBUILD_BUILD_ID --out output-dynatrace
+                - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
+                - |
+                  echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID
             post_build:
               commands:
                 - echo Performance test complete

@@ -197,6 +197,36 @@ Resources:
         Service: "ci/cd"
         Source: "alphagov/di-accounts-performance"
 
+  DynatraceURLParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: "Dynatrace URL"
+      Name: "/perfTest/dynatraceUrl"
+      Type: String
+      Value: " "
+      Tags:
+        Name: !Join
+          - "-"
+          - - !Ref AWS::StackName
+            - "LoadTestCodeBuildProject"
+        Service: "ci/cd"
+        Source: "alphagov/di-accounts-performance"
+
+  DynatraceAPITokenParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: "Dynatrace API Token"
+      Name: "/perfTest/dynatraceApiToken"
+      Type: String
+      Value: " "
+      Tags:
+        Name: !Join
+          - "-"
+          - - !Ref AWS::StackName
+            - "LoadTestCodeBuildProject"
+        Service: "ci/cd"
+        Source: "alphagov/di-accounts-performance"
+
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:

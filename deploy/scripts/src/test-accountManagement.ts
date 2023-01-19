@@ -27,10 +27,11 @@ const profiles: ProfileList = {
         startRate: 1,
         timeUnit: "1m",
         preAllocatedVUs: 1,
-        maxVUs: 1,
+        maxVUs: 50,
         stages: [
-          { target: 1, duration: "2m" }, //Ramps up to target load
-          //  { target: 1, duration: '60s' },    //Holds at target load
+          { target: 5, duration: "2m" }, //Starts at the target start load 10
+          { target: 15, duration: '2m' }, //Starts at the target start load 30
+          { target: 25, duration: '2m' }, //50
         ],
         exec: "changePassword",
       },
@@ -80,10 +81,17 @@ const profiles: ProfileList = {
         startRate: 1,
         timeUnit: "1m",
         preAllocatedVUs: 1,
-        maxVUs: 50,
+        maxVUs: 100,
         stages: [
-          { target: 60, duration: "120s" }, //Ramps up to target load
-          { target: 60, duration: "120s" }, //Holds at target load
+          { target: 50, duration: "120s" }, //Ramp Up to Load - 550 transactions per minute i.e. 9.16 tps
+          { target: 100, duration: "120s" }, //Ramp Up to Load - 1100 transactions per minute i.e. 18.33 tps
+          { target: 150, duration: "120s" }, //Ramp Up to Load - 1650 transactions per minute i.e. 27.5 tps
+          { target: 200, duration: "120s" }, //Ramp Up to Load - 2200 transactions per minute i.e. 36.66 tps
+          { target: 300, duration: "120s" }, //Ramp Up to Load - 3300 transactions per minute i.e. 55 tps
+          { target: 300, duration: "1800s" }, //Steady State of 55 tps for 30 minutes
+          { target: 200, duration: "120s" }, //Ramp Down to Load - 36.66 tps in a minute
+          { target: 100, duration: "120s" }, //Ramp Down to Load - 18.33 tps in a minute
+          { target: 0, duration: "60s" }, //Ramp Down to Load - 0 tps in a minute
         ],
         exec: "changePassword",
       },
@@ -120,7 +128,6 @@ let loadProfile = selectProfile(profiles);
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  httpDebug:'full',
   thresholds: {
     http_req_duration: ["p(95)<1000"],
     http_req_failed: ["rate<0.05"], // Error rate <5%
@@ -151,13 +158,12 @@ type UserPasswordChange = {
   currEmail: string;
 };
 
-const csvData2: UserPasswordChange[] = new SharedArray("csvPasswordChange",function () {
+const csvData2 : UserPasswordChange[]= new SharedArray("csvPasswordChange",function () {
     return open("./data/changePassword_TestData.csv").split("\n").slice(1).map((s) => {
-        let data = s.split(",");
-        return {
-          currEmail: data[0],
-        };
-      });
+      return {
+        currEmail: s,
+      };
+    });
   }
 );
 
@@ -183,14 +189,12 @@ const csvData3: UserPhoneNumberChange[] = new SharedArray("csvPhoneNumChange",fu
   }
 );
 
-type UserDeleteAccount = { currEmail: string; currEmailOTP: string };
+type UserDeleteAccount = { currEmail: string; };
 
 const csvData4: UserDeleteAccount[] = new SharedArray("csvDelAccount",function () {
     return open("./data/deleteAccount_TestData.csv").split("\n").slice(1).map((s) => {
-        let data = s.split(",");
         return {
-          currEmail: data[0],
-          currEmailOTP: data[1],
+          currEmail: s,
         };
       });
   }
@@ -201,8 +205,8 @@ export function setup() {
 }
 
 const env = {
-  launchURL: `https://${__ENV.stagingLaunch}`, //home.staging.account.gov.uk home.build.account.gov.uk 
-  baseUrl: `https://${__ENV.stagingBase}`,
+  envURL: `https://${__ENV.launchURL}`, //home.staging.account.gov.uk home.build.account.gov.uk 
+  signinURL: `https://${__ENV.signinURL}`,
 };
 
 const credentials ={
@@ -221,9 +225,9 @@ export function changeEmail() {
  
   let totp = new TOTP(credentials.authAppKey); 
 
-  group(`01 - GET Launch Accounts Entry Point`, function () {
-    res = http.get(env.launchURL, {
-      tags: { reqName: "01_LaunchStagingAccountsHome" },
+  group(`B01_ChangeEmail_01_LaunchAccountsHome GET`, function () {
+    res = http.get(env.envURL, {
+      tags: { name: "B01_ChangeEmail_01_LaunchAccountsHome" },
     });
 
     check(res, {
@@ -237,9 +241,9 @@ export function changeEmail() {
 
   sleep(Math.random() * 3);
 
-  group(`02 - GET Click Sign In`, function () {
-    res = http.get(env.baseUrl + "/sign-in-or-create?redirectPost=true", {
-      tags: { reqName: "02_ClickSignIn" },
+  group(`B01_ChangeEmail_02_ClickSignIn GET`, function () {
+    res = http.get(env.signinURL + "/sign-in-or-create?redirectPost=true", {
+      tags: { name: "B01_ChangeEmail_02_ClickSignIn" },
     });
 
     check(res, {
@@ -257,15 +261,15 @@ export function changeEmail() {
 
   sleep(Math.random() * 3);
 
-    group(`03 - POST Enter Email ID`, () => {
+    group(`B01_ChangeEmail_03_EnterEmailID POST`, () => {
       res = http.post(
-        env.baseUrl + "/enter-email",
+        env.signinURL + "/enter-email",
         {
           _csrf: csrfToken,
           email: user1.currEmail,
         },
         {
-          tags: { reqName: "03_EnterEmailID" },
+          tags: { name: "B01_ChangeEmail_03_EnterEmailID" },
         }
       );
 
@@ -282,15 +286,15 @@ export function changeEmail() {
 
   sleep(Math.random() * 3);
 
-      group(`04 - POST Enter Sign in Password`, () => {
+      group(`B01_ChangeEmail_04_EnterLoginPassword POST`, () => {
         res = http.post(
-          env.baseUrl + "/enter-password",
+          env.signinURL + "/enter-password",
           {
             _csrf: csrfToken,
             password: credentials.currPassword,
           },
           {
-            tags: { reqName: "04_EnterLoginPassword" },
+            tags: { name: "B01_ChangeEmail_04_EnterLoginPassword" },
           }
         );
 
@@ -309,14 +313,14 @@ export function changeEmail() {
 
   sleep(2);
 
-      group(`05 - POST Enter Auth OTP Sign In`, () => {
-          res = http.post(env.baseUrl + '/enter-authenticator-app-code',
+      group(`B01_ChangeEmail_05_EnterAuthAppOTP POST`, () => {
+          res = http.post(env.signinURL + '/enter-authenticator-app-code',
               {
                   _csrf: csrfToken,
                   code: totp.generateTOTP(),
               },
               {
-                  tags: {reqName: "05_EnterAuthAppOTP"}
+                  tags: {name: "B01_ChangeEmail_05_EnterAuthAppOTP"}
               }
           );
   
@@ -329,9 +333,9 @@ export function changeEmail() {
 
       sleep(Math.random() * 3);  
 
-      group(`06 - GET Click Settings Tab`, () => {
-        res = http.get(env.launchURL + "/settings", {
-          tags: { reqName: "06_ClickSettingsTab" },
+      group(`B01_ChangeEmail_06_ClickSettingsTab GET`, () => {
+        res = http.get(env.envURL + "/settings", {
+          tags: { name: "B01_ChangeEmail_06_ClickSettingsTab" },
         });
   
         check(res, {
@@ -346,9 +350,9 @@ export function changeEmail() {
   function changeEmailSteps(loopCount: number) {
     for (let i = 1; i <= loopCount; i++) {
 
-      group(`07 - GET Click Change Email Link`, function () {
-        res = http.get(env.launchURL + "/enter-password?type=changeEmail", {
-          tags: { reqName: "07_ClickChangeEmailLink" },
+      group(`B01_ChangeEmail_07_ClickChangeEmailLink GET`, function () {
+        res = http.get(env.envURL + "/enter-password?type=changeEmail", {
+          tags: { name: "B01_ChangeEmail_07_ClickChangeEmailLink" },
         });
 
         check(res, {
@@ -364,16 +368,16 @@ export function changeEmail() {
 
       sleep(Math.random() * 3);
 
-      group(`08 - POST Enter Current Password`, () => {
+      group(`B01_ChangeEmail_08_EnterCurrentPassword POST`, () => {
         res = http.post(
-          env.launchURL + "/enter-password",
+          env.envURL + "/enter-password",
           {
             _csrf: csrfToken,
             requestType: "changeEmail",
             password: credentials.currPassword,
           },
           {
-            tags: { reqName: "08_EnterCurrentPassword" },
+            tags: { name: "B01_ChangeEmail_08_EnterCurrentPassword" },
           }
         );
 
@@ -390,15 +394,15 @@ export function changeEmail() {
 
       sleep(Math.random() * 3);
 
-      group(`09 - POST Enter new email ID`, () => {
+      group(`B01_ChangeEmail_09_EnterNewEmailID POST`, () => {
         res = http.post(
-          env.launchURL + "/change-email",
+          env.envURL + "/change-email",
           {
             _csrf: csrfToken,
             email: user1.newEmail,
           },
           {
-            tags: { reqName: "09_EnterNewEmailID" },
+            tags: { name: "B01_ChangeEmail_09_EnterNewEmailID" },
           }
         );
 
@@ -415,16 +419,16 @@ export function changeEmail() {
 
       sleep(Math.random() * 3);
 
-      group(`10 - POST Enter email OTP`, () => {
+      group(`B01_ChangeEmail_10_EnterEmailOTP POST`, () => {
         res = http.post(
-          env.launchURL + "/check-your-email",
+          env.envURL + "/check-your-email",
           {
             _csrf: csrfToken,
             email: user1.newEmail,
             code: user1.newEmailOTP,
           },
           {
-            tags: { reqName: "10_EnterEmailOTP" },
+            tags: { name: "B01_ChangeEmail_10_EnterEmailOTP" },
           }
         );
 
@@ -441,9 +445,9 @@ export function changeEmail() {
 
       sleep(Math.random() * 3);
 
-      group(`11 - GET Click Back to my account`, function () {
-        res = http.get(env.launchURL + "/manage-your-account", {
-          tags: { reqName: "11_ClickBackToMyAccount" },
+      group(`B01_ChangeEmail_11_ClickBackToMyAccount GET`, function () {
+        res = http.get(env.envURL + "/manage-your-account", {
+          tags: { name: "B01_ChangeEmail_11_ClickBackToMyAccount" },
         });
 
         check(res, {
@@ -466,9 +470,9 @@ export function changeEmail() {
 
   changeEmailSteps(2);  //Calling the email change function
 
-  group(`12 - GET SignOut`, function () {
-    res = http.get(env.launchURL + "/sign-out", {
-      tags: { reqName: "12_SignOut" },
+  group(`B01_ChangeEmail_12_SignOut GET`, function () {
+    res = http.get(env.envURL + "/sign-out", {
+      tags: { name: "B01_ChangeEmail_12_SignOut" },
     });
 
     check(res, {
@@ -489,11 +493,11 @@ export function changePassword() {
 
     let totp = new TOTP(credentials.authAppKey); 
   
-    group(`01 - GET Launch Accounts Entry Point`, function () {
-      res = http.get(env.launchURL, {
-        tags: { reqName: "01_LaunchStagingAccountsHome" },
+    group(`B02_ChangePassword_01_LaunchAccountsHome GET`, function () {
+      res = http.get(env.envURL,{
+        tags: { name: "B02_ChangePassword_01_LaunchAccountsHome" },
       });
-  
+
       check(res, {
         "is status 200": (r) => r.status === 200,
         "verify page content": (r) =>
@@ -505,9 +509,9 @@ export function changePassword() {
   
     sleep(Math.random() * 3);
   
-    group(`02 - GET Click Sign In`, function () {
-      res = http.get(env.baseUrl + "/sign-in-or-create?redirectPost=true", {
-        tags: { reqName: "02_ClickSignIn" },
+    group(`B02_ChangePassword_02_ClickSignIn GET`, function () {
+      res = http.get(env.signinURL + "/sign-in-or-create?redirectPost=true",{
+        tags: { name: "B02_ChangePassword_02_ClickSignIn" },
       });
   
       check(res, {
@@ -525,15 +529,15 @@ export function changePassword() {
   
     sleep(Math.random() * 3);
   
-    group(`03 - POST Enter Email ID`, () => {
+    group(`B02_ChangePassword_03_EnterEmailID POST`, () => {
       res = http.post(
-        env.baseUrl + "/enter-email",
+        env.signinURL + "/enter-email",
         {
           _csrf: csrfToken,
           email: user2.currEmail,
         },
         {
-          tags: { reqName: "03_EnterEmailID" },
+          tags: { name: "B02_ChangePassword_03_EnterEmailID" },
         }
       );
   
@@ -550,15 +554,15 @@ export function changePassword() {
   
     sleep(Math.random() * 3);
   
-    group(`04 - POST Enter Sign in Password`, () => {
+    group(`B02_ChangePassword_04_EnterLoginPassword POST`, () => {
       res = http.post(
-        env.baseUrl + "/enter-password",
+        env.signinURL + "/enter-password",
         {
           _csrf: csrfToken,
           password: credentials.currPassword,
         },
         {
-          tags: { reqName: "04_EnterLoginPassword" },
+          tags: { name: "B02_ChangePassword_04_EnterLoginPassword" },
         }
       );
   
@@ -577,14 +581,14 @@ export function changePassword() {
   
     sleep(Math.random() * 3);
   
-    group(`05 - POST Enter Auth OTP Sign In`, () => {
-          res = http.post(env.baseUrl + '/enter-authenticator-app-code',
+    group(`B02_ChangePassword_05_EnterAuthAppOTP POST`, () => {
+          res = http.post(env.signinURL + '/enter-authenticator-app-code',
               {
                   _csrf: csrfToken,
                   code: totp.generateTOTP(),
               },
               {
-                  tags: {reqName: "05_EnterAuthAppOTP"}
+                tags: { name: "B02_ChangePassword_05_EnterAuthAppOTP" },
               }
           );
   
@@ -597,9 +601,9 @@ export function changePassword() {
     
     sleep(Math.random() * 3);  
 
-    group(`06 - GET Click Settings Tab`, () => {
-      res = http.get(env.launchURL + "/settings", {
-        tags: { reqName: "06_ClickSettingsTab" },
+    group(`B02_ChangePassword_06_ClickSettingsTab GET`, () => {
+      res = http.get(env.envURL + "/settings",{
+        tags: { name: "B02_ChangePassword_06_ClickSettingsTab" },
       });
 
       check(res, {
@@ -614,9 +618,9 @@ export function changePassword() {
     function changePassSteps(loopCount: number) {
       for (let i = 1; i <= loopCount; i++) {
   
-        group(`07 - GET Click Change Password Link`, function () {
-          res = http.get(env.launchURL + "/enter-password?type=changePassword", {
-            tags: { reqName: "07_ClickChangePasswordLink" },
+        group(`B02_ChangePassword_07_ClickChangePasswordLink GET`, function () {
+          res = http.get(env.envURL + "/enter-password?type=changePassword",{
+            tags: { name: "B02_ChangePassword_07_ClickChangePasswordLink" },
           });
   
           check(res, {
@@ -632,16 +636,16 @@ export function changePassword() {
   
         sleep(Math.random() * 3);
   
-        group(`08 - POST Enter Current Password`, () => {
+        group(`B02_ChangePassword_08_EnterCurrentPassword POST`, () => {
           res = http.post(
-            env.launchURL + "/enter-password",
+            env.envURL + "/enter-password",
             {
               _csrf: csrfToken,
               requestType: "changePassword",
               password: credentials.currPassword,
             },
             {
-              tags: { reqName: "08_EnterCurrentPassword" },
+              tags: { name: "B02_ChangePassword_08_EnterCurrentPassword" },
             }
           );
   
@@ -658,16 +662,16 @@ export function changePassword() {
   
         sleep(Math.random() * 3);
   
-        group(`09 - POST Enter and confirm new password`, () => {
+        group(`B02_ChangePassword_09_EnterNewPassword POST`, () => {
           res = http.post(
-            env.launchURL + "/change-password",
+            env.envURL + "/change-password",
             {
               _csrf: csrfToken,
               password: credentials.newPassword,
               "confirm-password": credentials.newPassword,
             },
             {
-              tags: { reqName: "09_EnterNewPassword" },
+              tags: { name: "B02_ChangePassword_09_EnterNewPassword" },
             }
           );
   
@@ -684,9 +688,9 @@ export function changePassword() {
   
         sleep(Math.random() * 3);
   
-        group(`10 - GET Click Back to my account`, function () {
-          res = http.get(env.launchURL + "/manage-your-account", {
-            tags: { reqName: "10_ClickBackToMyAccounts" },
+        group(`B02_ChangePassword_10_ClickBackToMyAccounts GET`, function () {
+          res = http.get(env.envURL + "/manage-your-account",{
+            tags: { name: "B02_ChangePassword_10_ClickBackToMyAccounts" },
           });
   
           check(res, {
@@ -706,9 +710,9 @@ export function changePassword() {
   
     changePassSteps(2); //Calling the password change function twice to change the password back to the original one
   
-    group(`11 - GET SignOut`, function () {
-      res = http.get(env.launchURL + "/sign-out", {
-        tags: { reqName: "11_SignOut" },
+    group(`B02_ChangePassword_11_SignOut GET`, function () {
+      res = http.get(env.envURL + "/sign-out",{
+        tags: { name: "B02_ChangePassword_11_SignOut" },
       });
   
       check(res, {
@@ -728,9 +732,9 @@ export function changePhone() {
   
     const user3 = csvData3[exec.scenario.iterationInTest % csvData3.length];
   
-    group(`01 - GET Launch Accounts Entry Point`, function () {
-      res = http.get(env.launchURL, {
-        tags: { reqName: "01_LaunchStagingAccountsHome" },
+    group(`B03_ChangePhone_01_LaunchAccountsHome GET`, function () {
+      res = http.get(env.envURL, {
+        tags: { name: "B03_ChangePhone_01_LaunchAccountsHome" },
       });
   
       check(res, {
@@ -744,9 +748,9 @@ export function changePhone() {
   
     sleep(Math.random() * 3);
   
-    group(`02 - GET Click Sign In`, function () {
-      res = http.get(env.baseUrl + "/sign-in-or-create?redirectPost=true", {
-        tags: { reqName: "02_ClickSignIn" },
+    group(`B03_ChangePhone_02_ClickSignIn GET`, function () {
+      res = http.get(env.signinURL + "/sign-in-or-create?redirectPost=true", {
+        tags: { name: "B03_ChangePhone_02_ClickSignIn" },
       });
   
       check(res, {
@@ -764,15 +768,15 @@ export function changePhone() {
   
     sleep(Math.random() * 3);
   
-    group(`03 - POST Enter Email ID`, () => {
+    group(`B03_ChangePhone_03_EnterEmailID POST`, () => {
       res = http.post(
-        env.baseUrl + "/enter-email",
+        env.signinURL + "/enter-email",
         {
           _csrf: csrfToken,
           email: user3.currEmail,
         },
         {
-          tags: { reqName: "03_EnterEmailID" },
+          tags: { name: "B03_ChangePhone_03_EnterEmailID" },
         }
       );
   
@@ -789,15 +793,15 @@ export function changePhone() {
   
     sleep(Math.random() * 3);
   
-    group(`04 - POST Enter Sign in Password`, () => {
+    group(`B03_ChangePhone_04_EnterSignInPassword POST`, () => {
       res = http.post(
-        env.baseUrl + "/enter-password",
+        env.signinURL + "/enter-password",
         {
           _csrf: csrfToken,
           password: credentials.currPassword,
         },
         {
-          tags: { reqName: "04_EnterSignInPassword" },
+          tags: { name: "B03_ChangePhone_04_EnterSignInPassword" },
         }
       );
   
@@ -817,16 +821,16 @@ export function changePhone() {
   
     sleep(Math.random() * 3);
   
-    group(`05 - POST Enter SMS OTP Sign In`, () => {
+    group(`B03_ChangePhone_05_EnterSMSOTP POST`, () => {
       res = http.post(
-        env.baseUrl + "/enter-code",
+        env.signinURL + "/enter-code",
         {
           phoneNumber: phoneNumHidden,
           _csrf: csrfToken,
           code: user3.currEmailOTP,
         },
         {
-          tags: { reqName: "05_EnterSMSOTP" },
+          tags: { name: "B03_ChangePhone_05_EnterSMSOTP" },
         }
       );
   
@@ -841,9 +845,9 @@ export function changePhone() {
 
     sleep(Math.random() * 3);  
 
-    group(`06 - GET Click Settings Tab`, () => {
-      res = http.get(env.launchURL + "/settings", {
-        tags: { reqName: "06_ClickSettingsTab" },
+    group(`B03_ChangePhone_06_ClickSettingsTab GET`, () => {
+      res = http.get(env.envURL + "/settings", {
+        tags: { name: "B03_ChangePhone_06_ClickSettingsTab" },
       });
 
       check(res, {
@@ -858,11 +862,11 @@ export function changePhone() {
     function changePhoneSteps(loopCount: number) {
       for (let i = 1; i <= loopCount; i++) {
   
-        group(`07 - GET Click Change Phone Number Link`, function () {
+        group(`B03_ChangePhone_07_ClickChangePhoneNumber GET`, function () {
           res = http.get(
-            env.launchURL + "/enter-password?type=changePhoneNumber",
+            env.envURL + "/enter-password?type=changePhoneNumber",
             {
-              tags: { reqName: "07_ClickChangePhoneNumber" },
+              tags: { name: "B03_ChangePhone_07_ClickChangePhoneNumber" },
             }
           );
   
@@ -879,16 +883,16 @@ export function changePhone() {
   
         sleep(Math.random() * 3);
   
-        group(`08 - POST Enter Current Password`, () => {
+        group(`B03_ChangePhone_08_EnterCurrentPassword POST`, () => {
           res = http.post(
-            env.launchURL + "/enter-password",
+            env.envURL + "/enter-password",
             {
               _csrf: csrfToken,
               requestType: "changePhoneNumber",
               password: credentials.currPassword,
             },
             {
-              tags: { reqName: "08_EnterCurrentPassword" },
+              tags: { name: "B03_ChangePhone_08_EnterCurrentPassword" },
             }
           );
   
@@ -905,16 +909,16 @@ export function changePhone() {
   
         sleep(Math.random() * 3);
   
-        group(`09 - POST Enter new phone number`, () => {
+        group(`B03_ChangePhone_09_EnterNewPhoneNumber POST`, () => {
           res = http.post(
-            env.launchURL + "/change-phone-number",
+            env.envURL + "/change-phone-number",
             {
               _csrf: csrfToken,
               supportInternationalNumbers: "",
               phoneNumber: user3.newPhone,
             },
             {
-              tags: { reqName: "09_EnterNewPhoneNumber" },
+              tags: { name: "B03_ChangePhone_09_EnterNewPhoneNumber" },
             }
           );
   
@@ -932,16 +936,16 @@ export function changePhone() {
   
         sleep(Math.random() * 3);
   
-        group(`10 - POST Enter New Phone Num OTP`, () => {
+        group(`B03_ChangePhone_10_EnteNewPhoneOTP POST`, () => {
           res = http.post(
-            env.launchURL + "/check-your-phone",
+            env.envURL + "/check-your-phone",
             {
               _csrf: csrfToken,
               phoneNumber: phoneNumHidden,
               code: user3.newPhoneOTP,
             },
             {
-              tags: { reqName: "10_EnteNewPhoneOTP" },
+              tags: { name: "B03_ChangePhone_10_EnteNewPhoneOTP" },
             }
           );
   
@@ -958,9 +962,9 @@ export function changePhone() {
   
         sleep(Math.random() * 3);
   
-        group(`11 - GET Click Back to my account`, function () {
-          res = http.get(env.launchURL + "/manage-your-account", {
-            tags: { reqName: "11_ClickBackToMyAccounts" },
+        group(`B03_ChangePhone_11_ClickBackToMyAccounts GET`, function () {
+          res = http.get(env.envURL + "/manage-your-account", {
+            tags: { name: "B03_ChangePhone_11_ClickBackToMyAccounts" },
           });
   
           check(res, {
@@ -982,9 +986,9 @@ export function changePhone() {
   
     changePhoneSteps(2);  //Calling the password change function
   
-    group(`12 - GET SignOut`, function () {
-      res = http.get(env.launchURL + "/sign-out", {
-        tags: { reqName: "12_SignOut" },
+    group(`B03_ChangePhone_12_SignOut GET`, function () {
+      res = http.get(env.envURL + "/sign-out", {
+        tags: { name: "B03_ChangePhone_12_SignOut" },
       });
   
       check(res, {
@@ -1006,9 +1010,9 @@ export function deleteAccount() {
 
     let totp = new TOTP(credentials.authAppKey); 
   
-    group(`01 - GET Launch Accounts Entry Point`, function () {
-      res = http.get(env.launchURL, {
-        tags: { reqName: "01_LaunchStagingAccountsHome" },
+    group(`B04_DeleteAccount_01_LaunchAccountsHome GET`, function () {
+      res = http.get(env.envURL, {
+        tags: { name: "B04_DeleteAccount_01_LaunchAccountsHome" },
       });
   
       check(res, {
@@ -1022,9 +1026,9 @@ export function deleteAccount() {
   
     sleep(Math.random() * 3);
   
-    group(`02- GET Click Sign In`, function () {
-      res = http.get(env.baseUrl + "/sign-in-or-create?redirectPost=true", {
-        tags: { reqName: "02_ClickSignIn" },
+    group(`B04_DeleteAccount_02_ClickSignIn GET`, function () {
+      res = http.get(env.signinURL + "/sign-in-or-create?redirectPost=true", {
+        tags: { name: "B04_DeleteAccount_02_ClickSignIn" },
       });
   
       check(res, {
@@ -1042,15 +1046,15 @@ export function deleteAccount() {
   
     sleep(Math.random() * 3);
   
-    group(`03 - POST Enter Email ID`, () => {
+    group(`B04_DeleteAccount_03_EnterEmailID POST`, () => {
       res = http.post(
-        env.baseUrl + "/enter-email",
+        env.signinURL + "/enter-email",
         {
           _csrf: csrfToken,
           email: user4.currEmail,
         },
         {
-          tags: { reqName: "03_EnterEmailID" },
+          tags: { name: "B04_DeleteAccount_03_EnterEmailID" },
         }
       );
   
@@ -1067,15 +1071,15 @@ export function deleteAccount() {
   
     sleep(Math.random() * 3);
   
-    group(`04 - POST Enter Sign in Password`, () => {
+    group(`B04_DeleteAccount_04_EnterSignInPassword POST`, () => {
       res = http.post(
-        env.baseUrl + "/enter-password",
+        env.signinURL + "/enter-password",
         {
           _csrf: csrfToken,
           password: credentials.currPassword,
         },
         {
-          tags: { reqName: "04_EnterSignInPassword" },
+          tags: { name: "B04_DeleteAccount_04_EnterSignInPassword" },
         }
       );
   
@@ -1083,7 +1087,7 @@ export function deleteAccount() {
         "is status 200": (r) => r.status === 200,
         "verify page content": (r) =>
           (r.body as String).includes(
-            "We sent a code to the phone number linked to your account"
+            "Enter the 6 digit security code shown in your authenticator app"
           ),
       })
         ? transactionDuration.add(res.timings.duration)
@@ -1095,14 +1099,14 @@ export function deleteAccount() {
   
     sleep(Math.random() * 3);
    
-   group(`05 - POST Enter Auth OTP Sign In`, () => {
-          res = http.post(env.baseUrl + '/enter-authenticator-app-code',
+   group(`B04_DeleteAccount_05_EnterAuthAppOTP POST`, () => {
+          res = http.post(env.signinURL + '/enter-authenticator-app-code',
               {
                   _csrf: csrfToken,
                   code: totp.generateTOTP(),
               },
               {
-                  tags: {reqName: "05_EnterAuthAppOTP"}
+                  tags: {name: "B04_DeleteAccount_05_EnterAuthAppOTP"}
               }
           );
   
@@ -1115,9 +1119,9 @@ export function deleteAccount() {
     
     sleep(Math.random() * 3);  
 
-    group(`06 - GET Click Settings Tab`, () => {
-      res = http.get(env.launchURL + "/settings", {
-        tags: { reqName: "06_ClickSettingsTab" },
+    group(`B04_DeleteAccount_06_ClickSettingsTab GET`, () => {
+      res = http.get(env.envURL + "/settings", {
+        tags: { name: "B04_DeleteAccount_06_ClickSettingsTab" },
       });
 
       check(res, {
@@ -1129,9 +1133,9 @@ export function deleteAccount() {
   
     sleep(Math.random() * 3);
   
-    group(`07 - GET Click Delete Account Link`, function () {
-      res = http.get(env.launchURL + "/enter-password?type=deleteAccount", {
-        tags: { reqName: "07_ClickDeleteAccountLink" },
+    group(`B04_DeleteAccount_07_ClickDeleteAccountLink GET`, function () {
+      res = http.get(env.envURL + "/enter-password?type=deleteAccount", {
+        tags: { name: "B04_DeleteAccount_07_ClickDeleteAccountLink" },
       });
   
       check(res, {
@@ -1147,16 +1151,16 @@ export function deleteAccount() {
   
     sleep(Math.random() * 3);
   
-    group(`08 - POST Enter Password to confirm account deletion`, () => {
+    group(`B04_DeleteAccount_08_EnterCurrentPassword POST`, () => {
       res = http.post(
-        env.launchURL + "/enter-password",
+        env.envURL + "/enter-password",
         {
           _csrf: csrfToken,
           requestType: "deleteAccount",
           password: credentials.currPassword,
         },
         {
-          tags: { reqName: "08_EnterCurrentPassword" },
+          tags: { name: "B04_DeleteAccount_08_EnterCurrentPassword" },
         }
       );
   
@@ -1175,14 +1179,14 @@ export function deleteAccount() {
   
     sleep(Math.random() * 3);
   
-    group(`09 - POST Click Delete your account button`, () => {
+    group(`B04_DeleteAccount_09_DeleteAccountConfirm POST`, () => {
       res = http.post(
-        env.launchURL + "/delete-account",
+        env.envURL + "/delete-account",
         {
           _csrf: csrfToken,
         },
         {
-          tags: { reqName: "09_DeleteAccountConfirm" },
+          tags: { name: "B04_DeleteAccount_09_DeleteAccountConfirm" },
         }
       );
   

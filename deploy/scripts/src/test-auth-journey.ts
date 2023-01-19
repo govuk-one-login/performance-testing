@@ -31,6 +31,30 @@ const profiles: ProfileList = {
             ],
             exec: 'sign_in'
         },
+    },
+    stress: {
+        sign_up: {
+            executor: 'ramping-arrival-rate',
+            startRate: 1,
+            timeUnit: '60s',
+            preAllocatedVUs: 1,
+            maxVUs: 3000,
+            stages: [
+                { target: 6000, duration: '15m' },   // Ramps up to target load
+            ],
+            exec: 'sign_up'
+        },
+        sign_in: {
+            executor: 'ramping-arrival-rate',
+            startRate: 1,
+            timeUnit: '60s',
+            preAllocatedVUs: 1,
+            maxVUs: 3000,
+            stages: [
+                { target: 6000, duration: '15m' },   // Ramps up to target load
+            ],
+            exec: 'sign_in'
+        }
     }
 }
 let loadProfile = selectProfile(profiles);
@@ -38,8 +62,8 @@ let loadProfile = selectProfile(profiles);
 export const options: Options = {
     scenarios: loadProfile.scenarios,
     thresholds: {
-        http_req_duration: ['p(95)<1000'], // 95th percntile response time <1000ms
-        http_req_failed: ['rate<0.05'],   // Error rate <5%
+        http_req_duration: ['p(95)<1000'],  // 95th percntile response time <1000ms
+        http_req_failed: ['rate<0.05'],     // Error rate <5%
     }
 };
 
@@ -87,7 +111,6 @@ export function sign_up() {
     let secretKey: string;
     let totp: TOTP;
     let mfaOption: mfaType = (Math.random() <= 0.5) ? "SMS" : "AUTH_APP";
-    console.log(testEmail);
 
     group('GET - {RP Stub}', function () {
         res = http.get(env.rpStub);

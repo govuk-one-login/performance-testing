@@ -245,12 +245,12 @@ Resources:
               ArnLike:
                 aws:SourceArn: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/perfTest/dynatraceAPIToken"
       Tags:
-        Name: !Join
-          - "-"
-          - - !Ref AWS::StackName
-            - "LoadTestCodeBuildProject"
-        Service: "ci/cd"
-        Source: "alphagov/di-accounts-performance"
+        - Key: Name
+          Value: !Ref "${AWS::StackName}-LoadTestCodeBuildProject"
+        - Key: Service
+          Value: ci/cd
+        - Key: Source
+          Value: alphagov/di-accounts-performance
 
   SecretsKmsKeyAlias:
     Type: AWS::KMS::Alias

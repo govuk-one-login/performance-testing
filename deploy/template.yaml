@@ -255,7 +255,7 @@ Resources:
   SecretsKmsKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub "alias/${AAMStackName}-SecretsKmsKey"
+      AliasName: !Sub "alias/${AWS::StackName}-SecretsKmsKey"
       TargetKeyId: !Ref SecretsKmsKey
 
   DynatraceAPITokenSecret:

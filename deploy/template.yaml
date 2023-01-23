@@ -155,6 +155,11 @@ Resources:
               - "secretsmanager:GetSecretValue"
             Resource:
               - !Ref DynatraceAPITokenSecret
+          - Effect: Allow
+            Action:
+              - "kms:Decrypt"
+            Resource:
+              - !GetAtt SecretsKmsKey.Arn
 
   TestUserPasswordParameter:
     Type: AWS::SSM::Parameter
@@ -233,7 +238,7 @@ Resources:
             Resource: "*"
           - Effect: Allow
             Principal:
-              Service: !Sub "secretsmanager.${AWS::Region}.amazonaws.com"
+              Service: secretsmanager.amazonaws.com
             Action:
               - "kms:Encrypt*"
               - "kms:Decrypt*"
@@ -264,8 +269,7 @@ Resources:
       Description: "Dynatrace API Token"
       Name: "/perfTest/dynatraceAPIToken"
       SecretString: "please-set-me"
-      KmsKeyId: 
-        !GetAtt SecretsKmsKey.Arn
+      KmsKeyId: !GetAtt SecretsKmsKey.Arn
       Tags:
         - Key: Name
           Value: !Sub "${AWS::StackName}-LoadTestCodeBuildProject"
@@ -307,7 +311,7 @@ Resources:
               APP_PASSWORD_NEW: "/perfTest/testUserNewPassword"
               K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
             secrets-manager:
-              K6_DYNATRACE_APITOKEN: "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/perfTest/dynatraceAPIToken-*"
+              K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceAPIToken"
 
           phases:
             pre_build:

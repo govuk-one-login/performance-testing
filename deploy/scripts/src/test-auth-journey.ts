@@ -113,19 +113,22 @@ export function sign_up() {
     let mfaOption: mfaType = (Math.random() <= 0.5) ? "SMS" : "AUTH_APP";
 
     group('GET - {RP Stub}', function () {
+        const start = Date.now();
         res = http.get(env.rpStub);
+        const end = Date.now();
         const jar = http.cookieJar();
         const cookies = jar.cookiesForURL(env.rpStub);
         check(res, {
             "is status 200": r => r.status === 200,
             "has cookie 'JSESSIONID'": () => cookies.JSESSIONID.length > 0,
             "has cookie '__VCAP_ID__'": () => cookies.__VCAP_ID__.length > 0 && cookies.__VCAP_ID__[0].length === 28,
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
     });
 
     sleep(1);
 
     group('POST - {RP Stub} /oidc/auth', () => {
+        const start = Date.now();
         res = http.post(env.rpStub + '/oidc/auth',
             {
                 'scopes-email': 'email',
@@ -139,16 +142,18 @@ export function sign_up() {
                 'lng': '',
             }
         );
+        const end = Date.now();
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Create a GOV.UK account or sign in'),
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
     sleep(1);
 
     group('POST - /sign-in-or-create', () => {
+        const start = Date.now();
         res = http.post(env.baseUrl + '/sign-in-or-create',
             {
                 _csrf: csrfToken,
@@ -156,32 +161,36 @@ export function sign_up() {
                 optionSelected: 'create',
             }
         );
+        const end = Date.now();
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Enter your email address'),
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
     sleep(1);
 
     group('POST - /enter-email-create', () => {
+        const start = Date.now();
         res = http.post(env.baseUrl + '/enter-email-create',
             {
                 _csrf: csrfToken,
                 email: testEmail,
             }
         );
+        const end = Date.now();
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Check your email'),
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
     sleep(1);
 
     group('POST - /check-your-email', () => {
+        const start = Date.now();
         res = http.post(env.baseUrl + '/check-your-email',
             {
                 _csrf: csrfToken,
@@ -189,16 +198,18 @@ export function sign_up() {
                 code: credentials.emailOTP,
             }
         );
+        const end = Date.now();
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Create your password'),
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
     sleep(1);
 
     group('POST - /create-password', () => {
+        const start = Date.now();
         res = http.post(env.baseUrl + '/create-password',
             {
                 _csrf: csrfToken,
@@ -206,10 +217,11 @@ export function sign_up() {
                 'confirm-password': credentials.password,
             }
         );
+        const end = Date.now();
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Choose how to get security codes'),
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
@@ -218,6 +230,7 @@ export function sign_up() {
     switch (mfaOption) {    // Switch statement for either Auth App or SMS paths
         case "AUTH_APP": {
             group('POST - /get-security-codes', () => {
+                const start = Date.now();
                 res = http.post(env.baseUrl + '/get-security-codes',
                     {
                         _csrf: csrfToken,
@@ -225,10 +238,11 @@ export function sign_up() {
                         mfaOptions: mfaOption,
                     }
                 );
+                const end = Date.now();
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Set up an authenticator app'),
-                }) ? durations.add(res.timings.duration) : fail("Checks failed");
+                }) ? durations.add(end - start) : fail("Checks failed");
                 secretKey = res.html().find("input[name='_secretKey']").val() || '';
                 totp = new TOTP(secretKey);
                 csrfToken = getCSRF(res);
@@ -237,6 +251,7 @@ export function sign_up() {
             sleep(1);
 
             group('POST - /setup-authenticator-app', () => {
+                const start = Date.now();
                 res = http.post(env.baseUrl + '/setup-authenticator-app',
                     {
                         _csrf: csrfToken,
@@ -244,16 +259,18 @@ export function sign_up() {
                         code: totp.generateTOTP(),
                     }
                 );
+                const end = Date.now();
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('You&#39;ve created your GOV.UK account'),
-                }) ? durations.add(res.timings.duration) : fail("Checks failed");
+                }) ? durations.add(end - start) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
             break;
         }
         case "SMS": {
             group('POST - /get-security-codes', () => {
+                const start = Date.now();
                 res = http.post(env.baseUrl + '/get-security-codes',
                     {
                         _csrf: csrfToken,
@@ -261,10 +278,11 @@ export function sign_up() {
                         mfaOptions: mfaOption,
                     }
                 );
+                const end = Date.now();
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Enter your mobile phone number'),
-                }) ? durations.add(res.timings.duration) : fail("Checks failed");
+                }) ? durations.add(end - start) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
 
@@ -272,6 +290,7 @@ export function sign_up() {
 
             let censoredPhoneNumber = '';
             group('POST - /enter-phone-number', () => {
+                const start = Date.now();
                 res = http.post(env.baseUrl + '/enter-phone-number',
                     {
                         _csrf: csrfToken,
@@ -280,10 +299,11 @@ export function sign_up() {
                         phoneNumber,
                     }
                 );
+                const end = Date.now();
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Check your phone'),
-                }) ? durations.add(res.timings.duration) : fail("Checks failed");
+                }) ? durations.add(end - start) : fail("Checks failed");
                 censoredPhoneNumber = getPhoneNumber(res);
                 csrfToken = getCSRF(res);
             });
@@ -291,6 +311,7 @@ export function sign_up() {
             sleep(1);
 
             group('POST - /check-your-phone', () => {
+                const start = Date.now();
                 res = http.post(env.baseUrl + '/check-your-phone',
                     {
                         _csrf: csrfToken,
@@ -298,10 +319,11 @@ export function sign_up() {
                         code: credentials.phoneOTP,
                     }
                 );
+                const end = Date.now();
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('You&#39;ve created your GOV.UK account'),
-                }) ? durations.add(res.timings.duration) : fail("Checks failed");
+                }) ? durations.add(end - start) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
             break;
@@ -311,16 +333,18 @@ export function sign_up() {
     sleep(1);
 
     group('POST - /account-created', () => {
+        const start = Date.now();
         res = http.post(env.baseUrl + '/account-created',
             {
                 _csrf: csrfToken,
                 phoneNumber: '',
             }
         );
+        const end = Date.now();
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('User information'),
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
     });
 
     // 25% of users logout
@@ -328,15 +352,17 @@ export function sign_up() {
         sleep(1);
 
         group('POST - {RP Stub} /logout', () => {
+            const start = Date.now();
             res = http.post(env.rpStub + '/logout',
                 {
                     logout: '',
                 }
             );
+            const end = Date.now();
             check(res, {
                 'is status 200': r => r.status === 200,
                 'verify page content': r => (r.body as String).includes('Successfully signed out'),
-            }) ? durations.add(res.timings.duration) : fail("Checks failed");
+            }) ? durations.add(end - start) : fail("Checks failed");
         });
     };
 };
@@ -347,19 +373,22 @@ export function sign_in() {
     const userData = data_sign_in[execution.scenario.iterationInInstance % data_sign_in.length];
 
     group('GET - {RP Stub}', function () {
+        const start = Date.now();
         res = http.get(env.rpStub);
+        const end = Date.now();
         const jar = http.cookieJar();
         const cookies = jar.cookiesForURL(env.rpStub);
         check(res, {
             "is status 200": r => r.status === 200,
             "has cookie 'JSESSIONID'": () => cookies.JSESSIONID.length > 0,
             "has cookie '__VCAP_ID__'": () => cookies.__VCAP_ID__.length > 0 && cookies.__VCAP_ID__[0].length === 28,
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
     });
 
     sleep(1);
 
     group('POST - {RP Stub} /oidc/auth', () => {
+        const start = Date.now();
         res = http.post(env.rpStub + '/oidc/auth',
             {
                 'scopes-email': 'email',
@@ -372,21 +401,24 @@ export function sign_in() {
                 lng: '',
             }
         );
+        const end = Date.now();
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Create a GOV.UK account or sign in'),
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
     });
 
     sleep(1);
 
     group('GET - /sign-in-or-create', function () {
+        const start = Date.now();
         res = http.get(env.baseUrl + '/sign-in-or-create?redirectPost=true');
+        const end = Date.now();
 
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Enter your email address to sign in to your GOV.UK account'),
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
 
         csrfToken = getCSRF(res);
     });
@@ -394,16 +426,18 @@ export function sign_in() {
     sleep(1);
 
     group('POST - /enter-email', () => {
+        const start = Date.now();
         res = http.post(env.baseUrl + '/enter-email',
             {
                 _csrf: csrfToken,
                 email: userData.email,
             }
         );
+        const end = Date.now();
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Enter your password'),
-        }) ? durations.add(res.timings.duration) : fail("Checks failed");
+        }) ? durations.add(end - start) : fail("Checks failed");
         csrfToken = getCSRF(res);
     });
 
@@ -412,16 +446,18 @@ export function sign_in() {
     switch (userData.mfaOption) {
         case "AUTH_APP": {
             group('POST - /enter-password', () => {
+                const start = Date.now();
                 res = http.post(env.baseUrl + '/enter-password',
                     {
                         _csrf: csrfToken,
                         password: credentials.password,
                     }
                 );
+                const end = Date.now();
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Enter the 6 digit security code shown in your authenticator app'),
-                }) ? durations.add(res.timings.duration) : fail("Checks failed");
+                }) ? durations.add(end - start) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
 
@@ -429,16 +465,18 @@ export function sign_in() {
 
             group('POST - /enter-authenticator-app-code', () => {
                 let totp = new TOTP(credentials.authAppKey);
+                const start = Date.now();
                 res = http.post(env.baseUrl + '/enter-authenticator-app-code',
                     {
                         _csrf: csrfToken,
                         code: totp.generateTOTP(),
                     }
                 );
+                const end = Date.now();
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('User information'),
-                }) ? durations.add(res.timings.duration) : fail("Checks failed");
+                }) ? durations.add(end - start) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
             break;
@@ -446,16 +484,18 @@ export function sign_in() {
         case "SMS": {
             let phoneNumber = '';
             group('POST - /enter-password', () => {
+                const start = Date.now();
                 res = http.post(env.baseUrl + '/enter-password',
                     {
                         _csrf: csrfToken,
                         password: credentials.password,
                     }
                 );
+                const end = Date.now();
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('Check your phone'),
-                }) ? durations.add(res.timings.duration) : fail("Checks failed");
+                }) ? durations.add(end - start) : fail("Checks failed");
                 phoneNumber = getPhoneNumber(res);
                 csrfToken = getCSRF(res);
             });
@@ -463,6 +503,7 @@ export function sign_in() {
             sleep(1);
 
             group('POST - /enter-code', () => {
+                const start = Date.now();
                 res = http.post(env.baseUrl + '/enter-code',
                     {
                         _csrf: csrfToken,
@@ -470,10 +511,11 @@ export function sign_in() {
                         code: credentials.phoneOTP,
                     }
                 );
+                const end = Date.now();
                 check(res, {
                     'is status 200': r => r.status === 200,
                     'verify page content': r => (r.body as String).includes('User information'),
-                }) ? durations.add(res.timings.duration) : fail("Checks failed");
+                }) ? durations.add(end - start) : fail("Checks failed");
                 csrfToken = getCSRF(res);
             });
             break;
@@ -485,15 +527,17 @@ export function sign_in() {
         sleep(1);
 
         group('POST - {RP Stub} /logout', () => {
+            const start = Date.now();
             res = http.post(env.rpStub + '/logout',
                 {
                     logout: '',
                 }
             );
+            const end = Date.now();
             check(res, {
                 'is status 200': r => r.status === 200,
                 'verify page content': r => (r.body as String).includes('Successfully signed out'),
-            }) ? durations.add(res.timings.duration) : fail("Checks failed");
+            }) ? durations.add(end - start) : fail("Checks failed");
         });
     };
 }

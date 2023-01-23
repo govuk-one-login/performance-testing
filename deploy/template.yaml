@@ -267,12 +267,12 @@ Resources:
       KmsKeyId: 
         !GetAtt SecretsKmsKey.Arn
       Tags:
-        Name: !Join
-          - "-"
-          - - !Ref AWS::StackName
-            - "LoadTestCodeBuildProject"
-        Service: "ci/cd"
-        Source: "alphagov/di-accounts-performance"
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-LoadTestCodeBuildProject"
+        - Key: Service
+          Value: ci/cd
+        - Key: Source
+          Value: alphagov/di-accounts-performance
 
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project

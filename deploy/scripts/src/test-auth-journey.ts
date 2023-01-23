@@ -36,22 +36,22 @@ const profiles: ProfileList = {
         sign_up: {
             executor: 'ramping-arrival-rate',
             startRate: 1,
-            timeUnit: '60s',
+            timeUnit: '1s',
             preAllocatedVUs: 1,
-            maxVUs: 3000,
+            maxVUs: 600,
             stages: [
-                { target: 6000, duration: '15m' },   // Ramps up to target load
+                { target: 15, duration: '15m' },   // Ramps up to target load
             ],
             exec: 'sign_up'
         },
         sign_in: {
             executor: 'ramping-arrival-rate',
             startRate: 1,
-            timeUnit: '60s',
+            timeUnit: '1s',
             preAllocatedVUs: 1,
-            maxVUs: 3000,
+            maxVUs: 600,
             stages: [
-                { target: 6000, duration: '15m' },   // Ramps up to target load
+                { target: 15, duration: '15m' },   // Ramps up to target load
             ],
             exec: 'sign_in'
         }
@@ -386,7 +386,7 @@ export function sign_in() {
         check(res, {
             'is status 200': r => r.status === 200,
             'verify page content': r => (r.body as String).includes('Enter your email address to sign in to your GOV.UK account'),
-        });
+        }) ? durations.add(res.timings.duration) : fail("Checks failed");
 
         csrfToken = getCSRF(res);
     });

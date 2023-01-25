@@ -32,6 +32,30 @@ const profiles: ProfileList = {
             exec: 'sign_in'
         },
     },
+    singleScenarioStress: {
+        sign_up: {
+            executor: 'ramping-arrival-rate',
+            startRate: 1,
+            timeUnit: '1s',
+            preAllocatedVUs: 1,
+            maxVUs: 600,
+            stages: [
+                { target: 30, duration: '10m' },   // Ramps up to target load
+            ],
+            exec: 'sign_up'
+        },
+        sign_in: {
+            executor: 'ramping-arrival-rate',
+            startRate: 1,
+            timeUnit: '1s',
+            preAllocatedVUs: 1,
+            maxVUs: 600,
+            stages: [
+                { target: 30, duration: '10m' },   // Ramps up to target load
+            ],
+            exec: 'sign_in'
+        }
+    },
     stress: {
         sign_up: {
             executor: 'ramping-arrival-rate',

@@ -19,7 +19,7 @@ FROM golang:1.18-alpine as k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@latest
-RUN xk6 build v0.40.0 --with github.com/henrikrexed/xk6-output-dynatrace@latest --output /k6
+RUN xk6 build v0.40.0 --with github.com/Dynatrace/xk6-output-dynatrace@latest --output /k6
 
 # ---
 # Run

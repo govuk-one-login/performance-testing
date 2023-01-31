@@ -14,7 +14,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 1, duration: '10s' } // Ramps up to target load
       ],
       exec: 'fraudScenario1'
     }
@@ -49,8 +49,13 @@ export function setup (): void {
 }
 
 const env = {
-  ipvCoreStub: `https://${__ENV.coreStub}`,
-  fraudEndPoint: `https://${__ENV.fraudURL}`
+  ipvCoreStub: __ENV.coreStub,
+  fraudEndPoint: __ENV.fraudURL
+}
+
+const stubCreds = {
+  userName: __ENV.coreStubUserName,
+  password: __ENV.coreStubPassword
 }
 
 const transactionDuration = new Trend('duration')
@@ -58,10 +63,8 @@ const transactionDuration = new Trend('duration')
 export function fraudScenario1 (): void {
   let res: Response
   let csrfToken: string
-  const stubUserName = `${__ENV.coreStubUserName}`
-  const stubPassword = `${__ENV.coreStubPassword}`
   const userDetails = getUserDetails()
-  const credentials = `${stubUserName}:${stubPassword}`
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
 
   group(
@@ -142,15 +145,15 @@ export function fraudScenario1 (): void {
       ? transactionDuration.add(endTime1 - startTime1)
       : fail('Response Validation Failed')
 
-    const headerData = res.body as string
-    const headerDataSplit = headerData.split('=')
-    const codeID = headerDataSplit[2]
-    const stateID = headerDataSplit[3]
+    const myHeaders = res.headers.Location
+    const regExpMatch = myHeaders.match(/&code=(.+?)&state=(.+?)$/)
+    const codeID = regExpMatch?.[1] ?? ''
+    const stateID = regExpMatch?.[2] ?? ''
 
     const startTime2 = Date.now()
     res = http.get(
       env.ipvCoreStub +
-          `/callback?client_id=ipv-core-stub&code=${codeID}=${stateID}`,
+          `/callback?client_id=ipv-core-stub&code=${codeID}&state=${stateID}`,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails2' }
@@ -170,8 +173,17 @@ export function fraudScenario1 (): void {
 function getCSRF (r: Response): string {
   return r.html().find("input[name='x-csrf-token']").val() ?? ''
 }
+/*
+function getStateID (r: Response): string {
+  return r.html().find('state').val() ?? ''
+}
 
-function getUserDetails (): {
+function getCodeID (r: Response): string {
+  return r.html().find('code').val() ?? ''
+}
+*/
+
+interface User {
   firstName: string
   lastName: string
   day: number
@@ -182,17 +194,19 @@ function getUserDetails (): {
   street: string
   city: string
   postCode: string
-} {
-  const firstName = `perfFirst${Math.floor(Math.random() * 99998) + 1}`
-  const lastName = `perfLast${Math.floor(Math.random() * 99998) + 1}`
-  const day = Math.floor(Math.random() * 29) + 1
-  const month = Math.floor(Math.random() * 12) + 1
-  const year = Math.floor(Math.random() * 71) + 1950
-  const buildNum = Math.floor(Math.random() * 999) + 1
-  const buildName = `RandomBuilding${Math.floor(Math.random() * 99998) + 1}`
-  const street = `RandomgStreet${Math.floor(Math.random() * 99998) + 1}`
-  const city = `RandomCity${Math.floor(Math.random() * 999) + 1}`
-  const postCode = `AB${Math.floor(Math.random() * 99) + 1} CD${Math.floor(Math.random() * 99) + 1}`
+}
 
-  return { firstName, lastName, day, month, year, buildNum, buildName, street, city, postCode }
+function getUserDetails (): User {
+  return {
+    firstName: `perfFirst${Math.floor(Math.random() * 99998) + 1}`,
+    lastName: `perfLast${Math.floor(Math.random() * 99998) + 1}`,
+    day: Math.floor(Math.random() * 29) + 1,
+    month: Math.floor(Math.random() * 12) + 1,
+    year: Math.floor(Math.random() * 71) + 1950,
+    buildNum: Math.floor(Math.random() * 999) + 1,
+    buildName: `RandomBuilding${Math.floor(Math.random() * 99998) + 1}`,
+    street: `RandomStreet${Math.floor(Math.random() * 99998) + 1}`,
+    city: `RandomCity${Math.floor(Math.random() * 999) + 1}`,
+    postCode: `AB${Math.floor(Math.random() * 99) + 1} CD${Math.floor(Math.random() * 99) + 1}`
+  }
 }

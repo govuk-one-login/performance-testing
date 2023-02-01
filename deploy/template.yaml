@@ -185,7 +185,7 @@ Resources:
               commands:
                 - mkdir -p "$TEST_REPORT_DIR"
                 - |
-                  sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" $OTEL_TEMPLATE > $OTEL_CONFIG
+                  sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_ID#" $OTEL_TEMPLATE > $OTEL_CONFIG
                 - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &
             build:
               commands:

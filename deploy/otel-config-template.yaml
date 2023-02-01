@@ -1,0 +1,20 @@
+receivers:
+  statsd:
+
+processors:
+  batch:
+
+exporters:
+  otlphttp:
+    endpoint: "{URL}/api/v2/otlp"
+    headers:
+      Authorization: "Api-Token {APITOKEN}"
+
+service:
+
+  pipelines:
+
+    metrics:
+      receivers: [statsd]
+      processors: [batch]
+      exporters: [otlphttp]

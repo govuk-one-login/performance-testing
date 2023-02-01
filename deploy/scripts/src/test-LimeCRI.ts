@@ -173,15 +173,6 @@ export function fraudScenario1 (): void {
 function getCSRF (r: Response): string {
   return r.html().find("input[name='x-csrf-token']").val() ?? ''
 }
-/*
-function getStateID (r: Response): string {
-  return r.html().find('state').val() ?? ''
-}
-
-function getCodeID (r: Response): string {
-  return r.html().find('code').val() ?? ''
-}
-*/
 
 interface User {
   firstName: string

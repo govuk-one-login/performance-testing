@@ -54,8 +54,8 @@ const env = {
 }
 
 const stubCreds = {
-  userName: __ENV.coreStubUserName,
-  password: __ENV.coreStubPassword
+  userName: __ENV.CORE_STUB_USERNAME,
+  password: __ENV.CORE_STUB_PASSWORD
 }
 
 const transactionDuration = new Trend('duration')
@@ -145,15 +145,8 @@ export function fraudScenario1 (): void {
       ? transactionDuration.add(endTime1 - startTime1)
       : fail('Response Validation Failed')
 
-    const myHeaders = res.headers.Location
-    const regExpMatch = myHeaders.match(/&code=(.+?)&state=(.+?)$/)
-    const codeID = regExpMatch?.[1] ?? ''
-    const stateID = regExpMatch?.[2] ?? ''
-
     const startTime2 = Date.now()
-    res = http.get(
-      env.ipvCoreStub +
-          `/callback?client_id=ipv-core-stub&code=${codeID}&state=${stateID}`,
+    res = http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails2' }

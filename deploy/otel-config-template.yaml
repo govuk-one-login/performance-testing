@@ -5,7 +5,10 @@ receivers:
     collection_interval: 1m
     scrapers:
       cpu:
+      load:
       memory:
+      network:
+      process:
 
 processors:
   batch:

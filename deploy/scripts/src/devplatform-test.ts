@@ -5,7 +5,7 @@ import { selectProfile, type ProfileList, describeProfile } from './utils/config
 
 const profiles: ProfileList = {
   smoke: {
-    demo_sam_app: {
+    demoSamApp: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1m',
@@ -15,9 +15,9 @@ const profiles: ProfileList = {
         { target: 6, duration: '10s' }, // Ramps up to target load
         { target: 6, duration: '10s' } // Holds at target load
       ],
-      exec: 'demo_sam_app'
+      exec: 'demoSamApp'
     },
-    demo_node_app: {
+    demoNodeApp: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1m',
@@ -27,11 +27,11 @@ const profiles: ProfileList = {
         { target: 6, duration: '10s' }, // Ramps up to target load
         { target: 6, duration: '10s' } // Holds at target load
       ],
-      exec: 'demo_node_app'
+      exec: 'demoNodeApp'
     }
   },
   load: {
-    demo_sam_app: {
+    demoSamApp: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1m',
@@ -41,9 +41,9 @@ const profiles: ProfileList = {
         { target: 60, duration: '120s' }, // Ramps up to target load
         { target: 60, duration: '120s' } // Holds at target load
       ],
-      exec: 'demo_sam_app'
+      exec: 'demoSamApp'
     },
-    demo_node_app: {
+    demoNodeApp: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1m',
@@ -53,7 +53,7 @@ const profiles: ProfileList = {
         { target: 60, duration: '120s' }, // Ramps up to target load
         { target: 60, duration: '120s' } // Holds at target load
       ],
-      exec: 'demo_node_app'
+      exec: 'demoNodeApp'
     }
   }
 }
@@ -72,14 +72,14 @@ export function setup (): void {
 }
 
 const env = {
-  FE_URL: __ENV.CFN_HelloWorldApi, // Output from demo_sap_app
-  BE_URL: __ENV.CFN_ApiGatewayEndpoint // Output from demo_node_app
+  FE_URL: __ENV.CFN_HelloWorldApi, // Output from demoNodeApp
+  BE_URL: __ENV.CFN_ApiGatewayEndpoint // Output from demoNodeApp
 }
 
 export function demoSamApp (): void {
   let res: Response
 
-  group('GET - {demo_sam_app} /test', function () {
+  group('GET - {demoSamApp} /test', function () {
     res = http.get(env.BE_URL + '/test')
 
     check(res, {
@@ -94,7 +94,7 @@ export function demoSamApp (): void {
 export function demoNodeApp (): void {
   let res: Response
 
-  group('GET - {demo_node_app}', function () {
+  group('GET - {demoNodeApp}', function () {
     res = http.get(env.FE_URL)
 
     check(res, {

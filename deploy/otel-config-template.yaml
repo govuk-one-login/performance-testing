@@ -1,0 +1,39 @@
+receivers:
+  statsd:
+
+  hostmetrics:
+    collection_interval: 1m
+    scrapers:
+      cpu:
+      load:
+      memory:
+      network:
+      process:
+
+processors:
+  batch:
+
+  metricstransform:
+    transforms:
+    - include: ^.*$
+      match_type: regexp
+      action: update
+      operations:
+        - action: add_label
+          new_label: build_id
+          new_value: "{ID}"
+
+exporters:
+  otlphttp:
+    endpoint: "{URL}/api/v2/otlp"
+    headers:
+      Authorization: "Api-Token {APITOKEN}"
+
+service:
+
+  pipelines:
+
+    metrics:
+      receivers: [statsd, hostmetrics]
+      processors: [batch, metricstransform]
+      exporters: [otlphttp]

@@ -29,8 +29,11 @@ ENV OTEL_CONFIG=/home/k6/config.yaml
 ENV WORKDIR=/home/k6
 
 WORKDIR ${WORKDIR}
-USER k6
 
+USER root
+RUN apk add --no-cache aws-cli
+
+USER k6
 RUN mkdir ${WORKDIR}/scripts
 COPY --from=node-build /home/node/scripts/dist ${WORKDIR}/scripts
 

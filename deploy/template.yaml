@@ -184,6 +184,9 @@ Resources:
             pre_build:
               commands:
                 - mkdir -p "$TEST_REPORT_DIR"
+                - |
+                  sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_ID#" $OTEL_TEMPLATE > $OTEL_CONFIG
+                - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &
             build:
               commands:
                 - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
@@ -196,7 +199,7 @@ Resources:
                   aws cloudformation describe-stacks --stack-name "$FRONTEND_STACK_NAME" --region '${AWS::Region}' --query 'Stacks[0].Outputs[].{key: OutputKey, value: OutputValue}' --output text > cf-output.txt
                 - eval $(awk '{ printf("export CFN_%s=\"%s\"\n", $1, $2) }' cf-output.txt)
                 - echo "Run performance test"
-                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --tag build_id=$CODEBUILD_BUILD_ID --out output-dynatrace
+                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out statsd
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID

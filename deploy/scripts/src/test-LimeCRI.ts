@@ -45,6 +45,12 @@ export const options: Options = {
   }
 }
 
+type drivingLicenceIssuer = "DVA" | "DLVA";
+var optionLicence: drivingLicenceIssuer = (Math.random() <=0,5) ? "DLVA" : "DVA"
+
+
+
+
 export function setup (): void {
   describeProfile(loadProfile)
 }
@@ -162,6 +168,162 @@ export function fraudScenario1 (): void {
       ? transactionDuration.add(endTime2 - startTime2)
       : fail('Response Validation Failed')
   })
+}
+
+export function drivingScenario(): void {
+  let res: Response
+  let csrfToken: string
+  const userDetails = getUserDetails()
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+
+  group('B02_Driving_01_CoreStubEditUserContinue GET',
+  function(){
+    const startTime=Date.now()
+    res=http.get(env.ipvCoreStub+
+      "authorize?cri=driving-licence-cri-build&rowNumber=5")
+
+    const endTime=Date.now();
+
+    check(res,{
+      "is status 302": (r) => r.status === 302,
+      "verify page content": (r) => (r.body as string).includes('Who was your UK driving licence issued by?')
+    })
+      ? transactionDuration.add(endTime-startTime)
+      : fail('Response Validation Failed')
+      csrfToken = getCSRF(res)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B02_Driving_02_SelectingOption_POST', function(){
+    
+
+    switch(optionLicence){
+
+      case "DLVA":
+      
+          const startTime2=Date.now();
+            res=http.post(env.fraudEndPoint +"/licence-issuer",
+            {
+          
+              licenceIssuerRadio: 'DVLA',
+              submitButton: '',
+              'x-csrf-token': csrfToken
+
+      })
+      const endTime2=Date.now();
+
+      check(res,{
+        'is status 302': (r) => r.status === 302
+      })
+        ?transactionDuration.add(endTime2-startTime2)
+        :fail("Response Validation Failed")
+
+        break;
+      case "DVA":
+        const startTime3=Date.now();
+        res=http.post(env.fraudEndPoint +"/licence-issuer",
+        {
+      
+          licenceIssuerRadio: 'DVA',
+          submitButton: '',
+          'x-csrf-token': csrfToken
+
+  })
+  const endTime3=Date.now();
+      check(res,{
+       'is status 302': (r) => r.status === 302
+  })
+       ?transactionDuration.add(endTime3-startTime3)
+       :fail("Response Vaildation Failed")
+
+        break;
+      default:
+       console.log("Wrong option used");
+  
+    }
+
+  } )
+
+  sleep(Math.random() * 3)
+
+  group('B02_Driving_03_EditUser POST', function(){
+
+    switch(optionLicence){
+      case "DLVA":
+        
+        const startTime4=Date.now()
+          res=http.post(env.fraudEndPoint+"/details",{
+
+            surname: '',
+            firstName: '',
+            middleNames: '',
+            'dateOfBirth-day': '',
+            'dateOfBirth-month': '',
+            'dateOfBirth-year':  '',
+            dvlaDependent: '',
+            'issueDate-day': '',
+            'issueDate-month': '',
+            'issueDate-year': '',
+            'expiryDate-day': '',
+            'expiryDate-month': '',
+            'expiryDate-year':  '',
+            drivingLicenceNumber: '',
+            issueNumber: '',
+            postcode:'',
+            continue:'',
+            'x-csrf-token': ''
+
+          })
+      const endTime4=Date.now()
+      
+      check(res,{
+        'is status 302': (r) => r.status === 302,
+        'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
+      })
+        ?transactionDuration.add(endTime4-startTime4)
+        :fail("Response Validation Failed")
+        break;
+
+      case "DVA":
+
+        const startTime5=Date.now()
+        res=http.post(env.fraudEndPoint+"/details",{
+
+          surname: '',
+          firstName: '',
+          middleNames: '',
+          'dateOfBirth-day': '',
+          'dateOfBirth-month': '',
+          'dateOfBirth-year':  '',
+          dvaDependent: '',
+          'dateOfissue-day': '',
+          'dateOfissue-month': '',
+          'dateOfissue-year': '',
+          'expiryDate-day': '',
+          'expiryDate-month': '',
+          'expiryDate-year':  '',
+          dvaLicenceNumber: '',
+          issueNumber: '',
+          postcode:'',
+          continue:'',
+          'x-csrf-token': ''
+
+        })
+    const endTime5=Date.now()
+    
+    check(res,{
+      'is status 302': (r) => r.status === 302,
+      'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
+    })
+      ?transactionDuration.add(endTime5-startTime5)
+      :fail("Response Validation Failed")
+      break;
+
+    }
+  })
+
 }
 
 function getCSRF (r: Response): string {

@@ -72,8 +72,8 @@ export function setup (): void {
 }
 
 const env = {
-  FE_URL: __ENV.CFN_HelloWorldApi, // Output from demoNodeApp
-  BE_URL: __ENV.CFN_ApiGatewayEndpoint // Output from demoNodeApp
+  FE_URL: __ENV.CFN_HelloWorldApi.replace(/\/$/, ''), // Output from demoNodeApp
+  BE_URL: __ENV.CFN_ApiGatewayEndpoint.replace(/\/$/, '') // Output from demoNodeApp
 }
 
 export function demoSamApp (): void {

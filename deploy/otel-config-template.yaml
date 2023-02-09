@@ -8,7 +8,6 @@ receivers:
       load:
       memory:
       network:
-      process:
 
 processors:
   batch:

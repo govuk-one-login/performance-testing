@@ -43,17 +43,10 @@ export const options: Options = {
   }
 }
 
-const passportData = JSON.parse(open('./data/passportStub.json'))
-const passportStubData = JSON.stringify(passportData)
-
-const addressData = JSON.parse(open('./data/addressStub.json'))
-const addressStubData = JSON.stringify(addressData)
-
-const fraudData = JSON.parse(open('./data/fraudStub.json'))
-const fraudStubData = JSON.stringify(fraudData)
-
-const kbvData = JSON.parse(open('./data/kbvData.json'))
-const kbvStubData = JSON.stringify(kbvData)
+const passportData = open('./data/passportStub.json')
+const addressData = open('./data/addressStub.json')
+const fraudData = open('./data/fraudStub.json')
+const kbvData = open('./data/kbvData.json')
 
 export function setup (): void {
   describeProfile(loadProfile)
@@ -205,7 +198,7 @@ export function coreScenario1 (): void {
       res = http.post(
         passportStubURL,
         {
-          jsonPayload: passportStubData,
+          jsonPayload: passportData,
           strengthScore: '4',
           validityScore: '2',
           evidenceJsonPayload: '',
@@ -277,7 +270,7 @@ export function coreScenario1 (): void {
       res = http.post(
         addressStubURL,
         {
-          jsonPayload: addressStubData,
+          jsonPayload: addressData,
           expHours: '0',
           expMinutes: '0',
           expSeconds: '0',
@@ -346,7 +339,7 @@ export function coreScenario1 (): void {
       res = http.post(
         fraudStubURL,
         {
-          jsonPayload: fraudStubData,
+          jsonPayload: fraudData,
           identityFraudScore: '2',
           evidenceJsonPayload: '',
           expHours: '0',
@@ -460,7 +453,7 @@ export function coreScenario1 (): void {
       res = http.post(
         kbvStubURL,
         {
-          jsonPayload: kbvStubData,
+          jsonPayload: kbvData,
           verificationScore: '2',
           evidenceJsonPayload: '',
           expHours: '0',

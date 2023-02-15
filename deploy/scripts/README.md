@@ -69,3 +69,5 @@ This unit test also runs when raising pull requests as a [github action](../../.
 5. Click 'Start Build'
 
 6. Build progress and the stdout results summary are printed in the 'Build logs'
+
+7. Minor change for updating image tag - To be reverted

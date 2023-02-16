@@ -43,7 +43,7 @@ Parameters:
     Type: String
     Default: "none"
   TesterArns:
-    Description: "A list of AWS Arns of the performance testers with access to this account.
+    Description: "A list of AWS Arns of the performance testers with access to this account"
     Type: "CommaDelimitedList"
 
 Resources:

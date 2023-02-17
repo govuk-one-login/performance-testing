@@ -87,7 +87,7 @@ export function coreScenario1 (): void {
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
 
-      uniqueUserID = res.html().find('select[name=userIdSelect]>option').last().val() ?? ''
+      uniqueUserID = res.html().find('select[name=userIdSelect]>option').last().val() ?? fail('User UUID not found')
     }
   )
 

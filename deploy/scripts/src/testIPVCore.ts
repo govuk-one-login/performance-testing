@@ -63,6 +63,8 @@ export function coreScenario1 (): void {
   let res: Response
   let csrfToken: string
   let resourceID: string
+  let extractedUserIDFull: string
+  let uniqueUserID: string
   let passportStubURL: string
   let addressStubURL: string
   let fraudStubURL: string
@@ -85,6 +87,12 @@ export function coreScenario1 (): void {
       })
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
+
+      extractedUserIDFull = res.html().find('select[name=userIdSelect]>option').eq(2).text()
+
+      extractedUserIDFull.startsWith('urn:uuid:') && extractedUserIDFull.endsWith(' - Non app journey user')
+        ? uniqueUserID = extractedUserIDFull.slice(9, 45)
+        : console.log(`User ID not found for ${__VU} and ${__ITER}`)
     }
   )
 
@@ -93,8 +101,6 @@ export function coreScenario1 (): void {
   group(
     'B01_Core_02_SelectUserIDContinue GET',
     function () {
-      const regExpMatch = JSON.stringify(res.body).match(/App journey user<\/option>\\n {20}<option value=\\"urn:uuid:(.+?)\\">urn:uuid:(.+?) - Non app journey user<\/option>/)
-      const uniqueUserID = regExpMatch?.[1] ?? ''
       const startTime = Date.now()
       res = http.get(
         env.orchStubEndPoint + `/authorize?journeyType=full&userIdSelect=urn%3Auuid%3A${uniqueUserID}&userIdText=`,
@@ -173,7 +179,7 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_04_ClickContiueOnPYIStartPage_02_Stub' }
+          tags: { name: 'B01_Core_04_ClickContiueOnPYIStartPage_02_PassportStub' }
         }
       )
       const endTime2 = Date.now()
@@ -214,7 +220,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_05_SelectPassportDataAndContinue_01_Stub' }
+          tags: { name: 'B01_Core_05_SelectPassportDataAndContinue_01_PassportStub' }
         }
       )
       const endTime1 = Date.now()
@@ -245,7 +251,7 @@ export function coreScenario1 (): void {
       const startTime3 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_05_SelectPassportDataAndContinue_03_Core' }
+          tags: { name: 'B01_Core_05_SelectPassportDataAndContinue_03_AddressStub' }
         }
       )
       const endTime3 = Date.now()
@@ -283,7 +289,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_06_SelectAddressDataAndContinue_01_Stub' }
+          tags: { name: 'B01_Core_06_SelectAddressDataAndContinue_01_AddressStub' }
         }
       )
       const endTime1 = Date.now()
@@ -314,7 +320,7 @@ export function coreScenario1 (): void {
       const startTime3 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_06_SelectAddressDataAndContinue_03_Stub' }
+          tags: { name: 'B01_Core_06_SelectAddressDataAndContinue_03_FraudStub' }
         }
       )
       const endTime3 = Date.now()
@@ -354,7 +360,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_07_SelectFraudDataAndContinue_01_Stub' }
+          tags: { name: 'B01_Core_07_SelectFraudDataAndContinue_01_FraudStub' }
         }
       )
       const endTime1 = Date.now()
@@ -368,31 +374,16 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          redirects: 0,
           tags: { name: 'B01_Core_07_SelectFraudDataAndContinue_02_Core' }
         }
       )
       const endTime2 = Date.now()
 
       check(res, {
-        'is status 302': (r) => r.status === 302
-      })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
-
-      const startTime3 = Date.now()
-      res = http.get(env.coreEndPoint + res.headers.Location,
-        {
-          tags: { name: 'B01_Core_07_SelectFraudDataAndContinue_03_Core' }
-        }
-      )
-      const endTime3 = Date.now()
-
-      check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('Answer security questions')
       })
-        ? transactionDuration.add(endTime3 - startTime3)
+        ? transactionDuration.add(endTime2 - startTime2)
         : fail('Response Validation Failed')
 
       csrfToken = getCSRF(res)
@@ -428,7 +419,7 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_08_ContinueOnPreKBVTransition_02_Stub' }
+          tags: { name: 'B01_Core_08_ContinueOnPreKBVTransition_02_KBVStub' }
         }
       )
       const endTime2 = Date.now()
@@ -468,7 +459,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_09_SelectKBVDataAndContinue_01_Stub' }
+          tags: { name: 'B01_Core_09_SelectKBVDataAndContinue_01_KBVStub' }
         }
       )
       const endTime1 = Date.now()
@@ -482,31 +473,16 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          redirects: 0,
           tags: { name: 'B01_Core_09_SelectKBVDataAndContinue_02_Core' }
         }
       )
       const endTime2 = Date.now()
 
       check(res, {
-        'is status 302': (r) => r.status === 302
-      })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
-
-      const startTime3 = Date.now()
-      res = http.get(env.coreEndPoint + res.headers.Location,
-        {
-          tags: { name: 'B01_Core_09_SelectKBVDataAndContinue_03_Core' }
-        }
-      )
-      const endTime3 = Date.now()
-
-      check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('You’ve successfully proved your identity')
       })
-        ? transactionDuration.add(endTime3 - startTime3)
+        ? transactionDuration.add(endTime2 - startTime2)
         : fail('Response Validation Failed')
 
       csrfToken = getCSRF(res)
@@ -518,23 +494,38 @@ export function coreScenario1 (): void {
   group(
     'B01_Core_10_ContinueOnPYISuccessPage POST',
     function () {
-      const startTime = Date.now()
+      const startTime1 = Date.now()
       res = http.post(
         env.coreEndPoint + '/ipv/page/page-ipv-success',
         {
           _csrf: csrfToken
         },
         {
-          tags: { name: 'B01_Core_10_ContinueOnPYISuccessPage' }
+          redirects: 0,
+          tags: { name: 'B01_Core_10_ContinueOnPYISuccessPage_01_Core' }
         }
       )
-      const endTime = Date.now()
+      const endTime1 = Date.now()
+
+      check(res, {
+        'is status 302': (r) => r.status === 302
+      })
+        ? transactionDuration.add(endTime1 - startTime1)
+        : fail('Response Validation Failed')
+
+      const startTime2 = Date.now()
+      res = http.get(res.headers.Location,
+        {
+          tags: { name: 'B01_Core_10_ContinueOnPYISuccessPage_02_OrchStub' }
+        }
+      )
+      const endTime2 = Date.now()
 
       check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('User information')
       })
-        ? transactionDuration.add(endTime - startTime)
+        ? transactionDuration.add(endTime2 - startTime2)
         : fail('Response Validation Failed')
     }
   )

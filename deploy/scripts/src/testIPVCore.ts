@@ -88,7 +88,7 @@ export function coreScenario1 (): void {
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
 
-      extractedUserIDFull = res.html().find('select[name=userIdSelect]>option').eq(2).text()
+      extractedUserIDFull = res.html().find('select[name=userIdSelect]>option').eq(-1).text()
 
       extractedUserIDFull.startsWith('urn:uuid:') && extractedUserIDFull.endsWith(' - Non app journey user')
         ? uniqueUserID = extractedUserIDFull.slice(9, 45)

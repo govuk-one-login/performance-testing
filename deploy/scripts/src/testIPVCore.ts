@@ -8,7 +8,7 @@ const profiles: ProfileList = {
   smoke: {
     coreScenario1: {
       executor: 'ramping-arrival-rate',
-      startRate: 5,
+      startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
       maxVUs: 1,
@@ -63,7 +63,6 @@ export function coreScenario1 (): void {
   let res: Response
   let csrfToken: string
   let resourceID: string
-  let extractedUserIDFull: string
   let uniqueUserID: string
   let passportStubURL: string
   let addressStubURL: string
@@ -88,11 +87,7 @@ export function coreScenario1 (): void {
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
 
-      extractedUserIDFull = res.html().find('select[name=userIdSelect]>option').eq(-1).text()
-
-      extractedUserIDFull.startsWith('urn:uuid:') && extractedUserIDFull.endsWith(' - Non app journey user')
-        ? uniqueUserID = extractedUserIDFull.slice(9, 45)
-        : console.log(`User ID not found for ${__VU} and ${__ITER}`)
+      uniqueUserID = res.html().find('select[name=userIdSelect]>option').last().val() ?? ''
     }
   )
 
@@ -103,7 +98,7 @@ export function coreScenario1 (): void {
     function () {
       const startTime = Date.now()
       res = http.get(
-        env.orchStubEndPoint + `/authorize?journeyType=full&userIdSelect=urn%3Auuid%3A${uniqueUserID}&userIdText=`,
+        env.orchStubEndPoint + `/authorize?journeyType=full&userIdSelect=${uniqueUserID}&userIdText=`,
         {
           tags: { name: 'B01_Core_02_SelectUserIDContinue' }
         }

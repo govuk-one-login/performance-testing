@@ -53,8 +53,8 @@ export function setup (): void {
 }
 
 const env = {
-  orchStubEndPoint: __ENV.orchStubURL,
-  coreEndPoint: __ENV.coreURL
+  orchStubEndPoint: __ENV.ORCH_STUB_URL,
+  coreEndPoint: __ENV.CORE_URL
 }
 
 const transactionDuration = new Trend('duration')

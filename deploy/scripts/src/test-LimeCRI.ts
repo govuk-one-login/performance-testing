@@ -75,7 +75,7 @@ export const options: Options = {
 
 
 
-export function setup (): void {
+export function setup(): void {
   describeProfile(loadProfile)
 }
 
@@ -93,7 +93,7 @@ const stubCreds = {
 
 const transactionDuration = new Trend('duration')
 
-export function fraudScenario1 (): void {
+export function fraudScenario1(): void {
   let res: Response
   let csrfToken: string
   const userDetails = getUserDetails()
@@ -200,7 +200,7 @@ export function drivingScenario(): void {
   let res: Response
   let csrfToken: string
   type drivingLicenceIssuer = "DVA" | "DVLA";
-  const optionLicence: drivingLicenceIssuer = (Math.random() >=0,5) ? "DVA" : "DVLA"
+  const optionLicence: drivingLicenceIssuer = (Math.random() >= 0, 5) ? "DVA" : "DVLA"
   const userDetails = getUserDetails()
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
@@ -208,199 +208,199 @@ export function drivingScenario(): void {
   const user1DVLA = csvData1[exec.scenario.iterationInTest % csvData1.length]
   const user1DVA = csvData2[exec.scenario.iterationInTest % csvData2.length]
 
-  
-  
+
+
 
   group('B02_Driving_01_CoreStub GET',
-  function(){
-    const startTime=Date.now()
-    res=http.get(env.ipvCoreStub+
-      "/authorize?cri=driving-licence-cri-build&rowNumber=5",
-      {
-        headers:{Authorization: `Basic ${encodedCredentials}`},
-        tags: {name: 'B02_Driving_01_CoreStuB'}
+    function () {
+      const startTime = Date.now()
+      res = http.get(env.ipvCoreStub +
+        "/authorize?cri=driving-licence-cri-build&rowNumber=5",
+        {
+          headers: { Authorization: `Basic ${encodedCredentials}` },
+          tags: { name: 'B02_Driving_01_CoreStuB' }
+        })
+
+      const endTime = Date.now();
+
+      check(res, {
+        'is status 200': (r) => r.status === 200,
+        'verify page content': (r) => (r.body as string).includes('Who was your UK driving licence issued by?')
       })
-
-    const endTime=Date.now();
-
-    check(res,{
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Who was your UK driving licence issued by?')
-    })
-      ? transactionDuration.add(endTime-startTime)
-      : fail('Response Validation Failed')
+        ? transactionDuration.add(endTime - startTime)
+        : fail('Response Validation Failed')
       csrfToken = getCSRF(res)
-      
-  })
+
+    })
 
   sleep(Math.random() * 3)
 
-  switch (optionLicence){
-    case "DVLA":{
-      group('B02_Driving_02_SelectingOption_DVLA_POST', function(){
-        const startTime2=Date.now();
-        res=http.post(env.drivingUrl + "/licence-issuer",
+  switch (optionLicence) {
+    case "DVLA": {
+      group('B02_Driving_02_SelectingOption_DVLA_POST', function () {
+        const startTime2 = Date.now();
+        res = http.post(env.drivingUrl + "/licence-issuer",
           {
-                licenceIssuerRadio: 'DVLA',
-                submitButton: '',
-               'x-csrf-token': csrfToken
+            licenceIssuerRadio: 'DVLA',
+            submitButton: '',
+            'x-csrf-token': csrfToken
           })
-        const endTime2=Date.now();
-        
-        check(res,{
+        const endTime2 = Date.now();
+
+        check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes("Enter your details exactly as they appear on your UK driving licence")
         })
-          ?transactionDuration.add(endTime2-startTime2)
-          :fail("Response Validation Failed")
-          csrfToken = getCSRF(res)
+          ? transactionDuration.add(endTime2 - startTime2)
+          : fail("Response Validation Failed")
+        csrfToken = getCSRF(res)
       })
 
       sleep(1);
 
-      group('B02_Driving_03_DVLA_EditUser POST', function(){
-        const startTime3=Date.now();
-        console.log("User1DVLA is Here "+JSON.stringify(user1DVLA))
-       
-        res=http.post(env.drivingUrl+"/details",{
+      group('B02_Driving_03_DVLA_EditUser POST', function () {
+        const startTime3 = Date.now();
+        console.log("User1DVLA is Here " + JSON.stringify(user1DVLA))
 
-            surname: user1DVLA.surname,
-            firstName: user1DVLA.firstName,
-            middleNames: user1DVLA.middleName,
-            'dateOfBirth-day': user1DVLA.birthday,
-            'dateOfBirth-month': user1DVLA.birthmonth,
-            'dateOfBirth-year':  user1DVLA.birthyear,
-            dvlaDependent: 'DVLA',
-            'issueDate-day': user1DVLA.issueDay,
-            'issueDate-month': user1DVLA.issueMonth,
-            'issueDate-year': user1DVLA.issueYear,
-            'expiryDate-day': user1DVLA.expiryDay,
-            'expiryDate-month': user1DVLA.expiryMonth,
-            'expiryDate-year':  user1DVLA.expiryYear,
-            drivingLicenceNumber:user1DVLA.drivingLicenceNumber,
-            issueNumber: user1DVLA.issueNumber,
-            postcode:user1DVLA.postcode,
-            continue:'',
-            'x-csrf-token': csrfToken
+        res = http.post(env.drivingUrl + "/details", {
+
+          surname: user1DVLA.surname,
+          firstName: user1DVLA.firstName,
+          middleNames: user1DVLA.middleName,
+          'dateOfBirth-day': user1DVLA.birthday,
+          'dateOfBirth-month': user1DVLA.birthmonth,
+          'dateOfBirth-year': user1DVLA.birthyear,
+          dvlaDependent: 'DVLA',
+          'issueDate-day': user1DVLA.issueDay,
+          'issueDate-month': user1DVLA.issueMonth,
+          'issueDate-year': user1DVLA.issueYear,
+          'expiryDate-day': user1DVLA.expiryDay,
+          'expiryDate-month': user1DVLA.expiryMonth,
+          'expiryDate-year': user1DVLA.expiryYear,
+          drivingLicenceNumber: user1DVLA.drivingLicenceNumber,
+          issueNumber: user1DVLA.issueNumber,
+          postcode: user1DVLA.postcode,
+          continue: '',
+          'x-csrf-token': csrfToken
 
         },
-        {
-          redirects:2,
-          tags:{ name: 'B02_Driving_03_DVLA_EditUser'}
+          {
+            redirects: 2,
+            tags: { name: 'B02_Driving_03_DVLA_EditUser' }
 
-        })
-        const endTime3=Date.now();
+          })
+        const endTime3 = Date.now();
         check(res, {
           'is status 302': (r) => r.status === 302
-         
-        })
-        ?transactionDuration.add(endTime3-startTime3)
-        :fail("Response Validation Failed")
 
-        const startTime30=Date.now()
-        res =http.get(res.headers.Location,
+        })
+          ? transactionDuration.add(endTime3 - startTime3)
+          : fail("Response Validation Failed")
+
+        const startTime30 = Date.now()
+        res = http.get(res.headers.Location,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
             tags: { name: 'B02_Driving_03_DVLA_EditUser' }
           })
-          const endTime30=Date.now()
+        const endTime30 = Date.now()
 
-        check(res,{
+        check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
         })
-        ? transactionDuration.add(endTime30-startTime30)
-        :fail('Response Validation Failed')
-   
+          ? transactionDuration.add(endTime30 - startTime30)
+          : fail('Response Validation Failed')
+
       })
     };
-    break;
+      break;
 
-    case "DVA":{
-      group('B02_Driving_02_SelectingOption_DVA_POST', function(){
-        const startTime4=Date.now();
-        res=http.post(env.drivingUrl+"/licence-issuer",
-        {
-          licenceIssuerRadio:'DVA',
-          submitButton:'',
-          'x-csrf-token': csrfToken
-        })
-        const endtime4=Date.now();
+    case "DVA": {
+      group('B02_Driving_02_SelectingOption_DVA_POST', function () {
+        const startTime4 = Date.now();
+        res = http.post(env.drivingUrl + "/licence-issuer",
+          {
+            licenceIssuerRadio: 'DVA',
+            submitButton: '',
+            'x-csrf-token': csrfToken
+          })
+        const endtime4 = Date.now();
 
-        check(res,{
-          'is status 200': (r) => r.status ===200,
+        check(res, {
+          'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes("Enter your details exactly as they appear on your UK driving licence")
         })
-        ?transactionDuration.add(endtime4-startTime4)
-        :fail("Response Validation Failed")
+          ? transactionDuration.add(endtime4 - startTime4)
+          : fail("Response Validation Failed")
         csrfToken = getCSRF(res)
-  
+
       })
 
       sleep(1);
 
-      group('02_Driving_03_DVA_EditUser POST',function(){
-        const startTime5=Date.now()
-        console.log("User1Dva is Here "+JSON.stringify(user1DVA))
-        res=http.post(env.drivingUrl+"/details",{
-                      
-            surname: user1DVA.surname,
-            firstName: user1DVA.firstName,
-            middleNames: user1DVA.middleName,
-            'dvaDateOfBirth-day': user1DVA.birthday,
-            'dvaDateOfBirth-month': user1DVA.birthmonth,
-            'dvaDateOfBirth-year':  user1DVA.birthyear,
-            dvaDependent: 'DVA',
-            'dateOfIssue-day': user1DVA.issueDay,
-            'dateOfIssue-month': user1DVA.issueMonth,
-            'dateOfIssue-year': user1DVA.issueYear,
-            'expiryDate-day': user1DVA.expiryDay,
-            'expiryDate-month': user1DVA.expiryMonth,
-            'expiryDate-year':  user1DVA.expiryYear,
-            dvaLicenceNumber: user1DVA.drivingLicenceNumber,
-            postcode:user1DVA.postcode,
-            continue:'',
-            'x-csrf-token': csrfToken
+      group('02_Driving_03_DVA_EditUser POST', function () {
+        const startTime5 = Date.now()
+        console.log("User1Dva is Here " + JSON.stringify(user1DVA))
+        res = http.post(env.drivingUrl + "/details", {
+
+          surname: user1DVA.surname,
+          firstName: user1DVA.firstName,
+          middleNames: user1DVA.middleName,
+          'dvaDateOfBirth-day': user1DVA.birthday,
+          'dvaDateOfBirth-month': user1DVA.birthmonth,
+          'dvaDateOfBirth-year': user1DVA.birthyear,
+          dvaDependent: 'DVA',
+          'dateOfIssue-day': user1DVA.issueDay,
+          'dateOfIssue-month': user1DVA.issueMonth,
+          'dateOfIssue-year': user1DVA.issueYear,
+          'expiryDate-day': user1DVA.expiryDay,
+          'expiryDate-month': user1DVA.expiryMonth,
+          'expiryDate-year': user1DVA.expiryYear,
+          dvaLicenceNumber: user1DVA.drivingLicenceNumber,
+          postcode: user1DVA.postcode,
+          continue: '',
+          'x-csrf-token': csrfToken
 
         },
-        {
-          redirects:2,
-          tags: {name:'02_Driving_03_DVA_EditUser'}
+          {
+            redirects: 2,
+            tags: { name: '02_Driving_03_DVA_EditUser' }
 
-        })
-       
-        const endTime5=Date.now();
+          })
+
+        const endTime5 = Date.now();
         check(res, {
           'is status 302': (r) => r.status === 302,
         })
-        ?transactionDuration.add(endTime5-startTime5)
-        :fail("Response Validation Failed")
+          ? transactionDuration.add(endTime5 - startTime5)
+          : fail("Response Validation Failed")
 
-        const startTime50=Date.now()
-        res =http.get(res.headers.Location,
+        const startTime50 = Date.now()
+        res = http.get(res.headers.Location,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
             tags: { name: '02_Driving_03_DVA_EditUser' }
           })
-          const endTime50=Date.now()
+        const endTime50 = Date.now()
 
-        check(res,{
+        check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
         })
-        ? transactionDuration.add(endTime50-startTime50)
-        :fail('Response Validation Failed')
+          ? transactionDuration.add(endTime50 - startTime50)
+          : fail('Response Validation Failed')
 
       })
     }
 
   }
-  
-  
+
+
 
 }
 
-function getCSRF (r: Response): string {
+function getCSRF(r: Response): string {
   return r.html().find("input[name='x-csrf-token']").val() ?? ''
 }
 
@@ -427,7 +427,7 @@ const csvData1: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA',
       issueNumber: data[13],
       postcode: data[14]
 
-    
+
 
     }
   })
@@ -453,13 +453,13 @@ const csvData2: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', f
       drivingLicenceNumber: data[12],
       postcode: data[13]
 
-    
+
 
     }
   })
 })
 
-interface DrivingLicenseUserDVLA{
+interface DrivingLicenseUserDVLA {
   surname: string,
   firstName: string,
   middleName: string,
@@ -477,7 +477,7 @@ interface DrivingLicenseUserDVLA{
   postcode: string
 }
 
-interface DrivingLicenseUserDVA{
+interface DrivingLicenseUserDVA {
   surname: string,
   firstName: string,
   middleName: string,
@@ -507,7 +507,7 @@ interface User {
   postCode: string
 }
 
-function getUserDetails (): User {
+function getUserDetails(): User {
   return {
     firstName: `perfFirst${Math.floor(Math.random() * 99998) + 1}`,
     lastName: `perfLast${Math.floor(Math.random() * 99998) + 1}`,

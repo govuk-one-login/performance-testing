@@ -141,6 +141,22 @@ Resources:
               - "cloudformation:DescribeStacks"
             Resource:
               - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*/*"
+          - Effect: "Allow"
+            Action:
+              - "ssm:GetParameters"
+              - "ssm:GetParametersByPath"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #To fetch the value of the SSM parameter created under this path
+          - Effect: "Allow"
+            Action:
+              - "secretsmanager:GetSecretValue"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/perfTest/dynatraceAPIToken-*" # To fetch the value of the secret with this name
+          - Effect: Allow
+            Action:
+              - "kms:Decrypt"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}:key/SecretsKmsKey" #To decrypt the KMS Key created along with the secret
 
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project

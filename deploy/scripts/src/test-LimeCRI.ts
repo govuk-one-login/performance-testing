@@ -201,7 +201,6 @@ export function drivingScenario(): void {
   let csrfToken: string
   type drivingLicenceIssuer = "DVA" | "DVLA";
   const optionLicence: drivingLicenceIssuer = (Math.random() >= 0, 5) ? "DVA" : "DVLA"
-  const userDetails = getUserDetails()
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
 

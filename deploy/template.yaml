@@ -279,6 +279,7 @@ Resources:
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID
             post_build:
               commands:
+                - cat otel.log
                 - echo Performance test complete
 
       Tags:

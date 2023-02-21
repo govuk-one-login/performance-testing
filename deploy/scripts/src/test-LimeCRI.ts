@@ -33,7 +33,6 @@ const profiles: ProfileList = {
       exec: 'drivingScenario'
     }
 
-
   },
   load: {
     fraudScenario1: {
@@ -73,9 +72,7 @@ export const options: Options = {
   }
 }
 
-
-
-export function setup(): void {
+export function setup (): void {
   describeProfile(loadProfile)
 }
 
@@ -90,10 +87,9 @@ const stubCreds = {
   password: __ENV.CORE_STUB_PASSWORD
 }
 
-
 const transactionDuration = new Trend('duration')
 
-export function fraudScenario1(): void {
+export function fraudScenario1 (): void {
   let res: Response
   let csrfToken: string
   const userDetails = getUserDetails()
@@ -196,31 +192,28 @@ export function fraudScenario1(): void {
   })
 }
 
-export function drivingScenario(): void {
+export function drivingScenario (): void {
   let res: Response
   let csrfToken: string
-  type drivingLicenceIssuer = "DVA" | "DVLA";
-  const optionLicence: drivingLicenceIssuer = (Math.random() >= 0, 5) ? "DVA" : "DVLA"
+  type drivingLicenceIssuer = 'DVA' | 'DVLA'
+  const optionLicence: drivingLicenceIssuer = (Math.random() <= 0.5) ? 'DVA' : 'DVLA'
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
 
   const user1DVLA = csvData1[exec.scenario.iterationInTest % csvData1.length]
   const user1DVA = csvData2[exec.scenario.iterationInTest % csvData2.length]
 
-
-
-
   group('B02_Driving_01_CoreStub GET',
     function () {
       const startTime = Date.now()
       res = http.get(env.ipvCoreStub +
-        "/authorize?cri=driving-licence-cri-build&rowNumber=5",
-        {
-          headers: { Authorization: `Basic ${encodedCredentials}` },
-          tags: { name: 'B02_Driving_01_CoreStuB' }
-        })
+        '/authorize?cri=driving-licence-cri-build&rowNumber=5',
+      {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B02_Driving_01_CoreStuB' }
+      })
 
-      const endTime = Date.now();
+      const endTime = Date.now()
 
       check(res, {
         'is status 200': (r) => r.status === 200,
@@ -229,39 +222,38 @@ export function drivingScenario(): void {
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
       csrfToken = getCSRF(res)
-
     })
 
   sleep(Math.random() * 3)
 
   switch (optionLicence) {
-    case "DVLA": {
+    case 'DVLA':
       group('B02_Driving_02_SelectingOption_DVLA_POST', function () {
-        const startTime2 = Date.now();
-        res = http.post(env.drivingUrl + "/licence-issuer",
+        const startTime2 = Date.now()
+        res = http.post(env.drivingUrl + '/licence-issuer',
           {
             licenceIssuerRadio: 'DVLA',
             submitButton: '',
             'x-csrf-token': csrfToken
           })
-        const endTime2 = Date.now();
+        const endTime2 = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
-          'verify page content': (r) => (r.body as string).includes("Enter your details exactly as they appear on your UK driving licence")
+          'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK driving licence')
         })
           ? transactionDuration.add(endTime2 - startTime2)
-          : fail("Response Validation Failed")
+          : fail('Response Validation Failed')
         csrfToken = getCSRF(res)
       })
 
-      sleep(1);
+      sleep(1)
 
       group('B02_Driving_03_DVLA_EditUser POST', function () {
-        const startTime3 = Date.now();
-        console.log("User1DVLA is Here " + JSON.stringify(user1DVLA))
+        const startTime3 = Date.now()
+        console.log('User1DVLA is Here ' + JSON.stringify(user1DVLA))
 
-        res = http.post(env.drivingUrl + "/details", {
+        res = http.post(env.drivingUrl + '/details', {
 
           surname: user1DVLA.surname,
           firstName: user1DVLA.firstName,
@@ -283,18 +275,18 @@ export function drivingScenario(): void {
           'x-csrf-token': csrfToken
 
         },
-          {
-            redirects: 2,
-            tags: { name: 'B02_Driving_03_DVLA_EditUser' }
+        {
+          redirects: 2,
+          tags: { name: 'B02_Driving_03_DVLA_EditUser' }
 
-          })
-        const endTime3 = Date.now();
+        })
+        const endTime3 = Date.now()
         check(res, {
           'is status 302': (r) => r.status === 302
 
         })
           ? transactionDuration.add(endTime3 - startTime3)
-          : fail("Response Validation Failed")
+          : fail('Response Validation Failed')
 
         const startTime30 = Date.now()
         res = http.get(res.headers.Location,
@@ -310,38 +302,36 @@ export function drivingScenario(): void {
         })
           ? transactionDuration.add(endTime30 - startTime30)
           : fail('Response Validation Failed')
+      }
+      )
+      break
 
-      })
-    };
-      break;
-
-    case "DVA": {
+    case 'DVA': {
       group('B02_Driving_02_SelectingOption_DVA_POST', function () {
-        const startTime4 = Date.now();
-        res = http.post(env.drivingUrl + "/licence-issuer",
+        const startTime4 = Date.now()
+        res = http.post(env.drivingUrl + '/licence-issuer',
           {
             licenceIssuerRadio: 'DVA',
             submitButton: '',
             'x-csrf-token': csrfToken
           })
-        const endtime4 = Date.now();
+        const endtime4 = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
-          'verify page content': (r) => (r.body as string).includes("Enter your details exactly as they appear on your UK driving licence")
+          'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK driving licence')
         })
           ? transactionDuration.add(endtime4 - startTime4)
-          : fail("Response Validation Failed")
+          : fail('Response Validation Failed')
         csrfToken = getCSRF(res)
-
       })
 
-      sleep(1);
+      sleep(1)
 
       group('02_Driving_03_DVA_EditUser POST', function () {
         const startTime5 = Date.now()
-        console.log("User1Dva is Here " + JSON.stringify(user1DVA))
-        res = http.post(env.drivingUrl + "/details", {
+        console.log('User1Dva is Here ' + JSON.stringify(user1DVA))
+        res = http.post(env.drivingUrl + '/details', {
 
           surname: user1DVA.surname,
           firstName: user1DVA.firstName,
@@ -362,18 +352,18 @@ export function drivingScenario(): void {
           'x-csrf-token': csrfToken
 
         },
-          {
-            redirects: 2,
-            tags: { name: '02_Driving_03_DVA_EditUser' }
+        {
+          redirects: 2,
+          tags: { name: '02_Driving_03_DVA_EditUser' }
 
-          })
+        })
 
-        const endTime5 = Date.now();
+        const endTime5 = Date.now()
         check(res, {
-          'is status 302': (r) => r.status === 302,
+          'is status 302': (r) => r.status === 302
         })
           ? transactionDuration.add(endTime5 - startTime5)
-          : fail("Response Validation Failed")
+          : fail('Response Validation Failed')
 
         const startTime50 = Date.now()
         res = http.get(res.headers.Location,
@@ -389,27 +379,20 @@ export function drivingScenario(): void {
         })
           ? transactionDuration.add(endTime50 - startTime50)
           : fail('Response Validation Failed')
-
-      })
+      }
+      )
     }
-
   }
-
-
-
 }
 
-function getCSRF(r: Response): string {
+function getCSRF (r: Response): string {
   return r.html().find("input[name='x-csrf-token']").val() ?? ''
 }
-
-
 
 const csvData1: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', function () {
   return open('./data/drivingLicenceDVLAData.csv').split('\n').slice(1).map((s) => {
     const data = s.split(',')
     return {
-
       surname: data[0],
       firstName: data[1],
       middleName: data[2],
@@ -425,9 +408,6 @@ const csvData1: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA',
       drivingLicenceNumber: data[12],
       issueNumber: data[13],
       postcode: data[14]
-
-
-
     }
   })
 })
@@ -451,45 +431,42 @@ const csvData2: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', f
       expiryYear: data[11],
       drivingLicenceNumber: data[12],
       postcode: data[13]
-
-
-
     }
   })
 })
 
 interface DrivingLicenseUserDVLA {
-  surname: string,
-  firstName: string,
-  middleName: string,
-  birthday: string,
-  birthmonth: string,
-  birthyear: string,
-  issueDay: string,
-  issueMonth: string,
-  issueYear: string,
-  expiryDay: string,
-  expiryMonth: string,
-  expiryYear: string,
-  drivingLicenceNumber: string,
-  issueNumber: string,
+  surname: string
+  firstName: string
+  middleName: string
+  birthday: string
+  birthmonth: string
+  birthyear: string
+  issueDay: string
+  issueMonth: string
+  issueYear: string
+  expiryDay: string
+  expiryMonth: string
+  expiryYear: string
+  drivingLicenceNumber: string
+  issueNumber: string
   postcode: string
 }
 
 interface DrivingLicenseUserDVA {
-  surname: string,
-  firstName: string,
-  middleName: string,
-  birthday: string,
-  birthmonth: string,
-  birthyear: string,
-  issueDay: string,
-  issueMonth: string,
-  issueYear: string,
-  expiryDay: string,
-  expiryMonth: string,
-  expiryYear: string,
-  drivingLicenceNumber: string,
+  surname: string
+  firstName: string
+  middleName: string
+  birthday: string
+  birthmonth: string
+  birthyear: string
+  issueDay: string
+  issueMonth: string
+  issueYear: string
+  expiryDay: string
+  expiryMonth: string
+  expiryYear: string
+  drivingLicenceNumber: string
   postcode: string
 }
 
@@ -506,7 +483,7 @@ interface User {
   postCode: string
 }
 
-function getUserDetails(): User {
+function getUserDetails (): User {
   return {
     firstName: `perfFirst${Math.floor(Math.random() * 99998) + 1}`,
     lastName: `perfLast${Math.floor(Math.random() * 99998) + 1}`,

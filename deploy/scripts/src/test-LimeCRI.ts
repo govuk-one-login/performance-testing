@@ -17,7 +17,19 @@ const profiles: ProfileList = {
         { target: 1, duration: '10s' } // Ramps up to target load
       ],
       exec: 'fraudScenario1'
+    },
+    passportScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '10s' } // Ramps up to target load
+      ],
+      exec: 'passportScenario'
     }
+    
   },
   load: {
     fraudScenario1: {
@@ -30,7 +42,21 @@ const profiles: ProfileList = {
         { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
       ],
       exec: 'fraudScenario1'
+    },
+
+    passportScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1500,
+      stages: [
+        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+      ],
+      exec: 'passportScenario'
     }
+
+    
   }
 }
 
@@ -162,6 +188,14 @@ export function fraudScenario1 (): void {
       ? transactionDuration.add(endTime2 - startTime2)
       : fail('Response Validation Failed')
   })
+}
+
+export function passportScenario(): void {
+
+  let res: Response
+  let csrfToken: string
+  
+
 }
 
 function getCSRF (r: Response): string {

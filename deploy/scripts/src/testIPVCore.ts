@@ -9,11 +9,11 @@ const profiles: ProfileList = {
     coreScenario1: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '1s',
+      timeUnit: '1m',
       preAllocatedVUs: 1,
-      maxVUs: 1,
+      maxVUs: 5,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 1, duration: '5m' } // Ramps up to target load
       ],
       exec: 'coreScenario1'
     }

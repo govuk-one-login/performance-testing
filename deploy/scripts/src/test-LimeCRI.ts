@@ -4,6 +4,8 @@ import http, { type Response } from 'k6/http'
 import encoding from 'k6/encoding'
 import { Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from './utils/config/load-profiles'
+import { SharedArray } from 'k6/data'
+import exec from 'k6/execution'
 
 const profiles: ProfileList = {
   smoke: {
@@ -77,9 +79,12 @@ export function setup (): void {
 const env = {
   ipvCoreStub: __ENV.coreStub,
   fraudEndPoint: __ENV.fraudURL,
+  // https://staging-di-ipv-orchestrator-stub.london.cloudapps.digital
   orchestratorCoreStub: __ENV.orchCoreStub,
   // https://identity.staging.account.gov.uk
-  stagingUrl: __ENV.stagingUrl
+  identityStagingUrl: __ENV.idStagingUrl,
+  // https://review-p.staging.account.gov.uk
+  reviewStagingUrl: __ENV.rvwStaginUrl
 
 }
 
@@ -197,6 +202,8 @@ export function passportScenario (): void {
   let res: Response
   let csrfToken: string
 
+  const user1Passport = csvData1[exec.scenario.iterationInTest % csvData1.length]
+
   group('B03_Passport_01_OrchestratorStub GET',
     function () {
       const startTime = Date.now()
@@ -224,7 +231,7 @@ export function passportScenario (): void {
 
       check(res, {
         'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('di-ipv-core-front')
+        'verify page content': (r) => (r.body as string).includes('ukPassport')
 
       })
         ? transactionDuration.add(endTime - startTime)
@@ -236,7 +243,7 @@ export function passportScenario (): void {
   group('B03_Passport_03_ukPassport GET',
     function () {
       const startTime = Date.now()
-      res = http.get(env.stagingUrl + '/ipv/journey/cri/build-oauth-request/ukPassport')
+      res = http.get(env.identityStagingUrl + '/ipv/journey/cri/build-oauth-request/ukPassport')
 
       const endTime = Date.now()
 
@@ -254,42 +261,27 @@ export function passportScenario (): void {
   group('B03_Passport_04_passportDetails POST',
     function () {
       const startTime = Date.now()
-      res = http.post(env.stagingUrl + '/passport/details',
+      res = http.post(env.reviewStagingUrl + '/passport/details',
         {
-          passportNumber: '',
-          surname: '',
-          firstname: '',
-          middleNames: '',
-          'dateOfBirth-day': '',
-          'dateOfBirth-month': '',
-          'dateOfBirth-year': '',
-          'expiryDate-day': '',
-          'expiryDate-month': '',
-          'expiryDate-year': '',
+          passportNumber: user1Passport.passportNumber,
+          surname: user1Passport.surname,
+          firstname: user1Passport.firstName,
+          middleNames: user1Passport.middleName,
+          'dateOfBirth-day': user1Passport.birthday,
+          'dateOfBirth-month': user1Passport.birthmonth,
+          'dateOfBirth-year': user1Passport.birthyear,
+          'expiryDate-day': user1Passport.expiryDay,
+          'expiryDate-month': user1Passport.expiryMonth,
+          'expiryDate-year': user1Passport.expiryYear,
           'x-csrf-token': csrfToken
 
-        }, {
-          redirects: 3,
-          tags: { name: 'B04_Passport_04_passportDetails' }
         })
       const endTime = Date.now()
-      check(res, {
-        'is status 302': (r) => r.status === 302
-      })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
-
-      const startTime1 = Date.now()
-      res = http.get(res.headers.location, {
-        tags: { name: 'B04_Passport_04_passportDetails' }
-      })
-      const endTime1 = Date.now()
-
       check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('GPG45 Score')
       })
-        ? transactionDuration.add(endTime1 - startTime1)
+        ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
     }
   )
@@ -297,6 +289,37 @@ export function passportScenario (): void {
 
 function getCSRF (r: Response): string {
   return r.html().find("input[name='x-csrf-token']").val() ?? ''
+}
+
+const csvData1: PassportUser[] = new SharedArray('csvDataPasport', function () {
+  return open('./data/passportData.csv').split('\n').slice(1).map((s) => {
+    const data = s.split(',')
+    return {
+      passportNumber: data[0],
+      surname: data[1],
+      firstName: data[2],
+      middleName: data[3],
+      birthday: data[4],
+      birthmonth: data[5],
+      birthyear: data[6],
+      expiryDay: data[7],
+      expiryMonth: data[8],
+      expiryYear: data[9]
+    }
+  })
+})
+
+interface PassportUser {
+  passportNumber: string
+  surname: string
+  firstName: string
+  middleName: string
+  birthday: string
+  birthmonth: string
+  birthyear: string
+  expiryDay: string
+  expiryMonth: string
+  expiryYear: string
 }
 
 interface User {

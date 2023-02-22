@@ -64,7 +64,7 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 
 export const options: Options = {
-  httpDebug: 'full',
+  // httpDebug: 'full',
   scenarios: loadProfile.scenarios,
   thresholds: {
     http_req_duration: ['p(95)<1000'], // 95th percntile response time <1000ms
@@ -92,6 +92,37 @@ const stubCreds = {
   userName: __ENV.CORE_STUB_USERNAME,
   password: __ENV.CORE_STUB_PASSWORD
 }
+
+interface PassportUser {
+  passportNumber: string
+  surname: string
+  firstName: string
+  middleName: string
+  birthday: string
+  birthmonth: string
+  birthyear: string
+  expiryDay: string
+  expiryMonth: string
+  expiryYear: string
+}
+
+const csvData1: PassportUser[] = new SharedArray('csvDataPasport', function () {
+  return open('./data/passportData.csv').split('\n').slice(1).map((s) => {
+    const data = s.split(',')
+    return {
+      passportNumber: data[0],
+      surname: data[1],
+      firstName: data[2],
+      middleName: data[3],
+      birthday: data[4],
+      birthmonth: data[5],
+      birthyear: data[6],
+      expiryDay: data[7],
+      expiryMonth: data[8],
+      expiryYear: data[9]
+    }
+  })
+})
 
 const transactionDuration = new Trend('duration')
 
@@ -204,6 +235,9 @@ export function passportScenario (): void {
 
   const user1Passport = csvData1[exec.scenario.iterationInTest % csvData1.length]
 
+  // console.log(JSON.stringify(user1Passport))
+  console.log(`${user1Passport.passportNumber},${user1Passport.surname},${user1Passport.firstName},${user1Passport.middleName},${user1Passport.birthday},${user1Passport.birthmonth},${user1Passport.birthyear},${user1Passport.expiryDay},${user1Passport.expiryMonth},${user1Passport.expiryYear}`)
+
   group('B03_Passport_01_OrchestratorStub GET',
     function () {
       const startTime = Date.now()
@@ -289,37 +323,6 @@ export function passportScenario (): void {
 
 function getCSRF (r: Response): string {
   return r.html().find("input[name='x-csrf-token']").val() ?? ''
-}
-
-const csvData1: PassportUser[] = new SharedArray('csvDataPasport', function () {
-  return open('./data/passportData.csv').split('\n').slice(1).map((s) => {
-    const data = s.split(',')
-    return {
-      passportNumber: data[0],
-      surname: data[1],
-      firstName: data[2],
-      middleName: data[3],
-      birthday: data[4],
-      birthmonth: data[5],
-      birthyear: data[6],
-      expiryDay: data[7],
-      expiryMonth: data[8],
-      expiryYear: data[9]
-    }
-  })
-})
-
-interface PassportUser {
-  passportNumber: string
-  surname: string
-  firstName: string
-  middleName: string
-  birthday: string
-  birthmonth: string
-  birthyear: string
-  expiryDay: string
-  expiryMonth: string
-  expiryYear: string
 }
 
 interface User {

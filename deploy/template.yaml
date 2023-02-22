@@ -16,11 +16,6 @@ Conditions:
 Mappings:
   LoadTesters:
     AllEnvironments:
-      principals:
-        - "arn:aws:iam::622626885786:user/thomas.dann@digital.cabinet-office.gov.uk"
-        - "arn:aws:iam::622626885786:user/andrew.loughran@digital.cabinet-office.gov.uk"
-        - "arn:aws:iam::622626885786:user/monjurul.haque@digital.cabinet-office.gov.uk"
-        - "arn:aws:iam::622626885786:user/abhinay.srivastava@digital.cabinet-office.gov.uk"
 
 # The IP address blocks below are referenced from here:
 # https://sites.google.com/a/digital.cabinet-office.gov.uk/gds/working-at-gds/gds-internal-it/gds-internal-it-network-public-ip-addresses
@@ -51,34 +46,6 @@ Parameters:
 
 
 Resources:
-  CodeBuildServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "${AWS::StackName}-PerformanceTester"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Action: "sts:AssumeRole"
-            Principal:
-              AWS: !FindInMap [LoadTesters, AllEnvironments, principals]
-            Condition:
-              Bool:
-                aws:MultiFactorAuthPresent: true
-              IpAddress:
-                aws:SourceIp: !FindInMap [LoadTesters, AllEnvironments, officeIpAddresses]
-          - Effect: "Allow"
-            Principal:
-              Service: "codebuild.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
-      PermissionsBoundary: !If [
-          UsePermissionsBoundary,
-          !Ref PermissionsBoundary,
-          !Ref AWS::NoValue,
-        ]
 
   CodeBuildServicePolicy:
     Type: AWS::IAM::Policy

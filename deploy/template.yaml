@@ -118,12 +118,7 @@ Resources:
             Action:
               - "secretsmanager:GetSecretValue"
             Resource:
-              - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/perfTest/dynatraceAPIToken-*" # To fetch the value of the secret with this name
-          - Effect: Allow
-            Action:
-              - "kms:Decrypt"
-            Resource:
-              - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}:key/SecretsKmsKey" #To decrypt the KMS Key created along with the secret
+              - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/perfTest/*" # To fetch the value of the secret with this name
 
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project

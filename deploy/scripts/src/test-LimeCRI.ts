@@ -20,7 +20,6 @@ const profiles: ProfileList = {
       ],
       exec: 'fraudScenario1'
     },
-
     drivingScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -32,7 +31,6 @@ const profiles: ProfileList = {
       ],
       exec: 'drivingScenario'
     }
-
   },
   load: {
     fraudScenario1: {
@@ -58,7 +56,6 @@ const profiles: ProfileList = {
       exec: 'drivingScenario'
     }
   }
-
 }
 
 const loadProfile = selectProfile(profiles)
@@ -435,7 +432,7 @@ const csvData2: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', f
   })
 })
 
-interface DrivingLicenseUserDVLA {
+interface DrivingLicenseUser {
   surname: string
   firstName: string
   middleName: string
@@ -449,26 +446,13 @@ interface DrivingLicenseUserDVLA {
   expiryMonth: string
   expiryYear: string
   drivingLicenceNumber: string
-  issueNumber: string
   postcode: string
 }
 
-interface DrivingLicenseUserDVA {
-  surname: string
-  firstName: string
-  middleName: string
-  birthday: string
-  birthmonth: string
-  birthyear: string
-  issueDay: string
-  issueMonth: string
-  issueYear: string
-  expiryDay: string
-  expiryMonth: string
-  expiryYear: string
-  drivingLicenceNumber: string
-  postcode: string
+interface DrivingLicenseUserDVLA extends DrivingLicenseUser {
+  issueNumber: string
 }
+interface DrivingLicenseUserDVA extends DrivingLicenseUser {}
 
 interface User {
   firstName: string

@@ -64,7 +64,7 @@ function base32ToBytes (base32: string): ArrayBuffer {
   for (let i = 0; i < base32.length; i++) {
     const val = base32chars.indexOf(base32.charAt(i))
     if (val === -1) throw new Error('Invalid base32 character in key')
-    bits += val.toString(2).padStart(5, '0') as string
+    bits += val.toString(2).padStart(5, '0')
   }
 
   // Chunks bits to bytes

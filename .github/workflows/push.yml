@@ -1,4 +1,4 @@
-name: Unit Test
+name: Pre-Merge Lint & Unit Test
 
 on:
   pull_request:
@@ -7,11 +7,11 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: ./deploy
+    working-directory: ./deploy/scripts
 
 jobs:
   k6_unit_test:
-    name: Run k6 unit test
+    name: Run linting and unit tests
     runs-on: ubuntu-latest
 
     steps:
@@ -21,9 +21,10 @@ jobs:
           fetch-depth: '0'
 
       - name: Install dependencies
-        run: |
-          cd scripts
-          npm i
+        run: npm i
+          
+      - name: Run linting checks
+        run: npx eslint .
 
       - name: Transpile TypeScript test scripts
         run: |

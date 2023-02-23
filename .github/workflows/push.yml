@@ -27,9 +27,7 @@ jobs:
         run: npx eslint .
 
       - name: Transpile TypeScript test scripts
-        run: |
-          cd scripts
-          node ./build.js
+        run: node ./build.js
 
       - name: Run local k6 unit test script
         uses: grafana/k6-action@v0.2.0

@@ -76,13 +76,82 @@ export function setup (): void {
 const env = {
   ipvCoreStub: __ENV.coreStub,
   fraudEndPoint: __ENV.fraudURL,
-  drivingUrl: __ENV.drivingUrl
+  drivingUrl: __ENV.drivingUrl,
+  drivingEndpoint: __ENV.drivingEnd
 }
 
 const stubCreds = {
   userName: __ENV.CORE_STUB_USERNAME,
   password: __ENV.CORE_STUB_PASSWORD
 }
+
+interface DrivingLicenseUser {
+  surname: string
+  firstName: string
+  middleName: string
+  birthday: string
+  birthmonth: string
+  birthyear: string
+  issueDay: string
+  issueMonth: string
+  issueYear: string
+  expiryDay: string
+  expiryMonth: string
+  expiryYear: string
+  drivingLicenceNumber: string
+  postcode: string
+}
+
+interface DrivingLicenseUserDVLA extends DrivingLicenseUser {
+  issueNumber: string
+}
+interface DrivingLicenseUserDVA extends DrivingLicenseUser {}
+
+const csvData1: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', function () {
+  return open('./data/drivingLicenceDVLAData.csv').split('\n').slice(1).map((s) => {
+    const data = s.split(',')
+    return {
+      surname: data[0],
+      firstName: data[1],
+      middleName: data[2],
+      birthday: data[3],
+      birthmonth: data[4],
+      birthyear: data[5],
+      issueDay: data[6],
+      issueMonth: data[7],
+      issueYear: data[8],
+      expiryDay: data[9],
+      expiryMonth: data[10],
+      expiryYear: data[11],
+      drivingLicenceNumber: data[12],
+      issueNumber: data[13],
+      postcode: data[14]
+    }
+  })
+})
+
+const csvData2: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', function () {
+  return open('./data/drivingLicenceDVAData.csv').split('\n').slice(1).map((s) => {
+    const data = s.split(',')
+    return {
+
+      surname: data[0],
+      firstName: data[1],
+      middleName: data[2],
+      birthday: data[3],
+      birthmonth: data[4],
+      birthyear: data[5],
+      issueDay: data[6],
+      issueMonth: data[7],
+      issueYear: data[8],
+      expiryDay: data[9],
+      expiryMonth: data[10],
+      expiryYear: data[11],
+      drivingLicenceNumber: data[12],
+      postcode: data[13]
+    }
+  })
+})
 
 const transactionDuration = new Trend('duration')
 
@@ -203,8 +272,8 @@ export function drivingScenario (): void {
   group('B02_Driving_01_CoreStub GET',
     function () {
       const startTime = Date.now()
-      res = http.get(env.ipvCoreStub +
-        '/authorize?cri=driving-licence-cri-build&rowNumber=5',
+      res = http.get(env.ipvCoreStub + '/authorize?cri=' +
+        env.drivingEndpoint + '&rowNumber=5',
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Driving_01_CoreStuB' }
@@ -226,20 +295,20 @@ export function drivingScenario (): void {
   switch (optionLicence) {
     case 'DVLA':
       group('B02_Driving_02_SelectingOption_DVLA_POST', function () {
-        const startTime2 = Date.now()
+        const startTime = Date.now()
         res = http.post(env.drivingUrl + '/licence-issuer',
           {
             licenceIssuerRadio: 'DVLA',
             submitButton: '',
             'x-csrf-token': csrfToken
           })
-        const endTime2 = Date.now()
+        const endTime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK driving licence')
         })
-          ? transactionDuration.add(endTime2 - startTime2)
+          ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
         csrfToken = getCSRF(res)
       })
@@ -247,8 +316,7 @@ export function drivingScenario (): void {
       sleep(1)
 
       group('B02_Driving_03_DVLA_EditUser POST', function () {
-        const startTime3 = Date.now()
-        console.log('User1DVLA is Here ' + JSON.stringify(user1DVLA))
+        const startTime = Date.now()
 
         res = http.post(env.drivingUrl + '/details', {
 
@@ -274,22 +342,22 @@ export function drivingScenario (): void {
         },
         {
           redirects: 2,
-          tags: { name: 'B02_Driving_03_DVLA_EditUser' }
+          tags: { name: 'B02_Driving_03_DVLA_EditUser_01_CRICall' }
 
         })
-        const endTime3 = Date.now()
+        const endTime = Date.now()
         check(res, {
           'is status 302': (r) => r.status === 302
 
         })
-          ? transactionDuration.add(endTime3 - startTime3)
+          ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
 
         const startTime30 = Date.now()
         res = http.get(res.headers.Location,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
-            tags: { name: 'B02_Driving_03_DVLA_EditUser' }
+            tags: { name: 'B02_Driving_03_DVLA_EditUser_02_CoreStubCall' }
           })
         const endTime30 = Date.now()
 
@@ -305,20 +373,20 @@ export function drivingScenario (): void {
 
     case 'DVA': {
       group('B02_Driving_02_SelectingOption_DVA_POST', function () {
-        const startTime4 = Date.now()
+        const startTime = Date.now()
         res = http.post(env.drivingUrl + '/licence-issuer',
           {
             licenceIssuerRadio: 'DVA',
             submitButton: '',
             'x-csrf-token': csrfToken
           })
-        const endtime4 = Date.now()
+        const endtime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK driving licence')
         })
-          ? transactionDuration.add(endtime4 - startTime4)
+          ? transactionDuration.add(endtime - startTime)
           : fail('Response Validation Failed')
         csrfToken = getCSRF(res)
       })
@@ -326,8 +394,7 @@ export function drivingScenario (): void {
       sleep(1)
 
       group('02_Driving_03_DVA_EditUser POST', function () {
-        const startTime5 = Date.now()
-        console.log('User1Dva is Here ' + JSON.stringify(user1DVA))
+        const startTime = Date.now()
         res = http.post(env.drivingUrl + '/details', {
 
           surname: user1DVA.surname,
@@ -351,30 +418,30 @@ export function drivingScenario (): void {
         },
         {
           redirects: 2,
-          tags: { name: '02_Driving_03_DVA_EditUser' }
+          tags: { name: '02_Driving_03_DVA_EditUser_01_CRICall' }
 
         })
 
-        const endTime5 = Date.now()
+        const endTime = Date.now()
         check(res, {
           'is status 302': (r) => r.status === 302
         })
-          ? transactionDuration.add(endTime5 - startTime5)
+          ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
 
-        const startTime50 = Date.now()
+        const startTime1 = Date.now()
         res = http.get(res.headers.Location,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
-            tags: { name: '02_Driving_03_DVA_EditUser' }
+            tags: { name: '02_Driving_03_DVA_EditUser_02_CoreStubCall' }
           })
-        const endTime50 = Date.now()
+        const endTime1 = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
         })
-          ? transactionDuration.add(endTime50 - startTime50)
+          ? transactionDuration.add(endTime1 - startTime1)
           : fail('Response Validation Failed')
       }
       )
@@ -385,74 +452,6 @@ export function drivingScenario (): void {
 function getCSRF (r: Response): string {
   return r.html().find("input[name='x-csrf-token']").val() ?? ''
 }
-
-const csvData1: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', function () {
-  return open('./data/drivingLicenceDVLAData.csv').split('\n').slice(1).map((s) => {
-    const data = s.split(',')
-    return {
-      surname: data[0],
-      firstName: data[1],
-      middleName: data[2],
-      birthday: data[3],
-      birthmonth: data[4],
-      birthyear: data[5],
-      issueDay: data[6],
-      issueMonth: data[7],
-      issueYear: data[8],
-      expiryDay: data[9],
-      expiryMonth: data[10],
-      expiryYear: data[11],
-      drivingLicenceNumber: data[12],
-      issueNumber: data[13],
-      postcode: data[14]
-    }
-  })
-})
-
-const csvData2: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', function () {
-  return open('./data/drivingLicenceDVAData.csv').split('\n').slice(1).map((s) => {
-    const data = s.split(',')
-    return {
-
-      surname: data[0],
-      firstName: data[1],
-      middleName: data[2],
-      birthday: data[3],
-      birthmonth: data[4],
-      birthyear: data[5],
-      issueDay: data[6],
-      issueMonth: data[7],
-      issueYear: data[8],
-      expiryDay: data[9],
-      expiryMonth: data[10],
-      expiryYear: data[11],
-      drivingLicenceNumber: data[12],
-      postcode: data[13]
-    }
-  })
-})
-
-interface DrivingLicenseUser {
-  surname: string
-  firstName: string
-  middleName: string
-  birthday: string
-  birthmonth: string
-  birthyear: string
-  issueDay: string
-  issueMonth: string
-  issueYear: string
-  expiryDay: string
-  expiryMonth: string
-  expiryYear: string
-  drivingLicenceNumber: string
-  postcode: string
-}
-
-interface DrivingLicenseUserDVLA extends DrivingLicenseUser {
-  issueNumber: string
-}
-interface DrivingLicenseUserDVA extends DrivingLicenseUser {}
 
 interface User {
   firstName: string

@@ -64,7 +64,6 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 
 export const options: Options = {
-  // httpDebug: 'full',
   scenarios: loadProfile.scenarios,
   thresholds: {
     http_req_duration: ['p(95)<1000'], // 95th percntile response time <1000ms
@@ -79,12 +78,9 @@ export function setup (): void {
 const env = {
   ipvCoreStub: __ENV.coreStub,
   fraudEndPoint: __ENV.fraudURL,
-  // https://staging-di-ipv-orchestrator-stub.london.cloudapps.digital
   orchestratorCoreStub: __ENV.orchCoreStub,
-  // https://identity.staging.account.gov.uk
-  identityStagingUrl: __ENV.idStagingUrl,
-  // https://review-p.staging.account.gov.uk
-  reviewStagingUrl: __ENV.rvwStaginUrl
+  ipvCoreURL: __ENV.coreURL,
+  passportURL: __ENV.passportURL
 
 }
 
@@ -106,7 +102,7 @@ interface PassportUser {
   expiryYear: string
 }
 
-const csvData1: PassportUser[] = new SharedArray('csvDataPasport', function () {
+const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', function () {
   return open('./data/passportData.csv').split('\n').slice(1).map((s) => {
     const data = s.split(',')
     return {
@@ -233,10 +229,7 @@ export function passportScenario (): void {
   let res: Response
   let csrfToken: string
 
-  const user1Passport = csvData1[exec.scenario.iterationInTest % csvData1.length]
-
-  // console.log(JSON.stringify(user1Passport))
-  console.log(`${user1Passport.passportNumber},${user1Passport.surname},${user1Passport.firstName},${user1Passport.middleName},${user1Passport.birthday},${user1Passport.birthmonth},${user1Passport.birthyear},${user1Passport.expiryDay},${user1Passport.expiryMonth},${user1Passport.expiryYear}`)
+  const user1Passport = csvDataPassport[exec.scenario.iterationInTest % csvDataPassport.length]
 
   group('B03_Passport_01_OrchestratorStub GET',
     function () {
@@ -260,7 +253,6 @@ export function passportScenario (): void {
     function () {
       const startTime = Date.now()
       res = http.get(env.orchestratorCoreStub + '/authorize?journeyType=debug')
-
       const endTime = Date.now()
 
       check(res, {
@@ -277,8 +269,7 @@ export function passportScenario (): void {
   group('B03_Passport_03_ukPassport GET',
     function () {
       const startTime = Date.now()
-      res = http.get(env.identityStagingUrl + '/ipv/journey/cri/build-oauth-request/ukPassport')
-
+      res = http.get(env.ipvCoreURL + '/ipv/journey/cri/build-oauth-request/ukPassport')
       const endTime = Date.now()
 
       check(res, {
@@ -295,7 +286,7 @@ export function passportScenario (): void {
   group('B03_Passport_04_passportDetails POST',
     function () {
       const startTime = Date.now()
-      res = http.post(env.reviewStagingUrl + '/passport/details',
+      res = http.post(env.passportURL + '/passport/details',
         {
           passportNumber: user1Passport.passportNumber,
           surname: user1Passport.surname,
@@ -308,7 +299,6 @@ export function passportScenario (): void {
           'expiryDate-month': user1Passport.expiryMonth,
           'expiryDate-year': user1Passport.expiryYear,
           'x-csrf-token': csrfToken
-
         })
       const endTime = Date.now()
       check(res, {

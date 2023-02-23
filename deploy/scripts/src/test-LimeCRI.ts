@@ -299,7 +299,7 @@ export function passportScenario (): void {
         {
           passportNumber: user1Passport.passportNumber,
           surname: user1Passport.surname,
-          firstname: user1Passport.firstName,
+          firstName: user1Passport.firstName,
           middleNames: user1Passport.middleName,
           'dateOfBirth-day': user1Passport.birthday,
           'dateOfBirth-month': user1Passport.birthmonth,

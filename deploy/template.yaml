@@ -5,93 +5,9 @@ Description: >
 
   IPV Core Performance Testing Framework for Load Testing
 
-Parameters:
-  Environment:
-    Description: "The name of the environment to deploy to"
-    Type: "String"
-    AllowedValues:
-      - build
-      - staging
-
-
 Resources:
 
-  CodeBuildServicePolicy:
-    #checkov:skip=CKV_SECRET_6:This is a false positive #pragma: allowlist secret
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub ${AWS::StackName}-CodeBuildServicePolicy-${Environment}
-      Roles:
-        - !Sub "${AWS::Region}-ipv-core-performance-tester"
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Action:
-              - logs:CreateLogGroup
-              - logs:CreateLogStream
-              - logs:DescribeLogGroups
-              - logs:DescribeLogStreams
-              - logs:PutLogEvents
-            Resource:
-              - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:*"
-              - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:*:*"
-          - Effect: "Allow"
-            Action:
-              - "ecr:BatchCheckLayerAvailability"
-              - "ecr:BatchGetImage"
-              - "ecr:GetDownloadUrlForLayer"
-            Resource:
-              - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:*:repository/*"
-          - Effect: "Allow"
-            Action:
-              - "ecr:GetAuthorizationToken"
-            Resource:
-              - "*"
-          - Effect: Allow
-            Action:
-              - ecs:RegisterTaskDefinition
-            Resource: "*"
-          - Effect: Allow
-            Action:
-              - codebuild:CreateReportGroup
-              - codebuild:CreateReport
-              - codebuild:UpdateReport
-              - codebuild:BatchPutTestCases
-            Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-LoadTestCodeBuildProject-*"
-          - Effect: Allow
-            Action:
-              - iam:PassRole
-            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${AWS::Region}-ipv-core-performance-tester"
-          - Effect: "Allow"
-            Action:
-              - "s3:ListAllMyBuckets"
-            Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::*"
-              - !Sub "arn:${AWS::Partition}:s3:::*/*"
-            Condition:
-              StringEquals:
-                "s3:ResourceAccount":
-                  - !Sub "${AWS::AccountId}"
-          - Effect: "Allow"
-            Action:
-              - "cloudformation:DescribeStacks"
-            Resource:
-              - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*/*"
-          - Effect: "Allow"
-            Action:
-              - "ssm:GetParameters"
-              - "ssm:GetParametersByPath"
-            Resource:
-              - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #To fetch the value of the SSM parameter created under this path
-          - Effect: "Allow"
-            Action:
-              - "secretsmanager:GetSecretValue" #pragma: allowlist secret
-            Resource:
-              - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/perfTest/*" # To fetch the value of the secret with this name
-
   LoadTestCodeBuildProject:
-    DependsOn: CodeBuildServicePolicy
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Sub "LoadTest-${AWS::StackName}"
@@ -153,7 +69,6 @@ Resources:
           Value: "ci/cd"
         - Key: "Source"
           Value: "alphagov/di-ipv-core-performance"
-
 
 Outputs:
   PerformanceRoleArn:

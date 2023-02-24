@@ -12,26 +12,6 @@ Conditions:
           - !Ref PermissionsBoundary
           - "none"
 
-
-Mappings:
-  LoadTesters:
-    AllEnvironments:
-
-# The IP address blocks below are referenced from here:
-# https://sites.google.com/a/digital.cabinet-office.gov.uk/gds/working-at-gds/gds-internal-it/gds-internal-it-network-public-ip-addresses
-      officeIpAddresses:
-        - 213.86.153.211/32
-        - 213.86.153.212/32
-        - 213.86.153.213/32
-        - 213.86.153.214/32
-        - 213.86.153.231/32
-        - 213.86.153.235/32
-        - 213.86.153.236/32
-        - 213.86.153.237/32
-        - 51.149.8.0/25
-        - 51.149.8.128/29
-
-
 Parameters:
   Environment:
     Description: "The name of the environment to deploy to"
@@ -52,7 +32,7 @@ Resources:
     Properties:
       PolicyName: !Sub ${AWS::StackName}-CodeBuildServicePolicy-${Environment}
       Roles:
-        - !Ref CodeBuildServiceRole
+        - !Sub "{AWS::Region}-ipv-core-performance-tester"
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -92,7 +72,7 @@ Resources:
           - Effect: Allow
             Action:
               - iam:PassRole
-            Resource: !GetAtt CodeBuildServiceRole.Arn
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/{AWS::Region}-ipv-core-performance-tester"
           - Effect: "Allow"
             Action:
               - "s3:ListAllMyBuckets"
@@ -124,7 +104,7 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Sub "LoadTest-${AWS::StackName}"
-      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      ServiceRole: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/{AWS::Region}-ipv-core-performance-tester"
       Artifacts:
         Type: "NO_ARTIFACTS" # Needs changing to GH in build, and promote bucket in staging.
       Environment:
@@ -187,4 +167,4 @@ Resources:
 Outputs:
   PerformanceRoleArn:
     Description: "The RoleArn for performance testers to trigger CodeBuild tests."
-    Value: !Ref CodeBuildServiceRole
+    Value: !Sub "{AWS::Region}-ipv-core-performance-tester"

@@ -22,7 +22,7 @@ Resources:
     Properties:
       PolicyName: !Sub ${AWS::StackName}-CodeBuildServicePolicy-${Environment}
       Roles:
-        - !Sub "{AWS::Region}-ipv-core-performance-tester"
+        - !Sub "${AWS::Region}-ipv-core-performance-tester"
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -157,4 +157,4 @@ Resources:
 Outputs:
   PerformanceRoleArn:
     Description: "The RoleArn for performance testers to trigger CodeBuild tests."
-    Value: !Sub "{AWS::Region}-ipv-core-performance-tester"
+    Value: !Sub "${AWS::Region}-ipv-core-performance-tester"

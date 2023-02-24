@@ -5,13 +5,6 @@ Description: >
 
   IPV Core Performance Testing Framework for Load Testing
 
-Conditions:
-  UsePermissionsBoundary:
-    Fn::Not:
-      - Fn::Equals:
-          - !Ref PermissionsBoundary
-          - "none"
-
 Parameters:
   Environment:
     Description: "The name of the environment to deploy to"
@@ -19,15 +12,12 @@ Parameters:
     AllowedValues:
       - build
       - staging
-  PermissionsBoundary:
-    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
-    Type: String
-    Default: "none"
 
 
 Resources:
 
   CodeBuildServicePolicy:
+    #checkov:skip=CKV_SECRET_6:This is a false positive #pragma: allowlist secret
     Type: AWS::IAM::Policy
     Properties:
       PolicyName: !Sub ${AWS::StackName}-CodeBuildServicePolicy-${Environment}
@@ -96,7 +86,7 @@ Resources:
               - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #To fetch the value of the SSM parameter created under this path
           - Effect: "Allow"
             Action:
-              - "secretsmanager:GetSecretValue"
+              - "secretsmanager:GetSecretValue" #pragma: allowlist secret
             Resource:
               - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/perfTest/*" # To fetch the value of the secret with this name
 
@@ -104,7 +94,7 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Sub "LoadTest-${AWS::StackName}"
-      ServiceRole: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/{AWS::Region}-ipv-core-performance-tester"
+      ServiceRole: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${AWS::Region}-ipv-core-performance-tester"
       Artifacts:
         Type: "NO_ARTIFACTS" # Needs changing to GH in build, and promote bucket in staging.
       Environment:

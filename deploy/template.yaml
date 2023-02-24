@@ -58,7 +58,7 @@ Resources:
               - codebuild:CreateReport
               - codebuild:UpdateReport
               - codebuild:BatchPutTestCases
-            Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${LoadTestCodeBuildProject}-*"
+            Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-LoadTestCodeBuildProject-*"
           - Effect: Allow
             Action:
               - iam:PassRole
@@ -91,6 +91,7 @@ Resources:
               - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/perfTest/*" # To fetch the value of the secret with this name
 
   LoadTestCodeBuildProject:
+    DependsOn: CodeBuildServicePolicy
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Sub "LoadTest-${AWS::StackName}"

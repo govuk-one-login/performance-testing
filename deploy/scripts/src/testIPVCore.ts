@@ -26,7 +26,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1500,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 30, duration: '15m' } // Ramp up to 30 iterations per second in 10 minutes
       ],
       exec: 'coreScenario1'
     }
@@ -147,7 +147,7 @@ export function coreScenario1 (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_04_ClickContiueOnPYIStartPage POST',
+    'B01_Core_04_ContiueOnPYIStartPage POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -158,7 +158,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_04_ClickContiueOnPYIStartPage_01_Core' }
+          tags: { name: 'B01_Core_04_ContiueOnPYIStartPage_01_Core' }
         }
       )
       const endTime1 = Date.now()
@@ -174,7 +174,7 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_04_ClickContiueOnPYIStartPage_02_PassportStub' }
+          tags: { name: 'B01_Core_04_ContiueOnPYIStartPage_02_PassStub' }
         }
       )
       const endTime2 = Date.now()
@@ -193,7 +193,7 @@ export function coreScenario1 (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_05_SelectPassportDataAndContinue POST',
+    'B01_Core_05_PassportDataContinue POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -215,7 +215,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_05_SelectPassportDataAndContinue_01_PassportStub' }
+          tags: { name: 'B01_Core_05_PassportDataContinue_1_PassStub' }
         }
       )
       const endTime1 = Date.now()
@@ -230,7 +230,7 @@ export function coreScenario1 (): void {
       res = http.get(res.headers.Location,
         {
           redirects: 0,
-          tags: { name: 'B01_Core_05_SelectPassportDataAndContinue_02_Core' }
+          tags: { name: 'B01_Core_05_PassportDataContinue_2_Core' }
         }
       )
       const endTime2 = Date.now()
@@ -246,7 +246,7 @@ export function coreScenario1 (): void {
       const startTime3 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_05_SelectPassportDataAndContinue_03_AddressStub' }
+          tags: { name: 'B01_Core_05_PassportDataContinue_3_AddStub' }
         }
       )
       const endTime3 = Date.now()
@@ -265,7 +265,7 @@ export function coreScenario1 (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_06_SelectAddressDataAndContinue POST',
+    'B01_Core_06_AddrDataContinue POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -284,7 +284,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_06_SelectAddressDataAndContinue_01_AddressStub' }
+          tags: { name: 'B01_Core_06_AddrDataContinue_1_AddStub' }
         }
       )
       const endTime1 = Date.now()
@@ -299,7 +299,7 @@ export function coreScenario1 (): void {
       res = http.get(res.headers.Location,
         {
           redirects: 0,
-          tags: { name: 'B01_Core_06_SelectAddressDataAndContinue_02_Core' }
+          tags: { name: 'B01_Core_06_AddrDataContinue_2_Core' }
         }
       )
       const endTime2 = Date.now()
@@ -315,7 +315,7 @@ export function coreScenario1 (): void {
       const startTime3 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_06_SelectAddressDataAndContinue_03_FraudStub' }
+          tags: { name: 'B01_Core_06_AddrDataContinue_3_FraudStub' }
         }
       )
       const endTime3 = Date.now()
@@ -334,7 +334,7 @@ export function coreScenario1 (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_07_SelectFraudDataAndContinue POST',
+    'B01_Core_07_FraudDataContinue POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -355,7 +355,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_07_SelectFraudDataAndContinue_01_FraudStub' }
+          tags: { name: 'B01_Core_07_FraudDataContinue_1_FraudStub' }
         }
       )
       const endTime1 = Date.now()
@@ -369,7 +369,7 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_07_SelectFraudDataAndContinue_02_Core' }
+          tags: { name: 'B01_Core_07_FraudDataContinue_2_Core' }
         }
       )
       const endTime2 = Date.now()
@@ -388,7 +388,7 @@ export function coreScenario1 (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_08_ContinueOnPreKBVTransition POST',
+    'B01_Core_08_PreKBVTransition POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -398,7 +398,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_08_ContinueOnPreKBVTransition_01_Core' }
+          tags: { name: 'B01_Core_08_PreKBVTransition_1_Core' }
         }
       )
       const endTime1 = Date.now()
@@ -414,7 +414,7 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_08_ContinueOnPreKBVTransition_02_KBVStub' }
+          tags: { name: 'B01_Core_08_PreKBVTransition_2_KBVStub' }
         }
       )
       const endTime2 = Date.now()
@@ -433,7 +433,7 @@ export function coreScenario1 (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_09_SelectKBVDataAndContinue POST',
+    'B01_Core_09_KBVDataContinue POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -454,7 +454,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_09_SelectKBVDataAndContinue_01_KBVStub' }
+          tags: { name: 'B01_Core_09_KBVDataContinue_1_KBVStub' }
         }
       )
       const endTime1 = Date.now()
@@ -468,7 +468,7 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_09_SelectKBVDataAndContinue_02_Core' }
+          tags: { name: 'B01_Core_09_KBVDataContinue_2_Core' }
         }
       )
       const endTime2 = Date.now()
@@ -487,7 +487,7 @@ export function coreScenario1 (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_10_ContinueOnPYISuccessPage POST',
+    'B01_Core_10_ContinuePYISuccessPage POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -497,7 +497,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_10_ContinueOnPYISuccessPage_01_Core' }
+          tags: { name: 'B01_Core_10_ContinuePYISuccessPage_1_Core' }
         }
       )
       const endTime1 = Date.now()
@@ -511,7 +511,7 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_10_ContinueOnPYISuccessPage_02_OrchStub' }
+          tags: { name: 'B01_Core_10_ContinuePYISuccessPage_2_OrchStub' }
         }
       )
       const endTime2 = Date.now()

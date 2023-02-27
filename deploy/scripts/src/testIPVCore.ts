@@ -26,7 +26,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1500,
       stages: [
-        { target: 30, duration: '15m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 30, duration: '15m' } // Ramp up to 30 iterations per second in 15 minutes
       ],
       exec: 'coreScenario1'
     }
@@ -147,7 +147,7 @@ export function coreScenario1 (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_04_ContiueOnPYIStartPage POST',
+    'B01_Core_04_ContinueOnPYIStartPage POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -158,7 +158,7 @@ export function coreScenario1 (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_04_ContiueOnPYIStartPage_01_Core' }
+          tags: { name: 'B01_Core_04_ContinueOnPYIStartPage_01_Core' }
         }
       )
       const endTime1 = Date.now()
@@ -174,7 +174,7 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_04_ContiueOnPYIStartPage_02_PassStub' }
+          tags: { name: 'B01_Core_04_ContinueOnPYIStartPage_02_PassStub' }
         }
       )
       const endTime2 = Date.now()

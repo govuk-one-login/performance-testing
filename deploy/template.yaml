@@ -7,11 +7,82 @@ Description: >
 
 Resources:
 
+  CodeBuildPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName:
+        Fn::Join:
+          - "-"
+          - - !Ref AWS::StackName
+            - "CodeBuildPolicy"
+            - Fn::Select:
+                - 4
+                - Fn::Split:
+                    - "-"
+                    - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                            - "/"
+                            - Ref: AWS::StackId
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Resource:
+              - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Effect: "Allow"
+          - Resource:
+              - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/*"
+            Action:
+              - "codebuild:CreateReportGroup"
+              - "codebuild:CreateReport"
+              - "codebuild:UpdateReport"
+              - "codebuild:BatchPutTestCases"
+            Effect: "Allow"
+          - Resource:
+              - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/LoadTest-${AWS::StackName}"
+            Action:
+              - "codebuild:CreateProject"
+              - "codebuild:DeleteProject"
+              - "codebuild:UpdateProject"
+            Effect: "Allow"
+
+  LoadTestCodeBuildProjectServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Join:
+          - "-"
+          - - !Ref AWS::StackName
+            - "LoadTestCodeBuildProjectServiceRole"
+            - Fn::Select:
+                - 4
+                - Fn::Split:
+                    - "-"
+                    - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                            - "/"
+                            - Ref: AWS::StackId
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "codebuild.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - !Ref CodeBuildPolicy
+
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Sub "LoadTest-${AWS::StackName}"
-      ServiceRole: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${AWS::Region}-ipv-core-performance-tester"
+      ServiceRole: !Ref LoadTestCodeBuildProjectServiceRole
       Artifacts:
         Type: "NO_ARTIFACTS" # Needs changing to GH in build, and promote bucket in staging.
       Environment:

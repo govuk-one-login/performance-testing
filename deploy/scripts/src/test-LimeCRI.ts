@@ -20,6 +20,17 @@ const profiles: ProfileList = {
       ],
       exec: 'fraudScenario1'
     },
+    drivingScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '10s' } // Ramps up to target load
+      ],
+      exec: 'drivingScenario'
+    },
     passportScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -44,6 +55,17 @@ const profiles: ProfileList = {
         { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
       ],
       exec: 'fraudScenario1'
+    },
+    drivingScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1500,
+      stages: [
+        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+      ],
+      exec: 'drivingScenario'
     },
 
     passportScenario: {
@@ -78,6 +100,8 @@ export function setup (): void {
 const env = {
   ipvCoreStub: __ENV.coreStub,
   fraudEndPoint: __ENV.fraudURL,
+  drivingUrl: __ENV.drivingUrl,
+  drivingEndpoint: __ENV.drivingEnd,
   orchestratorCoreStub: __ENV.orchCoreStub,
   ipvCoreURL: __ENV.coreURL,
   passportURL: __ENV.passportURL
@@ -88,6 +112,74 @@ const stubCreds = {
   userName: __ENV.CORE_STUB_USERNAME,
   password: __ENV.CORE_STUB_PASSWORD
 }
+
+interface DrivingLicenseUser {
+  surname: string
+  firstName: string
+  middleName: string
+  birthday: string
+  birthmonth: string
+  birthyear: string
+  issueDay: string
+  issueMonth: string
+  issueYear: string
+  expiryDay: string
+  expiryMonth: string
+  expiryYear: string
+  drivingLicenceNumber: string
+  postcode: string
+}
+
+interface DrivingLicenseUserDVLA extends DrivingLicenseUser {
+  issueNumber: string
+}
+interface DrivingLicenseUserDVA extends DrivingLicenseUser {}
+
+const csvData1: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', function () {
+  return open('./data/drivingLicenceDVLAData.csv').split('\n').slice(1).map((s) => {
+    const data = s.split(',')
+    return {
+      surname: data[0],
+      firstName: data[1],
+      middleName: data[2],
+      birthday: data[3],
+      birthmonth: data[4],
+      birthyear: data[5],
+      issueDay: data[6],
+      issueMonth: data[7],
+      issueYear: data[8],
+      expiryDay: data[9],
+      expiryMonth: data[10],
+      expiryYear: data[11],
+      drivingLicenceNumber: data[12],
+      issueNumber: data[13],
+      postcode: data[14]
+    }
+  })
+})
+
+const csvData2: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', function () {
+  return open('./data/drivingLicenceDVAData.csv').split('\n').slice(1).map((s) => {
+    const data = s.split(',')
+    return {
+
+      surname: data[0],
+      firstName: data[1],
+      middleName: data[2],
+      birthday: data[3],
+      birthmonth: data[4],
+      birthyear: data[5],
+      issueDay: data[6],
+      issueMonth: data[7],
+      issueYear: data[8],
+      expiryDay: data[9],
+      expiryMonth: data[10],
+      expiryYear: data[11],
+      drivingLicenceNumber: data[12],
+      postcode: data[13]
+    }
+  })
+})
 
 interface PassportUser {
   passportNumber: string
@@ -223,6 +315,197 @@ export function fraudScenario1 (): void {
       ? transactionDuration.add(endTime2 - startTime2)
       : fail('Response Validation Failed')
   })
+}
+
+export function drivingScenario (): void {
+  let res: Response
+  let csrfToken: string
+  type drivingLicenceIssuer = 'DVA' | 'DVLA'
+  const optionLicence: drivingLicenceIssuer = (Math.random() <= 0.5) ? 'DVA' : 'DVLA'
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+
+  const user1DVLA = csvData1[exec.scenario.iterationInTest % csvData1.length]
+  const user1DVA = csvData2[exec.scenario.iterationInTest % csvData2.length]
+
+  group('B02_Driving_01_CoreStub GET',
+    function () {
+      const startTime = Date.now()
+      res = http.get(env.ipvCoreStub + '/authorize?cri=' +
+        env.drivingEndpoint + '&rowNumber=5',
+      {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B02_Driving_01_CoreStuB' }
+      })
+
+      const endTime = Date.now()
+
+      check(res, {
+        'is status 200': (r) => r.status === 200,
+        'verify page content': (r) => (r.body as string).includes('Who was your UK driving licence issued by?')
+      })
+        ? transactionDuration.add(endTime - startTime)
+        : fail('Response Validation Failed')
+      csrfToken = getCSRF(res)
+    })
+
+  sleep(Math.random() * 3)
+
+  switch (optionLicence) {
+    case 'DVLA':
+      group('B02_Driving_02_SelectingOption_DVLA_POST', function () {
+        const startTime = Date.now()
+        res = http.post(env.drivingUrl + '/licence-issuer',
+          {
+            licenceIssuerRadio: 'DVLA',
+            submitButton: '',
+            'x-csrf-token': csrfToken
+          })
+        const endTime = Date.now()
+
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK driving licence')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+        csrfToken = getCSRF(res)
+      })
+
+      sleep(1)
+
+      group('B02_Driving_03_DVLA_EditUser POST', function () {
+        const startTime = Date.now()
+
+        res = http.post(env.drivingUrl + '/details', {
+
+          surname: user1DVLA.surname,
+          firstName: user1DVLA.firstName,
+          middleNames: user1DVLA.middleName,
+          'dateOfBirth-day': user1DVLA.birthday,
+          'dateOfBirth-month': user1DVLA.birthmonth,
+          'dateOfBirth-year': user1DVLA.birthyear,
+          dvlaDependent: 'DVLA',
+          'issueDate-day': user1DVLA.issueDay,
+          'issueDate-month': user1DVLA.issueMonth,
+          'issueDate-year': user1DVLA.issueYear,
+          'expiryDate-day': user1DVLA.expiryDay,
+          'expiryDate-month': user1DVLA.expiryMonth,
+          'expiryDate-year': user1DVLA.expiryYear,
+          drivingLicenceNumber: user1DVLA.drivingLicenceNumber,
+          issueNumber: user1DVLA.issueNumber,
+          postcode: user1DVLA.postcode,
+          continue: '',
+          'x-csrf-token': csrfToken
+
+        },
+        {
+          redirects: 2,
+          tags: { name: 'B02_Driving_03_DVLA_EditUser_01_CRICall' }
+
+        })
+        const endTime = Date.now()
+        check(res, {
+          'is status 302': (r) => r.status === 302
+
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+
+        const startTime30 = Date.now()
+        res = http.get(res.headers.Location,
+          {
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            tags: { name: 'B02_Driving_03_DVLA_EditUser_02_CoreStubCall' }
+          })
+        const endTime30 = Date.now()
+
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
+        })
+          ? transactionDuration.add(endTime30 - startTime30)
+          : fail('Response Validation Failed')
+      }
+      )
+      break
+
+    case 'DVA': {
+      group('B02_Driving_02_SelectingOption_DVA_POST', function () {
+        const startTime = Date.now()
+        res = http.post(env.drivingUrl + '/licence-issuer',
+          {
+            licenceIssuerRadio: 'DVA',
+            submitButton: '',
+            'x-csrf-token': csrfToken
+          })
+        const endtime = Date.now()
+
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK driving licence')
+        })
+          ? transactionDuration.add(endtime - startTime)
+          : fail('Response Validation Failed')
+        csrfToken = getCSRF(res)
+      })
+
+      sleep(1)
+
+      group('02_Driving_03_DVA_EditUser POST', function () {
+        const startTime = Date.now()
+        res = http.post(env.drivingUrl + '/details', {
+
+          surname: user1DVA.surname,
+          firstName: user1DVA.firstName,
+          middleNames: user1DVA.middleName,
+          'dvaDateOfBirth-day': user1DVA.birthday,
+          'dvaDateOfBirth-month': user1DVA.birthmonth,
+          'dvaDateOfBirth-year': user1DVA.birthyear,
+          dvaDependent: 'DVA',
+          'dateOfIssue-day': user1DVA.issueDay,
+          'dateOfIssue-month': user1DVA.issueMonth,
+          'dateOfIssue-year': user1DVA.issueYear,
+          'expiryDate-day': user1DVA.expiryDay,
+          'expiryDate-month': user1DVA.expiryMonth,
+          'expiryDate-year': user1DVA.expiryYear,
+          dvaLicenceNumber: user1DVA.drivingLicenceNumber,
+          postcode: user1DVA.postcode,
+          continue: '',
+          'x-csrf-token': csrfToken
+
+        },
+        {
+          redirects: 2,
+          tags: { name: '02_Driving_03_DVA_EditUser_01_CRICall' }
+
+        })
+
+        const endTime = Date.now()
+        check(res, {
+          'is status 302': (r) => r.status === 302
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+
+        const startTime1 = Date.now()
+        res = http.get(res.headers.Location,
+          {
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            tags: { name: '02_Driving_03_DVA_EditUser_02_CoreStubCall' }
+          })
+        const endTime1 = Date.now()
+
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
+        })
+          ? transactionDuration.add(endTime1 - startTime1)
+          : fail('Response Validation Failed')
+      }
+      )
+    }
+  }
 }
 
 export function passportScenario (): void {

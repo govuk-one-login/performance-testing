@@ -30,7 +30,19 @@ const profiles: ProfileList = {
         { target: 1, duration: '10s' } // Ramps up to target load
       ],
       exec: 'drivingScenario'
+    },
+    passportScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '10s' } // Ramps up to target load
+      ],
+      exec: 'passportScenario'
     }
+
   },
   load: {
     fraudScenario1: {
@@ -54,14 +66,26 @@ const profiles: ProfileList = {
         { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
       ],
       exec: 'drivingScenario'
+    },
+
+    passportScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1500,
+      stages: [
+        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+      ],
+      exec: 'passportScenario'
     }
+
   }
 }
 
 const loadProfile = selectProfile(profiles)
 
 export const options: Options = {
-  httpDebug: 'full',
   scenarios: loadProfile.scenarios,
   thresholds: {
     http_req_duration: ['p(95)<1000'], // 95th percntile response time <1000ms
@@ -77,7 +101,11 @@ const env = {
   ipvCoreStub: __ENV.coreStub,
   fraudEndPoint: __ENV.fraudURL,
   drivingUrl: __ENV.drivingUrl,
-  drivingEndpoint: __ENV.drivingEnd
+  drivingEndpoint: __ENV.drivingEnd,
+  orchestratorCoreStub: __ENV.orchCoreStub,
+  ipvCoreURL: __ENV.coreURL,
+  passportURL: __ENV.passportURL
+
 }
 
 const stubCreds = {
@@ -149,6 +177,37 @@ const csvData2: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', f
       expiryYear: data[11],
       drivingLicenceNumber: data[12],
       postcode: data[13]
+    }
+  })
+})
+
+interface PassportUser {
+  passportNumber: string
+  surname: string
+  firstName: string
+  middleName: string
+  birthday: string
+  birthmonth: string
+  birthyear: string
+  expiryDay: string
+  expiryMonth: string
+  expiryYear: string
+}
+
+const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', function () {
+  return open('./data/passportData.csv').split('\n').slice(1).map((s) => {
+    const data = s.split(',')
+    return {
+      passportNumber: data[0],
+      surname: data[1],
+      firstName: data[2],
+      middleName: data[3],
+      birthday: data[4],
+      birthmonth: data[5],
+      birthyear: data[6],
+      expiryDay: data[7],
+      expiryMonth: data[8],
+      expiryYear: data[9]
     }
   })
 })
@@ -447,6 +506,92 @@ export function drivingScenario (): void {
       )
     }
   }
+}
+
+export function passportScenario (): void {
+  let res: Response
+  let csrfToken: string
+
+  const user1Passport = csvDataPassport[exec.scenario.iterationInTest % csvDataPassport.length]
+
+  group('B03_Passport_01_OrchestratorStub GET',
+    function () {
+      const startTime = Date.now()
+      res = http.get(env.orchestratorCoreStub)
+
+      const endTime = Date.now()
+
+      check(res, {
+        'is status 200': (r) => r.status === 200,
+        'verify page content': (r) => (r.body as string).includes('Orchestrator Stub')
+
+      })
+        ? transactionDuration.add(endTime - startTime)
+        : fail('Response Validation Failed')
+    })
+
+  sleep(Math.random() * 3)
+
+  group('B03_Passport_02_debugRoute GET',
+    function () {
+      const startTime = Date.now()
+      res = http.get(env.orchestratorCoreStub + '/authorize?journeyType=debug')
+      const endTime = Date.now()
+
+      check(res, {
+        'is status 200': (r) => r.status === 200,
+        'verify page content': (r) => (r.body as string).includes('ukPassport')
+
+      })
+        ? transactionDuration.add(endTime - startTime)
+        : fail('Respone Validation Failed')
+    })
+
+  sleep(Math.random() * 3)
+
+  group('B03_Passport_03_ukPassport GET',
+    function () {
+      const startTime = Date.now()
+      res = http.get(env.ipvCoreURL + '/ipv/journey/cri/build-oauth-request/ukPassport')
+      const endTime = Date.now()
+
+      check(res, {
+        'is status 200': (r) => r.status === 200,
+        'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK passport')
+      })
+        ? transactionDuration.add(endTime - startTime)
+        : fail('Response Validation Failed')
+      csrfToken = getCSRF(res)
+    })
+
+  sleep(Math.random() * 3)
+
+  group('B03_Passport_04_passportDetails POST',
+    function () {
+      const startTime = Date.now()
+      res = http.post(env.passportURL + '/passport/details',
+        {
+          passportNumber: user1Passport.passportNumber,
+          surname: user1Passport.surname,
+          firstName: user1Passport.firstName,
+          middleNames: user1Passport.middleName,
+          'dateOfBirth-day': user1Passport.birthday,
+          'dateOfBirth-month': user1Passport.birthmonth,
+          'dateOfBirth-year': user1Passport.birthyear,
+          'expiryDate-day': user1Passport.expiryDay,
+          'expiryDate-month': user1Passport.expiryMonth,
+          'expiryDate-year': user1Passport.expiryYear,
+          'x-csrf-token': csrfToken
+        })
+      const endTime = Date.now()
+      check(res, {
+        'is status 200': (r) => r.status === 200,
+        'verify page content': (r) => (r.body as string).includes('GPG45 Score')
+      })
+        ? transactionDuration.add(endTime - startTime)
+        : fail('Response Validation Failed')
+    }
+  )
 }
 
 function getCSRF (r: Response): string {

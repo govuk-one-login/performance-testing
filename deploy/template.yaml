@@ -135,7 +135,7 @@ Resources:
       Artifacts:
         Type: "NO_ARTIFACTS" # Needs changing to GH in build, and promote bucket in staging.
       Environment:
-        ComputeType: "BUILD_GENERAL1_SMALL"
+        ComputeType: "BUILD_GENERAL1_LARGE"
         Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"

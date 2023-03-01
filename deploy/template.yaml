@@ -61,6 +61,39 @@ Resources:
               - "codebuild:DeleteProject"
               - "codebuild:UpdateProject"
             Effect: "Allow"
+          - Effect: "Allow"
+            Action:
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:BatchGetImage"
+              - "ecr:GetDownloadUrlForLayer"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:*:repository/*"
+            Sid: AllowPerfTesterEcrRepoAccess
+          - Effect: "Allow"
+            Action:
+              - "ecr:GetAuthorizationToken"
+            Resource:
+              - "*"
+            Sid: AllowPerfTesterEcrTokenAccess
+          - Effect: Allow
+            Action:
+              - "ecs:RegisterTaskDefinition"
+            Resource: "*"
+            Sid: AllowPerfTesterEcsTaskDefn
+          - Effect: "Allow"
+            Action:
+              - "ssm:GetParameters"
+              - "ssm:GetParametersByPath"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #To fetch the value of the SSM parameter created under this path
+            Sid: AllowPerfTesterGetParams
+          - Effect: "Allow"
+            Action:
+              - "secretsmanager:GetSecretValue" #pragma: allowlist secret
+            Resource:
+              - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/perfTest/*" # To fetch the value of the secret with this name #pragma: allowlist secret
+            Sid: AllowPerfTesterGetSecret #pragma: allowlist secret
+
 
   LoadTestCodeBuildProjectServiceRole:
     Type: AWS::IAM::Role

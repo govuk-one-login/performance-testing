@@ -5,6 +5,18 @@ Description: >
 
   IPV Core Performance Testing Framework for Load Testing
 
+Parameters:
+  PermissionsBoundary:
+    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
+    Type: String
+    Default: "none"
+
+Conditions:
+  UsePermissionsBoundary:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref PermissionsBoundary
+          - "none"
 Resources:
 
   CodeBuildPolicy:
@@ -77,6 +89,10 @@ Resources:
               - "sts:AssumeRole"
       ManagedPolicyArns:
         - !Ref CodeBuildPolicy
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
 
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project

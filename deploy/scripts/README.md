@@ -46,8 +46,8 @@ This unit test also runs when raising pull requests as a [github action](../../.
 
     |Account|AWS ID|Role|Link|
     |:-:|:-:|:-:|:-:|
-    |Build|`457601271792`|`performance-build-PerformanceTester`|[Switch role](https://signin.aws.amazon.com/switchrole?roleName=performance-build-PerformanceTester&account=457601271792)|
-    |Staging|`335257547869`|`performance-staging-PerformanceTester`|[Switch role](https://signin.aws.amazon.com/switchrole?roleName=performance-staging-PerformanceTester&account=335257547869)|
+    |Build|`457601271792`|`eu-west-2-ipv-core-performance-tester`|[Switch role](https://signin.aws.amazon.com/switchrole?roleName=eu-west-2-ipv-core-performance-tester&account=457601271792)|
+    |Staging|`335257547869`|`eu-west-2-ipv-core-performance-tester`|[Switch role](https://signin.aws.amazon.com/switchrole?roleName=eu-west-2-ipv-core-performance-tester&account=335257547869)|
 
 3. Go to the CodeBuild project and click 'Start build with overrides':
 

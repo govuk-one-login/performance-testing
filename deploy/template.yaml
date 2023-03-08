@@ -139,6 +139,7 @@ Resources:
         Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
+      TimeoutInMinutes: 480
       Source:
         Type: "NO_SOURCE"
         BuildSpec: !Sub |

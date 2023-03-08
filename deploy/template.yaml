@@ -172,11 +172,11 @@ Resources:
                 - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - echo "Run performance test"
                 - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out statsd
+            post_build:
+              commands:
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID
-            post_build:
-              commands:
                 - cat otel.log
                 - echo Performance test complete
 

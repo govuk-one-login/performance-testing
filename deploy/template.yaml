@@ -177,12 +177,7 @@ Resources:
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID
-<<<<<<< HEAD
-            post_build:
-              commands:
                 - cat otel.log
-=======
->>>>>>> upstream/main
                 - echo Performance test complete
 
       Tags:

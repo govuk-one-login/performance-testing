@@ -11,6 +11,7 @@ receivers:
 
 processors:
   batch:
+    send_batch_max_size: 16384
 
   metricstransform:
     transforms:

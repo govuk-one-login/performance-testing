@@ -137,7 +137,7 @@ export function coreScenario1 (): void {
 
       check(res, {
         'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('Enter the details from your photo ID and answer security questions')
+        'verify page content': (r) => (r.body as string).includes('Enter your passport details and answer security questions')
       })
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
@@ -153,10 +153,10 @@ export function coreScenario1 (): void {
     function () {
       const startTime1 = Date.now()
       res = http.post(
-        env.coreEndPoint + '/ipv/page/page-multiple-doc-check',
+        env.coreEndPoint + '/ipv/page/page-passport-doc-check',
         {
           _csrf: csrfToken,
-          journey: 'next/passport'
+          journey: 'next'
         },
         {
           redirects: 0,

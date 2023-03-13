@@ -290,6 +290,7 @@ Resources:
         Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
+      TimeoutInMinutes: 480
       Source:
         Type: "NO_SOURCE"
         BuildSpec: !Sub |
@@ -317,16 +318,19 @@ Resources:
             pre_build:
               commands:
                 - mkdir -p "$TEST_REPORT_DIR"
+                - |
+                  sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_ID#" $OTEL_TEMPLATE > $OTEL_CONFIG
+                - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &
             build:
               commands:
                 - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - echo "Run performance test"
-                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --tag build_id=$CODEBUILD_BUILD_ID
+                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out statsd
+            post_build:
+              commands:
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID
-            post_build:
-              commands:
                 - echo Performance test complete
 
       Tags:

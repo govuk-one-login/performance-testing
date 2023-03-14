@@ -8,10 +8,10 @@ receivers:
       load:
       memory:
       network:
-      process:
 
 processors:
   batch:
+    send_batch_max_size: 16384
 
   metricstransform:
     transforms:
@@ -22,6 +22,11 @@ processors:
         - action: add_label
           new_label: build_id
           new_value: "{ID}"
+    - include: ^k6\.check\.(?P<name>.*?)\.(?P<result>.*)
+      match_type: regexp
+      action: combine
+      new_name: k6.checks
+      submatch_case: lower
 
 exporters:
   otlphttp:

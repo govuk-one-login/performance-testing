@@ -152,7 +152,7 @@ Resources:
               - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*"
           - Effect: "Allow"
             Action:
-              - "secretsmanager:GetSecretValue"
+              - "secretsmanager:GetSecretValue" #pragma: allowlist secret
             Resource:
               - !Ref DynatraceAPITokenSecret
           - Effect: Allow
@@ -175,7 +175,7 @@ Resources:
             - "LoadTestCodeBuildProject"
         Service: "ci/cd"
         Source: "alphagov/di-accounts-performance"
-  
+
   TestUserNewPasswordParameter:
     Type: AWS::SSM::Parameter
     Properties:
@@ -190,7 +190,7 @@ Resources:
             - "LoadTestCodeBuildProject"
         Service: "ci/cd"
         Source: "alphagov/di-accounts-performance"
-  
+
   AuthAppParameter:
     Type: AWS::SSM::Parameter
     Properties:
@@ -268,7 +268,7 @@ Resources:
     Properties:
       Description: "Dynatrace API Token"
       Name: "/perfTest/dynatraceAPIToken"
-      SecretString: "please-set-me"
+      SecretString: "please-set-me" #pragma: allowlist secret
       KmsKeyId: !GetAtt SecretsKmsKey.Arn
       Tags:
         - Key: Name

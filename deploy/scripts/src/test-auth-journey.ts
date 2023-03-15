@@ -84,6 +84,7 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 
 export const options: Options = {
+  httpDebug: 'full',
   scenarios: loadProfile.scenarios,
   thresholds: {
     http_req_duration: ['p(95)<1000'], // 95th percntile response time <1000ms
@@ -122,7 +123,7 @@ const env = {
 }
 const credentials = {
   authAppKey: __ENV.AUTH_APP_KEY,
-  password: __ENV.USER_PASSWORD,
+  password: __ENV.APP_PASSWORD,
   emailOTP: __ENV.EMAIL_OTP,
   phoneOTP: __ENV.PHONE_OTP
 }

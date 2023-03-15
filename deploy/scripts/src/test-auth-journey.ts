@@ -16,7 +16,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 5,
       stages: [
-        { target: 1, duration: '20s' } // Ramps up to target load
+        { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'signUp'
     },
@@ -174,7 +174,7 @@ export function signUp (): void {
     const end = Date.now()
     check(res, {
       'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Create a GOV.UK account or sign in')
+      'verify page content': r => (r.body as string).includes('Create a GOV.UK One Login or sign in')
     })
       ? durations.add(end - start)
       : fail('Checks failed')
@@ -188,7 +188,7 @@ export function signUp (): void {
     res = http.post(env.baseUrl + '/sign-in-or-create',
       {
         _csrf: csrfToken,
-        supportInternationalNumbers: '',
+        supportInternationalNumbers: 'true',
         optionSelected: 'create'
       }
     )
@@ -303,7 +303,7 @@ export function signUp (): void {
         const end = Date.now()
         check(res, {
           'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('You&#39;ve created your GOV.UK account')
+          'verify page content': r => (r.body as string).includes('You’ve created your GOV.UK One Login')
         })
           ? durations.add(end - start)
           : fail('Checks failed')
@@ -341,7 +341,8 @@ export function signUp (): void {
             _csrf: csrfToken,
             supportInternationalNumbers: '',
             isAccountPartCreated: 'false',
-            phoneNumber
+            phoneNumber,
+            internationalPhoneNumber: ''
           }
         )
         const end = Date.now()
@@ -369,7 +370,7 @@ export function signUp (): void {
         const end = Date.now()
         check(res, {
           'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('You&#39;ve created your GOV.UK account')
+          'verify page content': r => (r.body as string).includes('You’ve created your GOV.UK One Login')
         })
           ? durations.add(end - start)
           : fail('Checks failed')
@@ -448,6 +449,7 @@ export function signIn (): void {
       {
         'scopes-email': 'email',
         'scopes-phone': 'phone',
+        prompt: 'none',
         '2fa': 'Cl.Cm',
         loc: '',
         'claims-core-identity': 'https://vocab.account.gov.uk/v1/coreIdentityJWT',
@@ -459,22 +461,29 @@ export function signIn (): void {
     const end = Date.now()
     check(res, {
       'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Create a GOV.UK account or sign in')
+      'verify page content': r => (r.body as string).includes('Create a GOV.UK One Login or sign in')
     })
       ? durations.add(end - start)
       : fail('Checks failed')
+
+    csrfToken = getCSRF(res)
   })
 
   sleep(1)
 
   group('GET - /sign-in-or-create', function () {
     const start = Date.now()
-    res = http.get(env.baseUrl + '/sign-in-or-create?redirectPost=true')
+    res = http.post(env.baseUrl + '/sign-in-or-create',
+      {
+        _csrf: csrfToken,
+        supportInternationalNumbers: 'true'
+      }
+    )
     const end = Date.now()
 
     check(res, {
       'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Enter your email address to sign in to your GOV.UK account')
+      'verify page content': r => (r.body as string).includes('Enter your email address to sign in to your GOV.UK One Login')
     })
       ? durations.add(end - start)
       : fail('Checks failed')

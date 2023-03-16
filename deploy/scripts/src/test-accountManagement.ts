@@ -626,7 +626,7 @@ export function changePassword (): void {
   group('B02_ChangePassword_06_ClickSettingsTab GET', () => {
     const startTime = Date.now()
     res = http.get(env.envURL + '/settings', {
-      tags: { name: 'B02_ChangePassword_06_ClickSettingsTab' }
+      tags: { name: 'B02_ChangePassword_06_ClickSettingsTab' } // pragma: allowlist secret
     })
     const endTime = Date.now()
 
@@ -721,7 +721,7 @@ export function changePassword (): void {
       group('B02_ChangePassword_10_ClickBackToMyAccounts GET', function () {
         const startTime = Date.now()
         res = http.get(env.envURL + '/manage-your-account', {
-          tags: { name: 'B02_ChangePassword_10_ClickBackToMyAccounts' }
+          tags: { name: 'B02_ChangePassword_10_ClickBackToMyAccounts' } // pragma: allowlist secret
         })
         const endTime = Date.now()
 

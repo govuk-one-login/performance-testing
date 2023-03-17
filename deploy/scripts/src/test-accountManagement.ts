@@ -158,9 +158,9 @@ interface UserPhoneNumberChange {
 }
 
 const csvData3: UserPhoneNumberChange[] = new SharedArray('csvPhoneNumChange', function () {
-  return open('./data/changePhoneNumber_TestData.csv').split('\n').slice(1).map((changePhoneData) => {
+  return open('./data/changePhoneNumber_TestData.csv').split('\n').slice(1).map((email) => {
     return {
-      currEmail: changePhoneData
+      currEmail: email
     }
   })
 }

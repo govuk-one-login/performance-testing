@@ -303,8 +303,12 @@ Resources:
               TEST_REPORT_DIR: results
               PROFILE: smoke
               SCENARIO: all
-              BACKEND_STACK_NAME: demo-sam-app
-              FRONTEND_STACK_NAME: node-app
+              HOME_URL: Account Management Home URL
+              SIGNIN_URL: Account Management Signin URL
+              SMS_OTP: Fixed SMS OTP
+              EMAIL_OTP: Fixed Email OTP
+              CURR_PHONE: Current Phone Number
+              NEW_PHONE: New Phone Number
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
             parameter-store:
               APP_PASSWORD: "/perfTest/testUserPassword"

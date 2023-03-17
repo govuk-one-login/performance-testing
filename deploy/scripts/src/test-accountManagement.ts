@@ -36,11 +36,11 @@ const profiles: ProfileList = {
     changePhone: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '1m',
+      timeUnit: '1s',
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '2m' } // Ramps up to target load
+        { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'changePhone'
     },
@@ -155,21 +155,12 @@ const csvData2: UserPasswordChange[] = new SharedArray('csvPasswordChange', func
 
 interface UserPhoneNumberChange {
   currEmail: string
-  currEmailOTP: string
-  currPhone: string
-  newPhone: string
-  newPhoneOTP: string
 }
 
 const csvData3: UserPhoneNumberChange[] = new SharedArray('csvPhoneNumChange', function () {
   return open('./data/changePhoneNumber_TestData.csv').split('\n').slice(1).map((s) => {
-    const data = s.split(',')
     return {
-      currEmail: data[0],
-      currEmailOTP: data[1],
-      currPhone: data[2],
-      newPhone: data[3],
-      newPhoneOTP: data[4]
+      currEmail: s
     }
   })
 }
@@ -191,14 +182,21 @@ export function setup (): void {
 }
 
 const env = {
-  envURL: `https://${__ENV.launchURL}`, // home.staging.account.gov.uk home.build.account.gov.uk
-  signinURL: `https://${__ENV.signinURL}`
+  envURL: `${__ENV.HOME_URL}`,
+  signinURL: `${__ENV.SIGNIN_URL}`
 }
 
 const credentials = {
   authAppKey: __ENV.AUTH_APP_KEY,
   currPassword: __ENV.APP_PASSWORD,
-  newPassword: __ENV.APP_PASSWORD_NEW
+  newPassword: __ENV.APP_PASSWORD_NEW,
+  fixedSMSOTP: __ENV.SMS_OTP,
+  fixedEmailOTP: __ENV.EMAIL_OTP
+}
+
+const phoneData = {
+  currentPhone: __ENV.CURR_PHONE,
+  newPhone: __ENV.NEW_PHONE
 }
 
 const transactionDuration = new Trend('duration')
@@ -776,26 +774,34 @@ export function changePhone (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Create a GOV.UK account or sign in')
+        (r.body as string).includes('Create a GOV.UK One Login or sign in')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
+
+    csrfToken = getCSRF(res)
   })
 
   sleep(Math.random() * 3)
 
   group('B03_ChangePhone_02_ClickSignIn GET', function () {
     const startTime = Date.now()
-    res = http.get(env.signinURL + '/sign-in-or-create?redirectPost=true', {
-      tags: { name: 'B03_ChangePhone_02_ClickSignIn' }
-    })
+    res = http.post(env.signinURL + '/sign-in-or-create?redirectPost=true',
+      {
+        _csrf: csrfToken,
+        supportInternationalNumbers: 'true'
+      },
+      {
+        tags: { name: 'B03_ChangePhone_02_ClickSignIn' }
+      }
+    )
     const endTime = Date.now()
 
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
         (r.body as string).includes(
-          'Enter your email address to sign in to your GOV.UK account'
+          'Enter your email address to sign in to your GOV.UK One Login'
         )
     })
       ? transactionDuration.add(endTime - startTime)
@@ -851,7 +857,7 @@ export function changePhone (): void {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
         (r.body as string).includes(
-          'We sent a code to the phone number linked to your account'
+          'We sent a code to the phone number linked to your GOV.UK One Login'
         )
     })
       ? transactionDuration.add(endTime - startTime)
@@ -870,7 +876,7 @@ export function changePhone (): void {
       {
         phoneNumber: phoneNumHidden,
         _csrf: csrfToken,
-        code: user3.currEmailOTP
+        code: credentials.fixedSMSOTP
       },
       {
         tags: { name: 'B03_ChangePhone_05_EnterSMSOTP' }
@@ -898,7 +904,7 @@ export function changePhone (): void {
 
     check(res, {
       'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Delete your GOV.UK account')
+      'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -921,7 +927,7 @@ export function changePhone (): void {
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('Enter your current password')
+            (r.body as string).includes('We need to make sure it’s you before you can change your phone number.')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -965,8 +971,8 @@ export function changePhone (): void {
           env.envURL + '/change-phone-number',
           {
             _csrf: csrfToken,
-            supportInternationalNumbers: '',
-            phoneNumber: user3.newPhone
+            phoneNumber: phoneData.newPhone,
+            internationalPhoneNumber: ''
           },
           {
             tags: { name: 'B03_ChangePhone_09_EnterNewPhoneNumber' }
@@ -995,7 +1001,7 @@ export function changePhone (): void {
           {
             _csrf: csrfToken,
             phoneNumber: phoneNumHidden,
-            code: user3.newPhoneOTP
+            code: credentials.fixedSMSOTP
           },
           {
             tags: { name: 'B03_ChangePhone_10_EnteNewPhoneOTP' }
@@ -1006,7 +1012,7 @@ export function changePhone (): void {
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('You have changed your phone number')
+            (r.body as string).includes('You’ve changed your phone number')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -1016,25 +1022,24 @@ export function changePhone (): void {
 
       sleep(Math.random() * 3)
 
-      group('B03_ChangePhone_11_ClickBackToMyAccounts GET', function () {
+      group('B03_ChangePhone_11_ClickBackToSettings GET', function () {
         const startTime = Date.now()
         res = http.get(env.envURL + '/manage-your-account', {
-          tags: { name: 'B03_ChangePhone_11_ClickBackToMyAccounts' }
+          tags: { name: 'B03_ChangePhone_11_ClickBackToSettings' }
         })
         const endTime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('Delete your GOV.UK account')
+            (r.body as string).includes('Delete your GOV.UK One Login')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
       });
 
       // Swap the value of the variables by destructuring assignment
-      [user3.currPhone, user3.newPhone] = [user3.newPhone, user3.currPhone];
-      [user3.currEmailOTP, user3.newPhoneOTP] = [user3.newPhoneOTP, user3.currEmailOTP]
+      [phoneData.currentPhone, phoneData.newPhone] = [phoneData.newPhone, phoneData.currentPhone]
 
       sleep(Math.random() * 3)
     }

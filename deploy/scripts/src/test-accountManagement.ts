@@ -12,11 +12,11 @@ const profiles: ProfileList = {
     changeEmail: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '1m',
+      timeUnit: '1s',
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '2m' } // Ramps up to target load
+        { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'changeEmail'
     },
@@ -122,19 +122,38 @@ export const options: Options = {
 
 interface UserEmailChange {
   currEmail: string
-  currEmailOTP: string
   newEmail: string
-  newEmailOTP: string
 }
+
+type mfaType = 'SMS' | 'AUTH_APP'
+interface signInData {
+  email: string
+  mfaOption: mfaType
+}
+
+const dataSignIn: signInData[] = new SharedArray('data', () => {
+  const data: signInData[] = []
+
+  for (let i = 1; i <= 10000; i++) {
+    const id = i.toString().padStart(5, '0')
+    const emailAPP = `perftestAM2_APP_${id}@digital.cabinet-office.gov.uk`
+    const emailSMS = `perftestAM2_SMS_${id}@digital.cabinet-office.gov.uk`
+    const mfaOptionAPP = 'AUTH_APP' as mfaType
+    const mfaOptionSMS = 'SMS' as mfaType
+
+    data.push({ email: emailAPP, mfaOption: mfaOptionAPP })
+    data.push({ email: emailSMS, mfaOption: mfaOptionSMS })
+  }
+
+  return data
+})
 
 const csvData1: UserEmailChange[] = new SharedArray('csvEmailChange', function () {
   return open('./data/changeEmail_TestData.csv').split('\n').slice(1).map((s) => {
     const data = s.split(',')
     return {
       currEmail: data[0],
-      currEmailOTP: data[1],
-      newEmail: data[2],
-      newEmailOTP: data[3]
+      newEmail: data[1]
     }
   })
 }
@@ -204,8 +223,15 @@ const transactionDuration = new Trend('duration')
 export function changeEmail (): void {
   let res: Response
   let csrfToken: string
+  let phoneNumber: string
+  let currentEmail: string
+  let newEmail: string
 
+  const userData = dataSignIn[exec.scenario.iterationInInstance % dataSignIn.length]
   const user1 = csvData1[exec.scenario.iterationInTest % csvData1.length]
+
+  currentEmail = userData.email
+  newEmail = user1.newEmail
 
   const totp = new TOTP(credentials.authAppKey)
 
@@ -219,17 +245,23 @@ export function changeEmail (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Create a GOV.UK account or sign in')
+        (r.body as string).includes('Create a GOV.UK One Login or sign in')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
   })
 
   sleep(Math.random() * 3)
 
-  group('B01_ChangeEmail_02_ClickSignIn GET', function () {
+  group('B01_ChangeEmail_02_ClickSignIn POST', function () {
     const startTime = Date.now()
-    res = http.get(env.signinURL + '/sign-in-or-create?redirectPost=true', {
+    res = http.post(env.signinURL + '/sign-in-or-create', {
+
+      _csrf: csrfToken,
+      supportInternationalNumbers: 'true'
+    },
+    {
       tags: { name: 'B01_ChangeEmail_02_ClickSignIn' }
     })
     const endTime = Date.now()
@@ -238,7 +270,7 @@ export function changeEmail (): void {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
         (r.body as string).includes(
-          'Enter your email address to sign in to your GOV.UK account'
+          'Enter your email address to sign in to your GOV.UK One Login'
         )
     })
       ? transactionDuration.add(endTime - startTime)
@@ -255,7 +287,7 @@ export function changeEmail (): void {
       env.signinURL + '/enter-email',
       {
         _csrf: csrfToken,
-        email: user1.currEmail
+        email: userData.email
       },
       {
         tags: { name: 'B01_ChangeEmail_03_EnterEmailID' }
@@ -276,68 +308,126 @@ export function changeEmail (): void {
 
   sleep(Math.random() * 3)
 
-  group('B01_ChangeEmail_04_EnterLoginPassword POST', () => {
-    const startTime = Date.now()
-    res = http.post(
-      env.signinURL + '/enter-password',
-      {
-        _csrf: csrfToken,
-        password: credentials.currPassword
-      },
-      {
-        tags: { name: 'B01_ChangeEmail_04_EnterLoginPassword' }
-      }
-    )
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes(
-          'We sent a code to the phone number linked to your account'
+  switch (userData.mfaOption) {
+    case 'SMS': {
+      group('B01_ChangeEmail_04_SMS_EnterLoginPassword POST', () => {
+        const startTime = Date.now()
+        res = http.post(
+          env.signinURL + '/enter-password',
+          {
+            _csrf: csrfToken,
+            password: credentials.currPassword
+          },
+          {
+            tags: { name: 'B01_ChangeEmail_04_SMS_EnterLoginPassword' }
+          }
         )
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+        const endTime = Date.now()
 
-    csrfToken = getCSRF(res)
-  })
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) =>
+            (r.body as string).includes(
+              'Check your phone'
+            )
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
 
-  sleep(2)
+        csrfToken = getCSRF(res)
+        phoneNumber = getPhone(res)
+      })
 
-  group('B01_ChangeEmail_05_EnterAuthAppOTP POST', () => {
-    const startTime = Date.now()
-    res = http.post(env.signinURL + '/enter-authenticator-app-code',
-      {
-        _csrf: csrfToken,
-        code: totp.generateTOTP()
-      },
-      {
-        tags: { name: 'B01_ChangeEmail_05_EnterAuthAppOTP' }
-      }
-    )
-    const endTime = Date.now()
+      group('B01_ChangeEmail_05_SMS_EnterOTP POST', () => {
+        const startTime = Date.now()
+        res = http.post(env.signinURL + '/enter-code',
+          {
+            phoneNumber,
+            _csrf: csrfToken,
+            code: credentials.fixedSMSOTP
+          },
+          {
+            tags: { name: 'B01_ChangeEmail_05_SMS_EnterOTP' }
+          }
+        )
+        const endTime = Date.now()
 
-    check(res, {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Your services')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Respone Validation Failed')
-  })
+        check(res, {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as string).includes('Your services')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Respone Validation Failed')
+      })
+      break
+    }
+    case 'AUTH_APP':{
+      group('B01_ChangeEmail_06_APP_EnterLoginPassword POST', () => {
+        const startTime = Date.now()
+        res = http.post(
+          env.signinURL + '/enter-password',
+          {
+            _csrf: csrfToken,
+            password: credentials.currPassword
+          },
+          {
+            tags: { name: 'B01_ChangeEmail_06_APP_EnterLoginPassword' }
+          }
+        )
+        const endTime = Date.now()
+
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) =>
+            (r.body as string).includes(
+              'Enter the 6 digit security code shown in your authenticator app'
+            )
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+
+        csrfToken = getCSRF(res)
+      })
+
+      sleep(2)
+
+      group('B01_ChangeEmail_07_APP_EnterAuthAppOTP POST', () => {
+        const startTime = Date.now()
+        res = http.post(env.signinURL + '/enter-authenticator-app-code',
+          {
+            _csrf: csrfToken,
+            code: totp.generateTOTP()
+          },
+          {
+            tags: { name: 'B01_ChangeEmail_07_APP_EnterAuthAppOTP' }
+          }
+        )
+        const endTime = Date.now()
+
+        check(res, {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as string).includes('Your services')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Respone Validation Failed')
+      })
+
+      break
+    }
+  }
 
   sleep(Math.random() * 3)
 
-  group('B01_ChangeEmail_06_ClickSettingsTab GET', () => {
+  group('B01_ChangeEmail_08_ClickSettingsTab GET', () => {
     const startTime = Date.now()
     res = http.get(env.envURL + '/settings', {
-      tags: { name: 'B01_ChangeEmail_06_ClickSettingsTab' }
+      tags: { name: 'B01_ChangeEmail_08_ClickSettingsTab' }
     })
     const endTime = Date.now()
 
     check(res, {
       'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Delete your GOV.UK account')
+      'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -347,17 +437,17 @@ export function changeEmail (): void {
 
   function changeEmailSteps (loopCount: number): void {
     for (let i = 1; i <= loopCount; i++) {
-      group('B01_ChangeEmail_07_ClickChangeEmailLink GET', function () {
+      group('B01_ChangeEmail_09_ClickChangeEmailLink GET', function () {
         const startTime = Date.now()
         res = http.get(env.envURL + '/enter-password?type=changeEmail', {
-          tags: { name: 'B01_ChangeEmail_07_ClickChangeEmailLink' }
+          tags: { name: 'B01_ChangeEmail_09_ClickChangeEmailLink' }
         })
         const endTime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('Enter your current password')
+            (r.body as string).includes('Enter your password')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -367,7 +457,7 @@ export function changeEmail (): void {
 
       sleep(Math.random() * 3)
 
-      group('B01_ChangeEmail_08_EnterCurrentPassword POST', () => {
+      group('B01_ChangeEmail_10_EnterCurrentPassword POST', () => {
         const startTime = Date.now()
         res = http.post(
           env.envURL + '/enter-password',
@@ -377,7 +467,7 @@ export function changeEmail (): void {
             password: credentials.currPassword
           },
           {
-            tags: { name: 'B01_ChangeEmail_08_EnterCurrentPassword' }
+            tags: { name: 'B01_ChangeEmail_11_EnterCurrentPassword' }
           }
         )
         const endTime = Date.now()
@@ -395,16 +485,16 @@ export function changeEmail (): void {
 
       sleep(Math.random() * 3)
 
-      group('B01_ChangeEmail_09_EnterNewEmailID POST', () => {
+      group('B01_ChangeEmail_12_EnterNewEmailID POST', () => {
         const startTime = Date.now()
         res = http.post(
           env.envURL + '/change-email',
           {
             _csrf: csrfToken,
-            email: user1.newEmail
+            email: newEmail
           },
           {
-            tags: { name: 'B01_ChangeEmail_09_EnterNewEmailID' }
+            tags: { name: 'B01_ChangeEmail_12_EnterNewEmailID' }
           }
         )
         const endTime = Date.now()
@@ -412,7 +502,7 @@ export function changeEmail (): void {
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('We have sent an email to')
+            (r.body as string).includes('Check your email')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -422,17 +512,17 @@ export function changeEmail (): void {
 
       sleep(Math.random() * 3)
 
-      group('B01_ChangeEmail_10_EnterEmailOTP POST', () => {
+      group('B01_ChangeEmail_13_EnterEmailOTP POST', () => {
         const startTime = Date.now()
         res = http.post(
           env.envURL + '/check-your-email',
           {
             _csrf: csrfToken,
-            email: user1.newEmail,
-            code: user1.newEmailOTP
+            email: newEmail,
+            code: credentials.fixedEmailOTP
           },
           {
-            tags: { name: 'B01_ChangeEmail_10_EnterEmailOTP' }
+            tags: { name: 'B01_ChangeEmail_13_EnterEmailOTP' }
           }
         )
         const endTime = Date.now()
@@ -440,7 +530,7 @@ export function changeEmail (): void {
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('You have changed your email address')
+            (r.body as string).includes('You’ve changed your email address')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -450,17 +540,17 @@ export function changeEmail (): void {
 
       sleep(Math.random() * 3)
 
-      group('B01_ChangeEmail_11_ClickBackToMyAccount GET', function () {
+      group('B01_ChangeEmail_14_ClickBackToMyAccount GET', function () {
         const startTime = Date.now()
         res = http.get(env.envURL + '/manage-your-account', {
-          tags: { name: 'B01_ChangeEmail_11_ClickBackToMyAccount' }
+          tags: { name: 'B01_ChangeEmail_14_ClickBackToMyAccount' }
         })
         const endTime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('Delete your GOV.UK account')
+            (r.body as string).includes('Delete your GOV.UK One Login')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -469,18 +559,16 @@ export function changeEmail (): void {
       sleep(Math.random() * 3);
 
       // Swap the value of passwords by destructuring assignment
-
-      [user1.currEmail, user1.newEmail] = [user1.newEmail, user1.currEmail];
-      [user1.currEmailOTP, user1.newEmailOTP] = [user1.newEmailOTP, user1.currEmailOTP]
+      [currentEmail, newEmail] = [newEmail, currentEmail]
     }
   }
 
   changeEmailSteps(2) // Calling the email change function
 
-  group('B01_ChangeEmail_12_SignOut GET', function () {
+  group('B01_ChangeEmail_15_SignOut GET', function () {
     const startTime = Date.now()
     res = http.get(env.envURL + '/sign-out', {
-      tags: { name: 'B01_ChangeEmail_12_SignOut' }
+      tags: { name: 'B01_ChangeEmail_15_SignOut' }
     })
     const endTime = Date.now()
 

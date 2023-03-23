@@ -9,7 +9,7 @@ const profiles: ProfileList = {
     coreScenario1: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '1m',
+      timeUnit: '1s',
       preAllocatedVUs: 1,
       maxVUs: 5,
       stages: [
@@ -26,8 +26,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 5000,
       stages: [
-        { target: 30, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
-        { target: 30, duration: '60m' }, // Steady State of 1 hour at the ramp up load i.e. 30 iterations/second
+        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'coreScenario1'
@@ -109,7 +109,7 @@ export function coreScenario1 (): void {
 
       check(res, {
         'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('You’ve signed in to GOV.UK One Login')
+        'verify page content': (r) => (r.body as string).includes('Continue to prove your identity with GOV.UK One Login')
       })
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
@@ -137,7 +137,7 @@ export function coreScenario1 (): void {
 
       check(res, {
         'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('Enter your passport details and answer security questions')
+        'verify page content': (r) => (r.body as string).includes('Enter the details from your photo ID and answer security questions')
       })
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
@@ -153,10 +153,10 @@ export function coreScenario1 (): void {
     function () {
       const startTime1 = Date.now()
       res = http.post(
-        env.coreEndPoint + '/ipv/page/page-passport-doc-check',
+        env.coreEndPoint + '/ipv/page/page-multiple-doc-check',
         {
           _csrf: csrfToken,
-          journey: 'next'
+          journey: 'next/passport'
         },
         {
           redirects: 0,

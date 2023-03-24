@@ -35,10 +35,12 @@ exporters:
       Authorization: "Api-Token {APITOKEN}"
 
 service:
+  telemetry:
+    logs:
+      level: "debug"
 
   pipelines:
-
     metrics:
       receivers: [statsd, hostmetrics]
-      processors: [batch, metricstransform]
+      processors: [metricstransform, batch]
       exporters: [otlphttp]

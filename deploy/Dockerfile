@@ -15,7 +15,7 @@ RUN cd scripts && \
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.70.0 as otel
+FROM otel/opentelemetry-collector-contrib:0.74.0 as otel
 ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---

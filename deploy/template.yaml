@@ -174,6 +174,8 @@ Resources:
                 - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out statsd
             post_build:
               commands:
+                - echo Wait 90 seconds to flush remaining metrics
+                - sleep 90
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID

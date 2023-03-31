@@ -74,7 +74,7 @@ const addressData = open('./data/addressStub.json')
 const fraudData = open('./data/fraudStub.json')
 const kbvData = open('./data/kbvData.json')
 
-export function setup(): void {
+export function setup (): void {
   describeProfile(loadProfile)
 }
 
@@ -85,7 +85,7 @@ const env = {
 
 const transactionDuration = new Trend('duration')
 
-export function coreScenario1(): void {
+export function coreScenario1 (): void {
   let res: Response
   let csrfToken: string
   let resourceID: string
@@ -552,7 +552,7 @@ export function coreScenario1(): void {
   )
 }
 
-export function coreScenario2Driving(): void {
+export function coreScenario2Driving (): void {
   let res: Response
   let csrfToken: string
   let resourceID: string
@@ -1019,11 +1019,10 @@ export function coreScenario2Driving(): void {
   )
 }
 
-
-function getCSRF(r: Response): string {
+function getCSRF (r: Response): string {
   return r.html().find("input[name='_csrf']").val() ?? ''
 }
 
-function getResourceID(r: Response): string {
+function getResourceID (r: Response): string {
   return r.html().find("input[name='resourceId']").val() ?? ''
 }

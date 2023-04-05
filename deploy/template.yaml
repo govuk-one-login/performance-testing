@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   di-accounts-performance
@@ -11,6 +11,8 @@ Conditions:
       - Fn::Equals:
           - !Ref PermissionsBoundary
           - "none"
+  CreateVPCConfigurationForTestContainer:
+    !Equals [!Ref RunTestContainerInVPC, "True"]
 
 Parameters:
   Environment:
@@ -22,6 +24,22 @@ Parameters:
   PermissionsBoundary:
     Description: "The ARN of the permissions boundary to apply when creating IAM roles"
     Type: String
+    Default: "none"
+  RunTestContainerInVPC:
+    Description: |
+      (Optional)
+      Requires the testcontainers to run from within the VPC, allowing outbound configuration to be via the EIP,
+      therefore allow-listable in the WAF.
+      Any REGIONAL APIs under test will need to be accessible over the VPC NAT Gateway via public internet.
+      Trying to communicate over a VPC endpoint for Regional API gateways results in Forbbidden 403.
+    Type: "String"
+    AllowedValues:
+      - "True"
+      - "False"
+    Default: "False" # Existing behaviour is to run outside, teams need to flip this parameter to 'true' in order to benefit.
+  VpcStackName:
+    Type: "String"
+    Description: "The name of the stack that defines the VPC to use"
     Default: "none"
 
 Resources:
@@ -39,7 +57,8 @@ Resources:
               - "sts:AssumeRole"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
-      PermissionsBoundary: !If [
+      PermissionsBoundary:
+        !If [
           UsePermissionsBoundary,
           !Ref PermissionsBoundary,
           !Ref AWS::NoValue,
@@ -122,6 +141,60 @@ Resources:
               - "kms:Decrypt"
             Resource:
               - !GetAtt SecretsKmsKey.Arn
+
+  VPCTestPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    # checkov:skip=CKV_AWS_111:states:The mix of VPC permissions don't take a resource
+    Properties:
+      Roles:
+        - !Ref CodeBuildServiceRole
+      ManagedPolicyName:
+        Fn::Join:
+          - "-"
+          - - !Ref AWS::StackName
+            - "VPCTestPolicy"
+            - Fn::Select:
+                - 4
+                - Fn::Split:
+                    - "-"
+                    - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                            - "/"
+                            - Ref: AWS::StackId
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:CreateNetworkInterface
+              - ec2:DescribeDhcpOptions
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DeleteNetworkInterface
+              - ec2:DescribeSubnets
+              - ec2:DescribeSecurityGroups
+              - ec2:DescribeVpcs
+            Resource:
+              - "*"
+          - Effect: Allow
+            Action:
+              - ec2:CreateNetworkInterfacePermission
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"
+            Condition:
+              StringEquals:
+                ec2:AuthorizedService: codebuild.amazonaws.com
+              ArnEquals:
+                ec2:Subnet:
+                  - Fn::Sub:
+                      - "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/${SubnetId}"
+                      - SubnetId:
+                          Fn::ImportValue:
+                            Fn::Sub: "${VpcStackName}-ProtectedSubnetIdA"
+                  - Fn::Sub:
+                      - "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/${SubnetId}"
+                      - SubnetId:
+                          Fn::ImportValue:
+                            Fn::Sub: "${VpcStackName}-ProtectedSubnetIdB"
 
   TestUserPasswordParameter:
     Type: AWS::SSM::Parameter
@@ -332,6 +405,7 @@ Resources:
 
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project
+    DependsOn: VPCTestPolicy
     Properties:
       Name: !Sub "LoadTest-${AWS::StackName}"
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
@@ -342,6 +416,16 @@ Resources:
         Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
+      VpcConfig: !If
+        - CreateVPCConfigurationForTestContainer
+        - SecurityGroupIds:
+            - !GetAtt TestContainerSecurityGroup.GroupId
+          Subnets:
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
+          VpcId:
+            Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        - !Ref AWS::NoValue
       TimeoutInMinutes: 480
       Source:
         Type: "NO_SOURCE"
@@ -400,6 +484,20 @@ Resources:
         - Key: "Source"
           Value: "alphagov/di-accounts-performance"
 
+  TestContainerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Condition: CreateVPCConfigurationForTestContainer
+    Properties:
+      GroupDescription: >-
+        Permits unrestricted outbound on 443 to allow the testcontainer to access VPC endpoints and outbound over SSL.
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow to the wider internet on port 443
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
 Outputs:
   PerformanceRoleArn:

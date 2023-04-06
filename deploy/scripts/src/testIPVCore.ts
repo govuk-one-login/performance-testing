@@ -73,6 +73,7 @@ const passportData = open('./data/passportStub.json')
 const addressData = open('./data/addressStub.json')
 const fraudData = open('./data/fraudStub.json')
 const kbvData = open('./data/kbvData.json')
+const drivingLicenceData = open('./data/drivingLicenceStub.json')
 
 export function setup (): void {
   describeProfile(loadProfile)
@@ -557,18 +558,18 @@ export function coreScenario2Driving (): void {
   let csrfToken: string
   let resourceID: string
   let uniqueUserID: string
-  let passportStubURL: string
+  let drivingLicenceStubURL: string
   let addressStubURL: string
   let fraudStubURL: string
   let kbvStubURL: string
 
   group(
-    'B01_Core_01_LaunchOrchestratorStub GET',
+    'B02_Core_DrivingLicence_01_LaunchOrchestratorStub GET',
     function () {
       const startTime = Date.now()
       res = http.get(env.orchStubEndPoint,
         {
-          tags: { name: 'B01_Core_01_LaunchOrchestratorStub' }
+          tags: { name: 'B02_Core_DrivingLicence_01_LaunchOrchestratorStub' }
         }
       )
       const endTime = Date.now()
@@ -587,13 +588,13 @@ export function coreScenario2Driving (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_02_SelectUserIDContinue GET',
+    'B02_Core_DrivingLicence_02_SelectUserIDContinue GET',
     function () {
       const startTime = Date.now()
       res = http.get(
         env.orchStubEndPoint + `/authorize?journeyType=full&userIdSelect=${uniqueUserID}&userIdText=`,
         {
-          tags: { name: 'B01_Core_02_SelectUserIDContinue' }
+          tags: { name: 'B02_Core_DrivingLicence_02_SelectUserIDContinue' }
         }
       )
       const endTime = Date.now()
@@ -612,7 +613,7 @@ export function coreScenario2Driving (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_03_ClickContinueAfterLogin POST',
+    'B02_Core_DrivingLicence_03_ClickContinueAfterLogin POST',
     function () {
       const startTime = Date.now()
       res = http.post(
@@ -621,7 +622,7 @@ export function coreScenario2Driving (): void {
           _csrf: csrfToken
         },
         {
-          tags: { name: 'B01_Core_03_ClickContinueAfterLogin' }
+          tags: { name: 'B02_Core_DrivingLicence_03_ClickContinueAfterLogin' }
         }
       )
       const endTime = Date.now()
@@ -640,7 +641,7 @@ export function coreScenario2Driving (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_04_ContinueOnDrivingLicence POST',
+    'B02_Core_DrivingLicence_04_ContinueOnDrivingLicence POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -651,7 +652,7 @@ export function coreScenario2Driving (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_04_ContinueOnDrivingLicence' }
+          tags: { name: 'B02_Core_DrivingLicence_04_ContinueOnDrivingLicence' }
         }
       )
       const endTime1 = Date.now()
@@ -662,12 +663,12 @@ export function coreScenario2Driving (): void {
         ? transactionDuration.add(endTime1 - startTime1)
         : fail('Response Validation Failed')
 
-      passportStubURL = res.headers.Location
+      drivingLicenceStubURL = res.headers.Location
 
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_04_ContinueOnDrivingLicence_02_DrivingLicenceStub' }
+          tags: { name: 'B02_Core_DrivingLicence_04_ContinueOnDrivingLicence_02_DrivingLicenceStub' }
         }
       )
       const endTime2 = Date.now()
@@ -686,13 +687,13 @@ export function coreScenario2Driving (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_05_DrivingLicenceDataContinue POST',
+    'B02_Core_05_DrivingLicenceDataContinue POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
-        passportStubURL,
+        drivingLicenceStubURL,
         {
-          jsonPayload: passportData,
+          jsonPayload: drivingLicenceData,
           strengthScore: '4',
           validityScore: '2',
           evidenceJsonPayload: '',
@@ -708,7 +709,7 @@ export function coreScenario2Driving (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_05_DrivingLicenceDataContinue_1_DrivingLicenceStub' }
+          tags: { name: 'B02_Core_DrivingLicence_05_Continue' }
         }
       )
       const endTime1 = Date.now()
@@ -723,7 +724,7 @@ export function coreScenario2Driving (): void {
       res = http.get(res.headers.Location,
         {
           redirects: 0,
-          tags: { name: 'B01_Core_05_DrivingLicenceDataContinue_2_Core' }
+          tags: { name: 'B02_Core_DrivingLicence_05_DrivingLicenceDataContinue_2_Core' }
         }
       )
       const endTime2 = Date.now()
@@ -739,7 +740,7 @@ export function coreScenario2Driving (): void {
       const startTime3 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_05_DrivingLicenceDataContinue_3_AddStub' }
+          tags: { name: 'B02_Core_DrivingLicence_05_DrivingLicenceDataContinue_3_AddStub' }
         }
       )
       const endTime3 = Date.now()
@@ -758,7 +759,7 @@ export function coreScenario2Driving (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_06_AddrDataContinue POST',
+    'B02_Core_DrivingLicence_06_AddrDataContinue POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -777,7 +778,7 @@ export function coreScenario2Driving (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_06_AddrDataContinue_1_AddStub' }
+          tags: { name: 'B02_Core_DrivingLicence_06_AddrDataContinue_1_AddStub' }
         }
       )
       const endTime1 = Date.now()
@@ -792,7 +793,7 @@ export function coreScenario2Driving (): void {
       res = http.get(res.headers.Location,
         {
           redirects: 0,
-          tags: { name: 'B01_Core_06_AddrDataContinue_2_Core' }
+          tags: { name: 'B02_Core_DrivingLicence_06_AddrDataContinue_2_Core' }
         }
       )
       const endTime2 = Date.now()
@@ -808,7 +809,7 @@ export function coreScenario2Driving (): void {
       const startTime3 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_06_AddrDataContinue_3_FraudStub' }
+          tags: { name: 'B02_Core_DrivingLicence_06_AddrDataContinue_3_FraudStub' }
         }
       )
       const endTime3 = Date.now()
@@ -827,7 +828,7 @@ export function coreScenario2Driving (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_07_FraudDataContinue POST',
+    'B02_Core_DrivingLicence_07_FraudDataContinue POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -848,7 +849,7 @@ export function coreScenario2Driving (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_07_FraudDataContinue_1_FraudStub' }
+          tags: { name: 'B02_Core_DrivingLicence_07_FraudDataContinue_1_FraudStub' }
         }
       )
       const endTime1 = Date.now()
@@ -862,7 +863,7 @@ export function coreScenario2Driving (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_07_FraudDataContinue_2_Core' }
+          tags: { name: 'B02_Core_DrivingLicence_07_FraudDataContinue_2_Core' }
         }
       )
       const endTime2 = Date.now()
@@ -881,7 +882,7 @@ export function coreScenario2Driving (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_08_PreKBVTransition POST',
+    'B02_Core_Driving_Licence_08_PreKBVTransition POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -891,7 +892,7 @@ export function coreScenario2Driving (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_08_PreKBVTransition_1_Core' }
+          tags: { name: 'B02_Core_DrivingLicence_08_PreKBVTransition_1_Core' }
         }
       )
       const endTime1 = Date.now()
@@ -907,7 +908,7 @@ export function coreScenario2Driving (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_08_PreKBVTransition_2_KBVStub' }
+          tags: { name: 'B02_Core_DrivingLicence_08_PreKBVTransition_2_KBVStub' }
         }
       )
       const endTime2 = Date.now()
@@ -926,7 +927,7 @@ export function coreScenario2Driving (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_09_KBVDataContinue POST',
+    'B02_Core_DrivingLicence_09_KBVDataContinue POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -947,7 +948,7 @@ export function coreScenario2Driving (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_09_KBVDataContinue_1_KBVStub' }
+          tags: { name: 'B02_Core_DrivingLicence_09_KBVDataContinue_1_KBVStub' }
         }
       )
       const endTime1 = Date.now()
@@ -961,7 +962,7 @@ export function coreScenario2Driving (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_09_KBVDataContinue_2_Core' }
+          tags: { name: 'B02_Core_09_KBVDataContinue_2_Core' }
         }
       )
       const endTime2 = Date.now()
@@ -980,7 +981,7 @@ export function coreScenario2Driving (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_10_ContinueDrivingLicenceSuccessPage POST',
+    'B02_Core_DrivingLicence_10_ContinueDrivingLicenceSuccessPage POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
@@ -990,7 +991,7 @@ export function coreScenario2Driving (): void {
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_10_ContinueDrivingLicenceSuccessPage_1_Core' }
+          tags: { name: 'B02_Core_DrivingLicence_10_ContinueDrivingLicenceSuccessPage_1_Core' }
         }
       )
       const endTime1 = Date.now()
@@ -1004,7 +1005,7 @@ export function coreScenario2Driving (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_10_ContinueDrivingLicenceSuccessPage_2_OrchStub' }
+          tags: { name: 'B02_Core_DrivingLicence_10_ContinueDrivingLicenceSuccessPage_2_OrchStub' }
         }
       )
       const endTime2 = Date.now()

@@ -120,19 +120,15 @@ export const options: Options = {
   }
 }
 
-interface UserEmailChange {
-  currEmail: string
-  newEmail: string
-}
-
 type mfaType = 'SMS' | 'AUTH_APP'
-interface signInData {
+
+interface changeEmailData {
   email: string
   mfaOption: mfaType
 }
 
-const dataSignIn: signInData[] = new SharedArray('data', () => {
-  const data: signInData[] = []
+const dataChangeEmail: changeEmailData[] = new SharedArray('data', () => {
+  const data: changeEmailData[] = []
 
   for (let i = 1; i <= 10000; i++) {
     const id = i.toString().padStart(5, '0')
@@ -147,17 +143,6 @@ const dataSignIn: signInData[] = new SharedArray('data', () => {
 
   return data
 })
-
-const csvData1: UserEmailChange[] = new SharedArray('csvEmailChange', function () {
-  return open('./data/changeEmail_TestData.csv').split('\n').slice(1).map((s) => {
-    const data = s.split(',')
-    return {
-      currEmail: data[0],
-      newEmail: data[1]
-    }
-  })
-}
-)
 
 interface UserPasswordChange {
   currEmail: string
@@ -225,14 +210,13 @@ export function changeEmail (): void {
   let csrfToken: string
   let phoneNumber: string
   let currentEmail: string
-  let newEmail: string
+  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
+  const iteration = exec.scenario.iterationInInstance.toString().padStart(6, '0')
+  let newEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
 
-  const userData = dataSignIn[exec.scenario.iterationInInstance % dataSignIn.length]
-  const user1 = csvData1[exec.scenario.iterationInTest % csvData1.length]
+  const emailChangeData = dataChangeEmail[exec.scenario.iterationInInstance % dataChangeEmail.length]
 
-  currentEmail = userData.email
-  newEmail = user1.newEmail
-
+  currentEmail = emailChangeData.email
   const totp = new TOTP(credentials.authAppKey)
 
   group('B01_ChangeEmail_01_LaunchAccountsHome GET', function () {
@@ -287,7 +271,7 @@ export function changeEmail (): void {
       env.signinURL + '/enter-email',
       {
         _csrf: csrfToken,
-        email: userData.email
+        email: currentEmail
       },
       {
         tags: { name: 'B01_ChangeEmail_03_EnterEmailID' }
@@ -308,7 +292,7 @@ export function changeEmail (): void {
 
   sleep(Math.random() * 3)
 
-  switch (userData.mfaOption) {
+  switch (emailChangeData.mfaOption) {
     case 'SMS': {
       group('B01_ChangeEmail_04_SMS_EnterLoginPassword POST', () => {
         const startTime = Date.now()

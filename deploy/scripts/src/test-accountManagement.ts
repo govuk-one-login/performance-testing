@@ -451,7 +451,7 @@ export function changeEmail (): void {
             password: credentials.currPassword
           },
           {
-            tags: { name: 'B01_ChangeEmail_11_EnterCurrentPassword' }
+            tags: { name: 'B01_ChangeEmail_10_EnterCurrentPassword' }
           }
         )
         const endTime = Date.now()
@@ -469,7 +469,7 @@ export function changeEmail (): void {
 
       sleep(Math.random() * 3)
 
-      group('B01_ChangeEmail_12_EnterNewEmailID POST', () => {
+      group('B01_ChangeEmail_11_EnterNewEmailID POST', () => {
         const startTime = Date.now()
         res = http.post(
           env.envURL + '/change-email',
@@ -478,7 +478,7 @@ export function changeEmail (): void {
             email: newEmail
           },
           {
-            tags: { name: 'B01_ChangeEmail_12_EnterNewEmailID' }
+            tags: { name: 'B01_ChangeEmail_11_EnterNewEmailID' }
           }
         )
         const endTime = Date.now()
@@ -496,7 +496,7 @@ export function changeEmail (): void {
 
       sleep(Math.random() * 3)
 
-      group('B01_ChangeEmail_13_EnterEmailOTP POST', () => {
+      group('B01_ChangeEmail_12_EnterEmailOTP POST', () => {
         const startTime = Date.now()
         res = http.post(
           env.envURL + '/check-your-email',
@@ -506,7 +506,7 @@ export function changeEmail (): void {
             code: credentials.fixedEmailOTP
           },
           {
-            tags: { name: 'B01_ChangeEmail_13_EnterEmailOTP' }
+            tags: { name: 'B01_ChangeEmail_12_EnterEmailOTP' }
           }
         )
         const endTime = Date.now()
@@ -524,10 +524,10 @@ export function changeEmail (): void {
 
       sleep(Math.random() * 3)
 
-      group('B01_ChangeEmail_14_ClickBackToMyAccount GET', function () {
+      group('B01_ChangeEmail_13_ClickBackToMyAccount GET', function () {
         const startTime = Date.now()
         res = http.get(env.envURL + '/manage-your-account', {
-          tags: { name: 'B01_ChangeEmail_14_ClickBackToMyAccount' }
+          tags: { name: 'B01_ChangeEmail_13_ClickBackToMyAccount' }
         })
         const endTime = Date.now()
 
@@ -549,10 +549,10 @@ export function changeEmail (): void {
 
   changeEmailSteps(2) // Calling the email change function
 
-  group('B01_ChangeEmail_15_SignOut GET', function () {
+  group('B01_ChangeEmail_14_SignOut GET', function () {
     const startTime = Date.now()
     res = http.get(env.envURL + '/sign-out', {
-      tags: { name: 'B01_ChangeEmail_15_SignOut' }
+      tags: { name: 'B01_ChangeEmail_14_SignOut' }
     })
     const endTime = Date.now()
 

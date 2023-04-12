@@ -33,7 +33,7 @@ export enum YesOrNo {
 }
 
 export enum IphoneType {
-  Iphone7IrNewer = "iphone7OrNewer",
+  Iphone7OrNewer = "iphone7OrNewer",
 }
 
 const OAUTH_ROUTE = "/dca/oauth2/";

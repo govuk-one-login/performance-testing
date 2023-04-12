@@ -75,7 +75,7 @@ export function dcmawPassportIphone (): void {
   sleep(1)
   checkBiometricChipRedirect(YesOrNo.YES, SmartphoneType.Iphone)
   sleep(1)
-  checkIphoneModelRedirect(IphoneType.Iphone7IrNewer)
+  checkIphoneModelRedirect(IphoneType.Iphone7OrNewer)
   sleep(1)
   checkWorkingCameraRedirect(YesOrNo.YES)
   sleep(1)

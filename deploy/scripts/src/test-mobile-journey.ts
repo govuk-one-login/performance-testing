@@ -1,6 +1,6 @@
 import { sleep } from 'k6'
 import { type Options } from 'k6/options'
-import { describeProfile, ProfileList, selectProfile } from './utils/config/load-profiles'
+import { describeProfile, type ProfileList, selectProfile } from './utils/config/load-profiles'
 import {
   checkBiometricChipRedirect,
   checkFlashingWarningRedirect,
@@ -106,4 +106,3 @@ export function dcmawDrivingLicenseAndroid (): void {
   sleep(3)
   checkRedirectPage()
 }
-

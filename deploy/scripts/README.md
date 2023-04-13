@@ -44,20 +44,15 @@ This unit test also runs when raising pull requests as a [github action](../../.
 
 2. Switch to the relevant Performance Tester role.
 
-    |CRI|Account|AWS ID|Role|Link|
-    |:-:|:-:|:-:|:-:|:-:|
-    |Development||`di-facetoface-cri-development`|`440208678480`|`di-f2f-development-$role`| ##I don't know the link
-    |Build||`di-facetoface-cri-build`|`353376315620`|`di-f2f-build-$role`| ##I don't know the link
-    |Staging||`di-facetoface-cri-staging`|`869230006441`|`di-f2f-staging-$role`| ##I don't know the link
-    |Integration||`di-facetoface-cri-integration`|`766319219145`|`di-f2f-integration-$role`| ##I don't know the link
-    |Production||`di-facetoface-cri-prod`|`377086294028`|`di-f2f-prod-$role`| ##I don't know the link
+    |Account|AWS ID|Role|Link|
+    |:-:|:-:|:-:|:-:|
+    |Build|`155922983858`|`performance-build-PerformanceTester`|[Switch role](https://signin.aws.amazon.com/switchrole?roleName=performance-build-PerformanceTester&account=155922983858)|
+    |Staging|`065251012682`|`performance-staging-PerformanceTester`|[Switch role](https://signin.aws.amazon.com/switchrole?roleName=performance-staging-PerformanceTester&account=065251012682)|
 
 3. Go to the CodeBuild project and click 'Start build with overrides':
 
-    !['Start build with overrides' button](docs/start-build-with-overrides.png)
-
-    - [Build link](https://yevi8w6w2l.execute-api.eu-west-2.amazonaws.com/)
-   ## - [Staging link]() I don't know the link
+      - [Build link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/155922983858/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
+      - [Staging link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/065251012682/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
 
 4. Update environment variables in the 'Environment variables override' section. All environment variables are available in test scripts in the `__ENV` variable (see [k6 docs](https://k6.io/docs/using-k6/environment-variables/))
 

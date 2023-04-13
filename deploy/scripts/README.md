@@ -58,17 +58,17 @@ This unit test also runs when raising pull requests as a [github action](../../.
 
 2. Switch to the relevant Performance Tester role.
 
-    |Account|AWS ID|Role|Link|
+|Account|AWS ID|Role|Link|
     |:-:|:-:|:-:|:-:|
-    |Build|`372033887444`|`performance-build-PerformanceTester`|[Switch role](https://signin.aws.amazon.com/switchrole?roleName=performance-build-PerformanceTester&account=372033887444)|
-    |Staging|`223594937353`|`performance-staging-PerformanceTester`|[Switch role](https://signin.aws.amazon.com/switchrole?roleName=performance-staging-PerformanceTester&account=223594937353)|
+    |Build|`155922983858`|`performance-build-PerformanceTester`|[Switch role](https://signin.aws.amazon.com/switchrole?roleName=performance-build-PerformanceTester&account=155922983858)|
+    |Staging|`065251012682`|`performance-staging-PerformanceTester`|[Switch role](https://signin.aws.amazon.com/switchrole?roleName=performance-staging-PerformanceTester&account=065251012682)|
 
 3. Go to the CodeBuild project and click 'Start build with overrides':
 
     !['Start build with overrides' button](docs/start-build-with-overrides.png)
 
-    - [Build link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/372033887444/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
-    - [Staging link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/223594937353/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
+      - [Build link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/155922983858/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
+      - [Staging link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/065251012682/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
 
 4. Update environment variables in the 'Environment variables override' section. All environment variables are available in test scripts in the `__ENV` variable (see [k6 docs](https://k6.io/docs/using-k6/environment-variables/))
 

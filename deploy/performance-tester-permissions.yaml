@@ -16,7 +16,7 @@ Mappings:
     # https://sites.google.com/a/digital.cabinet-office.gov.uk/gds/working-at-gds/gds-internal-it/gds-internal-it-network-public-ip-addresses
       ipAddresses:
       - "0.0.0.0/32" # list allowed ip addresses here
-  
+
   # Principals who can assume each role keyed by the AWS account
   "333333333333": # sample aws account id
     readonly:
@@ -140,4 +140,3 @@ Outputs:
     Condition: IsBuildOrStaging
     Description: "The RoleArn for performance testers to trigger CodeBuild tests."
     Value: !GetAtt PerformanceTester.Arn
- 

@@ -6,6 +6,11 @@ Description: >
   Performance Testing Framework for Load Testing
 
 Conditions:
+  UsePermissionsBoundary:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref PermissionsBoundary
+          - "none"
   CreateVPCConfigurationForTestContainer:
     !Equals [!Ref RunTestContainerInVPC, "True"]
 
@@ -16,6 +21,10 @@ Parameters:
     AllowedValues:
       - build
       - staging
+  PermissionsBoundary:
+    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
+    Type: String
+    Default: "none"
   RunTestContainerInVPC:
     Description: |
       (Optional)
@@ -48,6 +57,12 @@ Resources:
               - "sts:AssumeRole"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
+      PermissionsBoundary:
+        !If [
+          UsePermissionsBoundary,
+          !Ref PermissionsBoundary,
+          !Ref AWS::NoValue,
+        ]
 
   CodeBuildServicePolicy:
     Type: AWS::IAM::Policy

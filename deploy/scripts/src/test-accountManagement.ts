@@ -52,7 +52,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 1, duration: '10s' } // Ramps up to target load
       ],
       exec: 'deleteAccount'
     }
@@ -127,10 +127,10 @@ interface changeEmailData {
   mfaOption: mfaType
 }
 
-const dataChangeEmail: changeEmailData[] = new SharedArray('data', () => {
+const dataChangeEmail: changeEmailData[] = new SharedArray('data1', () => {
   const data: changeEmailData[] = []
 
-  for (let i = 1; i <= 10000; i++) {
+  for (let i = 2; i <= 10000; i++) {
     const id = i.toString().padStart(5, '0')
     const emailAPP = `perftestAM2_App_${id}@digital.cabinet-office.gov.uk`
     const emailSMS = `perftestAM2_SMS_${id}@digital.cabinet-office.gov.uk`
@@ -149,7 +149,7 @@ interface changePasswordData {
   mfaOption: mfaType
 }
 
-const dataChangePassword: changePasswordData[] = new SharedArray('data', () => {
+const dataChangePassword: changePasswordData[] = new SharedArray('data2', () => {
   const data: changePasswordData[] = []
 
   for (let i = 1; i <= 10000; i++) {
@@ -179,16 +179,27 @@ const csvData3: UserPhoneNumberChange[] = new SharedArray('csvPhoneNumChange', f
 }
 )
 
-interface UserDeleteAccount { currEmail: string }
-
-const csvData4: UserDeleteAccount[] = new SharedArray('csvDelAccount', function () {
-  return open('./data/deleteAccount_TestData.csv').split('\n').slice(1).map((s) => {
-    return {
-      currEmail: s
-    }
-  })
+interface deleteAccountData {
+  email: string
+  mfaOption: mfaType
 }
-)
+
+const dataDeleteAccount: deleteAccountData[] = new SharedArray('data4', () => {
+  const data: deleteAccountData[] = []
+
+  for (let i = 1; i <= 10000; i++) {
+    const id = i.toString().padStart(5, '0')
+    const emailAPP = `perftestAM4_App_${id}@digital.cabinet-office.gov.uk`
+    const emailSMS = `perftestAM4_SMS_${id}@digital.cabinet-office.gov.uk`
+    const mfaOptionAPP = 'AUTH_APP' as mfaType
+    const mfaOptionSMS = 'SMS' as mfaType
+
+    data.push({ email: emailAPP, mfaOption: mfaOptionAPP })
+    data.push({ email: emailSMS, mfaOption: mfaOptionSMS })
+  }
+
+  return data
+})
 
 export function setup (): void {
   describeProfile(loadProfile)
@@ -1205,9 +1216,9 @@ export function changePhone (): void {
 export function deleteAccount (): void {
   let res: Response
   let csrfToken: string
-
-  const user4 = csvData4[exec.scenario.iterationInTest % csvData4.length]
-
+  let phoneNumber: string
+  const deleteAccountData = dataDeleteAccount[exec.scenario.iterationInInstance % dataDeleteAccount.length]
+  const currentEmail = deleteAccountData.email
   const totp = new TOTP(credentials.authAppKey)
 
   group('B04_DeleteAccount_01_LaunchAccountsHome GET', function () {
@@ -1220,7 +1231,7 @@ export function deleteAccount (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Create a GOV.UK account or sign in')
+        (r.body as string).includes('Create a GOV.UK One Login or sign in')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -1239,7 +1250,7 @@ export function deleteAccount (): void {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
         (r.body as string).includes(
-          'Enter your email address to sign in to your GOV.UK account'
+          'Enter your email address to sign in to your GOV.UK One Login'
         )
     })
       ? transactionDuration.add(endTime - startTime)
@@ -1256,7 +1267,7 @@ export function deleteAccount (): void {
       env.signinURL + '/enter-email',
       {
         _csrf: csrfToken,
-        email: user4.currEmail
+        email: currentEmail
       },
       {
         tags: { name: 'B04_DeleteAccount_03_EnterEmailID' }
@@ -1277,68 +1288,127 @@ export function deleteAccount (): void {
 
   sleep(Math.random() * 3)
 
-  group('B04_DeleteAccount_04_EnterSignInPassword POST', () => {
-    const startTime = Date.now()
-    res = http.post(
-      env.signinURL + '/enter-password',
-      {
-        _csrf: csrfToken,
-        password: credentials.currPassword
-      },
-      {
-        tags: { name: 'B04_DeleteAccount_04_EnterSignInPassword' }
-      }
-    )
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes(
-          'Enter the 6 digit security code shown in your authenticator app'
+  switch (deleteAccountData.mfaOption) {
+    case 'SMS': {
+      group('B04_DeleteAccount_04_SMS_EnterLoginPassword POST', () => {
+        const startTime = Date.now()
+        res = http.post(
+          env.signinURL + '/enter-password',
+          {
+            _csrf: csrfToken,
+            password: credentials.currPassword
+          },
+          {
+            tags: { name: 'B04_DeleteAccount_04_SMS_EnterLoginPassword' }
+          }
         )
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+        const endTime = Date.now()
 
-    csrfToken = getCSRF(res)
-  })
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) =>
+            (r.body as string).includes(
+              'We sent a code to the phone number'
+            )
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+
+        csrfToken = getCSRF(res)
+        phoneNumber = getPhone(res)
+      })
+
+      sleep(Math.random() * 3)
+
+      group('B04_DeleteAccount_05_SMS_EnterOTP POST', () => {
+        const startTime = Date.now()
+        res = http.post(env.signinURL + '/enter-code',
+          {
+            phoneNumber,
+            _csrf: csrfToken,
+            code: credentials.fixedSMSOTP
+          },
+          {
+            tags: { name: 'B04_DeleteAccount_05_SMS_EnterOTP' }
+          }
+        )
+        const endTime = Date.now()
+
+        check(res, {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as string).includes('Your services')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Respone Validation Failed')
+      })
+      break
+    }
+    case 'AUTH_APP': {
+      group('B04_DeleteAccount_06_APP_EnterLoginPassword POST', () => {
+        const startTime = Date.now()
+        res = http.post(
+          env.signinURL + '/enter-password',
+          {
+            _csrf: csrfToken,
+            password: credentials.currPassword
+          },
+          {
+            tags: { name: 'B04_DeleteAccount_06_APP_EnterLoginPassword' }
+          }
+        )
+        const endTime = Date.now()
+
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) =>
+            (r.body as string).includes(
+              'Enter the 6 digit security code shown in your authenticator app'
+            )
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+
+        csrfToken = getCSRF(res)
+      })
+
+      sleep(Math.random() * 3)
+
+      group('B04_DeleteAccount_07_APP_EnterAuthAppOTP POST', () => {
+        const startTime = Date.now()
+        res = http.post(env.signinURL + '/enter-authenticator-app-code',
+          {
+            _csrf: csrfToken,
+            code: totp.generateTOTP()
+          },
+          {
+            tags: { name: 'B04_DeleteAccount_07_APP_EnterAuthAppOTP' }
+          }
+        )
+        const endTime = Date.now()
+
+        check(res, {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as string).includes('Your services')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+      })
+      break
+    }
+  }
 
   sleep(Math.random() * 3)
 
-  group('B04_DeleteAccount_05_EnterAuthAppOTP POST', () => {
-    const startTime = Date.now()
-    res = http.post(env.signinURL + '/enter-authenticator-app-code',
-      {
-        _csrf: csrfToken,
-        code: totp.generateTOTP()
-      },
-      {
-        tags: { name: 'B04_DeleteAccount_05_EnterAuthAppOTP' }
-      }
-    )
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Your services')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Respone Validation Failed')
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B04_DeleteAccount_06_ClickSettingsTab GET', () => {
+  group('B04_DeleteAccount_08_ClickSettingsTab GET', () => {
     const startTime = Date.now()
     res = http.get(env.envURL + '/settings', {
-      tags: { name: 'B04_DeleteAccount_06_ClickSettingsTab' }
+      tags: { name: 'B04_DeleteAccount_08_ClickSettingsTab' }
     })
     const endTime = Date.now()
 
     check(res, {
       'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Delete your GOV.UK account')
+      'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -1385,7 +1455,7 @@ export function deleteAccount (): void {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
         (r.body as string).includes(
-          'Are you sure you want to delete your GOV.UK account'
+          'Are you sure you want to delete your GOV.UK One Login'
         )
     })
       ? transactionDuration.add(endTime - startTime)
@@ -1412,7 +1482,7 @@ export function deleteAccount (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('You have deleted your GOV.UK account')
+        (r.body as string).includes('You’ve deleted your GOV.UK One Login')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')

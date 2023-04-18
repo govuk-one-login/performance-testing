@@ -51,6 +51,8 @@ This unit test also runs when raising pull requests as a [github action](../../.
 
 3. Go to the CodeBuild project and click 'Start build with overrides':
 
+    !['Start build with overrides' button](docs/start-build-with-overrides.png)
+
       - [Build link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/155922983858/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
       - [Staging link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/065251012682/projects/LoadTest-performance-build/builds/start?region=eu-west-2)
 

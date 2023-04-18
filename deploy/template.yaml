@@ -172,7 +172,7 @@ Resources:
           Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"
           Condition:
             StringEquals:
-              ec2:AuthorizedService: cxodebuild.amazonaws.com
+              ec2:AuthorizedService: codebuild.amazonaws.com
             ArnEquals:
               ec2:Subnet:
                 - Fn::Sub:

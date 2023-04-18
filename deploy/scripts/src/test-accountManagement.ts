@@ -132,7 +132,7 @@ const dataChangeEmail: changeEmailData[] = new SharedArray('data', () => {
 
   for (let i = 1; i <= 10000; i++) {
     const id = i.toString().padStart(5, '0')
-    const emailAPP = `perftestAM2_APP_${id}@digital.cabinet-office.gov.uk`
+    const emailAPP = `perftestAM2_App_${id}@digital.cabinet-office.gov.uk`
     const emailSMS = `perftestAM2_SMS_${id}@digital.cabinet-office.gov.uk`
     const mfaOptionAPP = 'AUTH_APP' as mfaType
     const mfaOptionSMS = 'SMS' as mfaType
@@ -321,7 +321,7 @@ export function changeEmail (): void {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
             (r.body as string).includes(
-              'Check your phone'
+              'We sent a code to the phone number'
             )
         })
           ? transactionDuration.add(endTime - startTime)
@@ -372,9 +372,7 @@ export function changeEmail (): void {
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes(
-              'Enter the 6 digit security code shown in your authenticator app'
-            )
+            (r.body as string).includes('Enter the 6 digit security code shown in your authenticator app')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -670,7 +668,7 @@ export function changePassword (): void {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
             (r.body as string).includes(
-              'Check your phone'
+              'We sent a code to the phone number'
             )
         })
           ? transactionDuration.add(endTime - startTime)

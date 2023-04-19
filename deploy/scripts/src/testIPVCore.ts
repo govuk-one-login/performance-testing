@@ -134,7 +134,7 @@ export function coreScenario1 (): void {
 
       check(res, {
         'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('You’ve signed in to GOV.UK One Login')
+        'verify page content': (r) => (r.body as string).includes('Start proving your identity with GOV.UK One Login')
       })
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')

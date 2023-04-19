@@ -225,11 +225,11 @@ Resources:
               BACKEND_STACK_NAME: demo-sam-app
               FRONTEND_STACK_NAME: node-app
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
-              TEST_CLIENT_EXECUTE_URL: ${TEST_CLIENT_EXECUTE_URL}
-              BACK_END_URL: ${BACK_END_URL}
-              FRONT_END_URL: ${FRONT_END_URL}
-              BIOMETRIC_SESSION_ID: ${BIOMETRIC_SESSION_ID}
             parameter-store:
+              TEST_CLIENT_EXECUTE_URL: "/perfTest/testClientUrl"
+              BACK_END_URL: "/perfTest/backendUrl"
+              FRONT_END_URL: "/perfTest/frontendUrl"
+              BIOMETRIC_SESSION_ID: "/perfTest/biometricSessionID"
               APP_PASSWORD: "/perfTest/testUserPassword"
               AUTH_APP_KEY: "/perfTest/authAppKey"
               K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"

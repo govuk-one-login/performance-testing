@@ -1,13 +1,6 @@
 import { check } from 'k6'
 import http, { type Response } from 'k6/http'
-
-interface Cookies {
-  sessionId: string
-  device?: string
-  nfc?: 'true' | 'false'
-  autoHandback?: 'true' | 'false'
-  smartphone?: 'iphone' | 'android'
-}
+import { URL } from 'https://jslib.k6.io/url/1.0.0/index.js'
 
 const env = {
   testClientExecuteUrl: __ENV.TEST_CLIENT_EXECUTE_URL,
@@ -35,10 +28,7 @@ export enum IphoneType {
   Iphone7OrNewer = 'iphone7OrNewer',
 }
 
-const OAUTH_ROUTE = '/dca/oauth2/'
-let redirectLocation: string
-let cookies: Cookies
-let res: Response | string
+const OAUTH_ROUTE = '/dca/oauth2'
 
 function isStatusCode200 (res: Response): boolean {
   return check(res, {
@@ -72,47 +62,85 @@ function isPageRedirectCorrect (res: Response, pageUrl: string): boolean {
 
 function isHeaderLocationCorrect (res: Response, content: string): boolean {
   return check(res, {
-    'verify url redirect': (r) => r.headers.Location.includes(content)
+    'verify url redirect': (r) => {
+      return r.headers.Location.includes(content)
+    }
   })
 }
 
-export function getRedirectAndSessionId (): void {
-  res = http.post(
-    `${env.testClientExecuteUrl}start`,
+export interface Cookies {
+  readonly cookies: Record<string, string>
+}
+function postToVerifyURL (): Response {
+  return http.post(getUrl('start', env.testClientExecuteUrl),
     JSON.stringify({ target: env.backEndUrl, frontendUri: env.frontEndUrl }),
     { headers: { 'Content-Type': 'application/json' } }
   )
-  const responseBody = res.body?.toString()
-  const verifyUrl = typeof responseBody === 'string' ? JSON.parse(responseBody).WebLocation : null
-  console.log(verifyUrl)
-
-  isStatusCode201(res)
-
-  // First redirect when calling /authorize
-  res = http.get(verifyUrl, { redirects: 0 })
-  cookies = { sessionId: res.cookies.sessionId[0].value }
-  redirectLocation = res.headers.Location
 }
 
-export function startDcmawJourney (): void {
-  res = http.get(env.frontEndUrl + redirectLocation, {
-    cookies: { ...cookies }
-  })
+function parseVerifyUrl (response: Response): string {
+  const responseBody = response.body?.toString()
+  const verifyUrl = typeof responseBody === 'string' ? JSON.parse(responseBody).WebLocation : null
+
+  if (verifyUrl === null) {
+    throw new Error('Failed to parse verify URL from response')
+  }
+
+  return verifyUrl
+}
+
+function getSessionId (verifyRes: Response): string {
+  const sessionId = verifyRes.cookies.sessionId.find(s => s.value.length > 0)?.value
+
+  if (sessionId == null) {
+    throw new Error('Cannot find sessionId cookie')
+  }
+
+  return sessionId
+}
+
+export function sessionIdCookie (): Cookies {
+  const res = postToVerifyURL()
+  isStatusCode201(res)
+
+  const verifyUrl = parseVerifyUrl(res)
+  const verifyRes = http.get(verifyUrl, { redirects: 0 })
+  const sessionId = getSessionId(verifyRes)
+
+  const cookies = { sessionId }
+  return { cookies }
+}
+
+function getUrl (path: string, base: string, query?: Record<string, string>): string {
+  const url = new URL(path, base)
+
+  if (query != null) {
+    Object.entries(query).forEach(
+      ([key, value]) => {
+        url.searchParams.set(key, value)
+      })
+  }
+
+  return url.toString()
+}
+
+function getFrontendUrl (path: string, query?: Record<string, string>): string {
+  return getUrl(OAUTH_ROUTE + path, env.frontEndUrl, query)
+}
+
+function getBackendUrl (path: string, query?: Record<string, string>): string {
+  return getUrl(path, env.backEndUrl, query)
+}
+
+export function startDcmawJourney ({ cookies }: Cookies): void {
+  const res = http.get(getFrontendUrl('/selectDevice'), { cookies })
   isStatusCode200(res)
   isPageContentCorrect(res, 'Are you on a computer or a tablet right now?')
   isPageRedirectCorrect(res, '/selectDevice')
 }
 
-export function checkSelectDeviceRedirect (device: DeviceType): void {
-  cookies.device = device
-  res = http.post(
-    env.frontEndUrl + OAUTH_ROUTE + 'selectDevice',
-    {
-      'select-device-choice': device
-    },
-    { cookies: { ...cookies } }
-  )
-
+export function checkSelectDeviceRedirect ({ cookies }: Cookies, device: DeviceType): void {
+  const res = http.post(getFrontendUrl('/selectDevice'), { 'select-device-choice': device }, { cookies: { ...cookies, device } })
   isStatusCode200(res)
   isPageRedirectCorrect(res, '/selectSmartphone')
 
@@ -126,29 +154,15 @@ export function checkSelectDeviceRedirect (device: DeviceType): void {
   }
 }
 
-export function checkSelectSmartphoneRedirect (smartphone: SmartphoneType): void {
-  cookies.nfc = 'false'
-  cookies.smartphone = smartphone
-  res = http.post(
-    env.frontEndUrl + OAUTH_ROUTE + 'selectSmartphone',
-    {
-      'smartphone-choice': smartphone
-    },
-    { cookies: { ...cookies } }
-  )
+export function checkSelectSmartphoneRedirect ({ cookies }: Cookies, smartphone: SmartphoneType): void {
+  const res = http.post(getFrontendUrl('/selectSmartphone'), { 'smartphone-choice': smartphone }, { cookies: { ...cookies, nfc: 'false', smartphone } })
   isStatusCode200(res)
   isPageContentCorrect(res, 'Do you have a valid passport?')
   isPageRedirectCorrect(res, '/validPassport')
 }
 
-export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
-  res = http.post(
-    env.frontEndUrl + OAUTH_ROUTE + 'validPassport',
-    {
-      'select-option': validPassport
-    },
-    { cookies: { ...cookies } }
-  )
+export function checkValidPassportPageRedirect ({ cookies }: Cookies, validPassport: YesOrNo): void {
+  const res = http.post(getFrontendUrl('/validPassport'), { 'select-option': validPassport }, { cookies })
   isStatusCode200(res)
 
   switch (validPassport) {
@@ -165,39 +179,20 @@ export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
         'Do you have a valid UK photocard driving licence?'
       )
       isPageRedirectCorrect(res, '/validDrivingLicence')
-      break
   }
 }
 
-export function checkValidDrivingLicenseRedirect (validDrivingLicense: YesOrNo): void {
-  res = http.post(
-    env.frontEndUrl + OAUTH_ROUTE + 'validDrivingLicence',
-    {
-      'driving-licence-choice': validDrivingLicense
-    },
-    { cookies: { ...cookies } }
-  )
-
+export function checkValidDrivingLicenseRedirect ({ cookies }: Cookies, validDrivingLicense: YesOrNo): void {
+  const res = http.post(getFrontendUrl('/validDrivingLicence'), { 'driving-licence-choice': validDrivingLicense }, { cookies })
   isStatusCode200(res)
   isPageContentCorrect(
     res,
     'Use your UK driving licence and a GOV.UK app to confirm your identity'
   )
-  isPageRedirectCorrect(res, '/idCheckApp')
 }
 
-export function checkBiometricChipRedirect (
-  validChip: YesOrNo,
-  smartphone: SmartphoneType
-): void {
-  res = http.post(
-    env.frontEndUrl + OAUTH_ROUTE + 'biometricChip',
-    {
-      'select-option': validChip // valid biometric chip
-    },
-    { cookies: { ...cookies } }
-  )
-
+export function checkBiometricChipRedirect ({ cookies }: Cookies, validChip: YesOrNo, smartphone: SmartphoneType): void {
+  const res = http.post(getFrontendUrl('/biometricChip'), { 'select-option': validChip }, { cookies })
   isStatusCode200(res)
 
   switch (validChip) {
@@ -221,18 +216,10 @@ export function checkBiometricChipRedirect (
       isPageRedirectCorrect(res, '/validDrivingLicence')
       break
   }
-  cookies.nfc = 'true'
 }
 
-export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
-  res = http.post(
-    env.frontEndUrl + OAUTH_ROUTE + 'iphoneModel',
-    {
-      'select-option': iphoneModel
-    },
-    { cookies: { ...cookies } }
-  )
-
+export function checkIphoneModelRedirect ({ cookies }: Cookies, iphoneModel: IphoneType): void {
+  const res = http.post(getFrontendUrl('/iphoneModel'), { 'select-option': iphoneModel }, { cookies: { ...cookies, nfc: 'true' } })
   isStatusCode200(res)
   isPageContentCorrect(
     res,
@@ -241,15 +228,8 @@ export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
   isPageRedirectCorrect(res, '/idCheckApp')
 }
 
-export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void {
-  res = http.post(
-    env.frontEndUrl + OAUTH_ROUTE + 'workingCamera',
-    {
-      'working-camera-choice': workingCameraAnswer
-    },
-    { cookies: { ...cookies } }
-  )
-
+export function checkWorkingCameraRedirect ({ cookies }: Cookies, workingCameraAnswer: YesOrNo): void {
+  const res = http.post(getFrontendUrl('/workingCamera'), { 'working-camera-choice': workingCameraAnswer }, { cookies })
   isStatusCode200(res)
   isPageContentCorrect(
     res,
@@ -258,18 +238,8 @@ export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void 
   isPageRedirectCorrect(res, '/flashingWarning')
 }
 
-export function checkFlashingWarningRedirect (
-  warningAnswer: YesOrNo,
-  device: DeviceType
-): void {
-  res = http.post(
-    env.frontEndUrl + OAUTH_ROUTE + 'flashingWarning',
-    {
-      'flashing-colours-choice': warningAnswer
-    },
-    { cookies: { ...cookies } }
-  )
-
+export function checkFlashingWarningRedirect ({ cookies }: Cookies, warningAnswer: YesOrNo, device: DeviceType): void {
+  const res = http.post(getFrontendUrl('/flashingWarning'), { 'flashing-colours-choice': warningAnswer }, { cookies })
   isStatusCode200(res)
 
   switch (device) {
@@ -287,27 +257,23 @@ export function checkFlashingWarningRedirect (
   }
 }
 
-export function getBiometricToken (): void {
-  res = http.get(
-    `${env.backEndUrl}/biometricToken?authSessionId=${cookies.sessionId}`
-  )
+export function getBiometricToken ({ cookies }: Cookies): void {
+  const biometricTokenUrl = getBackendUrl('/biometricToken', { authSessionId: cookies.sessionId })
+  const res = http.get(biometricTokenUrl)
 
   isStatusCode200(res)
 }
 
-export function postFinishBiometricToken (): void {
-  res = http.post(
-    `${env.backEndUrl}/finishBiometricSession?authSessionId=${cookies.sessionId}&biometricSessionId=${env.biometricSessionId}`
-  )
+export function postFinishBiometricToken ({ cookies }: Cookies): void {
+  const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', { authSessionId: cookies.sessionId, biometricSessionId: env.biometricSessionId })
+  const res = http.post(finishBiometricSessionUrl)
 
   isStatusCode200(res)
 }
 
-export function checkRedirectPage (): void {
-  res = http.get(
-    `${env.frontEndUrl + OAUTH_ROUTE}redirect?sessionId=${cookies.sessionId}`,
-    { cookies: { ...cookies }, redirects: 0 }
-  )
+export function checkRedirectPage ({ cookies }: Cookies): void {
+  const redirectUrl = getFrontendUrl('/redirect', { sessionId: cookies.sessionId })
+  const res = http.get(redirectUrl, { cookies: { ...cookies }, redirects: 0 })
 
   isStatusCode302(res)
   isHeaderLocationCorrect(res, '/redirect')

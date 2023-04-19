@@ -2,23 +2,23 @@ import { sleep } from 'k6'
 import { type Options } from 'k6/options'
 import { describeProfile, type ProfileList, selectProfile } from './utils/config/load-profiles'
 import {
-  checkBiometricChipRedirect,
-  checkFlashingWarningRedirect,
-  checkIphoneModelRedirect,
-  checkRedirectPage,
-  checkSelectDeviceRedirect,
-  checkSelectSmartphoneRedirect,
-  checkValidDrivingLicenseRedirect,
-  checkValidPassportPageRedirect,
-  checkWorkingCameraRedirect,
-  getBiometricToken,
-  getRedirectAndSessionId,
-  postFinishBiometricToken,
+  sessionIdCookie,
   startDcmawJourney,
   DeviceType,
   SmartphoneType,
   YesOrNo,
-  IphoneType
+  IphoneType,
+  checkSelectDeviceRedirect,
+  checkSelectSmartphoneRedirect,
+  checkValidPassportPageRedirect,
+  checkValidDrivingLicenseRedirect,
+  checkBiometricChipRedirect,
+  checkFlashingWarningRedirect,
+  checkIphoneModelRedirect,
+  checkRedirectPage,
+  checkWorkingCameraRedirect,
+  getBiometricToken,
+  postFinishBiometricToken
 } from './utils/functions/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -64,45 +64,45 @@ export function setup (): void {
 }
 
 export function dcmawPassportIphone (): void {
-  getRedirectAndSessionId()
-  startDcmawJourney()
+  const context = sessionIdCookie()
+  startDcmawJourney(context)
   sleep(1)
-  checkSelectDeviceRedirect(DeviceType.Other)
+  checkSelectDeviceRedirect(context, DeviceType.Other)
   sleep(1)
-  checkSelectSmartphoneRedirect(SmartphoneType.Iphone)
+  checkSelectSmartphoneRedirect(context, SmartphoneType.Iphone)
   sleep(1)
-  checkValidPassportPageRedirect(YesOrNo.YES)
+  checkValidPassportPageRedirect(context, YesOrNo.YES)
   sleep(1)
-  checkBiometricChipRedirect(YesOrNo.YES, SmartphoneType.Iphone)
+  checkBiometricChipRedirect(context, YesOrNo.YES, SmartphoneType.Iphone)
   sleep(1)
-  checkIphoneModelRedirect(IphoneType.Iphone7OrNewer)
+  checkIphoneModelRedirect(context, IphoneType.Iphone7OrNewer)
   sleep(1)
-  checkWorkingCameraRedirect(YesOrNo.YES)
+  checkWorkingCameraRedirect(context, YesOrNo.YES)
   sleep(1)
-  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Other)
-  getBiometricToken()
-  postFinishBiometricToken()
+  checkFlashingWarningRedirect(context, YesOrNo.YES, DeviceType.Other)
+  getBiometricToken(context)
+  postFinishBiometricToken(context)
   sleep(3)
-  checkRedirectPage()
+  checkRedirectPage(context)
 }
 
 export function dcmawDrivingLicenseAndroid (): void {
-  getRedirectAndSessionId()
-  startDcmawJourney()
+  const context = sessionIdCookie()
+  startDcmawJourney(context)
   sleep(1)
-  checkSelectDeviceRedirect(DeviceType.ComputerOrTablet)
+  checkSelectDeviceRedirect(context, DeviceType.ComputerOrTablet)
   sleep(1)
-  checkSelectSmartphoneRedirect(SmartphoneType.Android)
+  checkSelectSmartphoneRedirect(context, SmartphoneType.Android)
   sleep(1)
-  checkValidPassportPageRedirect(YesOrNo.NO)
+  checkValidPassportPageRedirect(context, YesOrNo.NO)
   sleep(1)
-  checkValidDrivingLicenseRedirect(YesOrNo.YES)
+  checkValidDrivingLicenseRedirect(context, YesOrNo.YES)
   sleep(1)
-  checkWorkingCameraRedirect(YesOrNo.YES)
+  checkWorkingCameraRedirect(context, YesOrNo.YES)
   sleep(1)
-  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.ComputerOrTablet)
-  getBiometricToken()
-  postFinishBiometricToken()
+  checkFlashingWarningRedirect(context, YesOrNo.YES, DeviceType.ComputerOrTablet)
+  getBiometricToken(context)
+  postFinishBiometricToken(context)
   sleep(3)
-  checkRedirectPage()
+  checkRedirectPage(context)
 }

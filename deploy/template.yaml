@@ -310,17 +310,17 @@ Resources:
         Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
-        VpcConfig:
-          !If
-          - CreateVPCConfigurationForTestContainer
-          - SecurityGroupIds:
-            - !GetAtt TestContainerSecurityGroup.GroupId
-            Subnets:
-              - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
-              - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
-            VpcId:
-              Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
-          - !Ref AWS::NoValue
+      VpcConfig:
+        !If
+        - CreateVPCConfigurationForTestContainer
+        - SecurityGroupIds:
+          - !GetAtt TestContainerSecurityGroup.GroupId
+          Subnets:
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
+          VpcId:
+            Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        - !Ref AWS::NoValue
       TimeoutInMinutes: 480
       Source:
         Type: "NO_SOURCE"

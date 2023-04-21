@@ -16,6 +16,20 @@ Clone the repository and navigate to this folder `deploy/scripts`. Then to insta
 % npm install
 ```
 
+### Linting
+
+If using VSCode as an IDE it is recommended to install [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and set this to your default formatter for TypeScript files in this project.
+
+You can also manually run linting checks in the `scripts` directory with
+```console
+% npx eslint ./src
+```
+
+Further, you can add the `--fix` flag to fix any auto-fixable problems in your TypeScript files
+```console
+% npx eslint ./src --fix
+```
+
 ## Local Testing
 Test scripts are written in the `src` folder. Test script files must match the path ( `src/*.ts`) specified in the [build.js](build.js#L7) file. Static data files are kept in the `src/data`, they are copied to `dist/data` by esbuild as defined [here](build.js#L18-L25).
 

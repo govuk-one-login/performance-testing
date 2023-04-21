@@ -1,8 +1,8 @@
 import { sleep } from 'k6'
+import http from 'k6/http'
 import { type Options } from 'k6/options'
 import { describeProfile, type ProfileList, selectProfile } from './utils/config/load-profiles'
 import {
-  sessionIdCookie,
   startDcmawJourney,
   DeviceType,
   SmartphoneType,
@@ -18,7 +18,9 @@ import {
   checkRedirectPage,
   checkWorkingCameraRedirect,
   getBiometricToken,
-  postFinishBiometricToken
+  postFinishBiometricToken,
+  getSessionId,
+  setSessionCookie
 } from './utils/functions/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -64,45 +66,49 @@ export function setup (): void {
 }
 
 export function dcmawPassportIphone (): void {
-  const context = sessionIdCookie()
-  startDcmawJourney(context)
+  const jar = http.cookieJar()
+  const sessionId = getSessionId()
+  setSessionCookie(jar, sessionId)
+  startDcmawJourney()
   sleep(1)
-  checkSelectDeviceRedirect(context, DeviceType.Other)
+  checkSelectDeviceRedirect(DeviceType.Other)
   sleep(1)
-  checkSelectSmartphoneRedirect(context, SmartphoneType.Iphone)
+  checkSelectSmartphoneRedirect(SmartphoneType.Iphone)
   sleep(1)
-  checkValidPassportPageRedirect(context, YesOrNo.YES)
+  checkValidPassportPageRedirect(YesOrNo.YES)
   sleep(1)
-  checkBiometricChipRedirect(context, YesOrNo.YES, SmartphoneType.Iphone)
+  checkBiometricChipRedirect(YesOrNo.YES, SmartphoneType.Iphone)
   sleep(1)
-  checkIphoneModelRedirect(context, IphoneType.Iphone7OrNewer)
+  checkIphoneModelRedirect(IphoneType.Iphone7OrNewer)
   sleep(1)
-  checkWorkingCameraRedirect(context, YesOrNo.YES)
+  checkWorkingCameraRedirect(YesOrNo.YES)
   sleep(1)
-  checkFlashingWarningRedirect(context, YesOrNo.YES, DeviceType.Other)
-  getBiometricToken(context)
-  postFinishBiometricToken(context)
+  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Other)
+  getBiometricToken(sessionId)
+  postFinishBiometricToken(sessionId)
   sleep(3)
-  checkRedirectPage(context)
+  checkRedirectPage(sessionId)
 }
 
 export function dcmawDrivingLicenseAndroid (): void {
-  const context = sessionIdCookie()
-  startDcmawJourney(context)
+  const jar = http.cookieJar()
+  const sessionId = getSessionId()
+  setSessionCookie(jar, sessionId)
+  startDcmawJourney()
   sleep(1)
-  checkSelectDeviceRedirect(context, DeviceType.ComputerOrTablet)
+  checkSelectDeviceRedirect(DeviceType.ComputerOrTablet)
   sleep(1)
-  checkSelectSmartphoneRedirect(context, SmartphoneType.Android)
+  checkSelectSmartphoneRedirect(SmartphoneType.Android)
   sleep(1)
-  checkValidPassportPageRedirect(context, YesOrNo.NO)
+  checkValidPassportPageRedirect(YesOrNo.NO)
   sleep(1)
-  checkValidDrivingLicenseRedirect(context, YesOrNo.YES)
+  checkValidDrivingLicenseRedirect(YesOrNo.YES)
   sleep(1)
-  checkWorkingCameraRedirect(context, YesOrNo.YES)
+  checkWorkingCameraRedirect(YesOrNo.YES)
   sleep(1)
-  checkFlashingWarningRedirect(context, YesOrNo.YES, DeviceType.ComputerOrTablet)
-  getBiometricToken(context)
-  postFinishBiometricToken(context)
+  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.ComputerOrTablet)
+  getBiometricToken(sessionId)
+  postFinishBiometricToken(sessionId)
   sleep(3)
-  checkRedirectPage(context)
+  checkRedirectPage(sessionId)
 }

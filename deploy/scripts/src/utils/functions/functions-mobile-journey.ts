@@ -1,6 +1,6 @@
 import { check } from 'k6'
-import http, { type Response } from 'k6/http'
-import { URL } from 'https://jslib.k6.io/url/1.0.0/index.js'
+import http, { type CookieJar, type Response } from 'k6/http'
+import { URL } from '../../misc/url'
 
 const env = {
   testClientExecuteUrl: __ENV.TEST_CLIENT_EXECUTE_URL,
@@ -68,9 +68,6 @@ function isHeaderLocationCorrect (res: Response, content: string): boolean {
   })
 }
 
-export interface Cookies {
-  readonly cookies: Record<string, string>
-}
 function postToVerifyURL (): Response {
   return http.post(getUrl('start', env.testClientExecuteUrl),
     JSON.stringify({ target: env.backEndUrl, frontendUri: env.frontEndUrl }),
@@ -89,26 +86,22 @@ function parseVerifyUrl (response: Response): string {
   return verifyUrl
 }
 
-function getSessionId (verifyRes: Response): string {
-  const sessionId = verifyRes.cookies.sessionId.find(s => s.value.length > 0)?.value
-
-  if (sessionId == null) {
-    throw new Error('Cannot find sessionId cookie')
-  }
-
-  return sessionId
+export function setSessionCookie (jar: CookieJar, sessionId: string): void {
+  jar.set(getFrontendUrl('/'), 'sessionId', sessionId)
 }
 
-export function sessionIdCookie (): Cookies {
+export function getSessionId (): string {
   const res = postToVerifyURL()
   isStatusCode201(res)
 
   const verifyUrl = parseVerifyUrl(res)
   const verifyRes = http.get(verifyUrl, { redirects: 0 })
-  const sessionId = getSessionId(verifyRes)
+  const sessionId = verifyRes.cookies.sessionId.find(s => s.value.length > 0)?.value
 
-  const cookies = { sessionId }
-  return { cookies }
+  if (sessionId == null) {
+    throw new Error('Cannot find sessionId cookie')
+  }
+  return sessionId
 }
 
 function getUrl (path: string, base: string, query?: Record<string, string>): string {
@@ -132,15 +125,15 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
   return getUrl(path, env.backEndUrl, query)
 }
 
-export function startDcmawJourney ({ cookies }: Cookies): void {
-  const res = http.get(getFrontendUrl('/selectDevice'), { cookies })
+export function startDcmawJourney (): void {
+  const res = http.get(getFrontendUrl('/selectDevice'))
   isStatusCode200(res)
   isPageContentCorrect(res, 'Are you on a computer or a tablet right now?')
   isPageRedirectCorrect(res, '/selectDevice')
 }
 
-export function checkSelectDeviceRedirect ({ cookies }: Cookies, device: DeviceType): void {
-  const res = http.post(getFrontendUrl('/selectDevice'), { 'select-device-choice': device }, { cookies: { ...cookies, device } })
+export function checkSelectDeviceRedirect (device: DeviceType): void {
+  const res = http.post(getFrontendUrl('/selectDevice'), { 'select-device-choice': device })
   isStatusCode200(res)
   isPageRedirectCorrect(res, '/selectSmartphone')
 
@@ -154,15 +147,15 @@ export function checkSelectDeviceRedirect ({ cookies }: Cookies, device: DeviceT
   }
 }
 
-export function checkSelectSmartphoneRedirect ({ cookies }: Cookies, smartphone: SmartphoneType): void {
-  const res = http.post(getFrontendUrl('/selectSmartphone'), { 'smartphone-choice': smartphone }, { cookies: { ...cookies, nfc: 'false', smartphone } })
+export function checkSelectSmartphoneRedirect (smartphone: SmartphoneType): void {
+  const res = http.post(getFrontendUrl('/selectSmartphone'), { 'smartphone-choice': smartphone })
   isStatusCode200(res)
   isPageContentCorrect(res, 'Do you have a valid passport?')
   isPageRedirectCorrect(res, '/validPassport')
 }
 
-export function checkValidPassportPageRedirect ({ cookies }: Cookies, validPassport: YesOrNo): void {
-  const res = http.post(getFrontendUrl('/validPassport'), { 'select-option': validPassport }, { cookies })
+export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
+  const res = http.post(getFrontendUrl('/validPassport'), { 'select-option': validPassport })
   isStatusCode200(res)
 
   switch (validPassport) {
@@ -182,8 +175,8 @@ export function checkValidPassportPageRedirect ({ cookies }: Cookies, validPassp
   }
 }
 
-export function checkValidDrivingLicenseRedirect ({ cookies }: Cookies, validDrivingLicense: YesOrNo): void {
-  const res = http.post(getFrontendUrl('/validDrivingLicence'), { 'driving-licence-choice': validDrivingLicense }, { cookies })
+export function checkValidDrivingLicenseRedirect (validDrivingLicense: YesOrNo): void {
+  const res = http.post(getFrontendUrl('/validDrivingLicence'), { 'driving-licence-choice': validDrivingLicense })
   isStatusCode200(res)
   isPageContentCorrect(
     res,
@@ -191,8 +184,8 @@ export function checkValidDrivingLicenseRedirect ({ cookies }: Cookies, validDri
   )
 }
 
-export function checkBiometricChipRedirect ({ cookies }: Cookies, validChip: YesOrNo, smartphone: SmartphoneType): void {
-  const res = http.post(getFrontendUrl('/biometricChip'), { 'select-option': validChip }, { cookies })
+export function checkBiometricChipRedirect (validChip: YesOrNo, smartphone: SmartphoneType): void {
+  const res = http.post(getFrontendUrl('/biometricChip'), { 'select-option': validChip })
   isStatusCode200(res)
 
   switch (validChip) {
@@ -218,8 +211,8 @@ export function checkBiometricChipRedirect ({ cookies }: Cookies, validChip: Yes
   }
 }
 
-export function checkIphoneModelRedirect ({ cookies }: Cookies, iphoneModel: IphoneType): void {
-  const res = http.post(getFrontendUrl('/iphoneModel'), { 'select-option': iphoneModel }, { cookies: { ...cookies, nfc: 'true' } })
+export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
+  const res = http.post(getFrontendUrl('/iphoneModel'), { 'select-option': iphoneModel })
   isStatusCode200(res)
   isPageContentCorrect(
     res,
@@ -228,8 +221,8 @@ export function checkIphoneModelRedirect ({ cookies }: Cookies, iphoneModel: Iph
   isPageRedirectCorrect(res, '/idCheckApp')
 }
 
-export function checkWorkingCameraRedirect ({ cookies }: Cookies, workingCameraAnswer: YesOrNo): void {
-  const res = http.post(getFrontendUrl('/workingCamera'), { 'working-camera-choice': workingCameraAnswer }, { cookies })
+export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void {
+  const res = http.post(getFrontendUrl('/workingCamera'), { 'working-camera-choice': workingCameraAnswer })
   isStatusCode200(res)
   isPageContentCorrect(
     res,
@@ -238,8 +231,8 @@ export function checkWorkingCameraRedirect ({ cookies }: Cookies, workingCameraA
   isPageRedirectCorrect(res, '/flashingWarning')
 }
 
-export function checkFlashingWarningRedirect ({ cookies }: Cookies, warningAnswer: YesOrNo, device: DeviceType): void {
-  const res = http.post(getFrontendUrl('/flashingWarning'), { 'flashing-colours-choice': warningAnswer }, { cookies })
+export function checkFlashingWarningRedirect (warningAnswer: YesOrNo, device: DeviceType): void {
+  const res = http.post(getFrontendUrl('/flashingWarning'), { 'flashing-colours-choice': warningAnswer })
   isStatusCode200(res)
 
   switch (device) {
@@ -257,24 +250,23 @@ export function checkFlashingWarningRedirect ({ cookies }: Cookies, warningAnswe
   }
 }
 
-export function getBiometricToken ({ cookies }: Cookies): void {
-  const biometricTokenUrl = getBackendUrl('/biometricToken', { authSessionId: cookies.sessionId })
+export function getBiometricToken (sessionId: string): void {
+  const biometricTokenUrl = getBackendUrl('/biometricToken', { authSessionId: sessionId })
   const res = http.get(biometricTokenUrl)
 
   isStatusCode200(res)
 }
 
-export function postFinishBiometricToken ({ cookies }: Cookies): void {
-  const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', { authSessionId: cookies.sessionId, biometricSessionId: env.biometricSessionId })
+export function postFinishBiometricToken (sessionId: string): void {
+  const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', { authSessionId: sessionId, biometricSessionId: env.biometricSessionId })
   const res = http.post(finishBiometricSessionUrl)
 
   isStatusCode200(res)
 }
 
-export function checkRedirectPage ({ cookies }: Cookies): void {
-  const redirectUrl = getFrontendUrl('/redirect', { sessionId: cookies.sessionId })
-  const res = http.get(redirectUrl, { cookies: { ...cookies }, redirects: 0 })
-
+export function checkRedirectPage (sessionId: string): void {
+  const redirectUrl = getFrontendUrl('/redirect', { sessionId })
+  const res = http.get(redirectUrl, { redirects: 0 })
   isStatusCode302(res)
   isHeaderLocationCorrect(res, '/redirect')
 }

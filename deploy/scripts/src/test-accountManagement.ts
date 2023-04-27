@@ -52,7 +52,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 1, duration: '30s' } // Ramps up to target load
       ],
       exec: 'deleteAccount'
     }
@@ -63,7 +63,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1m',
       preAllocatedVUs: 1,
-      maxVUs: 50,
+      maxVUs: 300,
       stages: [
         { target: 30, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
         { target: 30, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
@@ -77,7 +77,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 250,
+      maxVUs: 300,
       stages: [
         { target: 30, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
         { target: 30, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
@@ -136,7 +136,7 @@ interface changeEmailData {
 const dataChangeEmail: changeEmailData[] = new SharedArray('data1', () => {
   const data: changeEmailData[] = []
 
-  for (let i = 2; i <= 10000; i++) {
+  for (let i = 4; i <= 10000; i++) {
     const id = i.toString().padStart(5, '0')
     const emailAPP = `perftestAM2_App_${id}@digital.cabinet-office.gov.uk`
     const emailSMS = `perftestAM2_SMS_${id}@digital.cabinet-office.gov.uk`
@@ -193,7 +193,7 @@ interface deleteAccountData {
 const dataDeleteAccount: deleteAccountData[] = new SharedArray('data4', () => {
   const data: deleteAccountData[] = []
 
-  for (let i = 1; i <= 10000; i++) {
+  for (let i = 4; i <= 10000; i++) {
     const id = i.toString().padStart(5, '0')
     const emailAPP = `perftestAM4_App_${id}@digital.cabinet-office.gov.uk`
     const emailSMS = `perftestAM4_SMS_${id}@digital.cabinet-office.gov.uk`
@@ -348,7 +348,7 @@ export function changeEmail (): void {
         phoneNumber = getPhone(res)
       })
 
-      group('B01_ChangeEmail_05_SMS_EnterOTP POST', () => {
+      group('B01_ChangeEmail_05_01_SMS_EnterOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-code',
           {
@@ -357,10 +357,27 @@ export function changeEmail (): void {
             code: credentials.fixedSMSOTP
           },
           {
-            tags: { name: 'B01_ChangeEmail_05_SMS_EnterOTP' }
+            tags: { name: 'B01_ChangeEmail_05_01_SMS_EnterOTP' }
           }
         )
         const endTime = Date.now()
+
+        check(res, {
+          'status is 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
+        })
+
+        if ((res.body as string).includes('terms of use update')) {
+          res = http.post(env.signinURL + '/updated-terms-and-conditions',
+            {
+              _csrf: csrfToken,
+              termsAndConditionsResult: 'accept'
+            },
+            {
+              tags: { name: 'B01_ChangeEmail_05_02_SMS_AcceptTerms' }
+            }
+          )
+        }
 
         check(res, {
           'is status 200': r => r.status === 200,
@@ -399,7 +416,7 @@ export function changeEmail (): void {
 
       sleep(2)
 
-      group('B01_ChangeEmail_07_APP_EnterAuthAppOTP POST', () => {
+      group('B01_ChangeEmail_07_01_APP_EnterAuthAppOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-authenticator-app-code',
           {
@@ -411,6 +428,23 @@ export function changeEmail (): void {
           }
         )
         const endTime = Date.now()
+
+        check(res, {
+          'status is 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
+        })
+
+        if ((res.body as string).includes('terms of use update')) {
+          res = http.post(env.signinURL + '/updated-terms-and-conditions',
+            {
+              _csrf: csrfToken,
+              termsAndConditionsResult: 'accept'
+            },
+            {
+              tags: { name: 'B02_ChangeEmail_07_02_APP_AcceptTerms' }
+            }
+          )
+        }
 
         check(res, {
           'is status 200': r => r.status === 200,
@@ -723,7 +757,7 @@ export function changePassword (): void {
               termsAndConditionsResult: 'accept'
             },
             {
-              tags: { name: 'B02_ChangePassword_05_02_SMS_AcceptCookies' }
+              tags: { name: 'B02_ChangePassword_05_02_SMS_AcceptTerms' }
             }
           )
         }
@@ -767,7 +801,7 @@ export function changePassword (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_ChangePassword_07_01_App_EnterAuthAppOTP POST', () => {
+      group('B02_ChangePassword_07_01_APP_EnterAuthAppOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-authenticator-app-code',
           {
@@ -775,7 +809,7 @@ export function changePassword (): void {
             code: totp.generateTOTP()
           },
           {
-            tags: { name: 'B02_ChangePassword_07_App_EnterAuthAppOTP' }
+            tags: { name: 'B02_ChangePassword_07_APP_EnterAuthAppOTP' }
           }
         )
         const endTime = Date.now()
@@ -792,7 +826,7 @@ export function changePassword (): void {
               termsAndConditionsResult: 'accept'
             },
             {
-              tags: { name: 'B02_ChangePassword_07_02_App_AcceptCookies' }
+              tags: { name: 'B02_ChangePassword_07_02_APP_AcceptTerms' }
             }
           )
         }
@@ -1360,7 +1394,7 @@ export function deleteAccount (): void {
 
       sleep(Math.random() * 3)
 
-      group('B04_DeleteAccount_05_SMS_EnterOTP POST', () => {
+      group('B04_DeleteAccount_05_01_SMS_EnterOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-code',
           {
@@ -1373,6 +1407,23 @@ export function deleteAccount (): void {
           }
         )
         const endTime = Date.now()
+
+        check(res, {
+          'status is 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
+        })
+
+        if ((res.body as string).includes('terms of use update')) {
+          res = http.post(env.signinURL + '/updated-terms-and-conditions',
+            {
+              _csrf: csrfToken,
+              termsAndConditionsResult: 'accept'
+            },
+            {
+              tags: { name: 'B01_DeleteAccount_05_01_SMS_AcceptTerms' }
+            }
+          )
+        }
 
         check(res, {
           'is status 200': r => r.status === 200,
@@ -1413,7 +1464,7 @@ export function deleteAccount (): void {
 
       sleep(Math.random() * 3)
 
-      group('B04_DeleteAccount_07_APP_EnterAuthAppOTP POST', () => {
+      group('B04_DeleteAccount_07_01_APP_EnterAuthAppOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-authenticator-app-code',
           {
@@ -1425,6 +1476,23 @@ export function deleteAccount (): void {
           }
         )
         const endTime = Date.now()
+
+        check(res, {
+          'status is 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
+        })
+
+        if ((res.body as string).includes('terms of use update')) {
+          res = http.post(env.signinURL + '/updated-terms-and-conditions',
+            {
+              _csrf: csrfToken,
+              termsAndConditionsResult: 'accept'
+            },
+            {
+              tags: { name: 'B01_DeleteAccount_05_02_APP_AcceptTerms' }
+            }
+          )
+        }
 
         check(res, {
           'is status 200': r => r.status === 200,

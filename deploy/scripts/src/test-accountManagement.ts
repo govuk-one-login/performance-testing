@@ -697,7 +697,7 @@ export function changePassword (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_ChangePassword_05_SMS_EnterOTP POST', () => {
+      group('B02_ChangePassword_05_01_SMS_EnterOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-code',
           {
@@ -710,6 +710,23 @@ export function changePassword (): void {
           }
         )
         const endTime = Date.now()
+
+        check(res, {
+          'status is 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
+        })
+
+        if ((res.body as string).includes('terms of use update')) {
+          res = http.post(env.signinURL + '/updated-terms-and-conditions',
+            {
+              _csrf: csrfToken,
+              termsAndConditionsResult: 'accept'
+            },
+            {
+              tags: { name: 'B02_ChangePassword_05_02_SMS_AcceptCookies' }
+            }
+          )
+        }
 
         check(res, {
           'is status 200': r => r.status === 200,
@@ -750,7 +767,7 @@ export function changePassword (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_ChangePassword_07_App_EnterAuthAppOTP POST', () => {
+      group('B02_ChangePassword_07_01_App_EnterAuthAppOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-authenticator-app-code',
           {
@@ -762,6 +779,23 @@ export function changePassword (): void {
           }
         )
         const endTime = Date.now()
+
+        check(res, {
+          'status is 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
+        })
+
+        if ((res.body as string).includes('terms of use update')) {
+          res = http.post(env.signinURL + '/updated-terms-and-conditions',
+            {
+              _csrf: csrfToken,
+              termsAndConditionsResult: 'accept'
+            },
+            {
+              tags: { name: 'B02_ChangePassword_07_02_App_AcceptCookies' }
+            }
+          )
+        }
 
         check(res, {
           'is status 200': r => r.status === 200,

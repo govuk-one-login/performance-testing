@@ -1,4 +1,4 @@
-import { sleep } from 'k6'
+import { group, sleep } from 'k6'
 import http from 'k6/http'
 import { type Options } from 'k6/options'
 import { describeProfile, type ProfileList, selectProfile } from './utils/config/load-profiles'
@@ -68,47 +68,79 @@ export function setup (): void {
 export function dcmawPassportIphone (): void {
   const jar = http.cookieJar()
   const sessionId = getSessionId()
-  setSessionCookie(jar, sessionId)
-  startDcmawJourney()
+
+  group('Set session id and start DCMAW journey', () => {
+    setSessionCookie(jar, sessionId)
+    startDcmawJourney()
+  })
+
   sleep(1)
-  checkSelectDeviceRedirect(DeviceType.Other)
+
+  group(`Select device: ${DeviceType.Other}, smartphone: ${SmartphoneType.Iphone}, iphone model: ${IphoneType.Iphone7OrNewer}, valid passpoert: ${YesOrNo.YES}`, () => {
+    checkSelectDeviceRedirect(DeviceType.Other)
+    sleep(1)
+    checkSelectSmartphoneRedirect(SmartphoneType.Iphone)
+    sleep(1)
+    checkValidPassportPageRedirect(YesOrNo.YES)
+    sleep(1)
+    checkBiometricChipRedirect(YesOrNo.YES, SmartphoneType.Iphone)
+    sleep(1)
+    checkIphoneModelRedirect(IphoneType.Iphone7OrNewer)
+    sleep(1)
+    checkWorkingCameraRedirect(YesOrNo.YES)
+    sleep(1)
+    checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Other)
+  })
+
   sleep(1)
-  checkSelectSmartphoneRedirect(SmartphoneType.Iphone)
-  sleep(1)
-  checkValidPassportPageRedirect(YesOrNo.YES)
-  sleep(1)
-  checkBiometricChipRedirect(YesOrNo.YES, SmartphoneType.Iphone)
-  sleep(1)
-  checkIphoneModelRedirect(IphoneType.Iphone7OrNewer)
-  sleep(1)
-  checkWorkingCameraRedirect(YesOrNo.YES)
-  sleep(1)
-  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Other)
-  getBiometricToken(sessionId)
-  postFinishBiometricToken(sessionId)
+
+  group('Biometric Token BE calls', () => {
+    getBiometricToken(sessionId)
+    postFinishBiometricToken(sessionId)
+  })
+
   sleep(3)
-  checkRedirectPage(sessionId)
+
+  group('Check Final Redirect page', () => {
+    checkRedirectPage(sessionId)
+  })
 }
 
 export function dcmawDrivingLicenseAndroid (): void {
   const jar = http.cookieJar()
   const sessionId = getSessionId()
-  setSessionCookie(jar, sessionId)
-  startDcmawJourney()
+
+  group('Set session id and start DCMAW journey', () => {
+    setSessionCookie(jar, sessionId)
+    startDcmawJourney()
+  })
+
   sleep(1)
-  checkSelectDeviceRedirect(DeviceType.ComputerOrTablet)
+
+  group(`Select device: ${DeviceType.ComputerOrTablet}, smartphone: ${SmartphoneType.Android}, valid passport: ${YesOrNo.NO}, valid driving license: ${YesOrNo.YES}`, () => {
+    checkSelectDeviceRedirect(DeviceType.ComputerOrTablet)
+    sleep(1)
+    checkSelectSmartphoneRedirect(SmartphoneType.Android)
+    sleep(1)
+    checkValidPassportPageRedirect(YesOrNo.NO)
+    sleep(1)
+    checkValidDrivingLicenseRedirect(YesOrNo.YES)
+    sleep(1)
+    checkWorkingCameraRedirect(YesOrNo.YES)
+    sleep(1)
+    checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.ComputerOrTablet)
+  })
+
   sleep(1)
-  checkSelectSmartphoneRedirect(SmartphoneType.Android)
-  sleep(1)
-  checkValidPassportPageRedirect(YesOrNo.NO)
-  sleep(1)
-  checkValidDrivingLicenseRedirect(YesOrNo.YES)
-  sleep(1)
-  checkWorkingCameraRedirect(YesOrNo.YES)
-  sleep(1)
-  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.ComputerOrTablet)
-  getBiometricToken(sessionId)
-  postFinishBiometricToken(sessionId)
+
+  group('Biometric Token BE calls', () => {
+    getBiometricToken(sessionId)
+    postFinishBiometricToken(sessionId)
+  })
+
   sleep(3)
-  checkRedirectPage(sessionId)
+
+  group('Check Final Redirect page', () => {
+    checkRedirectPage(sessionId)
+  })
 }

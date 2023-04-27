@@ -71,7 +71,7 @@ function isHeaderLocationCorrect (res: Response, content: string): boolean {
 function postToVerifyURL (): Response {
   return http.post(getUrl('start', env.testClientExecuteUrl),
     JSON.stringify({ target: env.backEndUrl, frontendUri: env.frontEndUrl }),
-    { headers: { 'Content-Type': 'application/json' } }
+    { tags: { name: 'Post request to Verify URL' }, headers: { 'Content-Type': 'application/json' } }
   )
 }
 
@@ -126,14 +126,16 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
 }
 
 export function startDcmawJourney (): void {
-  const res = http.get(getFrontendUrl('/selectDevice'))
+  const res = http.get(getFrontendUrl('/selectDevice'), {
+    tags: { name: 'Start DCMAW Journey' }
+  })
   isStatusCode200(res)
   isPageContentCorrect(res, 'Are you on a computer or a tablet right now?')
   isPageRedirectCorrect(res, '/selectDevice')
 }
 
 export function checkSelectDeviceRedirect (device: DeviceType): void {
-  const res = http.post(getFrontendUrl('/selectDevice'), { 'select-device-choice': device })
+  const res = http.post(getFrontendUrl('/selectDevice'), { 'select-device-choice': device }, { tags: { name: 'Select device: ' + device } })
   isStatusCode200(res)
   isPageRedirectCorrect(res, '/selectSmartphone')
 
@@ -148,14 +150,14 @@ export function checkSelectDeviceRedirect (device: DeviceType): void {
 }
 
 export function checkSelectSmartphoneRedirect (smartphone: SmartphoneType): void {
-  const res = http.post(getFrontendUrl('/selectSmartphone'), { 'smartphone-choice': smartphone })
+  const res = http.post(getFrontendUrl('/selectSmartphone'), { 'smartphone-choice': smartphone }, { tags: { name: 'Select smartphone: ' + smartphone } })
   isStatusCode200(res)
   isPageContentCorrect(res, 'Do you have a valid passport?')
   isPageRedirectCorrect(res, '/validPassport')
 }
 
 export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
-  const res = http.post(getFrontendUrl('/validPassport'), { 'select-option': validPassport })
+  const res = http.post(getFrontendUrl('/validPassport'), { 'select-option': validPassport }, { tags: { name: 'Select valid passport: ' + validPassport } })
   isStatusCode200(res)
 
   switch (validPassport) {
@@ -176,7 +178,7 @@ export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
 }
 
 export function checkValidDrivingLicenseRedirect (validDrivingLicense: YesOrNo): void {
-  const res = http.post(getFrontendUrl('/validDrivingLicence'), { 'driving-licence-choice': validDrivingLicense })
+  const res = http.post(getFrontendUrl('/validDrivingLicence'), { 'driving-licence-choice': validDrivingLicense }, { tags: { name: 'Select valid driving license: ' + validDrivingLicense } })
   isStatusCode200(res)
   isPageContentCorrect(
     res,
@@ -185,7 +187,7 @@ export function checkValidDrivingLicenseRedirect (validDrivingLicense: YesOrNo):
 }
 
 export function checkBiometricChipRedirect (validChip: YesOrNo, smartphone: SmartphoneType): void {
-  const res = http.post(getFrontendUrl('/biometricChip'), { 'select-option': validChip })
+  const res = http.post(getFrontendUrl('/biometricChip'), { 'select-option': validChip }, { tags: { name: 'Select valid chip: ' + validChip } })
   isStatusCode200(res)
 
   switch (validChip) {
@@ -212,7 +214,7 @@ export function checkBiometricChipRedirect (validChip: YesOrNo, smartphone: Smar
 }
 
 export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
-  const res = http.post(getFrontendUrl('/iphoneModel'), { 'select-option': iphoneModel })
+  const res = http.post(getFrontendUrl('/iphoneModel'), { 'select-option': iphoneModel }, { tags: { name: 'Select iphone model: ' + iphoneModel } })
   isStatusCode200(res)
   isPageContentCorrect(
     res,
@@ -222,7 +224,7 @@ export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
 }
 
 export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void {
-  const res = http.post(getFrontendUrl('/workingCamera'), { 'working-camera-choice': workingCameraAnswer })
+  const res = http.post(getFrontendUrl('/workingCamera'), { 'working-camera-choice': workingCameraAnswer }, { tags: { name: 'Select working camera: ' + workingCameraAnswer } })
   isStatusCode200(res)
   isPageContentCorrect(
     res,
@@ -232,7 +234,7 @@ export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void 
 }
 
 export function checkFlashingWarningRedirect (warningAnswer: YesOrNo, device: DeviceType): void {
-  const res = http.post(getFrontendUrl('/flashingWarning'), { 'flashing-colours-choice': warningAnswer })
+  const res = http.post(getFrontendUrl('/flashingWarning'), { 'flashing-colours-choice': warningAnswer }, { tags: { name: 'Select flashing warning: ' + warningAnswer } })
   isStatusCode200(res)
 
   switch (device) {
@@ -252,7 +254,7 @@ export function checkFlashingWarningRedirect (warningAnswer: YesOrNo, device: De
 
 export function getBiometricToken (sessionId: string): void {
   const biometricTokenUrl = getBackendUrl('/biometricToken', { authSessionId: sessionId })
-  const res = http.get(biometricTokenUrl)
+  const res = http.get(biometricTokenUrl, { tags: { name: 'Get Biometric Token' } })
 
   isStatusCode200(res)
 }
@@ -266,7 +268,7 @@ export function postFinishBiometricToken (sessionId: string): void {
 
 export function checkRedirectPage (sessionId: string): void {
   const redirectUrl = getFrontendUrl('/redirect', { sessionId })
-  const res = http.get(redirectUrl, { redirects: 0 })
+  const res = http.get(redirectUrl, { redirects: 0, tags: { name: 'Check Redirect Final Page' } })
   isStatusCode302(res)
   isHeaderLocationCorrect(res, '/redirect')
 }

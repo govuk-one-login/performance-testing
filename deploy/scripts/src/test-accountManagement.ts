@@ -105,7 +105,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 250,
       stages: [
         { target: 30, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
         { target: 30, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second

@@ -363,7 +363,7 @@ export function changeEmail (): void {
         const endTime = Date.now()
 
         check(res, {
-          'status is 200': (r) => r.status === 200,
+          'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)
@@ -755,7 +755,7 @@ export function changePassword (): void {
         const endTime = Date.now()
 
         check(res, {
-          'status is 200': (r) => r.status === 200,
+          'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)
@@ -830,7 +830,7 @@ export function changePassword (): void {
         const endTime = Date.now()
 
         check(res, {
-          'status is 200': (r) => r.status === 200,
+          'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)
@@ -1429,7 +1429,7 @@ export function deleteAccount (): void {
         const endTime = Date.now()
 
         check(res, {
-          'status is 200': (r) => r.status === 200,
+          'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)

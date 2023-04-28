@@ -91,7 +91,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 50,
+      maxVUs: 300,
       stages: [
         { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
         { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
@@ -436,7 +436,7 @@ export function changeEmail (): void {
         const endTime = Date.now()
 
         check(res, {
-          'status is 200': (r) => r.status === 200,
+          'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)
@@ -1504,7 +1504,7 @@ export function deleteAccount (): void {
         const endTime = Date.now()
 
         check(res, {
-          'status is 200': (r) => r.status === 200,
+          'is status 200': (r) => r.status === 200,
           'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)

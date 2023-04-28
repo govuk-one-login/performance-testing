@@ -368,30 +368,31 @@ export function changeEmail (): void {
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
-      })
-      group('B01_ChangeEmail_05_02_SMS_AcceptTerms', () => {
-        const startTime = Date.now()
-        if ((res.body as string).includes('terms of use update')) {
-          res = http.post(
-            env.signinURL + '/updated-terms-and-conditions',
-            {
-              _csrf: csrfToken,
-              termsAndConditionsResult: 'accept'
-            },
-            {
-              tags: { name: 'B01_ChangeEmail_05_02_SMS_AcceptTerms' }
-            }
-          )
-        }
-        const endTime = Date.now()
-        check(res, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Your services')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-      })
 
+        if ((res.body as string).includes('terms of use update')) {
+          group('B01_ChangeEmail_05_02_SMS_AcceptTerms', () => {
+            const startTime = Date.now()
+            res = http.post(
+              env.signinURL + '/updated-terms-and-conditions',
+              {
+                _csrf: csrfToken,
+                termsAndConditionsResult: 'accept'
+              },
+              {
+                tags: { name: 'B01_ChangeEmail_05_02_SMS_AcceptTerms' }
+              }
+            )
+
+            const endTime = Date.now()
+            check(res, {
+              'is status 200': r => r.status === 200,
+              'verify page content': r => (r.body as string).includes('Your services')
+            })
+              ? transactionDuration.add(endTime - startTime)
+              : fail('Response Validation Failed')
+          })
+        }
+      })
       break
     }
     case 'AUTH_APP': {
@@ -760,28 +761,30 @@ export function changePassword (): void {
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
-      })
-      group('B02_ChangePassword_05_02_SMS_AcceptTerms', () => {
-        const startTime = Date.now()
+
         if ((res.body as string).includes('terms of use update')) {
-          res = http.post(
-            env.signinURL + '/updated-terms-and-conditions',
-            {
-              _csrf: csrfToken,
-              termsAndConditionsResult: 'accept'
-            },
-            {
-              tags: { name: 'B02_ChangePassword_05_02_SMS_AcceptTerms' }
-            }
-          )
+          group('B02_ChangePassword_05_02_SMS_AcceptTerms', () => {
+            const startTime = Date.now()
+            res = http.post(
+              env.signinURL + '/updated-terms-and-conditions',
+              {
+                _csrf: csrfToken,
+                termsAndConditionsResult: 'accept'
+              },
+              {
+                tags: { name: 'B02_ChangePassword_05_02_SMS_AcceptTerms' }
+              }
+            )
+
+            const endTime = Date.now()
+            check(res, {
+              'is status 200': r => r.status === 200,
+              'verify page content': r => (r.body as string).includes('Your services')
+            })
+              ? transactionDuration.add(endTime - startTime)
+              : fail('Response Validation Failed')
+          })
         }
-        const endTime = Date.now()
-        check(res, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Your services')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
       })
 
       break
@@ -1434,30 +1437,30 @@ export function deleteAccount (): void {
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
-      })
-      group('B04_DeleteAccount_05_02_SMS_AcceptTerms', () => {
-        const startTime = Date.now()
-        if ((res.body as string).includes('terms of use update')) {
-          res = http.post(
-            env.signinURL + '/updated-terms-and-conditions',
-            {
-              _csrf: csrfToken,
-              termsAndConditionsResult: 'accept'
-            },
-            {
-              tags: { name: 'B04_DeleteAccount_05_02_SMS_AcceptTerms' }
-            }
-          )
-        }
-        const endTime = Date.now()
-        check(res, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Your services')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-      })
 
+        if ((res.body as string).includes('terms of use update')) {
+          group('B04_DeleteAccount_05_02_SMS_AcceptTerms', () => {
+            const startTime = Date.now()
+            res = http.post(
+              env.signinURL + '/updated-terms-and-conditions',
+              {
+                _csrf: csrfToken,
+                termsAndConditionsResult: 'accept'
+              },
+              {
+                tags: { name: 'B04_DeleteAccount_05_02_SMS_AcceptTerms' }
+              }
+            )
+            const endTime = Date.now()
+            check(res, {
+              'is status 200': r => r.status === 200,
+              'verify page content': r => (r.body as string).includes('Your services')
+            })
+              ? transactionDuration.add(endTime - startTime)
+              : fail('Response Validation Failed')
+          })
+        }
+      })
       break
     }
     case 'AUTH_APP': {

@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   di-authentication-performance
@@ -11,7 +11,8 @@ Conditions:
       - Fn::Equals:
           - !Ref PermissionsBoundary
           - "none"
-  CreateVPCConfigurationForTestContainer:  !Equals [ !Ref RunTestContainerInVPC, "True" ]
+  CreateVPCConfigurationForTestContainer:
+    !Equals [!Ref RunTestContainerInVPC, "True"]
 
 Parameters:
   Environment:
@@ -41,7 +42,6 @@ Parameters:
     Description: "The name of the stack that defines the VPC to use"
     Default: "none"
 
-
 Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
@@ -57,7 +57,8 @@ Resources:
               - "sts:AssumeRole"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
-      PermissionsBoundary: !If [
+      PermissionsBoundary:
+        !If [
           UsePermissionsBoundary,
           !Ref PermissionsBoundary,
           !Ref AWS::NoValue,
@@ -133,7 +134,6 @@ Resources:
 
   VPCTestPolicy:
     Type: AWS::IAM::ManagedPolicy
-    Condition: CreateVPCConfigurationForTestContainer
     # checkov:skip=CKV_AWS_111:states:The mix of VPC permissions don't take a resource
     Properties:
       Roles:
@@ -153,41 +153,42 @@ Resources:
                             - "/"
                             - Ref: AWS::StackId
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
-        - Effect: Allow
-          Action:
-          - ec2:CreateNetworkInterface
-          - ec2:DescribeDhcpOptions
-          - ec2:DescribeNetworkInterfaces
-          - ec2:DeleteNetworkInterface
-          - ec2:DescribeSubnets
-          - ec2:DescribeSecurityGroups
-          - ec2:DescribeVpcs
-          Resource:
-          - "*"
-        - Effect: Allow
-          Action:
-          - ec2:CreateNetworkInterfacePermission
-          Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"
-          Condition:
-            StringEquals:
-              ec2:AuthorizedService: codebuild.amazonaws.com
-            ArnEquals:
-              ec2:Subnet:
-                - Fn::Sub:
-                  - "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/${SubnetId}"
-                  - SubnetId:
-                      Fn::ImportValue:
-                        Fn::Sub: "${VpcStackName}-ProtectedSubnetIdA"
-                - Fn::Sub:
-                  - "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/${SubnetId}"
-                  - SubnetId:
-                      Fn::ImportValue:
-                        Fn::Sub: "${VpcStackName}-ProtectedSubnetIdB"
+          - Effect: Allow
+            Action:
+              - ec2:CreateNetworkInterface
+              - ec2:DescribeDhcpOptions
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DeleteNetworkInterface
+              - ec2:DescribeSubnets
+              - ec2:DescribeSecurityGroups
+              - ec2:DescribeVpcs
+            Resource:
+              - "*"
+          - Effect: Allow
+            Action:
+              - ec2:CreateNetworkInterfacePermission
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"
+            Condition:
+              StringEquals:
+                ec2:AuthorizedService: codebuild.amazonaws.com
+              ArnEquals:
+                ec2:Subnet:
+                  - Fn::Sub:
+                      - "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/${SubnetId}"
+                      - SubnetId:
+                          Fn::ImportValue:
+                            Fn::Sub: "${VpcStackName}-ProtectedSubnetIdA"
+                  - Fn::Sub:
+                      - "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/${SubnetId}"
+                      - SubnetId:
+                          Fn::ImportValue:
+                            Fn::Sub: "${VpcStackName}-ProtectedSubnetIdB"
 
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project
+    DependsOn: VPCTestPolicy
     Properties:
       Name: !Sub "LoadTest-${AWS::StackName}"
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
@@ -198,11 +199,10 @@ Resources:
         Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
-      VpcConfig:
-        !If
+      VpcConfig: !If
         - CreateVPCConfigurationForTestContainer
         - SecurityGroupIds:
-          - !GetAtt TestContainerSecurityGroup.GroupId
+            - !GetAtt TestContainerSecurityGroup.GroupId
           Subnets:
             - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
             - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"

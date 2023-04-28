@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  di-ipv-cri-f2f-performance
+  di-ipv-cri-kiwi-performance
 
   Performance Testing Framework for Load Testing
 
@@ -257,7 +257,7 @@ Resources:
         - Key: "Service"
           Value: "ci/cd"
         - Key: "Source"
-          Value: "alphagov/di-ipv-cri-f2f-performance"
+          Value: "alphagov/di-ipv-cri-kiwi-performance"
 
   TestContainerSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"

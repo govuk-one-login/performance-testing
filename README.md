@@ -1,4 +1,4 @@
-[![Publish](https://github.com/alphagov/di-ipv-cri-f2f-performance/actions/workflows/post-merge.yaml/badge.svg?branch=main)](https://github.com/alphagov/di-ipv-cri-f2f-performance/actions/workflows/post-merge.yaml)
+[![Publish](https://github.com/alphagov/di-ipv-cri-kiwi-performance/actions/workflows/post-merge.yaml/badge.svg?branch=main)](https://github.com/alphagov/di-ipv-cri-kiwi-performance/actions/workflows/post-merge.yaml)
 
 # Performance Testing Framework
 

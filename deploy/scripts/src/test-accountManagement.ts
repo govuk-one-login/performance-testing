@@ -52,7 +52,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '10s' } // Ramps up to target load
+        { target: 1, duration: '30s' } // Ramps up to target load
       ],
       exec: 'deleteAccount'
     }
@@ -61,12 +61,13 @@ const profiles: ProfileList = {
     changeEmail: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '1m',
+      timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 50,
+      maxVUs: 300,
       stages: [
-        { target: 60, duration: '120s' }, // Ramps up to target load
-        { target: 60, duration: '120s' } // Holds at target load
+        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
+        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changeEmail'
     },
@@ -76,9 +77,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 250,
+      maxVUs: 300,
       stages: [
-        { target: 30, duration: '15m' } // Ramp up to 30 iterations per second in 15 minutes
+        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
+        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changePassword'
     },
@@ -86,12 +89,13 @@ const profiles: ProfileList = {
     changePhone: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '1m',
+      timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 50,
+      maxVUs: 300,
       stages: [
-        { target: 60, duration: '120s' }, // Ramps up to target load
-        { target: 60, duration: '120s' } // Holds at target load
+        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
+        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changePhone'
     },
@@ -101,9 +105,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 250,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
+        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'deleteAccount'
     }
@@ -130,7 +136,7 @@ interface changeEmailData {
 const dataChangeEmail: changeEmailData[] = new SharedArray('data1', () => {
   const data: changeEmailData[] = []
 
-  for (let i = 2; i <= 10000; i++) {
+  for (let i = 1; i <= 10000; i++) {
     const id = i.toString().padStart(5, '0')
     const emailAPP = `perftestAM2_App_${id}@digital.cabinet-office.gov.uk`
     const emailSMS = `perftestAM2_SMS_${id}@digital.cabinet-office.gov.uk`
@@ -342,7 +348,7 @@ export function changeEmail (): void {
         phoneNumber = getPhone(res)
       })
 
-      group('B01_ChangeEmail_05_SMS_EnterOTP POST', () => {
+      group('B01_ChangeEmail_05_01_SMS_EnterOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-code',
           {
@@ -351,21 +357,45 @@ export function changeEmail (): void {
             code: credentials.fixedSMSOTP
           },
           {
-            tags: { name: 'B01_ChangeEmail_05_SMS_EnterOTP' }
+            tags: { name: 'B01_ChangeEmail_05_01_SMS_EnterOTP' }
           }
         )
         const endTime = Date.now()
 
         check(res, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Your services')
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)
-          : fail('Respone Validation Failed')
+          : fail('Response Validation Failed')
+
+        if ((res.body as string).includes('terms of use update')) {
+          group('B01_ChangeEmail_05_02_SMS_AcceptTerms', () => {
+            const startTime = Date.now()
+            res = http.post(
+              env.signinURL + '/updated-terms-and-conditions',
+              {
+                _csrf: csrfToken,
+                termsAndConditionsResult: 'accept'
+              },
+              {
+                tags: { name: 'B01_ChangeEmail_05_02_SMS_AcceptTerms' }
+              }
+            )
+
+            const endTime = Date.now()
+            check(res, {
+              'is status 200': r => r.status === 200,
+              'verify page content': r => (r.body as string).includes('Your services')
+            })
+              ? transactionDuration.add(endTime - startTime)
+              : fail('Response Validation Failed')
+          })
+        }
       })
       break
     }
-    case 'AUTH_APP':{
+    case 'AUTH_APP': {
       group('B01_ChangeEmail_06_APP_EnterLoginPassword POST', () => {
         const startTime = Date.now()
         res = http.post(
@@ -393,7 +423,7 @@ export function changeEmail (): void {
 
       sleep(2)
 
-      group('B01_ChangeEmail_07_APP_EnterAuthAppOTP POST', () => {
+      group('B01_ChangeEmail_07_01_APP_EnterAuthAppOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-authenticator-app-code',
           {
@@ -407,13 +437,33 @@ export function changeEmail (): void {
         const endTime = Date.now()
 
         check(res, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Your services')
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)
-          : fail('Respone Validation Failed')
+          : fail('Response Validation Failed')
+        if ((res.body as string).includes('terms of use update')) {
+          group('B01_ChangeEmail_07_02_APP_AcceptTerms POST', () => {
+            const startTime = Date.now()
+            res = http.post(env.signinURL + '/updated-terms-and-conditions',
+              {
+                _csrf: csrfToken,
+                termsAndConditionsResult: 'accept'
+              },
+              {
+                tags: { name: 'B02_ChangeEmail_07_02_APP_AcceptTerms' }
+              }
+            )
+            const endTime = Date.now()
+            check(res, {
+              'is status 200': r => r.status === 200,
+              'verify page content': r => (r.body as string).includes('Your services')
+            })
+              ? transactionDuration.add(endTime - startTime)
+              : fail('Respone Validation Failed')
+          })
+        }
       })
-
       break
     }
   }
@@ -691,7 +741,7 @@ export function changePassword (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_ChangePassword_05_SMS_EnterOTP POST', () => {
+      group('B02_ChangePassword_05_01_SMS_EnterOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-code',
           {
@@ -700,18 +750,43 @@ export function changePassword (): void {
             code: credentials.fixedSMSOTP
           },
           {
-            tags: { name: 'B02_ChangePassword_05_SMS_EnterOTP' }
+            tags: { name: 'B02_ChangePassword_05_01_SMS_EnterOTP' }
           }
         )
         const endTime = Date.now()
 
         check(res, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Your services')
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)
-          : fail('Respone Validation Failed')
+          : fail('Response Validation Failed')
+
+        if ((res.body as string).includes('terms of use update')) {
+          group('B02_ChangePassword_05_02_SMS_AcceptTerms', () => {
+            const startTime = Date.now()
+            res = http.post(
+              env.signinURL + '/updated-terms-and-conditions',
+              {
+                _csrf: csrfToken,
+                termsAndConditionsResult: 'accept'
+              },
+              {
+                tags: { name: 'B02_ChangePassword_05_02_SMS_AcceptTerms' }
+              }
+            )
+
+            const endTime = Date.now()
+            check(res, {
+              'is status 200': r => r.status === 200,
+              'verify page content': r => (r.body as string).includes('Your services')
+            })
+              ? transactionDuration.add(endTime - startTime)
+              : fail('Response Validation Failed')
+          })
+        }
       })
+
       break
     }
     case 'AUTH_APP': {
@@ -744,7 +819,7 @@ export function changePassword (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_ChangePassword_07_App_EnterAuthAppOTP POST', () => {
+      group('B02_ChangePassword_07_01_APP_EnterAuthAppOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-authenticator-app-code',
           {
@@ -752,17 +827,39 @@ export function changePassword (): void {
             code: totp.generateTOTP()
           },
           {
-            tags: { name: 'B02_ChangePassword_07_App_EnterAuthAppOTP' }
+            tags: { name: 'B02_ChangePassword_07_APP_EnterAuthAppOTP' }
           }
         )
         const endTime = Date.now()
 
         check(res, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Your services')
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
+
+        if ((res.body as string).includes('terms of use update')) {
+          group('B02_ChangePassword_07_02_APP_AcceptTerms POST', () => {
+            const startTime = Date.now()
+            res = http.post(env.signinURL + '/updated-terms-and-conditions',
+              {
+                _csrf: csrfToken,
+                termsAndConditionsResult: 'accept'
+              },
+              {
+                tags: { name: 'B02_ChangePassword_07_02_APP_AcceptTerms' }
+              }
+            )
+            const endTime = Date.now()
+            check(res, {
+              'is status 200': r => r.status === 200,
+              'verify page content': r => (r.body as string).includes('Your services')
+            })
+              ? transactionDuration.add(endTime - startTime)
+              : fail('Respone Validation Failed')
+          })
+        }
       })
       break
     }
@@ -1320,7 +1417,7 @@ export function deleteAccount (): void {
 
       sleep(Math.random() * 3)
 
-      group('B04_DeleteAccount_05_SMS_EnterOTP POST', () => {
+      group('B04_DeleteAccount_05_01_SMS_EnterOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-code',
           {
@@ -1329,17 +1426,40 @@ export function deleteAccount (): void {
             code: credentials.fixedSMSOTP
           },
           {
-            tags: { name: 'B04_DeleteAccount_05_SMS_EnterOTP' }
+            tags: { name: 'B04_DeleteAccount_05_01_SMS_EnterOTP' }
           }
         )
         const endTime = Date.now()
 
         check(res, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Your services')
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)
-          : fail('Respone Validation Failed')
+          : fail('Response Validation Failed')
+
+        if ((res.body as string).includes('terms of use update')) {
+          group('B04_DeleteAccount_05_02_SMS_AcceptTerms', () => {
+            const startTime = Date.now()
+            res = http.post(
+              env.signinURL + '/updated-terms-and-conditions',
+              {
+                _csrf: csrfToken,
+                termsAndConditionsResult: 'accept'
+              },
+              {
+                tags: { name: 'B04_DeleteAccount_05_02_SMS_AcceptTerms' }
+              }
+            )
+            const endTime = Date.now()
+            check(res, {
+              'is status 200': r => r.status === 200,
+              'verify page content': r => (r.body as string).includes('Your services')
+            })
+              ? transactionDuration.add(endTime - startTime)
+              : fail('Response Validation Failed')
+          })
+        }
       })
       break
     }
@@ -1373,7 +1493,7 @@ export function deleteAccount (): void {
 
       sleep(Math.random() * 3)
 
-      group('B04_DeleteAccount_07_APP_EnterAuthAppOTP POST', () => {
+      group('B04_DeleteAccount_07_01_APP_EnterAuthAppOTP POST', () => {
         const startTime = Date.now()
         res = http.post(env.signinURL + '/enter-authenticator-app-code',
           {
@@ -1381,17 +1501,39 @@ export function deleteAccount (): void {
             code: totp.generateTOTP()
           },
           {
-            tags: { name: 'B04_DeleteAccount_07_APP_EnterAuthAppOTP' }
+            tags: { name: 'B04_DeleteAccount_07_01_APP_EnterAuthAppOTP' }
           }
         )
         const endTime = Date.now()
 
         check(res, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Your services')
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
+
+        if ((res.body as string).includes('terms of use update')) {
+          group('B04_DeleteAccount_07_02_APP_AcceptTerms POST', () => {
+            const startTime = Date.now()
+            res = http.post(env.signinURL + '/updated-terms-and-conditions',
+              {
+                _csrf: csrfToken,
+                termsAndConditionsResult: 'accept'
+              },
+              {
+                tags: { name: 'B04_DeleteAccount_07_02_APP_AcceptTerms' }
+              }
+            )
+            const endTime = Date.now()
+            check(res, {
+              'is status 200': r => r.status === 200,
+              'verify page content': r => (r.body as string).includes('Your services')
+            })
+              ? transactionDuration.add(endTime - startTime)
+              : fail('Respone Validation Failed')
+          })
+        }
       })
       break
     }

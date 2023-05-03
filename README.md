@@ -43,5 +43,3 @@ Where we're testing against a particular CFN stack deployed to an environment.
 ### Third Party Load Testing
 
 Where we're testing directly/indirectly to a third party.
-
-(Change latest commit hash on main)

@@ -137,7 +137,7 @@ export function startDcmawJourney (): void {
 }
 
 export function checkSelectDeviceRedirect (device: DeviceType): void {
-  group(`Select: ${device} from /selectdevice page`, () => {
+  group(`Select device: ${device} from /selectdevice page`, () => {
     const res = http.post(getFrontendUrl('/selectDevice'), { 'select-device-choice': device }, { tags: { name: 'Select Device Page' } })
     isStatusCode200(res)
     isPageRedirectCorrect(res, '/selectSmartphone')
@@ -154,7 +154,7 @@ export function checkSelectDeviceRedirect (device: DeviceType): void {
 }
 
 export function checkSelectSmartphoneRedirect (smartphone: SmartphoneType): void {
-  group(`Select: ${smartphone} from /selectSmartphone page`, () => {
+  group(`Select smartphone: ${smartphone} from /selectSmartphone page`, () => {
     const res = http.post(getFrontendUrl('/selectSmartphone'), { 'smartphone-choice': smartphone }, { tags: { name: 'Select Smartphone Page' } })
     isStatusCode200(res)
     isPageContentCorrect(res, 'Do you have a valid passport?')
@@ -250,7 +250,7 @@ export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void 
 }
 
 export function checkFlashingWarningRedirect (warningAnswer: YesOrNo, device: DeviceType): void {
-  group(`Select working camera: ${warningAnswer} option from /workingCamera page`, () => {
+  group(`Select flashing warning: ${warningAnswer} from /flashingWarning page`, () => {
     const res = http.post(getFrontendUrl('/flashingWarning'), { 'flashing-colours-choice': warningAnswer }, { tags: { name: 'Select Flashing Warning Page' } })
     isStatusCode200(res)
 

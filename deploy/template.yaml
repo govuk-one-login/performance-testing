@@ -224,8 +224,7 @@ Resources:
               SCENARIO: all
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
             parameter-store:
-              APP_PASSWORD: "/perfTest/testUserPassword"
-              AUTH_APP_KEY: "/perfTest/authAppKey"
+              ENVURL: "/perfTest/envUrl"
               K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
               K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"
 

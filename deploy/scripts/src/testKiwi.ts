@@ -18,7 +18,7 @@ const profiles: ProfileList = {
       exec: 'FaceToFace'
     },
 
-    CRI: {
+    CIC: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -27,7 +27,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
-      exec: 'CRI'
+      exec: 'CIC'
     }
 
   },
@@ -44,7 +44,7 @@ const profiles: ProfileList = {
       ],
       exec: 'FaceToFace'
     },
-    CRI: {
+    CIC: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1m',
@@ -54,7 +54,7 @@ const profiles: ProfileList = {
         { target: 60, duration: '120s' }, // Ramps up to target load
         { target: 60, duration: '120s' } // Holds at target load
       ],
-      exec: 'CRI'
+      exec: 'CIC'
     }
 
   }
@@ -80,14 +80,14 @@ const env = {
 
 const transactionDuration = new Trend('duration')
 
-export function CRI (): void {
+export function CIC (): void {
   let res: Response
   let csrfToken: string
 
-  group('B01_CRI_01_LaunchLandingPage GET', function () {
+  group('B01_CIC_01_LaunchLandingPage GET', function () {
     const startTime = Date.now()
     res = http.get(env.envURL, {
-      tags: { name: 'B01_CRI_01_LaunchLandingPage' }
+      tags: { name: 'B01_CIC_01_LaunchLandingPage' }
     })
     const endTime = Date.now()
 
@@ -101,7 +101,7 @@ export function CRI (): void {
     csrfToken = getCSRF(res)
   })
 
-  group('B01_CRI_02_UserDetails POST', function () {
+  group('B01_CIC_02_UserDetails POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/nameEntry', {
       surname: 'NameTest',
@@ -111,7 +111,7 @@ export function CRI (): void {
       'x-csrf-token': csrfToken
 
     }, {
-      tags: { name: 'B01_CRI_02_UserDetails' }
+      tags: { name: 'B01_CIC_02_UserDetails' }
     })
     const endTime = Date.now()
 
@@ -127,7 +127,7 @@ export function CRI (): void {
 
   sleep(Math.random() * 3)
 
-  group('B01_CRI_03_UserBirthdate POST', function () {
+  group('B01_CIC_03_UserBirthdate POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/dateOfBirth', {
       'dateOfBirth-day': '1',
@@ -137,7 +137,7 @@ export function CRI (): void {
       'x-csrf-token': csrfToken
 
     }, {
-      tags: { name: 'B01_CRI_03_UserBirthdate' }
+      tags: { name: 'B01_CIC_03_UserBirthdate' }
     })
     const endTime = Date.now()
 

@@ -16,6 +16,18 @@ const profiles: ProfileList = {
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'FaceToFace'
+    },
+
+    CRI: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '60s' } // Ramps up to target load
+      ],
+      exec: 'CRI'
     }
 
   },
@@ -31,6 +43,18 @@ const profiles: ProfileList = {
         { target: 60, duration: '120s' } // Holds at target load
       ],
       exec: 'FaceToFace'
+    },
+    CRI: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1m',
+      preAllocatedVUs: 1,
+      maxVUs: 50,
+      stages: [
+        { target: 60, duration: '120s' }, // Ramps up to target load
+        { target: 60, duration: '120s' } // Holds at target load
+      ],
+      exec: 'CRI'
     }
 
   }
@@ -56,103 +80,28 @@ const env = {
 
 const transactionDuration = new Trend('duration')
 
-export function FaceToFace (): void {
+export function CRI (): void {
   let res: Response
   let csrfToken: string
 
-  group('B01_FaceToFace_LaunchLandingPage GET', function () {
+  group('B01_CRI_01_LaunchLandingPage GET', function () {
     const startTime = Date.now()
     res = http.get(env.envURL, {
-      tags: { name: 'B01_FaceToFace_LaunchLandingPage' }
+      tags: { name: 'B01_CRI_01_LaunchLandingPage' }
     })
     const endTime = Date.now()
 
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Proving your identity in person')
+        (r.body as string).includes('What is your name?')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
     csrfToken = getCSRF(res)
   })
 
-  sleep(Math.random() * 3)
-
-  group('B02_FaceToFace_Continue POST', function () {
-    const startTime = Date.now()
-    res = http.post(env.envURL + '/landingPage', {
-      continue: '',
-      'x-csrf-token': csrfToken
-
-    }, {
-      tags: { name: 'B02_FaceToFace_Continue' }
-    })
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Choose a photo ID you can take to a Post Office')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B03_FaceToFace_ChoosePhotoId POST', function () {
-    const startTime = Date.now()
-    res = http.post(env.envURL + '/photoIdSelection', {
-      photoIdChoice: 'ukPassport',
-      continue: '',
-      'x-csrf-token': csrfToken
-
-    }, {
-      tags: { name: 'B03_FaceToFace_ChoosePhotoId' }
-    })
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('When does your UK passport expire')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B04_FaceToFace_PassportDetails POST', function () {
-    const startTime = Date.now()
-    res = http.post(env.envURL + '/passportDetails', {
-      'passportExpiryDate-day': '1',
-      'passportExpiryDate-month': '1',
-      'passportExpiryDate-year': '2025',
-      continue: '',
-      'x-csrf-token': csrfToken
-
-    }, {
-      tags: { name: 'B04_FaceToFace_PassportDetails' }
-    })
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('What is your name')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B05_FaceToFace_UserDetails POST', function () {
+  group('B01_CRI_02_UserDetails POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/nameEntry', {
       surname: 'NameTest',
@@ -162,7 +111,7 @@ export function FaceToFace (): void {
       'x-csrf-token': csrfToken
 
     }, {
-      tags: { name: 'B05_FaceToFace_UserDetails' }
+      tags: { name: 'B01_CRI_02_UserDetails' }
     })
     const endTime = Date.now()
 
@@ -178,7 +127,7 @@ export function FaceToFace (): void {
 
   sleep(Math.random() * 3)
 
-  group('B06_FaceToFace_UserBirthdate POST', function () {
+  group('B01_CRI_03_UserBirthdate POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/dateOfBirth', {
       'dateOfBirth-day': '1',
@@ -188,7 +137,152 @@ export function FaceToFace (): void {
       'x-csrf-token': csrfToken
 
     }, {
-      tags: { name: 'B06_FaceToFace_UserBirthdate' }
+      tags: { name: 'B01_CRI_03_UserBirthdate' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Check your details')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
+
+  sleep(Math.random() * 3)
+}
+
+export function FaceToFace (): void {
+  let res: Response
+  let csrfToken: string
+
+  group('B02_FaceToFace_01_LaunchLandingPage GET', function () {
+    const startTime = Date.now()
+    res = http.get(env.envURL, {
+      tags: { name: 'B02_FaceToFace_01_LaunchLandingPage' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('How to prove your identity at a Post Office')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B02_FaceToFace_02_Continue POST', function () {
+    const startTime = Date.now()
+    res = http.post(env.envURL + '/landingPage', {
+      continue: '',
+      'x-csrf-token': csrfToken
+
+    }, {
+      tags: { name: 'B02_FaceToFace_02_Continue' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Choose a photo ID you can take to a Post Office')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B02_FaceToFace03_ChoosePhotoId POST', function () {
+    const startTime = Date.now()
+    res = http.post(env.envURL + '/photoIdSelection', {
+      photoIdChoice: 'ukPassport',
+      continue: '',
+      'x-csrf-token': csrfToken
+
+    }, {
+      tags: { name: 'B02_FaceToFace03_ChoosePhotoId' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('When does your UK passport expire')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B02_FaceToFace_04_PassportDetails POST', function () {
+    const startTime = Date.now()
+    res = http.post(env.envURL + '/ukPassportDetails', {
+      'ukPassportExpiryDate-day': '1',
+      'ukPassportExpiryDate-month': '1',
+      'ukPassportExpiryDate-year': '2025',
+      continue: '',
+      'x-csrf-token': csrfToken
+
+    }, {
+      tags: { name: 'B02_FaceToFace_04_PassportDetails' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Enter a UK postcode')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B02_FaceToFace_05_FindPostOffice POST', function () {
+    const startTime = Date.now()
+    res = http.post(env.envURL + '/findBranch', {
+      postcode: 'SW1A 2AA',
+      continue: '',
+      'x-csrf-token': csrfToken
+
+    }, {
+      tags: { name: 'B02_FaceToFace_05_FindPosttOffice' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Choose a Post Office where you can prove your identity')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B02_FaceToFace_06_ChoosePostOffice POST', function () {
+    const startTime = Date.now()
+    res = http.post(env.envURL + '/locations', {
+      branches: '1',
+      continue: '',
+      'x-csrf-token': csrfToken
+
+    }, {
+      tags: { name: 'B02_FaceToFace_06_ChoosePostOffice' }
     })
     const endTime = Date.now()
 

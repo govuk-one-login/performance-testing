@@ -35,24 +35,26 @@ const profiles: ProfileList = {
     FaceToFace: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '1m',
+      timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 50,
+      maxVUs: 180,
       stages: [
-        { target: 60, duration: '120s' }, // Ramps up to target load
-        { target: 60, duration: '120s' } // Holds at target load
+        { target: 8, duration: '30m' }, // Ramps up to target load
+        { target: 8, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 8 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'FaceToFace'
     },
     CIC: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '1m',
+      timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 50,
+      maxVUs: 180,
       stages: [
-        { target: 60, duration: '120s' }, // Ramps up to target load
-        { target: 60, duration: '120s' } // Holds at target load
+        { target: 8, duration: '30m' }, // Ramps up to target load
+        { target: 8, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 8 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'CIC'
     }

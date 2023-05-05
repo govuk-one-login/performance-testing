@@ -253,6 +253,10 @@ Resources:
                 - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out statsd
             post_build:
               commands:
+                - OTEL_PID=$(pgrep /otel/otelcol-contrib)
+                - kill $OTEL_PID
+                - while kill -0 $OTEL_PID; do sleep 1; done
+                - cat otel.log
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID

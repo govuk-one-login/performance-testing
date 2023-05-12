@@ -16,7 +16,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '10s' } // Ramps up to target load
+        { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'fraudScenario1'
     },
@@ -50,9 +50,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 350,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 10, duration: '30m' }, // Ramp up to 10 iterations per second in 10 minutes
+        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e 10 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'fraudScenario1'
     },

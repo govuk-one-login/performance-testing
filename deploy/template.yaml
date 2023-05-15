@@ -255,7 +255,8 @@ Resources:
               commands:
                 - OTEL_PID=$(pgrep /otel/otelcol-contrib)
                 - kill $OTEL_PID
-                - while kill -0 $OTEL_PID; do sleep 1; done
+                - TIMEOUT=0
+                - while kill -0 $OTEL_PID && (( TIMEOUT < 300 )); do sleep 1; (( TIMEOUT++ )); done
                 - cat otel.log
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |

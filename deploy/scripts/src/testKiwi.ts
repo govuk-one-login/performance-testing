@@ -243,7 +243,7 @@ export function FaceToFace (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Enter a UK postcode')
+        (r.body as string).includes('Find a Post Office where you can prove your identity')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')

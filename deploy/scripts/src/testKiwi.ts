@@ -3,7 +3,6 @@ import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from './utils/config/load-profiles'
 import { Trend } from 'k6/metrics'
-import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
 
 const profiles: ProfileList = {
@@ -77,22 +76,6 @@ export const options: Options = {
 export function setup (): void {
   describeProfile(loadProfile)
 }
-
-interface ExpiryDates {
-  expiryDay: string
-  expiryMonth: string
-  expiryYear: string
-}
-const csvExpiryDates: ExpiryDates[] = new SharedArray('csvExpiryDates', function () {
-  return open('./data/expiryDates.csv').split('\n').slice(1).map((s) => {
-    const data = s.split(',')
-    return {
-      expiryDay: data[0],
-      expiryMonth: data[1],
-      expiryYear: data[2]
-    }
-  })
-})
 
 const env = {
   envURL: __ENV.ENV_URL
@@ -180,9 +163,10 @@ export function FaceToFace (): void {
   const iteration = execution.scenario.iterationInInstance
   const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL']
   const path = paths[(iteration) % paths.length]
-  console.log(iteration)
-  console.log(path)
-  const expiryDates = csvExpiryDates[execution.scenario.iterationInTest % csvExpiryDates.length]
+  const expiry = randomDate(new Date(2024, 1, 1), new Date(2024, 12, 31))
+  const expiryDay = expiry.getDate().toString()
+  const expiryMonth = (expiry.getMonth() + 1).toString()
+  const expiryYear = expiry.getFullYear().toString()
 
   group('B02_FaceToFace_01_LaunchLandingPage GET', function () {
     const startTime = Date.now()
@@ -255,9 +239,9 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_UKPassport_PassportDetails POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/ukPassportDetails', {
-          'ukPassportExpiryDate-day': expiryDates.expiryDay,
-          'ukPassportExpiryDate-month': expiryDates.expiryMonth,
-          'ukPassportExpiryDate-year': expiryDates.expiryYear,
+          'ukPassportExpiryDate-day': expiryDay,
+          'ukPassportExpiryDate-month': expiryMonth,
+          'ukPassportExpiryDate-year': expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
         }, {
@@ -305,9 +289,9 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_NationalIDEEA_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/eeaIdentityCardDetails', {
-          'eeaIdCardExpiryDate-day': expiryDates.expiryDay,
-          'eeaIdCardExpiryDate-month': expiryDates.expiryMonth,
-          'eeaIdCardExpiryDate-year': expiryDates.expiryYear,
+          'eeaIdCardExpiryDate-day': expiryDay,
+          'eeaIdCardExpiryDate-month': expiryMonth,
+          'eeaIdCardExpiryDate-year': expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
         }, {
@@ -401,9 +385,9 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_EUDL_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/euPhotocardDlDetails', {
-          'euPhotocardDlExpiryDate-day': expiryDates.expiryDay,
-          'euPhotocardDlExpiryDate-month': expiryDates.expiryMonth,
-          'euPhotocardDlExpiryDate-year': expiryDates.expiryYear,
+          'euPhotocardDlExpiryDate-day': expiryDay,
+          'euPhotocardDlExpiryDate-month': expiryMonth,
+          'euPhotocardDlExpiryDate-year': expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
         },
@@ -499,9 +483,9 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_NonUKPassport_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/nonUKPassportDetails', {
-          'nonUKPassportExpiryDate-day': expiryDates.expiryDay,
-          'nonUKPassportExpiryDate-month': expiryDates.expiryMonth,
-          'nonUKPassportExpiryDate-year': expiryDates.expiryYear,
+          'nonUKPassportExpiryDate-day': expiryDay,
+          'nonUKPassportExpiryDate-month': expiryMonth,
+          'nonUKPassportExpiryDate-year': expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
         },
@@ -574,9 +558,9 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_BRP_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/brpDetails', {
-          'brpExpiryDate-day': expiryDates.expiryDay,
-          'brpExpiryDate-month': expiryDates.expiryMonth,
-          'brpExpiryDate-year': expiryDates.expiryYear,
+          'brpExpiryDate-day': expiryDay,
+          'brpExpiryDate-month': expiryMonth,
+          'brpExpiryDate-year': expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
         },
@@ -626,9 +610,9 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_UKDL_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/ukPhotocardDlDetails', {
-          'ukPhotocardDlExpiryDate-day': expiryDates.expiryDay,
-          'ukPhotocardDlExpiryDate-month': expiryDates.expiryMonth,
-          'ukPhotocardDlExpiryDate-year': expiryDates.expiryYear,
+          'ukPhotocardDlExpiryDate-day': expiryDay,
+          'ukPhotocardDlExpiryDate-month': expiryMonth,
+          'ukPhotocardDlExpiryDate-year': expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
         },
@@ -722,6 +706,12 @@ export function FaceToFace (): void {
   })
 
   sleep(Math.random() * 3)
+}
+
+function randomDate (start: Date, end: Date): Date {
+  const diff = Math.abs(+end - +start)
+  const min = Math.min(+end, +start)
+  return new Date(min + (diff * Math.random()))
 }
 
 function getCSRF (r: Response): string {

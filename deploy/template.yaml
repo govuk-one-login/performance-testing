@@ -21,6 +21,7 @@ Parameters:
     AllowedValues:
       - build
       - staging
+      - production
   PermissionsBoundary:
     Description: "The ARN of the permissions boundary to apply when creating IAM roles"
     Type: String
@@ -468,8 +469,11 @@ Resources:
                 - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out statsd
             post_build:
               commands:
-                - echo Wait 5 minutes to flush remaining metrics
-                - sleep 300
+                - OTEL_PID=$(pgrep /otel/otelcol-contrib)
+                - kill $OTEL_PID
+                - TIMEOUT=0
+                - while kill -0 $OTEL_PID && (( TIMEOUT < 300 )); do sleep 1; (( TIMEOUT++ )); done
+                - cat otel.log
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID

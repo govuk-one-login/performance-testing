@@ -3,6 +3,8 @@ import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from './utils/config/load-profiles'
 import { Trend } from 'k6/metrics'
+import { SharedArray } from 'k6/data'
+import execution from 'k6/execution'
 
 const profiles: ProfileList = {
   smoke: {
@@ -13,7 +15,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 2, duration: '2m' } // Ramps up to target load
       ],
       exec: 'FaceToFace'
     },
@@ -76,9 +78,24 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
+interface ExpiryDates {
+  expiryDay: string
+  expiryMonth: string
+  expiryYear: string
+}
+const csvExpiryDates: ExpiryDates[] = new SharedArray('csvExpiryDates', function () {
+  return open('./data/expiryDates.csv').split('\n').slice(1).map((s) => {
+    const data = s.split(',')
+    return {
+      expiryDay: data[0],
+      expiryMonth: data[1],
+      expiryYear: data[2]
+    }
+  })
+})
+
 const env = {
-  envURL: __ENV.ENV_URL,
-  path: __ENV.ENV_PATH
+  envURL: __ENV.ENV_URL
 }
 
 const transactionDuration = new Trend('duration')
@@ -160,6 +177,12 @@ export function CIC (): void {
 export function FaceToFace (): void {
   let res: Response
   let csrfToken: string
+  const iteration = execution.scenario.iterationInInstance
+  const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL']
+  const path = paths[(iteration) % paths.length]
+  console.log(iteration)
+  console.log(path)
+  const expiryDates = csvExpiryDates[execution.scenario.iterationInTest % csvExpiryDates.length]
 
   group('B02_FaceToFace_01_LaunchLandingPage GET', function () {
     const startTime = Date.now()
@@ -185,8 +208,8 @@ export function FaceToFace (): void {
     res = http.post(env.envURL + '/landingPage', {
       continue: '',
       'x-csrf-token': csrfToken
-
-    }, {
+    },
+    {
       tags: { name: 'B02_FaceToFace_02_Continue' }
     })
     const endTime = Date.now()
@@ -203,7 +226,7 @@ export function FaceToFace (): void {
 
   sleep(Math.random() * 3)
 
-  switch (env.path) {
+  switch (path) {
     case 'UKPassport':
       group('B02_FaceToFace_03_UKPassport_ChoosePhotoId POST', function () {
         const startTime = Date.now()
@@ -211,8 +234,8 @@ export function FaceToFace (): void {
           photoIdChoice: 'ukPassport',
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
+        },
+        {
           tags: { name: 'B02_FaceToFace_03_UKPassport_ChoosePhotoId' }
         })
         const endTime = Date.now()
@@ -232,12 +255,11 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_UKPassport_PassportDetails POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/ukPassportDetails', {
-          'ukPassportExpiryDate-day': '1',
-          'ukPassportExpiryDate-month': '1',
-          'ukPassportExpiryDate-year': '2025',
+          'ukPassportExpiryDate-day': expiryDates.expiryDay,
+          'ukPassportExpiryDate-month': expiryDates.expiryMonth,
+          'ukPassportExpiryDate-year': expiryDates.expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
-
         }, {
           tags: { name: 'B02_FaceToFace_04_UKPassport_PassportDetails' }
         })
@@ -262,8 +284,8 @@ export function FaceToFace (): void {
           photoIdChoice: 'eeaIdentityCard',
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
+        },
+        {
           tags: { name: 'B02_FaceToFace_03_NationalIDEEA_ChoosePhotoId' }
         })
         const endTime = Date.now()
@@ -283,12 +305,11 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_NationalIDEEA_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/eeaIdentityCardDetails', {
-          'eeaIdCardExpiryDate-day': '31',
-          'eeaIdCardExpiryDate-month': '3',
-          'eeaIdCardExpiryDate-year': '2025',
+          'eeaIdCardExpiryDate-day': expiryDates.expiryDay,
+          'eeaIdCardExpiryDate-month': expiryDates.expiryMonth,
+          'eeaIdCardExpiryDate-year': expiryDates.expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
-
         }, {
           tags: { name: 'B02_FaceToFace_04_NationalIDEEA_Details' }
         })
@@ -312,7 +333,6 @@ export function FaceToFace (): void {
           eeaIdCardAddressCheck: 'sameAddress',
           continue: '',
           'x-csrf-token': csrfToken
-
         }, {
           tags: { name: 'B02_FaceToFace_05_NationalIDEEA_CurrentAddress' }
         })
@@ -336,9 +356,8 @@ export function FaceToFace (): void {
           eeaIdentityCardCountrySelector: 'RO',
           continue: '',
           'x-csrf-token': csrfToken
-
         }, {
-          tags: { name: 'B02_FaceToFace_06_NationalIDEEA_WhichCountry' }
+          tags: { name: 'B02_FaceToFace_06_NationalIDEEA_WhichCountry' } // pragma: allowlist secret`
         })
         const endTime = Date.now()
 
@@ -362,7 +381,6 @@ export function FaceToFace (): void {
           photoIdChoice: 'euPhotocardDl',
           continue: '',
           'x-csrf-token': csrfToken
-
         }, {
           tags: { name: 'B02_FaceToFace_03_EUDL_ChoosePhotoId' }
         })
@@ -383,14 +401,37 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_EUDL_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/euPhotocardDlDetails', {
-          'euPhotocardDlExpiryDate-day': '31',
-          'euPhotocardDlExpiryDate-month': '3',
-          'euPhotocardDlExpiryDate-year': '2025',
+          'euPhotocardDlExpiryDate-day': expiryDates.expiryDay,
+          'euPhotocardDlExpiryDate-month': expiryDates.expiryMonth,
+          'euPhotocardDlExpiryDate-year': expiryDates.expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
+        },
+        {
           tags: { name: 'B02_FaceToFace_04_EUDL_Details' }
+        })
+        const endTime = Date.now()
+
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) =>
+            (r.body as string).includes('Does your driving licence have your current address on it?')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+        csrfToken = getCSRF(res)
+      })
+
+      sleep(Math.random() * 3)
+      group('B02_FaceToFace_05_EUDL_CurrentAddress POST', function () {
+        const startTime = Date.now()
+        res = http.post(env.envURL + '/euDrivingLicenceAddressCheck', {
+          euDrivingLicenceAddressCheck: 'sameAddress',
+          continue: '',
+          'x-csrf-token': csrfToken
+        },
+        {
+          tags: { name: 'B02_FaceToFace_05_EUDL_CurrentAddress' }
         })
         const endTime = Date.now()
 
@@ -406,15 +447,15 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_05_EUDL_WhichCountry POST', function () {
+      group('B02_FaceToFace_06_EUDL_WhichCountry POST', function () {
         const startTime = Date.now()
-        res = http.post(env.envURL + '/euDrivingLicenseCountrySelector', {
-          euDrivingLicenseCountrySelector: 'RO',
+        res = http.post(env.envURL + '/euDrivingLicenceCountrySelector', {
+          euDrivingLicenceCountrySelector: 'RO',
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
-          tags: { name: 'B02_FaceToFace_05_EUDL_WhichCountry' }
+        },
+        {
+          tags: { name: 'B02_FaceToFace_06_EUDL_WhichCountry' }
         })
         const endTime = Date.now()
 
@@ -437,8 +478,8 @@ export function FaceToFace (): void {
           photoIdChoice: 'nonUkPassport',
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
+        },
+        {
           tags: { name: 'B02_FaceToFace_03_NonUKPassport_ChoosePhotoId' }
         })
         const endTime = Date.now()
@@ -458,13 +499,13 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_NonUKPassport_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/nonUKPassportDetails', {
-          'nonUKPassportExpiryDate-day': '31',
-          'nonUKPassportExpiryDate-month': '3',
-          'nonUKPassportExpiryDate-year': '2025',
+          'nonUKPassportExpiryDate-day': expiryDates.expiryDay,
+          'nonUKPassportExpiryDate-month': expiryDates.expiryMonth,
+          'nonUKPassportExpiryDate-year': expiryDates.expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
+        },
+        {
           tags: { name: 'B02_FaceToFace_04_NonUKPassport_Details' }
         })
         const endTime = Date.now()
@@ -487,9 +528,9 @@ export function FaceToFace (): void {
           nonUkPassportcountrySelector: 'RO',
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
-          tags: { name: 'B02_FaceToFace_05_NonUKPassport_WhichCountry' }
+        },
+        {
+          tags: { name: 'B02_FaceToFace_05_NonUKPassport_WhichCountry' } // pragma: allowlist secret`
         })
         const endTime = Date.now()
 
@@ -512,8 +553,8 @@ export function FaceToFace (): void {
           photoIdChoice: 'brp',
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
+        },
+        {
           tags: { name: 'B02_FaceToFace_03_BRP_ChoosePhotoId' }
         })
         const endTime = Date.now()
@@ -533,13 +574,13 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_BRP_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/brpDetails', {
-          'brpExpiryDate-day': '1',
-          'brpExpiryDate-month': '1',
-          'brpExpiryDate-year': '2024',
+          'brpExpiryDate-day': expiryDates.expiryDay,
+          'brpExpiryDate-month': expiryDates.expiryMonth,
+          'brpExpiryDate-year': expiryDates.expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
+        },
+        {
           tags: { name: 'B02_FaceToFace_04_BRP_Details' }
         })
         const endTime = Date.now()
@@ -564,8 +605,8 @@ export function FaceToFace (): void {
           photoIdChoice: 'ukPhotocardDl',
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
+        },
+        {
           tags: { name: 'B02_FaceToFace_03_UKDL_ChoosePhotoId' }
         })
         const endTime = Date.now()
@@ -585,14 +626,35 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_04_UKDL_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/ukPhotocardDlDetails', {
-          'ukPhotocardDlExpiryDate-day': '1',
-          'ukPhotocardDlExpiryDate-month': '3',
-          'ukPhotocardDlExpiryDate-year': '2025',
+          'ukPhotocardDlExpiryDate-day': expiryDates.expiryDay,
+          'ukPhotocardDlExpiryDate-month': expiryDates.expiryMonth,
+          'ukPhotocardDlExpiryDate-year': expiryDates.expiryYear,
           continue: '',
           'x-csrf-token': csrfToken
-
-        }, {
+        },
+        {
           tags: { name: 'B02_FaceToFace_04_UKDL_Details' }
+
+        })
+        const endTime = Date.now()
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) =>
+            (r.body as string).includes('Is the address on your driving licence the same as your current address?')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+        csrfToken = getCSRF(res)
+      })
+
+      group('B02_FaceToFace_05_UKDL_CurrentAddress POST', function () {
+        const startTime = Date.now()
+        res = http.post(env.envURL + '/ukDlAddressCheck', {
+          ukDlAddressCheck: 'Yes',
+          continue: '',
+          'x-csrf-token': csrfToken
+        }, {
+          tags: { name: 'B02_FaceToFace_05_UKDL_CurrentAddress' }
         })
         const endTime = Date.now()
 
@@ -619,8 +681,8 @@ export function FaceToFace (): void {
       postcode: 'SW1A 2AA',
       continue: '',
       'x-csrf-token': csrfToken
-
-    }, {
+    },
+    {
       tags: { name: 'B02_FaceToFace_07_FindPostOffice' }
     })
     const endTime = Date.now()
@@ -643,8 +705,8 @@ export function FaceToFace (): void {
       branches: '1',
       continue: '',
       'x-csrf-token': csrfToken
-
-    }, {
+    },
+    {
       tags: { name: 'B02_FaceToFace_08_ChoosePostOffice' }
     })
     const endTime = Date.now()

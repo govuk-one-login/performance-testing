@@ -12,7 +12,6 @@ build({
   format: 'esm',
   bundle: true,
   sourcemap: true,
-  watch: false,
   minify: false,
   external: ['k6*', 'https://*'],
   plugins: [

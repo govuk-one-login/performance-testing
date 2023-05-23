@@ -225,6 +225,10 @@ Resources:
               SCENARIO: all
               ORCH_STUB_URL: Orchestrator Stub URL
               CORE_URL: IPV Core test environment URL
+              RP_STUB: RP stub URL
+              BASE_URL: Auth test environment base URL
+              EMAIL_OTP: Fixed email OTP
+              PHONE_OTP: Fixed SMS OTP
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
             parameter-store:
               APP_PASSWORD: "/perfTest/testUserPassword"

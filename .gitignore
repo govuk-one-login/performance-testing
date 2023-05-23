@@ -435,3 +435,4 @@ cf-template.yaml
 node_modules
 */node_modules
 deploy/scripts/dist
+*env.sh

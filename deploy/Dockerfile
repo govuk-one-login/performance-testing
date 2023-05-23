@@ -21,7 +21,7 @@ ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 # ---
 # Run
 # ---
-FROM loadimpact/k6:0.44.0
+FROM loadimpact/k6:0.44.1
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true
 ENV OTEL_TEMPLATE=/otel/etc/otelcol/config-template.yaml

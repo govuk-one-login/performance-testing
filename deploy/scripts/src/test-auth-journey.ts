@@ -84,7 +84,6 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 
 export const options: Options = {
-  httpDebug: 'full',
   scenarios: loadProfile.scenarios,
   thresholds: {
     http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
@@ -274,7 +273,6 @@ export function signUp (): void {
         res = http.post(env.baseUrl + '/get-security-codes',
           {
             _csrf: csrfToken,
-            isAccountPartCreated: 'false',
             mfaOptions: mfaOption
           }
         )
@@ -285,7 +283,7 @@ export function signUp (): void {
         })
           ? durations.add(end - start)
           : fail('Checks failed')
-        secretKey = res.html().find("input[name='_secretKey']").val() ?? ''
+        secretKey = res.html().find("span[class*='secret-key-fragment']").text() ?? ''
         totp = new TOTP(secretKey)
         csrfToken = getCSRF(res)
       })
@@ -318,7 +316,6 @@ export function signUp (): void {
         res = http.post(env.baseUrl + '/get-security-codes',
           {
             _csrf: csrfToken,
-            isAccountPartCreated: 'false',
             mfaOptions: mfaOption
           }
         )

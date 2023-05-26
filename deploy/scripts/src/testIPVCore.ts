@@ -1,7 +1,7 @@
 import { sleep, group, check, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { Trend } from 'k6/metrics'
+import { Rate, Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from './utils/config/load-profiles'
 
 const profiles: ProfileList = {
@@ -85,6 +85,7 @@ const env = {
 }
 
 const transactionDuration = new Trend('duration')
+const myRate = new Rate('rate')
 
 export function coreScenario1 (): void {
   let res: Response
@@ -95,7 +96,7 @@ export function coreScenario1 (): void {
   let addressStubURL: string
   let fraudStubURL: string
   let kbvStubURL: string
-
+  let passed: boolean
   group(
     'B01_Core_01_LaunchOrchestratorStub GET',
     function () {
@@ -107,12 +108,16 @@ export function coreScenario1 (): void {
       )
       const endTime = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('Choose a user id value')
       })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime - startTime)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       uniqueUserID = res.html().find('select[name=userIdSelect]>option').last().val() ?? fail('User UUID not found')
     }
@@ -132,12 +137,16 @@ export function coreScenario1 (): void {
       )
       const endTime = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('Start proving your identity with GOV.UK One Login')
       })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime - startTime)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       csrfToken = getCSRF(res)
     }
@@ -160,13 +169,16 @@ export function coreScenario1 (): void {
       )
       const endTime = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('Enter the details from your photo ID and answer security questions')
       })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
-
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime - startTime)
+      } else {
+        fail('Response Validation Failed')
+      }
       csrfToken = getCSRF(res)
     }
   )
@@ -190,12 +202,15 @@ export function coreScenario1 (): void {
       )
       const endTime1 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 302': (r) => r.status === 302
       })
-        ? transactionDuration.add(endTime1 - startTime1)
-        : fail('Response Validation Failed')
-
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime1 - startTime1)
+      } else {
+        fail('Response Validation Failed')
+      }
       passportStubURL = res.headers.Location
 
       const startTime2 = Date.now()
@@ -206,13 +221,16 @@ export function coreScenario1 (): void {
       )
       const endTime2 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('UK Passport (Stub)')
       })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
-
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime2 - startTime2)
+      } else {
+        fail('Response Validation Failed')
+      }
       resourceID = getResourceID(res)
     }
   )
@@ -247,11 +265,15 @@ export function coreScenario1 (): void {
       )
       const endTime1 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 302': (r) => r.status === 302
       })
-        ? transactionDuration.add(endTime1 - startTime1)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime1 - startTime1)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
@@ -262,12 +284,15 @@ export function coreScenario1 (): void {
       )
       const endTime2 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 302': (r) => r.status === 302
       })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
-
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime2 - startTime2)
+      } else {
+        fail('Response Validation Failed')
+      }
       addressStubURL = res.headers.Location
 
       const startTime3 = Date.now()
@@ -278,13 +303,16 @@ export function coreScenario1 (): void {
       )
       const endTime3 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('Address (Stub)')
       })
-        ? transactionDuration.add(endTime3 - startTime3)
-        : fail('Response Validation Failed')
-
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime3 - startTime3)
+      } else {
+        fail('Response Validation Failed')
+      }
       resourceID = getResourceID(res)
     }
   )
@@ -316,11 +344,15 @@ export function coreScenario1 (): void {
       )
       const endTime1 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 302': (r) => r.status === 302
       })
-        ? transactionDuration.add(endTime1 - startTime1)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime1 - startTime1)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
@@ -331,12 +363,15 @@ export function coreScenario1 (): void {
       )
       const endTime2 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 302': (r) => r.status === 302
       })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
-
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime2 - startTime2)
+      } else {
+        fail('Response Validation Failed')
+      }
       fraudStubURL = res.headers.Location
 
       const startTime3 = Date.now()
@@ -347,12 +382,16 @@ export function coreScenario1 (): void {
       )
       const endTime3 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('Fraud Check (Stub)')
       })
-        ? transactionDuration.add(endTime3 - startTime3)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime3 - startTime3)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       resourceID = getResourceID(res)
     }
@@ -387,11 +426,15 @@ export function coreScenario1 (): void {
       )
       const endTime1 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 302': (r) => r.status === 302
       })
-        ? transactionDuration.add(endTime1 - startTime1)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime1 - startTime1)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
@@ -401,12 +444,16 @@ export function coreScenario1 (): void {
       )
       const endTime2 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('Answer security questions')
       })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime2 - startTime2)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       csrfToken = getCSRF(res)
     }
@@ -430,11 +477,15 @@ export function coreScenario1 (): void {
       )
       const endTime1 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 302': (r) => r.status === 302
       })
-        ? transactionDuration.add(endTime1 - startTime1)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime1 - startTime1)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       kbvStubURL = res.headers.Location
 
@@ -446,12 +497,16 @@ export function coreScenario1 (): void {
       )
       const endTime2 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('Knowledge Based Verification (Stub)')
       })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime2 - startTime2)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       resourceID = getResourceID(res)
     }
@@ -486,11 +541,15 @@ export function coreScenario1 (): void {
       )
       const endTime1 = Date.now()
 
-      check(res, {
+      let passed = check(res, {
         'is status 302': (r) => r.status === 302
       })
-        ? transactionDuration.add(endTime1 - startTime1)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime1 - startTime1)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
@@ -500,12 +559,16 @@ export function coreScenario1 (): void {
       )
       const endTime2 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('You’ve successfully proved your identity')
       })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime2 - startTime2)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       csrfToken = getCSRF(res)
     }
@@ -529,11 +592,15 @@ export function coreScenario1 (): void {
       )
       const endTime1 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 302': (r) => r.status === 302
       })
-        ? transactionDuration.add(endTime1 - startTime1)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime1 - startTime1)
+      } else {
+        fail('Response Validation Failed')
+      }
 
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
@@ -543,12 +610,16 @@ export function coreScenario1 (): void {
       )
       const endTime2 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('User information')
       })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime2 - startTime2)
+      } else {
+        fail('Response Validation Failed')
+      }
     }
   )
 }

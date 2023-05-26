@@ -216,6 +216,10 @@ Resources:
               PHONE_OTP: Fixed SMS OTP
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
             parameter-store:
+              TEST_CLIENT_EXECUTE_URL: "/perfTest/testClientUrl"
+              BACK_END_URL: "/perfTest/backendUrl"
+              FRONT_END_URL: "/perfTest/frontendUrl"
+              BIOMETRIC_SESSION_ID: "/perfTest/biometricSessionID"
               APP_PASSWORD: "/perfTest/testUserPassword"
               AUTH_APP_KEY: "/perfTest/authAppKey"
               APP_PASSWORD_NEW: "/perfTest/testUserNewPassword"

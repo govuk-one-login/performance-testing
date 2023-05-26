@@ -78,7 +78,7 @@ export function setup (): void {
 }
 
 const env = {
-  envURL: __ENV.ENV_URL
+  envURL: __ENV.F2F_URL
 }
 
 const transactionDuration = new Trend('duration')

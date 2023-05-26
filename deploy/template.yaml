@@ -226,7 +226,7 @@ Resources:
               KBV_ENV_NAME: "/perfTest/kbvEnvName"
               CORE_STUB_USERNAME: "/perfTest/coreStubUsername"
               CORE_STUB_PASSWORD: "/perfTest/coreStubPassword"
-              ENV_URL: "/perfTest/envUrl"
+              F2F_URL: "/perfTest/f2fUrl"
               K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
               HOME_URL: "/perfTest/homeUrl"
               SIGNIN_URL: "/perfTest/signInUrl"

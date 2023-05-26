@@ -11,6 +11,7 @@
         "sourceType": "module",
         "project": "**/tsconfig.json"
     },
+    "ignorePatterns": ["src/misc/url.js"],
     "rules": {
     }
 }

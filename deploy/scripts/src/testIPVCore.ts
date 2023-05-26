@@ -531,15 +531,11 @@ export function coreScenario1 (): void {
       )
       const endTime1 = Date.now()
 
-      passed = check(res, {
+      check(res, {
         'is status 302': (r) => r.status === 302
       })
-      myRate.add(passed)
-      if (passed) {
-        transactionDuration.add(endTime1 - startTime1)
-      } else {
-        fail('Response Validation Failed')
-      }
+        ? transactionDuration.add(endTime1 - startTime1)
+        : fail('Response Validation Failed')
 
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,

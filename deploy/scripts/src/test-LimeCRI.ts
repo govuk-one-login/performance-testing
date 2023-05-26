@@ -418,7 +418,7 @@ export function drivingScenario (): void {
         res = http.get(res.headers.Location,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
-            tags: { name: 'B02_Driving_03_DVLA_EditUser_02_CoreStubCall' }
+            tags: { name: 'B02_Driving_03_DVLA_EditUser_02_CoreStubCall' } // pragma: allowlist secret
           })
         const endTime30 = Date.now()
 

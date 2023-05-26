@@ -33,3 +33,9 @@ jobs:
         uses: grafana/k6-action@v0.3.0
         with:
           filename: ./deploy/scripts/dist/unit-tests.js
+
+      - run: git fetch origin main
+      - name:  Run pre-commit action
+        uses: pre-commit/action@v3.0.0
+        with:
+          extra_args: --from-ref FETCH_HEAD --to-ref HEAD

@@ -1,7 +1,7 @@
 import { sleep, group, check, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { Trend } from 'k6/metrics'
+import { Rate, Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from './utils/config/load-profiles'
 
 const profiles: ProfileList = {
@@ -85,6 +85,7 @@ const env = {
 }
 
 const transactionDuration = new Trend('duration')
+const myRate = new Rate('rate')
 
 export function coreScenario1 (): void {
   let res: Response
@@ -95,6 +96,7 @@ export function coreScenario1 (): void {
   let addressStubURL: string
   let fraudStubURL: string
   let kbvStubURL: string
+  let passed: boolean
 
   group(
     'B01_Core_01_LaunchOrchestratorStub GET',
@@ -543,12 +545,16 @@ export function coreScenario1 (): void {
       )
       const endTime2 = Date.now()
 
-      check(res, {
+      passed = check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('User information')
       })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
+      myRate.add(passed)
+      if (passed) {
+        transactionDuration.add(endTime2 - startTime2)
+      } else {
+        fail('Response Validation Failed')
+      }
     }
   )
 }

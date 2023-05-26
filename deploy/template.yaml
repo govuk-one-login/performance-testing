@@ -25,18 +25,6 @@ Parameters:
     Description: "The ARN of the permissions boundary to apply when creating IAM roles"
     Type: String
     Default: "none"
-  RunTestContainerInVPC:
-    Description: |
-      (Optional)
-      Requires the testcontainers to run from within the VPC, allowing outbound configuration to be via the EIP,
-      therefore allow-listable in the WAF.
-      Any REGIONAL APIs under test will need to be accessible over the VPC NAT Gateway via public internet.
-      Trying to communicate over a VPC endpoint for Regional API gateways results in Forbbidden 403.
-    Type: "String"
-    AllowedValues:
-      - "True"
-      - "False"
-    Default: "False" # Existing behaviour is to run outside, teams need to flip this parameter to 'true' in order to benefit.
   VpcStackName:
     Type: "String"
     Description: "The name of the stack that defines the VPC to use"

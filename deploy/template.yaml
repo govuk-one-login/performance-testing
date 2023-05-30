@@ -208,12 +208,6 @@ Resources:
               TEST_REPORT_DIR: results
               PROFILE: smoke
               SCENARIO: all
-              ORCH_STUB_URL: Orchestrator Stub URL
-              CORE_URL: IPV Core test environment URL
-              RP_STUB: RP stub URL
-              BASE_URL: Auth test environment base URL
-              EMAIL_OTP: Fixed email OTP
-              PHONE_OTP: Fixed SMS OTP
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
             parameter-store:
               TEST_CLIENT_EXECUTE_URL: "/perfTest/testClientUrl"
@@ -230,12 +224,17 @@ Resources:
               KBV_ENV_NAME: "/perfTest/kbvEnvName"
               CORE_STUB_USERNAME: "/perfTest/coreStubUsername"
               CORE_STUB_PASSWORD: "/perfTest/coreStubPassword"
+              CORE_URL: "/perfTest/coreUrl"
+              ORCH_STUB_URL: "/perfTest/orchStubUrl"
+              RP_STUB: "/perfTest/rpStub"
+              BASE_URL: "/perfTest/baseUrl"
               F2F_URL: "/perfTest/f2fUrl"
               K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
               HOME_URL: "/perfTest/homeUrl"
               SIGNIN_URL: "/perfTest/signInUrl"
               SMS_OTP: "/perfTest/fixedSMSOTP"
               EMAIL_OTP: "/perfTest/fixedEmailOTP"
+              PHONE_OTP: ""/perfTest/fixedPhoneOTP""
               CURR_PHONE: "/perfTest/currPhone"
               NEW_PHONE: "/perfTest/newPhone"
               K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"

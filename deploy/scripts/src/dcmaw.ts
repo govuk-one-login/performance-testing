@@ -21,7 +21,7 @@ import {
   postFinishBiometricToken,
   getSessionId,
   setSessionCookie
-} from './utils/functions/functions-mobile-journey'
+} from './utils/mobile/functions-mobile-journey'
 
 const profiles: ProfileList = {
   smoke: {

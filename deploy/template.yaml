@@ -232,7 +232,6 @@ Resources:
               K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
               HOME_URL: "/perfTest/homeUrl"
               SIGNIN_URL: "/perfTest/signInUrl"
-              SMS_OTP: "/perfTest/fixedSMSOTP"
               EMAIL_OTP: "/perfTest/fixedEmailOTP"
               PHONE_OTP: ""/perfTest/fixedPhoneOTP""
               CURR_PHONE: "/perfTest/currPhone"

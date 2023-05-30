@@ -220,7 +220,7 @@ const credentials = {
   authAppKey: __ENV.AUTH_APP_KEY,
   currPassword: __ENV.APP_PASSWORD,
   newPassword: __ENV.APP_PASSWORD_NEW,
-  fixedSMSOTP: __ENV.SMS_OTP,
+  fixedPhoneOTP: __ENV.PHONE_OTP,
   fixedEmailOTP: __ENV.EMAIL_OTP
 }
 
@@ -354,7 +354,7 @@ export function changeEmail (): void {
           {
             phoneNumber,
             _csrf: csrfToken,
-            code: credentials.fixedSMSOTP
+            code: credentials.fixedPhoneOTP
           },
           {
             tags: { name: 'B01_ChangeEmail_05_01_SMS_EnterOTP' }
@@ -747,7 +747,7 @@ export function changePassword (): void {
           {
             phoneNumber,
             _csrf: csrfToken,
-            code: credentials.fixedSMSOTP
+            code: credentials.fixedPhoneOTP
           },
           {
             tags: { name: 'B02_ChangePassword_05_01_SMS_EnterOTP' }
@@ -1122,7 +1122,7 @@ export function changePhone (): void {
       {
         phoneNumber: phoneNumHidden,
         _csrf: csrfToken,
-        code: credentials.fixedSMSOTP
+        code: credentials.fixedPhoneOTP
       },
       {
         tags: { name: 'B03_ChangePhone_05_EnterSMSOTP' }
@@ -1247,7 +1247,7 @@ export function changePhone (): void {
           {
             _csrf: csrfToken,
             phoneNumber: phoneNumHidden,
-            code: credentials.fixedSMSOTP
+            code: credentials.fixedPhoneOTP
           },
           {
             tags: { name: 'B03_ChangePhone_10_EnteNewPhoneOTP' }
@@ -1423,7 +1423,7 @@ export function deleteAccount (): void {
           {
             phoneNumber,
             _csrf: csrfToken,
-            code: credentials.fixedSMSOTP
+            code: credentials.fixedPhoneOTP
           },
           {
             tags: { name: 'B04_DeleteAccount_05_01_SMS_EnterOTP' }

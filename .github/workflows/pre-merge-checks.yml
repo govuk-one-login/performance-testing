@@ -32,7 +32,7 @@ jobs:
       - name: Run local k6 unit test script
         uses: grafana/k6-action@v0.3.0
         with:
-          filename: ./deploy/scripts/dist/utils/unit-tests.js
+          filename: ./deploy/scripts/dist/unit-tests.js
 
       - run: git fetch origin main
       - name:  Run pre-commit action

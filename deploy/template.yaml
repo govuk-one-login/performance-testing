@@ -233,7 +233,7 @@ Resources:
               HOME_URL: "/perfTest/homeUrl"
               SIGNIN_URL: "/perfTest/signInUrl"
               EMAIL_OTP: "/perfTest/fixedEmailOTP"
-              PHONE_OTP: ""/perfTest/fixedPhoneOTP""
+              PHONE_OTP: "/perfTest/fixedPhoneOTP"
               CURR_PHONE: "/perfTest/currPhone"
               NEW_PHONE: "/perfTest/newPhone"
               K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"

@@ -97,7 +97,6 @@ export function coreScenario1 (): void {
   let fraudStubURL: string
   let kbvStubURL: string
   let passed: boolean
-  let passVal: string
 
   group(
     'B01_Core_01_LaunchOrchestratorStub GET',
@@ -551,10 +550,8 @@ export function coreScenario1 (): void {
         'verify page content': (r) => (r.body as string).includes('User information')
       })
       myRate.add(passed)
-      passVal = passed.toString()
       if (passed) {
         transactionDuration.add(endTime2 - startTime2)
-        console.log(`Virtual user ${__VU}, iteration ${__ITER}, current value ${passVal} `)
       } else {
         fail('Response Validation Failed')
       }

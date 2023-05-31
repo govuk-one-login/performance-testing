@@ -12,7 +12,6 @@ Conditions:
           - !Ref PermissionsBoundary
           - "none"
 
-
 Parameters:
   Environment:
     Description: "The name of the environment to deploy to"
@@ -256,7 +255,6 @@ Resources:
                 - kill $OTEL_PID
                 - TIMEOUT=0
                 - while kill -0 $OTEL_PID && (( TIMEOUT < 300 )); do sleep 1; (( TIMEOUT++ )); done
-                - cat otel.log
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID

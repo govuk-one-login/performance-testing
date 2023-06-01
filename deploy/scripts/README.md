@@ -86,7 +86,7 @@ Parameter store locations must start with the prefix `/perfTest/` in order for t
 
 1.  Login to [Control Tower](https://uk-digital-identity.awsapps.com/start#/)
 
-2. Login to the `di-performance-test-prod` account with the `di-perf-test-prod-poweruser` role.
+2. Login to the `di-performance-test-prod` account with the `di-perf-test-prod-testers` role.
 
 3. Go to the CodeBuild project and click 'Start build with overrides' ([Direct link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/projects/LoadTest-perftest/builds/start?region=eu-west-2))
 

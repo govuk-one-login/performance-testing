@@ -248,7 +248,7 @@ Resources:
               commands:
                 - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - echo "Run performance test"
-                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out statsd
+                - k6 run --verbose $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out statsd
             post_build:
               commands:
                 - OTEL_PID=$(pgrep /otel/otelcol-contrib)

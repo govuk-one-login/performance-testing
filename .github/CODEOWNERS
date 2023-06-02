@@ -1,0 +1,5 @@
+# Global owners
+* @alphagov/di-dev-platform @alphagov/digital-identity-performance-test
+
+# Test Scripts
+/deploy/scripts @alphagov/digital-identity-performance-test

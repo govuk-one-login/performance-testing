@@ -17,7 +17,6 @@ RUN cd scripts && \
 # -----------------------
 FROM otel/opentelemetry-collector-contrib:0.78.0 as otel
 ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
-ENV OTEL_METRIC_EXPORT_INTERVAL=1000
 
 # ---
 # Run
@@ -25,6 +24,7 @@ ENV OTEL_METRIC_EXPORT_INTERVAL=1000
 FROM loadimpact/k6:0.44.1
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true
+ENV OTEL_METRIC_EXPORT_INTERVAL=1000
 ENV OTEL_TEMPLATE=/otel/etc/otelcol/config-template.yaml
 ENV OTEL_CONFIG=/home/k6/config.yaml
 ENV WORKDIR=/home/k6

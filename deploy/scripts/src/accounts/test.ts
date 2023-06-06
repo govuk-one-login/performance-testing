@@ -212,8 +212,8 @@ export function setup (): void {
 }
 
 const env = {
-  envURL: `${__ENV.ACCOUNTS_HOME_URL}`,
-  signinURL: `${__ENV.ACCOUNTS_SIGNIN_URL}`
+  envURL: __ENV.ACCOUNTS_HOME_URL,
+  signinURL: __ENV.ACCOUNTS_SIGNIN_URL
 }
 
 const credentials = {

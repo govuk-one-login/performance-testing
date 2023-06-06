@@ -17,6 +17,7 @@ RUN cd scripts && \
 # -----------------------
 FROM otel/opentelemetry-collector-contrib:0.78.0 as otel
 ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
+ENV OTEL_METRIC_EXPORT_INTERVAL=1000
 
 # ---
 # Run

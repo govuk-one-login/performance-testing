@@ -212,21 +212,21 @@ export function setup (): void {
 }
 
 const env = {
-  envURL: `${__ENV.HOME_URL}`,
-  signinURL: `${__ENV.SIGNIN_URL}`
+  envURL: `${__ENV.ACCOUNTS_HOME_URL}`,
+  signinURL: `${__ENV.ACCOUNTS_SIGNIN_URL}`
 }
 
 const credentials = {
-  authAppKey: __ENV.AUTH_APP_KEY,
-  currPassword: __ENV.APP_PASSWORD,
-  newPassword: __ENV.APP_PASSWORD_NEW,
-  fixedPhoneOTP: __ENV.PHONE_OTP,
-  fixedEmailOTP: __ENV.EMAIL_OTP
+  authAppKey: __ENV.ACCOUNTS_AUTH_APP_KEY,
+  currPassword: __ENV.ACCOUNTS_APP_PASSWORD,
+  newPassword: __ENV.ACCOUNTS_APP_PASSWORD_NEW,
+  fixedPhoneOTP: __ENV.ACCOUNTS_PHONE_OTP,
+  fixedEmailOTP: __ENV.ACCOUNTS_EMAIL_OTP
 }
 
 const phoneData = {
-  currentPhone: __ENV.CURR_PHONE,
-  newPhone: __ENV.NEW_PHONE
+  currentPhone: __ENV.ACCOUNTS_CURR_PHONE,
+  newPhone: __ENV.ACCOUNTS_NEW_PHONE
 }
 
 const transactionDuration = new Trend('duration')

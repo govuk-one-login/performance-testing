@@ -78,7 +78,7 @@ export function setup (): void {
 }
 
 const env = {
-  envURL: __ENV.F2F_URL
+  envURL: __ENV.IDENTITY_KIWI_URL
 }
 
 const transactionDuration = new Trend('duration')

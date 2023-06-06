@@ -1,1 +1,1 @@
-export const URL: typeof globalThis.URL = {}
+export const URL: typeof globalThis.URL

@@ -1,6 +1,6 @@
 import { check, group } from 'k6'
 import http, { type CookieJar, type Response } from 'k6/http'
-import { URL } from '../../misc/url'
+import { URL } from './url'
 
 const env = {
   testClientExecuteUrl: __ENV.TEST_CLIENT_EXECUTE_URL,

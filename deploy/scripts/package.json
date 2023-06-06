@@ -22,7 +22,7 @@
   "scripts": {
     "start": "node build.js",
     "pretest": "node build.js",
-    "test": "k6 run dist/unit-tests.js"
+    "test": "k6 run dist/common/unit-tests.js"
   },
   "keywords": [],
   "author": "",

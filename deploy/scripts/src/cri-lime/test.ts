@@ -3,7 +3,7 @@ import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import encoding from 'k6/encoding'
 import { Trend } from 'k6/metrics'
-import { selectProfile, type ProfileList, describeProfile } from './utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
 

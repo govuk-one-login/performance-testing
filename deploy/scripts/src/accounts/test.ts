@@ -4,8 +4,8 @@ import http, { type Response } from 'k6/http'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
 import { Trend } from 'k6/metrics'
-import TOTP from './utils/authentication/totp'
-import { selectProfile, type ProfileList, describeProfile } from './utils/config/load-profiles'
+import TOTP from '../common/utils/authentication/totp'
+import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 
 const profiles: ProfileList = {
   smoke: {

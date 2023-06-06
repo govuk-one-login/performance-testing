@@ -33,7 +33,7 @@ Further, you can add the `--fix` flag to fix any auto-fixable problems in your T
 
 ## Local Testing
 
-Test scripts are written in the `src` folder. Test script files must match the path ( `src/*.ts`) specified in the [build.js](build.js#L7) file. Static data files are kept in the `src/data`, they are copied to `dist/data` by esbuild as defined [here](build.js#L18-L25).
+Test scripts are contained in the `src` folder, with a folder for each product team. Test script files must match the path ( `src/<team_name>/*.ts`) specified in the [build.js](build.js#L8) file. Static data files are kept in `src/<team_name>/data` folders, they are copied to `dist/<team_name>/data` by esbuild as defined [here](build.js#L17-L24).
 
 To run a TypeScript test locally, navigate to the `deploy/scripts` folder and run the following
 
@@ -43,18 +43,18 @@ To run a TypeScript test locally, navigate to the `deploy/scripts` folder and ru
 This command will generate the JavaScript files in the `dist` folder. These can then be run with k6 in the normal way using a command such as
 
 ```console
-% k6 run dist/test.js
+% k6 run dist/common/test.js
 ```
 
-## Unit Testing
+## Unit Testing and Common Utilities
 
-Unit tests to validate the TypeScript utility files are contained in the [`src/unit-tests.js`](src/unit-tests.ts) file. They can be run to validate the utilities are working as intended by running
+Unit tests to validate the TypeScript utility files are contained in the [`src/common/unit-tests.js`](src/common/unit-tests.ts) file. They can be run to validate the utilities are working as intended by running
 
 ```console
 % npm test
 ```
 
-This unit test also runs when raising pull requests as a [github action](../../.github/workflows/pre-merge-checks.yml). If adding an additional utility in the `src/utils` folder, add another `group` to the test script with `checks` to validate the behaviour.
+This unit test also runs when raising pull requests as a [github action](../../.github/workflows/pre-merge-checks.yml). If adding an additional utility in the `src/common/utils` folder, add another `group` to the test script with `checks` to validate the behaviour.
 
 ## Environment Variables and Secrets
 
@@ -98,7 +98,7 @@ Parameter store locations must start with the prefix `/perfTest/` in order for t
 
     |Environment Variable|Example Values|Description|
     |-|-|-|
-    |`TEST_SCRIPT`|`accounts.js`</br>`authentication.js`</br>`test.js`<sup>[_default_]</sup></br>`unit-tests.js`|Relative path of test script to use, including `.js` extension|
+    |`TEST_SCRIPT`|`accounts/test.js`</br>`authentication/test.js`</br>`common/test.js`<sup>[_default_]</sup></br>`common/unit-tests.js`|Relative path of test script to use, including `.js` extension|
     |`PROFILE`|`smoke`<sup>[_default_]</sup></br>`stress`</br>`load`|Used to select a named load profile described in the test script. Values should match the keys of a [`ProfileList`](src/utils/config/load-profiles.ts#L4) object|
     |`SCENARIOS`|`all`<sup>[_default_]</sup></br>`sign_in`</br>`create_account,sign_in`|Comma seperated list of scenarios to enable. Blank strings or `'all'` will default to enabling all scenarios in the selected load profile. Implementation in [`getScenarios`](src/utils/config/load-profiles.ts#L27-L36) function|
 

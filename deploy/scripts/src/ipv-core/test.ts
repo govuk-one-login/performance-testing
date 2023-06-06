@@ -2,7 +2,7 @@ import { sleep, group, check, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { Rate, Trend } from 'k6/metrics'
-import { selectProfile, type ProfileList, describeProfile } from './utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 
 const profiles: ProfileList = {
   smoke: {

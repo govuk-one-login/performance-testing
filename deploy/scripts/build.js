@@ -5,7 +5,7 @@ const outbase = './src'
 const outdir = './dist'
 
 build({
-  entryPoints: glob.sync('src/*.ts'),
+  entryPoints: glob.sync('src/*/*.ts'),
   outbase,
   outdir,
   target: 'es6',
@@ -17,15 +17,15 @@ build({
   plugins: [
     copy({
       assets: {
-        from: [outbase + '/data/*'],
-        to: ['./data']
+        from: [outbase + '/**/*.csv', outbase + '/**/*.json'],
+        to: ['.']
       }
     })
   ]
 })
   .then(() => {
-    console.log('Transpiled files generated:')
-    glob.sync(outdir + '/*').forEach(file => {
+    console.log('Test scripts transpiled:')
+    glob.sync(outdir + '/*/*.js').sort().forEach(file => {
       console.log(`+ \x1b[32m${file}\x1b[0m`)
     })
   })

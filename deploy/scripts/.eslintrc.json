@@ -11,7 +11,7 @@
         "sourceType": "module",
         "project": "**/tsconfig.json"
     },
-    "ignorePatterns": ["src/misc/url.js"],
+    "ignorePatterns": ["src/dcmaw/utils/url.js"],
     "rules": {
     }
 }

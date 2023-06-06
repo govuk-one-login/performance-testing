@@ -1,7 +1,7 @@
 import { sleep } from 'k6'
 import http from 'k6/http'
 import { type Options } from 'k6/options'
-import { describeProfile, type ProfileList, selectProfile } from './utils/config/load-profiles'
+import { describeProfile, type ProfileList, selectProfile } from '../common/utils/config/load-profiles'
 import {
   startDcmawJourney,
   DeviceType,
@@ -21,7 +21,7 @@ import {
   postFinishBiometricToken,
   getSessionId,
   setSessionCookie
-} from './utils/mobile/functions-mobile-journey'
+} from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
   smoke: {

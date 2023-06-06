@@ -34,7 +34,7 @@ This repository contains the performance test framework for testing Digital Iden
 
 ## Contributing
 
-If you would like to create a new test script or make changes to any of the existing test scripts, first read through the information in [`deploy/scripts/README.md`](deploy/scripts/README.md). Create a new `.ts` file in the `deploy/scripts` directory or change an existing one.
+If you would like to create a new test script or make changes to any of the existing test scripts, first read through the information in [`deploy/scripts/README.md`](deploy/scripts/README.md). Create a new `.ts` file in the appropriate team folder within the `deploy/scripts` directory or change an existing one.
 
 Raise pull requests for any changes, including the JIRA ticket number in the description. Pull requests must pass pre-commit hooks, linting and unit test checks before merging to main.
 

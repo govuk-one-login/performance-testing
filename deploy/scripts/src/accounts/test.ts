@@ -338,7 +338,7 @@ export function changeEmail (): void {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
             (r.body as string).includes(
-              'We sent a code to the phone number'
+              'We have sent a code to your phone number'
             )
         })
           ? transactionDuration.add(endTime - startTime)
@@ -354,6 +354,8 @@ export function changeEmail (): void {
           {
             phoneNumber,
             _csrf: csrfToken,
+            supportAccountRecovery: 'true',
+            checkEmailLink: '/check-email-change-security-codes?type=SMS',
             code: credentials.fixedPhoneOTP
           },
           {
@@ -470,10 +472,10 @@ export function changeEmail (): void {
 
   sleep(Math.random() * 3)
 
-  group('B01_ChangeEmail_08_ClickSettingsTab GET', () => {
+  group('B01_ChangeEmail_08_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/settings', {
-      tags: { name: 'B01_ChangeEmail_08_ClickSettingsTab' }
+    res = http.get(env.envURL + '/security', {
+      tags: { name: 'B01_ChangeEmail_08_ClickSecurityTab' }
     })
     const endTime = Date.now()
 
@@ -592,7 +594,7 @@ export function changeEmail (): void {
 
       sleep(Math.random() * 3)
 
-      group('B01_ChangeEmail_13_ClickBackToMyAccount GET', function () {
+      group('B01_ChangeEmail_13_ClickBackToSecurity GET', function () {
         const startTime = Date.now()
         res = http.get(env.envURL + '/manage-your-account', {
           tags: { name: 'B01_ChangeEmail_13_ClickBackToMyAccount' }
@@ -729,7 +731,7 @@ export function changePassword (): void {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
             (r.body as string).includes(
-              'We sent a code to the phone number'
+              'We have sent a code to your phone number'
             )
         })
           ? transactionDuration.add(endTime - startTime)
@@ -747,6 +749,8 @@ export function changePassword (): void {
           {
             phoneNumber,
             _csrf: csrfToken,
+            supportAccountRecovery: 'true',
+            checkEmailLink: '/check-email-change-security-codes?type=SMS',
             code: credentials.fixedPhoneOTP
           },
           {
@@ -867,10 +871,10 @@ export function changePassword (): void {
 
   sleep(Math.random() * 3)
 
-  group('B02_ChangePassword_08_ClickSettingsTab GET', () => {
+  group('B02_ChangePassword_08_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/settings', {
-      tags: { name: 'B02_ChangePassword_08_ClickSettingsTab' } // pragma: allowlist secret
+    res = http.get(env.envURL + '/security', {
+      tags: { name: 'B02_ChangePassword_08_ClickSecurityTab' } // pragma: allowlist secret
     })
     const endTime = Date.now()
 
@@ -962,10 +966,10 @@ export function changePassword (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_ChangePassword_12_ClickBackToSettings GET', function () {
+      group('B02_ChangePassword_12_ClickBackToSecurity GET', function () {
         const startTime = Date.now()
         res = http.get(env.envURL + '/manage-your-account', {
-          tags: { name: 'B02_ChangePassword_12_ClickBackToSettings' } // pragma: allowlist secret
+          tags: { name: 'B02_ChangePassword_12_ClickBackToSecurity' } // pragma: allowlist secret
         })
         const endTime = Date.now()
 
@@ -1405,7 +1409,7 @@ export function deleteAccount (): void {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
             (r.body as string).includes(
-              'We sent a code to the phone number'
+              'We have sent a code to your phone number'
             )
         })
           ? transactionDuration.add(endTime - startTime)
@@ -1423,6 +1427,8 @@ export function deleteAccount (): void {
           {
             phoneNumber,
             _csrf: csrfToken,
+            supportAccountRecovery: 'true',
+            checkEmailLink: '/check-email-change-security-codes?type=SMS',
             code: credentials.fixedPhoneOTP
           },
           {
@@ -1541,10 +1547,10 @@ export function deleteAccount (): void {
 
   sleep(Math.random() * 3)
 
-  group('B04_DeleteAccount_08_ClickSettingsTab GET', () => {
+  group('B04_DeleteAccount_08_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/settings', {
-      tags: { name: 'B04_DeleteAccount_08_ClickSettingsTab' }
+    res = http.get(env.envURL + '/security', {
+      tags: { name: 'B04_DeleteAccount_08_ClickSecurityTab' }
     })
     const endTime = Date.now()
 

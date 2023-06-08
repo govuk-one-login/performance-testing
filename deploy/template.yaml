@@ -241,7 +241,7 @@ Resources:
               MOBILE_BIOMETRIC_SESSION_ID: "/perfTest/mobile/biometricSessionID"
               MOBILE_FRONTEND_URL: "/perfTest/mobile/frontendUrl"
               MOBILE_TEST_CLIENT_EXECUTE_URL: "/perfTest/mobile/testClientUrl"
-              
+
 
           phases:
             pre_build:

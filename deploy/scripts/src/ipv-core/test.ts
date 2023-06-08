@@ -80,8 +80,8 @@ export function setup (): void {
 }
 
 const env = {
-  orchStubEndPoint: __ENV.IDENTITY_orchCoreStub,
-  ipvCoreURL: __ENV.IDENTITY_coreURL
+  orchStubEndPoint: __ENV.IDENTITY_ORCH_STUB_URL,
+  ipvCoreURL: __ENV.IDENTITY_CORE_URL
 }
 
 const transactionDuration = new Trend('duration')

@@ -100,13 +100,13 @@ export function setup (): void {
 }
 
 const env = {
-  ipvCoreStub: __ENV.IDENTITY_coreStub,
-  fraudEndPoint: __ENV.IDENTITY_fraudURL,
-  drivingUrl: __ENV.IDENTITY_drivingUrl,
-  drivingEndpoint: __ENV.IDENTITY_drivingEnd,
-  orchestratorCoreStub: __ENV.IDENTITY_orchCoreStub,
-  ipvCoreURL: __ENV.IDENTITY_coreURL,
-  passportURL: __ENV.IDENTITY_passportURL
+  ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL,
+  fraudEndPoint: __ENV.IDENTITY_FRAUD_URL,
+  drivingUrl: __ENV.IDENTITY_DRIVING_URL,
+  drivingEndpoint: __ENV.IDENTITY_DRIVING_ENDPOINT,
+  orchestratorCoreStub: __ENV.IDENTITY_ORCH_STUB_URL,
+  ipvCoreURL: __ENV.IDENTITY_CORE_URL,
+  passportURL: __ENV.IDENTITY_PASSPORT_URL
 
 }
 

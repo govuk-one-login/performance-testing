@@ -63,7 +63,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1000,
+      maxVUs: 300,
       stages: [
         { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
         { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
@@ -77,7 +77,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1000,
+      maxVUs: 300,
       stages: [
         { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
         { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
@@ -91,7 +91,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1000,
+      maxVUs: 300,
       stages: [
         { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
         { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
@@ -105,7 +105,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1000,
+      maxVUs: 300,
       stages: [
         { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
         { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second

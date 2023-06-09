@@ -65,8 +65,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 300,
       stages: [
-        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
-        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
+        { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changeEmail'
@@ -79,8 +79,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 300,
       stages: [
-        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
-        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
+        { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changePassword'
@@ -93,8 +93,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 300,
       stages: [
-        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
-        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
+        { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changePhone'
@@ -105,10 +105,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 250,
+      maxVUs: 300,
       stages: [
-        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
-        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
+        { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'deleteAccount'

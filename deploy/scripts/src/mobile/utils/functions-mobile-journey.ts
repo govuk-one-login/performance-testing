@@ -3,10 +3,10 @@ import http, { type CookieJar, type Response } from 'k6/http'
 import { URL } from './url'
 
 const env = {
-  testClientExecuteUrl: __ENV.TEST_CLIENT_EXECUTE_URL,
-  backEndUrl: __ENV.BACK_END_URL,
-  frontEndUrl: __ENV.FRONT_END_URL,
-  biometricSessionId: __ENV.BIOMETRIC_SESSION_ID
+  testClientExecuteUrl: __ENV.MOBILE_TEST_CLIENT_EXECUTE_URL,
+  backEndUrl: __ENV.MOBILE_BACK_END_URL,
+  frontEndUrl: __ENV.MOBILE_FRONT_END_URL,
+  biometricSessionId: __ENV.MOBILE_BIOMETRIC_SESSION_ID
 }
 
 export enum SmartphoneType {

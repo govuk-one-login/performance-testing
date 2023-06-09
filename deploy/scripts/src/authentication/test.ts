@@ -117,14 +117,14 @@ const dataSignIn: signInData[] = new SharedArray('data', () => Array.from({ leng
   }
 ))
 const env = {
-  rpStub: __ENV.RP_STUB,
-  baseUrl: __ENV.BASE_URL
+  rpStub: __ENV.ACCOUNT_RP_STUB,
+  baseUrl: __ENV.ACCOUNT_BASE_URL
 }
 const credentials = {
-  authAppKey: __ENV.AUTH_APP_KEY,
-  password: __ENV.APP_PASSWORD,
-  emailOTP: __ENV.EMAIL_OTP,
-  phoneOTP: __ENV.PHONE_OTP
+  authAppKey: __ENV.ACCOUNT_APP_KEY,
+  password: __ENV.ACCOUNT_APP_PASSWORD,
+  emailOTP: __ENV.ACCOUNT_EMAIL_OTP,
+  phoneOTP: __ENV.ACCOUNT_PHONE_OTP
 }
 const durations = new Trend('duration')
 

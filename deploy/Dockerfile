@@ -12,6 +12,15 @@ RUN cd scripts && \
     npm install && \
     node ./build.js
 
+# -------------------------------
+# Build k6 binary with extensions
+# -------------------------------
+FROM golang:1.18-alpine as k6-build
+WORKDIR $GOPATH/src/go.k6.io/k6
+
+RUN go install go.k6.io/xk6/cmd/xk6@v0.9.1
+RUN xk6 build v0.44.1 --with github.com/Dynatrace/xk6-output-dynatrace@latest --output /k6
+
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
@@ -22,10 +31,8 @@ ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 # Run
 # ---
 FROM loadimpact/k6:0.44.1
+COPY --from=k6-build /k6 /usr/bin/k6
 COPY --from=otel / /otel
-ENV K6_STATSD_ENABLE_TAGS=true
-ENV K6_STATSD_BUFFER_SIZE=100
-ENV K6_STATSD_PUSH_INTERVAL=100ms
 ENV OTEL_METRIC_EXPORT_INTERVAL=100
 ENV OTEL_TEMPLATE=/otel/etc/otelcol/config-template.yaml
 ENV OTEL_CONFIG=/home/k6/config.yaml

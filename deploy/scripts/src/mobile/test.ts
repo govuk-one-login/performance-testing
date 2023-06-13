@@ -1,31 +1,28 @@
 import { sleep } from 'k6'
 import http from 'k6/http'
 import { type Options } from 'k6/options'
+import { describeProfile, type ProfileList, selectProfile } from '../common/utils/config/load-profiles'
 import {
-  describeProfile,
-  type ProfileList,
-  selectProfile
-} from '../common/utils/config/load-profiles'
-import {
-  startDcmawJourney,
-  DeviceType,
-  SmartphoneType,
-  YesOrNo,
-  IphoneType,
-  checkSelectDeviceRedirect,
-  checkSelectSmartphoneRedirect,
-  checkValidPassportPageRedirect,
-  checkValidDrivingLicenseRedirect,
   checkBiometricChipRedirect,
   checkFlashingWarningRedirect,
   checkIphoneModelRedirect,
   checkRedirectPage,
+  checkSelectDeviceRedirect,
+  checkSelectSmartphoneRedirect,
+  checkValidBrpRedirect,
+  checkValidDrivingLicenseRedirect,
+  checkValidPassportPageRedirect,
   checkWorkingCameraRedirect,
+  DeviceType,
   getBiometricToken,
-  postFinishBiometricToken,
   getSessionId,
+  IphoneType,
+  postFinishBiometricToken,
   setSessionCookie,
-  updateCookiesFromIdCheckAppPage
+  SmartphoneType,
+  startDcmawJourney,
+  updateCookiesFromIdCheckAppPage,
+  YesOrNo
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -49,7 +46,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 5,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 5, duration: '30s' } // Ramps up to target load
       ],
       exec: 'dcmawDrivingLicenseAndroid'
     }
@@ -109,6 +106,8 @@ export function dcmawDrivingLicenseAndroid (): void {
   checkSelectSmartphoneRedirect(SmartphoneType.Android)
   sleep(1)
   checkValidPassportPageRedirect(YesOrNo.NO)
+  sleep(1)
+  checkValidBrpRedirect(YesOrNo.NO)
   sleep(1)
   checkValidDrivingLicenseRedirect(YesOrNo.YES)
   sleep(1)

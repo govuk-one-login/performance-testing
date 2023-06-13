@@ -189,7 +189,7 @@ export function checkSelectSmartphoneRedirect (
 
 export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
   group(
-    `Select valid passport: ${validPassport} from /selectPassport page`,
+    `Select valid passport: ${validPassport} from /validPassport page`,
     () => {
       const res = http.post(
         getFrontendUrl('/validPassport'),
@@ -205,6 +205,36 @@ export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
             'Does your passport have this symbol on the cover?'
           )
           isPageRedirectCorrect(res, '/biometricChip')
+          break
+        case YesOrNo.NO:
+          isPageContentCorrect(
+            res,
+            'Do you have a valid UK biometric residence permit (BRP)?'
+          )
+          isPageRedirectCorrect(res, '/validBrp')
+      }
+    }
+  )
+}
+
+export function checkValidBrpRedirect (validBrp: YesOrNo): void {
+  group(
+    `Select valid brp: ${validBrp} from /validBrp page`,
+    () => {
+      const res = http.post(
+        getFrontendUrl('/validBrp'),
+        { 'select-option': validBrp },
+        { tags: { name: 'Select Valid Brp Page' } }
+      )
+      isStatusCode200(res)
+
+      switch (validBrp) {
+        case YesOrNo.YES:
+          isPageContentCorrect(
+            res,
+            'Use your UK BRP and a GOV.UK app to confirm your identity'
+          )
+          isPageRedirectCorrect(res, '/idCheckApp')
           break
         case YesOrNo.NO:
           isPageContentCorrect(

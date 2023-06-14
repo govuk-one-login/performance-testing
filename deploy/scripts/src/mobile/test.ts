@@ -25,7 +25,7 @@ import {
 
 const profiles: ProfileList = {
   smoke: {
-    dcmawStartAuthorizeRequest: {
+    dcmawDoAuthorizeRequest: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -35,7 +35,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '30s' },
         { target: 5, duration: '30s' }
       ],
-      exec: 'dcmawStartAuthorizeRequest'
+      exec: 'dcmawDoAuthorizeRequest'
     }
   }
 }

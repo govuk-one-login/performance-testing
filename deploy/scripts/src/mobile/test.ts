@@ -25,27 +25,17 @@ import {
 
 const profiles: ProfileList = {
   smoke: {
-    dcmawPassportIphone: {
+    dcmawStartAuthorizeRequest: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
       maxVUs: 5,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 5, duration: '30s' },
+        { target: 5, duration: '30s' }
       ],
-      exec: 'dcmawPassportIphone'
-    },
-    dcmawDrivingLicenseAndroid: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'dcmawDrivingLicenseAndroid'
+      exec: 'dcmawStartAuthorizeRequest'
     }
   }
 }
@@ -63,6 +53,12 @@ export const options: Options = {
 
 export function setup (): void {
   describeProfile(loadProfile)
+}
+
+export function dcmawStartAuthorizeRequest (): void {
+  const jar = http.cookieJar()
+  const sessionId = getSessionId()
+  setSessionCookie(jar, sessionId)
 }
 
 export function dcmawPassportIphone (): void {

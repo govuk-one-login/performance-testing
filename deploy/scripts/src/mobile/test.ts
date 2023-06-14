@@ -46,7 +46,6 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 5,
       stages: [
-        { target: 5, duration: '30s' }, // Ramps up to target load
         { target: 5, duration: '30s' } // Ramps up to target load
       ],
       exec: 'dcmawDrivingLicenseAndroid'
@@ -113,9 +112,9 @@ export function dcmawDrivingLicenseAndroid (): void {
   checkValidDrivingLicenseRedirect(YesOrNo.YES)
   sleep(1)
   checkWorkingCameraRedirect(YesOrNo.YES)
-  updateCookiesFromIdCheckAppPage()
   sleep(1)
   checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.ComputerOrTablet)
+  updateCookiesFromIdCheckAppPage()
   sleep(1)
   getBiometricToken(sessionId)
   postFinishBiometricToken(sessionId)

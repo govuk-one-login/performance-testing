@@ -55,10 +55,8 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
-export function dcmawStartAuthorizeRequest (): void {
-  const jar = http.cookieJar()
-  const sessionId = getSessionId()
-  setSessionCookie(jar, sessionId)
+export function dcmawDoAuthorizeRequest (): void {
+  getSessionId()
 }
 
 export function dcmawPassportIphone (): void {

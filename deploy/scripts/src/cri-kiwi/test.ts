@@ -14,7 +14,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 2, duration: '2m' } // Ramps up to target load
+        { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'FaceToFace'
     },
@@ -78,7 +78,10 @@ export function setup (): void {
 }
 
 const env = {
-  envURL: __ENV.IDENTITY_KIWI_URL
+  envURL: __ENV.IDENTITY_KIWI_URL,
+  envIPVStub: __ENV.IDENTITY_KIWI_STUB_URL,
+  envVerifyRequest: __ENV.IDENTITY_KIWI_VERIFY_REQUEST,
+  envTarget: __ENV.IDENTITY_KIWI_TARGET
 }
 
 const transactionDuration = new Trend('duration')
@@ -86,11 +89,36 @@ const transactionDuration = new Trend('duration')
 export function CIC (): void {
   let res: Response
   let csrfToken: string
+  let requestValue: string
+  let clientId: string
+  const obj = {
+    target: env.envTarget
+  }
 
-  group('B01_CIC_01_LaunchLandingPage GET', function () {
+  const payload = JSON.stringify(obj)
+
+  group('B01_CIC_01_IPVStubCall POST', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL, {
-      tags: { name: 'B01_CIC_01_LaunchLandingPage' }
+    res = http.post(env.envIPVStub + '/start', payload,
+      {
+        tags: { name: 'B01_CIC_01_IPVStubCall' }
+      })
+    const endTime = Date.now()
+    check(res, {
+      'is status 201': (r) => r.status === 201,
+      'verify page content': (r) =>
+        (r.body as string).includes(env.envVerifyRequest)
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    requestValue = getRequestCode(res)
+    clientId = getClientID(res)
+  })
+
+  group('B01_CIC_02_Authorize GET', function () {
+    const startTime = Date.now()
+    res = http.get(env.envURL + '/oauth2/authorize?request=' + requestValue + '&response_type=code&client_id=' + clientId, {
+      tags: { name: 'B01_CIC_02_Authorize' }
     })
     const endTime = Date.now()
 
@@ -104,7 +132,7 @@ export function CIC (): void {
     csrfToken = getCSRF(res)
   })
 
-  group('B01_CIC_02_UserDetails POST', function () {
+  group('B01_CIC_03_UserDetails POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/nameEntry', {
       surname: 'NameTest',
@@ -112,9 +140,8 @@ export function CIC (): void {
       middleName: '',
       continue: '',
       'x-csrf-token': csrfToken
-
     }, {
-      tags: { name: 'B01_CIC_02_UserDetails' }
+      tags: { name: 'B01_CIC_03_UserDetails' }
     })
     const endTime = Date.now()
 
@@ -130,7 +157,7 @@ export function CIC (): void {
 
   sleep(Math.random() * 3)
 
-  group('B01_CIC_03_UserBirthdate POST', function () {
+  group('B01_CIC_04_UserBirthdate POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/dateOfBirth', {
       'dateOfBirth-day': '1',
@@ -138,9 +165,8 @@ export function CIC (): void {
       'dateOfBirth-year': '1985',
       continue: '',
       'x-csrf-token': csrfToken
-
     }, {
-      tags: { name: 'B01_CIC_03_UserBirthdate' }
+      tags: { name: 'B01_CIC_04_UserBirthdate' }
     })
     const endTime = Date.now()
 
@@ -148,6 +174,25 @@ export function CIC (): void {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
         (r.body as string).includes('Check your details')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
+
+  group('B01_CIC_05_CheckDetails POST', function () {
+    const startTime = Date.now()
+    res = http.post(env.envURL + '/checkDetails', {
+      continue: '',
+      'x-csrf-token': csrfToken
+    }, {
+      tags: { name: 'B01_CIC_05_CheckDetails' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'verify url body': (r) =>
+        (r.url).includes(clientId)
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -716,4 +761,26 @@ function randomDate (start: Date, end: Date): Date {
 
 function getCSRF (r: Response): string {
   return r.html().find("input[name='x-csrf-token']").val() ?? ''
+}
+
+function getRequestCode (r: Response): string {
+  const data = JSON.stringify(r.body)
+  const parsed = JSON.parse(data)
+  const matchResult = parsed.match(/"request"\s*:\s*"([^"]+)"/)
+  if (matchResult != null && matchResult.length > 1) {
+    return matchResult[1]
+  } else {
+    return 'No value found'
+  }
+}
+
+function getClientID (r: Response): string {
+  const data = JSON.stringify(r.body)
+  const parsed = JSON.parse(data)
+  const matchResult = parsed.match(/"clientId"\s*:\s*"([^"]+)"/)
+  if (matchResult != null && matchResult.length > 1) {
+    return matchResult[1]
+  } else {
+    return 'No value found'
+  }
 }

@@ -14,7 +14,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 2, duration: '2m' } // Ramps up to target load
       ],
       exec: 'FaceToFace'
     },

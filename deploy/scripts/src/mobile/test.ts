@@ -20,7 +20,8 @@ import {
   getBiometricToken,
   postFinishBiometricToken,
   getSessionId,
-  setSessionCookie
+  setSessionCookie,
+  doAuthorizeRequest
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -56,7 +57,7 @@ export function setup (): void {
 }
 
 export function dcmawDoAuthorizeRequest (): void {
-  getSessionId()
+  doAuthorizeRequest()
 }
 
 export function dcmawPassportIphone (): void {

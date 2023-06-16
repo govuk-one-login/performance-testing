@@ -4,6 +4,7 @@ import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { Trend } from 'k6/metrics'
 import execution from 'k6/execution'
+import { b64encode } from 'k6/encoding'
 
 const profiles: ProfileList = {
   smoke: {
@@ -80,7 +81,6 @@ export function setup (): void {
 const env = {
   envURL: __ENV.IDENTITY_KIWI_URL,
   envIPVStub: __ENV.IDENTITY_KIWI_STUB_URL,
-  envVerifyRequest: __ENV.IDENTITY_KIWI_VERIFY_REQUEST,
   envTarget: __ENV.IDENTITY_KIWI_TARGET
 }
 
@@ -91,23 +91,21 @@ export function CIC (): void {
   let csrfToken: string
   let requestValue: string
   let clientId: string
-  const obj = {
-    target: env.envTarget
-  }
-
-  const payload = JSON.stringify(obj)
+  const encodeRequest = b64encode('{"alg":"RSA', 'rawstd')
 
   group('B01_CIC_01_IPVStubCall POST', function () {
     const startTime = Date.now()
-    res = http.post(env.envIPVStub + '/start', payload,
+    res = http.post(env.envIPVStub + '/start',
+      JSON.stringify({
+        target: env.envTarget
+      }),
       {
         tags: { name: 'B01_CIC_01_IPVStubCall' }
       })
     const endTime = Date.now()
     check(res, {
       'is status 201': (r) => r.status === 201,
-      'verify page content': (r) =>
-        (r.body as string).includes(env.envVerifyRequest)
+      'verify page content': (r) => (r.body as string).includes(encodeRequest)
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -117,7 +115,8 @@ export function CIC (): void {
 
   group('B01_CIC_02_Authorize GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/oauth2/authorize?request=' + requestValue + '&response_type=code&client_id=' + clientId, {
+    const endpoint = `/oauth2/authorize?request=${requestValue}&response_type=code&client_id=${clientId}`
+    res = http.get(env.envURL + endpoint, {
       tags: { name: 'B01_CIC_02_Authorize' }
     })
     const endTime = Date.now()
@@ -764,23 +763,35 @@ function getCSRF (r: Response): string {
 }
 
 function getRequestCode (r: Response): string {
-  const data = JSON.stringify(r.body)
-  const parsed = JSON.parse(data)
-  const matchResult = parsed.match(/"request"\s*:\s*"([^"]+)"/)
-  if (matchResult != null && matchResult.length > 1) {
-    return matchResult[1]
+  const responseBody = r.body
+
+  if (responseBody !== null && typeof responseBody === 'string') {
+    const response = JSON.parse(responseBody)
+
+    if (response?.request !== null) {
+      const request = response.request
+      return request
+    } else {
+      return 'No value found'
+    }
   } else {
-    return 'No value found'
+    return 'Invalid response body'
   }
 }
 
 function getClientID (r: Response): string {
-  const data = JSON.stringify(r.body)
-  const parsed = JSON.parse(data)
-  const matchResult = parsed.match(/"clientId"\s*:\s*"([^"]+)"/)
-  if (matchResult != null && matchResult.length > 1) {
-    return matchResult[1]
+  const responseBody = r.body
+
+  if (responseBody !== null && typeof responseBody === 'string') {
+    const response = JSON.parse(responseBody)
+
+    if (response?.clientId != null) {
+      const clientId = response.clientId
+      return clientId
+    } else {
+      return 'No value found'
+    }
   } else {
-    return 'No value found'
+    return 'Invalid response body'
   }
 }

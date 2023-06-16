@@ -232,7 +232,6 @@ Resources:
               IDENTITY_KIWI_URL: "/perfTest/identity/kiwi/url"
               IDENTITY_KIWI_STUB_URL: "/perfTest/identity/kiwi/stubUrl"
               IDENTITY_KIWI_TARGET: "/perfTest/identity/kiwi/target"
-              IDENTITY_KIWI_VERIFY_REQUEST: "/perfTest/identity/kiwi/verifyRequest"
               IDENTITY_ORCH_STUB_URL: "/perfTest/identity/orchStubUrl"
               IDENTITY_PASSPORT_URL: "/perfTest/identity/lime/passportUrl"
               IDENTITY_STUB_PASSWORD: "/perfTest/identity/coreStubPassword"

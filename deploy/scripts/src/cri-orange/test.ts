@@ -87,6 +87,12 @@ const stubCreds = {
   password: __ENV.IDENTITY_STUB_PASSWORD
 }
 
+const kbvAnswers = {
+  kbvAns1: __ENV.IDENTITY_KBV_ANS1,
+  kbvAns2: __ENV.IDENTITY_KBV_ANS2,
+  kbvAns3: __ENV.IDENTITY_KBV_ANS3
+}
+
 interface Address {
   postcode: string
 }
@@ -104,7 +110,6 @@ const transactionDuration = new Trend('duration')
 export function kbvScenario1 (): void {
   let res: Response
   let csrfToken: string
-  const userDetails = getUserDetails()
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
 
@@ -112,39 +117,8 @@ export function kbvScenario1 (): void {
     'B01_KBV_01_CoreStubEditUserContinue POST',
     function () {
       const startTime = Date.now()
-      res = http.post(
-        env.ipvCoreStub + '/edit-user',
-        {
-          cri: env.kbvEnvName,
-          rowNumber: '197',
-          firstName: userDetails.firstName,
-          surname: userDetails.lastName,
-          'dateOfBirth-day': `${userDetails.day}`,
-          'dateOfBirth-month': `${userDetails.month}`,
-          'dateOfBirth-year': `${userDetails.year}`,
-          buildingNumber: `${userDetails.buildNum}`,
-          buildingName: userDetails.buildName,
-          street: userDetails.street,
-          townCity: userDetails.city,
-          postCode: userDetails.postCode,
-          validFromDay: '26',
-          validFromMonth: '02',
-          validFromYear: '2021',
-          validUntilDay: '',
-          validUntilMonth: '',
-          validUntilYear: '',
-          'SecondaryUKAddress.buildingNumber': '',
-          'SecondaryUKAddress.buildingName': '',
-          'SecondaryUKAddress.street': '',
-          'SecondaryUKAddress.townCity': '',
-          'SecondaryUKAddress.postCode': '',
-          'SecondaryUKAddress.validFromDay': '',
-          'SecondaryUKAddress.validFromMonth': '',
-          'SecondaryUKAddress.validFromYear': '',
-          'SecondaryUKAddress.validUntilDay': '',
-          'SecondaryUKAddress.validUntilMonth': '',
-          'SecondaryUKAddress.validUntilYear': ''
-        },
+      res = http.get(
+        env.ipvCoreStub + '/authorize?cri=kbv-cri-build&rowNumber=197',
         {
           headers: { Authorization: `Basic ${encodedCredentials}` },
           tags: { name: 'B01_KBV_01_CoreStubEditUserContinue' }
@@ -154,7 +128,7 @@ export function kbvScenario1 (): void {
 
       check(res, {
         'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('Question 1')
+        'verify page content': (r) => (r.body as string).includes('You can find this amount on your loan agreement')
       })
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
@@ -170,7 +144,7 @@ export function kbvScenario1 (): void {
     res = http.post(
       env.kbvEndPoint + '/kbv/question',
       {
-        Q00001: 'Correct 1',
+        Q00042: kbvAnswers.kbvAns1,
         continue: '',
         'x-csrf-token': csrfToken
       },
@@ -183,7 +157,7 @@ export function kbvScenario1 (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('User data incorrect')
+        (r.body as string).includes('This includes any interest')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -193,18 +167,46 @@ export function kbvScenario1 (): void {
 
   sleep(Math.random() * 3)
 
-  group('B01_KBV_02_KBVQuestion2 POST', function () {
+  group('B01_KBV_03_KBVQuestion2 POST', function () {
+    const startTime = Date.now()
+    res = http.post(
+      env.kbvEndPoint + '/kbv/question',
+      {
+        Q00015: kbvAnswers.kbvAns2,
+        continue: '',
+        'x-csrf-token': csrfToken
+      },
+      {
+        tags: { name: 'B01_KBV_03_KBVQuestion2' }
+      }
+    )
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Think about the amount you agreed to pay back every month')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+
+    csrfToken = getCSRF(res)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B01_KBV_04_KBVQuestion3 POST', function () {
     const startTime1 = Date.now()
     res = http.post(
       env.kbvEndPoint + '/kbv/question',
       {
-        Q00002: 'Correct 2',
+        Q00018: kbvAnswers.kbvAns3,
         continue: '',
         'x-csrf-token': csrfToken
       },
       {
         redirects: 2,
-        tags: { name: 'B01_KBV_02_KBVQuestion2_KBVCall' }
+        tags: { name: 'B01_KBV_04_KBVQuestion3_KBVCall' }
       }
     )
     const endTime1 = Date.now()
@@ -219,7 +221,7 @@ export function kbvScenario1 (): void {
     res = http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B01_KBV_02_KBVQuestion2_CoreStubCall' }
+        tags: { name: 'B01_KBV_04_KBVQuestion3_CoreStubCall' }
       }
     )
     const endTime2 = Date.now()
@@ -227,7 +229,7 @@ export function kbvScenario1 (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Verifiable Credentials')
+        (r.body as string).includes('verificationScore&quot;: 2')
     })
       ? transactionDuration.add(endTime2 - startTime2)
       : fail('Response Validation Failed')
@@ -420,33 +422,5 @@ function getAddressDetails (r: Response): AddressDetails {
     houseName: html.find("input[name='addressHouseName']").val() ?? '',
     streetName: html.find("input[name='addressStreetName']").val() ?? '',
     town: html.find("input[name='addressLocality']").val() ?? ''
-  }
-}
-
-interface User {
-  firstName: string
-  lastName: string
-  day: number
-  month: number
-  year: number
-  buildNum: number
-  buildName: string
-  street: string
-  city: string
-  postCode: string
-}
-
-function getUserDetails (): User {
-  return {
-    firstName: `perfFirst${Math.floor(Math.random() * 99998) + 1}`,
-    lastName: `perfLast${Math.floor(Math.random() * 99998) + 1}`,
-    day: Math.floor(Math.random() * 29) + 1,
-    month: Math.floor(Math.random() * 12) + 1,
-    year: Math.floor(Math.random() * 71) + 1950,
-    buildNum: Math.floor(Math.random() * 999) + 1,
-    buildName: `RandomBuilding${Math.floor(Math.random() * 99998) + 1}`,
-    street: `RandomgStreet${Math.floor(Math.random() * 99998) + 1}`,
-    city: `RandomCity${Math.floor(Math.random() * 999) + 1}`,
-    postCode: `AB${Math.floor(Math.random() * 99) + 1} CD${Math.floor(Math.random() * 99) + 1}`
   }
 }

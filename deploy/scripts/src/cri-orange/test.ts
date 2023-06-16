@@ -87,10 +87,8 @@ const stubCreds = {
   password: __ENV.IDENTITY_STUB_PASSWORD
 }
 
-const kbvAnswers = {
-  kbvAns1: __ENV.IDENTITY_KBV_ANS1,
-  kbvAns2: __ENV.IDENTITY_KBV_ANS2,
-  kbvAns3: __ENV.IDENTITY_KBV_ANS3
+const kbvAnswersOBJ = {
+  kbvAnswers: __ENV.IDENTITY_KBV_ANSWERS
 }
 
 interface Address {
@@ -112,6 +110,12 @@ export function kbvScenario1 (): void {
   let csrfToken: string
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
+  interface kbvAnswers {
+    kbvAns1: string
+    kbvAns2: string
+    kbvAns3: string
+  }
+  const kbvAnsJSON: kbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
 
   group(
     'B01_KBV_01_CoreStubEditUserContinue POST',
@@ -144,7 +148,7 @@ export function kbvScenario1 (): void {
     res = http.post(
       env.kbvEndPoint + '/kbv/question',
       {
-        Q00042: kbvAnswers.kbvAns1,
+        Q00042: kbvAnsJSON.kbvAns1,
         continue: '',
         'x-csrf-token': csrfToken
       },
@@ -172,7 +176,7 @@ export function kbvScenario1 (): void {
     res = http.post(
       env.kbvEndPoint + '/kbv/question',
       {
-        Q00015: kbvAnswers.kbvAns2,
+        Q00015: kbvAnsJSON.kbvAns2,
         continue: '',
         'x-csrf-token': csrfToken
       },
@@ -200,7 +204,7 @@ export function kbvScenario1 (): void {
     res = http.post(
       env.kbvEndPoint + '/kbv/question',
       {
-        Q00018: kbvAnswers.kbvAns3,
+        Q00018: kbvAnsJSON.kbvAns3,
         continue: '',
         'x-csrf-token': csrfToken
       },

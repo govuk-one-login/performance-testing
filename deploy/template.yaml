@@ -186,6 +186,10 @@ Resources:
         Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
+        EnvironmentVariables:
+        - Name: AWS_ACCOUNT_ID
+          Type: PLAINTEXT
+          Value: !Ref AWS::AccountId
       VpcConfig:
         SecurityGroupIds:
           - !GetAtt TestContainerSecurityGroup.GroupId

@@ -91,7 +91,6 @@ export function CIC (): void {
   let csrfToken: string
   let requestValue: string
   let clientId: string
-  const encodeRequest = b64encode('{"alg":"RSA', 'rawstd')
 
   group('B01_CIC_01_IPVStubCall POST', function () {
     const startTime = Date.now()
@@ -105,7 +104,7 @@ export function CIC (): void {
     const endTime = Date.now()
     check(res, {
       'is status 201': (r) => r.status === 201,
-      'verify page content': (r) => (r.body as string).includes(encodeRequest)
+      'verify page content': (r) => (r.body as string).includes(b64encode('{"alg":"RSA', 'rawstd'))
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -763,35 +762,13 @@ function getCSRF (r: Response): string {
 }
 
 function getRequestCode (r: Response): string {
-  const responseBody = r.body
-
-  if (responseBody !== null && typeof responseBody === 'string') {
-    const response = JSON.parse(responseBody)
-
-    if (response?.request !== null) {
-      const request = response.request
-      return request
-    } else {
-      return 'No value found'
-    }
-  } else {
-    return 'Invalid response body'
-  }
+  const request = r.json('request')
+  if (request !== null && typeof request === 'string') return request
+  fail('Request not found')
 }
 
 function getClientID (r: Response): string {
-  const responseBody = r.body
-
-  if (responseBody !== null && typeof responseBody === 'string') {
-    const response = JSON.parse(responseBody)
-
-    if (response?.clientId != null) {
-      const clientId = response.clientId
-      return clientId
-    } else {
-      return 'No value found'
-    }
-  } else {
-    return 'Invalid response body'
-  }
+  const clientId = r.json('clientId')
+  if (clientId !== null && typeof clientId === 'string') return clientId
+  fail('Client ID not found')
 }

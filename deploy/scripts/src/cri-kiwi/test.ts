@@ -39,10 +39,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 70,
       stages: [
-        { target: 50, duration: '15m' }, // Ramps up to target load
-        { target: 50, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 50 iterations/second
+        { target: 3, duration: '15m' }, // Ramps up to target load
+        { target: 3, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 50 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'FaceToFace'
@@ -52,10 +52,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 800,
+      maxVUs: 45,
       stages: [
-        { target: 50, duration: '15m' }, // Ramps up to target load
-        { target: 50, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 50 iterations/second
+        { target: 3, duration: '15m' }, // Ramps up to target load
+        { target: 3, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 50 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'CIC'

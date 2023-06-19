@@ -21,7 +21,7 @@ ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 # ---
 # Run
 # ---
-FROM loadimpact/k6:0.44.1
+FROM loadimpact/k6:0.45.0
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true
 ENV K6_STATSD_BUFFER_SIZE=100

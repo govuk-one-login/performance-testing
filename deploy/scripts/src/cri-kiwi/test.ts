@@ -233,7 +233,7 @@ export function FaceToFace (): void {
   group('B02_FaceToFace_02_Continue POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/landingPage', {
-      continue: '',
+      landingPageContinue: '',
       'x-csrf-token': csrfToken
     },
     {
@@ -341,7 +341,6 @@ export function FaceToFace (): void {
           tags: { name: 'B02_FaceToFace_04_NationalIDEEA_Details' }
         })
         const endTime = Date.now()
-
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
@@ -357,7 +356,7 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_05_NationalIDEEA_CurrentAddress POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/eeaIdCardAddressCheck', {
-          eeaIdCardAddressCheck: 'sameAddress',
+          eeaIdCardAddressCheck: 'Yes, it has my current address on it',
           continue: '',
           'x-csrf-token': csrfToken
         }, {
@@ -380,7 +379,7 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_06_NationalIDEEA_WhichCountry POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/eeaIdentityCardCountrySelector', {
-          eeaIdentityCardCountrySelector: 'RO',
+          eeaIdentityCardCountrySelector: 'Romania',
           continue: '',
           'x-csrf-token': csrfToken
         }, {
@@ -450,10 +449,11 @@ export function FaceToFace (): void {
       })
 
       sleep(Math.random() * 3)
+
       group('B02_FaceToFace_05_EUDL_CurrentAddress POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/euDrivingLicenceAddressCheck', {
-          euDrivingLicenceAddressCheck: 'sameAddress',
+          euDrivingLicenceAddressCheck: 'Yes, it has my current address on it',
           continue: '',
           'x-csrf-token': csrfToken
         },
@@ -461,7 +461,6 @@ export function FaceToFace (): void {
           tags: { name: 'B02_FaceToFace_05_EUDL_CurrentAddress' }
         })
         const endTime = Date.now()
-
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
@@ -477,7 +476,7 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_06_EUDL_WhichCountry POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/euDrivingLicenceCountrySelector', {
-          euDrivingLicenceCountrySelector: 'RO',
+          euDrivingLicenceCountrySelector: 'Romania',
           continue: '',
           'x-csrf-token': csrfToken
         },
@@ -552,7 +551,7 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_05_NonUKPassport_WhichCountry POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/nonUkPassportcountrySelector', {
-          nonUkPassportcountrySelector: 'RO',
+          nonUkPassportCountrySelector: 'Romania',
           continue: '',
           'x-csrf-token': csrfToken
         },
@@ -560,7 +559,6 @@ export function FaceToFace (): void {
           tags: { name: 'B02_FaceToFace_05_NonUKPassport_WhichCountry' } // pragma: allowlist secret`
         })
         const endTime = Date.now()
-
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>

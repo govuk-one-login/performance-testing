@@ -20,32 +20,23 @@ import {
   getBiometricToken,
   postFinishBiometricToken,
   getSessionId,
-  setSessionCookie
+  setSessionCookie,
+  doAuthorizeRequest
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
   smoke: {
-    dcmawPassportIphone: {
+    dcmawDoAuthorizeRequest: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
       maxVUs: 5,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 5, duration: '30s' },
+        { target: 5, duration: '30s' }
       ],
-      exec: 'dcmawPassportIphone'
-    },
-    dcmawDrivingLicenseAndroid: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'dcmawDrivingLicenseAndroid'
+      exec: 'dcmawDoAuthorizeRequest'
     }
   }
 }
@@ -63,6 +54,10 @@ export const options: Options = {
 
 export function setup (): void {
   describeProfile(loadProfile)
+}
+
+export function dcmawDoAuthorizeRequest (): void {
+  doAuthorizeRequest()
 }
 
 export function dcmawPassportIphone (): void {

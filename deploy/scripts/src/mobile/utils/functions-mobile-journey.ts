@@ -125,6 +125,14 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
   return getUrl(path, env.backEndUrl, query)
 }
 
+export function doAuthorizeRequest (): void {
+  const res = postToVerifyURL()
+  isStatusCode201(res)
+  const verifyUrl = parseVerifyUrl(res)
+  const verifyRes = http.get(verifyUrl)
+  isStatusCode200(verifyRes)
+}
+
 export function startDcmawJourney (): void {
   group('Start DCMAW Journey', () => {
     const res = http.get(getFrontendUrl('/selectDevice'), {

@@ -132,9 +132,8 @@ export function doAuthorizeRequest (): void {
   })
 
   group('Authorize Request', () => {
-    const verifyRes = http.get(verifyUrl, { redirects: 0 })
+    const verifyRes = http.get(verifyUrl)
     isStatusCode200(verifyRes)
-    console.log((verifyRes.status))
   })
 }
 
@@ -143,7 +142,6 @@ export function startDcmawJourney (): void {
     const res = http.get(getFrontendUrl('/selectDevice'), {
       tags: { name: 'Start DCMAW Journey' }
     })
-    console.log(getSessionIdFromCookieJar())
     isStatusCode200(res)
     isPageContentCorrect(res, 'Are you on a computer or a tablet right now?')
     isPageRedirectCorrect(res, '/selectDevice')

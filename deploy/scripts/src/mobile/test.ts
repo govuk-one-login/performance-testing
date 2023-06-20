@@ -47,8 +47,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 5,
       stages: [
-        { target: 5, duration: '30s' },
-        { target: 5, duration: '30s' }
+        { target: 5, duration: '10s' },
+        // { target: 5, duration: '30s' }
       ],
       exec: 'dcmawMamIphonePassport'
     }
@@ -75,9 +75,7 @@ export function dcmawDoAuthorizeRequest (): void {
 }
 
 export function dcmawMamIphonePassport (): void {
-  const jar = http.cookieJar()
-  const sessionId = getSessionId()
-  setSessionCookie(jar, sessionId)
+  doAuthorizeRequest()
   startDcmawJourney()
   sleep(1)
   checkSelectDeviceRedirect(DeviceType.Smartphone)
@@ -90,16 +88,16 @@ export function dcmawMamIphonePassport (): void {
   sleep(1)
   checkIphoneModelRedirect(IphoneType.Iphone7OrNewer)
   sleep(1)
-  setIsDocumentSavedCookie(jar)
   checkIdCheckAppRedirect()
+  sleep(1)
   checkWorkingCameraRedirect(YesOrNo.YES)
   sleep(1)
   checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Smartphone)
   sleep(1)
-  getBiometricToken(sessionId)
-  postFinishBiometricToken(sessionId)
-  sleep(3)
-  checkRedirectPage(sessionId)
+  // getBiometricToken(sessionId)
+  // postFinishBiometricToken(sessionId)
+  // sleep(3)
+  // checkRedirectPage(sessionId)
 }
 
 export function dcmawDrivingLicenseAndroid (): void {

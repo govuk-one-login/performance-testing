@@ -133,8 +133,9 @@ export function doAuthorizeRequest (): void {
   const res = postToVerifyURL()
   isStatusCode201(res)
   const verifyUrl = parseVerifyUrl(res)
-  const verifyRes = http.get(verifyUrl)
+  const verifyRes = http.get(verifyUrl, { redirects: 0 })
   isStatusCode200(verifyRes)
+  // console.log('VERIFY RES COOKIES', verifyRes.cookies)
 }
 
 export function startDcmawJourney (): void {
@@ -142,6 +143,7 @@ export function startDcmawJourney (): void {
     const res = http.get(getFrontendUrl('/selectDevice'), {
       tags: { name: 'Start DCMAW Journey' }
     })
+    console.log('RES COOKIES', res.cookies)
     isStatusCode200(res)
     isPageContentCorrect(res, 'Are you on a computer or a tablet right now?')
     isPageRedirectCorrect(res, '/selectDevice')
@@ -251,13 +253,14 @@ export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
 
 export function checkIdCheckAppRedirect (): void {
   group('Select continue from /idCheckApp page', () => {
-    const res = http.post(getFrontendUrl('/idCheckApp'), {}, { tags: { name: 'ID Check App Page' } })
+    const res = http.post(getFrontendUrl('/idCheckApp'), {}, { tags: { name: 'ID Check App Page' }, redirects: 0 })
     isStatusCode200(res)
     isPageContentCorrect(
       res,
       'Does your smartphone have a working camera?'
     )
     isPageRedirectCorrect(res, '/workingCamera')
+    console.log('ID CHECK APP COOKIES', res.cookies)
   })
 }
 

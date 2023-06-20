@@ -18,10 +18,7 @@ import {
   checkWorkingCameraRedirect,
   getBiometricToken,
   postFinishBiometricToken,
-  // getSessionId,
-  // setSessionCookie,
   doAuthorizeRequest,
-  // setIsDocumentSavedCookie,
   checkIdCheckAppRedirect
 } from './utils/functions-mobile-journey'
 
@@ -100,9 +97,6 @@ export function dcmawMamIphonePassport (): void {
 }
 
 export function dcmawDrivingLicenseAndroid (): void {
-  // const jar = http.cookieJar()
-  // const sessionId = getSessionId()
-  // setSessionCookie(jar, sessionId)
   startDcmawJourney()
   sleep(1)
   checkSelectDeviceRedirect(DeviceType.ComputerOrTablet)

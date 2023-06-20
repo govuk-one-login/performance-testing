@@ -93,31 +93,8 @@ function parseVerifyUrl (response: Response): string {
   return verifyUrl
 }
 
-// export function setSessionCookie (jar: CookieJar, sessionId: string): void {
-//   jar.set(getFrontendUrl('/'), 'sessionId', sessionId)
-// }
-
-// export function setIsDocumentSavedCookie (jar: CookieJar): void {
-//   jar.set(getFrontendUrl('/'), 'isDocumentSaved', 'true')
-// }
-
-// export function getSessionId (): string {
-//   const res = postToVerifyURL()
-//   isStatusCode201(res)
-
-//   const verifyUrl = parseVerifyUrl(res)
-//   const verifyRes = http.get(verifyUrl, { redirects: 0 })
-//   const sessionId = verifyRes.cookies.sessionId.find(s => s.value.length > 0)?.value
-
-//   if (sessionId == null) {
-//     throw new Error('Cannot find sessionId cookie')
-//   }
-//   return sessionId
-// }
-
 export function getSessionIdFromCookieJar (): string {
   const jar = http.cookieJar()
-  console.log(jar.cookiesForURL(getFrontendUrl('')))
   const sessionId = jar.cookiesForURL(getFrontendUrl('')).sessionId.toString()
   return sessionId
 }
@@ -147,10 +124,14 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
 }
 
 export function doAuthorizeRequest (): void {
-  group('First authorize request', () => {
+  let verifyUrl: string
+  group('Test Client Execute Request', () => {
     const res = postToVerifyURL()
     isStatusCode201(res)
-    const verifyUrl = parseVerifyUrl(res)
+    verifyUrl = parseVerifyUrl(res)
+  })
+
+  group('Authorize Request', () => {
     const verifyRes = http.get(verifyUrl)
     isStatusCode200(verifyRes)
   })
@@ -161,6 +142,7 @@ export function startDcmawJourney (): void {
     const res = http.get(getFrontendUrl('/selectDevice'), {
       tags: { name: 'Start DCMAW Journey' }
     })
+    console.log(getSessionIdFromCookieJar())
     isStatusCode200(res)
     isPageContentCorrect(res, 'Are you on a computer or a tablet right now?')
     isPageRedirectCorrect(res, '/selectDevice')
@@ -379,7 +361,6 @@ export function getBiometricToken (): void {
     const res = http.get(biometricTokenUrl, {
       tags: { name: 'Get Biometric Token' }
     })
-
     isStatusCode200(res)
   })
 }
@@ -391,15 +372,13 @@ export function postFinishBiometricToken (): void {
       biometricSessionId: env.biometricSessionId
     })
     const res = http.post(finishBiometricSessionUrl)
-
     isStatusCode200(res)
   })
 }
 
 export function checkRedirectPage (): void {
   group('Check Redirect Final Page /redirect', () => {
-    const sessionId = getSessionIdFromCookieJar()
-    const redirectUrl = getFrontendUrl('/redirect', { sessionId })
+    const redirectUrl = getFrontendUrl('/redirect', { sessinId: getSessionIdFromCookieJar() })
     const res = http.get(redirectUrl, {
       redirects: 0,
       tags: { name: 'Redirect Final Page' }

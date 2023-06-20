@@ -1,0 +1,33 @@
+name: Feature Branch Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run against'
+        type: environment
+        required: true
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./deploy
+
+jobs:
+  dockerBuildAndPush:
+    name: Docker build and push
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Deploy SAM app to ECR
+        uses: alphagov/di-devplatform-upload-action-ecr@1.0.2
+        with:
+          artifact-bucket-name: ${{ secrets.PERF_ARTIFACT_SOURCE_BUCKET_NAME }}
+          container-sign-kms-key-arn: ${{ secrets.PERF_CONTAINER_SIGN_KMS_KEY }}
+          working-directory: ./deploy
+          template-file: template.yaml
+          role-to-assume-arn: ${{ secrets.PERF_GH_ACTIONS_ROLE_ARN }}
+          ecr-repo-name: ${{ secrets.PERF_ECR_REPOSITORY }}

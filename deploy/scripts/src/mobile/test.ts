@@ -41,9 +41,9 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 10,
+      maxVUs: 5,
       stages: [
-        { target: 10, duration: '30s' }
+        { target: 5, duration: '20s' }
         // { target: 5, duration: '30s' }
       ],
       exec: 'dcmawMamIphonePassport'

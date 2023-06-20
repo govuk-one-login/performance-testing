@@ -132,8 +132,9 @@ export function doAuthorizeRequest (): void {
   })
 
   group('Authorize Request', () => {
-    const verifyRes = http.get(verifyUrl)
+    const verifyRes = http.get(verifyUrl, { redirects: 0 })
     isStatusCode200(verifyRes)
+    console.log((verifyRes.status))
   })
 }
 

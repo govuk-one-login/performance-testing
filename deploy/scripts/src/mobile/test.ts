@@ -21,7 +21,9 @@ import {
   postFinishBiometricToken,
   getSessionId,
   setSessionCookie,
-  doAuthorizeRequest
+  doAuthorizeRequest,
+  setIsDocumentSavedCookie,
+  checkIdCheckAppRedirect
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -37,6 +39,18 @@ const profiles: ProfileList = {
         { target: 5, duration: '30s' }
       ],
       exec: 'dcmawDoAuthorizeRequest'
+    },
+    dcmawMamIphonePassport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 5,
+      stages: [
+        { target: 5, duration: '30s' },
+        { target: 5, duration: '30s' }
+      ],
+      exec: 'dcmawMamIphonePassport'
     }
   }
 }
@@ -60,13 +74,13 @@ export function dcmawDoAuthorizeRequest (): void {
   doAuthorizeRequest()
 }
 
-export function dcmawPassportIphone (): void {
+export function dcmawMamIphonePassport (): void {
   const jar = http.cookieJar()
   const sessionId = getSessionId()
   setSessionCookie(jar, sessionId)
   startDcmawJourney()
   sleep(1)
-  checkSelectDeviceRedirect(DeviceType.Other)
+  checkSelectDeviceRedirect(DeviceType.Smartphone)
   sleep(1)
   checkSelectSmartphoneRedirect(SmartphoneType.Iphone)
   sleep(1)
@@ -76,9 +90,11 @@ export function dcmawPassportIphone (): void {
   sleep(1)
   checkIphoneModelRedirect(IphoneType.Iphone7OrNewer)
   sleep(1)
+  setIsDocumentSavedCookie(jar)
+  checkIdCheckAppRedirect()
   checkWorkingCameraRedirect(YesOrNo.YES)
   sleep(1)
-  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Other)
+  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Smartphone)
   sleep(1)
   getBiometricToken(sessionId)
   postFinishBiometricToken(sessionId)

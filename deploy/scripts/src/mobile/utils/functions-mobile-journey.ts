@@ -15,7 +15,7 @@ export enum SmartphoneType {
 }
 
 export enum DeviceType {
-  Other = 'other',
+  Smartphone = 'smartphone',
   ComputerOrTablet = 'computerOrTablet',
 }
 
@@ -90,6 +90,10 @@ export function setSessionCookie (jar: CookieJar, sessionId: string): void {
   jar.set(getFrontendUrl('/'), 'sessionId', sessionId)
 }
 
+export function setIsDocumentSavedCookie (jar: CookieJar): void {
+  jar.set(getFrontendUrl('/'), 'isDocumentSaved', 'true')
+}
+
 export function getSessionId (): string {
   const res = postToVerifyURL()
   isStatusCode201(res)
@@ -154,7 +158,7 @@ export function checkSelectDeviceRedirect (device: DeviceType): void {
       case DeviceType.ComputerOrTablet:
         isPageContentCorrect(res, 'Do you have a smartphone you can use?')
         break
-      case DeviceType.Other:
+      case DeviceType.Smartphone:
         isPageContentCorrect(res, 'Are you on a smartphone right now?')
         break
     }
@@ -245,6 +249,18 @@ export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
   })
 }
 
+export function checkIdCheckAppRedirect (): void {
+  group('Select continue from /idCheckApp page', () => {
+    const res = http.post(getFrontendUrl('/idCheckApp'), {}, { tags: { name: 'ID Check App Page' } })
+    isStatusCode200(res)
+    isPageContentCorrect(
+      res,
+      'Does your smartphone have a working camera?'
+    )
+    isPageRedirectCorrect(res, '/workingCamera')
+  })
+}
+
 export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void {
   group(`Select working camera: ${workingCameraAnswer} from /workingCamera page`, () => {
     const res = http.post(getFrontendUrl('/workingCamera'), { 'working-camera-choice': workingCameraAnswer }, { tags: { name: 'Select Working Camera' } })
@@ -263,7 +279,7 @@ export function checkFlashingWarningRedirect (warningAnswer: YesOrNo, device: De
     isStatusCode200(res)
 
     switch (device) {
-      case DeviceType.Other:
+      case DeviceType.Smartphone:
         isPageContentCorrect(res, 'Download the GOV.UK ID Check app')
         isPageRedirectCorrect(res, '/downloadApp')
         break

@@ -1,5 +1,5 @@
 import { check, group } from 'k6'
-import http, { type CookieJar, type Response } from 'k6/http'
+import http, { type Response } from 'k6/http'
 import { URL } from './url'
 
 const env = {
@@ -69,15 +69,22 @@ function isHeaderLocationCorrect (res: Response, content: string): boolean {
 }
 
 function postToVerifyURL (): Response {
-  return http.post(getUrl('start', env.testClientExecuteUrl),
+  return http.post(
+    getUrl('start', env.testClientExecuteUrl),
     JSON.stringify({ target: env.backEndUrl, frontendUri: env.frontEndUrl }),
-    { tags: { name: 'Post request to Verify URL' }, headers: { 'Content-Type': 'application/json' } }
+    {
+      tags: { name: 'Post request to Verify URL' },
+      headers: { 'Content-Type': 'application/json' }
+    }
   )
 }
 
 function parseVerifyUrl (response: Response): string {
   const responseBody = response.body?.toString()
-  const verifyUrl = typeof responseBody === 'string' ? JSON.parse(responseBody).WebLocation : null
+  const verifyUrl =
+    typeof responseBody === 'string'
+      ? JSON.parse(responseBody).WebLocation
+      : null
 
   if (verifyUrl === null) {
     throw new Error('Failed to parse verify URL from response')
@@ -86,36 +93,46 @@ function parseVerifyUrl (response: Response): string {
   return verifyUrl
 }
 
-export function setSessionCookie (jar: CookieJar, sessionId: string): void {
-  jar.set(getFrontendUrl('/'), 'sessionId', sessionId)
-}
+// export function setSessionCookie (jar: CookieJar, sessionId: string): void {
+//   jar.set(getFrontendUrl('/'), 'sessionId', sessionId)
+// }
 
-export function setIsDocumentSavedCookie (jar: CookieJar): void {
-  jar.set(getFrontendUrl('/'), 'isDocumentSaved', 'true')
-}
+// export function setIsDocumentSavedCookie (jar: CookieJar): void {
+//   jar.set(getFrontendUrl('/'), 'isDocumentSaved', 'true')
+// }
 
-export function getSessionId (): string {
-  const res = postToVerifyURL()
-  isStatusCode201(res)
+// export function getSessionId (): string {
+//   const res = postToVerifyURL()
+//   isStatusCode201(res)
 
-  const verifyUrl = parseVerifyUrl(res)
-  const verifyRes = http.get(verifyUrl, { redirects: 0 })
-  const sessionId = verifyRes.cookies.sessionId.find(s => s.value.length > 0)?.value
+//   const verifyUrl = parseVerifyUrl(res)
+//   const verifyRes = http.get(verifyUrl, { redirects: 0 })
+//   const sessionId = verifyRes.cookies.sessionId.find(s => s.value.length > 0)?.value
 
-  if (sessionId == null) {
-    throw new Error('Cannot find sessionId cookie')
-  }
+//   if (sessionId == null) {
+//     throw new Error('Cannot find sessionId cookie')
+//   }
+//   return sessionId
+// }
+
+export function getSessionIdFromCookieJar (): string {
+  const jar = http.cookieJar()
+  console.log(jar.cookiesForURL(getFrontendUrl('')))
+  const sessionId = jar.cookiesForURL(getFrontendUrl('')).sessionId.toString()
   return sessionId
 }
 
-function getUrl (path: string, base: string, query?: Record<string, string>): string {
+function getUrl (
+  path: string,
+  base: string,
+  query?: Record<string, string>
+): string {
   const url = new URL(path, base)
 
   if (query != null) {
-    Object.entries(query).forEach(
-      ([key, value]) => {
-        url.searchParams.set(key, value)
-      })
+    Object.entries(query).forEach(([key, value]) => {
+      url.searchParams.set(key, value)
+    })
   }
 
   return url.toString()
@@ -130,12 +147,13 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
 }
 
 export function doAuthorizeRequest (): void {
-  const res = postToVerifyURL()
-  isStatusCode201(res)
-  const verifyUrl = parseVerifyUrl(res)
-  const verifyRes = http.get(verifyUrl, { redirects: 0 })
-  isStatusCode200(verifyRes)
-  // console.log('VERIFY RES COOKIES', verifyRes.cookies)
+  group('First authorize request', () => {
+    const res = postToVerifyURL()
+    isStatusCode201(res)
+    const verifyUrl = parseVerifyUrl(res)
+    const verifyRes = http.get(verifyUrl)
+    isStatusCode200(verifyRes)
+  })
 }
 
 export function startDcmawJourney (): void {
@@ -143,7 +161,6 @@ export function startDcmawJourney (): void {
     const res = http.get(getFrontendUrl('/selectDevice'), {
       tags: { name: 'Start DCMAW Journey' }
     })
-    console.log('RES COOKIES', res.cookies)
     isStatusCode200(res)
     isPageContentCorrect(res, 'Are you on a computer or a tablet right now?')
     isPageRedirectCorrect(res, '/selectDevice')
@@ -152,7 +169,11 @@ export function startDcmawJourney (): void {
 
 export function checkSelectDeviceRedirect (device: DeviceType): void {
   group(`Select device: ${device} from /selectdevice page`, () => {
-    const res = http.post(getFrontendUrl('/selectDevice'), { 'select-device-choice': device }, { tags: { name: 'Select Device Page' } })
+    const res = http.post(
+      getFrontendUrl('/selectDevice'),
+      { 'select-device-choice': device },
+      { tags: { name: 'Select Device Page' } }
+    )
     isStatusCode200(res)
     isPageRedirectCorrect(res, '/selectSmartphone')
 
@@ -161,15 +182,21 @@ export function checkSelectDeviceRedirect (device: DeviceType): void {
         isPageContentCorrect(res, 'Do you have a smartphone you can use?')
         break
       case DeviceType.Smartphone:
-        isPageContentCorrect(res, 'Are you on a smartphone right now?')
+        isPageContentCorrect(res, 'Which smartphone are you using?')
         break
     }
   })
 }
 
-export function checkSelectSmartphoneRedirect (smartphone: SmartphoneType): void {
+export function checkSelectSmartphoneRedirect (
+  smartphone: SmartphoneType
+): void {
   group(`Select smartphone: ${smartphone} from /selectSmartphone page`, () => {
-    const res = http.post(getFrontendUrl('/selectSmartphone'), { 'smartphone-choice': smartphone }, { tags: { name: 'Select Smartphone Page' } })
+    const res = http.post(
+      getFrontendUrl('/selectSmartphone'),
+      { 'smartphone-choice': smartphone },
+      { tags: { name: 'Select Smartphone Page' } }
+    )
     isStatusCode200(res)
     isPageContentCorrect(res, 'Do you have a valid passport?')
     isPageRedirectCorrect(res, '/validPassport')
@@ -177,71 +204,101 @@ export function checkSelectSmartphoneRedirect (smartphone: SmartphoneType): void
 }
 
 export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
-  group(`Select valid passport: ${validPassport} from /selectPassport page`, () => {
-    const res = http.post(getFrontendUrl('/validPassport'), { 'select-option': validPassport }, { tags: { name: 'Select Valid Passport Page' } })
-    isStatusCode200(res)
+  group(
+    `Select valid passport: ${validPassport} from /selectPassport page`,
+    () => {
+      const res = http.post(
+        getFrontendUrl('/validPassport'),
+        { 'select-option': validPassport },
+        { tags: { name: 'Select Valid Passport Page' } }
+      )
+      isStatusCode200(res)
 
-    switch (validPassport) {
-      case YesOrNo.YES:
-        isPageContentCorrect(
-          res,
-          'Does your passport have this symbol on the cover?'
-        )
-        isPageRedirectCorrect(res, '/biometricChip')
-        break
-      case YesOrNo.NO:
-        isPageContentCorrect(
-          res,
-          'Do you have a valid UK photocard driving licence?'
-        )
-        isPageRedirectCorrect(res, '/validDrivingLicence')
-    }
-  })
-}
-
-export function checkValidDrivingLicenseRedirect (validDrivingLicense: YesOrNo): void {
-  group(`Select valid driving license: ${validDrivingLicense} from /validDrivingLicence page`, () => {
-    const res = http.post(getFrontendUrl('/validDrivingLicence'), { 'driving-licence-choice': validDrivingLicense }, { tags: { name: 'Select Valid Driving License Page' } })
-    isStatusCode200(res)
-    isPageContentCorrect(
-      res,
-      'Use your UK driving licence and a GOV.UK app to confirm your identity'
-    )
-  })
-}
-
-export function checkBiometricChipRedirect (validChip: YesOrNo, smartphone: SmartphoneType): void {
-  group(`Select valid biometric chip: ${validChip} from /biometricChip page`, () => {
-    const res = http.post(getFrontendUrl('/biometricChip'), { 'select-option': validChip }, { tags: { name: 'Select Valid Chip Page' } })
-    isStatusCode200(res)
-
-    switch (validChip) {
-      case YesOrNo.YES:
-        if (smartphone === SmartphoneType.Iphone) {
-          isPageContentCorrect(res, 'Which iPhone model do you have?')
-          isPageRedirectCorrect(res, '/iphoneModel')
-        } else if (smartphone === SmartphoneType.Android) {
+      switch (validPassport) {
+        case YesOrNo.YES:
           isPageContentCorrect(
             res,
-            'Use your passport and a GOV.UK app to confirm your identity'
+            'Does your passport have this symbol on the cover?'
           )
-          isPageRedirectCorrect(res, '/idCheckApp')
-        }
-        break
-      case YesOrNo.NO:
-        isPageContentCorrect(
-          res,
-          'Do you have a valid UK photocard driving licence?'
-        )
-        isPageRedirectCorrect(res, '/validDrivingLicence')
-        break
+          isPageRedirectCorrect(res, '/biometricChip')
+          break
+        case YesOrNo.NO:
+          isPageContentCorrect(
+            res,
+            'Do you have a valid UK photocard driving licence?'
+          )
+          isPageRedirectCorrect(res, '/validDrivingLicence')
+      }
     }
-  })
+  )
+}
+
+export function checkValidDrivingLicenseRedirect (
+  validDrivingLicense: YesOrNo
+): void {
+  group(
+    `Select valid driving license: ${validDrivingLicense} from /validDrivingLicence page`,
+    () => {
+      const res = http.post(
+        getFrontendUrl('/validDrivingLicence'),
+        { 'driving-licence-choice': validDrivingLicense },
+        { tags: { name: 'Select Valid Driving License Page' } }
+      )
+      isStatusCode200(res)
+      isPageContentCorrect(
+        res,
+        'Use your UK driving licence and a GOV.UK app to confirm your identity'
+      )
+    }
+  )
+}
+
+export function checkBiometricChipRedirect (
+  validChip: YesOrNo,
+  smartphone: SmartphoneType
+): void {
+  group(
+    `Select valid biometric chip: ${validChip} from /biometricChip page`,
+    () => {
+      const res = http.post(
+        getFrontendUrl('/biometricChip'),
+        { 'select-option': validChip },
+        { tags: { name: 'Select Valid Chip Page' } }
+      )
+      isStatusCode200(res)
+
+      switch (validChip) {
+        case YesOrNo.YES:
+          if (smartphone === SmartphoneType.Iphone) {
+            isPageContentCorrect(res, 'Which iPhone model do you have?')
+            isPageRedirectCorrect(res, '/iphoneModel')
+          } else if (smartphone === SmartphoneType.Android) {
+            isPageContentCorrect(
+              res,
+              'Use your passport and a GOV.UK app to confirm your identity'
+            )
+            isPageRedirectCorrect(res, '/idCheckApp')
+          }
+          break
+        case YesOrNo.NO:
+          isPageContentCorrect(
+            res,
+            'Do you have a valid UK photocard driving licence?'
+          )
+          isPageRedirectCorrect(res, '/validDrivingLicence')
+          break
+      }
+    }
+  )
 }
 
 export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
   group(`Select iphone model: ${iphoneModel} from /iphoneModel page`, () => {
-    const res = http.post(getFrontendUrl('/iphoneModel'), { 'select-option': iphoneModel }, { tags: { name: 'Select Iphone Model Page' } })
+    const res = http.post(
+      getFrontendUrl('/iphoneModel'),
+      { 'select-option': iphoneModel },
+      { tags: { name: 'Select Iphone Model Page' } }
+    )
     isStatusCode200(res)
     isPageContentCorrect(
       res,
@@ -253,72 +310,100 @@ export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
 
 export function checkIdCheckAppRedirect (): void {
   group('Select continue from /idCheckApp page', () => {
-    const res = http.post(getFrontendUrl('/idCheckApp'), {}, { tags: { name: 'ID Check App Page' }, redirects: 0 })
-    isStatusCode200(res)
-    isPageContentCorrect(
-      res,
-      'Does your smartphone have a working camera?'
+    const res = http.post(
+      getFrontendUrl('/idCheckApp'),
+      {},
+      { tags: { name: 'ID Check App Page' } }
     )
+    isStatusCode200(res)
+    isPageContentCorrect(res, 'Does your smartphone have a working camera?')
     isPageRedirectCorrect(res, '/workingCamera')
-    console.log('ID CHECK APP COOKIES', res.cookies)
   })
 }
 
 export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void {
-  group(`Select working camera: ${workingCameraAnswer} from /workingCamera page`, () => {
-    const res = http.post(getFrontendUrl('/workingCamera'), { 'working-camera-choice': workingCameraAnswer }, { tags: { name: 'Select Working Camera' } })
-    isStatusCode200(res)
-    isPageContentCorrect(
-      res,
-      'The app uses flashing colours. Do you want to continue?'
-    )
-    isPageRedirectCorrect(res, '/flashingWarning')
-  })
-}
-
-export function checkFlashingWarningRedirect (warningAnswer: YesOrNo, device: DeviceType): void {
-  group(`Select flashing warning: ${warningAnswer} from /flashingWarning page`, () => {
-    const res = http.post(getFrontendUrl('/flashingWarning'), { 'flashing-colours-choice': warningAnswer }, { tags: { name: 'Select Flashing Warning Page' } })
-    isStatusCode200(res)
-
-    switch (device) {
-      case DeviceType.Smartphone:
-        isPageContentCorrect(res, 'Download the GOV.UK ID Check app')
-        isPageRedirectCorrect(res, '/downloadApp')
-        break
-      case DeviceType.ComputerOrTablet:
-        isPageContentCorrect(
-          res,
-          'Scan the QR code to continue confirming your identity on your phone'
-        )
-        isPageRedirectCorrect(res, '/downloadApp')
-        break
+  group(
+    `Select working camera: ${workingCameraAnswer} from /workingCamera page`,
+    () => {
+      const res = http.post(
+        getFrontendUrl('/workingCamera'),
+        { 'working-camera-choice': workingCameraAnswer },
+        { tags: { name: 'Select Working Camera' } }
+      )
+      isStatusCode200(res)
+      isPageContentCorrect(
+        res,
+        'The app uses flashing colours. Do you want to continue?'
+      )
+      isPageRedirectCorrect(res, '/flashingWarning')
     }
-  })
+  )
 }
 
-export function getBiometricToken (sessionId: string): void {
+export function checkFlashingWarningRedirect (
+  warningAnswer: YesOrNo,
+  device: DeviceType
+): void {
+  group(
+    `Select flashing warning: ${warningAnswer} from /flashingWarning page`,
+    () => {
+      const res = http.post(
+        getFrontendUrl('/flashingWarning'),
+        { 'flashing-colours-choice': warningAnswer },
+        { tags: { name: 'Select Flashing Warning Page' } }
+      )
+      isStatusCode200(res)
+
+      switch (device) {
+        case DeviceType.Smartphone:
+          isPageContentCorrect(res, 'Download the GOV.UK ID Check app')
+          isPageRedirectCorrect(res, '/downloadApp')
+          break
+        case DeviceType.ComputerOrTablet:
+          isPageContentCorrect(
+            res,
+            'Scan the QR code to continue confirming your identity on your phone'
+          )
+          isPageRedirectCorrect(res, '/downloadApp')
+          break
+      }
+    }
+  )
+}
+
+export function getBiometricToken (): void {
   group('Get Biometric Token BE Request', () => {
-    const biometricTokenUrl = getBackendUrl('/biometricToken', { authSessionId: sessionId })
-    const res = http.get(biometricTokenUrl, { tags: { name: 'Get Biometric Token' } })
+    const biometricTokenUrl = getBackendUrl('/biometricToken', {
+      authSessionId: getSessionIdFromCookieJar()
+    })
+    const res = http.get(biometricTokenUrl, {
+      tags: { name: 'Get Biometric Token' }
+    })
 
     isStatusCode200(res)
   })
 }
 
-export function postFinishBiometricToken (sessionId: string): void {
+export function postFinishBiometricToken (): void {
   group('Post Finish Biometric Token BE Request', () => {
-    const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', { authSessionId: sessionId, biometricSessionId: env.biometricSessionId })
+    const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', {
+      authSessionId: getSessionIdFromCookieJar(),
+      biometricSessionId: env.biometricSessionId
+    })
     const res = http.post(finishBiometricSessionUrl)
 
     isStatusCode200(res)
   })
 }
 
-export function checkRedirectPage (sessionId: string): void {
+export function checkRedirectPage (): void {
   group('Check Redirect Final Page /redirect', () => {
+    const sessionId = getSessionIdFromCookieJar()
     const redirectUrl = getFrontendUrl('/redirect', { sessionId })
-    const res = http.get(redirectUrl, { redirects: 0, tags: { name: 'Redirect Final Page' } })
+    const res = http.get(redirectUrl, {
+      redirects: 0,
+      tags: { name: 'Redirect Final Page' }
+    })
     isStatusCode302(res)
     isHeaderLocationCorrect(res, '/redirect')
   })

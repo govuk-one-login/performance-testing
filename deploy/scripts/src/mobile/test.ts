@@ -1,5 +1,4 @@
 import { sleep } from 'k6'
-import http from 'k6/http'
 import { type Options } from 'k6/options'
 import { describeProfile, type ProfileList, selectProfile } from '../common/utils/config/load-profiles'
 import {
@@ -19,10 +18,10 @@ import {
   checkWorkingCameraRedirect,
   getBiometricToken,
   postFinishBiometricToken,
-  getSessionId,
-  setSessionCookie,
+  // getSessionId,
+  // setSessionCookie,
   doAuthorizeRequest,
-  setIsDocumentSavedCookie,
+  // setIsDocumentSavedCookie,
   checkIdCheckAppRedirect
 } from './utils/functions-mobile-journey'
 
@@ -45,9 +44,9 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 5,
+      maxVUs: 10,
       stages: [
-        { target: 5, duration: '10s' },
+        { target: 10, duration: '30s' }
         // { target: 5, duration: '30s' }
       ],
       exec: 'dcmawMamIphonePassport'
@@ -94,16 +93,16 @@ export function dcmawMamIphonePassport (): void {
   sleep(1)
   checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Smartphone)
   sleep(1)
-  // getBiometricToken(sessionId)
-  // postFinishBiometricToken(sessionId)
-  // sleep(3)
-  // checkRedirectPage(sessionId)
+  getBiometricToken()
+  postFinishBiometricToken()
+  sleep(3)
+  checkRedirectPage()
 }
 
 export function dcmawDrivingLicenseAndroid (): void {
-  const jar = http.cookieJar()
-  const sessionId = getSessionId()
-  setSessionCookie(jar, sessionId)
+  // const jar = http.cookieJar()
+  // const sessionId = getSessionId()
+  // setSessionCookie(jar, sessionId)
   startDcmawJourney()
   sleep(1)
   checkSelectDeviceRedirect(DeviceType.ComputerOrTablet)
@@ -118,8 +117,8 @@ export function dcmawDrivingLicenseAndroid (): void {
   sleep(1)
   checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.ComputerOrTablet)
   sleep(1)
-  getBiometricToken(sessionId)
-  postFinishBiometricToken(sessionId)
+  getBiometricToken()
+  postFinishBiometricToken()
   sleep(3)
-  checkRedirectPage(sessionId)
+  checkRedirectPage()
 }

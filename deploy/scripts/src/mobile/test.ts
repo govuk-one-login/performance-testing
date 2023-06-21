@@ -32,22 +32,34 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 5,
       stages: [
-        { target: 5, duration: '30s' },
-        { target: 5, duration: '30s' }
+        { target: 5, duration: '10s' },
+        // { target: 5, duration: '30s' }
       ],
       exec: 'dcmawDoAuthorizeRequest'
     },
-    dcmawMamIphonePassport: {
+    dcmawMamIphonePassportRedirect: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
       maxVUs: 5,
       stages: [
-        { target: 5, duration: '30s' },
-        { target: 5, duration: '30s' }
+        { target: 5, duration: '10s' },
+        // { target: 5, duration: '30s' }
       ],
-      exec: 'dcmawMamIphonePassport'
+      exec: 'dcmawMamIphonePassportRedirect'
+    },
+    dcmawMamIphonePassportAbort: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 5,
+      stages: [
+        { target: 5, duration: '10s' },
+        // { target: 5, duration: '30s' }
+      ],
+      exec: 'dcmawMamIphonePassportAbort'
     }
   }
 }
@@ -71,7 +83,7 @@ export function dcmawDoAuthorizeRequest (): void {
   doAuthorizeRequest()
 }
 
-export function dcmawMamIphonePassport (): void {
+export function dcmawMamIphonePassportRedirect (): void {
   doAuthorizeRequest()
   startDcmawJourney()
   sleep(1)
@@ -91,15 +103,33 @@ export function dcmawMamIphonePassport (): void {
   sleep(1)
   checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Smartphone)
   sleep(1)
+  getBiometricToken()
+  postFinishBiometricToken()
+  sleep(3)
+  checkRedirectPage()
+}
 
-  if (Math.random() <= 0.8) {
-    getBiometricToken()
-    postFinishBiometricToken()
-    sleep(3)
-    checkRedirectPage()
-  } else {
-    checkAbortCommand()
-  }
+export function dcmawMamIphonePassportAbort (): void {
+  doAuthorizeRequest()
+  startDcmawJourney()
+  sleep(1)
+  checkSelectDeviceRedirect(DeviceType.Smartphone)
+  sleep(1)
+  checkSelectSmartphoneRedirect(SmartphoneType.Iphone)
+  sleep(1)
+  checkValidPassportPageRedirect(YesOrNo.YES)
+  sleep(1)
+  checkBiometricChipRedirect(YesOrNo.YES, SmartphoneType.Iphone)
+  sleep(1)
+  checkIphoneModelRedirect(IphoneType.Iphone7OrNewer)
+  sleep(1)
+  checkIdCheckAppRedirect()
+  sleep(1)
+  checkWorkingCameraRedirect(YesOrNo.YES)
+  sleep(1)
+  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Smartphone)
+  sleep(1)
+  checkAbortCommand()
 }
 
 export function dcmawDrivingLicenseAndroid (): void {

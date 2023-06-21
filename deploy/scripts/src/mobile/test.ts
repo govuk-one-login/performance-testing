@@ -22,6 +22,7 @@ import {
   checkIdCheckAppRedirect,
   checkAbortCommand
 } from './utils/functions-mobile-journey'
+import execution from 'k6/execution'
 
 const profiles: ProfileList = {
   smoke: {
@@ -30,36 +31,24 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 5, duration: '10s' },
-        // { target: 5, duration: '30s' }
-      ],
-      exec: 'dcmawDoAuthorizeRequest'
-    },
-    dcmawMamIphonePassportRedirect: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
+      maxVUs: 5, // NOK
       stages: [
         { target: 5, duration: '30s' },
         { target: 5, duration: '30s' }
       ],
-      exec: 'dcmawMamIphonePassportRedirect'
+      exec: 'dcmawDoAuthorizeRequest'
     },
-    dcmawMamIphonePassportAbort: {
+    dcmawMamIphonePassport: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 5,
+      maxVUs: 90,
       stages: [
-        { target: 5, duration: '10s' },
-        // { target: 5, duration: '30s' }
+        { target: 5, duration: '30s' },
+        { target: 5, duration: '30s' }
       ],
-      exec: 'dcmawMamIphonePassportAbort'
+      exec: 'dcmawMamIphonePassport'
     }
   }
 }
@@ -83,7 +72,7 @@ export function dcmawDoAuthorizeRequest (): void {
   doAuthorizeRequest()
 }
 
-export function dcmawMamIphonePassportRedirect (): void {
+export function dcmawMamIphonePassport (): void {
   doAuthorizeRequest()
   startDcmawJourney()
   sleep(1)
@@ -103,40 +92,16 @@ export function dcmawMamIphonePassportRedirect (): void {
   sleep(1)
   checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Smartphone)
   sleep(1)
-
-  if (__ITER % 5 !== 0) {
-    console.log(`Redirect scenario. VU: ${__VU}. ITER: ${__ITER}`)
+  if (execution.scenario.iterationInTest % 5 === 0) {
+    // console.log(`Abort scenario: ${execution.scenario.iterationInTest}`)
+    checkAbortCommand()
+  } else {
+    // console.log(`Redirect scenario: ${execution.scenario.iterationInTest}`)
     getBiometricToken()
     postFinishBiometricToken()
     sleep(3)
     checkRedirectPage()
-  } else {
-    console.log(`Abort scenario. VU: ${__VU}. ITER: ${__ITER}`)
-    checkAbortCommand()
   }
-}
-
-export function dcmawMamIphonePassportAbort (): void {
-  doAuthorizeRequest()
-  startDcmawJourney()
-  sleep(1)
-  checkSelectDeviceRedirect(DeviceType.Smartphone)
-  sleep(1)
-  checkSelectSmartphoneRedirect(SmartphoneType.Iphone)
-  sleep(1)
-  checkValidPassportPageRedirect(YesOrNo.YES)
-  sleep(1)
-  checkBiometricChipRedirect(YesOrNo.YES, SmartphoneType.Iphone)
-  sleep(1)
-  checkIphoneModelRedirect(IphoneType.Iphone7OrNewer)
-  sleep(1)
-  checkIdCheckAppRedirect()
-  sleep(1)
-  checkWorkingCameraRedirect(YesOrNo.YES)
-  sleep(1)
-  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Smartphone)
-  sleep(1)
-  checkAbortCommand()
 }
 
 export function dcmawDrivingLicenseAndroid (): void {

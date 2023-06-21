@@ -19,7 +19,8 @@ import {
   getBiometricToken,
   postFinishBiometricToken,
   doAuthorizeRequest,
-  checkIdCheckAppRedirect
+  checkIdCheckAppRedirect,
+  checkAbortCommand
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -90,10 +91,15 @@ export function dcmawMamIphonePassport (): void {
   sleep(1)
   checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Smartphone)
   sleep(1)
-  getBiometricToken()
-  postFinishBiometricToken()
-  sleep(3)
-  checkRedirectPage()
+
+  if (Math.random() <= 0.8) {
+    getBiometricToken()
+    postFinishBiometricToken()
+    sleep(3)
+    checkRedirectPage()
+  } else {
+    checkAbortCommand()
+  }
 }
 
 export function dcmawDrivingLicenseAndroid (): void {

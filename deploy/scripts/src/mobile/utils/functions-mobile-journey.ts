@@ -377,10 +377,22 @@ export function postFinishBiometricToken (): void {
 
 export function checkRedirectPage (): void {
   group('Check Redirect Final Page /redirect', () => {
-    const redirectUrl = getFrontendUrl('/redirect', { sessinId: getSessionIdFromCookieJar() })
+    const redirectUrl = getFrontendUrl('/redirect', { sessionId: getSessionIdFromCookieJar() })
     const res = http.get(redirectUrl, {
       redirects: 0,
       tags: { name: 'Redirect Final Page' }
+    })
+    isStatusCode302(res)
+    isHeaderLocationCorrect(res, '/redirect')
+  })
+}
+
+export function checkAbortCommand (): void {
+  group('Check Abort and Redirect', () => {
+    const abortCommandUrl = getFrontendUrl('/abortCommand', { sessionId: getSessionIdFromCookieJar() })
+    const res = http.get(abortCommandUrl, {
+      redirects: 0,
+      tags: { name: 'Abort Command' }
     })
     isStatusCode302(res)
     isHeaderLocationCorrect(res, '/redirect')

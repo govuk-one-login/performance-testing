@@ -44,8 +44,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 5,
       stages: [
-        { target: 5, duration: '10s' },
-        // { target: 5, duration: '30s' }
+        { target: 5, duration: '30s' },
+        { target: 5, duration: '30s' }
       ],
       exec: 'dcmawMamIphonePassportRedirect'
     },
@@ -103,10 +103,17 @@ export function dcmawMamIphonePassportRedirect (): void {
   sleep(1)
   checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Smartphone)
   sleep(1)
-  getBiometricToken()
-  postFinishBiometricToken()
-  sleep(3)
-  checkRedirectPage()
+
+  if (__ITER % 5 !== 0) {
+    console.log(`Redirect scenario. VU: ${__VU}. ITER: ${__ITER}`)
+    getBiometricToken()
+    postFinishBiometricToken()
+    sleep(3)
+    checkRedirectPage()
+  } else {
+    console.log(`Abort scenario. VU: ${__VU}. ITER: ${__ITER}`)
+    checkAbortCommand()
+  }
 }
 
 export function dcmawMamIphonePassportAbort (): void {

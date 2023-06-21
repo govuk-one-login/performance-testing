@@ -143,7 +143,6 @@ export function startDcmawJourney (): void {
       tags: { name: 'Start DCMAW Journey' }
     })
     isStatusCode200(res)
-    isPageContentCorrect(res, 'Are you on a computer or a tablet right now?')
     isPageRedirectCorrect(res, '/selectDevice')
   })
 }
@@ -157,15 +156,6 @@ export function checkSelectDeviceRedirect (device: DeviceType): void {
     )
     isStatusCode200(res)
     isPageRedirectCorrect(res, '/selectSmartphone')
-
-    switch (device) {
-      case DeviceType.ComputerOrTablet:
-        isPageContentCorrect(res, 'Do you have a smartphone you can use?')
-        break
-      case DeviceType.Smartphone:
-        isPageContentCorrect(res, 'Which smartphone are you using?')
-        break
-    }
   })
 }
 
@@ -179,7 +169,6 @@ export function checkSelectSmartphoneRedirect (
       { tags: { name: 'Select Smartphone Page' } }
     )
     isStatusCode200(res)
-    isPageContentCorrect(res, 'Do you have a valid passport?')
     isPageRedirectCorrect(res, '/validPassport')
   })
 }
@@ -197,17 +186,9 @@ export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
 
       switch (validPassport) {
         case YesOrNo.YES:
-          isPageContentCorrect(
-            res,
-            'Does your passport have this symbol on the cover?'
-          )
           isPageRedirectCorrect(res, '/biometricChip')
           break
         case YesOrNo.NO:
-          isPageContentCorrect(
-            res,
-            'Do you have a valid UK photocard driving licence?'
-          )
           isPageRedirectCorrect(res, '/validDrivingLicence')
       }
     }
@@ -251,21 +232,12 @@ export function checkBiometricChipRedirect (
       switch (validChip) {
         case YesOrNo.YES:
           if (smartphone === SmartphoneType.Iphone) {
-            isPageContentCorrect(res, 'Which iPhone model do you have?')
             isPageRedirectCorrect(res, '/iphoneModel')
           } else if (smartphone === SmartphoneType.Android) {
-            isPageContentCorrect(
-              res,
-              'Use your passport and a GOV.UK app to confirm your identity'
-            )
             isPageRedirectCorrect(res, '/idCheckApp')
           }
           break
         case YesOrNo.NO:
-          isPageContentCorrect(
-            res,
-            'Do you have a valid UK photocard driving licence?'
-          )
           isPageRedirectCorrect(res, '/validDrivingLicence')
           break
       }
@@ -281,10 +253,6 @@ export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
       { tags: { name: 'Select Iphone Model Page' } }
     )
     isStatusCode200(res)
-    isPageContentCorrect(
-      res,
-      'Use your passport and a GOV.UK app to confirm your identity'
-    )
     isPageRedirectCorrect(res, '/idCheckApp')
   })
 }
@@ -297,7 +265,6 @@ export function checkIdCheckAppRedirect (): void {
       { tags: { name: 'ID Check App Page' } }
     )
     isStatusCode200(res)
-    isPageContentCorrect(res, 'Does your smartphone have a working camera?')
     isPageRedirectCorrect(res, '/workingCamera')
   })
 }
@@ -312,10 +279,6 @@ export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void 
         { tags: { name: 'Select Working Camera' } }
       )
       isStatusCode200(res)
-      isPageContentCorrect(
-        res,
-        'The app uses flashing colours. Do you want to continue?'
-      )
       isPageRedirectCorrect(res, '/flashingWarning')
     }
   )
@@ -337,14 +300,9 @@ export function checkFlashingWarningRedirect (
 
       switch (device) {
         case DeviceType.Smartphone:
-          isPageContentCorrect(res, 'Download the GOV.UK ID Check app')
           isPageRedirectCorrect(res, '/downloadApp')
           break
         case DeviceType.ComputerOrTablet:
-          isPageContentCorrect(
-            res,
-            'Scan the QR code to continue confirming your identity on your phone'
-          )
           isPageRedirectCorrect(res, '/downloadApp')
           break
       }

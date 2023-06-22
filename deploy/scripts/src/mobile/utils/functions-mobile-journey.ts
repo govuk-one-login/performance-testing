@@ -55,13 +55,8 @@ function postToVerifyURL (): Response {
 }
 
 function parseVerifyUrl (response: Response): string {
-  const responseBody = response.body?.toString()
-  const verifyUrl =
-    typeof responseBody === 'string'
-      ? JSON.parse(responseBody).WebLocation
-      : null
-
-  if (verifyUrl === null) {
+  const verifyUrl = response.json('WebLocation')
+  if (typeof verifyUrl !== 'string') {
     throw new Error('Failed to parse verify URL from response')
   }
 

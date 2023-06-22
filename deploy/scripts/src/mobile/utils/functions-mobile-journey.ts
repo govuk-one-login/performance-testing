@@ -43,7 +43,7 @@ function isHeaderLocationCorrect (res: Response, content: string): boolean {
   })
 }
 
-function postToVerifyURL (): Response {
+function postTestClientStart (): Response {
   return http.post(
     getUrl('start', env.testClientExecuteUrl),
     JSON.stringify({ target: env.backEndUrl, frontendUri: env.frontEndUrl }),
@@ -95,13 +95,13 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
 
 export function checkAuthorizeRedirect (): void {
   let verifyUrl: string
-  group('Test Client Execute Request', () => {
-    const res = postToVerifyURL()
-    isStatusCode201(res)
-    verifyUrl = parseVerifyUrl(res)
+  group('Post test client /start', () => {
+    const testClientRes = postTestClientStart()
+    isStatusCode201(testClientRes)
+    verifyUrl = parseVerifyUrl(testClientRes)
   })
 
-  group('Authorize Request', () => {
+  group('Post /verifyAuthorizeRequest', () => {
     const verifyRes = http.get(verifyUrl)
     isStatusCode200(verifyRes)
     isPageRedirectCorrect(verifyRes, '/selectDevice')

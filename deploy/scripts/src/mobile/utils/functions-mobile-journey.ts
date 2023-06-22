@@ -228,7 +228,7 @@ export function postFinishBiometricTokenAndValidateResponse (): void {
 }
 
 export function getRedirectAndValidateResponse (): void {
-  group('get /redirect', () => {
+  group('Get /redirect', () => {
     const redirectUrl = getFrontendUrl('/redirect', { sessionId: getSessionIdFromCookieJar() })
     const res = http.get(redirectUrl, {
       redirects: 0,
@@ -240,7 +240,7 @@ export function getRedirectAndValidateResponse (): void {
 }
 
 export function getAbortCommandAndValidateResponse (): void {
-  group('Check Abort and Redirect', () => {
+  group('Get /abortCommand', () => {
     const abortCommandUrl = getFrontendUrl('/abortCommand', { sessionId: getSessionIdFromCookieJar() })
     const res = http.get(abortCommandUrl, {
       redirects: 0,

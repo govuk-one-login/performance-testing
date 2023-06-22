@@ -21,7 +21,11 @@ import {
   postFinishBiometricToken,
   getSessionId,
   setSessionCookie,
-  doAuthorizeRequest
+  doAuthorizeRequest,
+  getBiometricTokenV2,
+  // postUserInfoV2,
+  // postAccessToken,
+  postDocumentGroups
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -37,6 +41,18 @@ const profiles: ProfileList = {
         { target: 5, duration: '30s' }
       ],
       exec: 'dcmawDoAuthorizeRequest'
+    },
+    dcmawBackendJourney: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 50,
+      stages: [
+        { target: 5, duration: '30s' }
+        // { target: 5, duration: '30s' }
+      ],
+      exec: 'dcmawBackendJourney'
     }
   }
 }
@@ -80,10 +96,20 @@ export function dcmawPassportIphone (): void {
   sleep(1)
   checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Other)
   sleep(1)
-  getBiometricToken(sessionId)
-  postFinishBiometricToken(sessionId)
+  getBiometricToken()
+  postFinishBiometricToken()
   sleep(3)
-  checkRedirectPage(sessionId)
+  checkRedirectPage()
+}
+
+export function dcmawBackendJourney (): void {
+  doAuthorizeRequest()
+  postDocumentGroups()
+  getBiometricTokenV2()
+  postFinishBiometricToken()
+  // checkRedirectPage()
+  // postAccessToken()
+  // postUserInfoV2()
 }
 
 export function dcmawDrivingLicenseAndroid (): void {
@@ -104,8 +130,8 @@ export function dcmawDrivingLicenseAndroid (): void {
   sleep(1)
   checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.ComputerOrTablet)
   sleep(1)
-  getBiometricToken(sessionId)
-  postFinishBiometricToken(sessionId)
+  getBiometricToken()
+  postFinishBiometricToken()
   sleep(3)
-  checkRedirectPage(sessionId)
+  checkRedirectPage()
 }

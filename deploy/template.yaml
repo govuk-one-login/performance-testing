@@ -217,6 +217,15 @@ Resources:
           - Name: S3_BUCKET
             Type: PLAINTEXT
             Value: !Ref ResultsBucket
+          - Name: TEST_SCRIPT
+            Type: PLAINTEXT
+            Value: common/test.js
+          - Name: PROFILE
+            Type: PLAINTEXT
+            Value: smoke
+          - Name: SCENARIO
+            Type: PLAINTEXT
+            Value: all
       VpcConfig:
         SecurityGroupIds:
           - !GetAtt TestContainerSecurityGroup.GroupId
@@ -234,10 +243,6 @@ Resources:
           env:
             variables:
               WORK_DIR: /home/k6/scripts
-              TEST_SCRIPT: common/test.js
-              TEST_REPORT_DIR: results
-              PROFILE: smoke
-              SCENARIO: all
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
             parameter-store:
               ACCOUNT_APP_KEY: "/perfTest/account/accounts/appKey"
@@ -276,7 +281,6 @@ Resources:
           phases:
             pre_build:
               commands:
-                - mkdir -p "$TEST_REPORT_DIR"
                 - |
                   sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_ID#" $OTEL_TEMPLATE > $OTEL_CONFIG
                 - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &

@@ -174,6 +174,29 @@ Resources:
                           Fn::ImportValue:
                             Fn::Sub: "${VpcStackName}-ProtectedSubnetIdB"
 
+  ResultsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub ${AWS::StackName}-test-results
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 1825 # Five years
+            Status: Enabled
+      LoggingConfiguration:
+        LogFilePrefix: ""
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project
     DependsOn: VPCTestPolicy
@@ -187,6 +210,13 @@ Resources:
         Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
+        EnvironmentVariables:
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountId
+          - Name: S3_BUCKET
+            Type: PLAINTEXT
+            Value: !Ref ResultsBucket
       VpcConfig:
         SecurityGroupIds:
           - !GetAtt TestContainerSecurityGroup.GroupId
@@ -198,7 +228,7 @@ Resources:
       TimeoutInMinutes: 480
       Source:
         Type: "NO_SOURCE"
-        BuildSpec: !Sub |
+        BuildSpec: |
           version: 0.2
 
           env:
@@ -254,9 +284,11 @@ Resources:
               commands:
                 - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - echo "Run performance test"
-                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out statsd
+                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out statsd --out json=results.json
             post_build:
               commands:
+                - S3_LOCATION=s3://${S3_BUCKET}/${TEST_SCRIPT%.*}/$(date +%F/%T)
+                - aws s3 cp results.json ${S3_LOCATION}/results.json
                 - OTEL_PID=$(pgrep /otel/otelcol-contrib)
                 - kill $OTEL_PID
                 - TIMEOUT=0

@@ -12,7 +12,6 @@ import {
   checkSelectDeviceRedirect,
   checkSelectSmartphoneRedirect,
   checkValidPassportPageRedirect,
-  checkValidDrivingLicenseRedirect,
   checkBiometricChipRedirect,
   checkFlashingWarningRedirect,
   checkIphoneModelRedirect,
@@ -25,26 +24,13 @@ import {
   HasValidPassport,
   HasBiometricChip,
   HasWorkingCamera,
-  HasValidDrivingLicense,
   CanHandleFlashingColours,
   checkAuthorizeRedirect
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
   smoke: {
-    dcmawDoAuthorizeRequest: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 5, duration: '30s' },
-        { target: 5, duration: '30s' }
-      ],
-      exec: 'dcmawDoAuthorizeRequest'
-    },
-    dcmawMamIphonePassport: {
+    mamIphonePassport: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -54,7 +40,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '30s' },
         { target: 5, duration: '30s' }
       ],
-      exec: 'dcmawMamIphonePassport'
+      exec: 'mamIphonePassport'
     }
   }
 }
@@ -74,11 +60,7 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
-export function dcmawDoAuthorizeRequest (): void {
-  checkAuthorizeRedirect()
-}
-
-export function dcmawMamIphonePassport (): void {
+export function mamIphonePassport (): void {
   checkAuthorizeRedirect()
   sleep(1)
   checkSelectDeviceRedirect(DeviceType.SMARTPHONE)
@@ -95,10 +77,7 @@ export function dcmawMamIphonePassport (): void {
   sleep(1)
   checkWorkingCameraRedirect(HasWorkingCamera.YES)
   sleep(1)
-  checkFlashingWarningRedirect(
-    CanHandleFlashingColours.YES,
-    DeviceType.SMARTPHONE
-  )
+  checkFlashingWarningRedirect(CanHandleFlashingColours.YES, DeviceType.SMARTPHONE)
   sleep(1)
   if (Math.random() <= 0.8) {
     getBiometricToken()
@@ -108,28 +87,4 @@ export function dcmawMamIphonePassport (): void {
   } else {
     checkAbortCommand()
   }
-}
-
-export function dcmawDrivingLicenseAndroid (): void {
-  checkAuthorizeRedirect()
-  sleep(1)
-  checkSelectDeviceRedirect(DeviceType.COMPUTER_OR_TABLET)
-  sleep(1)
-  checkSelectSmartphoneRedirect(SmartphoneType.ANDROID)
-  sleep(1)
-  checkValidPassportPageRedirect(HasValidPassport.NO)
-  sleep(1)
-  checkValidDrivingLicenseRedirect(HasValidDrivingLicense.YES)
-  sleep(1)
-  checkWorkingCameraRedirect(HasWorkingCamera.YES)
-  sleep(1)
-  checkFlashingWarningRedirect(
-    CanHandleFlashingColours.YES,
-    DeviceType.COMPUTER_OR_TABLET
-  )
-  sleep(1)
-  getBiometricToken()
-  postFinishBiometricToken()
-  sleep(3)
-  checkRedirectPage()
 }

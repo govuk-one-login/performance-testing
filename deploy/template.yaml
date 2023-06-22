@@ -110,6 +110,11 @@ Resources:
                   - !Sub "${AWS::AccountId}"
           - Effect: "Allow"
             Action:
+              - "s3:PutObject"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${AWS::StackName}-test-results*"
+          - Effect: "Allow"
+            Action:
               - "cloudformation:DescribeStacks"
             Resource:
               - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*/*"

@@ -23,11 +23,6 @@ on:
         type: environment
         required: true
 
-defaults:
-  run:
-    shell: bash
-    working-directory: ./deploy
-
 jobs:
   dockerBuildAndPush:
     name: Docker build and push

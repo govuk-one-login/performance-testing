@@ -205,8 +205,8 @@ export function postFlashingWarningAndValidateRedirect (): void {
 }
 
 export function getBiometricTokenAndValidateResponse (): void {
-  group('Post /biometricToken', () => {
-    const biometricTokenUrl = getBackendUrl('/biometricToken', {
+  group('Post /biometricToken/v2', () => {
+    const biometricTokenUrl = getBackendUrl('/biometricToken/v2', {
       authSessionId: getSessionIdFromCookieJar()
     })
     const res = http.get(biometricTokenUrl, {

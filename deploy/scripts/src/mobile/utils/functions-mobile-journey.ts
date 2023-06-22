@@ -65,8 +65,7 @@ function parseVerifyUrl (response: Response): string {
 
 export function getSessionIdFromCookieJar (): string {
   const jar = http.cookieJar()
-  const sessionId = jar.cookiesForURL(getFrontendUrl('')).sessionId.toString()
-  return sessionId
+  return jar.cookiesForURL(getFrontendUrl('')).sessionId.toString()
 }
 
 function getUrl (

@@ -10,22 +10,42 @@ const env = {
 }
 
 export enum SmartphoneType {
-  Iphone = 'iphone',
-  Android = 'android',
+  IPHONE = 'iphone',
+  ANDROID = 'android',
 }
 
 export enum DeviceType {
-  Smartphone = 'smartphone',
-  ComputerOrTablet = 'computerOrTablet',
+  SMARTPHONE = 'smartphone',
+  COMPUTER_OR_TABLET = 'computerOrTablet',
 }
 
-export enum YesOrNo {
+export enum HasValidPassport {
   YES = 'yes',
   NO = 'no',
 }
 
-export enum IphoneType {
-  Iphone7OrNewer = 'iphone7OrNewer',
+export enum HasBiometricChip {
+  YES = 'yes',
+  NO = 'no',
+}
+
+export enum HasValidDrivingLicense {
+  YES = 'yes',
+  NO = 'no',
+}
+
+export enum HasWorkingCamera {
+  YES = 'yes',
+  NO = 'no',
+}
+
+export enum CanHandleFlashingColours {
+  YES = 'yes',
+  NO = 'no',
+}
+
+export enum IphoneModel {
+  IPHONE_7_OR_NEWER = 'iphone7OrNewer',
 }
 
 const OAUTH_ROUTE = '/dca/oauth2'
@@ -123,7 +143,7 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
   return getUrl(path, env.backEndUrl, query)
 }
 
-export function doAuthorizeRequest (): void {
+export function checkAuthorizeRedirect (): void {
   let verifyUrl: string
   group('Test Client Execute Request', () => {
     const res = postToVerifyURL()
@@ -134,16 +154,7 @@ export function doAuthorizeRequest (): void {
   group('Authorize Request', () => {
     const verifyRes = http.get(verifyUrl)
     isStatusCode200(verifyRes)
-  })
-}
-
-export function startDcmawJourney (): void {
-  group('Start DCMAW Journey', () => {
-    const res = http.get(getFrontendUrl('/selectDevice'), {
-      tags: { name: 'Start DCMAW Journey' }
-    })
-    isStatusCode200(res)
-    isPageRedirectCorrect(res, '/selectDevice')
+    isPageRedirectCorrect(verifyRes, '/selectDevice')
   })
 }
 
@@ -173,22 +184,22 @@ export function checkSelectSmartphoneRedirect (
   })
 }
 
-export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
+export function checkValidPassportPageRedirect (hasValidPassport: HasValidPassport): void {
   group(
-    `Select valid passport: ${validPassport} from /selectPassport page`,
+    `Select valid passport: ${hasValidPassport} from /selectPassport page`,
     () => {
       const res = http.post(
         getFrontendUrl('/validPassport'),
-        { 'select-option': validPassport },
+        { 'select-option': hasValidPassport },
         { tags: { name: 'Select Valid Passport Page' } }
       )
       isStatusCode200(res)
 
-      switch (validPassport) {
-        case YesOrNo.YES:
+      switch (hasValidPassport) {
+        case HasValidPassport.YES:
           isPageRedirectCorrect(res, '/biometricChip')
           break
-        case YesOrNo.NO:
+        case HasValidPassport.NO:
           isPageRedirectCorrect(res, '/validDrivingLicence')
       }
     }
@@ -196,14 +207,14 @@ export function checkValidPassportPageRedirect (validPassport: YesOrNo): void {
 }
 
 export function checkValidDrivingLicenseRedirect (
-  validDrivingLicense: YesOrNo
+  hasValidDrivingLicense: HasValidDrivingLicense
 ): void {
   group(
-    `Select valid driving license: ${validDrivingLicense} from /validDrivingLicence page`,
+    `Select valid driving license: ${hasValidDrivingLicense} from /validDrivingLicence page`,
     () => {
       const res = http.post(
         getFrontendUrl('/validDrivingLicence'),
-        { 'driving-licence-choice': validDrivingLicense },
+        { 'driving-licence-choice': hasValidDrivingLicense },
         { tags: { name: 'Select Valid Driving License Page' } }
       )
       isStatusCode200(res)
@@ -216,28 +227,28 @@ export function checkValidDrivingLicenseRedirect (
 }
 
 export function checkBiometricChipRedirect (
-  validChip: YesOrNo,
+  hasBiometricChip: HasBiometricChip,
   smartphone: SmartphoneType
 ): void {
   group(
-    `Select valid biometric chip: ${validChip} from /biometricChip page`,
+    `Select valid biometric chip: ${hasBiometricChip} from /biometricChip page`,
     () => {
       const res = http.post(
         getFrontendUrl('/biometricChip'),
-        { 'select-option': validChip },
+        { 'select-option': hasBiometricChip },
         { tags: { name: 'Select Valid Chip Page' } }
       )
       isStatusCode200(res)
 
-      switch (validChip) {
-        case YesOrNo.YES:
-          if (smartphone === SmartphoneType.Iphone) {
+      switch (hasBiometricChip) {
+        case HasBiometricChip.YES:
+          if (smartphone === SmartphoneType.IPHONE) {
             isPageRedirectCorrect(res, '/iphoneModel')
-          } else if (smartphone === SmartphoneType.Android) {
+          } else if (smartphone === SmartphoneType.ANDROID) {
             isPageRedirectCorrect(res, '/idCheckApp')
           }
           break
-        case YesOrNo.NO:
+        case HasBiometricChip.NO:
           isPageRedirectCorrect(res, '/validDrivingLicence')
           break
       }
@@ -245,7 +256,7 @@ export function checkBiometricChipRedirect (
   )
 }
 
-export function checkIphoneModelRedirect (iphoneModel: IphoneType): void {
+export function checkIphoneModelRedirect (iphoneModel: IphoneModel): void {
   group(`Select iphone model: ${iphoneModel} from /iphoneModel page`, () => {
     const res = http.post(
       getFrontendUrl('/iphoneModel'),
@@ -269,13 +280,13 @@ export function checkIdCheckAppRedirect (): void {
   })
 }
 
-export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void {
+export function checkWorkingCameraRedirect (hasWorkingCamera: HasWorkingCamera): void {
   group(
-    `Select working camera: ${workingCameraAnswer} from /workingCamera page`,
+    `Select working camera: ${hasWorkingCamera} from /workingCamera page`,
     () => {
       const res = http.post(
         getFrontendUrl('/workingCamera'),
-        { 'working-camera-choice': workingCameraAnswer },
+        { 'working-camera-choice': hasWorkingCamera },
         { tags: { name: 'Select Working Camera' } }
       )
       isStatusCode200(res)
@@ -285,24 +296,24 @@ export function checkWorkingCameraRedirect (workingCameraAnswer: YesOrNo): void 
 }
 
 export function checkFlashingWarningRedirect (
-  warningAnswer: YesOrNo,
+  canHandleFlashingColours: CanHandleFlashingColours,
   device: DeviceType
 ): void {
   group(
-    `Select flashing warning: ${warningAnswer} from /flashingWarning page`,
+    `Select flashing warning: ${canHandleFlashingColours} from /flashingWarning page`,
     () => {
       const res = http.post(
         getFrontendUrl('/flashingWarning'),
-        { 'flashing-colours-choice': warningAnswer },
+        { 'flashing-colours-choice': canHandleFlashingColours },
         { tags: { name: 'Select Flashing Warning Page' } }
       )
       isStatusCode200(res)
 
       switch (device) {
-        case DeviceType.Smartphone:
+        case DeviceType.SMARTPHONE:
           isPageRedirectCorrect(res, '/downloadApp')
           break
-        case DeviceType.ComputerOrTablet:
+        case DeviceType.COMPUTER_OR_TABLET:
           isPageRedirectCorrect(res, '/downloadApp')
           break
       }

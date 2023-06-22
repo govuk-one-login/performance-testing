@@ -1,12 +1,14 @@
 import { sleep } from 'k6'
 import { type Options } from 'k6/options'
-import { describeProfile, type ProfileList, selectProfile } from '../common/utils/config/load-profiles'
 import {
-  startDcmawJourney,
+  describeProfile,
+  type ProfileList,
+  selectProfile
+} from '../common/utils/config/load-profiles'
+import {
   DeviceType,
   SmartphoneType,
-  YesOrNo,
-  IphoneType,
+  IphoneModel,
   checkSelectDeviceRedirect,
   checkSelectSmartphoneRedirect,
   checkValidPassportPageRedirect,
@@ -18,11 +20,15 @@ import {
   checkWorkingCameraRedirect,
   getBiometricToken,
   postFinishBiometricToken,
-  doAuthorizeRequest,
   checkIdCheckAppRedirect,
-  checkAbortCommand
+  checkAbortCommand,
+  HasValidPassport,
+  HasBiometricChip,
+  HasWorkingCamera,
+  HasValidDrivingLicense,
+  CanHandleFlashingColours,
+  checkAuthorizeRedirect
 } from './utils/functions-mobile-journey'
-import execution from 'k6/execution'
 
 const profiles: ProfileList = {
   smoke: {
@@ -31,7 +37,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 5, // NOK
+      maxVUs: 5,
       stages: [
         { target: 5, duration: '30s' },
         { target: 5, duration: '30s' }
@@ -42,8 +48,8 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 90,
+      preAllocatedVUs: 75,
+      maxVUs: 120,
       stages: [
         { target: 5, duration: '30s' },
         { target: 5, duration: '30s' }
@@ -69,55 +75,58 @@ export function setup (): void {
 }
 
 export function dcmawDoAuthorizeRequest (): void {
-  doAuthorizeRequest()
+  checkAuthorizeRedirect()
 }
 
 export function dcmawMamIphonePassport (): void {
-  doAuthorizeRequest()
-  startDcmawJourney()
+  checkAuthorizeRedirect()
   sleep(1)
-  checkSelectDeviceRedirect(DeviceType.Smartphone)
+  checkSelectDeviceRedirect(DeviceType.SMARTPHONE)
   sleep(1)
-  checkSelectSmartphoneRedirect(SmartphoneType.Iphone)
+  checkSelectSmartphoneRedirect(SmartphoneType.IPHONE)
   sleep(1)
-  checkValidPassportPageRedirect(YesOrNo.YES)
+  checkValidPassportPageRedirect(HasValidPassport.YES)
   sleep(1)
-  checkBiometricChipRedirect(YesOrNo.YES, SmartphoneType.Iphone)
+  checkBiometricChipRedirect(HasBiometricChip.YES, SmartphoneType.IPHONE)
   sleep(1)
-  checkIphoneModelRedirect(IphoneType.Iphone7OrNewer)
+  checkIphoneModelRedirect(IphoneModel.IPHONE_7_OR_NEWER)
   sleep(1)
   checkIdCheckAppRedirect()
   sleep(1)
-  checkWorkingCameraRedirect(YesOrNo.YES)
+  checkWorkingCameraRedirect(HasWorkingCamera.YES)
   sleep(1)
-  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.Smartphone)
+  checkFlashingWarningRedirect(
+    CanHandleFlashingColours.YES,
+    DeviceType.SMARTPHONE
+  )
   sleep(1)
-  if (execution.scenario.iterationInTest % 5 === 0) {
-    // console.log(`Abort scenario: ${execution.scenario.iterationInTest}`)
-    checkAbortCommand()
-  } else {
-    // console.log(`Redirect scenario: ${execution.scenario.iterationInTest}`)
+  if (Math.random() <= 0.8) {
     getBiometricToken()
     postFinishBiometricToken()
     sleep(3)
     checkRedirectPage()
+  } else {
+    checkAbortCommand()
   }
 }
 
 export function dcmawDrivingLicenseAndroid (): void {
-  startDcmawJourney()
+  checkAuthorizeRedirect()
   sleep(1)
-  checkSelectDeviceRedirect(DeviceType.ComputerOrTablet)
+  checkSelectDeviceRedirect(DeviceType.COMPUTER_OR_TABLET)
   sleep(1)
-  checkSelectSmartphoneRedirect(SmartphoneType.Android)
+  checkSelectSmartphoneRedirect(SmartphoneType.ANDROID)
   sleep(1)
-  checkValidPassportPageRedirect(YesOrNo.NO)
+  checkValidPassportPageRedirect(HasValidPassport.NO)
   sleep(1)
-  checkValidDrivingLicenseRedirect(YesOrNo.YES)
+  checkValidDrivingLicenseRedirect(HasValidDrivingLicense.YES)
   sleep(1)
-  checkWorkingCameraRedirect(YesOrNo.YES)
+  checkWorkingCameraRedirect(HasWorkingCamera.YES)
   sleep(1)
-  checkFlashingWarningRedirect(YesOrNo.YES, DeviceType.ComputerOrTablet)
+  checkFlashingWarningRedirect(
+    CanHandleFlashingColours.YES,
+    DeviceType.COMPUTER_OR_TABLET
+  )
   sleep(1)
   getBiometricToken()
   postFinishBiometricToken()

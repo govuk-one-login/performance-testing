@@ -1,7 +1,7 @@
 # -----------------------
 # Typescript > Javascript
 # -----------------------
-FROM node:16-alpine3.16 as node-build
+FROM node:16-alpine3.18 as node-build
 
 ENV WORKDIR=/home/node
 
@@ -15,7 +15,7 @@ RUN cd scripts && \
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.79.0 as otel
+FROM otel/opentelemetry-collector-contrib:0.80.0 as otel
 ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---

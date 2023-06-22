@@ -1,0 +1,48 @@
+name: Feature Branch Publish
+
+################################ Prerequisite setup ################################
+# Set the customization template for an OpenID Connect (OIDC) subject claim for the repository.
+# You must authenticate using an access token with the repo scope to curl the endpoint.
+#
+#        curl -L \
+#          -X PUT \
+#          -H "Accept: application/vnd.github+json" \
+#          -H "Authorization: Bearer <YOUR-TOKEN>"\
+#          -H "X-GitHub-Api-Version: 2022-11-28" \
+#          https://api.github.com/repos/alphagov/di-devplatform-performance/actions/oidc/customization/sub \
+#          -d '{"use_default":false,"include_claim_keys":["repo","context","ref"]}'
+#
+# With the above setup, example sub from AssumeRoleWithWebIdentity as seen in Cloudtrail in build account
+#        "subjectFromWebIdentityToken": "repo:alphagov/di-devplatform-performance:environment:build:ref:refs/heads/main",
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run against'
+        type: environment
+        required: true
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./deploy
+
+jobs:
+  dockerBuildAndPush:
+    name: Docker build and push
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Deploy SAM app to ECR
+        uses: alphagov/di-devplatform-upload-action-ecr@1.0.2
+        with:
+          artifact-bucket-name: ${{ secrets.PERF_ARTIFACT_SOURCE_BUCKET_NAME }}
+          container-sign-kms-key-arn: ${{ secrets.PERF_CONTAINER_SIGN_KMS_KEY }}
+          working-directory: ./deploy
+          template-file: template.yaml
+          role-to-assume-arn: ${{ secrets.PERF_GH_ACTIONS_ROLE_ARN }}
+          ecr-repo-name: ${{ secrets.PERF_ECR_REPOSITORY }}

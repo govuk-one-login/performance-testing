@@ -9,45 +9,6 @@ const env = {
   biometricSessionId: __ENV.MOBILE_BIOMETRIC_SESSION_ID
 }
 
-export enum SmartphoneType {
-  IPHONE = 'iphone',
-  ANDROID = 'android',
-}
-
-export enum DeviceType {
-  SMARTPHONE = 'smartphone',
-  COMPUTER_OR_TABLET = 'computerOrTablet',
-}
-
-export enum HasValidPassport {
-  YES = 'yes',
-  NO = 'no',
-}
-
-export enum HasBiometricChip {
-  YES = 'yes',
-  NO = 'no',
-}
-
-export enum HasValidDrivingLicense {
-  YES = 'yes',
-  NO = 'no',
-}
-
-export enum HasWorkingCamera {
-  YES = 'yes',
-  NO = 'no',
-}
-
-export enum CanHandleFlashingColours {
-  YES = 'yes',
-  NO = 'no',
-}
-
-export enum IphoneModel {
-  IPHONE_7_OR_NEWER = 'iphone7OrNewer',
-}
-
 const OAUTH_ROUTE = '/dca/oauth2'
 
 function isStatusCode200 (res: Response): boolean {
@@ -65,12 +26,6 @@ function isStatusCode201 (res: Response): boolean {
 function isStatusCode302 (res: Response): boolean {
   return check(res, {
     'is status 302': (r) => r.status === 302
-  })
-}
-
-function isPageContentCorrect (res: Response, pageContent: string): boolean {
-  return check(res, {
-    'verify page content': (r) => (r.body as string).includes(pageContent)
   })
 }
 
@@ -158,11 +113,11 @@ export function checkAuthorizeRedirect (): void {
   })
 }
 
-export function checkSelectDeviceRedirect (device: DeviceType): void {
-  group(`Select device: ${device} from /selectdevice page`, () => {
+export function postSelectDeviceAndValidateRedirect (): void {
+  group('Post /selectDevice', () => {
     const res = http.post(
       getFrontendUrl('/selectDevice'),
-      { 'select-device-choice': device },
+      { 'select-device-choice': 'smartphone' },
       { tags: { name: 'Select Device Page' } }
     )
     isStatusCode200(res)
@@ -170,13 +125,11 @@ export function checkSelectDeviceRedirect (device: DeviceType): void {
   })
 }
 
-export function checkSelectSmartphoneRedirect (
-  smartphone: SmartphoneType
-): void {
-  group(`Select smartphone: ${smartphone} from /selectSmartphone page`, () => {
+export function postSelectSmartphoneAndValidateRedirect (): void {
+  group('Post /selectSmartphone', () => {
     const res = http.post(
       getFrontendUrl('/selectSmartphone'),
-      { 'smartphone-choice': smartphone },
+      { 'smartphone-choice': 'iphone' },
       { tags: { name: 'Select Smartphone Page' } }
     )
     isStatusCode200(res)
@@ -184,83 +137,35 @@ export function checkSelectSmartphoneRedirect (
   })
 }
 
-export function checkValidPassportPageRedirect (hasValidPassport: HasValidPassport): void {
-  group(
-    `Select valid passport: ${hasValidPassport} from /selectPassport page`,
-    () => {
-      const res = http.post(
-        getFrontendUrl('/validPassport'),
-        { 'select-option': hasValidPassport },
-        { tags: { name: 'Select Valid Passport Page' } }
-      )
-      isStatusCode200(res)
-
-      switch (hasValidPassport) {
-        case HasValidPassport.YES:
-          isPageRedirectCorrect(res, '/biometricChip')
-          break
-        case HasValidPassport.NO:
-          isPageRedirectCorrect(res, '/validDrivingLicence')
-      }
-    }
-  )
+export function postValidPassportAndValidateRedirect (): void {
+  group('Post /validPassport', () => {
+    const res = http.post(
+      getFrontendUrl('/validPassport'),
+      { 'select-option': 'yes' },
+      { tags: { name: 'Select Valid Passport Page' } }
+    )
+    isStatusCode200(res)
+    isPageRedirectCorrect(res, '/biometricChip')
+  })
 }
 
-export function checkValidDrivingLicenseRedirect (
-  hasValidDrivingLicense: HasValidDrivingLicense
-): void {
-  group(
-    `Select valid driving license: ${hasValidDrivingLicense} from /validDrivingLicence page`,
-    () => {
-      const res = http.post(
-        getFrontendUrl('/validDrivingLicence'),
-        { 'driving-licence-choice': hasValidDrivingLicense },
-        { tags: { name: 'Select Valid Driving License Page' } }
-      )
-      isStatusCode200(res)
-      isPageContentCorrect(
-        res,
-        'Use your UK driving licence and a GOV.UK app to confirm your identity'
-      )
-    }
-  )
+export function postBiometricChipAndValidateRedirect (): void {
+  group('Post /biometricChip', () => {
+    const res = http.post(
+      getFrontendUrl('/biometricChip'),
+      { 'select-option': 'yes' },
+      { tags: { name: 'Select Biometric Chip Page' } }
+    )
+    isStatusCode200(res)
+    isPageRedirectCorrect(res, '/iphoneModel')
+  })
 }
 
-export function checkBiometricChipRedirect (
-  hasBiometricChip: HasBiometricChip,
-  smartphone: SmartphoneType
-): void {
-  group(
-    `Select valid biometric chip: ${hasBiometricChip} from /biometricChip page`,
-    () => {
-      const res = http.post(
-        getFrontendUrl('/biometricChip'),
-        { 'select-option': hasBiometricChip },
-        { tags: { name: 'Select Valid Chip Page' } }
-      )
-      isStatusCode200(res)
-
-      switch (hasBiometricChip) {
-        case HasBiometricChip.YES:
-          if (smartphone === SmartphoneType.IPHONE) {
-            isPageRedirectCorrect(res, '/iphoneModel')
-          } else if (smartphone === SmartphoneType.ANDROID) {
-            isPageRedirectCorrect(res, '/idCheckApp')
-          }
-          break
-        case HasBiometricChip.NO:
-          isPageRedirectCorrect(res, '/validDrivingLicence')
-          break
-      }
-    }
-  )
-}
-
-export function checkIphoneModelRedirect (iphoneModel: IphoneModel): void {
-  group(`Select iphone model: ${iphoneModel} from /iphoneModel page`, () => {
+export function postIphoneModelAndValidateRedirect (): void {
+  group('Post /iphoneModel', () => {
     const res = http.post(
       getFrontendUrl('/iphoneModel'),
-      { 'select-option': iphoneModel },
+      { 'select-option': 'iphone7OrNewer' },
       { tags: { name: 'Select Iphone Model Page' } }
     )
     isStatusCode200(res)
@@ -268,8 +173,8 @@ export function checkIphoneModelRedirect (iphoneModel: IphoneModel): void {
   })
 }
 
-export function checkIdCheckAppRedirect (): void {
-  group('Select continue from /idCheckApp page', () => {
+export function postIdCheckAppAndValidateRedirect (): void {
+  group('Post /idCheckApp', () => {
     const res = http.post(
       getFrontendUrl('/idCheckApp'),
       {},
@@ -280,49 +185,32 @@ export function checkIdCheckAppRedirect (): void {
   })
 }
 
-export function checkWorkingCameraRedirect (hasWorkingCamera: HasWorkingCamera): void {
-  group(
-    `Select working camera: ${hasWorkingCamera} from /workingCamera page`,
-    () => {
-      const res = http.post(
-        getFrontendUrl('/workingCamera'),
-        { 'working-camera-choice': hasWorkingCamera },
-        { tags: { name: 'Select Working Camera' } }
-      )
-      isStatusCode200(res)
-      isPageRedirectCorrect(res, '/flashingWarning')
-    }
-  )
+export function postWorkingCameraAndValidateRedirect (): void {
+  group('Post /workingCamera', () => {
+    const res = http.post(
+      getFrontendUrl('/workingCamera'),
+      { 'working-camera-choice': 'yes' },
+      { tags: { name: 'Select Working Camera' } }
+    )
+    isStatusCode200(res)
+    isPageRedirectCorrect(res, '/flashingWarning')
+  })
 }
 
-export function checkFlashingWarningRedirect (
-  canHandleFlashingColours: CanHandleFlashingColours,
-  device: DeviceType
-): void {
-  group(
-    `Select flashing warning: ${canHandleFlashingColours} from /flashingWarning page`,
-    () => {
-      const res = http.post(
-        getFrontendUrl('/flashingWarning'),
-        { 'flashing-colours-choice': canHandleFlashingColours },
-        { tags: { name: 'Select Flashing Warning Page' } }
-      )
-      isStatusCode200(res)
-
-      switch (device) {
-        case DeviceType.SMARTPHONE:
-          isPageRedirectCorrect(res, '/downloadApp')
-          break
-        case DeviceType.COMPUTER_OR_TABLET:
-          isPageRedirectCorrect(res, '/downloadApp')
-          break
-      }
-    }
-  )
+export function postFlashingWarningAndValidateRedirect (): void {
+  group('Post /flashingWarning', () => {
+    const res = http.post(
+      getFrontendUrl('/flashingWarning'),
+      { 'flashing-colours-choice': 'yes' },
+      { tags: { name: 'Select Flashing Warning Page' } }
+    )
+    isStatusCode200(res)
+    isPageRedirectCorrect(res, '/downloadApp')
+  })
 }
 
-export function getBiometricToken (): void {
-  group('Get Biometric Token BE Request', () => {
+export function getBiometricTokenAndValidateResponse (): void {
+  group('Post /biometricToken', () => {
     const biometricTokenUrl = getBackendUrl('/biometricToken', {
       authSessionId: getSessionIdFromCookieJar()
     })
@@ -333,8 +221,8 @@ export function getBiometricToken (): void {
   })
 }
 
-export function postFinishBiometricToken (): void {
-  group('Post Finish Biometric Token BE Request', () => {
+export function postFinishBiometricTokenAndValidateResponse (): void {
+  group('Post /finishBiometricSession', () => {
     const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', {
       authSessionId: getSessionIdFromCookieJar(),
       biometricSessionId: env.biometricSessionId
@@ -344,8 +232,8 @@ export function postFinishBiometricToken (): void {
   })
 }
 
-export function checkRedirectPage (): void {
-  group('Check Redirect Final Page /redirect', () => {
+export function getRedirectAndValidateResponse (): void {
+  group('get /redirect', () => {
     const redirectUrl = getFrontendUrl('/redirect', { sessionId: getSessionIdFromCookieJar() })
     const res = http.get(redirectUrl, {
       redirects: 0,
@@ -356,7 +244,7 @@ export function checkRedirectPage (): void {
   })
 }
 
-export function checkAbortCommand (): void {
+export function getAbortCommandAndValidateResponse (): void {
   group('Check Abort and Redirect', () => {
     const abortCommandUrl = getFrontendUrl('/abortCommand', { sessionId: getSessionIdFromCookieJar() })
     const res = http.get(abortCommandUrl, {

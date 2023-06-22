@@ -6,25 +6,18 @@ import {
   selectProfile
 } from '../common/utils/config/load-profiles'
 import {
-  DeviceType,
-  SmartphoneType,
-  IphoneModel,
-  checkSelectDeviceRedirect,
-  checkSelectSmartphoneRedirect,
-  checkValidPassportPageRedirect,
-  checkBiometricChipRedirect,
-  checkFlashingWarningRedirect,
-  checkIphoneModelRedirect,
-  checkRedirectPage,
-  checkWorkingCameraRedirect,
-  getBiometricToken,
-  postFinishBiometricToken,
-  checkIdCheckAppRedirect,
-  checkAbortCommand,
-  HasValidPassport,
-  HasBiometricChip,
-  HasWorkingCamera,
-  CanHandleFlashingColours,
+  postSelectDeviceAndValidateRedirect,
+  postSelectSmartphoneAndValidateRedirect,
+  postValidPassportAndValidateRedirect,
+  postBiometricChipAndValidateRedirect,
+  postFlashingWarningAndValidateRedirect,
+  postIphoneModelAndValidateRedirect,
+  getRedirectAndValidateResponse,
+  postWorkingCameraAndValidateRedirect,
+  getBiometricTokenAndValidateResponse,
+  postFinishBiometricTokenAndValidateResponse,
+  postIdCheckAppAndValidateRedirect,
+  getAbortCommandAndValidateResponse,
   checkAuthorizeRedirect
 } from './utils/functions-mobile-journey'
 
@@ -63,28 +56,28 @@ export function setup (): void {
 export function mamIphonePassport (): void {
   checkAuthorizeRedirect()
   sleep(1)
-  checkSelectDeviceRedirect(DeviceType.SMARTPHONE)
+  postSelectDeviceAndValidateRedirect()
   sleep(1)
-  checkSelectSmartphoneRedirect(SmartphoneType.IPHONE)
+  postSelectSmartphoneAndValidateRedirect()
   sleep(1)
-  checkValidPassportPageRedirect(HasValidPassport.YES)
+  postValidPassportAndValidateRedirect()
   sleep(1)
-  checkBiometricChipRedirect(HasBiometricChip.YES, SmartphoneType.IPHONE)
+  postBiometricChipAndValidateRedirect()
   sleep(1)
-  checkIphoneModelRedirect(IphoneModel.IPHONE_7_OR_NEWER)
+  postIphoneModelAndValidateRedirect()
   sleep(1)
-  checkIdCheckAppRedirect()
+  postIdCheckAppAndValidateRedirect()
   sleep(1)
-  checkWorkingCameraRedirect(HasWorkingCamera.YES)
+  postWorkingCameraAndValidateRedirect()
   sleep(1)
-  checkFlashingWarningRedirect(CanHandleFlashingColours.YES, DeviceType.SMARTPHONE)
+  postFlashingWarningAndValidateRedirect()
   sleep(1)
   if (Math.random() <= 0.8) {
-    getBiometricToken()
-    postFinishBiometricToken()
+    getBiometricTokenAndValidateResponse()
+    postFinishBiometricTokenAndValidateResponse()
     sleep(3)
-    checkRedirectPage()
+    getRedirectAndValidateResponse()
   } else {
-    checkAbortCommand()
+    getAbortCommandAndValidateResponse()
   }
 }

@@ -1,12 +1,13 @@
 import { check, group } from 'k6'
 import http, { type Response } from 'k6/http'
 import { URL } from './url'
+import { crypto } from 'k6/experimental/webcrypto'
+// import { URL } from 'https://jslib.k6.io/url/1.0.0/index.js'
 
 const env = {
   testClientExecuteUrl: __ENV.MOBILE_TEST_CLIENT_EXECUTE_URL,
   backEndUrl: __ENV.MOBILE_BACK_END_URL,
-  frontEndUrl: __ENV.MOBILE_FRONT_END_URL,
-  biometricSessionId: __ENV.MOBILE_BIOMETRIC_SESSION_ID
+  frontEndUrl: __ENV.MOBILE_FRONT_END_URL
 }
 
 const OAUTH_ROUTE = '/dca/oauth2'
@@ -108,7 +109,7 @@ export function startJourneyAndValidateRedirect (): void {
 }
 
 export function postSelectDeviceAndValidateRedirect (): void {
-  group('Post /selectDevice', () => {
+  group('POST /selectDevice', () => {
     const res = http.post(
       getFrontendUrl('/selectDevice'),
       { 'select-device-choice': 'smartphone' },
@@ -120,7 +121,7 @@ export function postSelectDeviceAndValidateRedirect (): void {
 }
 
 export function postSelectSmartphoneAndValidateRedirect (): void {
-  group('Post /selectSmartphone', () => {
+  group('POST /selectSmartphone', () => {
     const res = http.post(
       getFrontendUrl('/selectSmartphone'),
       { 'smartphone-choice': 'iphone' },
@@ -132,7 +133,7 @@ export function postSelectSmartphoneAndValidateRedirect (): void {
 }
 
 export function postValidPassportAndValidateRedirect (): void {
-  group('Post /validPassport', () => {
+  group('POST /validPassport', () => {
     const res = http.post(
       getFrontendUrl('/validPassport'),
       { 'select-option': 'yes' },
@@ -144,7 +145,7 @@ export function postValidPassportAndValidateRedirect (): void {
 }
 
 export function postBiometricChipAndValidateRedirect (): void {
-  group('Post /biometricChip', () => {
+  group('POST /biometricChip', () => {
     const res = http.post(
       getFrontendUrl('/biometricChip'),
       { 'select-option': 'yes' },
@@ -156,7 +157,7 @@ export function postBiometricChipAndValidateRedirect (): void {
 }
 
 export function postIphoneModelAndValidateRedirect (): void {
-  group('Post /iphoneModel', () => {
+  group('POST /iphoneModel', () => {
     const res = http.post(
       getFrontendUrl('/iphoneModel'),
       { 'select-option': 'iphone7OrNewer' },
@@ -168,7 +169,7 @@ export function postIphoneModelAndValidateRedirect (): void {
 }
 
 export function postIdCheckAppAndValidateRedirect (): void {
-  group('Post /idCheckApp', () => {
+  group('POST /idCheckApp', () => {
     const res = http.post(
       getFrontendUrl('/idCheckApp'),
       {},
@@ -180,7 +181,7 @@ export function postIdCheckAppAndValidateRedirect (): void {
 }
 
 export function postWorkingCameraAndValidateRedirect (): void {
-  group('Post /workingCamera', () => {
+  group('POST /workingCamera', () => {
     const res = http.post(
       getFrontendUrl('/workingCamera'),
       { 'working-camera-choice': 'yes' },
@@ -192,7 +193,7 @@ export function postWorkingCameraAndValidateRedirect (): void {
 }
 
 export function postFlashingWarningAndValidateRedirect (): void {
-  group('Post /flashingWarning', () => {
+  group('POST /flashingWarning', () => {
     const res = http.post(
       getFrontendUrl('/flashingWarning'),
       { 'flashing-colours-choice': 'yes' },
@@ -204,7 +205,7 @@ export function postFlashingWarningAndValidateRedirect (): void {
 }
 
 export function getBiometricTokenAndValidateResponse (): void {
-  group('Post /biometricToken/v2', () => {
+  group('POST /biometricToken/v2', () => {
     const biometricTokenUrl = getBackendUrl('/biometricToken/v2', {
       authSessionId: getSessionIdFromCookieJar()
     })
@@ -216,10 +217,10 @@ export function getBiometricTokenAndValidateResponse (): void {
 }
 
 export function postFinishBiometricTokenAndValidateResponse (): void {
-  group('Post /finishBiometricSession', () => {
+  group('POST /finishBiometricSession', () => {
     const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', {
       authSessionId: getSessionIdFromCookieJar(),
-      biometricSessionId: env.biometricSessionId
+      biometricSessionId: crypto.randomUUID()
     })
     const res = http.post(finishBiometricSessionUrl)
     isStatusCode200(res)
@@ -227,7 +228,7 @@ export function postFinishBiometricTokenAndValidateResponse (): void {
 }
 
 export function getRedirectAndValidateResponse (): void {
-  group('Get /redirect', () => {
+  group('GET /redirect', () => {
     const redirectUrl = getFrontendUrl('/redirect', { sessionId: getSessionIdFromCookieJar() })
     const res = http.get(redirectUrl, {
       redirects: 0,
@@ -235,11 +236,12 @@ export function getRedirectAndValidateResponse (): void {
     })
     isStatusCode302(res)
     isHeaderLocationCorrect(res, '/redirect')
+    isHeaderLocationCorrect(res, 'code')
   })
 }
 
 export function getAbortCommandAndValidateResponse (): void {
-  group('Get /abortCommand', () => {
+  group('GET /abortCommand', () => {
     const abortCommandUrl = getFrontendUrl('/abortCommand', { sessionId: getSessionIdFromCookieJar() })
     const res = http.get(abortCommandUrl, {
       redirects: 0,
@@ -247,5 +249,6 @@ export function getAbortCommandAndValidateResponse (): void {
     })
     isStatusCode302(res)
     isHeaderLocationCorrect(res, '/redirect')
+    isHeaderLocationCorrect(res, 'error')
   })
 }

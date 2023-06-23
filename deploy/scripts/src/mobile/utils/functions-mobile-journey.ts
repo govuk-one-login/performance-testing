@@ -35,10 +35,19 @@ function isPageRedirectCorrect (res: Response, pageUrl: string): boolean {
   })
 }
 
-function isHeaderLocationCorrect (res: Response, content: string): boolean {
-  return check(res, {
-    'verify url redirect': (r) => {
-      return r.headers.Location.includes(content)
+function isRedirectUrlCorrect (url: URL): boolean {
+  return check(url, {
+    'verify url redirect': (url) => {
+      return url.pathname.includes('/redirect')
+    }
+  })
+}
+
+function urlContainsQueryParam (url: URL, param: string): boolean {
+  return check(url, {
+    'verify query param': (url) => {
+      const queryParams = url.searchParams
+      return queryParams.get(param) !== null
     }
   })
 }
@@ -234,8 +243,9 @@ export function getRedirectAndValidateResponse (): void {
       tags: { name: 'Redirect Final Page' }
     })
     isStatusCode302(res)
-    isHeaderLocationCorrect(res, '/redirect')
-    isHeaderLocationCorrect(res, 'code')
+    const location = new URL(res.headers.Location)
+    isRedirectUrlCorrect(location)
+    urlContainsQueryParam(location, 'code')
   })
 }
 
@@ -247,7 +257,8 @@ export function getAbortCommandAndValidateResponse (): void {
       tags: { name: 'Abort Command' }
     })
     isStatusCode302(res)
-    isHeaderLocationCorrect(res, '/redirect')
-    isHeaderLocationCorrect(res, 'error')
+    const location = new URL(res.headers.Location)
+    isRedirectUrlCorrect(location)
+    urlContainsQueryParam(location, 'error')
   })
 }

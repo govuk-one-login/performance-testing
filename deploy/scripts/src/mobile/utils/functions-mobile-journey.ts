@@ -215,7 +215,7 @@ export function getBiometricTokenAndValidateResponse (): void {
   })
 }
 
-export function postFinishBiometricTokenAndValidateResponse (): void {
+export function postFinishBiometricSessionAndValidateResponse (): void {
   group('POST /finishBiometricSession', () => {
     const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', {
       authSessionId: getSessionIdFromCookieJar(),

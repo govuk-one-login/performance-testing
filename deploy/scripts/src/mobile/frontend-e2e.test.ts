@@ -15,7 +15,7 @@ import {
   getRedirectAndValidateResponse,
   postWorkingCameraAndValidateResponse,
   getBiometricTokenAndValidateResponse,
-  postFinishBiometricTokenAndValidateResponse,
+  postFinishBiometricSessionAndValidateResponse,
   postIdCheckAppAndValidateResponse,
   getAbortCommandAndValidateResponse,
   startJourneyAndValidateResponse
@@ -75,7 +75,7 @@ export function mamIphonePassport (): void {
   if (Math.random() <= 0.8) {
     getBiometricTokenAndValidateResponse()
     sleep(1)
-    postFinishBiometricTokenAndValidateResponse()
+    postFinishBiometricSessionAndValidateResponse()
     sleep(1)
     getRedirectAndValidateResponse()
   } else {

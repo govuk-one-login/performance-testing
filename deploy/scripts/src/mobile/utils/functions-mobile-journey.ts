@@ -1,8 +1,7 @@
 import { check, group } from 'k6'
 import http, { type Response } from 'k6/http'
 import { URL } from './url'
-import { crypto } from 'k6/experimental/webcrypto'
-// import { URL } from 'https://jslib.k6.io/url/1.0.0/index.js'
+import { uuidv4 } from './k6-utils'
 
 const env = {
   testClientExecuteUrl: __ENV.MOBILE_TEST_CLIENT_EXECUTE_URL,
@@ -220,7 +219,7 @@ export function postFinishBiometricTokenAndValidateResponse (): void {
   group('POST /finishBiometricSession', () => {
     const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', {
       authSessionId: getSessionIdFromCookieJar(),
-      biometricSessionId: crypto.randomUUID()
+      biometricSessionId: uuidv4()
     })
     const res = http.post(finishBiometricSessionUrl)
     isStatusCode200(res)

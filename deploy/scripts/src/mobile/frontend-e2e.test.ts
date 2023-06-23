@@ -6,19 +6,19 @@ import {
   selectProfile
 } from '../common/utils/config/load-profiles'
 import {
-  postSelectDeviceAndValidateRedirect,
-  postSelectSmartphoneAndValidateRedirect,
-  postValidPassportAndValidateRedirect,
-  postBiometricChipAndValidateRedirect,
-  postFlashingWarningAndValidateRedirect,
-  postIphoneModelAndValidateRedirect,
+  postSelectDeviceAndValidateResponse,
+  postSelectSmartphoneAndValidateResponse,
+  postValidPassportAndValidateResponse,
+  postBiometricChipAndValidateResponse,
+  postFlashingWarningAndValidateResponse,
+  postIphoneModelAndValidateResponse,
   getRedirectAndValidateResponse,
-  postWorkingCameraAndValidateRedirect,
+  postWorkingCameraAndValidateResponse,
   getBiometricTokenAndValidateResponse,
   postFinishBiometricTokenAndValidateResponse,
-  postIdCheckAppAndValidateRedirect,
+  postIdCheckAppAndValidateResponse,
   getAbortCommandAndValidateResponse,
-  startJourneyAndValidateRedirect
+  startJourneyAndValidateResponse
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -54,23 +54,23 @@ export function setup (): void {
 }
 
 export function mamIphonePassport (): void {
-  startJourneyAndValidateRedirect()
+  startJourneyAndValidateResponse()
   sleep(1 + Math.random())
-  postSelectDeviceAndValidateRedirect()
+  postSelectDeviceAndValidateResponse()
   sleep(1 + Math.random())
-  postSelectSmartphoneAndValidateRedirect()
+  postSelectSmartphoneAndValidateResponse()
   sleep(1 + Math.random())
-  postValidPassportAndValidateRedirect()
+  postValidPassportAndValidateResponse()
   sleep(1 + Math.random())
-  postBiometricChipAndValidateRedirect()
+  postBiometricChipAndValidateResponse()
   sleep(1 + Math.random())
-  postIphoneModelAndValidateRedirect()
+  postIphoneModelAndValidateResponse()
   sleep(1 + Math.random())
-  postIdCheckAppAndValidateRedirect()
+  postIdCheckAppAndValidateResponse()
   sleep(1 + Math.random())
-  postWorkingCameraAndValidateRedirect()
+  postWorkingCameraAndValidateResponse()
   sleep(1 + Math.random())
-  postFlashingWarningAndValidateRedirect()
+  postFlashingWarningAndValidateResponse()
   sleep(1 + Math.random())
   if (Math.random() <= 0.8) {
     getBiometricTokenAndValidateResponse()

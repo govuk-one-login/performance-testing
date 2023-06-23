@@ -5,7 +5,7 @@ import {
   selectProfile
 } from '../common/utils/config/load-profiles'
 import {
-  startJourneyAndValidateRedirect
+  startJourneyAndValidateResponse
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -41,5 +41,5 @@ export function setup (): void {
 }
 
 export function startJourney (): void {
-  startJourneyAndValidateRedirect()
+  startJourneyAndValidateResponse()
 }

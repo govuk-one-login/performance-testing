@@ -92,7 +92,7 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
   return getUrl(path, env.backEndUrl, query)
 }
 
-export function startJourneyAndValidateRedirect (): void {
+export function startJourneyAndValidateResponse (): void {
   let verifyUrl: string
   group('POST test client /start', () => {
     const testClientRes = postTestClientStart()
@@ -107,7 +107,7 @@ export function startJourneyAndValidateRedirect (): void {
   })
 }
 
-export function postSelectDeviceAndValidateRedirect (): void {
+export function postSelectDeviceAndValidateResponse (): void {
   group('POST /selectDevice', () => {
     const res = http.post(
       getFrontendUrl('/selectDevice'),
@@ -119,7 +119,7 @@ export function postSelectDeviceAndValidateRedirect (): void {
   })
 }
 
-export function postSelectSmartphoneAndValidateRedirect (): void {
+export function postSelectSmartphoneAndValidateResponse (): void {
   group('POST /selectSmartphone', () => {
     const res = http.post(
       getFrontendUrl('/selectSmartphone'),
@@ -131,7 +131,7 @@ export function postSelectSmartphoneAndValidateRedirect (): void {
   })
 }
 
-export function postValidPassportAndValidateRedirect (): void {
+export function postValidPassportAndValidateResponse (): void {
   group('POST /validPassport', () => {
     const res = http.post(
       getFrontendUrl('/validPassport'),
@@ -143,7 +143,7 @@ export function postValidPassportAndValidateRedirect (): void {
   })
 }
 
-export function postBiometricChipAndValidateRedirect (): void {
+export function postBiometricChipAndValidateResponse (): void {
   group('POST /biometricChip', () => {
     const res = http.post(
       getFrontendUrl('/biometricChip'),
@@ -155,7 +155,7 @@ export function postBiometricChipAndValidateRedirect (): void {
   })
 }
 
-export function postIphoneModelAndValidateRedirect (): void {
+export function postIphoneModelAndValidateResponse (): void {
   group('POST /iphoneModel', () => {
     const res = http.post(
       getFrontendUrl('/iphoneModel'),
@@ -167,7 +167,7 @@ export function postIphoneModelAndValidateRedirect (): void {
   })
 }
 
-export function postIdCheckAppAndValidateRedirect (): void {
+export function postIdCheckAppAndValidateResponse (): void {
   group('POST /idCheckApp', () => {
     const res = http.post(
       getFrontendUrl('/idCheckApp'),
@@ -179,7 +179,7 @@ export function postIdCheckAppAndValidateRedirect (): void {
   })
 }
 
-export function postWorkingCameraAndValidateRedirect (): void {
+export function postWorkingCameraAndValidateResponse (): void {
   group('POST /workingCamera', () => {
     const res = http.post(
       getFrontendUrl('/workingCamera'),
@@ -191,7 +191,7 @@ export function postWorkingCameraAndValidateRedirect (): void {
   })
 }
 
-export function postFlashingWarningAndValidateRedirect (): void {
+export function postFlashingWarningAndValidateResponse (): void {
   group('POST /flashingWarning', () => {
     const res = http.post(
       getFrontendUrl('/flashingWarning'),

@@ -92,15 +92,15 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
   return getUrl(path, env.backEndUrl, query)
 }
 
-export function checkAuthorizeRedirect (): void {
+export function startJourneyAndValidateRedirect (): void {
   let verifyUrl: string
-  group('Post test client /start', () => {
+  group('POST test client /start', () => {
     const testClientRes = postTestClientStart()
     isStatusCode201(testClientRes)
     verifyUrl = parseVerifyUrl(testClientRes)
   })
 
-  group('Post /verifyAuthorizeRequest', () => {
+  group('GET /authorize', () => {
     const verifyRes = http.get(verifyUrl)
     isStatusCode200(verifyRes)
     isPageRedirectCorrect(verifyRes, '/selectDevice')

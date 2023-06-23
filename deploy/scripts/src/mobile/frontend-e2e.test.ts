@@ -18,7 +18,7 @@ import {
   postFinishBiometricTokenAndValidateResponse,
   postIdCheckAppAndValidateRedirect,
   getAbortCommandAndValidateResponse,
-  checkAuthorizeRedirect
+  startJourneyAndValidateRedirect
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -54,7 +54,7 @@ export function setup (): void {
 }
 
 export function mamIphonePassport (): void {
-  checkAuthorizeRedirect()
+  startJourneyAndValidateRedirect()
   sleep(1)
   postSelectDeviceAndValidateRedirect()
   sleep(1)

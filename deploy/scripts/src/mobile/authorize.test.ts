@@ -5,12 +5,12 @@ import {
   selectProfile
 } from '../common/utils/config/load-profiles'
 import {
-  checkAuthorizeRedirect
+  startJourneyAndValidateRedirect
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
   smoke: {
-    doAuthorizeRequest: {
+    startJourney: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -20,7 +20,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '30s' },
         { target: 5, duration: '30s' }
       ],
-      exec: 'doAuthorizeRequest'
+      exec: 'startJourney'
     }
   }
 }
@@ -40,6 +40,6 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
-export function doAuthorizeRequest (): void {
-  checkAuthorizeRedirect()
+export function startJourney (): void {
+  startJourneyAndValidateRedirect()
 }

@@ -101,7 +101,7 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
   return getUrl(path, env.backEndUrl, query)
 }
 
-export function startJourneyAndValidateResponse (): void {
+export function startJourney (): void {
   let authorizeUrl: string
   group('POST test client /start', () => {
     const testClientRes = postTestClientStart()
@@ -116,7 +116,7 @@ export function startJourneyAndValidateResponse (): void {
   })
 }
 
-export function postSelectDeviceAndValidateResponse (): void {
+export function postSelectDevice (): void {
   group('POST /selectDevice', () => {
     const res = http.post(
       getFrontendUrl('/selectDevice'),
@@ -128,7 +128,7 @@ export function postSelectDeviceAndValidateResponse (): void {
   })
 }
 
-export function postSelectSmartphoneAndValidateResponse (): void {
+export function postSelectSmartphone (): void {
   group('POST /selectSmartphone', () => {
     const res = http.post(
       getFrontendUrl('/selectSmartphone'),
@@ -140,7 +140,7 @@ export function postSelectSmartphoneAndValidateResponse (): void {
   })
 }
 
-export function postValidPassportAndValidateResponse (): void {
+export function postValidPassport (): void {
   group('POST /validPassport', () => {
     const res = http.post(
       getFrontendUrl('/validPassport'),
@@ -152,7 +152,7 @@ export function postValidPassportAndValidateResponse (): void {
   })
 }
 
-export function postBiometricChipAndValidateResponse (): void {
+export function postBiometricChip (): void {
   group('POST /biometricChip', () => {
     const res = http.post(
       getFrontendUrl('/biometricChip'),
@@ -164,7 +164,7 @@ export function postBiometricChipAndValidateResponse (): void {
   })
 }
 
-export function postIphoneModelAndValidateResponse (): void {
+export function postIphoneModel (): void {
   group('POST /iphoneModel', () => {
     const res = http.post(
       getFrontendUrl('/iphoneModel'),
@@ -176,7 +176,7 @@ export function postIphoneModelAndValidateResponse (): void {
   })
 }
 
-export function postIdCheckAppAndValidateResponse (): void {
+export function postIdCheckApp (): void {
   group('POST /idCheckApp', () => {
     const res = http.post(
       getFrontendUrl('/idCheckApp'),
@@ -188,7 +188,7 @@ export function postIdCheckAppAndValidateResponse (): void {
   })
 }
 
-export function postWorkingCameraAndValidateResponse (): void {
+export function postWorkingCamera (): void {
   group('POST /workingCamera', () => {
     const res = http.post(
       getFrontendUrl('/workingCamera'),
@@ -200,7 +200,7 @@ export function postWorkingCameraAndValidateResponse (): void {
   })
 }
 
-export function postFlashingWarningAndValidateResponse (): void {
+export function postFlashingWarning (): void {
   group('POST /flashingWarning', () => {
     const res = http.post(
       getFrontendUrl('/flashingWarning'),
@@ -212,7 +212,7 @@ export function postFlashingWarningAndValidateResponse (): void {
   })
 }
 
-export function getBiometricTokenAndValidateResponse (): void {
+export function getBiometricToken (): void {
   group('GET /biometricToken/v2', () => {
     const biometricTokenUrl = getBackendUrl('/biometricToken/v2', {
       authSessionId: getSessionIdFromCookieJar()
@@ -224,7 +224,7 @@ export function getBiometricTokenAndValidateResponse (): void {
   })
 }
 
-export function postFinishBiometricSessionAndValidateResponse (): void {
+export function postFinishBiometricSession (): void {
   group('POST /finishBiometricSession', () => {
     const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', {
       authSessionId: getSessionIdFromCookieJar(),
@@ -235,7 +235,7 @@ export function postFinishBiometricSessionAndValidateResponse (): void {
   })
 }
 
-export function getRedirectAndValidateResponse (): void {
+export function getRedirect (): void {
   group('GET /redirect', () => {
     const redirectUrl = getFrontendUrl('/redirect', { sessionId: getSessionIdFromCookieJar() })
     const res = http.get(redirectUrl, {
@@ -249,7 +249,7 @@ export function getRedirectAndValidateResponse (): void {
   })
 }
 
-export function getAbortCommandAndValidateResponse (): void {
+export function getAbortCommand (): void {
   group('GET /abortCommand', () => {
     const abortCommandUrl = getFrontendUrl('/abortCommand', { sessionId: getSessionIdFromCookieJar() })
     const res = http.get(abortCommandUrl, {

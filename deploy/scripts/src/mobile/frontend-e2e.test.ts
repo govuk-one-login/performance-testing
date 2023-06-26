@@ -6,19 +6,19 @@ import {
   selectProfile
 } from '../common/utils/config/load-profiles'
 import {
-  postSelectDeviceAndValidateResponse,
-  postSelectSmartphoneAndValidateResponse,
-  postValidPassportAndValidateResponse,
-  postBiometricChipAndValidateResponse,
-  postFlashingWarningAndValidateResponse,
-  postIphoneModelAndValidateResponse,
-  getRedirectAndValidateResponse,
-  postWorkingCameraAndValidateResponse,
-  getBiometricTokenAndValidateResponse,
-  postFinishBiometricSessionAndValidateResponse,
-  postIdCheckAppAndValidateResponse,
-  getAbortCommandAndValidateResponse,
-  startJourneyAndValidateResponse
+  postSelectDevice,
+  postSelectSmartphone,
+  postValidPassport,
+  postBiometricChip,
+  postFlashingWarning,
+  postIphoneModel,
+  getRedirect,
+  postWorkingCamera,
+  getBiometricToken,
+  postFinishBiometricSession,
+  postIdCheckApp,
+  getAbortCommand,
+  startJourney
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -54,31 +54,31 @@ export function setup (): void {
 }
 
 export function mamIphonePassport (): void {
-  startJourneyAndValidateResponse()
+  startJourney()
   sleep(1 + Math.random())
-  postSelectDeviceAndValidateResponse()
+  postSelectDevice()
   sleep(1 + Math.random())
-  postSelectSmartphoneAndValidateResponse()
+  postSelectSmartphone()
   sleep(1 + Math.random())
-  postValidPassportAndValidateResponse()
+  postValidPassport()
   sleep(1 + Math.random())
-  postBiometricChipAndValidateResponse()
+  postBiometricChip()
   sleep(1 + Math.random())
-  postIphoneModelAndValidateResponse()
+  postIphoneModel()
   sleep(1 + Math.random())
-  postIdCheckAppAndValidateResponse()
+  postIdCheckApp()
   sleep(1 + Math.random())
-  postWorkingCameraAndValidateResponse()
+  postWorkingCamera()
   sleep(1 + Math.random())
-  postFlashingWarningAndValidateResponse()
+  postFlashingWarning()
   sleep(1 + Math.random())
   if (Math.random() <= 0.8) {
-    getBiometricTokenAndValidateResponse()
+    getBiometricToken()
     sleep(1)
-    postFinishBiometricSessionAndValidateResponse()
+    postFinishBiometricSession()
     sleep(1)
-    getRedirectAndValidateResponse()
+    getRedirect()
   } else {
-    getAbortCommandAndValidateResponse()
+    getAbortCommand()
   }
 }

@@ -72,13 +72,13 @@ export function mamIphonePassport (): void {
   simulateUserWait()
   postFlashingWarning()
   simulateUserWait()
-  if (Math.random() <= 0.8) {
+  if (Math.random() <= 0.8) { // Approximately 80% of users complete journey successfully
     getBiometricToken()
     sleep(1)
     postFinishBiometricSession()
     sleep(1)
     getRedirect()
-  } else {
+  } else { // Approximately 20% of users abort journey
     getAbortCommand()
   }
 }

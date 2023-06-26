@@ -61,7 +61,7 @@ function postTestClientStart (): Response {
     getUrl('start', env.testClientExecuteUrl),
     JSON.stringify({ target: env.backEndUrl, frontendUri: env.frontEndUrl }),
     {
-      tags: { name: 'Post request to Verify URL' },
+      tags: { name: 'Post request to authorize URL' },
       headers: { 'Content-Type': 'application/json' }
     }
   )
@@ -70,7 +70,7 @@ function postTestClientStart (): Response {
 function parseAuthorizeUrl (response: Response): string {
   const authorizeUrl = response.json('WebLocation')
   if (typeof authorizeUrl !== 'string') {
-    throw new Error('Failed to parse verify URL from response')
+    throw new Error('Failed to parse authorize URL from response')
   }
 
   return authorizeUrl

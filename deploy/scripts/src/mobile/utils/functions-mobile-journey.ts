@@ -299,24 +299,6 @@ export function getAbortCommand (): void {
   })
 }
 
-export function postDocumentGroups (sessionId: string): void {
-  const documentGroupsData = {
-    resourceOwner: {
-      documentGroups: [
-        {
-          groupName: 'Photo Identity Document',
-          allowableDocuments: ['NFC_PASSPORT']
-        }
-      ]
-    }
-  }
-  const documentGroupsUrl = getBackendUrl(
-    `/resourceOwner/documentGroups/${getSessionIdFromCookieJar()}`
-  )
-  const res = http.post(documentGroupsUrl, JSON.stringify(documentGroupsData))
-  isStatusCode200(res)
-}
-
 export function redirectTokenAndUserInfo (): void {
   let verifyUrl: string
   group('POST test client /start', () => {
@@ -337,7 +319,21 @@ export function redirectTokenAndUserInfo (): void {
   sleep(1)
 
   group('POST /resourceOwner/documentGroups', () => {
-    postDocumentGroups(sessionId)
+    const documentGroupsData = {
+      resourceOwner: {
+        documentGroups: [
+          {
+            groupName: 'Photo Identity Document',
+            allowableDocuments: ['NFC_PASSPORT']
+          }
+        ]
+      }
+    }
+    const documentGroupsUrl = getBackendUrl(
+      `/resourceOwner/documentGroups/${sessionId}`
+    )
+    const res = http.post(documentGroupsUrl, JSON.stringify(documentGroupsData))
+    isStatusCode200(res)
   })
 
   sleep(1)
@@ -361,6 +357,8 @@ export function redirectTokenAndUserInfo (): void {
     const res = http.post(finishBiometricSessionUrl)
     isStatusCode200(res)
   })
+
+  sleep(1)
 
   let redirectRes: Response
   group('GET /redirect (BE)', () => {

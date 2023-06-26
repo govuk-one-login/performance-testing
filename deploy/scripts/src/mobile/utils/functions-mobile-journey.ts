@@ -291,7 +291,7 @@ export function postDocumentGroups (): void {
       ]
     }
   }
-  group('Post Document Groups BE Request', () => {
+  group('POST /resourceOwner/documentGroups', () => {
     const documentGroupsUrl = getBackendUrl(
       `/resourceOwner/documentGroups/${getSessionIdFromCookieJar()}`
     )
@@ -303,23 +303,22 @@ export function postDocumentGroups (): void {
   })
 }
 
-export function checkRedirectBackendAndAccessToken (): void {
+export function redirectTokenAndUserInfo (): void {
   let redirectRes: Response
-  let accessTokenResponse: Response
-  group('GET Redirect BE Page /redirect', () => {
+  group('GET /redirect (BE)', () => {
     const redirectUrl = getBackendUrl('/redirect', {
       sessionId: getSessionIdFromCookieJar()
     })
     redirectRes = http.get(redirectUrl, {
-      redirects: 0,
-      tags: { name: 'Redirect Final Page' }
+      tags: { name: 'Redirect BE' }
     })
     isStatusCode200(redirectRes)
   })
 
   sleep(1)
 
-  group('Post Access Token BE Request', () => {
+  let accessTokenResponse: Response
+  group('POST /token', () => {
     const accessTokenUrl = getBackendUrl('/token')
     const authorizationCode = redirectRes.json('authorizationCode') as string
     const redirectUri = redirectRes.json('redirectUri') as string
@@ -328,13 +327,12 @@ export function checkRedirectBackendAndAccessToken (): void {
       grant_type: 'authorization_code',
       redirect_uri: redirectUri
     })
-    console.log(accessTokenResponse.body)
     isStatusCode200(accessTokenResponse)
   })
 
   sleep(1)
 
-  group('Post User Info v2 BE Request', () => {
+  group('POST /userinfo/v2', () => {
     const accessToken = accessTokenResponse.json('access_token') as string
     const userInfoV2Url = getBackendUrl('/userinfo/v2')
     const res = http.post(userInfoV2Url, '', {
@@ -343,7 +341,6 @@ export function checkRedirectBackendAndAccessToken (): void {
         Authorization: 'Bearer ' + accessToken
       }
     })
-
     isStatusCode200(res)
   })
 }

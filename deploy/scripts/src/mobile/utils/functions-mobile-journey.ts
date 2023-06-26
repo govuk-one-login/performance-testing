@@ -110,9 +110,9 @@ export function startJourneyAndValidateResponse (): void {
   })
 
   group('GET /authorize', () => {
-    const verifyRes = http.get(authorizeUrl)
-    isStatusCode200(verifyRes)
-    isPageRedirectCorrect(verifyRes, '/selectDevice')
+    const authorizeRes = http.get(authorizeUrl)
+    isStatusCode200(authorizeRes)
+    isPageRedirectCorrect(authorizeRes, '/selectDevice')
   })
 }
 

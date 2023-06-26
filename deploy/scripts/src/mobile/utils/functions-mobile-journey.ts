@@ -63,13 +63,13 @@ function postTestClientStart (): Response {
   )
 }
 
-function parseVerifyUrl (response: Response): string {
-  const verifyUrl = response.json('WebLocation')
-  if (typeof verifyUrl !== 'string') {
+function parseAuthorizeUrl (response: Response): string {
+  const authorizeUrl = response.json('WebLocation')
+  if (typeof authorizeUrl !== 'string') {
     throw new Error('Failed to parse verify URL from response')
   }
 
-  return verifyUrl
+  return authorizeUrl
 }
 
 export function getSessionIdFromCookieJar (): string {
@@ -106,7 +106,7 @@ export function startJourneyAndValidateResponse (): void {
   group('POST test client /start', () => {
     const testClientRes = postTestClientStart()
     isStatusCode201(testClientRes)
-    verifyUrl = parseVerifyUrl(testClientRes)
+    verifyUrl = parseAuthorizeUrl(testClientRes)
   })
 
   group('GET /authorize', () => {

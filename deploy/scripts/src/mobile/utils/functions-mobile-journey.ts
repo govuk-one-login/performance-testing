@@ -38,6 +38,12 @@ function validatePageRedirect (res: Response, pageUrl: string): boolean {
   })
 }
 
+function validatePageContent (res: Response, pageContent: string): boolean {
+  return check(res, {
+    'validate page content': (r) => (r.body as string).includes(pageContent)
+  })
+}
+
 function validateHeaderLocation (res: Response): boolean {
   return check(res, {
     'validate redirect url': (res) => {
@@ -117,6 +123,7 @@ export function startJourney (): void {
     const authorizeRes = http.get(authorizeUrl)
     isStatusCode200(authorizeRes)
     validatePageRedirect(authorizeRes, '/selectDevice')
+    validatePageContent(authorizeRes, 'Are you on a computer or a tablet right now?')
   })
 }
 
@@ -129,6 +136,7 @@ export function postSelectDevice (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/selectSmartphone')
+    validatePageContent(res, 'Which smartphone are you using?')
   })
 }
 
@@ -141,6 +149,7 @@ export function postSelectSmartphone (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/validPassport')
+    validatePageContent(res, 'Do you have a valid passport?')
   })
 }
 
@@ -153,6 +162,7 @@ export function postValidPassport (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/biometricChip')
+    validatePageContent(res, 'Does your passport have this symbol on the cover?')
   })
 }
 
@@ -165,6 +175,7 @@ export function postBiometricChip (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/iphoneModel')
+    validatePageContent(res, 'Which iPhone model do you have?')
   })
 }
 
@@ -177,6 +188,7 @@ export function postIphoneModel (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/idCheckApp')
+    validatePageContent(res, 'Use your passport and a GOV.UK app to confirm your identity')
   })
 }
 
@@ -189,6 +201,7 @@ export function postIdCheckApp (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/workingCamera')
+    validatePageContent(res, 'Does your smartphone have a working camera?')
   })
 }
 
@@ -201,6 +214,7 @@ export function postWorkingCamera (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/flashingWarning')
+    validatePageContent(res, 'The app uses flashing colours. Do you want to continue?')
   })
 }
 
@@ -213,6 +227,7 @@ export function postFlashingWarning (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/downloadApp')
+    validatePageContent(res, 'Download the GOV.UK ID Check app')
   })
 }
 

@@ -20,7 +20,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '30s' }, // linear increase from 1 iteration per second to 5 iterations per second for 30 seconds
         { target: 5, duration: '30s' } // maintain 5 iterations per second for 30 seconds
       ],
-      exec: 'startJourney'
+      exec: 'authorize'
     }
   }
 }
@@ -40,6 +40,6 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
-export function startJourney (): void {
+export function authorize (): void {
   startJourney()
 }

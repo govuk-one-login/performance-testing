@@ -84,5 +84,5 @@ export function mamIphonePassport (): void {
 }
 
 function simulateUserWait (): void {
-  sleep(1 + Math.random())
+  sleep(1 + Math.random()) // Simulate random time between 1s and 2s for user to stay on page
 }

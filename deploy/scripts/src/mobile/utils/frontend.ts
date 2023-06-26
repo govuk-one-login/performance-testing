@@ -1,33 +1,14 @@
-import { check, group, sleep } from 'k6'
 import http, { type Response } from 'k6/http'
+import { check, group } from 'k6'
 import { URL } from './k6/url'
 import { uuidv4 } from './k6/k6-utils'
-
-const env = {
-  testClientExecuteUrl: __ENV.MOBILE_TEST_CLIENT_EXECUTE_URL,
-  backendUrl: __ENV.MOBILE_BACKEND_URL,
-  frontendUrl: __ENV.MOBILE_FRONTEND_URL
-}
-
-const OAUTH_ROUTE = '/dca/oauth2'
-
-function isStatusCode200 (res: Response): boolean {
-  return check(res, {
-    'is status 200': (r) => r.status === 200
-  })
-}
-
-function isStatusCode201 (res: Response): boolean {
-  return check(res, {
-    'is status 201': (r) => r.status === 201
-  })
-}
-
-function isStatusCode302 (res: Response): boolean {
-  return check(res, {
-    'is status 302': (r) => r.status === 302
-  })
-}
+import {
+  isStatusCode200,
+  isStatusCode201, isStatusCode302,
+  parseTestClientResponse,
+  postTestClientStart
+} from './common'
+import { getBackendUrl, getFrontendUrl } from './url'
 
 function validatePageRedirect (res: Response, pageUrl: string): boolean {
   return check(res, {
@@ -62,56 +43,9 @@ function validateQueryParam (url: string, param: string): boolean {
   })
 }
 
-function postTestClientStart (): Response {
-  return http.post(
-    getUrl('start', env.testClientExecuteUrl),
-    JSON.stringify({ frontendUri: env.frontendUrl }),
-    {
-      tags: { name: 'Post request to authorize URL' },
-      headers: { 'Content-Type': 'application/json' }
-    }
-  )
-}
-
-function parseTestClientResponse (
-  response: Response,
-  location: 'WebLocation' | 'ApiLocation'
-): string {
-  const authorizeUrl = response.json(location)
-  if (typeof authorizeUrl !== 'string') {
-    throw new Error('Failed to parse authorize URL from response')
-  }
-
-  return authorizeUrl
-}
-
-export function getSessionIdFromCookieJar (): string {
+function getSessionIdFromCookieJar (): string {
   const jar = http.cookieJar()
   return jar.cookiesForURL(getFrontendUrl('')).sessionId.toString()
-}
-
-function getUrl (
-  path: string,
-  base: string,
-  query?: Record<string, string>
-): string {
-  const url = new URL(path, base)
-
-  if (query != null) {
-    Object.entries(query).forEach(([key, value]) => {
-      url.searchParams.set(key, value)
-    })
-  }
-
-  return url.toString()
-}
-
-function getFrontendUrl (path: string, query?: Record<string, string>): string {
-  return getUrl(OAUTH_ROUTE + path, env.frontendUrl, query)
-}
-
-function getBackendUrl (path: string, query?: Record<string, string>): string {
-  return getUrl(path, env.backendUrl, query)
 }
 
 export function startJourney (): void {
@@ -296,105 +230,5 @@ export function getAbortCommand (): void {
     isStatusCode302(res)
     validateHeaderLocation(res)
     validateQueryParam(res.headers.Location, 'error')
-  })
-}
-
-export function redirectTokenAndUserInfo (): void {
-  let verifyUrl: string
-  group('POST test client /start', () => {
-    const testClientRes = postTestClientStart()
-    isStatusCode201(testClientRes)
-    console.log('testclient response', testClientRes)
-    verifyUrl = parseTestClientResponse(testClientRes, 'ApiLocation')
-  })
-
-  let sessionId: string
-  group('POST /verifyAuthorizeRequest', () => {
-    const verifyRes = http.post(verifyUrl)
-    isStatusCode200(verifyRes)
-    sessionId = verifyRes.json('sessionId') as string
-    console.log('session id test', sessionId)
-  })
-
-  sleep(1)
-
-  group('POST /resourceOwner/documentGroups', () => {
-    const documentGroupsData = {
-      resourceOwner: {
-        documentGroups: [
-          {
-            groupName: 'Photo Identity Document',
-            allowableDocuments: ['NFC_PASSPORT']
-          }
-        ]
-      }
-    }
-    const documentGroupsUrl = getBackendUrl(
-      `/resourceOwner/documentGroups/${sessionId}`
-    )
-    const res = http.post(documentGroupsUrl, JSON.stringify(documentGroupsData))
-    isStatusCode200(res)
-  })
-
-  sleep(1)
-
-  group('GET /biometricToken/v2', () => {
-    const biometricTokenUrl = getBackendUrl('/biometricToken/v2', { authSessionId: sessionId })
-    const res = http.get(biometricTokenUrl, {
-      tags: { name: 'Get Biometric Token' }
-    })
-    console.log(res)
-    isStatusCode200(res)
-  })
-
-  sleep(1)
-
-  group('POST /finishBiometricSession', () => {
-    const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', {
-      authSessionId: sessionId,
-      biometricSessionId: uuidv4()
-    })
-    const res = http.post(finishBiometricSessionUrl)
-    isStatusCode200(res)
-  })
-
-  sleep(1)
-
-  let redirectRes: Response
-  group('GET /redirect (BE)', () => {
-    const redirectUrl = getBackendUrl('/redirect', { sessionId })
-    redirectRes = http.get(redirectUrl, {
-      tags: { name: 'Redirect BE' }
-    })
-    isStatusCode200(redirectRes)
-  })
-
-  sleep(1)
-
-  let accessTokenResponse: Response
-  group('POST /token', () => {
-    const accessTokenUrl = getBackendUrl('/token')
-    const authorizationCode = redirectRes.json('authorizationCode') as string
-    const redirectUri = redirectRes.json('redirectUri') as string
-    accessTokenResponse = http.post(accessTokenUrl, {
-      code: authorizationCode,
-      grant_type: 'authorization_code',
-      redirect_uri: redirectUri
-    })
-    isStatusCode200(accessTokenResponse)
-  })
-
-  sleep(1)
-
-  group('POST /userinfo/v2', () => {
-    const accessToken = accessTokenResponse.json('access_token') as string
-    const userInfoV2Url = getBackendUrl('/userinfo/v2')
-    const res = http.post(userInfoV2Url, '', {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + accessToken
-      }
-    })
-    isStatusCode200(res)
   })
 }

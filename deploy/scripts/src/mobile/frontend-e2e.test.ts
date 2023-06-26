@@ -19,7 +19,7 @@ import {
   postIdCheckApp,
   getAbortCommand,
   startJourney
-} from './utils/functions-mobile-journey'
+} from './utils/frontend'
 
 const profiles: ProfileList = {
   smoke: {

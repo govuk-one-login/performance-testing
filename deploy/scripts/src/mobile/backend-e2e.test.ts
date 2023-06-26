@@ -1,8 +1,8 @@
 import { type Options } from 'k6/options'
 import { describeProfile, type ProfileList, selectProfile } from '../common/utils/config/load-profiles'
 import {
-  redirectTokenAndUserInfo
-} from './utils/functions-mobile-journey'
+  backendJourneyTestSteps
+} from './utils/backend'
 
 const profiles: ProfileList = {
   smoke: {
@@ -13,8 +13,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 50,
       stages: [
+        { target: 5, duration: '30s' },
         { target: 5, duration: '30s' }
-        // { target: 5, duration: '30s' }
       ],
       exec: 'backendJourney'
     }
@@ -37,9 +37,5 @@ export function setup (): void {
 }
 
 export function backendJourney (): void {
-  // startJourney()
-  // postDocumentGroups()
-  // getBiometricToken()
-  // postFinishBiometricSession()
-  redirectTokenAndUserInfo()
+  backendJourneyTestSteps()
 }

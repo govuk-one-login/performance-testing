@@ -31,7 +31,10 @@ function isStatusCode302 (res: Response): boolean {
 
 function validatePageRedirect (res: Response, pageUrl: string): boolean {
   return check(res, {
-    'validate redirect url': (r) => r.url.includes(pageUrl)
+    'validate redirect url': (r) => {
+      const url = new URL(r.url)
+      return url.pathname.includes(pageUrl)
+    }
   })
 }
 

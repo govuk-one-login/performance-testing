@@ -23,11 +23,6 @@ on:
         type: environment
         required: true
 
-defaults:
-  run:
-    shell: bash
-    working-directory: ./deploy
-
 jobs:
   dockerBuildAndPush:
     name: Docker build and push
@@ -37,12 +32,53 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Deploy SAM app to ECR
-        uses: alphagov/di-devplatform-upload-action-ecr@1.0.2
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
         with:
-          artifact-bucket-name: ${{ secrets.PERF_ARTIFACT_SOURCE_BUCKET_NAME }}
-          container-sign-kms-key-arn: ${{ secrets.PERF_CONTAINER_SIGN_KMS_KEY }}
-          working-directory: ./deploy
-          template-file: template.yaml
-          role-to-assume-arn: ${{ secrets.PERF_GH_ACTIONS_ROLE_ARN }}
-          ecr-repo-name: ${{ secrets.PERF_ECR_REPOSITORY }}
+          python-version: "3.8"
+
+      - name: Set up AWS creds
+        uses: aws-actions/configure-aws-credentials@v2.2.0
+        with:
+          role-to-assume: ${{ secrets.PERF_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Upload Fargates to S3
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          GITHUB_SHA: ${{ github.sha }}
+          WORKING_DIRECTORY: ./deploy
+          TEMPLATE_FILE: template.yaml
+          ECR_REPO_NAME: ${{ secrets.PERF_ECR_REPOSITORY }}
+          ARTIFACT_BUCKET_NAME: ${{ secrets.PERF_ARTIFACT_SOURCE_BUCKET_NAME }}
+        run: |
+          set -eu
+
+          echo "building image(s)"
+
+          cd "${WORKING_DIRECTORY}"
+          echo "Packaging app in /$WORKING_DIRECTORY"
+
+          docker build -t "$ECR_REGISTRY/$ECR_REPO_NAME:$GITHUB_SHA" .
+          docker push "$ECR_REGISTRY/$ECR_REPO_NAME:$GITHUB_SHA"
+
+          echo "Running sam build on template file"
+          sam build --template-file="$TEMPLATE_FILE"
+          mv .aws-sam/build/template.yaml cf-template.yaml
+
+          if grep -q "CONTAINER-IMAGE-PLACEHOLDER" cf-template.yaml; then
+            echo "Replacing \"CONTAINER-IMAGE-PLACEHOLDER\" with new ECR image ref"
+            sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPO_NAME:$GITHUB_SHA|" cf-template.yaml
+          else
+            echo "WARNING!!! Image placeholder text \"CONTAINER-IMAGE-PLACEHOLDER\" not found - uploading template anyway"
+          fi
+          zip template.zip cf-template.yaml
+          aws s3 cp template.zip "s3://$ARTIFACT_BUCKET_NAME/template.zip" --metadata "repository=$GITHUB_REPOSITORY,commitsha=$GITHUB_SHA"
+        shell: bash

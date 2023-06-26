@@ -5,8 +5,8 @@ import { uuidv4 } from './k6/k6-utils'
 
 const env = {
   testClientExecuteUrl: __ENV.MOBILE_TEST_CLIENT_EXECUTE_URL,
-  backEndUrl: __ENV.MOBILE_BACK_END_URL,
-  frontEndUrl: __ENV.MOBILE_FRONT_END_URL
+  backendUrl: __ENV.MOBILE_BACKEND_URL,
+  frontendUrl: __ENV.MOBILE_FRONTEND_URL
 }
 
 const OAUTH_ROUTE = '/dca/oauth2'
@@ -65,7 +65,7 @@ function validateQueryParam (url: string, param: string): boolean {
 function postTestClientStart (): Response {
   return http.post(
     getUrl('start', env.testClientExecuteUrl),
-    JSON.stringify({ target: env.backEndUrl, frontendUri: env.frontEndUrl }),
+    JSON.stringify({ target: env.backendUrl, frontendUri: env.frontendUrl }),
     {
       tags: { name: 'Post request to authorize URL' },
       headers: { 'Content-Type': 'application/json' }
@@ -104,11 +104,11 @@ function getUrl (
 }
 
 function getFrontendUrl (path: string, query?: Record<string, string>): string {
-  return getUrl(OAUTH_ROUTE + path, env.frontEndUrl, query)
+  return getUrl(OAUTH_ROUTE + path, env.frontendUrl, query)
 }
 
 function getBackendUrl (path: string, query?: Record<string, string>): string {
-  return getUrl(path, env.backEndUrl, query)
+  return getUrl(path, env.backendUrl, query)
 }
 
 export function startJourney (): void {

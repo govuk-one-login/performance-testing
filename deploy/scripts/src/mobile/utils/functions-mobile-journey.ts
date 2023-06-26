@@ -1,7 +1,7 @@
 import { check, group } from 'k6'
 import http, { type Response } from 'k6/http'
-import { URL } from './url'
-import { uuidv4 } from './k6-utils'
+import { URL } from './k6/url'
+import { uuidv4 } from './k6/k6-utils'
 
 const env = {
   testClientExecuteUrl: __ENV.MOBILE_TEST_CLIENT_EXECUTE_URL,

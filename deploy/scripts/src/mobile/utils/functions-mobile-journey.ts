@@ -29,24 +29,25 @@ function isStatusCode302 (res: Response): boolean {
   })
 }
 
-function isPageRedirectCorrect (res: Response, pageUrl: string): boolean {
+function validatePageRedirect (res: Response, pageUrl: string): boolean {
   return check(res, {
-    'verify url redirect': (r) => r.url.includes(pageUrl)
+    'validate redirect url': (r) => r.url.includes(pageUrl)
   })
 }
 
-function isRedirectUrlCorrect (url: URL): boolean {
-  return check(url, {
-    'verify url redirect': (url) => {
+function validateHeaderLocation (res: Response): boolean {
+  return check(res, {
+    'validate redirect url': (res) => {
+      const url = new URL(res.headers.Location)
       return url.pathname.includes('/redirect')
     }
   })
 }
 
-function urlContainsQueryParam (url: URL, param: string): boolean {
+function validateQueryParam (url: string, param: string): boolean {
   return check(url, {
-    'verify query param': (url) => {
-      const queryParams = url.searchParams
+    'validate query param': (url) => {
+      const queryParams = new URL(url).searchParams
       return queryParams.get(param) !== null
     }
   })
@@ -112,7 +113,7 @@ export function startJourney (): void {
   group('GET /authorize', () => {
     const authorizeRes = http.get(authorizeUrl)
     isStatusCode200(authorizeRes)
-    isPageRedirectCorrect(authorizeRes, '/selectDevice')
+    validatePageRedirect(authorizeRes, '/selectDevice')
   })
 }
 
@@ -124,7 +125,7 @@ export function postSelectDevice (): void {
       { tags: { name: 'Select Device Page' } }
     )
     isStatusCode200(res)
-    isPageRedirectCorrect(res, '/selectSmartphone')
+    validatePageRedirect(res, '/selectSmartphone')
   })
 }
 
@@ -136,7 +137,7 @@ export function postSelectSmartphone (): void {
       { tags: { name: 'Select Smartphone Page' } }
     )
     isStatusCode200(res)
-    isPageRedirectCorrect(res, '/validPassport')
+    validatePageRedirect(res, '/validPassport')
   })
 }
 
@@ -148,7 +149,7 @@ export function postValidPassport (): void {
       { tags: { name: 'Select Valid Passport Page' } }
     )
     isStatusCode200(res)
-    isPageRedirectCorrect(res, '/biometricChip')
+    validatePageRedirect(res, '/biometricChip')
   })
 }
 
@@ -160,7 +161,7 @@ export function postBiometricChip (): void {
       { tags: { name: 'Select Biometric Chip Page' } }
     )
     isStatusCode200(res)
-    isPageRedirectCorrect(res, '/iphoneModel')
+    validatePageRedirect(res, '/iphoneModel')
   })
 }
 
@@ -172,7 +173,7 @@ export function postIphoneModel (): void {
       { tags: { name: 'Select Iphone Model Page' } }
     )
     isStatusCode200(res)
-    isPageRedirectCorrect(res, '/idCheckApp')
+    validatePageRedirect(res, '/idCheckApp')
   })
 }
 
@@ -184,7 +185,7 @@ export function postIdCheckApp (): void {
       { tags: { name: 'ID Check App Page' } }
     )
     isStatusCode200(res)
-    isPageRedirectCorrect(res, '/workingCamera')
+    validatePageRedirect(res, '/workingCamera')
   })
 }
 
@@ -196,7 +197,7 @@ export function postWorkingCamera (): void {
       { tags: { name: 'Select Working Camera' } }
     )
     isStatusCode200(res)
-    isPageRedirectCorrect(res, '/flashingWarning')
+    validatePageRedirect(res, '/flashingWarning')
   })
 }
 
@@ -208,7 +209,7 @@ export function postFlashingWarning (): void {
       { tags: { name: 'Select Flashing Warning Page' } }
     )
     isStatusCode200(res)
-    isPageRedirectCorrect(res, '/downloadApp')
+    validatePageRedirect(res, '/downloadApp')
   })
 }
 
@@ -243,9 +244,8 @@ export function getRedirect (): void {
       tags: { name: 'Redirect Final Page' }
     })
     isStatusCode302(res)
-    const location = new URL(res.headers.Location)
-    isRedirectUrlCorrect(location)
-    urlContainsQueryParam(location, 'code')
+    validateHeaderLocation(res)
+    validateQueryParam(res.headers.Location, 'code')
   })
 }
 
@@ -257,8 +257,7 @@ export function getAbortCommand (): void {
       tags: { name: 'Abort Command' }
     })
     isStatusCode302(res)
-    const location = new URL(res.headers.Location)
-    isRedirectUrlCorrect(location)
-    urlContainsQueryParam(location, 'error')
+    validateHeaderLocation(res)
+    validateQueryParam(res.headers.Location, 'error')
   })
 }

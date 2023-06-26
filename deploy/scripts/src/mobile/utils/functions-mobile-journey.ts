@@ -416,19 +416,47 @@ export function checkRedirectPage (): void {
   })
 }
 
-export function postDocumentGroups (): void {
-  group('Post Document Groups BE Request', () => {
+export function postDocumentGroupsAndAccessToken (): void {
+  const documentGroupRes = group('Post Document Groups BE Request', () => {
+    console.log('sessions id', getSessionIdFromCookieJar())
     const documentGroupsUrl = getBackendUrl(`/resourceOwner/documentGroups/${getSessionIdFromCookieJar()}`)
     const res = http.post(documentGroupsUrl, { body: JSON.stringify(documentGroupsData) })
+    console.log(res.status)
+    console.log(getSessionIdFromCookieJar())
+    console.log(res.url)
+    isStatusCode200(res)
+    return res
+  })
+
+  group('Post Access Token BE Request', () => {
+    const documentGroupsUrl = getBackendUrl('/token', {
+      code: getSessionIdFromCookieJar(),
+      grant_type: JSON.stringify(documentGroupRes.json('authorizationCode')),
+      redirect_uri: JSON.stringify(documentGroupRes.json('redirectUri'))
+    })
+    const res = http.post(documentGroupsUrl)
 
     isStatusCode200(res)
   })
 }
 
+// export function postDocumentGroups (): void {
+//   group('Post Document Groups BE Request', () => {
+//     console.log('sessions id', getSessionIdFromCookieJar())
+//     const documentGroupsUrl = getBackendUrl(`/resourceOwner/documentGroups/${getSessionIdFromCookieJar()}`)
+//     const res = http.post(documentGroupsUrl, { body: JSON.stringify(documentGroupsData) })
+//     console.log(res.status)
+//     console.log(getSessionIdFromCookieJar())
+//     console.log(res.url)
+//     isStatusCode200(res)
+//   })
+// }
+
 // export function postAccessToken (): void {
 //   group('Post Access Token BE Request', () => {
 //     const documentGroupsUrl = getBackendUrl('/token', {
-//       authSessionId: getSessionIdFromCookieJar()
+//       sessionId: getSessionIdFromCookieJar(),
+
 //     })
 //     const res = http.post(documentGroupsUrl)
 

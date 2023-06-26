@@ -65,7 +65,7 @@ function validateQueryParam (url: string, param: string): boolean {
 function postTestClientStart (): Response {
   return http.post(
     getUrl('start', env.testClientExecuteUrl),
-    JSON.stringify({ target: env.backendUrl, frontendUri: env.frontendUrl }),
+    JSON.stringify({ frontendUri: env.frontendUrl }),
     {
       tags: { name: 'Post request to authorize URL' },
       headers: { 'Content-Type': 'application/json' }
@@ -73,8 +73,11 @@ function postTestClientStart (): Response {
   )
 }
 
-function parseAuthorizeUrl (response: Response): string {
-  const authorizeUrl = response.json('WebLocation')
+function parseTestClientResponse (
+  response: Response,
+  location: 'WebLocation' | 'ApiLocation'
+): string {
+  const authorizeUrl = response.json(location)
   if (typeof authorizeUrl !== 'string') {
     throw new Error('Failed to parse authorize URL from response')
   }
@@ -116,14 +119,17 @@ export function startJourney (): void {
   group('POST test client /start', () => {
     const testClientRes = postTestClientStart()
     isStatusCode201(testClientRes)
-    authorizeUrl = parseAuthorizeUrl(testClientRes)
+    authorizeUrl = parseTestClientResponse(testClientRes, 'WebLocation')
   })
 
   group('GET /authorize', () => {
     const authorizeRes = http.get(authorizeUrl)
     isStatusCode200(authorizeRes)
     validatePageRedirect(authorizeRes, '/selectDevice')
-    validatePageContent(authorizeRes, 'Are you on a computer or a tablet right now?')
+    validatePageContent(
+      authorizeRes,
+      'Are you on a computer or a tablet right now?'
+    )
   })
 }
 
@@ -162,7 +168,10 @@ export function postValidPassport (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/biometricChip')
-    validatePageContent(res, 'Does your passport have this symbol on the cover?')
+    validatePageContent(
+      res,
+      'Does your passport have this symbol on the cover?'
+    )
   })
 }
 
@@ -188,7 +197,10 @@ export function postIphoneModel (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/idCheckApp')
-    validatePageContent(res, 'Use your passport and a GOV.UK app to confirm your identity')
+    validatePageContent(
+      res,
+      'Use your passport and a GOV.UK app to confirm your identity'
+    )
   })
 }
 
@@ -214,7 +226,10 @@ export function postWorkingCamera (): void {
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/flashingWarning')
-    validatePageContent(res, 'The app uses flashing colours. Do you want to continue?')
+    validatePageContent(
+      res,
+      'The app uses flashing colours. Do you want to continue?'
+    )
   })
 }
 
@@ -256,7 +271,9 @@ export function postFinishBiometricSession (): void {
 
 export function getRedirect (): void {
   group('GET /redirect', () => {
-    const redirectUrl = getFrontendUrl('/redirect', { sessionId: getSessionIdFromCookieJar() })
+    const redirectUrl = getFrontendUrl('/redirect', {
+      sessionId: getSessionIdFromCookieJar()
+    })
     const res = http.get(redirectUrl, {
       redirects: 0,
       tags: { name: 'Redirect Final Page' }
@@ -269,7 +286,9 @@ export function getRedirect (): void {
 
 export function getAbortCommand (): void {
   group('GET /abortCommand', () => {
-    const abortCommandUrl = getFrontendUrl('/abortCommand', { sessionId: getSessionIdFromCookieJar() })
+    const abortCommandUrl = getFrontendUrl('/abortCommand', {
+      sessionId: getSessionIdFromCookieJar()
+    })
     const res = http.get(abortCommandUrl, {
       redirects: 0,
       tags: { name: 'Abort Command' }
@@ -280,7 +299,7 @@ export function getAbortCommand (): void {
   })
 }
 
-export function postDocumentGroups (): void {
+export function postDocumentGroups (sessionId: string): void {
   const documentGroupsData = {
     resourceOwner: {
       documentGroups: [
@@ -291,24 +310,61 @@ export function postDocumentGroups (): void {
       ]
     }
   }
-  group('POST /resourceOwner/documentGroups', () => {
-    const documentGroupsUrl = getBackendUrl(
-      `/resourceOwner/documentGroups/${getSessionIdFromCookieJar()}`
-    )
-    const res = http.post(
-      documentGroupsUrl,
-      JSON.stringify(documentGroupsData)
-    )
-    isStatusCode200(res)
-  })
+  const documentGroupsUrl = getBackendUrl(
+    `/resourceOwner/documentGroups/${getSessionIdFromCookieJar()}`
+  )
+  const res = http.post(documentGroupsUrl, JSON.stringify(documentGroupsData))
+  isStatusCode200(res)
 }
 
 export function redirectTokenAndUserInfo (): void {
+  let verifyUrl: string
+  group('POST test client /start', () => {
+    const testClientRes = postTestClientStart()
+    isStatusCode201(testClientRes)
+    console.log('testclient response', testClientRes)
+    verifyUrl = parseTestClientResponse(testClientRes, 'ApiLocation')
+  })
+
+  let sessionId: string
+  group('POST /verifyAuthorizeRequest', () => {
+    const verifyRes = http.post(verifyUrl)
+    isStatusCode200(verifyRes)
+    sessionId = verifyRes.json('sessionId') as string
+    console.log('session id test', sessionId)
+  })
+
+  sleep(1)
+
+  group('POST /resourceOwner/documentGroups', () => {
+    postDocumentGroups(sessionId)
+  })
+
+  sleep(1)
+
+  group('GET /biometricToken/v2', () => {
+    const biometricTokenUrl = getBackendUrl('/biometricToken/v2', { authSessionId: sessionId })
+    const res = http.get(biometricTokenUrl, {
+      tags: { name: 'Get Biometric Token' }
+    })
+    console.log(res)
+    isStatusCode200(res)
+  })
+
+  sleep(1)
+
+  group('POST /finishBiometricSession', () => {
+    const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', {
+      authSessionId: sessionId,
+      biometricSessionId: uuidv4()
+    })
+    const res = http.post(finishBiometricSessionUrl)
+    isStatusCode200(res)
+  })
+
   let redirectRes: Response
   group('GET /redirect (BE)', () => {
-    const redirectUrl = getBackendUrl('/redirect', {
-      sessionId: getSessionIdFromCookieJar()
-    })
+    const redirectUrl = getBackendUrl('/redirect', { sessionId })
     redirectRes = http.get(redirectUrl, {
       tags: { name: 'Redirect BE' }
     })

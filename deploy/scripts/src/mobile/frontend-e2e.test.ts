@@ -55,23 +55,23 @@ export function setup (): void {
 
 export function mamIphonePassport (): void {
   startJourney()
-  sleep(1 + Math.random())
+  simulateUserWait()
   postSelectDevice()
-  sleep(1 + Math.random())
+  simulateUserWait()
   postSelectSmartphone()
-  sleep(1 + Math.random())
+  simulateUserWait()
   postValidPassport()
-  sleep(1 + Math.random())
+  simulateUserWait()
   postBiometricChip()
-  sleep(1 + Math.random())
+  simulateUserWait()
   postIphoneModel()
-  sleep(1 + Math.random())
+  simulateUserWait()
   postIdCheckApp()
-  sleep(1 + Math.random())
+  simulateUserWait()
   postWorkingCamera()
-  sleep(1 + Math.random())
+  simulateUserWait()
   postFlashingWarning()
-  sleep(1 + Math.random())
+  simulateUserWait()
   if (Math.random() <= 0.8) {
     getBiometricToken()
     sleep(1)
@@ -81,4 +81,8 @@ export function mamIphonePassport (): void {
   } else {
     getAbortCommand()
   }
+}
+
+function simulateUserWait (): void {
+  sleep(1 + Math.random())
 }

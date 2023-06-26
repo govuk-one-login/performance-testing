@@ -102,15 +102,15 @@ function getBackendUrl (path: string, query?: Record<string, string>): string {
 }
 
 export function startJourneyAndValidateResponse (): void {
-  let verifyUrl: string
+  let authorizeUrl: string
   group('POST test client /start', () => {
     const testClientRes = postTestClientStart()
     isStatusCode201(testClientRes)
-    verifyUrl = parseAuthorizeUrl(testClientRes)
+    authorizeUrl = parseAuthorizeUrl(testClientRes)
   })
 
   group('GET /authorize', () => {
-    const verifyRes = http.get(verifyUrl)
+    const verifyRes = http.get(authorizeUrl)
     isStatusCode200(verifyRes)
     isPageRedirectCorrect(verifyRes, '/selectDevice')
   })

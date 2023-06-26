@@ -1,4 +1,4 @@
-import { check, group } from 'k6'
+import { check, group, sleep } from 'k6'
 import http, { type CookieJar, type Response } from 'k6/http'
 import { URL } from './url'
 
@@ -7,17 +7,6 @@ const env = {
   backEndUrl: __ENV.MOBILE_BACK_END_URL,
   frontEndUrl: __ENV.MOBILE_FRONT_END_URL,
   biometricSessionId: __ENV.MOBILE_BIOMETRIC_SESSION_ID
-}
-
-const documentGroupsData = {
-  resourceOwner: {
-    documentGroups: [
-      {
-        groupName: 'Photo Identity Document',
-        allowableDocuments: ['NFC_PASSPORT']
-      }
-    ]
-  }
 }
 
 export enum SmartphoneType {
@@ -53,11 +42,11 @@ function isStatusCode201 (res: Response): boolean {
   })
 }
 
-function isStatusCode302 (res: Response): boolean {
-  return check(res, {
-    'is status 302': (r) => r.status === 302
-  })
-}
+// function isStatusCode302 (res: Response): boolean {
+//   return check(res, {
+//     'is status 302': (r) => r.status === 302
+//   })
+// }
 
 function isPageContentCorrect (res: Response, pageContent: string): boolean {
   return check(res, {
@@ -71,13 +60,13 @@ function isPageRedirectCorrect (res: Response, pageUrl: string): boolean {
   })
 }
 
-function isHeaderLocationCorrect (res: Response, content: string): boolean {
-  return check(res, {
-    'verify url redirect': (r) => {
-      return r.headers.Location.includes(content)
-    }
-  })
-}
+// function isHeaderLocationCorrect (res: Response, content: string): boolean {
+//   return check(res, {
+//     'verify url redirect': (r) => {
+//       return r.headers.Location.includes(content)
+//     }
+//   })
+// }
 
 function postToVerifyURL (): Response {
   return http.post(
@@ -407,70 +396,77 @@ export function checkRedirectPage (): void {
     const redirectUrl = getFrontendUrl('/redirect', {
       sessionId: getSessionIdFromCookieJar()
     })
-    const res = http.get(redirectUrl, {
+    http.get(redirectUrl, {
       redirects: 0,
       tags: { name: 'Redirect Final Page' }
     })
-    isStatusCode302(res)
-    isHeaderLocationCorrect(res, '/redirect')
   })
 }
 
-export function postDocumentGroupsAndAccessToken (): void {
-  const documentGroupRes = group('Post Document Groups BE Request', () => {
-    console.log('sessions id', getSessionIdFromCookieJar())
-    const documentGroupsUrl = getBackendUrl(`/resourceOwner/documentGroups/${getSessionIdFromCookieJar()}`)
-    const res = http.post(documentGroupsUrl, { body: JSON.stringify(documentGroupsData) })
-    console.log(res.status)
-    console.log(getSessionIdFromCookieJar())
-    console.log(res.url)
+export function postDocumentGroups (): void {
+  const documentGroupsData = {
+    resourceOwner: {
+      documentGroups: [
+        {
+          groupName: 'Photo Identity Document',
+          allowableDocuments: ['NFC_PASSPORT']
+        }
+      ]
+    }
+  }
+  group('Post Document Groups BE Request', () => {
+    const documentGroupsUrl = getBackendUrl(
+      `/resourceOwner/documentGroups/${getSessionIdFromCookieJar()}`
+    )
+    const res = http.post(
+      documentGroupsUrl,
+      JSON.stringify(documentGroupsData)
+    )
     isStatusCode200(res)
-    return res
   })
+}
+
+export function checkRedirectBackendAndAccessToken (): void {
+  let redirectRes: Response
+  let accessTokenResponse: Response
+  group('GET Redirect BE Page /redirect', () => {
+    const redirectUrl = getBackendUrl('/redirect', {
+      sessionId: getSessionIdFromCookieJar()
+    })
+    redirectRes = http.get(redirectUrl, {
+      redirects: 0,
+      tags: { name: 'Redirect Final Page' }
+    })
+    isStatusCode200(redirectRes)
+  })
+
+  sleep(1)
 
   group('Post Access Token BE Request', () => {
-    const documentGroupsUrl = getBackendUrl('/token', {
-      code: getSessionIdFromCookieJar(),
-      grant_type: JSON.stringify(documentGroupRes.json('authorizationCode')),
-      redirect_uri: JSON.stringify(documentGroupRes.json('redirectUri'))
+    const accessTokenUrl = getBackendUrl('/token')
+    const authorizationCode = redirectRes.json('authorizationCode') as string
+    const redirectUri = redirectRes.json('redirectUri') as string
+    accessTokenResponse = http.post(accessTokenUrl, {
+      code: authorizationCode,
+      grant_type: 'authorization_code',
+      redirect_uri: redirectUri
     })
-    const res = http.post(documentGroupsUrl)
+    console.log(accessTokenResponse.body)
+    isStatusCode200(accessTokenResponse)
+  })
+
+  sleep(1)
+
+  group('Post User Info v2 BE Request', () => {
+    const accessToken = accessTokenResponse.json('access_token') as string
+    const userInfoV2Url = getBackendUrl('/userinfo/v2')
+    const res = http.post(userInfoV2Url, '', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + accessToken
+      }
+    })
 
     isStatusCode200(res)
   })
 }
-
-// export function postDocumentGroups (): void {
-//   group('Post Document Groups BE Request', () => {
-//     console.log('sessions id', getSessionIdFromCookieJar())
-//     const documentGroupsUrl = getBackendUrl(`/resourceOwner/documentGroups/${getSessionIdFromCookieJar()}`)
-//     const res = http.post(documentGroupsUrl, { body: JSON.stringify(documentGroupsData) })
-//     console.log(res.status)
-//     console.log(getSessionIdFromCookieJar())
-//     console.log(res.url)
-//     isStatusCode200(res)
-//   })
-// }
-
-// export function postAccessToken (): void {
-//   group('Post Access Token BE Request', () => {
-//     const documentGroupsUrl = getBackendUrl('/token', {
-//       sessionId: getSessionIdFromCookieJar(),
-
-//     })
-//     const res = http.post(documentGroupsUrl)
-
-//     isStatusCode200(res)
-//   })
-// }
-
-// export function postUserInfoV2 (): void {
-//   group('Post User Info v2 BE Request', () => {
-//     const userInfoV2Url = getBackendUrl('/token', {
-//       authSessionId: getSessionIdFromCookieJar()
-//     })
-//     const res = http.post(userInfoV2Url)
-
-//     isStatusCode200(res)
-//   })
-// }

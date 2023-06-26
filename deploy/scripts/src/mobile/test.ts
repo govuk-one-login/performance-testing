@@ -25,7 +25,8 @@ import {
   getBiometricTokenV2,
   // postUserInfoV2,
   // postAccessToken,
-  postDocumentGroupsAndAccessToken
+  postDocumentGroups,
+  checkRedirectBackendAndAccessToken
 } from './utils/functions-mobile-journey'
 
 const profiles: ProfileList = {
@@ -105,13 +106,10 @@ export function dcmawPassportIphone (): void {
 export function dcmawBackendJourney (): void {
   doAuthorizeRequest()
   startDcmawJourney()
-  // startDcmawJourney()
-  // postDocumentGroupsAndAccessToken()
-  // getBiometricTokenV2()
-  // postFinishBiometricToken()
-  // checkRedirectPage()
-  // postAccessToken()
-  // postUserInfoV2()
+  postDocumentGroups()
+  getBiometricTokenV2()
+  postFinishBiometricToken()
+  checkRedirectBackendAndAccessToken()
 }
 
 export function dcmawDrivingLicenseAndroid (): void {

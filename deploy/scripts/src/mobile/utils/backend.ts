@@ -1,8 +1,9 @@
 import http from 'k6/http'
 import { group } from 'k6'
 import { uuidv4 } from './k6/k6-utils'
-import { isStatusCode200, isStatusCode201, parseTestClientResponse, postTestClientStart } from './common'
 import { getBackendUrl } from './url'
+import { parseTestClientResponse, postTestClientStart } from './test-client'
+import { isStatusCode200, isStatusCode201 } from './assertions'
 
 export function postVerifyAuthorizeRequest (): string {
   let verifyUrl: string

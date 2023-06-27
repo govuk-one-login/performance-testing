@@ -1,5 +1,7 @@
 import { URL } from './k6/url'
-import { env, OAUTH_ROUTE } from './common'
+import { env } from './env'
+
+const OAUTH_ROUTE = '/dca/oauth2'
 
 export function getUrl (
   path: string,

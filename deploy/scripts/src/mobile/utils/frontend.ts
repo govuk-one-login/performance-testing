@@ -1,47 +1,16 @@
-import http, { type Response } from 'k6/http'
-import { check, group } from 'k6'
-import { URL } from './k6/url'
-import { uuidv4 } from './k6/k6-utils'
+import http from 'k6/http'
+import { group } from 'k6'
+import { getFrontendUrl } from './url'
 import {
   isStatusCode200,
-  isStatusCode201, isStatusCode302,
-  parseTestClientResponse,
-  postTestClientStart
-} from './common'
-import { getBackendUrl, getFrontendUrl } from './url'
-
-function validatePageRedirect (res: Response, pageUrl: string): boolean {
-  return check(res, {
-    'validate redirect url': (r) => {
-      const url = new URL(r.url)
-      return url.pathname.includes(pageUrl)
-    }
-  })
-}
-
-function validatePageContent (res: Response, pageContent: string): boolean {
-  return check(res, {
-    'validate page content': (r) => (r.body as string).includes(pageContent)
-  })
-}
-
-function validateHeaderLocation (res: Response): boolean {
-  return check(res, {
-    'validate redirect url': (res) => {
-      const url = new URL(res.headers.Location)
-      return url.pathname.includes('/redirect')
-    }
-  })
-}
-
-function validateQueryParam (url: string, param: string): boolean {
-  return check(url, {
-    'validate query param': (url) => {
-      const queryParams = new URL(url).searchParams
-      return queryParams.get(param) !== null
-    }
-  })
-}
+  isStatusCode201,
+  isStatusCode302,
+  validatePageRedirect,
+  validatePageContent,
+  validateHeaderLocation,
+  validateQueryParam
+} from './assertions'
+import { parseTestClientResponse, postTestClientStart } from './test-client'
 
 export function getSessionIdFromCookieJar (): string {
   const jar = http.cookieJar()

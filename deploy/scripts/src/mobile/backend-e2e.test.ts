@@ -52,9 +52,9 @@ export function backendJourney (): void {
   sleep(1)
   postFinishBiometricSession(sessionId)
   sleep(1)
-  const { authorizationCode, redirectUri } = getRedirect(sessionId)
+  const redirectResponse = getRedirect(sessionId)
   sleep(1)
-  const accessToken = postToken(authorizationCode, redirectUri)
+  const accessToken = postToken(redirectResponse)
   sleep(1)
   postUserInfo(accessToken)
 }

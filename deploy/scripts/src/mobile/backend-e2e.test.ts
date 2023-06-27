@@ -7,7 +7,7 @@ import {
   postFinishBiometricSession,
   getRedirect,
   postToken,
-  postUserInfo
+  postUserInfoV2
 } from './utils/backend'
 import { sleep } from 'k6'
 
@@ -56,5 +56,5 @@ export function backendJourney (): void {
   sleep(1)
   const accessToken = postToken(redirectResponse)
   sleep(1)
-  postUserInfo(accessToken)
+  postUserInfoV2(accessToken)
 }

@@ -92,7 +92,7 @@ export function postToken (redirectResponse: RedirectResponse): string {
   })
 }
 
-export function postUserInfo (accessToken: string): void {
+export function postUserInfoV2 (accessToken: string): void {
   group('POST /userinfo/v2', () => {
     const userInfoV2Url = getBackendUrl('/userinfo/v2')
     const res = http.post(userInfoV2Url, '', {

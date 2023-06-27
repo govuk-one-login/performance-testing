@@ -1,8 +1,15 @@
 import { type Options } from 'k6/options'
 import { describeProfile, type ProfileList, selectProfile } from '../common/utils/config/load-profiles'
 import {
-  backendJourneyTestSteps
+  postVerifyAuthorizeRequest,
+  postResourceOwnerDocumentGroups,
+  getBiometricTokenV2,
+  postFinishBiometricSession,
+  getRedirect,
+  postToken,
+  postUserInfo
 } from './utils/backend'
+import { sleep } from 'k6'
 
 const profiles: ProfileList = {
   smoke: {
@@ -37,5 +44,17 @@ export function setup (): void {
 }
 
 export function backendJourney (): void {
-  backendJourneyTestSteps()
+  const sessionId = postVerifyAuthorizeRequest()
+  sleep(1)
+  postResourceOwnerDocumentGroups(sessionId)
+  sleep(1)
+  getBiometricTokenV2(sessionId)
+  sleep(1)
+  postFinishBiometricSession(sessionId)
+  sleep(1)
+  const { authorizationCode, redirectUri } = getRedirect(sessionId)
+  sleep(1)
+  const accessToken = postToken(authorizationCode, redirectUri)
+  sleep(1)
+  postUserInfo(accessToken)
 }

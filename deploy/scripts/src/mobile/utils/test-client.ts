@@ -1,11 +1,11 @@
 import http, { type Response } from 'k6/http'
 import { getUrl } from './url'
-import { env } from './config'
+import { config } from './config'
 
 export function postTestClientStart (): Response {
   return http.post(
-    getUrl('start', env.testClientExecuteUrl),
-    JSON.stringify({ frontendUri: env.frontendUrl }),
+    getUrl('start', config.testClientExecuteUrl),
+    JSON.stringify({ frontendUri: config.frontendUrl }),
     {
       tags: { name: 'Post request to authorize URL' },
       headers: { 'Content-Type': 'application/json' }

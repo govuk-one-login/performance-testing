@@ -190,7 +190,7 @@ Resources:
       BucketName: !Sub ${AWS::StackName}-test-results
       LifecycleConfiguration:
         Rules:
-          - ExpirationInDays: 1825 # Five years
+          - ExpirationInDays: 365
             Status: Enabled
       LoggingConfiguration:
         LogFilePrefix: ""

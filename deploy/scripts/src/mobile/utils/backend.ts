@@ -31,9 +31,7 @@ export function postResourceOwnerDocumentGroups (sessionId: string): void {
         ]
       }
     }
-    const documentGroupsUrl = getBackendUrl(
-      `/resourceOwner/documentGroups/${sessionId}`
-    )
+    const documentGroupsUrl = getBackendUrl(`/resourceOwner/documentGroups/${sessionId}`)
     const res = http.post(documentGroupsUrl, JSON.stringify(documentGroupsData))
     isStatusCode200(res)
   })

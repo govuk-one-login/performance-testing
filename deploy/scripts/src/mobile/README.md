@@ -24,7 +24,7 @@ npm install
 
 ## Run Command
 K6 environment variales can be found in config.ts file.
-Profile and scenario can be found in mobile/*.test.ts file.
+Test Scripts are located in the `/mobile` folder with naming convention `*.test.ts`. Profile and scenario can be found in each script file.
 
 
 ```bash
@@ -34,5 +34,4 @@ npm start
 
 ```bash
 # Run k6 test. Replace with actual values
-k6 run ./dist/mobile/<your_test_file>.test.js -e PROFILE=<your_profile_name> -e SCENARIO=<your_scenario_name> -e MOBILE_TEST_CLIENT_EXECUTE_URL=<your_test_client_execute_url> -e MOBILE_BACK_END_URL=<your_backend_url> -e MOBILE_FRONT_END_URL=<your_frontend_url> -e MOBILE_BIOMETRIC_SESSION_ID=<your_biometric_session_id>
-```
+k6 run ./dist/mobile/<your_test_file>.test.js -e PROFILE=<your_profile_name> -e SCENARIO=<your_scenario_name> -e MOBILE_TEST_CLIENT_EXECUTE_URL=<your_test_client_execute_url> -e MOBILE_BACK_END_URL=<your_backend_url> -e MOBILE_FRONT_END_URL=<your_frontend_url> -e

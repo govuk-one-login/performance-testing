@@ -1,6 +1,6 @@
 import http, { type Response } from 'k6/http'
 import { getUrl } from './url'
-import { env } from './env'
+import { env } from './config'
 
 export function postTestClientStart (): Response {
   return http.post(

@@ -16,7 +16,8 @@ import {
   postWorkingCamera,
   postIdCheckApp,
   getAbortCommand,
-  startJourney, getSessionIdFromCookieJar
+  startJourney,
+  getSessionIdFromCookieJar
 } from './utils/frontend'
 import {
   getBiometricTokenV2,

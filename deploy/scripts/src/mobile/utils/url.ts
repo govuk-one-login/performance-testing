@@ -1,5 +1,5 @@
 import { URL } from './k6/url'
-import { env } from './env'
+import { env } from './config'
 
 const OAUTH_ROUTE = '/dca/oauth2'
 

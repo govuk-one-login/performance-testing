@@ -43,7 +43,7 @@ function validateQueryParam (url: string, param: string): boolean {
   })
 }
 
-function getSessionIdFromCookieJar (): string {
+export function getSessionIdFromCookieJar (): string {
   const jar = http.cookieJar()
   return jar.cookiesForURL(getFrontendUrl('')).sessionId.toString()
 }
@@ -177,29 +177,6 @@ export function postFlashingWarning (): void {
     isStatusCode200(res)
     validatePageRedirect(res, '/downloadApp')
     validatePageContent(res, 'Download the GOV.UK ID Check app')
-  })
-}
-
-export function getBiometricToken (): void {
-  group('GET /biometricToken/v2', () => {
-    const biometricTokenUrl = getBackendUrl('/biometricToken/v2', {
-      authSessionId: getSessionIdFromCookieJar()
-    })
-    const res = http.get(biometricTokenUrl, {
-      tags: { name: 'Get Biometric Token' }
-    })
-    isStatusCode200(res)
-  })
-}
-
-export function postFinishBiometricSession (): void {
-  group('POST /finishBiometricSession', () => {
-    const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', {
-      authSessionId: getSessionIdFromCookieJar(),
-      biometricSessionId: uuidv4()
-    })
-    const res = http.post(finishBiometricSessionUrl)
-    isStatusCode200(res)
   })
 }
 

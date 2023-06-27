@@ -14,12 +14,14 @@ import {
   postIphoneModel,
   getRedirect,
   postWorkingCamera,
-  getBiometricToken,
-  postFinishBiometricSession,
   postIdCheckApp,
   getAbortCommand,
-  startJourney
+  startJourney, getSessionIdFromCookieJar
 } from './utils/frontend'
+import {
+  getBiometricTokenV2,
+  postFinishBiometricSession
+} from './utils/backend'
 
 const profiles: ProfileList = {
   smoke: {
@@ -73,9 +75,10 @@ export function mamIphonePassport (): void {
   postFlashingWarning()
   simulateUserWait()
   if (Math.random() <= 0.8) { // Approximately 80% of users complete journey successfully
-    getBiometricToken()
+    const sessionId = getSessionIdFromCookieJar()
+    getBiometricTokenV2(sessionId)
     sleep(1)
-    postFinishBiometricSession()
+    postFinishBiometricSession(sessionId)
     sleep(1)
     getRedirect()
   } else { // Approximately 20% of users abort journey

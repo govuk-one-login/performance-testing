@@ -60,4 +60,3 @@ export function sendEvent (): void {
 
   console.log('3 === debug === messageBody', messageBody)
 }
-

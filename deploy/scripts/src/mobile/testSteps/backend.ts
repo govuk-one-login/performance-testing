@@ -57,12 +57,7 @@ export function postFinishBiometricSession (sessionId: string): void {
   })
 }
 
-interface RedirectResponse {
-  authorizationCode: string
-  redirectUri: string
-}
-
-export function getRedirect (sessionId: string): RedirectResponse {
+export function getRedirect (sessionId: string): { authorizationCode: string, redirectUri: string } {
   return group('GET /redirect', () => {
     const redirectUrl = buildBackendUrl('/redirect', { sessionId })
     const redirectRes = http.get(redirectUrl)
@@ -75,13 +70,13 @@ export function getRedirect (sessionId: string): RedirectResponse {
   })
 }
 
-export function postToken (redirectResponse: RedirectResponse): string {
+export function postToken (authorizationCode: string, redirectUri: string): string {
   return group('POST /token', () => {
     const accessTokenUrl = buildBackendUrl('/token')
     const accessTokenResponse = http.post(accessTokenUrl, {
-      code: redirectResponse.authorizationCode,
+      code: authorizationCode,
       grant_type: 'authorization_code',
-      redirect_uri: redirectResponse.redirectUri
+      redirect_uri: redirectUri
     })
     isStatusCode200(accessTokenResponse)
     return accessTokenResponse.json('access_token') as string

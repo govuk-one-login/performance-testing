@@ -3,7 +3,7 @@ import { config } from './config'
 
 const OAUTH_ROUTE = '/dca/oauth2'
 
-export function getUrl (
+export function buildUrl (
   path: string,
   base: string,
   query?: Record<string, string>
@@ -19,10 +19,10 @@ export function getUrl (
   return url.toString()
 }
 
-export function getFrontendUrl (path: string, query?: Record<string, string>): string {
-  return getUrl(OAUTH_ROUTE + path, config.frontendUrl, query)
+export function buildFrontendUrl (path: string, query?: Record<string, string>): string {
+  return buildUrl(OAUTH_ROUTE + path, config.frontendUrl, query)
 }
 
-export function getBackendUrl (path: string, query?: Record<string, string>): string {
-  return getUrl(path, config.backendUrl, query)
+export function buildBackendUrl (path: string, query?: Record<string, string>): string {
+  return buildUrl(path, config.backendUrl, query)
 }

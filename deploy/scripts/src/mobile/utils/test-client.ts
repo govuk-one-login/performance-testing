@@ -1,10 +1,10 @@
 import http, { type Response } from 'k6/http'
-import { getUrl } from './url'
+import { buildUrl } from './url'
 import { config } from './config'
 
 export function postTestClientStart (): Response {
   return http.post(
-    getUrl('start', config.testClientExecuteUrl),
+    buildUrl('start', config.testClientExecuteUrl),
     JSON.stringify({ frontendUri: config.frontendUrl }),
     {
       tags: { name: 'Post request to authorize URL' },

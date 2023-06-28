@@ -1,7 +1,7 @@
 import http from 'k6/http'
 import { group } from 'k6'
 import { uuidv4 } from '../utils/k6/k6-utils'
-import { getBackendUrl } from '../utils/url'
+import { buildBackendUrl } from '../utils/url'
 import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
 import { isStatusCode200, isStatusCode201 } from '../utils/assertions'
 
@@ -32,7 +32,7 @@ export function postResourceOwnerDocumentGroups (sessionId: string): void {
         ]
       }
     }
-    const documentGroupsUrl = getBackendUrl(`/resourceOwner/documentGroups/${sessionId}`)
+    const documentGroupsUrl = buildBackendUrl(`/resourceOwner/documentGroups/${sessionId}`)
     const res = http.post(documentGroupsUrl, JSON.stringify(documentGroupsData))
     isStatusCode200(res)
   })
@@ -40,7 +40,7 @@ export function postResourceOwnerDocumentGroups (sessionId: string): void {
 
 export function getBiometricTokenV2 (sessionId: string): void {
   group('GET /biometricToken/v2', () => {
-    const biometricTokenUrl = getBackendUrl('/biometricToken/v2', { authSessionId: sessionId })
+    const biometricTokenUrl = buildBackendUrl('/biometricToken/v2', { authSessionId: sessionId })
     const res = http.get(biometricTokenUrl, {
       tags: { name: 'Get Biometric Token' }
     })
@@ -50,7 +50,7 @@ export function getBiometricTokenV2 (sessionId: string): void {
 
 export function postFinishBiometricSession (sessionId: string): void {
   group('POST /finishBiometricSession', () => {
-    const finishBiometricSessionUrl = getBackendUrl('/finishBiometricSession', {
+    const finishBiometricSessionUrl = buildBackendUrl('/finishBiometricSession', {
       authSessionId: sessionId,
       biometricSessionId: uuidv4()
     })
@@ -66,7 +66,7 @@ interface RedirectResponse {
 
 export function getRedirect (sessionId: string): RedirectResponse {
   return group('GET /redirect', () => {
-    const redirectUrl = getBackendUrl('/redirect', { sessionId })
+    const redirectUrl = buildBackendUrl('/redirect', { sessionId })
     const redirectRes = http.get(redirectUrl, {
       tags: { name: 'Redirect BE' }
     })
@@ -81,7 +81,7 @@ export function getRedirect (sessionId: string): RedirectResponse {
 
 export function postToken (redirectResponse: RedirectResponse): string {
   return group('POST /token', () => {
-    const accessTokenUrl = getBackendUrl('/token')
+    const accessTokenUrl = buildBackendUrl('/token')
     const accessTokenResponse = http.post(accessTokenUrl, {
       code: redirectResponse.authorizationCode,
       grant_type: 'authorization_code',
@@ -94,7 +94,7 @@ export function postToken (redirectResponse: RedirectResponse): string {
 
 export function postUserInfoV2 (accessToken: string): void {
   group('POST /userinfo/v2', () => {
-    const userInfoV2Url = getBackendUrl('/userinfo/v2')
+    const userInfoV2Url = buildBackendUrl('/userinfo/v2')
     const res = http.post(userInfoV2Url, '', {
       headers: {
         'Content-Type': 'application/json',

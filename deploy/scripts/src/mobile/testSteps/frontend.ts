@@ -1,6 +1,6 @@
 import http from 'k6/http'
 import { group } from 'k6'
-import { getFrontendUrl } from '../utils/url'
+import { buildFrontendUrl } from '../utils/url'
 import {
   isStatusCode200,
   isStatusCode201,
@@ -14,7 +14,7 @@ import { parseTestClientResponse, postTestClientStart } from '../utils/test-clie
 
 export function getSessionIdFromCookieJar (): string {
   const jar = http.cookieJar()
-  return jar.cookiesForURL(getFrontendUrl('')).sessionId.toString()
+  return jar.cookiesForURL(buildFrontendUrl('')).sessionId.toString()
 }
 
 export function startJourney (): void {
@@ -39,7 +39,7 @@ export function startJourney (): void {
 export function postSelectDevice (): void {
   group('POST /selectDevice', () => {
     const res = http.post(
-      getFrontendUrl('/selectDevice'),
+      buildFrontendUrl('/selectDevice'),
       { 'select-device-choice': 'smartphone' },
       { tags: { name: 'Select Device Page' } }
     )
@@ -52,7 +52,7 @@ export function postSelectDevice (): void {
 export function postSelectSmartphone (): void {
   group('POST /selectSmartphone', () => {
     const res = http.post(
-      getFrontendUrl('/selectSmartphone'),
+      buildFrontendUrl('/selectSmartphone'),
       { 'smartphone-choice': 'iphone' },
       { tags: { name: 'Select Smartphone Page' } }
     )
@@ -65,7 +65,7 @@ export function postSelectSmartphone (): void {
 export function postValidPassport (): void {
   group('POST /validPassport', () => {
     const res = http.post(
-      getFrontendUrl('/validPassport'),
+      buildFrontendUrl('/validPassport'),
       { 'select-option': 'yes' },
       { tags: { name: 'Select Valid Passport Page' } }
     )
@@ -81,7 +81,7 @@ export function postValidPassport (): void {
 export function postBiometricChip (): void {
   group('POST /biometricChip', () => {
     const res = http.post(
-      getFrontendUrl('/biometricChip'),
+      buildFrontendUrl('/biometricChip'),
       { 'select-option': 'yes' },
       { tags: { name: 'Select Biometric Chip Page' } }
     )
@@ -94,7 +94,7 @@ export function postBiometricChip (): void {
 export function postIphoneModel (): void {
   group('POST /iphoneModel', () => {
     const res = http.post(
-      getFrontendUrl('/iphoneModel'),
+      buildFrontendUrl('/iphoneModel'),
       { 'select-option': 'iphone7OrNewer' },
       { tags: { name: 'Select Iphone Model Page' } }
     )
@@ -110,7 +110,7 @@ export function postIphoneModel (): void {
 export function postIdCheckApp (): void {
   group('POST /idCheckApp', () => {
     const res = http.post(
-      getFrontendUrl('/idCheckApp'),
+      buildFrontendUrl('/idCheckApp'),
       {},
       { tags: { name: 'ID Check App Page' } }
     )
@@ -123,7 +123,7 @@ export function postIdCheckApp (): void {
 export function postWorkingCamera (): void {
   group('POST /workingCamera', () => {
     const res = http.post(
-      getFrontendUrl('/workingCamera'),
+      buildFrontendUrl('/workingCamera'),
       { 'working-camera-choice': 'yes' },
       { tags: { name: 'Select Working Camera' } }
     )
@@ -139,7 +139,7 @@ export function postWorkingCamera (): void {
 export function postFlashingWarning (): void {
   group('POST /flashingWarning', () => {
     const res = http.post(
-      getFrontendUrl('/flashingWarning'),
+      buildFrontendUrl('/flashingWarning'),
       { 'flashing-colours-choice': 'yes' },
       { tags: { name: 'Select Flashing Warning Page' } }
     )
@@ -151,7 +151,7 @@ export function postFlashingWarning (): void {
 
 export function getRedirect (): void {
   group('GET /redirect', () => {
-    const redirectUrl = getFrontendUrl('/redirect', {
+    const redirectUrl = buildFrontendUrl('/redirect', {
       sessionId: getSessionIdFromCookieJar()
     })
     const res = http.get(redirectUrl, {
@@ -166,7 +166,7 @@ export function getRedirect (): void {
 
 export function getAbortCommand (): void {
   group('GET /abortCommand', () => {
-    const abortCommandUrl = getFrontendUrl('/abortCommand', {
+    const abortCommandUrl = buildFrontendUrl('/abortCommand', {
       sessionId: getSessionIdFromCookieJar()
     })
     const res = http.get(abortCommandUrl, {

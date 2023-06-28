@@ -20,8 +20,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 50, // Calculation: 5 journeys / second * 10 seconds average journey time
       maxVUs: 70, // Calculation: 5 journeys / second * 14 seconds maximum journey time
       stages: [
-        { target: 5, duration: '30s' }, // linear increase from 1 iteration per second to 5 iterations per second for 30 seconds
-        { target: 5, duration: '30s' } // maintain 5 iterations per second for 30 seconds
+        { target: 5, duration: '10s' }, // linear increase from 1 iteration per second to 5 iterations per second for 30 seconds
+        // { target: 5, duration: '30s' } // maintain 5 iterations per second for 30 seconds
       ],
       exec: 'backendJourney'
     }

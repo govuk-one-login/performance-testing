@@ -14,12 +14,15 @@ import {
   postIphoneModel,
   getRedirect,
   postWorkingCamera,
-  getBiometricToken,
-  postFinishBiometricSession,
   postIdCheckApp,
   getAbortCommand,
-  startJourney
-} from './utils/functions-mobile-journey'
+  startJourney,
+  getSessionIdFromCookieJar
+} from './testSteps/frontend'
+import {
+  getBiometricTokenV2,
+  postFinishBiometricSession
+} from './testSteps/backend'
 
 const profiles: ProfileList = {
   smoke: {
@@ -41,7 +44,6 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 
 export const options: Options = {
-  // httpDebug: 'full',
   scenarios: loadProfile.scenarios,
   thresholds: {
     http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
@@ -73,9 +75,10 @@ export function mamIphonePassport (): void {
   postFlashingWarning()
   simulateUserWait()
   if (Math.random() <= 0.8) { // Approximately 80% of users complete journey successfully
-    getBiometricToken()
+    const sessionId = getSessionIdFromCookieJar()
+    getBiometricTokenV2(sessionId)
     sleep(1)
-    postFinishBiometricSession()
+    postFinishBiometricSession(sessionId)
     sleep(1)
     getRedirect()
   } else { // Approximately 20% of users abort journey

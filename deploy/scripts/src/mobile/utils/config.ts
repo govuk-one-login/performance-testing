@@ -1,5 +1,5 @@
-// __ENV.<variable> refers to value of environment variable, either passed via the CLI
-// or defined in the env/parameter-store section of the template.yaml
+// __ENV is the syntax in k6 for accessing environment variables
+// Refer to deploy/scripts/README.md for guidance on how to set environment variables
 export const config = {
   testClientExecuteUrl: __ENV.MOBILE_TEST_CLIENT_EXECUTE_URL,
   backendUrl: __ENV.MOBILE_BACKEND_URL,

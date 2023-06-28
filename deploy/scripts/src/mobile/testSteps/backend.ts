@@ -41,9 +41,7 @@ export function postResourceOwnerDocumentGroups (sessionId: string): void {
 export function getBiometricTokenV2 (sessionId: string): void {
   group('GET /biometricToken/v2', () => {
     const biometricTokenUrl = buildBackendUrl('/biometricToken/v2', { authSessionId: sessionId })
-    const res = http.get(biometricTokenUrl, {
-      tags: { name: 'Get Biometric Token' }
-    })
+    const res = http.get(biometricTokenUrl)
     isStatusCode200(res)
   })
 }
@@ -67,9 +65,7 @@ interface RedirectResponse {
 export function getRedirect (sessionId: string): RedirectResponse {
   return group('GET /redirect', () => {
     const redirectUrl = buildBackendUrl('/redirect', { sessionId })
-    const redirectRes = http.get(redirectUrl, {
-      tags: { name: 'Redirect BE' }
-    })
+    const redirectRes = http.get(redirectUrl)
 
     isStatusCode200(redirectRes)
     return {

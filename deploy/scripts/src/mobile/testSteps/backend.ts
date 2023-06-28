@@ -72,14 +72,14 @@ export function getRedirect (sessionId: string): { authorizationCode: string, re
 
 export function postToken (authorizationCode: string, redirectUri: string): string {
   return group('POST /token', () => {
-    const accessTokenUrl = buildBackendUrl('/token')
-    const accessTokenResponse = http.post(accessTokenUrl, {
+    const tokenUrl = buildBackendUrl('/token')
+    const tokenResponse = http.post(tokenUrl, {
       code: authorizationCode,
       grant_type: 'authorization_code',
       redirect_uri: redirectUri
     })
-    isStatusCode200(accessTokenResponse)
-    return accessTokenResponse.json('access_token') as string
+    isStatusCode200(tokenResponse)
+    return tokenResponse.json('access_token') as string
   })
 }
 

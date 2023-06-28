@@ -1,6 +1,6 @@
 import http from 'k6/http'
 import { group } from 'k6'
-import { getFrontendUrl } from './url'
+import { getFrontendUrl } from '../utils/url'
 import {
   isStatusCode200,
   isStatusCode201,
@@ -9,8 +9,8 @@ import {
   validatePageContent,
   validateHeaderLocation,
   validateQueryParam
-} from './assertions'
-import { parseTestClientResponse, postTestClientStart } from './test-client'
+} from '../utils/assertions'
+import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
 
 export function getSessionIdFromCookieJar (): string {
   const jar = http.cookieJar()

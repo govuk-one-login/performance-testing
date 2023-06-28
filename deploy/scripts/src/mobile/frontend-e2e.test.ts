@@ -18,11 +18,11 @@ import {
   getAbortCommand,
   startJourney,
   getSessionIdFromCookieJar
-} from './utils/frontend'
+} from './testSteps/frontend'
 import {
   getBiometricTokenV2,
   postFinishBiometricSession
-} from './utils/backend'
+} from './testSteps/backend'
 
 const profiles: ProfileList = {
   smoke: {

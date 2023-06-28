@@ -8,7 +8,7 @@ import {
   getRedirect,
   postToken,
   postUserInfoV2
-} from './utils/backend'
+} from './testSteps/backend'
 import { sleep } from 'k6'
 
 const profiles: ProfileList = {

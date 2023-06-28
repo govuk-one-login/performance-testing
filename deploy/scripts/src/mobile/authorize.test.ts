@@ -6,7 +6,7 @@ import {
 } from '../common/utils/config/load-profiles'
 import {
   startJourney
-} from './utils/frontend'
+} from './testSteps/frontend'
 
 const profiles: ProfileList = {
   smoke: {

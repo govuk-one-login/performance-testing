@@ -7,7 +7,7 @@ import {
   isStatusCode302,
   validatePageRedirect,
   validatePageContent,
-  validateHeaderLocation,
+  validateLocationHeader,
   validateQueryParam
 } from '../utils/assertions'
 import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
@@ -159,7 +159,7 @@ export function getRedirect (): void {
       tags: { name: 'Redirect Final Page' }
     })
     isStatusCode302(res)
-    validateHeaderLocation(res)
+    validateLocationHeader(res)
     validateQueryParam(res.headers.Location, 'code')
   })
 }
@@ -174,7 +174,7 @@ export function getAbortCommand (): void {
       tags: { name: 'Abort Command' }
     })
     isStatusCode302(res)
-    validateHeaderLocation(res)
+    validateLocationHeader(res)
     validateQueryParam(res.headers.Location, 'error')
   })
 }

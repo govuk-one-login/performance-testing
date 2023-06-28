@@ -35,7 +35,7 @@ export function validatePageContent (res: Response, pageContent: string): boolea
   })
 }
 
-export function validateHeaderLocation (res: Response): boolean {
+export function validateLocationHeader (res: Response): boolean {
   return check(res, {
     'validate redirect url': (res) => {
       const url = new URL(res.headers.Location)

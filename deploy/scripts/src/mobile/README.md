@@ -23,7 +23,7 @@ npm install
 
 
 ## Run Command
-K6 environment variales can be found in config.ts file.
+K6 environment variables can be found in config.ts file.
 Test Scripts are located in the `/mobile` folder with naming convention `*.test.ts`. Profile and scenario can be found in each script file.
 
 

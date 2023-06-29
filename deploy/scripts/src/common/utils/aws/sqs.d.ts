@@ -1,17 +1,14 @@
 export interface AWSConfigOptions {
-    region: string
-    accessKeyId: string
-    secretAccessKey: string
-    sessionToken: string
+  region: string
+  accessKeyId: string
+  secretAccessKey: string
+  sessionToken: string
 }
-  
 export class AWSConfig {
-    constructor (options: AWSConfigOptions)
-    awsconfig (): void
+  constructor (options: AWSConfigOptions)
+  awsconfig (): void
 }
-  
 export class SQSClient {
     constructor (config: AWSConfig)
     sendMessage (queueUrl: string, messageBody: string): void
 }
-  

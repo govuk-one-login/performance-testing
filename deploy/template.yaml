@@ -297,6 +297,8 @@ Resources:
               MOBILE_BACKEND_URL: "/perfTest/mobile/backendUrl"
               MOBILE_FRONTEND_URL: "/perfTest/mobile/frontendUrl"
               MOBILE_TEST_CLIENT_EXECUTE_URL: "/perfTest/mobile/testClientUrl"
+              BTM_AWS_SQS_QUEUE: "/perfTest/txmxconsumeroutputqueuebilling"
+              TXMA_AWS_SQS_QUEUE: "/perfTest/txmxscaledauditeventsqueue"
           phases:
             pre_build:
               commands:

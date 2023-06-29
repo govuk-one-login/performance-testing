@@ -2,8 +2,9 @@ import { type Options } from 'k6/options'
 
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 
-import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js'
-import { AWSConfig, SQSClient } from 'https://jslib.k6.io/aws/0.7.2/sqs.js'
+import { uuidv4 } from '../common/utils/k6/k6-utils'
+
+import { AWSConfig, SQSClient } from '../common/utils/aws/sqs'
 
 const profiles: ProfileList = {
   smoke: {

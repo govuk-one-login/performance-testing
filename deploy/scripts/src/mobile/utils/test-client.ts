@@ -5,7 +5,7 @@ import { config } from './config'
 export function postTestClientStart (): Response {
   return http.post(
     buildUrl('start', config.testClientExecuteUrl),
-    JSON.stringify({ frontendUri: config.frontendUrl }),
+    JSON.stringify({ backendUri: `${config.backendUrl}/`, frontendUri: config.frontendUrl }),
     {
       tags: { name: 'Post request to authorize URL' },
       headers: { 'Content-Type': 'application/json' }

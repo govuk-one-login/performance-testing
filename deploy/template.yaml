@@ -236,8 +236,6 @@ Resources:
               CURR_PHONE: "/perfTest/currPhone"
               NEW_PHONE: "/perfTest/newPhone"
               K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"
-              BTM_AWS_SQS_QUEUE: "/perfTest/txmxconsumeroutputqueuebilling"
-              TXMA_AWS_SQS_QUEUE: "/perfTest/txmxscaledauditeventsqueue"
 
           phases:
             pre_build:

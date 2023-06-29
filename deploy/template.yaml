@@ -17,6 +17,7 @@ Parameters:
     Description: "The name of the environment to deploy to"
     Type: "String"
     AllowedValues:
+      - dev
       - build
       - staging
       - production
@@ -109,6 +110,11 @@ Resources:
                   - !Sub "${AWS::AccountId}"
           - Effect: "Allow"
             Action:
+              - "s3:PutObject"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${AWS::StackName}-test-results*"
+          - Effect: "Allow"
+            Action:
               - "cloudformation:DescribeStacks"
             Resource:
               - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*/*"
@@ -173,6 +179,42 @@ Resources:
                           Fn::ImportValue:
                             Fn::Sub: "${VpcStackName}-ProtectedSubnetIdB"
 
+  ResultsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName:
+        Fn::Join:
+            - '-'
+            - - Ref: AWS::StackName
+              - test-results
+              - Fn::Select:
+                  - 4
+                  - Fn::Split:
+                      - '-'
+                      - Fn::Select:
+                          - 2
+                          - Fn::Split:
+                              - /
+                              - Ref: AWS::StackId
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 365
+            Status: Enabled
+      LoggingConfiguration:
+        LogFilePrefix: ""
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
   LoadTestCodeBuildProject:
     Type: AWS::CodeBuild::Project
     DependsOn: VPCTestPolicy
@@ -186,6 +228,22 @@ Resources:
         Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
+        EnvironmentVariables:
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountId
+          - Name: S3_BUCKET
+            Type: PLAINTEXT
+            Value: !Ref ResultsBucket
+          - Name: TEST_SCRIPT
+            Type: PLAINTEXT
+            Value: common/test.js
+          - Name: PROFILE
+            Type: PLAINTEXT
+            Value: smoke
+          - Name: SCENARIO
+            Type: PLAINTEXT
+            Value: all
       VpcConfig:
         SecurityGroupIds:
           - !GetAtt TestContainerSecurityGroup.GroupId
@@ -197,54 +255,51 @@ Resources:
       TimeoutInMinutes: 480
       Source:
         Type: "NO_SOURCE"
-        BuildSpec: !Sub |
+        BuildSpec: |
           version: 0.2
 
           env:
             variables:
               WORK_DIR: /home/k6/scripts
-              TEST_SCRIPT: common/test.js
-              TEST_REPORT_DIR: results
-              PROFILE: smoke
-              SCENARIO: all
+              JSON_RESULTS: results.gz
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
             parameter-store:
-              TEST_CLIENT_EXECUTE_URL: "/perfTest/testClientUrl"
-              BACK_END_URL: "/perfTest/backendUrl"
-              FRONT_END_URL: "/perfTest/frontendUrl"
-              BIOMETRIC_SESSION_ID: "/perfTest/biometricSessionID"
-              APP_PASSWORD: "/perfTest/testUserPassword"
-              AUTH_APP_KEY: "/perfTest/authAppKey"
-              APP_PASSWORD_NEW: "/perfTest/testUserNewPassword"
-              CORE_STUB_URL: "/perfTest/coreStubUrl"
-              KBV_URL: "/perfTest/kbvUrl"
-              ADDRESS_URL: "/perfTest/addressUrl"
-              ADDRESS_ENV_NAME: "/perfTest/addressEnvName"
-              KBV_ENV_NAME: "/perfTest/kbvEnvName"
-              CORE_STUB_USERNAME: "/perfTest/coreStubUsername"
-              CORE_STUB_PASSWORD: "/perfTest/coreStubPassword"
-              CORE_URL: "/perfTest/coreUrl"
-              ORCH_STUB_URL: "/perfTest/orchStubUrl"
-              RP_STUB: "/perfTest/rpStub"
-              BASE_URL: "/perfTest/baseUrl"
-              F2F_URL: "/perfTest/f2fUrl"
-              K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
-              HOME_URL: "/perfTest/homeUrl"
-              SIGNIN_URL: "/perfTest/signInUrl"
-              EMAIL_OTP: "/perfTest/fixedEmailOTP"
-              PHONE_OTP: "/perfTest/fixedPhoneOTP"
-              CURR_PHONE: "/perfTest/currPhone"
-              NEW_PHONE: "/perfTest/newPhone"
+              ACCOUNT_APP_KEY: "/perfTest/account/accounts/appKey"
+              ACCOUNT_APP_PASSWORD_NEW: "/perfTest/account/testUserNewPassword"
+              ACCOUNT_APP_PASSWORD: "/perfTest/account/testUserPassword"
+              ACCOUNT_BASE_URL: "/perfTest/account/authentication/baseUrl"
+              ACCOUNT_CURR_PHONE: "/perfTest/account/accounts/currPhone"
+              ACCOUNT_EMAIL_OTP: "/perfTest/account/fixedEmailOTP"
+              ACCOUNT_HOME_URL: "/perfTest/account/accounts/homeUrl"
+              ACCOUNT_NEW_PHONE: "/perfTest/account/accounts/newPhone"
+              ACCOUNT_PHONE_OTP: "/perfTest/account/fixedPhoneOTP"
+              ACCOUNT_RP_STUB: "/perfTest/account/authentication/rpStub"
+              ACCOUNT_SIGNIN_URL: "/perfTest/account/accounts/signInUrl"
+              IDENTITY_ADDRESS_ENV_NAME: "/perfTest/identity/orange/addressEnvName"
+              IDENTITY_ADDRESS_URL: "/perfTest/identity/orange/addressUrl"
+              IDENTITY_CORE_STUB_URL: "/perfTest/identity/coreStubUrl"
+              IDENTITY_CORE_URL: "/perfTest/identity/coreUrl"
+              IDENTITY_DRIVING_ENDPOINT: "/perfTest/identity/lime/drivingEndpoint"
+              IDENTITY_DRIVING_URL: "/perfTest/identity/lime/drivingUrl"
+              IDENTITY_FRAUD_URL: "/perfTest/identity/lime/fraudUrl"
+              IDENTITY_KBV_ENV_NAME: "/perfTest/identity/orange/kbvEnvName"
+              IDENTITY_KBV_URL: "/perfTest/identity/orange/kbvUrl"
+              IDENTITY_KBV_ANSWERS: "/perfTest/identity/orange/kbvAnswers"
+              IDENTITY_KIWI_URL: "/perfTest/identity/kiwi/url"
+              IDENTITY_KIWI_STUB_URL: "/perfTest/identity/kiwi/stubUrl"
+              IDENTITY_KIWI_TARGET: "/perfTest/identity/kiwi/target"
+              IDENTITY_ORCH_STUB_URL: "/perfTest/identity/orchStubUrl"
+              IDENTITY_PASSPORT_URL: "/perfTest/identity/lime/passportUrl"
+              IDENTITY_STUB_PASSWORD: "/perfTest/identity/coreStubPassword"
+              IDENTITY_STUB_USERNAME: "/perfTest/identity/coreStubUsername"
               K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"
               K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
               MOBILE_BACKEND_URL: "/perfTest/mobile/backendUrl"
               MOBILE_FRONTEND_URL: "/perfTest/mobile/frontendUrl"
               MOBILE_TEST_CLIENT_EXECUTE_URL: "/perfTest/mobile/testClientUrl"
-              
           phases:
             pre_build:
               commands:
-                - mkdir -p "$TEST_REPORT_DIR"
                 - |
                   sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_ID#" $OTEL_TEMPLATE > $OTEL_CONFIG
                 - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &
@@ -252,14 +307,17 @@ Resources:
               commands:
                 - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - echo "Run performance test"
-                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=${AWS::AccountId} --out statsd
+                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out statsd --out json=$JSON_RESULTS
             post_build:
               commands:
+                - S3_LOCATION=s3://${S3_BUCKET}/${TEST_SCRIPT%.*}/$(date +%F/%T)
+                - aws s3 cp $JSON_RESULTS ${S3_LOCATION}/$JSON_RESULTS
                 - OTEL_PID=$(pgrep /otel/otelcol-contrib)
                 - kill $OTEL_PID
                 - TIMEOUT=0
                 - while kill -0 $OTEL_PID && (( TIMEOUT < 300 )); do sleep 1; (( TIMEOUT++ )); done
                 - cat otel.log
+                - ifconfig lo
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID

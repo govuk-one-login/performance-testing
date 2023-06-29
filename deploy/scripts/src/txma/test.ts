@@ -48,7 +48,6 @@ const awsConfig = new AWSConfig({
 
 const eventData = {
   payload: __ENV.TXMA_DATA_001
-  // payload: __ENV.BTM_DATA_001
 }
 
 const sqs = new SQSClient(awsConfig)

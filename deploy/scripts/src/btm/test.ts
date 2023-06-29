@@ -2,7 +2,9 @@ import { type Options } from 'k6/options'
 
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 
-import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js'
+import { uuidv4 } from '../common/utils/jslib/jslib.k6.io/k6-utils/1.4.0/index.js'
+
+// import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js'
 import { AWSConfig, SQSClient } from 'https://jslib.k6.io/aws/0.7.2/sqs.js'
 
 const profiles: ProfileList = {

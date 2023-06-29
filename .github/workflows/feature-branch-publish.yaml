@@ -1,0 +1,84 @@
+name: Feature Branch Publish
+
+################################ Prerequisite setup ################################
+# Set the customization template for an OpenID Connect (OIDC) subject claim for the repository.
+# You must authenticate using an access token with the repo scope to curl the endpoint.
+#
+#        curl -L \
+#          -X PUT \
+#          -H "Accept: application/vnd.github+json" \
+#          -H "Authorization: Bearer <YOUR-TOKEN>"\
+#          -H "X-GitHub-Api-Version: 2022-11-28" \
+#          https://api.github.com/repos/alphagov/di-devplatform-performance/actions/oidc/customization/sub \
+#          -d '{"use_default":false,"include_claim_keys":["repo","context","ref"]}'
+#
+# With the above setup, example sub from AssumeRoleWithWebIdentity as seen in Cloudtrail in build account
+#        "subjectFromWebIdentityToken": "repo:alphagov/di-devplatform-performance:environment:build:ref:refs/heads/main",
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run against'
+        type: environment
+        required: true
+
+jobs:
+  dockerBuildAndPush:
+    name: Docker build and push
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+
+      - name: Set up AWS creds
+        uses: aws-actions/configure-aws-credentials@v2.2.0
+        with:
+          role-to-assume: ${{ secrets.PERF_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Upload Fargates to S3
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          GITHUB_SHA: ${{ github.sha }}
+          WORKING_DIRECTORY: ./deploy
+          TEMPLATE_FILE: template.yaml
+          ECR_REPO_NAME: ${{ secrets.PERF_ECR_REPOSITORY }}
+          ARTIFACT_BUCKET_NAME: ${{ secrets.PERF_ARTIFACT_SOURCE_BUCKET_NAME }}
+        run: |
+          set -eu
+
+          echo "building image(s)"
+
+          cd "${WORKING_DIRECTORY}"
+          echo "Packaging app in /$WORKING_DIRECTORY"
+
+          docker build -t "$ECR_REGISTRY/$ECR_REPO_NAME:$GITHUB_SHA" .
+          docker push "$ECR_REGISTRY/$ECR_REPO_NAME:$GITHUB_SHA"
+
+          echo "Running sam build on template file"
+          sam build --template-file="$TEMPLATE_FILE"
+          mv .aws-sam/build/template.yaml cf-template.yaml
+
+          if grep -q "CONTAINER-IMAGE-PLACEHOLDER" cf-template.yaml; then
+            echo "Replacing \"CONTAINER-IMAGE-PLACEHOLDER\" with new ECR image ref"
+            sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPO_NAME:$GITHUB_SHA|" cf-template.yaml
+          else
+            echo "WARNING!!! Image placeholder text \"CONTAINER-IMAGE-PLACEHOLDER\" not found - uploading template anyway"
+          fi
+          zip template.zip cf-template.yaml
+          aws s3 cp template.zip "s3://$ARTIFACT_BUCKET_NAME/template.zip" --metadata "repository=$GITHUB_REPOSITORY,commitsha=$GITHUB_SHA"
+        shell: bash

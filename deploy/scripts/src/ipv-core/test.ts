@@ -80,8 +80,8 @@ export function setup (): void {
 }
 
 const env = {
-  orchStubEndPoint: __ENV.ORCH_STUB_URL,
-  coreEndPoint: __ENV.CORE_URL
+  orchStubEndPoint: __ENV.IDENTITY_ORCH_STUB_URL,
+  ipvCoreURL: __ENV.IDENTITY_CORE_URL
 }
 
 const transactionDuration = new Trend('duration')
@@ -152,7 +152,7 @@ export function coreScenario1 (): void {
     function () {
       const startTime = Date.now()
       res = http.post(
-        env.coreEndPoint + '/ipv/page/page-ipv-identity-start',
+        env.ipvCoreURL + '/ipv/page/page-ipv-identity-start',
         {
           _csrf: csrfToken
         },
@@ -180,7 +180,7 @@ export function coreScenario1 (): void {
     function () {
       const startTime1 = Date.now()
       res = http.post(
-        env.coreEndPoint + '/ipv/page/page-multiple-doc-check',
+        env.ipvCoreURL + '/ipv/page/page-multiple-doc-check',
         {
           _csrf: csrfToken,
           journey: 'next/passport'
@@ -421,7 +421,7 @@ export function coreScenario1 (): void {
     function () {
       const startTime1 = Date.now()
       res = http.post(
-        env.coreEndPoint + '/ipv/page/page-pre-kbv-transition',
+        env.ipvCoreURL + '/ipv/page/page-pre-kbv-transition',
         {
           _csrf: csrfToken
         },
@@ -520,7 +520,7 @@ export function coreScenario1 (): void {
     function () {
       const startTime1 = Date.now()
       res = http.post(
-        env.coreEndPoint + '/ipv/page/page-ipv-success',
+        env.ipvCoreURL + '/ipv/page/page-ipv-success',
         {
           _csrf: csrfToken
         },
@@ -623,7 +623,7 @@ export function coreScenario2Driving (): void {
     function () {
       const startTime = Date.now()
       res = http.post(
-        env.coreEndPoint + '/ipv/page/page-ipv-identity-start',
+        env.ipvCoreURL + '/ipv/page/page-ipv-identity-start',
         {
           _csrf: csrfToken
         },
@@ -651,7 +651,7 @@ export function coreScenario2Driving (): void {
     function () {
       const startTime1 = Date.now()
       res = http.post(
-        env.coreEndPoint + '/ipv/page/page-multiple-doc-check',
+        env.ipvCoreURL + '/ipv/page/page-multiple-doc-check',
         {
           _csrf: csrfToken,
           journey: 'next/driving-licence'
@@ -892,7 +892,7 @@ export function coreScenario2Driving (): void {
     function () {
       const startTime1 = Date.now()
       res = http.post(
-        env.coreEndPoint + '/ipv/page/page-pre-kbv-transition',
+        env.ipvCoreURL + '/ipv/page/page-pre-kbv-transition',
         {
           _csrf: csrfToken
         },
@@ -991,7 +991,7 @@ export function coreScenario2Driving (): void {
     function () {
       const startTime1 = Date.now()
       res = http.post(
-        env.coreEndPoint + '/ipv/page/page-ipv-success',
+        env.ipvCoreURL + '/ipv/page/page-ipv-success',
         {
           _csrf: csrfToken
         },

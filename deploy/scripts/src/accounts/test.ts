@@ -65,8 +65,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 300,
       stages: [
-        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
-        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
+        { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changeEmail'
@@ -79,8 +79,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 300,
       stages: [
-        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
-        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
+        { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changePassword'
@@ -93,8 +93,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 300,
       stages: [
-        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
-        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
+        { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changePhone'
@@ -105,10 +105,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 250,
+      maxVUs: 300,
       stages: [
-        { target: 10, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
-        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 10, duration: '15m' }, // Ramp up to 10 iterations per second in 15 minutes
+        { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'deleteAccount'
@@ -212,21 +212,21 @@ export function setup (): void {
 }
 
 const env = {
-  envURL: `${__ENV.HOME_URL}`,
-  signinURL: `${__ENV.SIGNIN_URL}`
+  envURL: __ENV.ACCOUNT_HOME_URL,
+  signinURL: __ENV.ACCOUNT_SIGNIN_URL
 }
 
 const credentials = {
-  authAppKey: __ENV.AUTH_APP_KEY,
-  currPassword: __ENV.APP_PASSWORD,
-  newPassword: __ENV.APP_PASSWORD_NEW,
-  fixedPhoneOTP: __ENV.PHONE_OTP,
-  fixedEmailOTP: __ENV.EMAIL_OTP
+  authAppKey: __ENV.ACCOUNT_APP_KEY,
+  currPassword: __ENV.ACCOUNT_APP_PASSWORD,
+  newPassword: __ENV.ACCOUNT_APP_PASSWORD_NEW,
+  fixedPhoneOTP: __ENV.ACCOUNT_PHONE_OTP,
+  fixedEmailOTP: __ENV.ACCOUNT_EMAIL_OTP
 }
 
 const phoneData = {
-  currentPhone: __ENV.CURR_PHONE,
-  newPhone: __ENV.NEW_PHONE
+  currentPhone: __ENV.ACCOUNT_CURR_PHONE,
+  newPhone: __ENV.ACCOUNT_NEW_PHONE
 }
 
 const transactionDuration = new Trend('duration')
@@ -338,7 +338,7 @@ export function changeEmail (): void {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
             (r.body as string).includes(
-              'We sent a code to the phone number'
+              'We have sent a code to your phone number'
             )
         })
           ? transactionDuration.add(endTime - startTime)
@@ -354,6 +354,8 @@ export function changeEmail (): void {
           {
             phoneNumber,
             _csrf: csrfToken,
+            supportAccountRecovery: 'true',
+            checkEmailLink: '/check-email-change-security-codes?type=SMS',
             code: credentials.fixedPhoneOTP
           },
           {
@@ -470,10 +472,10 @@ export function changeEmail (): void {
 
   sleep(Math.random() * 3)
 
-  group('B01_ChangeEmail_08_ClickSettingsTab GET', () => {
+  group('B01_ChangeEmail_08_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/settings', {
-      tags: { name: 'B01_ChangeEmail_08_ClickSettingsTab' }
+    res = http.get(env.envURL + '/security', {
+      tags: { name: 'B01_ChangeEmail_08_ClickSecurityTab' }
     })
     const endTime = Date.now()
 
@@ -592,7 +594,7 @@ export function changeEmail (): void {
 
       sleep(Math.random() * 3)
 
-      group('B01_ChangeEmail_13_ClickBackToMyAccount GET', function () {
+      group('B01_ChangeEmail_13_ClickBackToSecurity GET', function () {
         const startTime = Date.now()
         res = http.get(env.envURL + '/manage-your-account', {
           tags: { name: 'B01_ChangeEmail_13_ClickBackToMyAccount' }
@@ -729,7 +731,7 @@ export function changePassword (): void {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
             (r.body as string).includes(
-              'We sent a code to the phone number'
+              'We have sent a code to your phone number'
             )
         })
           ? transactionDuration.add(endTime - startTime)
@@ -747,6 +749,8 @@ export function changePassword (): void {
           {
             phoneNumber,
             _csrf: csrfToken,
+            supportAccountRecovery: 'true',
+            checkEmailLink: '/check-email-change-security-codes?type=SMS',
             code: credentials.fixedPhoneOTP
           },
           {
@@ -867,10 +871,10 @@ export function changePassword (): void {
 
   sleep(Math.random() * 3)
 
-  group('B02_ChangePassword_08_ClickSettingsTab GET', () => {
+  group('B02_ChangePassword_08_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/settings', {
-      tags: { name: 'B02_ChangePassword_08_ClickSettingsTab' } // pragma: allowlist secret
+    res = http.get(env.envURL + '/security', {
+      tags: { name: 'B02_ChangePassword_08_ClickSecurityTab' } // pragma: allowlist secret
     })
     const endTime = Date.now()
 
@@ -962,10 +966,10 @@ export function changePassword (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_ChangePassword_12_ClickBackToSettings GET', function () {
+      group('B02_ChangePassword_12_ClickBackToSecurity GET', function () {
         const startTime = Date.now()
         res = http.get(env.envURL + '/manage-your-account', {
-          tags: { name: 'B02_ChangePassword_12_ClickBackToSettings' } // pragma: allowlist secret
+          tags: { name: 'B02_ChangePassword_12_ClickBackToSecurity' } // pragma: allowlist secret
         })
         const endTime = Date.now()
 
@@ -1103,7 +1107,7 @@ export function changePhone (): void {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
         (r.body as string).includes(
-          'We sent a code to the phone number linked to your GOV.UK One Login'
+          'We have sent a code to your phone number'
         )
     })
       ? transactionDuration.add(endTime - startTime)
@@ -1122,29 +1126,54 @@ export function changePhone (): void {
       {
         phoneNumber: phoneNumHidden,
         _csrf: csrfToken,
+        supportAccountRecovery: 'true',
+        checkEmailLink: '/check-email-change-security-codes?type=SMS',
         code: credentials.fixedPhoneOTP
       },
       {
-        tags: { name: 'B03_ChangePhone_05_EnterSMSOTP' }
+        tags: { name: 'B03_ChangePhone_05_01_EnterSMSOTP' }
       }
     )
     const endTime = Date.now()
 
     check(res, {
       'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Your services')
+      'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
+
+    if ((res.body as string).includes('terms of use update')) {
+      group('B03_ChangePhone_05_02_SMS_AcceptTerms', () => {
+        const startTime = Date.now()
+        res = http.post(
+          env.signinURL + '/updated-terms-and-conditions',
+          {
+            _csrf: csrfToken,
+            termsAndConditionsResult: 'accept'
+          },
+          {
+            tags: { name: 'B03_ChangePhone_05_02_SMS_AcceptTerms' }
+          }
+        )
+
+        const endTime = Date.now()
+        check(res, {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as string).includes('Your services')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+      })
+    }
   })
 
   sleep(Math.random() * 3)
 
-  group('B03_ChangePhone_06_ClickSettingsTab GET', () => {
+  group('B03_ChangePhone_06_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/settings', {
-      tags: { name: 'B03_ChangePhone_06_ClickSettingsTab' }
+    res = http.get(env.envURL + '/security', {
+      tags: { name: 'B03_ChangePhone_06_ClickSecurityTab' }
     })
     const endTime = Date.now()
 
@@ -1268,10 +1297,10 @@ export function changePhone (): void {
 
       sleep(Math.random() * 3)
 
-      group('B03_ChangePhone_11_ClickBackToSettings GET', function () {
+      group('B03_ChangePhone_11_ClickBackToSecurity GET', function () {
         const startTime = Date.now()
         res = http.get(env.envURL + '/manage-your-account', {
-          tags: { name: 'B03_ChangePhone_11_ClickBackToSettings' }
+          tags: { name: 'B03_ChangePhone_11_ClickBackToSecurity' }
         })
         const endTime = Date.now()
 
@@ -1405,7 +1434,7 @@ export function deleteAccount (): void {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
             (r.body as string).includes(
-              'We sent a code to the phone number'
+              'We have sent a code to your phone number'
             )
         })
           ? transactionDuration.add(endTime - startTime)
@@ -1423,6 +1452,8 @@ export function deleteAccount (): void {
           {
             phoneNumber,
             _csrf: csrfToken,
+            supportAccountRecovery: 'true',
+            checkEmailLink: '/check-email-change-security-codes?type=SMS',
             code: credentials.fixedPhoneOTP
           },
           {
@@ -1541,10 +1572,10 @@ export function deleteAccount (): void {
 
   sleep(Math.random() * 3)
 
-  group('B04_DeleteAccount_08_ClickSettingsTab GET', () => {
+  group('B04_DeleteAccount_08_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/settings', {
-      tags: { name: 'B04_DeleteAccount_08_ClickSettingsTab' }
+    res = http.get(env.envURL + '/security', {
+      tags: { name: 'B04_DeleteAccount_08_ClickSecurityTab' }
     })
     const endTime = Date.now()
 

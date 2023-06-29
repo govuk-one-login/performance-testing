@@ -9,6 +9,6 @@ export class AWSConfig {
   awsconfig (): void
 }
 export class SQSClient {
-    constructor (config: AWSConfig)
-    sendMessage (queueUrl: string, messageBody: string): void
+  constructor (config: AWSConfig)
+  sendMessage (queueUrl: string, messageBody: string): void
 }

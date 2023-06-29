@@ -5,7 +5,7 @@ import { config } from './config'
 export function postTestClientStart (): Response {
   return http.post(
     buildUrl('start', config.testClientExecuteUrl),
-    JSON.stringify({ backendUri: `${config.backendUrl}/`, frontendUri: config.frontendUrl }),
+    JSON.stringify({ target: config.backendUrl, frontendUri: config.frontendUrl }),
     {
       tags: { name: 'Post request to authorize URL' },
       headers: { 'Content-Type': 'application/json' }
@@ -19,5 +19,5 @@ export function parseTestClientResponse (response: Response, location: 'WebLocat
     throw new Error('Failed to parse URL from response')
   }
 
-  return url
+  return url.replace(config.backendUrl, `${config.backendUrl}/`)
 }

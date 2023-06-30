@@ -32,16 +32,17 @@ export function parseTestClientResponse (
 }
 
 function parseApiLocation (apiLocation: string): string {
-  const requestJwt = parseQueryParams(apiLocation, 'request')
-  const clientId = parseQueryParams(apiLocation, 'client_id')
+  function parseQueryParams (queryParams: string[], parameterName: string): string {
+    return queryParams.filter((value) => value.startsWith(parameterName))[0].split('=')[1]
+  }
+
+  const queryParams = apiLocation.split('?')[1].split('&')
+  const requestJwt = parseQueryParams(queryParams, 'request')
+  const clientId = parseQueryParams(queryParams, 'client_id')
 
   return buildBackendUrl('verifyAuthorizeRequest', {
     client_id: clientId,
     response_type: 'code',
     request: requestJwt
   })
-}
-
-function parseQueryParams (location: string, parameterName: string): string {
-  return location.split('?')[1].split('&').filter((value) => value.startsWith(parameterName))[0].split('=')[1]
 }

@@ -275,6 +275,8 @@ Resources:
               ACCOUNT_PHONE_OTP: "/perfTest/account/fixedPhoneOTP"
               ACCOUNT_RP_STUB: "/perfTest/account/authentication/rpStub"
               ACCOUNT_SIGNIN_URL: "/perfTest/account/accounts/signInUrl"
+              DATA_BTM_SQS: "/perfTest/data/btm/consumerOutputSQS"
+              DATA_TXMA_SQS: "/perfTest/data/txma/auditSQS"
               IDENTITY_ADDRESS_ENV_NAME: "/perfTest/identity/orange/addressEnvName"
               IDENTITY_ADDRESS_URL: "/perfTest/identity/orange/addressUrl"
               IDENTITY_CORE_STUB_URL: "/perfTest/identity/coreStubUrl"
@@ -297,8 +299,6 @@ Resources:
               MOBILE_BACKEND_URL: "/perfTest/mobile/backendUrl"
               MOBILE_FRONTEND_URL: "/perfTest/mobile/frontendUrl"
               MOBILE_TEST_CLIENT_EXECUTE_URL: "/perfTest/mobile/testClientUrl"
-              BTM_AWS_SQS_QUEUE: "/perfTest/txmxconsumeroutputqueuebilling"
-              TXMA_AWS_SQS_QUEUE: "/perfTest/txmxscaledauditeventsqueue"
           phases:
             pre_build:
               commands:

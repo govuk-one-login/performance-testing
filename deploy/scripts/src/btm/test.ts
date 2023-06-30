@@ -1,9 +1,6 @@
 import { type Options } from 'k6/options'
-
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
-
 import { uuidv4 } from '../common/utils/k6/k6-utils'
-
 import { AWSConfig, SQSClient } from '../common/utils/aws/sqs'
 
 const profiles: ProfileList = {
@@ -37,18 +34,18 @@ export function setup (): void {
 }
 
 const env = {
-  sqs_queue: __ENV.BTM_AWS_SQS_QUEUE
+  sqs_queue: __ENV.DATA_BTM_SQS
 }
 
 const awsConfig = new AWSConfig({
-  region: __ENV.BTM_AWS_REGION,
-  accessKeyId: __ENV.BTM_AWS_ACCESS_KEY_ID,
-  secretAccessKey: __ENV.BTM_AWS_SECRET_ACCESS_KEY,
-  sessionToken: __ENV.BTM_AWS_SESSION_TOKEN
+  region: __ENV.DATA_BTM_AWS_REGION,
+  accessKeyId: __ENV.DATA_BTM_AWS_ACCESS_KEY_ID,
+  secretAccessKey: __ENV.DATA_BTM_AWS_SECRET_ACCESS_KEY,
+  sessionToken: __ENV.DATA_BTM_AWS_SESSION_TOKEN
 })
 
 const eventData = {
-  payload: __ENV.BTM_DATA_001
+  payload: __ENV.DATA_BTM_SQS_PAYLOAD
 
 }
 

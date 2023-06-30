@@ -1,11 +1,7 @@
 import { type Options } from 'k6/options'
-
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
-
 import { uuidv4 } from '../common/utils/k6/k6-utils'
-
 import { AWSConfig, SQSClient } from '../common/utils/aws/sqs'
-
 const profiles: ProfileList = {
   smoke: {
     sendEventSmokeTest1: {
@@ -37,18 +33,18 @@ export function setup (): void {
 }
 
 const env = {
-  sqs_queue: __ENV.TXMA_AWS_SQS_QUEUE
+  sqs_queue: __ENV.DATA_TXMA_SQS
 }
 
 const awsConfig = new AWSConfig({
-  region: __ENV.TXMA_AWS_REGION,
-  accessKeyId: __ENV.TXMA_AWS_ACCESS_KEY_ID,
-  secretAccessKey: __ENV.TXMA_AWS_SECRET_ACCESS_KEY,
-  sessionToken: __ENV.TXMA_AWS_SESSION_TOKEN
+  region: __ENV.DATA_TXMA_AWS_REGION,
+  accessKeyId: __ENV.DATA_TXMA_AWS_ACCESS_KEY_ID,
+  secretAccessKey: __ENV.DATA_TXMA_AWS_SECRET_ACCESS_KEY,
+  sessionToken: __ENV.DATA_TXMA_AWS_SESSION_TOKEN
 })
 
 const eventData = {
-  payload: __ENV.TXMA_DATA_001
+  payload: __ENV.DATA_TXMA_SQS_PAYLOAD
 }
 
 const sqs = new SQSClient(awsConfig)

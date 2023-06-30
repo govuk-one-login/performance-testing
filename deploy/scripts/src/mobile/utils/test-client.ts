@@ -20,22 +20,18 @@ export function parseTestClientResponse (
   response: Response,
   location: 'WebLocation' | 'ApiLocation'
 ): string {
-  let url
-  if (location === 'ApiLocation') {
-    const apiLocation = response.json(location) as string
-    url = parseApiLocation(apiLocation)
-  } else {
-    url = response.json(location)
-  }
-
+  const url = response.json(location)
   if (typeof url !== 'string') {
     throw new Error('Failed to parse URL from response')
   }
-
-  return url
+  if (location === 'ApiLocation') {
+    return parseApiLocation(url)
+  } else {
+    return url
+  }
 }
 
-export function parseApiLocation (apiLocation: string): string {
+function parseApiLocation (apiLocation: string): string {
   const queryParams = apiLocation.split('?')[1].split('&')
   const requestJwt = queryParams
     .filter((value) => value.startsWith('request'))[0]
@@ -44,11 +40,9 @@ export function parseApiLocation (apiLocation: string): string {
     .filter((value) => value.startsWith('client_id'))[0]
     .split('=')[1]
 
-  const apiLocationUrl = buildBackendUrl('verifyAuthorizeRequest', {
+  return buildBackendUrl('verifyAuthorizeRequest', {
     client_id: clientId,
     response_type: 'code',
     request: requestJwt
   })
-
-  return apiLocationUrl
 }

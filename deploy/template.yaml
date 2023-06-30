@@ -124,6 +124,62 @@ Resources:
               - "ssm:GetParametersByPath"
             Resource:
               - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path
+          - Effect: "Allow"
+            Action:
+              - "kms:Decrypt"
+              - "kms:GenerateDataKey"
+            Resource:
+              - "{{resolve:ssm:/perfTest/identity/spot/requestQueue/kmsArn}}"
+          - Effect: "Allow"
+            Action:
+              - "kms:Decrypt"
+            Resource:
+              - "{{resolve:ssm:/perfTest/identity/spot/outputQueue/kmsArn}}"
+          - Effect: "Allow"
+            Action:
+              - "sqs:SendMessage"
+            Resource:
+              - "{{resolve:ssm:/perfTest/identity/spot/requestQueue/arn}}"
+          - Effect: "Allow"
+            Action:
+              - "sqs:ReceiveMessage"
+              - "sqs:GetQueueAttributes"
+              - "sqs:DeleteMessage"
+              - "sqs:ChangeMessageVisibility"
+            Resource:
+              - "{{resolve:ssm:/perfTest/identity/spot/outputQueue/arn}}"
+
+  SpotRequestKeyParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /perfTest/identity/spot/requestQueue/kmsArn
+      Type: String
+      Value: " " # Placeholder
+      Description: ARN of KMS Key for SPoT Request Queue
+
+  SpotOutputKeyParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /perfTest/identity/spot/outputQueue/kmsArn
+      Type: String
+      Value: " " # Placeholder
+      Description: ARN of KMS Key for SPoT Output Queue
+
+  SpotRequestQueueParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /perfTest/identity/spot/requestQueue/arn
+      Type: String
+      Value: " " # Placeholder
+      Description: ARN of SPoT Request SQS Queue
+
+  SpotOutputQueueParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /perfTest/identity/spot/outputQueue/arn
+      Type: String
+      Value: " " # Placeholder
+      Description: ARN of SPoT Output SQS Queue
 
   VPCTestPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -189,18 +245,18 @@ Resources:
               SSEAlgorithm: AES256
       BucketName:
         Fn::Join:
-            - '-'
-            - - Ref: AWS::StackName
-              - test-results
-              - Fn::Select:
-                  - 4
-                  - Fn::Split:
-                      - '-'
-                      - Fn::Select:
-                          - 2
-                          - Fn::Split:
-                              - /
-                              - Ref: AWS::StackId
+          - "-"
+          - - Ref: AWS::StackName
+            - test-results
+            - Fn::Select:
+                - 4
+                - Fn::Split:
+                    - "-"
+                    - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                            - /
+                            - Ref: AWS::StackId
       LifecycleConfiguration:
         Rules:
           - ExpirationInDays: 365

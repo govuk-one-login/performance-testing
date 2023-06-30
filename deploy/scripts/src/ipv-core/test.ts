@@ -172,7 +172,7 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_03_ClickStartAfterLogin_02_DcmawStub' }
+          tags: { name: 'B01_Core_03_ClickStartAfterLogin_02_DcmawStub' } // pragma: allowlist secret
         }
       )
       const endTime2 = Date.now()

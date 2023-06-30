@@ -314,6 +314,7 @@ Resources:
               commands:
                 - S3_LOCATION=s3://${S3_BUCKET}/${TEST_SCRIPT%.*}/$(date +%F/%T)
                 - aws s3 cp $JSON_RESULTS ${S3_LOCATION}/$JSON_RESULTS
+                - sleep 120
                 - OTEL_PID=$(pgrep /otel/otelcol-contrib)
                 - kill $OTEL_PID
                 - TIMEOUT=0

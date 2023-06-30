@@ -2,6 +2,7 @@ import { sleep, group, check, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { Rate, Trend } from 'k6/metrics'
+import { SharedArray } from 'k6/data'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 
 const profiles: ProfileList = {
@@ -69,6 +70,16 @@ export const options: Options = {
   }
 }
 
+interface StubUser {
+  passport: string
+  address: string
+  fraud: string
+  kbv: string
+}
+
+const stubUser: StubUser[] = new SharedArray('stub', function () {
+  return JSON.parse(open('./data/stubUser.json')).stubUser
+})
 const passportData = open('./data/passportStub.json')
 const addressData = open('./data/addressStub.json')
 const fraudData = open('./data/fraudStub.json')
@@ -97,6 +108,7 @@ export function coreScenario1 (): void {
   let fraudStubURL: string
   let kbvStubURL: string
   let passed: boolean
+  const user = stubUser[Math.floor(Math.random() * stubUser.length)]
 
   group(
     'B01_Core_01_LaunchOrchestratorStub GET',
@@ -300,7 +312,7 @@ export function coreScenario1 (): void {
       res = http.post(
         passportStubURL,
         {
-          sort: 'Kenneth Decerqueira (Valid Experian) Passport',
+          sort: user.passport,
           jsonPayload: passportData,
           strengthScore: '4',
           validityScore: '2',
@@ -373,7 +385,7 @@ export function coreScenario1 (): void {
       res = http.post(
         addressStubURL,
         {
-          sort: 'Kenneth Decerqueira (Valid Experian) Address',
+          sort: user.address,
           jsonPayload: addressData,
           expHours: '0',
           expMinutes: '0',
@@ -443,7 +455,7 @@ export function coreScenario1 (): void {
       res = http.post(
         fraudStubURL,
         {
-          sort: 'Kenneth Decerqueira (Valid Experian) Fraud',
+          sort: user.fraud,
           jsonPayload: fraudData,
           identityFraudScore: '2',
           activityHistoryScore: '',
@@ -544,7 +556,7 @@ export function coreScenario1 (): void {
       res = http.post(
         kbvStubURL,
         {
-          sort: 'Kenneth Decerqueira (Valid Experian) KBV',
+          sort: user.kbv,
           jsonPayload: kbvData,
           verificationScore: '2',
           evidenceJsonPayload: '',

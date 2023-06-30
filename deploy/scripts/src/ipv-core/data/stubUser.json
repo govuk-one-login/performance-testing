@@ -1,0 +1,8 @@
+{
+    "stubUser": [
+        { "passport": "Kenneth Decerqueira (Valid Experian) Passport", 
+        "address": "Kenneth Decerqueira (Valid Experian) Address", 
+        "fraud": "Kenneth Decerqueira (Valid Experian) Fraud", 
+        "kbv": "Kenneth Decerqueira (Valid Experian) KBV" }
+    ]
+}

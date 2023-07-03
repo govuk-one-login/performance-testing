@@ -309,7 +309,7 @@ Resources:
               commands:
                 - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - echo "Run performance test"
-                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out statsd --out json=$JSON_RESULTS
+                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --tag build_id=$CODEBUILD_BUILD_ID --out output-dynatrace --out json=$JSON_RESULTS
             post_build:
               commands:
                 - S3_LOCATION=s3://${S3_BUCKET}/${TEST_SCRIPT%.*}/$(date +%F/%T)

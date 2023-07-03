@@ -11,7 +11,11 @@
         "sourceType": "module",
         "project": "**/tsconfig.json"
     },
-    "ignorePatterns": ["src/mobile/utils/k6/*.js"],
+    "ignorePatterns": [
+        "build.js",
+        "src/mobile/utils/k6/*.js",
+        "dist/"
+    ],
     "rules": {
     }
 }

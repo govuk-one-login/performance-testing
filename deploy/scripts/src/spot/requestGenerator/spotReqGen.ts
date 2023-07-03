@@ -1,5 +1,5 @@
 import { type SpotRequest } from '../../spot/requestGenerator/spotReqFormat'
-import { uuidv4 } from '../../common/utils/k6/k6-utils'
+import { uuidv4 } from '../../common/utils/jslib/index'
 
 export function generateRequest (currTime: string): SpotRequest {
   const sampleSpotRequest: SpotRequest = {

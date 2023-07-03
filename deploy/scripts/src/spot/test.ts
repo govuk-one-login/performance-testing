@@ -1,6 +1,6 @@
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
-import { AWSConfig, SQSClient } from '../common/utils/aws/sqs'
+import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generateRequest } from './requestGenerator/spotReqGen'
 
 const profiles: ProfileList = {

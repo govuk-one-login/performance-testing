@@ -4,6 +4,7 @@ import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { Trend } from 'k6/metrics'
 import execution from 'k6/execution'
+import { b64encode } from 'k6/encoding'
 
 const profiles: ProfileList = {
   smoke: {
@@ -38,10 +39,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 70,
       stages: [
-        { target: 50, duration: '15m' }, // Ramps up to target load
-        { target: 50, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 50 iterations/second
+        { target: 3, duration: '15m' }, // Ramps up to target load
+        { target: 3, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 3 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'FaceToFace'
@@ -51,10 +52,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 800,
+      maxVUs: 45,
       stages: [
-        { target: 50, duration: '15m' }, // Ramps up to target load
-        { target: 50, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 50 iterations/second
+        { target: 3, duration: '15m' }, // Ramps up to target load
+        { target: 3, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 3 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'CIC'
@@ -78,7 +79,9 @@ export function setup (): void {
 }
 
 const env = {
-  envURL: __ENV.IDENTITY_KIWI_URL
+  envURL: __ENV.IDENTITY_KIWI_URL,
+  envIPVStub: __ENV.IDENTITY_KIWI_STUB_URL,
+  envTarget: __ENV.IDENTITY_KIWI_TARGET
 }
 
 const transactionDuration = new Trend('duration')
@@ -86,11 +89,34 @@ const transactionDuration = new Trend('duration')
 export function CIC (): void {
   let res: Response
   let csrfToken: string
+  let requestValue: string
+  let clientId: string
 
-  group('B01_CIC_01_LaunchLandingPage GET', function () {
+  group('B01_CIC_01_IPVStubCall POST', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL, {
-      tags: { name: 'B01_CIC_01_LaunchLandingPage' }
+    res = http.post(env.envIPVStub + '/start',
+      JSON.stringify({
+        target: env.envTarget
+      }),
+      {
+        tags: { name: 'B01_CIC_01_IPVStubCall' }
+      })
+    const endTime = Date.now()
+    check(res, {
+      'is status 201': (r) => r.status === 201,
+      'verify page content': (r) => (r.body as string).includes(b64encode('{"alg":"RSA', 'rawstd'))
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    requestValue = getRequestCode(res)
+    clientId = getClientID(res)
+  })
+
+  group('B01_CIC_02_Authorize GET', function () {
+    const startTime = Date.now()
+    const endpoint = `/oauth2/authorize?request=${requestValue}&response_type=code&client_id=${clientId}`
+    res = http.get(env.envURL + endpoint, {
+      tags: { name: 'B01_CIC_02_Authorize' }
     })
     const endTime = Date.now()
 
@@ -104,7 +130,7 @@ export function CIC (): void {
     csrfToken = getCSRF(res)
   })
 
-  group('B01_CIC_02_UserDetails POST', function () {
+  group('B01_CIC_03_UserDetails POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/nameEntry', {
       surname: 'NameTest',
@@ -112,9 +138,8 @@ export function CIC (): void {
       middleName: '',
       continue: '',
       'x-csrf-token': csrfToken
-
     }, {
-      tags: { name: 'B01_CIC_02_UserDetails' }
+      tags: { name: 'B01_CIC_03_UserDetails' }
     })
     const endTime = Date.now()
 
@@ -130,7 +155,7 @@ export function CIC (): void {
 
   sleep(Math.random() * 3)
 
-  group('B01_CIC_03_UserBirthdate POST', function () {
+  group('B01_CIC_04_UserBirthdate POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/dateOfBirth', {
       'dateOfBirth-day': '1',
@@ -138,9 +163,8 @@ export function CIC (): void {
       'dateOfBirth-year': '1985',
       continue: '',
       'x-csrf-token': csrfToken
-
     }, {
-      tags: { name: 'B01_CIC_03_UserBirthdate' }
+      tags: { name: 'B01_CIC_04_UserBirthdate' }
     })
     const endTime = Date.now()
 
@@ -148,6 +172,25 @@ export function CIC (): void {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
         (r.body as string).includes('Check your details')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
+
+  group('B01_CIC_05_CheckDetails POST', function () {
+    const startTime = Date.now()
+    res = http.post(env.envURL + '/checkDetails', {
+      continue: '',
+      'x-csrf-token': csrfToken
+    }, {
+      tags: { name: 'B01_CIC_05_CheckDetails' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'verify url body': (r) =>
+        (r.url).includes(clientId)
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -190,7 +233,7 @@ export function FaceToFace (): void {
   group('B02_FaceToFace_02_Continue POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/landingPage', {
-      continue: '',
+      landingPageContinue: '',
       'x-csrf-token': csrfToken
     },
     {
@@ -298,7 +341,6 @@ export function FaceToFace (): void {
           tags: { name: 'B02_FaceToFace_04_NationalIDEEA_Details' }
         })
         const endTime = Date.now()
-
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
@@ -314,7 +356,7 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_05_NationalIDEEA_CurrentAddress POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/eeaIdCardAddressCheck', {
-          eeaIdCardAddressCheck: 'sameAddress',
+          eeaIdCardAddressCheck: 'Yes, it has my current address on it',
           continue: '',
           'x-csrf-token': csrfToken
         }, {
@@ -337,7 +379,7 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_06_NationalIDEEA_WhichCountry POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/eeaIdentityCardCountrySelector', {
-          eeaIdentityCardCountrySelector: 'RO',
+          eeaIdentityCardCountrySelector: 'Romania',
           continue: '',
           'x-csrf-token': csrfToken
         }, {
@@ -407,10 +449,11 @@ export function FaceToFace (): void {
       })
 
       sleep(Math.random() * 3)
+
       group('B02_FaceToFace_05_EUDL_CurrentAddress POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/euDrivingLicenceAddressCheck', {
-          euDrivingLicenceAddressCheck: 'sameAddress',
+          euDrivingLicenceAddressCheck: 'Yes, it has my current address on it',
           continue: '',
           'x-csrf-token': csrfToken
         },
@@ -418,7 +461,6 @@ export function FaceToFace (): void {
           tags: { name: 'B02_FaceToFace_05_EUDL_CurrentAddress' }
         })
         const endTime = Date.now()
-
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
@@ -434,7 +476,7 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_06_EUDL_WhichCountry POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/euDrivingLicenceCountrySelector', {
-          euDrivingLicenceCountrySelector: 'RO',
+          euDrivingLicenceCountrySelector: 'Romania',
           continue: '',
           'x-csrf-token': csrfToken
         },
@@ -509,7 +551,7 @@ export function FaceToFace (): void {
       group('B02_FaceToFace_05_NonUKPassport_WhichCountry POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/nonUkPassportcountrySelector', {
-          nonUkPassportcountrySelector: 'RO',
+          nonUkPassportCountrySelector: 'Romania',
           continue: '',
           'x-csrf-token': csrfToken
         },
@@ -517,7 +559,6 @@ export function FaceToFace (): void {
           tags: { name: 'B02_FaceToFace_05_NonUKPassport_WhichCountry' } // pragma: allowlist secret`
         })
         const endTime = Date.now()
-
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
@@ -716,4 +757,16 @@ function randomDate (start: Date, end: Date): Date {
 
 function getCSRF (r: Response): string {
   return r.html().find("input[name='x-csrf-token']").val() ?? ''
+}
+
+function getRequestCode (r: Response): string {
+  const request = r.json('request')
+  if (request !== null && typeof request === 'string') return request
+  fail('Request not found')
+}
+
+function getClientID (r: Response): string {
+  const clientId = r.json('clientId')
+  if (clientId !== null && typeof clientId === 'string') return clientId
+  fail('Client ID not found')
 }

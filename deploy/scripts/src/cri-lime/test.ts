@@ -334,12 +334,11 @@ export function drivingScenario (): void {
     function () {
       const startTime = Date.now()
       res = http.get(env.ipvCoreStub + '/authorize?cri=' +
-        env.drivingEndpoint + '&rowNumber=5',
+        env.drivingEndpoint + '&rowNumber=197',
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Driving_01_CoreStuB' }
       })
-
       const endTime = Date.now()
 
       check(res, {
@@ -359,7 +358,7 @@ export function drivingScenario (): void {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/licence-issuer',
           {
-            licenceIssuerRadio: 'DVLA',
+            licenceIssuer: 'DVLA',
             submitButton: '',
             'x-csrf-token': csrfToken
           })
@@ -387,7 +386,7 @@ export function drivingScenario (): void {
           'dateOfBirth-day': user1DVLA.birthday,
           'dateOfBirth-month': user1DVLA.birthmonth,
           'dateOfBirth-year': user1DVLA.birthyear,
-          dvlaDependent: 'DVLA',
+          issuerDependent: 'DVLA',
           'issueDate-day': user1DVLA.issueDay,
           'issueDate-month': user1DVLA.issueMonth,
           'issueDate-year': user1DVLA.issueYear,
@@ -397,6 +396,7 @@ export function drivingScenario (): void {
           drivingLicenceNumber: user1DVLA.drivingLicenceNumber,
           issueNumber: user1DVLA.issueNumber,
           postcode: user1DVLA.postcode,
+          consentCheckbox: 'true',
           continue: '',
           'x-csrf-token': csrfToken
 
@@ -437,7 +437,7 @@ export function drivingScenario (): void {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/licence-issuer',
           {
-            licenceIssuerRadio: 'DVA',
+            licenceIssuer: 'DVA',
             submitButton: '',
             'x-csrf-token': csrfToken
           })
@@ -454,7 +454,7 @@ export function drivingScenario (): void {
 
       sleep(1)
 
-      group('02_Driving_03_DVA_EditUser POST', function () {
+      group('B02_Driving_03_DVA_EditUser POST', function () {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/details', {
 
@@ -464,7 +464,7 @@ export function drivingScenario (): void {
           'dvaDateOfBirth-day': user1DVA.birthday,
           'dvaDateOfBirth-month': user1DVA.birthmonth,
           'dvaDateOfBirth-year': user1DVA.birthyear,
-          dvaDependent: 'DVA',
+          issuerDependent: 'DVA',
           'dateOfIssue-day': user1DVA.issueDay,
           'dateOfIssue-month': user1DVA.issueMonth,
           'dateOfIssue-year': user1DVA.issueYear,
@@ -473,6 +473,7 @@ export function drivingScenario (): void {
           'expiryDate-year': user1DVA.expiryYear,
           dvaLicenceNumber: user1DVA.drivingLicenceNumber,
           postcode: user1DVA.postcode,
+          consentDVACheckbox: 'true',
           continue: '',
           'x-csrf-token': csrfToken
 

@@ -1,6 +1,6 @@
 import http from 'k6/http'
 import { group } from 'k6'
-import { uuidv4 } from '../utils/k6/k6-utils'
+import { uuidv4 } from '../../common/utils/jslib/index'
 import { buildBackendUrl } from '../utils/url'
 import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
 import { isStatusCode200, isStatusCode201 } from '../utils/assertions'

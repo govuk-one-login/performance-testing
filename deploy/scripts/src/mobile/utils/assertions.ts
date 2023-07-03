@@ -1,6 +1,6 @@
 import { type Response } from 'k6/http'
 import { check } from 'k6'
-import { URL } from './k6/url'
+import { URL } from '../../common/utils/jslib/url'
 
 export function isStatusCode200 (res: Response): boolean {
   return check(res, {

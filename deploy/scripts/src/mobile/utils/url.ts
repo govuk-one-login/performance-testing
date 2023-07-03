@@ -1,4 +1,4 @@
-import { URL } from './k6/url'
+import { URL } from '../../common/utils/jslib/url'
 import { config } from './config'
 
 const OAUTH_ROUTE = '/dca/oauth2'

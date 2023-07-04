@@ -207,7 +207,7 @@ export function CIC (): void {
     res = http.post(env.envTarget + '/token', {
       grant_type: 'authorization_code',
       code: codeUrl,
-      redirect_uri: 'https://ipvstub.review-c.build.account.gov.uk/redirect'
+      redirect_uri: env.envIPVStub + '/redirect'
 
     }, {
       tags: { name: 'B01_CIC_06_SendAuthorizationCode' }
@@ -822,12 +822,8 @@ function getClientID (r: Response): string {
 }
 
 function getCodeFromUrl (url: string): string {
-  const urlParts = url.split('?')
-  const queryParams = urlParts[1].split('&')
-  for (const param of queryParams) {
-    const [key, value] = param.split('=')
-    if (key === 'code' && value !== null && typeof value === 'string') return value
-  }
+  const code = url.match(/code=([^&]*)/)
+  if (code?.[1] != null) return code[1]
   fail('Code not found')
 }
 

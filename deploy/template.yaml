@@ -129,16 +129,19 @@ Resources:
               - "kms:Decrypt"
               - "kms:GenerateDataKey"
             Resource:
+              # SSM Paramater '/perfTest/identity/spot/requestQueue/kmsArn' must contain ARN of KMS Key for SPoT Request Queue
               - "{{resolve:ssm:/perfTest/identity/spot/requestQueue/kmsArn}}"
           - Effect: "Allow"
             Action:
               - "kms:Decrypt"
             Resource:
+              # SSM Paramater '/perfTest/identity/spot/outputQueue/kmsArn' must contain ARN of KMS Key for SPoT Output Queue
               - "{{resolve:ssm:/perfTest/identity/spot/outputQueue/kmsArn}}"
           - Effect: "Allow"
             Action:
               - "sqs:SendMessage"
             Resource:
+              # SSM Paramater '/perfTest/identity/spot/requestQueue/arn' must contain ARN of SPoT Request SQS Queue
               - "{{resolve:ssm:/perfTest/identity/spot/requestQueue/arn}}"
           - Effect: "Allow"
             Action:
@@ -147,39 +150,8 @@ Resources:
               - "sqs:DeleteMessage"
               - "sqs:ChangeMessageVisibility"
             Resource:
+              # SSM Paramater '/perfTest/identity/spot/outputQueue/arn' must contain ARN of SPoT Output SQS Queue
               - "{{resolve:ssm:/perfTest/identity/spot/outputQueue/arn}}"
-
-  SpotRequestKeyParameter:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: /perfTest/identity/spot/requestQueue/kmsArn
-      Type: String
-      Value: " " # Placeholder
-      Description: ARN of KMS Key for SPoT Request Queue
-
-  SpotOutputKeyParameter:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: /perfTest/identity/spot/outputQueue/kmsArn
-      Type: String
-      Value: " " # Placeholder
-      Description: ARN of KMS Key for SPoT Output Queue
-
-  SpotRequestQueueParameter:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: /perfTest/identity/spot/requestQueue/arn
-      Type: String
-      Value: " " # Placeholder
-      Description: ARN of SPoT Request SQS Queue
-
-  SpotOutputQueueParameter:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: /perfTest/identity/spot/outputQueue/arn
-      Type: String
-      Value: " " # Placeholder
-      Description: ARN of SPoT Output SQS Queue
 
   VPCTestPolicy:
     Type: AWS::IAM::ManagedPolicy

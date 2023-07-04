@@ -152,6 +152,15 @@ Resources:
                 - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                   - !FindInMap [SPOT, AWS, AccountID]
                   - "di-ipv-spot-app-*"
+          - Effect: "Allow"
+            Action:
+              - "lambda:InvokeFunction"
+            Resource:
+              Fn::Join:
+                - ":"
+                - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                  - !FindInMap [SPOT, AWS, AccountID]
+                  - "function:*"
 
   VPCTestPolicy:
     Type: AWS::IAM::ManagedPolicy

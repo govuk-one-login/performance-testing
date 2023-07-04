@@ -208,7 +208,6 @@ export function CIC (): void {
       grant_type: 'authorization_code',
       code: codeUrl,
       redirect_uri: env.envIPVStub + '/redirect'
-
     }, {
       tags: { name: 'B01_CIC_06_SendAuthorizationCode' }
     })

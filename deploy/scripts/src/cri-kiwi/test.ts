@@ -123,7 +123,7 @@ export function CIC (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('What is your name?')
+        (r.body as string).includes('Enter your name exactly as it appears on your photo ID')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -146,7 +146,7 @@ export function CIC (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('What is your date of birth')
+        (r.body as string).includes('Enter your date of birth')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -171,7 +171,7 @@ export function CIC (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Check your details')
+        (r.body as string).includes('Confirm your details')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')

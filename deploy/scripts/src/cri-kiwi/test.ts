@@ -91,6 +91,8 @@ export function CIC (): void {
   let csrfToken: string
   let requestValue: string
   let clientId: string
+  let codeUrl: string
+  let accessToken: string
 
   group('B01_CIC_01_IPVStubCall POST', function () {
     const startTime = Date.now()
@@ -191,6 +193,54 @@ export function CIC (): void {
     check(res, {
       'verify url body': (r) =>
         (r.url).includes(clientId)
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+    codeUrl = getCodeFromUrl(res.url)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B01_CIC_06_SendAuthorizationCode POST', function () {
+    const startTime = Date.now()
+    res = http.post(env.envTarget + '/token', {
+      grant_type: 'authorization_code',
+      code: codeUrl,
+      redirect_uri: 'https://ipvstub.review-c.build.account.gov.uk/redirect'
+
+    }, {
+      tags: { name: 'B01_CIC_06_SendAuthorizationCode' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify response body': (r) => (r.body as string).includes('access_token')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+    accessToken = getAccessToken(res)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B01_CIC_07_SendBearerToken POST', function () {
+    const startTime = Date.now()
+    const authHeader = `Bearer ${accessToken}`
+    const options = {
+      headers: {
+        Authorization: authHeader
+      },
+      tags: { name: 'B01_CIC_07_SendBearerToken' }
+    }
+    res = http.post(env.envTarget + '/userinfo', {}, options)
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify response body': (r) => (r.body as string).includes('credentialJWT')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -769,4 +819,20 @@ function getClientID (r: Response): string {
   const clientId = r.json('clientId')
   if (clientId !== null && typeof clientId === 'string') return clientId
   fail('Client ID not found')
+}
+
+function getCodeFromUrl (url: string): string {
+  const urlParts = url.split('?')
+  const queryParams = urlParts[1].split('&')
+  for (const param of queryParams) {
+    const [key, value] = param.split('=')
+    if (key === 'code' && value !== null && typeof value === 'string') return value
+  }
+  fail('Code not found')
+}
+
+function getAccessToken (r: Response): string {
+  const accessToken = r.json('access_token')
+  if (accessToken !== null && typeof accessToken === 'string') return accessToken
+  fail('AccessToken not found')
 }

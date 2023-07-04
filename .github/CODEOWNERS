@@ -7,8 +7,10 @@
 # Team Specific Test Script Directories
 /deploy/scripts/src/accounts @alphagov/digital-identity-performance-test @alphagov/gov-uk-accounts
 /deploy/scripts/src/authentication @alphagov/digital-identity-performance-test
+/deploy/scripts/src/btm @alphagov/digital-identity-performance-test @alphagov/di-billing-and-transaction-monitoring
 /deploy/scripts/src/cri-kiwi @alphagov/digital-identity-performance-test @alphagov/di-ipv-kiwi-devs
 /deploy/scripts/src/cri-lime @alphagov/digital-identity-performance-test @alphagov/digital-identity-ipv
 /deploy/scripts/src/cri-orange @alphagov/digital-identity-performance-test @alphagov/di-ipv-orange-cri-maintainers
-/deploy/scripts/src/mobile @alphagov/digital-identity-performance-test @alphagov/di-doc-checking-narwhal-codeowners
 /deploy/scripts/src/ipv-core @alphagov/digital-identity-performance-test @alphagov/digital-identity-ipv
+/deploy/scripts/src/mobile @alphagov/digital-identity-performance-test @alphagov/di-doc-checking-narwhal-codeowners
+/deploy/scripts/src/txma @alphagov/digital-identity-performance-test @alphagov/digital-identity-txma

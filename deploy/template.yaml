@@ -30,6 +30,11 @@ Parameters:
     Description: "The name of the stack that defines the VPC to use"
     Default: "none"
 
+Mappings:
+  SPOT:
+    AWS:
+      AccountID: "429671060046"
+
 Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
@@ -129,29 +134,24 @@ Resources:
               - "kms:Decrypt"
               - "kms:GenerateDataKey"
             Resource:
-              # SSM Paramater '/perfTest/identity/spot/requestQueue/kmsArn' must contain ARN of KMS Key for SPoT Request Queue
-              - "{{resolve:ssm:/perfTest/identity/spot/requestQueue/kmsArn}}"
-          - Effect: "Allow"
-            Action:
-              - "kms:Decrypt"
-            Resource:
-              # SSM Paramater '/perfTest/identity/spot/outputQueue/kmsArn' must contain ARN of KMS Key for SPoT Output Queue
-              - "{{resolve:ssm:/perfTest/identity/spot/outputQueue/kmsArn}}"
+              Fn::Join:
+                - ":"
+                - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                  - !FindInMap [SPOT, AWS, AccountID]
+                  - "key/*"
           - Effect: "Allow"
             Action:
               - "sqs:SendMessage"
-            Resource:
-              # SSM Paramater '/perfTest/identity/spot/requestQueue/arn' must contain ARN of SPoT Request SQS Queue
-              - "{{resolve:ssm:/perfTest/identity/spot/requestQueue/arn}}"
-          - Effect: "Allow"
-            Action:
               - "sqs:ReceiveMessage"
               - "sqs:GetQueueAttributes"
               - "sqs:DeleteMessage"
               - "sqs:ChangeMessageVisibility"
             Resource:
-              # SSM Paramater '/perfTest/identity/spot/outputQueue/arn' must contain ARN of SPoT Output SQS Queue
-              - "{{resolve:ssm:/perfTest/identity/spot/outputQueue/arn}}"
+              Fn::Join:
+                - ":"
+                - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                  - !FindInMap [SPOT, AWS, AccountID]
+                  - "di-ipv-spot-app-*"
 
   VPCTestPolicy:
     Type: AWS::IAM::ManagedPolicy

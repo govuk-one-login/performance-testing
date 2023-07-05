@@ -12,7 +12,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 2,
       stages: [
-        { target: 1, duration: '5s' } // Ramps up to target load
+        { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'sendEvent'
     }

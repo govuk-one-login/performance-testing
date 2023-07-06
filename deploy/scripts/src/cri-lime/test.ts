@@ -514,7 +514,7 @@ export function passportScenario (): void {
     function () {
       const startTime = Date.now()
       res = http.get(env.ipvCoreStub + '/authorize?cri=' +
-        env.passportEnvName + '&rowNumber=197',
+        env.envName + '&rowNumber=197',
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B03_Passport_01_PassportCRIEntryFromStub' }

@@ -112,12 +112,11 @@ export function sendEvent (): void {
   sqs.sendMessage(env.sqs_queue, messageBody)
 }
 
-console.log('1 === debug === env.sqs_queue', env.sqs_queue)
-console.log('2 === debug === awsConfig', awsConfig)
-console.log('3 === debug === payload', eventData.payload)
-
 export function sendEventDebug (): void {
   const messageBody = eventData.payload.replace('UUID', uuidv4())
   sqs.sendMessage(env.sqs_queue, messageBody)
+  console.log('1 === debug === env.sqs_queue', env.sqs_queue)
+  console.log('2 === debug === awsConfig', awsConfig)
+  console.log('3 === debug === payload', eventData.payload)
   console.log('4 === debug === messageBody', messageBody)
 }

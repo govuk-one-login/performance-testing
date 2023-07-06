@@ -102,13 +102,11 @@ export function setup (): void {
 const env = {
   ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL,
   fraudUrl: __ENV.IDENTITY_FRAUD_URL,
-  fraudEnvName: __ENV.IDENTITY_FRAUD_ENV_NAME,
   drivingUrl: __ENV.IDENTITY_DRIVING_URL,
-  drivingEnvName: __ENV.IDENTITY_DRIVING_ENV_NAME,
   orchestratorCoreStub: __ENV.IDENTITY_ORCH_STUB_URL,
   ipvCoreURL: __ENV.IDENTITY_CORE_URL,
-  passportURL: __ENV.IDENTITY_PASSPORT_URL
-
+  passportURL: __ENV.IDENTITY_PASSPORT_URL,
+  envName: __ENV.ENVIRONMENT
 }
 
 const stubCreds = {
@@ -231,7 +229,7 @@ export function fraudScenario1 (): void {
       res = http.post(
         env.ipvCoreStub + '/edit-user',
         {
-          cri: env.fraudEnvName,
+          cri: `fraud-cri-${env.envName}`,
           rowNumber: '197',
           firstName: userDetails.firstName,
           surname: userDetails.lastName,
@@ -334,7 +332,7 @@ export function drivingScenario (): void {
     function () {
       const startTime = Date.now()
       res = http.get(env.ipvCoreStub + '/authorize?cri=' +
-        env.drivingEnvName + '&rowNumber=197',
+        env.envName + '&rowNumber=197',
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Driving_01_CoreStuB' }

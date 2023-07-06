@@ -77,7 +77,7 @@ export function addressScenario1 (): void {
     function () {
       const startTime = Date.now()
       res = http.get(
-        env.ipvCoreStub + `/credential-issuer?cri=${env.addressEnvName}`,
+        env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName,
         {
           headers: { Authorization: `Basic ${encodedCredentials}` },
           tags: { name: 'B02_Address_01_AddressCRIEntryFromStub' }

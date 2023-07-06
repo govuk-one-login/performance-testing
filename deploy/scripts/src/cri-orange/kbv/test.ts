@@ -70,7 +70,7 @@ export function kbvScenario1 (): void {
     function () {
       const startTime = Date.now()
       res = http.get(
-        env.ipvCoreStub + '/authorize?cri=kbv-cri-build&rowNumber=197',
+        env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197',
         {
           headers: { Authorization: `Basic ${encodedCredentials}` },
           tags: { name: 'B01_KBV_01_CoreStubEditUserContinue' }

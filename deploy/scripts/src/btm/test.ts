@@ -15,6 +15,63 @@ const profiles: ProfileList = {
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'sendEvent'
+    },
+    sendEventSmokeTest2: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 2,
+      stages: [
+        { target: 1, duration: '60s' } // Ramps up to target load
+      ],
+      exec: 'sendEventDebug'
+    }
+  },
+  load: {
+    sendEventLoadTest1: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 350,
+      stages: [
+        { target: 10, duration: '10m' } // Ramp up to 10 iterations per second in 10 minutes
+      ],
+      exec: 'sendEvent'
+    },
+    sendEventLoadTest2: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 700,
+      stages: [
+        { target: 20, duration: '10m' } // Ramp up to 20 iterations per second in 10 minutes
+      ],
+      exec: 'sendEvent'
+    },
+    sendEventLoadTest3: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1500,
+      stages: [
+        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+      ],
+      exec: 'sendEvent'
+    },
+    sendEventLoadTest4: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1500,
+      stages: [
+        { target: 30, duration: '60m' } // Ramp up to 30 iterations per second in 60 minutes
+      ],
+      exec: 'sendEvent'
     }
   }
 }
@@ -46,13 +103,21 @@ const awsConfig = new AWSConfig({
 
 const eventData = {
   payload: __ENV.DATA_BTM_SQS_PAYLOAD
-
 }
 
 const sqs = new SQSClient(awsConfig)
 
 export function sendEvent (): void {
   const messageBody = eventData.payload.replace('UUID', uuidv4())
-
   sqs.sendMessage(env.sqs_queue, messageBody)
+}
+
+console.log('1 === debug === env.sqs_queue', env.sqs_queue)
+console.log('2 === debug === awsConfig', awsConfig)
+console.log('3 === debug === payload', eventData.payload)
+
+export function sendEventDebug (): void {
+  const messageBody = eventData.payload.replace('UUID', uuidv4())
+  sqs.sendMessage(env.sqs_queue, messageBody)
+  console.log('4 === debug === messageBody', messageBody)
 }

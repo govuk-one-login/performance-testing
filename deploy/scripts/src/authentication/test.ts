@@ -533,6 +533,7 @@ export function signIn (): void {
 
       sleep(1)
 
+      let acceptNewTerms = false
       group('POST - /enter-authenticator-app-code', () => {
         const totp = new TOTP(credentials.authAppKey)
         const start = Date.now()
@@ -543,14 +544,32 @@ export function signIn (): void {
           }
         )
         const end = Date.now()
+
+        acceptNewTerms = (res.body as string).includes('terms of use update')
         check(res, {
           'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('User information')
+          'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
         })
           ? durations.add(end - start)
           : fail('Checks failed')
-        csrfToken = getCSRF(res)
       })
+
+      if (acceptNewTerms) {
+        group('POST - /updated-terms-and-conditions', () => {
+          const start = Date.now()
+          res = res.submitForm({
+            fields: { termsAndConditionsResult: 'accept' }
+          })
+          const end = Date.now()
+
+          check(res, {
+            'is status 200': r => r.status === 200,
+            'verify page content': r => (r.body as string).includes('User information')
+          })
+            ? durations.add(end - start)
+            : fail('Checks failed')
+        })
+      }
       break
     }
     case 'SMS': {

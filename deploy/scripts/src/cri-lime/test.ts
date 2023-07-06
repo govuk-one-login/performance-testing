@@ -102,13 +102,11 @@ export function setup (): void {
 const env = {
   ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL,
   fraudUrl: __ENV.IDENTITY_FRAUD_URL,
-  fraudEnvName: __ENV.IDENTITY_FRAUD_ENV_NAME,
   drivingUrl: __ENV.IDENTITY_DRIVING_URL,
-  drivingEnvName: __ENV.IDENTITY_DRIVING_ENV_NAME,
   orchestratorCoreStub: __ENV.IDENTITY_ORCH_STUB_URL,
   ipvCoreURL: __ENV.IDENTITY_CORE_URL,
-  passportURL: __ENV.IDENTITY_PASSPORT_URL
-
+  passportURL: __ENV.IDENTITY_PASSPORT_URL,
+  envName: __ENV.ENVIRONMENT
 }
 
 const stubCreds = {
@@ -231,7 +229,7 @@ export function fraudScenario1 (): void {
       res = http.post(
         env.ipvCoreStub + '/edit-user',
         {
-          cri: env.fraudEnvName,
+          cri: `fraud-cri-${env.envName}`,
           rowNumber: '197',
           firstName: userDetails.firstName,
           surname: userDetails.lastName,
@@ -334,7 +332,7 @@ export function drivingScenario (): void {
     function () {
       const startTime = Date.now()
       res = http.get(env.ipvCoreStub + '/authorize?cri=' +
-        env.drivingEnvName + '&rowNumber=197',
+        env.envName + '&rowNumber=197',
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Driving_01_CoreStuB' }
@@ -508,51 +506,25 @@ export function drivingScenario (): void {
 export function passportScenario (): void {
   let res: Response
   let csrfToken: string
-  const user1Passport = csvDataPassport[exec.scenario.iterationInTest % csvDataPassport.length]
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  const userPassport = csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)]
 
-  group('B03_Passport_01_OrchestratorStub GET',
+  group('B03_Passport_01_PassportCRIEntryFromStub GET',
     function () {
       const startTime = Date.now()
-      res = http.get(env.orchestratorCoreStub)
-      const endTime = Date.now()
-
-      check(res, {
-        'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('Orchestrator Stub')
-
+      res = http.get(env.ipvCoreStub + '/authorize?cri=' +
+        env.envName + '&rowNumber=197',
+      {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B03_Passport_01_PassportCRIEntryFromStub' }
       })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
-    })
-
-  sleep(Math.random() * 3)
-
-  group('B03_Passport_02_debugRoute GET',
-    function () {
-      const startTime = Date.now()
-      res = http.get(env.orchestratorCoreStub + '/authorize?journeyType=debug')
-      const endTime = Date.now()
-
-      check(res, {
-        'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('ukPassport')
-
-      })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Respone Validation Failed')
-    })
-
-  sleep(Math.random() * 3)
-
-  group('B03_Passport_03_ukPassport GET',
-    function () {
-      const startTime = Date.now()
-      res = http.get(env.ipvCoreURL + '/ipv/journey/cri/build-oauth-request/ukPassport')
       const endTime = Date.now()
 
       check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK passport')
+
       })
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
@@ -561,29 +533,49 @@ export function passportScenario (): void {
 
   sleep(Math.random() * 3)
 
-  group('B03_Passport_04_passportDetails POST',
+  group('B03_Passport_02_EnterPassportDetailsAndContinue POST',
     function () {
-      const startTime = Date.now()
-      res = http.post(env.passportURL + '/passport/details',
+      const startTime1 = Date.now()
+      res = http.post(env.passportURL + '/details',
         {
-          passportNumber: user1Passport.passportNumber,
-          surname: user1Passport.surname,
-          firstName: user1Passport.firstName,
-          middleNames: user1Passport.middleName,
-          'dateOfBirth-day': user1Passport.birthday,
-          'dateOfBirth-month': user1Passport.birthmonth,
-          'dateOfBirth-year': user1Passport.birthyear,
-          'expiryDate-day': user1Passport.expiryDay,
-          'expiryDate-month': user1Passport.expiryMonth,
-          'expiryDate-year': user1Passport.expiryYear,
+          passportNumber: userPassport.passportNumber,
+          surname: userPassport.surname,
+          firstName: userPassport.firstName,
+          middleNames: userPassport.middleName,
+          'dateOfBirth-day': userPassport.birthday,
+          'dateOfBirth-month': userPassport.birthmonth,
+          'dateOfBirth-year': userPassport.birthyear,
+          'expiryDate-day': userPassport.expiryDay,
+          'expiryDate-month': userPassport.expiryMonth,
+          'expiryDate-year': userPassport.expiryYear,
           'x-csrf-token': csrfToken
+        },
+        {
+          redirects: 2,
+          tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_01_PassCRICall' }
         })
-      const endTime = Date.now()
+      const endTime1 = Date.now()
+
+      check(res, {
+        'is status 302': (r) => r.status === 302
+      })
+        ? transactionDuration.add(endTime1 - startTime1)
+        : fail('Response Validation Failed')
+
+      const startTime2 = Date.now()
+      res = http.get(res.headers.Location,
+        {
+          headers: { Authorization: `Basic ${encodedCredentials}` },
+          tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_02_CoreStubCall' }
+        }
+      )
+      const endTime2 = Date.now()
+
       check(res, {
         'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('GPG45 Score')
+        'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
       })
-        ? transactionDuration.add(endTime - startTime)
+        ? transactionDuration.add(endTime2 - startTime2)
         : fail('Response Validation Failed')
     }
   )

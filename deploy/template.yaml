@@ -244,6 +244,9 @@ Resources:
           - Name: SCENARIO
             Type: PLAINTEXT
             Value: all
+          - Name: ENVIRONMENT
+            Type: PLAINTEXT
+            Value: build
       VpcConfig:
         SecurityGroupIds:
           - !GetAtt TestContainerSecurityGroup.GroupId
@@ -277,14 +280,11 @@ Resources:
               ACCOUNT_SIGNIN_URL: "/perfTest/account/accounts/signInUrl"
               DATA_BTM_SQS: "/perfTest/data/btm/consumerOutputSQS"
               DATA_TXMA_SQS: "/perfTest/data/txma/auditSQS"
-              IDENTITY_ADDRESS_ENV_NAME: "/perfTest/identity/orange/addressEnvName"
               IDENTITY_ADDRESS_URL: "/perfTest/identity/orange/addressUrl"
               IDENTITY_CORE_STUB_URL: "/perfTest/identity/coreStubUrl"
               IDENTITY_CORE_URL: "/perfTest/identity/coreUrl"
-              IDENTITY_DRIVING_ENDPOINT: "/perfTest/identity/lime/drivingEndpoint"
               IDENTITY_DRIVING_URL: "/perfTest/identity/lime/drivingUrl"
               IDENTITY_FRAUD_URL: "/perfTest/identity/lime/fraudUrl"
-              IDENTITY_KBV_ENV_NAME: "/perfTest/identity/orange/kbvEnvName"
               IDENTITY_KBV_URL: "/perfTest/identity/orange/kbvUrl"
               IDENTITY_KBV_ANSWERS: "/perfTest/identity/orange/kbvAnswers"
               IDENTITY_KIWI_URL: "/perfTest/identity/kiwi/url"

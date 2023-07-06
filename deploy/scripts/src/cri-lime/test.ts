@@ -101,13 +101,12 @@ export function setup (): void {
 
 const env = {
   ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL,
-  fraudEndPoint: __ENV.IDENTITY_FRAUD_URL,
+  fraudUrl: __ENV.IDENTITY_FRAUD_URL,
   drivingUrl: __ENV.IDENTITY_DRIVING_URL,
-  drivingEndpoint: __ENV.IDENTITY_DRIVING_ENDPOINT,
   orchestratorCoreStub: __ENV.IDENTITY_ORCH_STUB_URL,
   ipvCoreURL: __ENV.IDENTITY_CORE_URL,
-  passportURL: __ENV.IDENTITY_PASSPORT_URL
-
+  passportURL: __ENV.IDENTITY_PASSPORT_URL,
+  envName: __ENV.ENVIRONMENT
 }
 
 const stubCreds = {
@@ -230,7 +229,7 @@ export function fraudScenario1 (): void {
       res = http.post(
         env.ipvCoreStub + '/edit-user',
         {
-          cri: 'fraud-cri-build',
+          cri: `fraud-cri-${env.envName}`,
           rowNumber: '197',
           firstName: userDetails.firstName,
           surname: userDetails.lastName,
@@ -283,7 +282,7 @@ export function fraudScenario1 (): void {
   group('B01_Fraud_02_ContinueToCheckFraudDetails POST', function () {
     const startTime1 = Date.now()
     res = http.post(
-      env.fraudEndPoint + '/check',
+      env.fraudUrl + '/check',
       {
         continue: '',
         'x-csrf-token': csrfToken
@@ -326,7 +325,6 @@ export function drivingScenario (): void {
   const optionLicence: drivingLicenceIssuer = (Math.random() <= 0.5) ? 'DVA' : 'DVLA'
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
-
   const user1DVLA = csvData1[exec.scenario.iterationInTest % csvData1.length]
   const user1DVA = csvData2[exec.scenario.iterationInTest % csvData2.length]
 
@@ -334,7 +332,7 @@ export function drivingScenario (): void {
     function () {
       const startTime = Date.now()
       res = http.get(env.ipvCoreStub + '/authorize?cri=' +
-        env.drivingEndpoint + '&rowNumber=197',
+        env.envName + '&rowNumber=197',
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Driving_01_CoreStuB' }
@@ -373,13 +371,11 @@ export function drivingScenario (): void {
         csrfToken = getCSRF(res)
       })
 
-      sleep(1)
+      sleep(Math.random() * 3)
 
       group('B02_Driving_03_DVLA_EditUser POST', function () {
         const startTime = Date.now()
-
         res = http.post(env.drivingUrl + '/details', {
-
           surname: user1DVLA.surname,
           firstName: user1DVLA.firstName,
           middleNames: user1DVLA.middleName,
@@ -399,7 +395,6 @@ export function drivingScenario (): void {
           consentCheckbox: 'true',
           continue: '',
           'x-csrf-token': csrfToken
-
         },
         {
           redirects: 2,
@@ -452,12 +447,11 @@ export function drivingScenario (): void {
         csrfToken = getCSRF(res)
       })
 
-      sleep(1)
+      sleep(Math.random() * 3)
 
       group('B02_Driving_03_DVA_EditUser POST', function () {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/details', {
-
           surname: user1DVA.surname,
           firstName: user1DVA.firstName,
           middleNames: user1DVA.middleName,
@@ -476,15 +470,13 @@ export function drivingScenario (): void {
           consentDVACheckbox: 'true',
           continue: '',
           'x-csrf-token': csrfToken
-
         },
         {
           redirects: 2,
           tags: { name: '02_Driving_03_DVA_EditUser_01_CRICall' }
-
         })
-
         const endTime = Date.now()
+
         check(res, {
           'is status 302': (r) => r.status === 302
         })
@@ -514,14 +506,12 @@ export function drivingScenario (): void {
 export function passportScenario (): void {
   let res: Response
   let csrfToken: string
-
   const user1Passport = csvDataPassport[exec.scenario.iterationInTest % csvDataPassport.length]
 
   group('B03_Passport_01_OrchestratorStub GET',
     function () {
       const startTime = Date.now()
       res = http.get(env.orchestratorCoreStub)
-
       const endTime = Date.now()
 
       check(res, {

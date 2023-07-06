@@ -4,8 +4,7 @@ export const env = {
   ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL,
   kbvEndPoint: __ENV.IDENTITY_KBV_URL,
   addressEndPoint: __ENV.IDENTITY_ADDRESS_URL,
-  kbvEnvName: __ENV.IDENTITY_KBV_ENV_NAME,
-  addressEnvName: __ENV.IDENTITY_ADDRESS_ENV_NAME
+  envName: __ENV.ENVIRONMENT
 }
 
 export const stubCreds = {

@@ -14,4 +14,4 @@
 /deploy/scripts/src/ipv-core @alphagov/digital-identity-performance-test @alphagov/digital-identity-ipv
 /deploy/scripts/src/mobile @alphagov/digital-identity-performance-test @alphagov/di-doc-checking-narwhal-codeowners
 /deploy/scripts/src/txma @alphagov/digital-identity-performance-test @alphagov/digital-identity-txma
-/deploy/scripts/src/spot @alphagov/digital-identity-performance-test @alphagov/di-ipv-spot-reviewers
+/deploy/scripts/src/spot @alphagov/digital-identity-performance-test @alphagov/di-ipv-spot-team

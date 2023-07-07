@@ -22,15 +22,32 @@ const profiles: ProfileList = {
       exec: 'addressScenario1'
     }
   },
-  load: {
+  lowVolumeTest: {
     addressScenario1: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 900,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'addressScenario1'
+    }
+  },
+  stress: {
+    addressScenario1: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1935,
+      stages: [
+        { target: 65, duration: '15m' }, // Ramp up to 65 iterations per second in 15 minutes
+        { target: 65, duration: '30m' }, // Maintain steady state at 65 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'addressScenario1'
     }
@@ -129,7 +146,7 @@ export function addressScenario1 (): void {
       }
     )
     const endTime = Date.now()
-    isStatusCode200(res) && validatePageContent(res, 'Check your addresss')
+    isStatusCode200(res) && validatePageContent(res, 'Check your address')
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
 

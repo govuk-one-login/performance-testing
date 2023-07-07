@@ -2,9 +2,9 @@ import { sleep, group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { Trend } from 'k6/metrics'
-import { selectProfile, type ProfileList, describeProfile } from '../../common/utils/config/load-profiles'
-import { env, encodedCredentials } from '../utils/config'
-import { isStatusCode200, isStatusCode302, validatePageContent } from '../utils/assertions'
+import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { env, encodedCredentials } from './utils/config'
+import { isStatusCode200, isStatusCode302, validatePageContent } from './utils/assertions'
 
 const profiles: ProfileList = {
   smoke: {

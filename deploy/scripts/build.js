@@ -5,7 +5,7 @@ const outbase = './src'
 const outdir = './dist'
 
 build({
-  entryPoints: glob.sync(['src/*/*.ts', 'src/*/*/*.ts']),
+  entryPoints: glob.sync('src/*/*.ts'),
   outbase,
   outdir,
   target: 'es6',

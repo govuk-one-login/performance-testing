@@ -4,9 +4,9 @@ import http, { type Response } from 'k6/http'
 import { Trend } from 'k6/metrics'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
-import { selectProfile, type ProfileList, describeProfile } from '../../common/utils/config/load-profiles'
-import { env, encodedCredentials } from '../utils/config'
-import { isStatusCode200, isStatusCode302, validatePageContent } from '../utils/assertions'
+import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { env, encodedCredentials } from './utils/config'
+import { isStatusCode200, isStatusCode302, validatePageContent } from './utils/assertions'
 
 const profiles: ProfileList = {
   smoke: {

@@ -252,6 +252,10 @@ export function CIC (): void {
 export function FaceToFace (): void {
   let res: Response
   let csrfToken: string
+  let requestValue: string
+  let clientId: string
+  let accessToken: string
+  let codeUrl: string
   const iteration = execution.scenario.iterationInInstance
   const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL']
   const path = paths[(iteration) % paths.length]
@@ -260,10 +264,31 @@ export function FaceToFace (): void {
   const expiryMonth = (expiry.getMonth() + 1).toString()
   const expiryYear = expiry.getFullYear().toString()
 
-  group('B02_FaceToFace_01_LaunchLandingPage GET', function () {
+  group('B02_FaceToFace_01_IPVStubCall POST', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL, {
-      tags: { name: 'B02_FaceToFace_01_LaunchLandingPage' }
+    res = http.post(env.envIPVStub + '/start',
+      JSON.stringify({
+        yotiMockID: '0000'
+      }),
+      {
+        tags: { name: 'B02_FaceToFace_01_IPVStubCall' }
+      })
+    const endTime = Date.now()
+    check(res, {
+      'is status 201': (r) => r.status === 201,
+      'verify page content': (r) => (r.body as string).includes(b64encode('{"alg":"RSA', 'rawstd'))
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    requestValue = getRequestCode(res)
+    clientId = getClientID(res)
+  })
+
+  group('B02_FaceToFace_02_Authorize GET', function () {
+    const startTime = Date.now()
+    const endpoint = `/oauth2/authorize?request=${requestValue}&response_type=code&client_id=${clientId}`
+    res = http.get(env.envURL + endpoint, {
+      tags: { name: 'B02_FaceToFace_02_Authorize' }
     })
     const endTime = Date.now()
 
@@ -279,21 +304,21 @@ export function FaceToFace (): void {
 
   sleep(Math.random() * 3)
 
-  group('B02_FaceToFace_02_Continue POST', function () {
+  group('B02_FaceToFace_03_Continue POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/landingPage', {
       landingPageContinue: '',
       'x-csrf-token': csrfToken
     },
     {
-      tags: { name: 'B02_FaceToFace_02_Continue' }
+      tags: { name: 'B02_FaceToFace_03_Continue' }
     })
     const endTime = Date.now()
 
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Choose a photo ID you can take to a Post Office')
+        (r.body as string).includes('Choose which photo ID you can take to a Post Office')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -304,7 +329,7 @@ export function FaceToFace (): void {
 
   switch (path) {
     case 'UKPassport':
-      group('B02_FaceToFace_03_UKPassport_ChoosePhotoId POST', function () {
+      group('B02_FaceToFace_04_UKPassport_ChoosePhotoId POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/photoIdSelection', {
           photoIdChoice: 'ukPassport',
@@ -312,14 +337,14 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_03_UKPassport_ChoosePhotoId' }
+          tags: { name: 'B02_FaceToFace_04_UKPassport_ChoosePhotoId' }
         })
         const endTime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('When does your UK passport expire')
+            (r.body as string).includes('When does your passport expire?')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -328,7 +353,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_04_UKPassport_PassportDetails POST', function () {
+      group('B02_FaceToFace_05_UKPassport_PassportDetails POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/ukPassportDetails', {
           'ukPassportExpiryDate-day': expiryDay,
@@ -337,7 +362,7 @@ export function FaceToFace (): void {
           continue: '',
           'x-csrf-token': csrfToken
         }, {
-          tags: { name: 'B02_FaceToFace_04_UKPassport_PassportDetails' }
+          tags: { name: 'B02_FaceToFace_05_UKPassport_PassportDetails' }
         })
         const endTime = Date.now()
 
@@ -354,7 +379,7 @@ export function FaceToFace (): void {
       sleep(Math.random() * 3)
       break
     case 'NationalIDEEA':
-      group('B02_FaceToFace_03_NationalIDEEA_ChoosePhotoId POST', function () {
+      group('B02_FaceToFace_04_NationalIDEEA_ChoosePhotoId POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/photoIdSelection', {
           photoIdChoice: 'eeaIdentityCard',
@@ -362,14 +387,14 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_03_NationalIDEEA_ChoosePhotoId' }
+          tags: { name: 'B02_FaceToFace_04_NationalIDEEA_ChoosePhotoId' }
         })
         const endTime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('When does your National Identity card from an EEA country expire?')
+            (r.body as string).includes('When does your national identity card expire?')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -378,7 +403,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_04_NationalIDEEA_Details POST', function () {
+      group('B02_FaceToFace_05_NationalIDEEA_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/eeaIdentityCardDetails', {
           'eeaIdCardExpiryDate-day': expiryDay,
@@ -387,13 +412,13 @@ export function FaceToFace (): void {
           continue: '',
           'x-csrf-token': csrfToken
         }, {
-          tags: { name: 'B02_FaceToFace_04_NationalIDEEA_Details' }
+          tags: { name: 'B02_FaceToFace_05_NationalIDEEA_Details' }
         })
         const endTime = Date.now()
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('Does your identity card have your current address on it')
+            (r.body as string).includes('Does your national identity card have your current address on it?')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -402,21 +427,21 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_05_NationalIDEEA_CurrentAddress POST', function () {
+      group('B02_FaceToFace_06_NationalIDEEA_CurrentAddress POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/eeaIdCardAddressCheck', {
           eeaIdCardAddressCheck: 'Yes, it has my current address on it',
           continue: '',
           'x-csrf-token': csrfToken
         }, {
-          tags: { name: 'B02_FaceToFace_05_NationalIDEEA_CurrentAddress' }
+          tags: { name: 'B02_FaceToFace_06_NationalIDEEA_CurrentAddress' }
         })
         const endTime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('Select which country your EEA national identity card is from')
+            (r.body as string).includes('Select which country your national identity card is from')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -425,14 +450,14 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_06_NationalIDEEA_WhichCountry POST', function () {
+      group('B02_FaceToFace_07_NationalIDEEA_WhichCountry POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/eeaIdentityCardCountrySelector', {
           eeaIdentityCardCountrySelector: 'Romania',
           continue: '',
           'x-csrf-token': csrfToken
         }, {
-          tags: { name: 'B02_FaceToFace_06_NationalIDEEA_WhichCountry' } // pragma: allowlist secret`
+          tags: { name: 'B02_FaceToFace_07_NationalIDEEA_WhichCountry' } // pragma: allowlist secret`
         })
         const endTime = Date.now()
 
@@ -450,21 +475,21 @@ export function FaceToFace (): void {
 
       break
     case 'EU-DL':
-      group('B02_FaceToFace_03_EUDL_ChoosePhotoId POST', function () {
+      group('B02_FaceToFace_04_EUDL_ChoosePhotoId POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/photoIdSelection', {
           photoIdChoice: 'euPhotocardDl',
           continue: '',
           'x-csrf-token': csrfToken
         }, {
-          tags: { name: 'B02_FaceToFace_03_EUDL_ChoosePhotoId' }
+          tags: { name: 'B02_FaceToFace_04_EUDL_ChoosePhotoId' }
         })
         const endTime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('When does your EU photocard driving licence expire?')
+            (r.body as string).includes('When does your driving licence expire?')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -473,7 +498,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_04_EUDL_Details POST', function () {
+      group('B02_FaceToFace_05_EUDL_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/euPhotocardDlDetails', {
           'euPhotocardDlExpiryDate-day': expiryDay,
@@ -483,7 +508,7 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_04_EUDL_Details' }
+          tags: { name: 'B02_FaceToFace_05_EUDL_Details' }
         })
         const endTime = Date.now()
 
@@ -499,7 +524,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_05_EUDL_CurrentAddress POST', function () {
+      group('B02_FaceToFace_06_EUDL_CurrentAddress POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/euDrivingLicenceAddressCheck', {
           euDrivingLicenceAddressCheck: 'Yes, it has my current address on it',
@@ -507,13 +532,13 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_05_EUDL_CurrentAddress' }
+          tags: { name: 'B02_FaceToFace_06_EUDL_CurrentAddress' }
         })
         const endTime = Date.now()
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('Select which country your EU photocard driving licence is from')
+            (r.body as string).includes('Select which country driving licence is from')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -522,7 +547,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_06_EUDL_WhichCountry POST', function () {
+      group('B02_FaceToFace_07_EUDL_WhichCountry POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/euDrivingLicenceCountrySelector', {
           euDrivingLicenceCountrySelector: 'Romania',
@@ -530,7 +555,7 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_06_EUDL_WhichCountry' }
+          tags: { name: 'B02_FaceToFace_07_EUDL_WhichCountry' }
         })
         const endTime = Date.now()
 
@@ -547,7 +572,7 @@ export function FaceToFace (): void {
       sleep(Math.random() * 3)
       break
     case 'Non-UKPassport':
-      group('B02_FaceToFace_03_NonUKPassport_ChoosePhotoId POST', function () {
+      group('B02_FaceToFace_04_NonUKPassport_ChoosePhotoId POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/photoIdSelection', {
           photoIdChoice: 'nonUkPassport',
@@ -555,14 +580,14 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_03_NonUKPassport_ChoosePhotoId' }
+          tags: { name: 'B02_FaceToFace_04_NonUKPassport_ChoosePhotoId' }
         })
         const endTime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('When does your non-UK biometric passport expire?')
+            (r.body as string).includes('When does your passport expire?')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -571,7 +596,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_04_NonUKPassport_Details POST', function () {
+      group('B02_FaceToFace_05_NonUKPassport_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/nonUKPassportDetails', {
           'nonUKPassportExpiryDate-day': expiryDay,
@@ -581,7 +606,7 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_04_NonUKPassport_Details' }
+          tags: { name: 'B02_FaceToFace_05_NonUKPassport_Details' }
         })
         const endTime = Date.now()
 
@@ -597,7 +622,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_05_NonUKPassport_WhichCountry POST', function () {
+      group('B02_FaceToFace_06_NonUKPassport_WhichCountry POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/nonUkPassportcountrySelector', {
           nonUkPassportCountrySelector: 'Romania',
@@ -605,7 +630,7 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_05_NonUKPassport_WhichCountry' } // pragma: allowlist secret`
+          tags: { name: 'B02_FaceToFace_06_NonUKPassport_WhichCountry' } // pragma: allowlist secret`
         })
         const endTime = Date.now()
         check(res, {
@@ -621,7 +646,7 @@ export function FaceToFace (): void {
       sleep(Math.random() * 3)
       break
     case 'BRP':
-      group('B02_FaceToFace_03_BRP_ChoosePhotoId POST', function () {
+      group('B02_FaceToFace_04_BRP_ChoosePhotoId POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/photoIdSelection', {
           photoIdChoice: 'brp',
@@ -629,7 +654,7 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_03_BRP_ChoosePhotoId' }
+          tags: { name: 'B02_FaceToFace_04_BRP_ChoosePhotoId' }
         })
         const endTime = Date.now()
 
@@ -645,7 +670,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_04_BRP_Details POST', function () {
+      group('B02_FaceToFace_05_BRP_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/brpDetails', {
           'brpExpiryDate-day': expiryDay,
@@ -655,7 +680,7 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_04_BRP_Details' }
+          tags: { name: 'B02_FaceToFace_05_BRP_Details' }
         })
         const endTime = Date.now()
 
@@ -673,7 +698,7 @@ export function FaceToFace (): void {
 
       break
     case 'UKDL':
-      group('B02_FaceToFace_03_UKDL_ChoosePhotoId POST', function () {
+      group('B02_FaceToFace_04_UKDL_ChoosePhotoId POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/photoIdSelection', {
           photoIdChoice: 'ukPhotocardDl',
@@ -681,14 +706,14 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_03_UKDL_ChoosePhotoId' }
+          tags: { name: 'B02_FaceToFace_04_UKDL_ChoosePhotoId' }
         })
         const endTime = Date.now()
 
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('When does your UK photocard driving licence expire?')
+            (r.body as string).includes('When does your driving licence expire?')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -697,7 +722,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_04_UKDL_Details POST', function () {
+      group('B02_FaceToFace_05_UKDL_Details POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/ukPhotocardDlDetails', {
           'ukPhotocardDlExpiryDate-day': expiryDay,
@@ -707,28 +732,28 @@ export function FaceToFace (): void {
           'x-csrf-token': csrfToken
         },
         {
-          tags: { name: 'B02_FaceToFace_04_UKDL_Details' }
+          tags: { name: 'B02_FaceToFace_05_UKDL_Details' }
 
         })
         const endTime = Date.now()
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('Is the address on your driving licence the same as your current address?')
+            (r.body as string).includes('Does your driving licence have your current address on it?')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
         csrfToken = getCSRF(res)
       })
 
-      group('B02_FaceToFace_05_UKDL_CurrentAddress POST', function () {
+      group('B02_FaceToFace_06_UKDL_CurrentAddress POST', function () {
         const startTime = Date.now()
         res = http.post(env.envURL + '/ukDlAddressCheck', {
           ukDlAddressCheck: 'Yes',
           continue: '',
           'x-csrf-token': csrfToken
         }, {
-          tags: { name: 'B02_FaceToFace_05_UKDL_CurrentAddress' }
+          tags: { name: 'B02_FaceToFace_06_UKDL_CurrentAddress' }
         })
         const endTime = Date.now()
 
@@ -749,7 +774,7 @@ export function FaceToFace (): void {
       break
   }
 
-  group('B02_FaceToFace_07_FindPostOffice POST', function () {
+  group('B02_FaceToFace_08_FindPostOffice POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/findBranch', {
       postcode: 'SW1A 2AA',
@@ -757,7 +782,7 @@ export function FaceToFace (): void {
       'x-csrf-token': csrfToken
     },
     {
-      tags: { name: 'B02_FaceToFace_07_FindPostOffice' }
+      tags: { name: 'B02_FaceToFace_08_FindPostOffice' }
     })
     const endTime = Date.now()
 
@@ -773,7 +798,7 @@ export function FaceToFace (): void {
 
   sleep(Math.random() * 3)
 
-  group('B02_FaceToFace_08_ChoosePostOffice POST', function () {
+  group('B02_FaceToFace_09_ChoosePostOffice POST', function () {
     const startTime = Date.now()
     res = http.post(env.envURL + '/locations', {
       branches: '1',
@@ -781,7 +806,7 @@ export function FaceToFace (): void {
       'x-csrf-token': csrfToken
     },
     {
-      tags: { name: 'B02_FaceToFace_08_ChoosePostOffice' }
+      tags: { name: 'B02_FaceToFace_09_ChoosePostOffice' }
     })
     const endTime = Date.now()
 
@@ -789,6 +814,74 @@ export function FaceToFace (): void {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
         (r.body as string).includes('Check your details')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B02_FaceToFace_10_CheckDetails POST', function () {
+    const startTime = Date.now()
+    res = http.post(env.envURL + '/checkDetails', {
+      continue: '',
+      'x-csrf-token': csrfToken
+    }, {
+      tags: { name: 'B02_FaceToFace_10_CheckDetails' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'verify url body': (r) =>
+        (r.url).includes(clientId)
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+    codeUrl = getCodeFromUrl(res.url)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B02_FaceToFace_11_SendAuthorizationCode POST', function () {
+    const startTime = Date.now()
+    res = http.post(env.envTarget + '/token', {
+      grant_type: 'authorization_code',
+      code: codeUrl,
+      redirect_uri: env.envIPVStub + '/redirect'
+    }, {
+      tags: { name: 'B02_FaceToFace_11_SendAuthorizationCode' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify response body': (r) => (r.body as string).includes('access_token')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+    accessToken = getAccessToken(res)
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B02_FaceToFace_12_SendBearerToken POST', function () {
+    const startTime = Date.now()
+    const authHeader = `Bearer ${accessToken}`
+    const options = {
+      headers: {
+        Authorization: authHeader
+      },
+      tags: { name: 'B02_FaceToFace_12_SendBearerToken' }
+    }
+    res = http.post(env.envTarget + '/userinfo', {}, options)
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 202': (r) => r.status === 202,
+      'verify response body': (r) => (r.body as string).includes('sub')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')

@@ -281,6 +281,9 @@ Resources:
           - Name: SCENARIO
             Type: PLAINTEXT
             Value: all
+          - Name: ENVIRONMENT
+            Type: PLAINTEXT
+            Value: build
       VpcConfig:
         SecurityGroupIds:
           - !GetAtt TestContainerSecurityGroup.GroupId
@@ -314,14 +317,11 @@ Resources:
               ACCOUNT_SIGNIN_URL: "/perfTest/account/accounts/signInUrl"
               DATA_BTM_SQS: "/perfTest/data/btm/consumerOutputSQS"
               DATA_TXMA_SQS: "/perfTest/data/txma/auditSQS"
-              IDENTITY_ADDRESS_ENV_NAME: "/perfTest/identity/orange/addressEnvName"
               IDENTITY_ADDRESS_URL: "/perfTest/identity/orange/addressUrl"
               IDENTITY_CORE_STUB_URL: "/perfTest/identity/coreStubUrl"
               IDENTITY_CORE_URL: "/perfTest/identity/coreUrl"
-              IDENTITY_DRIVING_ENDPOINT: "/perfTest/identity/lime/drivingEndpoint"
               IDENTITY_DRIVING_URL: "/perfTest/identity/lime/drivingUrl"
               IDENTITY_FRAUD_URL: "/perfTest/identity/lime/fraudUrl"
-              IDENTITY_KBV_ENV_NAME: "/perfTest/identity/orange/kbvEnvName"
               IDENTITY_KBV_URL: "/perfTest/identity/orange/kbvUrl"
               IDENTITY_KBV_ANSWERS: "/perfTest/identity/orange/kbvAnswers"
               IDENTITY_KIWI_URL: "/perfTest/identity/kiwi/url"
@@ -349,19 +349,19 @@ Resources:
                 - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out statsd --out json=$JSON_RESULTS
             post_build:
               commands:
+                - echo "Uploading test results to s3"
                 - S3_LOCATION=s3://${S3_BUCKET}/${TEST_SCRIPT%.*}/$(date +%F/%T)
                 - aws s3 cp $JSON_RESULTS ${S3_LOCATION}/$JSON_RESULTS
+                - echo "Shutting down OpenTelemetry collector"
                 - sleep 120
                 - OTEL_PID=$(pgrep /otel/otelcol-contrib)
                 - kill $OTEL_PID
                 - TIMEOUT=0
                 - while kill -0 $OTEL_PID && (( TIMEOUT < 300 )); do sleep 1; (( TIMEOUT++ )); done
-                - cat otel.log
-                - ifconfig lo
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID
-                - echo Performance test complete
+                - echo "Performance test complete"
 
       Tags:
         - Key: "Name"

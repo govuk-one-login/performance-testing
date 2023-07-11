@@ -51,7 +51,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 900,
       stages: [
-        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
         { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
@@ -64,7 +64,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 150,
       stages: [
-        { target: 5, duration: '2m' }, // Ramp up to 5 iterations per second in 2 minutes
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
         { target: 5, duration: '15m' }, // Maintain steady state at 5 iterations per second for 15 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
@@ -77,7 +77,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 150,
       stages: [
-        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
         { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],

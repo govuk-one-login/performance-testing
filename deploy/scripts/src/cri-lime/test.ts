@@ -42,19 +42,18 @@ const profiles: ProfileList = {
       ],
       exec: 'passportScenario'
     }
-
   },
-  load: {
+  lowVolumeTest: {
     fraudScenario1: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 350,
+      maxVUs: 900,
       stages: [
-        { target: 10, duration: '30m' }, // Ramp up to 10 iterations per second in 10 minutes
-        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e 10 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'fraudScenario1'
     },
@@ -63,13 +62,55 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 150,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 5, duration: '2m' }, // Ramp up to 5 iterations per second in 2 minutes
+        { target: 5, duration: '15m' }, // Maintain steady state at 5 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'drivingScenario'
     },
-
+    passportScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 150,
+      stages: [
+        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'passportScenario'
+    }
+  },
+  stress: {
+    fraudScenario1: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1878,
+      stages: [
+        { target: 63, duration: '15m' }, // Ramp up to 63 iterations per second in 15 minutes
+        { target: 63, duration: '30m' }, // Maintain steady state at 63 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'fraudScenario1'
+    },
+    drivingScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 411,
+      stages: [
+        { target: 14, duration: '15m' }, // Ramp up to 14 iterations per second in 15 minutes
+        { target: 14, duration: '30m' }, // Maintain steady state at 14 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'drivingScenario'
+    },
     passportScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -77,7 +118,9 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1500,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 55, duration: '15m' }, // Ramp up to 55 iterations per second in 15 minutes
+        { target: 55, duration: '30m' }, // Maintain steady state at 55 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'passportScenario'
     }

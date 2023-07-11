@@ -27,7 +27,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '10s' } // Ramps up to target load
+        { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'drivingScenario'
     },
@@ -38,7 +38,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '10s' } // Ramps up to target load
+        { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'passportScenario'
     }
@@ -103,8 +103,6 @@ const env = {
   ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL,
   fraudUrl: __ENV.IDENTITY_FRAUD_URL,
   drivingUrl: __ENV.IDENTITY_DRIVING_URL,
-  orchestratorCoreStub: __ENV.IDENTITY_ORCH_STUB_URL,
-  ipvCoreURL: __ENV.IDENTITY_CORE_URL,
   passportURL: __ENV.IDENTITY_PASSPORT_URL,
   envName: __ENV.ENVIRONMENT
 }
@@ -289,7 +287,7 @@ export function fraudScenario1 (): void {
       },
       {
         redirects: 1,
-        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails1' }
+        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_01_FraudCall' }
       }
     )
     const endTime1 = Date.now()
@@ -304,7 +302,7 @@ export function fraudScenario1 (): void {
     res = http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails2' }
+        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_01_StubCall' }
       }
     )
     const endTime2 = Date.now()
@@ -328,14 +326,14 @@ export function drivingScenario (): void {
   const user1DVLA = csvData1[exec.scenario.iterationInTest % csvData1.length]
   const user1DVA = csvData2[exec.scenario.iterationInTest % csvData2.length]
 
-  group('B02_Driving_01_CoreStub GET',
+  group('B02_Driving_01_DLEntryFromCoreStub GET',
     function () {
       const startTime = Date.now()
-      res = http.get(env.ipvCoreStub + '/authorize?cri=' +
+      res = http.get(env.ipvCoreStub + '/authorize?cri=driving-licence-cri-' +
         env.envName + '&rowNumber=197',
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B02_Driving_01_CoreStuB' }
+        tags: { name: 'B02_Driving_01_DLEntryFromCoreStub' }
       })
       const endTime = Date.now()
 
@@ -352,13 +350,16 @@ export function drivingScenario (): void {
 
   switch (optionLicence) {
     case 'DVLA':
-      group('B02_Driving_02_SelectingOption_DVLA_POST', function () {
+      group('B02_Driving_02_SelectDVLA POST', function () {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/licence-issuer',
           {
             licenceIssuer: 'DVLA',
             submitButton: '',
             'x-csrf-token': csrfToken
+          },
+          {
+            tags: { name: 'B02_Driving_02_SelectDVLA' }
           })
         const endTime = Date.now()
 
@@ -373,7 +374,7 @@ export function drivingScenario (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_Driving_03_DVLA_EditUser POST', function () {
+      group('B02_Driving_03_DVLA_EnterDetailsConfirm POST', function () {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/details', {
           surname: user1DVLA.surname,
@@ -398,7 +399,7 @@ export function drivingScenario (): void {
         },
         {
           redirects: 2,
-          tags: { name: 'B02_Driving_03_DVLA_EditUser_01_CRICall' }
+          tags: { name: 'B02_Driving_03_DVLA_EnterDetailsConfirm_01_CRICall' }
 
         })
         const endTime = Date.now()
@@ -413,7 +414,7 @@ export function drivingScenario (): void {
         res = http.get(res.headers.Location,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
-            tags: { name: 'B02_Driving_03_DVLA_EditUser_02_CoreStubCall' } // pragma: allowlist secret
+            tags: { name: 'B02_Driving_03_DVLA_EnterDetailsConfirm_02_CoreStubCall' } // pragma: allowlist secret
           })
         const endTime30 = Date.now()
 
@@ -428,13 +429,16 @@ export function drivingScenario (): void {
       break
 
     case 'DVA': {
-      group('B02_Driving_02_SelectingOption_DVA_POST', function () {
+      group('B02_Driving_02_SelectDVA POST', function () {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/licence-issuer',
           {
             licenceIssuer: 'DVA',
             submitButton: '',
             'x-csrf-token': csrfToken
+          },
+          {
+            tags: { name: 'B02_Driving_02_SelectDVA' }
           })
         const endtime = Date.now()
 
@@ -449,7 +453,7 @@ export function drivingScenario (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_Driving_03_DVA_EditUser POST', function () {
+      group('B02_Driving_03_DVA_EnterDetailsConfirm POST', function () {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/details', {
           surname: user1DVA.surname,
@@ -473,7 +477,7 @@ export function drivingScenario (): void {
         },
         {
           redirects: 2,
-          tags: { name: '02_Driving_03_DVA_EditUser_01_CRICall' }
+          tags: { name: 'B02_Driving_03_DVA_EnterDetailsConfirm_01_CRICall' }
         })
         const endTime = Date.now()
 
@@ -487,7 +491,7 @@ export function drivingScenario (): void {
         res = http.get(res.headers.Location,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
-            tags: { name: '02_Driving_03_DVA_EditUser_02_CoreStubCall' }
+            tags: { name: 'B02_Driving_03_DVA_EnterDetailsConfirm_02_CoreStubCall' }
           })
         const endTime1 = Date.now()
 
@@ -513,7 +517,7 @@ export function passportScenario (): void {
   group('B03_Passport_01_PassportCRIEntryFromStub GET',
     function () {
       const startTime = Date.now()
-      res = http.get(env.ipvCoreStub + '/authorize?cri=' +
+      res = http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' +
         env.envName + '&rowNumber=197',
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
@@ -548,6 +552,7 @@ export function passportScenario (): void {
           'expiryDate-day': userPassport.expiryDay,
           'expiryDate-month': userPassport.expiryMonth,
           'expiryDate-year': userPassport.expiryYear,
+          submitButton: '',
           'x-csrf-token': csrfToken
         },
         {

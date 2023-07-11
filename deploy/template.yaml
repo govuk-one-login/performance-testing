@@ -272,6 +272,9 @@ Resources:
           - Name: S3_BUCKET
             Type: PLAINTEXT
             Value: !Ref ResultsBucket
+          - Name: SERVICE_ROLE
+            Type: PLAINTEXT
+            Value: !GetAtt CodeBuildServiceRole.Arn
           - Name: TEST_SCRIPT
             Type: PLAINTEXT
             Value: common/test.js
@@ -343,6 +346,12 @@ Resources:
                 - |
                   sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_ID#" $OTEL_TEMPLATE > $OTEL_CONFIG
                 - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &
+                - aws sts get-caller-identity
+                - mkdir ~/.aws/ && touch ~/.aws/config
+                - echo "[profile testprofile]" > ~/.aws/config
+                - echo "role_arn = ${SERVICE_ROLE}" >> ~/.aws/config
+                - echo "credential_source = EcsContainer" >> ~/.aws/config
+                - aws sts get-caller-identity --profile testprofile
             build:
               commands:
                 - start=`date +"%Y-%m-%dT%H:%M:%SZ"`

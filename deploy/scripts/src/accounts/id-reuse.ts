@@ -54,10 +54,10 @@ export function setup (): void {
 const transactionDuration = new Trend('duration')
 
 const env = {
-  envURL: __ENV.ID_REUSE_URL,
-  envMock: __ENV.ID_REUSE_MOCK,
-  envApiKey: __ENV.ID_REUSE_API_KEY,
-  envApiKeySummarise: __ENV.ID_REUSE_API_KEY_SUMMARISE
+  envURL: __ENV.ACCOUNT_BRAVO_ID_REUSE_URL,
+  envMock: __ENV.ACCOUNT_BRAVO_ID_REUSE_MOCK,
+  envApiKey: __ENV.ACCOUNT_BRAVO_ID_REUSE_API_KEY,
+  envApiKeySummarise: __ENV.ACCOUNT_BRAVO_ID_REUSE_API_KEY_SUMMARISE
 }
 export function idReuse (): void {
   let res: Response

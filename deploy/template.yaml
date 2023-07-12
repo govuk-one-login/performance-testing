@@ -30,6 +30,11 @@ Parameters:
     Description: "The name of the stack that defines the VPC to use"
     Default: "none"
 
+Mappings:
+  SPOT:
+    AWS:
+      AccountID: "429671060046"
+
 Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
@@ -124,6 +129,38 @@ Resources:
               - "ssm:GetParametersByPath"
             Resource:
               - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path
+          - Effect: "Allow"
+            Action:
+              - "kms:Decrypt"
+              - "kms:GenerateDataKey"
+            Resource:
+              Fn::Join:
+                - ":"
+                - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                  - !FindInMap [SPOT, AWS, AccountID]
+                  - "key/*"
+          - Effect: "Allow"
+            Action:
+              - "sqs:SendMessage"
+              - "sqs:ReceiveMessage"
+              - "sqs:GetQueueAttributes"
+              - "sqs:DeleteMessage"
+              - "sqs:ChangeMessageVisibility"
+            Resource:
+              Fn::Join:
+                - ":"
+                - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                  - !FindInMap [SPOT, AWS, AccountID]
+                  - "di-ipv-spot-app-*"
+          - Effect: "Allow"
+            Action:
+              - "lambda:InvokeFunction"
+            Resource:
+              Fn::Join:
+                - ":"
+                - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                  - !FindInMap [SPOT, AWS, AccountID]
+                  - "function:*"
 
   VPCTestPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -189,18 +226,18 @@ Resources:
               SSEAlgorithm: AES256
       BucketName:
         Fn::Join:
-            - '-'
-            - - Ref: AWS::StackName
-              - test-results
-              - Fn::Select:
-                  - 4
-                  - Fn::Split:
-                      - '-'
-                      - Fn::Select:
-                          - 2
-                          - Fn::Split:
-                              - /
-                              - Ref: AWS::StackId
+          - "-"
+          - - Ref: AWS::StackName
+            - test-results
+            - Fn::Select:
+                - 4
+                - Fn::Split:
+                    - "-"
+                    - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                            - /
+                            - Ref: AWS::StackId
       LifecycleConfiguration:
         Rules:
           - ExpirationInDays: 365
@@ -313,19 +350,19 @@ Resources:
                 - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out statsd --out json=$JSON_RESULTS
             post_build:
               commands:
+                - echo "Uploading test results to s3"
                 - S3_LOCATION=s3://${S3_BUCKET}/${TEST_SCRIPT%.*}/$(date +%F/%T)
                 - aws s3 cp $JSON_RESULTS ${S3_LOCATION}/$JSON_RESULTS
+                - echo "Shutting down OpenTelemetry collector"
                 - sleep 120
                 - OTEL_PID=$(pgrep /otel/otelcol-contrib)
                 - kill $OTEL_PID
                 - TIMEOUT=0
                 - while kill -0 $OTEL_PID && (( TIMEOUT < 300 )); do sleep 1; (( TIMEOUT++ )); done
-                - cat otel.log
-                - ifconfig lo
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
                   echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID
-                - echo Performance test complete
+                - echo "Performance test complete"
 
       Tags:
         - Key: "Name"

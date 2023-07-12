@@ -27,7 +27,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '10s' } // Ramps up to target load
+        { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'drivingScenario'
     },
@@ -38,23 +38,22 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '10s' } // Ramps up to target load
+        { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'passportScenario'
     }
-
   },
-  load: {
+  lowVolumeTest: {
     fraudScenario1: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 350,
+      maxVUs: 900,
       stages: [
-        { target: 10, duration: '30m' }, // Ramp up to 10 iterations per second in 10 minutes
-        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e 10 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
+        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'fraudScenario1'
     },
@@ -63,13 +62,55 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 150,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '15m' }, // Maintain steady state at 5 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'drivingScenario'
     },
-
+    passportScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 150,
+      stages: [
+        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
+        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'passportScenario'
+    }
+  },
+  stress: {
+    fraudScenario1: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1878,
+      stages: [
+        { target: 63, duration: '15m' }, // Ramp up to 63 iterations per second in 15 minutes
+        { target: 63, duration: '30m' }, // Maintain steady state at 63 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'fraudScenario1'
+    },
+    drivingScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 411,
+      stages: [
+        { target: 14, duration: '15m' }, // Ramp up to 14 iterations per second in 15 minutes
+        { target: 14, duration: '30m' }, // Maintain steady state at 14 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'drivingScenario'
+    },
     passportScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -77,7 +118,9 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1500,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 55, duration: '15m' }, // Ramp up to 55 iterations per second in 15 minutes
+        { target: 55, duration: '30m' }, // Maintain steady state at 55 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'passportScenario'
     }
@@ -103,8 +146,6 @@ const env = {
   ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL,
   fraudUrl: __ENV.IDENTITY_FRAUD_URL,
   drivingUrl: __ENV.IDENTITY_DRIVING_URL,
-  orchestratorCoreStub: __ENV.IDENTITY_ORCH_STUB_URL,
-  ipvCoreURL: __ENV.IDENTITY_CORE_URL,
   passportURL: __ENV.IDENTITY_PASSPORT_URL,
   envName: __ENV.ENVIRONMENT
 }
@@ -289,7 +330,7 @@ export function fraudScenario1 (): void {
       },
       {
         redirects: 1,
-        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails1' }
+        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_01_FraudCall' }
       }
     )
     const endTime1 = Date.now()
@@ -304,7 +345,7 @@ export function fraudScenario1 (): void {
     res = http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails2' }
+        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_01_StubCall' }
       }
     )
     const endTime2 = Date.now()
@@ -328,14 +369,14 @@ export function drivingScenario (): void {
   const user1DVLA = csvData1[exec.scenario.iterationInTest % csvData1.length]
   const user1DVA = csvData2[exec.scenario.iterationInTest % csvData2.length]
 
-  group('B02_Driving_01_CoreStub GET',
+  group('B02_Driving_01_DLEntryFromCoreStub GET',
     function () {
       const startTime = Date.now()
-      res = http.get(env.ipvCoreStub + '/authorize?cri=' +
+      res = http.get(env.ipvCoreStub + '/authorize?cri=driving-licence-cri-' +
         env.envName + '&rowNumber=197',
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B02_Driving_01_CoreStuB' }
+        tags: { name: 'B02_Driving_01_DLEntryFromCoreStub' }
       })
       const endTime = Date.now()
 
@@ -352,13 +393,16 @@ export function drivingScenario (): void {
 
   switch (optionLicence) {
     case 'DVLA':
-      group('B02_Driving_02_SelectingOption_DVLA_POST', function () {
+      group('B02_Driving_02_SelectDVLA POST', function () {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/licence-issuer',
           {
             licenceIssuer: 'DVLA',
             submitButton: '',
             'x-csrf-token': csrfToken
+          },
+          {
+            tags: { name: 'B02_Driving_02_SelectDVLA' }
           })
         const endTime = Date.now()
 
@@ -373,7 +417,7 @@ export function drivingScenario (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_Driving_03_DVLA_EditUser POST', function () {
+      group('B02_Driving_03_DVLA_EnterDetailsConfirm POST', function () {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/details', {
           surname: user1DVLA.surname,
@@ -398,7 +442,7 @@ export function drivingScenario (): void {
         },
         {
           redirects: 2,
-          tags: { name: 'B02_Driving_03_DVLA_EditUser_01_CRICall' }
+          tags: { name: 'B02_Driving_03_DVLA_EnterDetailsConfirm_01_CRICall' }
 
         })
         const endTime = Date.now()
@@ -413,7 +457,7 @@ export function drivingScenario (): void {
         res = http.get(res.headers.Location,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
-            tags: { name: 'B02_Driving_03_DVLA_EditUser_02_CoreStubCall' } // pragma: allowlist secret
+            tags: { name: 'B02_Driving_03_DVLA_EnterDetailsConfirm_02_CoreStubCall' } // pragma: allowlist secret
           })
         const endTime30 = Date.now()
 
@@ -428,13 +472,16 @@ export function drivingScenario (): void {
       break
 
     case 'DVA': {
-      group('B02_Driving_02_SelectingOption_DVA_POST', function () {
+      group('B02_Driving_02_SelectDVA POST', function () {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/licence-issuer',
           {
             licenceIssuer: 'DVA',
             submitButton: '',
             'x-csrf-token': csrfToken
+          },
+          {
+            tags: { name: 'B02_Driving_02_SelectDVA' }
           })
         const endtime = Date.now()
 
@@ -449,7 +496,7 @@ export function drivingScenario (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_Driving_03_DVA_EditUser POST', function () {
+      group('B02_Driving_03_DVA_EnterDetailsConfirm POST', function () {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/details', {
           surname: user1DVA.surname,
@@ -473,7 +520,7 @@ export function drivingScenario (): void {
         },
         {
           redirects: 2,
-          tags: { name: '02_Driving_03_DVA_EditUser_01_CRICall' }
+          tags: { name: 'B02_Driving_03_DVA_EnterDetailsConfirm_01_CRICall' }
         })
         const endTime = Date.now()
 
@@ -487,7 +534,7 @@ export function drivingScenario (): void {
         res = http.get(res.headers.Location,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
-            tags: { name: '02_Driving_03_DVA_EditUser_02_CoreStubCall' }
+            tags: { name: 'B02_Driving_03_DVA_EnterDetailsConfirm_02_CoreStubCall' }
           })
         const endTime1 = Date.now()
 
@@ -506,51 +553,25 @@ export function drivingScenario (): void {
 export function passportScenario (): void {
   let res: Response
   let csrfToken: string
-  const user1Passport = csvDataPassport[exec.scenario.iterationInTest % csvDataPassport.length]
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  const userPassport = csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)]
 
-  group('B03_Passport_01_OrchestratorStub GET',
+  group('B03_Passport_01_PassportCRIEntryFromStub GET',
     function () {
       const startTime = Date.now()
-      res = http.get(env.orchestratorCoreStub)
-      const endTime = Date.now()
-
-      check(res, {
-        'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('Orchestrator Stub')
-
+      res = http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' +
+        env.envName + '&rowNumber=197',
+      {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B03_Passport_01_PassportCRIEntryFromStub' }
       })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
-    })
-
-  sleep(Math.random() * 3)
-
-  group('B03_Passport_02_debugRoute GET',
-    function () {
-      const startTime = Date.now()
-      res = http.get(env.orchestratorCoreStub + '/authorize?journeyType=debug')
-      const endTime = Date.now()
-
-      check(res, {
-        'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('ukPassport')
-
-      })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Respone Validation Failed')
-    })
-
-  sleep(Math.random() * 3)
-
-  group('B03_Passport_03_ukPassport GET',
-    function () {
-      const startTime = Date.now()
-      res = http.get(env.ipvCoreURL + '/ipv/journey/cri/build-oauth-request/ukPassport')
       const endTime = Date.now()
 
       check(res, {
         'is status 200': (r) => r.status === 200,
         'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK passport')
+
       })
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
@@ -559,29 +580,50 @@ export function passportScenario (): void {
 
   sleep(Math.random() * 3)
 
-  group('B03_Passport_04_passportDetails POST',
+  group('B03_Passport_02_EnterPassportDetailsAndContinue POST',
     function () {
-      const startTime = Date.now()
-      res = http.post(env.passportURL + '/passport/details',
+      const startTime1 = Date.now()
+      res = http.post(env.passportURL + '/details',
         {
-          passportNumber: user1Passport.passportNumber,
-          surname: user1Passport.surname,
-          firstName: user1Passport.firstName,
-          middleNames: user1Passport.middleName,
-          'dateOfBirth-day': user1Passport.birthday,
-          'dateOfBirth-month': user1Passport.birthmonth,
-          'dateOfBirth-year': user1Passport.birthyear,
-          'expiryDate-day': user1Passport.expiryDay,
-          'expiryDate-month': user1Passport.expiryMonth,
-          'expiryDate-year': user1Passport.expiryYear,
+          passportNumber: userPassport.passportNumber,
+          surname: userPassport.surname,
+          firstName: userPassport.firstName,
+          middleNames: userPassport.middleName,
+          'dateOfBirth-day': userPassport.birthday,
+          'dateOfBirth-month': userPassport.birthmonth,
+          'dateOfBirth-year': userPassport.birthyear,
+          'expiryDate-day': userPassport.expiryDay,
+          'expiryDate-month': userPassport.expiryMonth,
+          'expiryDate-year': userPassport.expiryYear,
+          submitButton: '',
           'x-csrf-token': csrfToken
+        },
+        {
+          redirects: 2,
+          tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_01_PassCRICall' }
         })
-      const endTime = Date.now()
+      const endTime1 = Date.now()
+
+      check(res, {
+        'is status 302': (r) => r.status === 302
+      })
+        ? transactionDuration.add(endTime1 - startTime1)
+        : fail('Response Validation Failed')
+
+      const startTime2 = Date.now()
+      res = http.get(res.headers.Location,
+        {
+          headers: { Authorization: `Basic ${encodedCredentials}` },
+          tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_02_CoreStubCall' }
+        }
+      )
+      const endTime2 = Date.now()
+
       check(res, {
         'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('GPG45 Score')
+        'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
       })
-        ? transactionDuration.add(endTime - startTime)
+        ? transactionDuration.add(endTime2 - startTime2)
         : fail('Response Validation Failed')
     }
   )

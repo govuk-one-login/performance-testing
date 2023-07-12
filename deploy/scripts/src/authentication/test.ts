@@ -32,15 +32,17 @@ const profiles: ProfileList = {
       exec: 'signIn'
     }
   },
-  singleScenarioStress: {
+  lowVolumeTest: {
     signUp: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 600,
+      maxVUs: 900,
       stages: [
-        { target: 30, duration: '10m' } // Ramps up to target load
+        { target: 30, duration: '5m' }, // Ramps up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'signUp'
     },
@@ -49,9 +51,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 600,
+      maxVUs: 900,
       stages: [
-        { target: 30, duration: '10m' } // Ramps up to target load
+        { target: 30, duration: '5m' }, // Ramps up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'signIn'
     }
@@ -62,9 +66,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 600,
+      maxVUs: 3000,
       stages: [
-        { target: 15, duration: '15m' } // Ramps up to target load
+        { target: 100, duration: '15m' }, // Ramps up to 100 iterations per second in 15 minutes
+        { target: 100, duration: '30m' }, // Maintain steady state at 100 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'signUp'
     },
@@ -73,9 +79,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 600,
+      maxVUs: 60000,
       stages: [
-        { target: 15, duration: '15m' } // Ramps up to target load
+        { target: 2000, duration: '15m' }, // Ramps up to 100 iterations per second in 15 minutes
+        { target: 2000, duration: '30m' }, // Maintain steady state at 100 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'signIn'
     }
@@ -511,6 +519,7 @@ export function signIn (): void {
 
   sleep(1)
 
+  let acceptNewTerms = false
   switch (userData.mfaOption) {
     case 'AUTH_APP': {
       group('POST - /enter-password', () => {
@@ -543,13 +552,14 @@ export function signIn (): void {
           }
         )
         const end = Date.now()
+
+        acceptNewTerms = (res.body as string).includes('terms of use update')
         check(res, {
           'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('User information')
+          'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
         })
           ? durations.add(end - start)
           : fail('Checks failed')
-        csrfToken = getCSRF(res)
       })
       break
     }
@@ -586,16 +596,34 @@ export function signIn (): void {
           }
         )
         const end = Date.now()
+
+        acceptNewTerms = (res.body as string).includes('terms of use update')
         check(res, {
           'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('User information')
+          'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
         })
           ? durations.add(end - start)
           : fail('Checks failed')
-        csrfToken = getCSRF(res)
       })
       break
     }
+  }
+
+  if (acceptNewTerms) {
+    group('POST - /updated-terms-and-conditions', () => {
+      const start = Date.now()
+      res = res.submitForm({
+        fields: { termsAndConditionsResult: 'accept' }
+      })
+      const end = Date.now()
+
+      check(res, {
+        'is status 200': r => r.status === 200,
+        'verify page content': r => (r.body as string).includes('User information')
+      })
+        ? durations.add(end - start)
+        : fail('Checks failed')
+    })
   }
 
   // 25% of users logout

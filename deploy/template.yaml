@@ -333,6 +333,7 @@ Resources:
               IDENTITY_KIWI_TARGET: "/perfTest/identity/kiwi/target"
               IDENTITY_ORCH_STUB_URL: "/perfTest/identity/orchStubUrl"
               IDENTITY_PASSPORT_URL: "/perfTest/identity/lime/passportUrl"
+              IDENTITY_SPOT_SQS: "/perfTest/identity/spot/SQS"
               IDENTITY_STUB_PASSWORD: "/perfTest/identity/coreStubPassword"
               IDENTITY_STUB_USERNAME: "/perfTest/identity/coreStubUsername"
               K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"

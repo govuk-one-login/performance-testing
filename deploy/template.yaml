@@ -39,7 +39,7 @@ Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${AWS::StackName}-PerformanceTester"
+      RoleName: !Sub "${AWS::StackName}-PerformanceServiceRole"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -130,6 +130,35 @@ Resources:
               - "ssm:GetParametersByPath"
             Resource:
               - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path
+
+  PerformanceTesterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-PerformanceTester"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              AWS: !GetAtt CodeBuildServiceRole.Arn
+            Action:
+              - "sts:AssumeRole"
+      PermissionsBoundary:
+        !If [
+          UsePermissionsBoundary,
+          !Ref PermissionsBoundary,
+          !Ref AWS::NoValue,
+        ]
+
+  PerofrmanceTesterPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${AWS::StackName}-PerformanceTesterPolicy-${Environment}
+      Roles:
+        - !Ref PerformanceTesterRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
           - Effect: "Allow"
             Action:
               - "kms:Decrypt"

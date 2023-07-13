@@ -146,7 +146,7 @@ export function coreScenario1 (): void {
 
       check(res, {
         'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('Start proving your identity with GOV.UK One Login')
+        'verify page content': (r) => (r.body as string).includes('Tell us if you have one of the following types of photo ID')
       })
         ? transactionDuration.add(endTime - startTime)
         : fail('Response Validation Failed')
@@ -158,17 +158,18 @@ export function coreScenario1 (): void {
   sleep(Math.random() * 3)
 
   group(
-    'B01_Core_03_ClickStartAfterLogin POST',
+    'B01_Core_03_ClickContinueStartPage POST',
     function () {
       const startTime1 = Date.now()
       res = http.post(
-        env.ipvCoreURL + '/ipv/page/page-ipv-identity-start',
+        env.ipvCoreURL + '/ipv/page/page-ipv-identity-document-start',
         {
-          _csrf: csrfToken
+          _csrf: csrfToken,
+          journey: 'next'
         },
         {
           redirects: 0,
-          tags: { name: 'B01_Core_03_ClickStartAfterLogin_01_Core' }
+          tags: { name: 'B01_Core_03_ClickContinueStartPage_01_Core' }
         }
       )
       const endTime1 = Date.now()
@@ -184,7 +185,7 @@ export function coreScenario1 (): void {
       const startTime2 = Date.now()
       res = http.get(res.headers.Location,
         {
-          tags: { name: 'B01_Core_03_ClickStartAfterLogin_02_DcmawStub' } // pragma: allowlist secret
+          tags: { name: 'B01_Core_03_ClickContinueStartPage_02_DcmawStub' } // pragma: allowlist secret
         }
       )
       const endTime2 = Date.now()

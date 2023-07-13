@@ -87,7 +87,7 @@ export function idReuse (): void {
     const startTime = Date.now()
     const options = {
       headers: {
-        Authorization: token,
+        Authorization: `Bearer ${token}`,
         'x-api-key': env.envApiKey
       },
       tags: { name: 'R02_idReuse_02_CreateVC' }
@@ -112,7 +112,7 @@ export function idReuse (): void {
     const startTime = Date.now()
     const options = {
       headers: {
-        Authorization: token,
+        Authorization: `Bearer ${token}`,
         'x-api-key': env.envApiKey
       },
       tags: { name: 'R01_idReuse_03_Retrieve' }
@@ -152,7 +152,7 @@ export function idReuse (): void {
     const startTime = Date.now()
     const options = {
       headers: {
-        Authorization: token,
+        Authorization: `Bearer ${token}`,
         'x-api-key': env.envApiKeySummarise
       },
       tags: { name: 'R01_idReuse_05_Summarise' }

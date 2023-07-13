@@ -134,7 +134,7 @@ Resources:
   PerformanceTesterRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${AWS::StackName}-PerformanceTester"
+      RoleName: !Sub "${AWS::StackName}-PerformanceTesterRole"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:

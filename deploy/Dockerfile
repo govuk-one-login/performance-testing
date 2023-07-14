@@ -10,7 +10,7 @@ ADD scripts ${WORKDIR}/scripts
 WORKDIR ${WORKDIR}
 RUN cd scripts && \
     npm install && \
-    node ./build.js
+    npm start
 
 # -----------------------
 # OpenTelemetry Collector

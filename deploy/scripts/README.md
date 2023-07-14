@@ -23,12 +23,12 @@ If using VSCode as an IDE it is recommended to install [ESLint](https://marketpl
 
 You can also manually run linting checks in the `scripts` directory with
 ```console
-% npx eslint ./src
+% npm run lint
 ```
 
 Further, you can add the `--fix` flag to fix any auto-fixable problems in your TypeScript files
 ```console
-% npx eslint ./src --fix
+% npm run lint -- --fix
 ```
 
 ## Local Testing

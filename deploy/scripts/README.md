@@ -28,7 +28,7 @@ You can also manually run linting checks in the `scripts` directory with
 
 Further, you can add the `--fix` flag to fix any auto-fixable problems in your TypeScript files
 ```console
-% npx run lint -- --fix
+% npm run lint -- --fix
 ```
 
 ## Local Testing

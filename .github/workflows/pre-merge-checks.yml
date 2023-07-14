@@ -27,7 +27,7 @@ jobs:
         run: npm run lint
 
       - name: Transpile TypeScript test scripts
-        run: node ./build.js
+        run: npm start
 
       - name: Run local k6 unit test script
         uses: grafana/k6-action@v0.3.0

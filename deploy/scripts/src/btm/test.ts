@@ -155,7 +155,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: loadMaxVUInt1,
       stages: [
-        { target: loadTargetInt1, duration: loadProfileVar.smokeDuration }
+        { target: loadTargetInt1, duration: loadProfileVar.loadDuration }
       ],
       exec: 'sendEvent1'
     },
@@ -166,7 +166,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: loadMaxVUInt2,
       stages: [
-        { target: loadTargetInt2, duration: loadProfileVar.smokeDuration }
+        { target: loadTargetInt2, duration: loadProfileVar.loadDuration }
       ],
       exec: 'sendEvent2'
     },
@@ -199,7 +199,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: loadMaxVUInt5,
       stages: [
-        { target: loadTargetInt5, duration: loadProfileVar.smokeDuration }
+        { target: loadTargetInt5, duration: loadProfileVar.loadDuration }
       ],
       exec: 'sendEvent5'
     },
@@ -210,7 +210,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: loadMaxVUInt6,
       stages: [
-        { target: loadTargetInt6, duration: loadProfileVar.smokeDuration }
+        { target: loadTargetInt6, duration: loadProfileVar.loadDuration }
       ],
       exec: 'sendEvent6'
     },
@@ -221,7 +221,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: loadMaxVUInt7,
       stages: [
-        { target: loadTargetInt7, duration: loadProfileVar.smokeDuration }
+        { target: loadTargetInt7, duration: loadProfileVar.loadDuration }
       ],
       exec: 'sendEvent7'
     }

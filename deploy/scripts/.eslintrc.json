@@ -4,14 +4,13 @@
         "es2021": true
     },
     "extends": "standard-with-typescript",
-    "overrides": [
-    ],
+    "overrides": [],
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module",
         "project": "**/tsconfig.json"
     },
-    "ignorePatterns": ["src/common/utils/jslib/*.js"],
+    "ignorePatterns": ["src/common/utils/jslib/*.js", "dist/**", "build.js"],
     "rules": {
     }
 }

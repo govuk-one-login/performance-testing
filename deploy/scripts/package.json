@@ -20,9 +20,11 @@
     "typescript": "^5.1.6"
   },
   "scripts": {
-    "start": "node build.js",
+    "lint": "npx eslint src/**/*.ts",
     "pretest": "node build.js",
-    "test": "k6 run dist/common/unit-tests.js"
+    "start": "node build.js",
+    "test": "k6 run dist/common/unit-tests.js",
+    "tsc": "tsc"
   },
   "keywords": [],
   "author": "",

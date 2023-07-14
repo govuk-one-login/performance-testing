@@ -24,7 +24,7 @@ jobs:
         run: npm i
 
       - name: Run linting checks
-        run: npx eslint .
+        run: npm run lint
 
       - name: Transpile TypeScript test scripts
         run: node ./build.js

@@ -20,7 +20,7 @@
     "typescript": "^5.1.6"
   },
   "scripts": {
-    "lint": "npx eslint src/**/*.ts",
+    "lint": "npx eslint 'src/**/*.ts'",
     "pretest": "node build.js",
     "start": "node build.js",
     "test": "k6 run dist/common/unit-tests.js",

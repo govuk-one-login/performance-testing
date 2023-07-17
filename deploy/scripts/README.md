@@ -132,6 +132,7 @@ After each pipeline run, the test results file is zipped and uploaded to S3.
 
 **Error Count by Group Name and Status Code**
 
+The following command filters the results on errors and then totals the count by group and status
 ```console
 % cat path/to/results.json |
 jq 'select(
@@ -147,7 +148,24 @@ jq -s 'group_by(.group,.status)
         "group":first.group,
         "status":first.status,
         "count":length
-    }) | sort_by(.count)'
+    })
+    | sort_by(.count)
+    | reverse' > error-counts.json
+```
+
+The output of the above command can be further pretty printed into a table using `jq` and `column`
+```console
+cat error-counts.json |
+jq -r '(
+    ["Group Name","Status","Count"]
+    | (., map(length*"-"))
+  ),
+  (
+    .[]
+    | [.group, .status, .count]
+  )
+  | @tsv'
+  | column -ts$'\t'
 ```
 
 **Converting to CSV**

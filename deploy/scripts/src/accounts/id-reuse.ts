@@ -6,7 +6,7 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 
 const profiles: ProfileList = {
   smoke: {
-    idReuse: {
+    idReuseIPVCore: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -15,12 +15,24 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
-      exec: 'idReuse'
+      exec: 'idReuseIPVCore'
+    },
+
+    idReuseAlpha: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '60s' } // Ramps up to target load
+      ],
+      exec: 'idReuseAlpha'
     }
 
   },
   initialLoad: {
-    idReuse: {
+    idReuseIPVCore: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -31,13 +43,27 @@ const profiles: ProfileList = {
         { target: 30, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
-      exec: 'idReuse'
+      exec: 'idReuseIPVCore'
+    },
+
+    idReuseAlpha: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 400,
+      stages: [
+        { target: 30, duration: '15m' }, // Ramps up to target load
+        { target: 30, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'idReuseAlpha'
     }
 
   },
 
   load: {
-    idReuse: {
+    idReuseIPVCore: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -48,7 +74,21 @@ const profiles: ProfileList = {
         { target: 1900, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 1900 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
-      exec: 'idReuse'
+      exec: 'idReuseIPVCore'
+    },
+
+    idReuseAlpha: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 20000,
+      stages: [
+        { target: 1900, duration: '15m' }, // Ramps up to target load
+        { target: 1900, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 1900 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'idReuseAlpha'
     }
 
   }
@@ -76,7 +116,7 @@ const env = {
   envApiKey: __ENV.ACCOUNT_BRAVO_ID_REUSE_API_KEY,
   envApiKeySummarise: __ENV.ACCOUNT_BRAVO_ID_REUSE_API_KEY_SUMMARISE
 }
-export function idReuse (): void {
+export function idReuseIPVCore (): void {
   let res: Response
   let token: string
   group('R01_idReuse_01_GenerateToken POST', function () {
@@ -143,6 +183,11 @@ export function idReuse (): void {
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
   })
+}
+
+export function idReuseAlpha (): void {
+  let res: Response
+  let token: string
 
   group('R01_idReuse_04_GenerateTokenSummary POST', function () {
     const startTime = Date.now()

@@ -137,8 +137,8 @@ The following command filters the results on errors and then totals the count by
 % cat path/to/results.json |
 jq 'select(
         .type=="Point" and
-        .metric == "http_req_failed" and
-        .data.value == 1
+        .metric=="http_req_failed" and
+        .data.value==1
     ) | {
         "group":.data.tags.group,
         "status":.data.tags.status
@@ -155,17 +155,17 @@ jq -s 'group_by(.group,.status)
 
 The output of the above command can be further pretty printed into a table using `jq` and `column`
 ```console
-cat error-counts.json |
+% cat error-counts.json |
 jq -r '(
-    ["Group Name","Status","Count"]
-    | (., map(length*"-"))
-  ),
-  (
-    .[]
-    | [.group, .status, .count]
-  )
-  | @tsv'
-  | column -ts$'\t'
+        ["Group Name","Status","Count"]
+        | (., map(length*"-"))
+    ),
+    (
+        .[]
+        | [.group, .status, .count]
+    )
+    | @tsv'
+    | column -ts$'\t'
 ```
 
 **Converting to CSV**
@@ -174,8 +174,8 @@ The results file can also be coverted to CSV format (for example to easily calcu
 
 ```console
 % jq -r 'select(
-    .type=="Point" and
-    .metric == "duration"
+        .type=="Point" and
+        .metric=="duration"
     ) | [
         .data.time,
         .data.tags.group,

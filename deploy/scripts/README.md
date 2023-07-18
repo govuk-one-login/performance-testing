@@ -86,13 +86,13 @@ Parameter store locations must start with the prefix `/perfTest/` in order for t
 
 1.  Login to [Control Tower](https://uk-digital-identity.awsapps.com/start#/)
 
-2. Login to the `di-performance-test-prod` account with the `di-perf-test-prod-testers` role.
+2.  Login to the `di-performance-test-prod` account with the `di-perf-test-prod-testers` role.
 
-3. Go to the CodeBuild project and click 'Start build with overrides' ([Direct link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/projects/LoadTest-perftest/builds/start?region=eu-west-2))
+3.  Go to the CodeBuild project and click 'Start build with overrides' ([Direct link](https://eu-west-2.console.aws.amazon.com/codesuite/codebuild/projects/LoadTest-perftest/builds/start?region=eu-west-2))
 
     !['Start build with overrides' button](../../docs/start-build-with-overrides.png)
 
-4. Update environment variables in the 'Environment variables override' section. All environment variables are available in test scripts in the `__ENV` variable (see [k6 docs](https://k6.io/docs/using-k6/environment-variables/))
+4.  Update environment variables in the 'Environment variables override' section. All environment variables are available in test scripts in the `__ENV` variable (see [k6 docs](https://k6.io/docs/using-k6/environment-variables/))
 
     !['Environment variables override' section](../../docs/environment-variables-override.png)
 
@@ -106,3 +106,79 @@ Parameter store locations must start with the prefix `/perfTest/` in order for t
 5. Click 'Start Build'
 
 6. Build progress and the stdout results summary are printed in the 'Build logs'
+
+## Querying the Test Result File
+
+After each pipeline run, the test results file is zipped and uploaded to S3.
+
+1.  To download the file: navigate to the s3 bucket in the AWS account. The bucket name is `perftest-test-results-<stack_id>`.
+
+    Here results files are organised by team name, script name and the date and time the test run finished.
+    The file prefix will be of the form `<team_name>/<script_name>/YY-MM-DD/hh:mm:ss/results.gz`.
+
+2.  Expand the archive using `gunzip`
+
+    ```console
+    % gunzip -c path/to/results.gz > output/path/results.json
+    ```
+
+3.  The results file contains one metric per line, eahc in the form of a JSON object. This file can now be queried using `jq`.
+
+    > **Note**
+    > The [k6 documentation](https://k6.io/docs/results-output/real-time/json/) has further information on this file format and querying
+
+
+### Useful `jq` queries
+
+**Error Count by Group Name and Status Code**
+
+The following command filters the results on errors and then totals the count by group and status
+```console
+% cat path/to/results.json |
+jq 'select(
+        .type=="Point" and
+        .metric=="http_req_failed" and
+        .data.value==1
+    ) | {
+        "group":.data.tags.group,
+        "status":.data.tags.status
+    }' |
+jq -s 'group_by(.group,.status)
+    | map({
+        "group":first.group,
+        "status":first.status,
+        "count":length
+    })
+    | sort_by(.count)
+    | reverse' > error-counts.json
+```
+
+The output of the above command can be further pretty printed into a table using `jq` and `column`
+```console
+% cat error-counts.json |
+jq -r '(
+        ["Group Name","Status","Count"]
+        | (., map(length*"-"))
+    ),
+    (
+        .[]
+        | [.group, .status, .count]
+    )
+    | @tsv'
+    | column -ts$'\t'
+```
+
+**Converting to CSV**
+
+The results file can also be coverted to CSV format (for example to easily calculate repsonse time percentiles in Excel, or for graphing purposes). The following command produces a CSV with columns: `timestamp`, `group name` and `duration in milliseconds`
+
+```console
+% jq -r 'select(
+        .type=="Point" and
+        .metric=="duration"
+    ) | [
+        .data.time,
+        .data.tags.group,
+        .data.value
+    ] | @csv' path/to/results.json > durations.csv
+```

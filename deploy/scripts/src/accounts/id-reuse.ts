@@ -68,10 +68,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 20000,
+      maxVUs: 1900,
       stages: [
-        { target: 1900, duration: '15m' }, // Ramps up to target load
-        { target: 1900, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 1900 iterations/second
+        { target: 100, duration: '15m' }, // Ramps up to target load
+        { target: 100, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 100 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'persistID'
@@ -119,7 +119,7 @@ const env = {
 export function persistID (): void {
   let res: Response
   let token: string
-  group('R01_idReuse_01_GenerateToken POST', function () {
+  group('R01_persistID_01_GenerateToken POST', function () {
     const startTime = Date.now()
     res = http.post(env.envMock + '/generate',
       JSON.stringify({
@@ -140,7 +140,7 @@ export function persistID (): void {
 
   sleep(Math.random() * 3)
 
-  group('R02_idReuse_02_CreateVC POST', function () {
+  group('R02_persistID_02_CreateVC POST', function () {
     const startTime = Date.now()
     const options = {
       headers: {
@@ -151,7 +151,8 @@ export function persistID (): void {
     }
     const body = JSON.stringify([
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkphbmUgRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.LeLQg33PXWySMBwXi0KnJsKwO3Cb7a2pd501orGEyEo', // pragma: allowlist secret
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.6PIinUiv_RExeCq3XlTQqIAPqLv_jkpeFtqDc1PcWwQ' // pragma: allowlist secret
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.6PIinUiv_RExeCq3XlTQqIAPqLv_jkpeFtqDc1PcWwQ', // pragma: allowlist secret
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' // pragma: allowlist secret
     ])
     res = http.post(env.envURL + '/vcs/ValidTest', body, options)
     const endTime = Date.now()
@@ -165,7 +166,7 @@ export function persistID (): void {
 
   sleep(Math.random() * 3)
 
-  group('R01_idReuse_03_Retrieve GET', function () {
+  group('R01_persistID_03_Retrieve GET', function () {
     const startTime = Date.now()
     const options = {
       headers: {
@@ -189,7 +190,7 @@ export function retrieveID (): void {
   let res: Response
   let token: string
 
-  group('R01_idReuse_04_GenerateTokenSummary POST', function () {
+  group('R02_RetrieveID_01_GenerateTokenSummary POST', function () {
     const startTime = Date.now()
     res = http.post(env.envMock + '/generate',
       JSON.stringify({
@@ -210,7 +211,7 @@ export function retrieveID (): void {
     token = getToken(res)
   })
 
-  group('R01_idReuse_05_Summarise GET', function () {
+  group('R02_RetrieveID_02_Summarise GET', function () {
     const startTime = Date.now()
     const options = {
       headers: {

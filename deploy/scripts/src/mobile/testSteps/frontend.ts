@@ -26,7 +26,8 @@ export function startJourney (): void {
   })
 
   group('GET /authorize', () => {
-    const authorizeRes = http.get(authorizeUrl)
+    const authorizeRes = http.get(authorizeUrl,
+      { tags: { name: 'GET /authorize' } })
     isStatusCode200(authorizeRes)
     validatePageRedirect(authorizeRes, '/selectDevice')
     validatePageContent(

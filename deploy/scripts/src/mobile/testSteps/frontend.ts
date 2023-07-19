@@ -42,7 +42,7 @@ export function postSelectDevice (): void {
     const res = http.post(
       buildFrontendUrl('/selectDevice'),
       { 'select-device-choice': 'smartphone' },
-      { tags: { name: 'Select Device Page' } }
+      { tags: { name: 'POST /selectDevice' } }
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/selectSmartphone')
@@ -55,7 +55,7 @@ export function postSelectSmartphone (): void {
     const res = http.post(
       buildFrontendUrl('/selectSmartphone'),
       { 'smartphone-choice': 'iphone' },
-      { tags: { name: 'Select Smartphone Page' } }
+      { tags: { name: 'POST /selectSmartphone' } }
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/validPassport')
@@ -68,7 +68,7 @@ export function postValidPassport (): void {
     const res = http.post(
       buildFrontendUrl('/validPassport'),
       { 'select-option': 'yes' },
-      { tags: { name: 'Select Valid Passport Page' } }
+      { tags: { name: 'POST /validPassport' } }
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/biometricChip')
@@ -84,7 +84,7 @@ export function postBiometricChip (): void {
     const res = http.post(
       buildFrontendUrl('/biometricChip'),
       { 'select-option': 'yes' },
-      { tags: { name: 'Select Biometric Chip Page' } }
+      { tags: { name: 'POST /biometricChip' } }
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/iphoneModel')
@@ -97,7 +97,7 @@ export function postIphoneModel (): void {
     const res = http.post(
       buildFrontendUrl('/iphoneModel'),
       { 'select-option': 'iphone7OrNewer' },
-      { tags: { name: 'Select Iphone Model Page' } }
+      { tags: { name: 'POST /iphoneModel' } }
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/idCheckApp')
@@ -113,7 +113,7 @@ export function postIdCheckApp (): void {
     const res = http.post(
       buildFrontendUrl('/idCheckApp'),
       {},
-      { tags: { name: 'ID Check App Page' } }
+      { tags: { name: 'POST /idCheckApp' } }
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/workingCamera')
@@ -126,7 +126,7 @@ export function postWorkingCamera (): void {
     const res = http.post(
       buildFrontendUrl('/workingCamera'),
       { 'working-camera-choice': 'yes' },
-      { tags: { name: 'Select Working Camera' } }
+      { tags: { name: 'POST /workingCamera' } }
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/flashingWarning')
@@ -142,7 +142,7 @@ export function postFlashingWarning (): void {
     const res = http.post(
       buildFrontendUrl('/flashingWarning'),
       { 'flashing-colours-choice': 'yes' },
-      { tags: { name: 'Select Flashing Warning Page' } }
+      { tags: { name: 'POST /flashingWarning' } }
     )
     isStatusCode200(res)
     validatePageRedirect(res, '/downloadApp')
@@ -157,7 +157,7 @@ export function getRedirect (): void {
     })
     const res = http.get(redirectUrl, {
       redirects: 0,
-      tags: { name: 'Redirect Final Page' }
+      tags: { name: 'GET /redirect' }
     })
     isStatusCode302(res)
     validateLocationHeader(res)
@@ -172,7 +172,7 @@ export function getAbortCommand (): void {
     })
     const res = http.get(abortCommandUrl, {
       redirects: 0,
-      tags: { name: 'Abort Command' }
+      tags: { name: 'GET /abortCommand' }
     })
     isStatusCode302(res)
     validateLocationHeader(res)

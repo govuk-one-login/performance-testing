@@ -17,7 +17,7 @@ export function postVerifyAuthorizeRequest (): string {
   })
 
   return group('POST /verifyAuthorizeRequest', () => {
-    const verifyRes = http.post(verifyUrl, '', {
+    const verifyRes = http.post(verifyUrl, null, {
       tags: { name: 'POST /verifyAuthorizeRequest' }
     })
     isStatusCode200(verifyRes)
@@ -70,7 +70,7 @@ export function postFinishBiometricSession (sessionId: string): void {
         biometricSessionId: uuidv4()
       }
     )
-    const res = http.post(finishBiometricSessionUrl, '', {
+    const res = http.post(finishBiometricSessionUrl, null, {
       tags: { name: 'POST /finishBiometricSession' }
     })
     isStatusCode200(res)
@@ -118,7 +118,7 @@ export function postToken (
 export function postUserInfoV2 (accessToken: string): void {
   group('POST /userinfo/v2', () => {
     const userInfoV2Url = buildBackendUrl('/userinfo/v2')
-    const res = http.post(userInfoV2Url, '', {
+    const res = http.post(userInfoV2Url, null, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + accessToken

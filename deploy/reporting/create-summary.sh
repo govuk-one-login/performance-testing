@@ -74,3 +74,23 @@ if [[ ! -f "durations.csv" ]]; then # Do not filter if this has already been don
     | @csv' results.json >durations.csv
 fi
 echo "Output to $OUTPUT/durations.csv"
+
+# Generate HTTP Request Durations CSV
+echo ''
+echo '┌------------------------------------------------┐'
+echo '| Request Duration by Timestamp and HTTP Request |'
+echo '└------------------------------------------------┘'
+if [[ ! -f "http_req_duration.csv" ]]; then # Do not filter if this has already been done
+    jq -r 'select(
+      .type=="Point"
+      and .metric=="http_req_duration"
+    )
+    | [
+      .data.time,
+      .data.tags.group,
+      .data.tags.name,
+      .data.value
+    ]
+    | @csv' results.json >http_req_duration.csv
+fi
+echo "Output to $OUTPUT/http_req_duration.csv"

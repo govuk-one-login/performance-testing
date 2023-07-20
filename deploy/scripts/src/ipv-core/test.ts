@@ -4,6 +4,7 @@ import http, { type Response } from 'k6/http'
 import { Rate, Trend } from 'k6/metrics'
 import { SharedArray } from 'k6/data'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { getStaticResources } from '../common/utils/request/static_assets'
 
 const profiles: ProfileList = {
   smoke: {
@@ -119,6 +120,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_01_LaunchOrchestratorStub' }
         }
       )
+      getStaticResources(res)
       const endTime = Date.now()
 
       check(res, {
@@ -142,6 +144,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_02_GoToFullJourneyRoute' }
         }
       )
+      getStaticResources(res)
       const endTime = Date.now()
 
       check(res, {
@@ -188,6 +191,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_03_ClickContinueStartPage_02_DcmawStub' } // pragma: allowlist secret
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {
@@ -245,6 +249,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_04_DCMAWContinue_2_Core' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {
@@ -291,6 +296,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_05_ContinueOnPYIStartPage_02_PassStub' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {
@@ -364,6 +370,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_06_PassportDataContinue_3_AddStub' }
         }
       )
+      getStaticResources(res)
       const endTime3 = Date.now()
 
       check(res, {
@@ -434,6 +441,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_07_AddrDataContinue_3_FraudStub' }
         }
       )
+      getStaticResources(res)
       const endTime3 = Date.now()
 
       check(res, {
@@ -490,6 +498,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_08_FraudDataContinue_2_Core' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {
@@ -535,6 +544,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_09_PreKBVTransition_2_KBVStub' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {
@@ -590,6 +600,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_10_KBVDataContinue_2_Core' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {
@@ -633,6 +644,7 @@ export function coreScenario1 (): void {
           tags: { name: 'B01_Core_11_ContinuePYISuccessPage_2_OrchStub' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       passed = check(res, {
@@ -668,6 +680,7 @@ export function coreScenario2Driving (): void {
           tags: { name: 'B02_Core_DrivingLicence_01_LaunchOrchestratorStub' }
         }
       )
+      getStaticResources(res)
       const endTime = Date.now()
 
       check(res, {
@@ -693,6 +706,7 @@ export function coreScenario2Driving (): void {
           tags: { name: 'B02_Core_DrivingLicence_02_SelectUserIDContinue' }
         }
       )
+      getStaticResources(res)
       const endTime = Date.now()
 
       check(res, {
@@ -721,6 +735,7 @@ export function coreScenario2Driving (): void {
           tags: { name: 'B02_Core_DrivingLicence_03_ClickContinueAfterLogin' }
         }
       )
+      getStaticResources(res)
       const endTime = Date.now()
 
       check(res, {
@@ -767,6 +782,7 @@ export function coreScenario2Driving (): void {
           tags: { name: 'B02_Core_DrivingLicence_04_ContinueOnDrivingLicence_02_DrivingLicenceStub' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {
@@ -839,6 +855,7 @@ export function coreScenario2Driving (): void {
           tags: { name: 'B02_Core_DrivingLicence_05_DrivingLicenceDataContinue_3_AddStub' }
         }
       )
+      getStaticResources(res)
       const endTime3 = Date.now()
 
       check(res, {
@@ -908,6 +925,7 @@ export function coreScenario2Driving (): void {
           tags: { name: 'B02_Core_DrivingLicence_06_AddrDataContinue_3_FraudStub' }
         }
       )
+      getStaticResources(res)
       const endTime3 = Date.now()
 
       check(res, {
@@ -962,6 +980,7 @@ export function coreScenario2Driving (): void {
           tags: { name: 'B02_Core_DrivingLicence_07_FraudDataContinue_2_Core' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {
@@ -1007,6 +1026,7 @@ export function coreScenario2Driving (): void {
           tags: { name: 'B02_Core_DrivingLicence_08_PreKBVTransition_2_KBVStub' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {
@@ -1061,6 +1081,7 @@ export function coreScenario2Driving (): void {
           tags: { name: 'B02_Core_09_KBVDataContinue_2_Core' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {
@@ -1104,6 +1125,7 @@ export function coreScenario2Driving (): void {
           tags: { name: 'B02_Core_DrivingLicence_10_ContinueDrivingLicenceSuccessPage_2_OrchStub' }
         }
       )
+      getStaticResources(res)
       const endTime2 = Date.now()
 
       check(res, {

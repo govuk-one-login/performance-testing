@@ -4,7 +4,7 @@ import http, { type Response } from 'k6/http'
 import { Rate, Trend } from 'k6/metrics'
 import { SharedArray } from 'k6/data'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
-import { getStaticResources } from '../common/utils/request/static_assets'
+import { getStaticResources } from '../common/utils/request/static'
 
 const profiles: ProfileList = {
   smoke: {

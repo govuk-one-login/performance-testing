@@ -57,6 +57,7 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 
 export const options: Options = {
+  noConnectionReuse: true,
   scenarios: loadProfile.scenarios,
   thresholds: {
     http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms

@@ -3,7 +3,7 @@ import { URL } from '../jslib/url'
 import { check } from 'k6'
 
 // Resolves relative and absolute `src` and `href` paths
-function resolveUrl (source: string, url: string): string {
+export function resolveUrl (source: string, url: string): string {
   if (source[0] !== '/') return source // Absolute paths do not start with a forward slash
   return new URL(url).origin + source // Includes origin with relative path
 }

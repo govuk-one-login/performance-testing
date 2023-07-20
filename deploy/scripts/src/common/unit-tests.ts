@@ -1,6 +1,7 @@
 import { check, group } from 'k6'
 import TOTP from './utils/authentication/totp'
 import { type Profile, type ProfileList, selectProfile } from './utils/config/load-profiles'
+import { resolveUrl } from './utils/request/static'
 
 export const options = {
   vus: 1,
@@ -74,6 +75,13 @@ export default (): void => {
       'Multi Scenario       ': () => checkProfile(multiScenario, 'stress', 2), // Only specified scenarios enabled
       'Scenario "all" String': () => checkProfile(scenarioAll, 'smoke', 2), // All scenarios enabled
       'Scenario Empty String': () => checkProfile(scenarioBlank, 'stress', 3) // All scenarios enabled
+    })
+  })
+
+  group('request/static', () => {
+    check(null, {
+      'Resolve absolute path': () => resolveUrl('https://gov.uk/assets/static/default.css', 'https://gov.uk/page/') === 'https://gov.uk/assets/static/default.css',
+      'Resolve relative path': () => resolveUrl('/assets/script.js', 'https://gov.uk/page/') === 'https://gov.uk/assets/script.js'
     })
   })
 }

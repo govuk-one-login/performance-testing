@@ -66,7 +66,7 @@ export function getBiometricTokenV2 (sessionId: string): void {
 
     isStatusCode200(res)
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -88,7 +88,7 @@ export function postFinishBiometricSession (sessionId: string): void {
 
     isStatusCode200(res)
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -107,7 +107,7 @@ export function getRedirect (sessionId: string): {
 
     isStatusCode200(redirectRes)
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
 
     return {
       authorizationCode: redirectRes.json('authorizationCode') as string,

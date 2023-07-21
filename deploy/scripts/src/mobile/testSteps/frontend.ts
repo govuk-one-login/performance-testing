@@ -32,7 +32,7 @@ export function startJourney (): void {
 
     isStatusCode201(testClientRes)
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
     authorizeUrl = parseTestClientResponse(testClientRes, 'WebLocation')
   })
 
@@ -50,7 +50,7 @@ export function startJourney (): void {
       'Are you on a computer or a tablet right now?'
     )
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -68,7 +68,7 @@ export function postSelectDevice (): void {
     validatePageRedirect(res, '/selectSmartphone') &&
     validatePageContent(res, 'Which smartphone are you using?')
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -86,7 +86,7 @@ export function postSelectSmartphone (): void {
     validatePageRedirect(res, '/validPassport') &&
     validatePageContent(res, 'Do you have a valid passport?')
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -107,7 +107,7 @@ export function postValidPassport (): void {
       'Does your passport have this symbol on the cover?'
     )
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -125,7 +125,7 @@ export function postBiometricChip (): void {
     validatePageRedirect(res, '/iphoneModel') &&
     validatePageContent(res, 'Which iPhone model do you have?')
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -146,7 +146,7 @@ export function postIphoneModel (): void {
       'Use your passport and a GOV.UK app to confirm your identity'
     )
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -164,7 +164,7 @@ export function postIdCheckApp (): void {
     validatePageRedirect(res, '/workingCamera') &&
     validatePageContent(res, 'Does your smartphone have a working camera?')
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -185,7 +185,7 @@ export function postWorkingCamera (): void {
       'The app uses flashing colours. Do you want to continue?'
     )
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -203,7 +203,7 @@ export function postFlashingWarning (): void {
     validatePageRedirect(res, '/downloadApp') &&
     validatePageContent(res, 'Download the GOV.UK ID Check app')
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -224,7 +224,7 @@ export function getRedirect (): void {
     validateLocationHeader(res) &&
     validateQueryParam(res.headers.Location, 'code')
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }
 
@@ -245,6 +245,6 @@ export function getAbortCommand (): void {
     validateLocationHeader(res) &&
     validateQueryParam(res.headers.Location, 'error')
       ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+      : fail()
   })
 }

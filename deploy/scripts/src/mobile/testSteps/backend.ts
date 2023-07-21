@@ -1,5 +1,5 @@
 import http from 'k6/http'
-import { group } from 'k6'
+import { fail, group } from 'k6'
 import { uuidv4 } from '../../common/utils/jslib/index'
 import { buildBackendUrl } from '../utils/url'
 import {
@@ -7,6 +7,9 @@ import {
   postTestClientStart
 } from '../utils/test-client'
 import { isStatusCode200, isStatusCode201 } from '../utils/assertions'
+import { Trend } from 'k6/metrics'
+
+const transactionDuration = new Trend('duration')
 
 export function postVerifyAuthorizeRequest (): string {
   let verifyUrl: string
@@ -54,10 +57,16 @@ export function getBiometricTokenV2 (sessionId: string): void {
     const biometricTokenUrl = buildBackendUrl('/biometricToken/v2', {
       authSessionId: sessionId
     })
+
+    const startTime = Date.now()
     const res = http.get(biometricTokenUrl, {
       tags: { name: 'GET /biometricToken/v2' }
     })
+    const endTime = Date.now()
+
     isStatusCode200(res)
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
@@ -70,10 +79,16 @@ export function postFinishBiometricSession (sessionId: string): void {
         biometricSessionId: uuidv4()
       }
     )
+
+    const startTime = Date.now()
     const res = http.post(finishBiometricSessionUrl, null, {
       tags: { name: 'POST /finishBiometricSession' }
     })
+    const endTime = Date.now()
+
     isStatusCode200(res)
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
@@ -83,11 +98,17 @@ export function getRedirect (sessionId: string): {
 } {
   return group('GET /redirect', () => {
     const redirectUrl = buildBackendUrl('/redirect', { sessionId })
+
+    const startTime = Date.now()
     const redirectRes = http.get(redirectUrl, {
       tags: { name: 'GET /redirect' }
     })
+    const endTime = Date.now()
 
     isStatusCode200(redirectRes)
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
+
     return {
       authorizationCode: redirectRes.json('authorizationCode') as string,
       redirectUri: redirectRes.json('redirectUri') as string

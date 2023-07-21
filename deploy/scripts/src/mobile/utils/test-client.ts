@@ -10,7 +10,7 @@ export function postTestClientStart (): Response {
       frontendUri: config.frontendUrl
     }),
     {
-      tags: { name: 'Post request to authorize URL' },
+      tags: { name: 'POST /start' },
       headers: { 'Content-Type': 'application/json' }
     }
   )

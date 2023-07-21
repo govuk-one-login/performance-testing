@@ -1,5 +1,5 @@
 import http from 'k6/http'
-import { group } from 'k6'
+import { fail, group } from 'k6'
 import { buildFrontendUrl } from '../utils/url'
 import {
   isStatusCode200,
@@ -10,7 +10,13 @@ import {
   validateLocationHeader,
   validateQueryParam
 } from '../utils/assertions'
-import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
+import {
+  parseTestClientResponse,
+  postTestClientStart
+} from '../utils/test-client'
+import { Trend } from 'k6/metrics'
+
+const transactionDuration = new Trend('duration')
 
 export function getSessionIdFromCookieJar (): string {
   const jar = http.cookieJar()
@@ -20,132 +26,184 @@ export function getSessionIdFromCookieJar (): string {
 export function startJourney (): void {
   let authorizeUrl: string
   group('POST test client /start', () => {
+    const startTime = Date.now()
     const testClientRes = postTestClientStart()
+    const endTime = Date.now()
+
     isStatusCode201(testClientRes)
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
     authorizeUrl = parseTestClientResponse(testClientRes, 'WebLocation')
   })
 
   group('GET /authorize', () => {
-    const authorizeRes = http.get(authorizeUrl)
-    isStatusCode200(authorizeRes)
-    validatePageRedirect(authorizeRes, '/selectDevice')
+    const startTime = Date.now()
+    const authorizeRes = http.get(authorizeUrl, {
+      tags: { name: 'GET /authorize' }
+    })
+    const endTime = Date.now()
+
+    isStatusCode200(authorizeRes) &&
+    validatePageRedirect(authorizeRes, '/selectDevice') &&
     validatePageContent(
       authorizeRes,
       'Are you on a computer or a tablet right now?'
     )
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
 export function postSelectDevice (): void {
   group('POST /selectDevice', () => {
+    const startTime = Date.now()
     const res = http.post(
       buildFrontendUrl('/selectDevice'),
       { 'select-device-choice': 'smartphone' },
-      { tags: { name: 'Select Device Page' } }
+      { tags: { name: 'POST /selectDevice' } }
     )
-    isStatusCode200(res)
-    validatePageRedirect(res, '/selectSmartphone')
+    const endTime = Date.now()
+
+    isStatusCode200(res) &&
+    validatePageRedirect(res, '/selectSmartphone') &&
     validatePageContent(res, 'Which smartphone are you using?')
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
 export function postSelectSmartphone (): void {
   group('POST /selectSmartphone', () => {
+    const startTime = Date.now()
     const res = http.post(
       buildFrontendUrl('/selectSmartphone'),
       { 'smartphone-choice': 'iphone' },
-      { tags: { name: 'Select Smartphone Page' } }
+      { tags: { name: 'POST /selectSmartphone' } }
     )
-    isStatusCode200(res)
-    validatePageRedirect(res, '/validPassport')
+    const endTime = Date.now()
+
+    isStatusCode200(res) &&
+    validatePageRedirect(res, '/validPassport') &&
     validatePageContent(res, 'Do you have a valid passport?')
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
 export function postValidPassport (): void {
   group('POST /validPassport', () => {
+    const startTime = Date.now()
     const res = http.post(
       buildFrontendUrl('/validPassport'),
       { 'select-option': 'yes' },
-      { tags: { name: 'Select Valid Passport Page' } }
+      { tags: { name: 'POST /validPassport' } }
     )
-    isStatusCode200(res)
-    validatePageRedirect(res, '/biometricChip')
+    const endTime = Date.now()
+
+    isStatusCode200(res) &&
+    validatePageRedirect(res, '/biometricChip') &&
     validatePageContent(
       res,
       'Does your passport have this symbol on the cover?'
     )
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
 export function postBiometricChip (): void {
   group('POST /biometricChip', () => {
+    const startTime = Date.now()
     const res = http.post(
       buildFrontendUrl('/biometricChip'),
       { 'select-option': 'yes' },
-      { tags: { name: 'Select Biometric Chip Page' } }
+      { tags: { name: 'POST /biometricChip' } }
     )
-    isStatusCode200(res)
-    validatePageRedirect(res, '/iphoneModel')
+    const endTime = Date.now()
+
+    isStatusCode200(res) &&
+    validatePageRedirect(res, '/iphoneModel') &&
     validatePageContent(res, 'Which iPhone model do you have?')
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
 export function postIphoneModel (): void {
   group('POST /iphoneModel', () => {
+    const startTime = Date.now()
     const res = http.post(
       buildFrontendUrl('/iphoneModel'),
       { 'select-option': 'iphone7OrNewer' },
-      { tags: { name: 'Select Iphone Model Page' } }
+      { tags: { name: 'POST /iphoneModel' } }
     )
-    isStatusCode200(res)
-    validatePageRedirect(res, '/idCheckApp')
+    const endTime = Date.now()
+
+    isStatusCode200(res) &&
+    validatePageRedirect(res, '/idCheckApp') &&
     validatePageContent(
       res,
       'Use your passport and a GOV.UK app to confirm your identity'
     )
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
 export function postIdCheckApp (): void {
   group('POST /idCheckApp', () => {
+    const startTime = Date.now()
     const res = http.post(
       buildFrontendUrl('/idCheckApp'),
       {},
-      { tags: { name: 'ID Check App Page' } }
+      { tags: { name: 'POST /idCheckApp' } }
     )
-    isStatusCode200(res)
-    validatePageRedirect(res, '/workingCamera')
+    const endTime = Date.now()
+
+    isStatusCode200(res) &&
+    validatePageRedirect(res, '/workingCamera') &&
     validatePageContent(res, 'Does your smartphone have a working camera?')
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
 export function postWorkingCamera (): void {
   group('POST /workingCamera', () => {
+    const startTime = Date.now()
     const res = http.post(
       buildFrontendUrl('/workingCamera'),
       { 'working-camera-choice': 'yes' },
-      { tags: { name: 'Select Working Camera' } }
+      { tags: { name: 'POST /workingCamera' } }
     )
-    isStatusCode200(res)
-    validatePageRedirect(res, '/flashingWarning')
+    const endTime = Date.now()
+
+    isStatusCode200(res) &&
+    validatePageRedirect(res, '/flashingWarning') &&
     validatePageContent(
       res,
       'The app uses flashing colours. Do you want to continue?'
     )
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
 export function postFlashingWarning (): void {
   group('POST /flashingWarning', () => {
+    const startTime = Date.now()
     const res = http.post(
       buildFrontendUrl('/flashingWarning'),
       { 'flashing-colours-choice': 'yes' },
-      { tags: { name: 'Select Flashing Warning Page' } }
+      { tags: { name: 'POST /flashingWarning' } }
     )
-    isStatusCode200(res)
-    validatePageRedirect(res, '/downloadApp')
+    const endTime = Date.now()
+
+    isStatusCode200(res) &&
+    validatePageRedirect(res, '/downloadApp') &&
     validatePageContent(res, 'Download the GOV.UK ID Check app')
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
@@ -154,13 +212,19 @@ export function getRedirect (): void {
     const redirectUrl = buildFrontendUrl('/redirect', {
       sessionId: getSessionIdFromCookieJar()
     })
+
+    const startTime = Date.now()
     const res = http.get(redirectUrl, {
       redirects: 0,
-      tags: { name: 'Redirect Final Page' }
+      tags: { name: 'GET /redirect' }
     })
-    isStatusCode302(res)
-    validateLocationHeader(res)
+    const endTime = Date.now()
+
+    isStatusCode302(res) &&
+    validateLocationHeader(res) &&
     validateQueryParam(res.headers.Location, 'code')
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
@@ -169,12 +233,18 @@ export function getAbortCommand (): void {
     const abortCommandUrl = buildFrontendUrl('/abortCommand', {
       sessionId: getSessionIdFromCookieJar()
     })
+
+    const startTime = Date.now()
     const res = http.get(abortCommandUrl, {
       redirects: 0,
-      tags: { name: 'Abort Command' }
+      tags: { name: 'GET /abortCommand' }
     })
-    isStatusCode302(res)
-    validateLocationHeader(res)
+    const endTime = Date.now()
+
+    isStatusCode302(res) &&
+    validateLocationHeader(res) &&
     validateQueryParam(res.headers.Location, 'error')
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }

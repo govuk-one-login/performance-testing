@@ -3,6 +3,7 @@ name: Pre-Merge Lint & Unit Test
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  merge_group:
 
 defaults:
   run:
@@ -24,10 +25,10 @@ jobs:
         run: npm i
 
       - name: Run linting checks
-        run: npx eslint .
+        run: npm run lint
 
       - name: Transpile TypeScript test scripts
-        run: node ./build.js
+        run: npm start
 
       - name: Run local k6 unit test script
         uses: grafana/k6-action@v0.3.0

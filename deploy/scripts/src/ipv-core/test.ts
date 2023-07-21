@@ -249,7 +249,7 @@ export function coreScenario1 (): void {
 
       check(res, {
         'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('Which photo ID would you like to use')
+        'verify page content': (r) => (r.body as string).includes('Enter your UK passport details and answer security questions online')
       })
         ? transactionDuration.add(endTime2 - startTime2)
         : fail('Response Validation Failed')

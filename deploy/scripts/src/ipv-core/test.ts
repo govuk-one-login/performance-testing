@@ -95,7 +95,7 @@ const env = {
   ipvCoreURL: __ENV.IDENTITY_CORE_URL
 }
 
-const transactionDuration = new Trend('duration')
+const transactionDuration = new Trend('duration', true)
 const myRate = new Rate('rate')
 
 export function coreScenario1 (): void {

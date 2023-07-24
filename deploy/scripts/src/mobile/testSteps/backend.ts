@@ -9,7 +9,7 @@ import {
 import { isStatusCode200, isStatusCode201 } from '../utils/assertions'
 import { Trend } from 'k6/metrics'
 
-const transactionDuration = new Trend('duration')
+const transactionDuration = new Trend('duration', true)
 
 export function postVerifyAuthorizeRequest (): string {
   let verifyUrl: string

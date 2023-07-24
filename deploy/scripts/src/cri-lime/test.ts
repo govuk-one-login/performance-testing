@@ -254,7 +254,7 @@ const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', functi
   })
 })
 
-const transactionDuration = new Trend('duration')
+const transactionDuration = new Trend('duration', true)
 
 export function fraudScenario1 (): void {
   let res: Response

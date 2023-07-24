@@ -16,7 +16,7 @@ import {
 } from '../utils/test-client'
 import { Trend } from 'k6/metrics'
 
-const transactionDuration = new Trend('duration')
+const transactionDuration = new Trend('duration', true)
 
 export function getSessionIdFromCookieJar (): string {
   const jar = http.cookieJar()

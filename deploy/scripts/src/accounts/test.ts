@@ -229,7 +229,7 @@ const phoneData = {
   newPhone: __ENV.ACCOUNT_NEW_PHONE
 }
 
-const transactionDuration = new Trend('duration')
+const transactionDuration = new Trend('duration', true)
 
 export function changeEmail (): void {
   let res: Response

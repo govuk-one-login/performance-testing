@@ -95,7 +95,7 @@ const env = {
   sqs_queue: __ENV.DATA_TXMA_SQS
 }
 
-const credentials = (JSON.parse(__ENV.AWS_CREDENTIALS) as AssumeRoleOutput).Credentials
+const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
   region: __ENV.AWS_REGION,
   accessKeyId: credentials.AccessKeyId,

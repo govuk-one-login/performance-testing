@@ -21,6 +21,26 @@ jobs:
         with:
           fetch-depth: '0'
 
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('package-lock.json', 'package.json') }}
+          restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
+
+      - name: Cache pre-commit
+        id: cache-pre-commit
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-pre-commit
+        with:
+          path: ~/.cache/pre-commit/
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
+          restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
+
       - name: Install dependencies
         run: npm i
 

@@ -14,16 +14,28 @@ const transactionDuration = new Trend('duration')
 export function postVerifyAuthorizeRequest (): string {
   let verifyUrl: string
   group('POST test client /start', () => {
+    const startTime = Date.now()
     const testClientRes = postTestClientStart()
+    const endTime = Date.now()
+
     isStatusCode201(testClientRes)
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
+
     verifyUrl = parseTestClientResponse(testClientRes, 'ApiLocation')
   })
 
   return group('POST /verifyAuthorizeRequest', () => {
+    const startTime = Date.now()
     const verifyRes = http.post(verifyUrl, null, {
       tags: { name: 'POST /verifyAuthorizeRequest' }
     })
+    const endTime = Date.now()
+
     isStatusCode200(verifyRes)
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
+
     return verifyRes.json('sessionId') as string
   })
 }
@@ -43,12 +55,18 @@ export function postResourceOwnerDocumentGroups (sessionId: string): void {
     const documentGroupsUrl = buildBackendUrl(
       `/resourceOwner/documentGroups/${sessionId}`
     )
+
+    const startTime = Date.now()
     const res = http.post(
       documentGroupsUrl,
       JSON.stringify(documentGroupsData),
       { tags: { name: 'POST /resourceOwner/documentGroups' } }
     )
+    const endTime = Date.now()
+
     isStatusCode200(res)
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }
 
@@ -122,6 +140,8 @@ export function postToken (
 ): string {
   return group('POST /token', () => {
     const tokenUrl = buildBackendUrl('/token')
+
+    const startTime = Date.now()
     const tokenResponse = http.post(
       tokenUrl,
       {
@@ -131,7 +151,12 @@ export function postToken (
       },
       { tags: { name: 'POST /token' } }
     )
+    const endTime = Date.now()
+
     isStatusCode200(tokenResponse)
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
+
     return tokenResponse.json('access_token') as string
   })
 }
@@ -139,6 +164,8 @@ export function postToken (
 export function postUserInfoV2 (accessToken: string): void {
   group('POST /userinfo/v2', () => {
     const userInfoV2Url = buildBackendUrl('/userinfo/v2')
+
+    const startTime = Date.now()
     const res = http.post(userInfoV2Url, null, {
       headers: {
         'Content-Type': 'application/json',
@@ -146,6 +173,10 @@ export function postUserInfoV2 (accessToken: string): void {
       },
       tags: { name: 'POST /userinfo/v2' }
     })
+    const endTime = Date.now()
+
     isStatusCode200(res)
+      ? transactionDuration.add(endTime - startTime)
+      : fail()
   })
 }

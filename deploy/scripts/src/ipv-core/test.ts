@@ -97,7 +97,7 @@ const env = {
   staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
 }
 
-const transactionDuration = new Trend('duration')
+const transactionDuration = new Trend('duration', true)
 const myRate = new Rate('rate')
 
 export function coreScenario1 (): void {

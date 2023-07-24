@@ -84,7 +84,7 @@ const env = {
   envTarget: __ENV.IDENTITY_KIWI_TARGET
 }
 
-const transactionDuration = new Trend('duration')
+const transactionDuration = new Trend('duration', true)
 
 export function CIC (): void {
   let res: Response

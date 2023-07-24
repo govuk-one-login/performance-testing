@@ -70,7 +70,7 @@ const kbvAnswersOBJ = {
   kbvAnswers: __ENV.IDENTITY_KBV_ANSWERS
 }
 
-const transactionDuration = new Trend('duration')
+const transactionDuration = new Trend('duration', true)
 
 export function kbvScenario1 (): void {
   let res: Response

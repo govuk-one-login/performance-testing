@@ -134,7 +134,7 @@ const credentials = {
   emailOTP: __ENV.ACCOUNT_EMAIL_OTP,
   phoneOTP: __ENV.ACCOUNT_PHONE_OTP
 }
-const durations = new Trend('duration')
+const durations = new Trend('duration', true)
 
 export function signUp (): void {
   let res: Response

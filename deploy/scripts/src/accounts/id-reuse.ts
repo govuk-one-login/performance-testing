@@ -108,7 +108,7 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
-const transactionDuration = new Trend('duration')
+const transactionDuration = new Trend('duration', true)
 
 const env = {
   envURL: __ENV.ACCOUNT_BRAVO_ID_REUSE_URL,

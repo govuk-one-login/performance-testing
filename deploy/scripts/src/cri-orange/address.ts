@@ -80,7 +80,7 @@ const csvData1: Address[] = new SharedArray('csvDataAddress', function () {
   })
 })
 
-const transactionDuration = new Trend('duration')
+const transactionDuration = new Trend('duration', true)
 
 export function addressScenario1 (): void {
   let res: Response

@@ -2,6 +2,7 @@ import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
+import { type AssumeRoleOutput } from '../common/utils/aws/types'
 
 const profiles: ProfileList = {
   smoke: {
@@ -94,11 +95,12 @@ const env = {
   sqs_queue: __ENV.DATA_TXMA_SQS
 }
 
+const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
-  region: __ENV.DATA_TXMA_AWS_REGION,
-  accessKeyId: __ENV.DATA_TXMA_AWS_ACCESS_KEY_ID,
-  secretAccessKey: __ENV.DATA_TXMA_AWS_SECRET_ACCESS_KEY,
-  sessionToken: __ENV.DATA_TXMA_AWS_SESSION_TOKEN
+  region: __ENV.AWS_REGION,
+  accessKeyId: credentials.AccessKeyId,
+  secretAccessKey: credentials.SecretAccessKey,
+  sessionToken: credentials.SessionToken
 })
 
 const eventData = {

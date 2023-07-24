@@ -39,7 +39,7 @@ Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${AWS::StackName}-PerformanceTester"
+      RoleName: !Sub "${AWS::StackName}-PerformanceServiceRole"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -102,6 +102,7 @@ Resources:
           - Effect: Allow
             Action:
               - iam:PassRole
+              - sts:AssumeRole
             Resource: !GetAtt CodeBuildServiceRole.Arn
           - Effect: "Allow"
             Action:
@@ -129,6 +130,35 @@ Resources:
               - "ssm:GetParametersByPath"
             Resource:
               - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path
+
+  PerformanceTesterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-PerformanceTesterRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              AWS: !GetAtt CodeBuildServiceRole.Arn
+            Action:
+              - "sts:AssumeRole"
+      PermissionsBoundary:
+        !If [
+          UsePermissionsBoundary,
+          !Ref PermissionsBoundary,
+          !Ref AWS::NoValue,
+        ]
+
+  PerofrmanceTesterPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${AWS::StackName}-PerformanceTesterPolicy-${Environment}
+      Roles:
+        - !Ref PerformanceTesterRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
           - Effect: "Allow"
             Action:
               - "kms:Decrypt"
@@ -272,6 +302,9 @@ Resources:
           - Name: S3_BUCKET
             Type: PLAINTEXT
             Value: !Ref ResultsBucket
+          - Name: EXECUTION_ROLE
+            Type: PLAINTEXT
+            Value: !GetAtt PerformanceTesterRole.Arn
           - Name: TEST_SCRIPT
             Type: PLAINTEXT
             Value: common/test.js
@@ -347,6 +380,7 @@ Resources:
                 - |
                   sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_ID#" $OTEL_TEMPLATE > $OTEL_CONFIG
                 - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &
+                - export EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name $CODEBUILD_BUILD_NUMBER)
             build:
               commands:
                 - start=`date +"%Y-%m-%dT%H:%M:%SZ"`

@@ -34,6 +34,9 @@ Mappings:
   SPOT:
     AWS:
       AccountID: "429671060046"
+  TxMA:
+    AWS:
+      AccountID: "750703655225"
 
 Resources:
   CodeBuildServiceRole:
@@ -150,7 +153,7 @@ Resources:
           !Ref AWS::NoValue,
         ]
 
-  PerofrmanceTesterPolicy:
+  PerformanceTesterPolicy:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName: !Sub ${AWS::StackName}-PerformanceTesterPolicy-${Environment}
@@ -177,11 +180,16 @@ Resources:
               - "sqs:DeleteMessage"
               - "sqs:ChangeMessageVisibility"
             Resource:
-              Fn::Join:
-                - ":"
-                - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
-                  - !FindInMap [SPOT, AWS, AccountID]
-                  - "di-ipv-spot-app-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [SPOT, AWS, AccountID]
+                    - "di-ipv-spot-app-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [TxMA, AWS, AccountID]
+                    - "*"
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"

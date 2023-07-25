@@ -378,7 +378,7 @@ Resources:
             pre_build:
               commands:
                 - |
-                  sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_ID#" $OTEL_TEMPLATE > $OTEL_CONFIG
+                  sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_NUMBER#" $OTEL_TEMPLATE > $OTEL_CONFIG
                 - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &
                 - export EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name $CODEBUILD_BUILD_NUMBER)
             build:
@@ -399,7 +399,7 @@ Resources:
                 - while kill -0 $OTEL_PID && (( TIMEOUT < 300 )); do sleep 1; (( TIMEOUT++ )); done
                 - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - |
-                  echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_ID
+                  echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_NUMBER
                 - echo "Performance test complete"
 
       Tags:

@@ -7,9 +7,9 @@ const signinJourneyID = uuidv4()
 const userURN = `urn:fdc:gov.uk:2022:${userID}`
 const email = `${uuidv4()}@digital.cabinet-office.gov.uk`
 const encodedEmail = encoding.b64encode(email)
-const timestamp = new Date().toISOString()
 
 export function generateAuthRequest (): AUTH_IPV_AUTHORISATION_REQUESTED {
+  const timestamp = new Date().toISOString()
   const sampleAuthRequest: AUTH_IPV_AUTHORISATION_REQUESTED = {
     event_id: uuidv4(),
     client_id: uuidv4(),
@@ -72,6 +72,7 @@ export function generateF2FRequest (): F2F_YOTI_START {
 }
 
 export function generateIPVRequest (): IPV_F2F_CRI_VC_CONSUMED {
+  const timestamp = new Date().toISOString()
   const sampleIPVRequest: IPV_F2F_CRI_VC_CONSUMED = {
     event_id: uuidv4(),
     component_id: 'https://identity.staging.account.gov.uk', // To be updated once the build environment specific details are available

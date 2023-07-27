@@ -347,6 +347,7 @@ Resources:
           env:
             variables:
               WORK_DIR: /home/k6/scripts
+              REPORTING_DIR: /home/k6/reporting
               JSON_RESULTS: results.gz
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
               SLACK_NOTIFY_CHANNEL: C05J07H48UE
@@ -396,7 +397,7 @@ Resources:
                   sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_NUMBER#" $OTEL_TEMPLATE > $OTEL_CONFIG
                 - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &
                 - export EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name $CODEBUILD_BUILD_NUMBER)
-                - source reporting/slack.sh POST
+                - source ${REPORTING_DIR}/slack.sh POST
             build:
               commands:
                 - echo "Run performance test"
@@ -412,7 +413,7 @@ Resources:
                 - kill $OTEL_PID
                 - TIMEOUT=0
                 - while kill -0 $OTEL_PID && (( TIMEOUT < 300 )); do sleep 1; (( TIMEOUT++ )); done
-                - source reporting/slack.sh UPDATE
+                - source ${REPORTING_DIR}/slack.sh UPDATE
                 - echo "Performance test complete"
 
       Tags:

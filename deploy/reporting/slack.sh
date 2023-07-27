@@ -37,7 +37,7 @@ esac
 
 if $valid_args; then
     dynatrace_url="${K6_DYNATRACE_URL}/#dashboard;gtf=${CODEBUILD_START_TIME}%20to%20${dashboard_end};id=${K6_DYNATRACE_DASHBOARD_ID};gf=all;es=CUSTOM_DIMENSION-build_id:${CODEBUILD_BUILD_NUMBER}/"
-    message_id=$(curl https://slack.com/api/${api_command} \
+    message_id=$(curl https://www.slack.com/api/${api_command} \
             -X POST \
             -H "Authorization: Bearer ${SLACK_OAUTH_TOKEN}" \
             -H "Content-type: application/json" \

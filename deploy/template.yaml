@@ -349,6 +349,7 @@ Resources:
               WORK_DIR: /home/k6/scripts
               JSON_RESULTS: results.gz
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
+              SLACK_NOTIFY_CHANNEL: C05J07H48UE
             parameter-store:
               ACCOUNT_APP_KEY: "/perfTest/account/accounts/appKey"
               ACCOUNT_APP_PASSWORD_NEW: "/perfTest/account/testUserNewPassword"

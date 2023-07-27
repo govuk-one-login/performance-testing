@@ -167,11 +167,16 @@ Resources:
               - "kms:Decrypt"
               - "kms:GenerateDataKey"
             Resource:
-              Fn::Join:
-                - ":"
-                - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
-                  - !FindInMap [SPOT, AWS, AccountID]
-                  - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [SPOT, AWS, AccountID]
+                    - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [TxMA, AWS, AccountID]
+                    - "key/*"
           - Effect: "Allow"
             Action:
               - "sqs:SendMessage"
@@ -189,7 +194,7 @@ Resources:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [TxMA, AWS, AccountID]
-                    - "*"
+                    - "event-processing-*"
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"

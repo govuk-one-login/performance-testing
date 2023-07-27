@@ -35,10 +35,11 @@ ENV WORKDIR=/home/k6
 WORKDIR ${WORKDIR}
 
 USER root
-RUN apk add --no-cache aws-cli
+RUN apk add --no-cache aws-cli curl jq
 
 USER k6
 RUN mkdir ${WORKDIR}/scripts
 COPY --from=node-build /home/node/scripts/dist ${WORKDIR}/scripts
+ADD reporting ${WORKDIR}/reporting
 
 ENTRYPOINT ["sh"]

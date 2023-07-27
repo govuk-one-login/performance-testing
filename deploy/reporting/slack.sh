@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Script to handle posting messages to Slack
-# To be called as source in the pipeline with argument 'POST' or 'UPDATE'
-# e.g. `. ./slack.sh POST` or `. ./slack.sh UPDATE`
+# To be called with source in the pipeline with argument 'POST' or 'UPDATE'
+# e.g. `source ./slack.sh POST` or `source ./slack.sh UPDATE`
 
 valid_args=true
 case $1 in

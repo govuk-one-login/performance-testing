@@ -387,6 +387,7 @@ Resources:
               MOBILE_BACKEND_URL: "/perfTest/mobile/backendUrl"
               MOBILE_FRONTEND_URL: "/perfTest/mobile/frontendUrl"
               MOBILE_TEST_CLIENT_EXECUTE_URL: "/perfTest/mobile/testClientUrl"
+              SLACK_OAUTH_TOKEN: "/perfTest/slack/OAuthToken"
           phases:
             pre_build:
               commands:

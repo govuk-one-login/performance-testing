@@ -180,7 +180,7 @@ export function persistID (): void {
       : fail('Response Validation Failed')
   })
 
-  sleep(Math.random() * 2 + 2)
+  sleep(2 + Math.random() * 2) // Random sleep between 2-4 seconds
 
   group('R01_persistID_03_Retrieve GET', function () {
     const startTime = Date.now()

@@ -1,9 +1,8 @@
 import { type SpotRequest } from '../../spot/requestGenerator/spotReqFormat'
 import { uuidv4 } from '../../common/utils/jslib/index'
 
-const audClientID = uuidv4()
-
 export function generateRequest (currTime: string): SpotRequest {
+  const audClientID = uuidv4()
   const sampleSpotRequest: SpotRequest = {
     in_claims: {
       'https://vocab.account.gov.uk/v1/credentialJWT': [

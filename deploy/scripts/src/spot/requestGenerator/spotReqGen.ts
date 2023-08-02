@@ -2,6 +2,7 @@ import { type SpotRequest } from '../../spot/requestGenerator/spotReqFormat'
 import { uuidv4 } from '../../common/utils/jslib/index'
 
 export function generateRequest (currTime: string): SpotRequest {
+  const audClientID = uuidv4()
   const sampleSpotRequest: SpotRequest = {
     in_claims: {
       'https://vocab.account.gov.uk/v1/credentialJWT': [
@@ -15,9 +16,9 @@ export function generateRequest (currTime: string): SpotRequest {
     in_local_account_id: 'a-simple-local-account-id',
     in_rp_sector_id: 'a.simple.sector.id',
     in_salt: 'YS1zaW1wbGUtc2FsdA==',
-    out_audience: uuidv4(),
+    out_audience: audClientID,
     log_ids: {
-      client_id: uuidv4(),
+      client_id: audClientID,
       persistent_session_id: uuidv4(),
       request_id: uuidv4() + '_' + currTime,
       session_id: uuidv4(),

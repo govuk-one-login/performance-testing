@@ -166,14 +166,7 @@ export function signUp (): void {
     const start = Date.now()
     res = res.submitForm({
       fields: {
-        'scopes-email': 'email',
-        'scopes-phone': 'phone',
-        prompt: 'none',
         '2fa': 'Cl.Cm',
-        loc: '',
-        'claims-core-identity': 'https://vocab.account.gov.uk/v1/coreIdentityJWT',
-        'claims-passport': 'https://vocab.account.gov.uk/v1/passport',
-        'claims-address': 'https://vocab.account.gov.uk/v1/address',
         lng: ''
       }
     })
@@ -403,14 +396,7 @@ export function signIn (): void {
     const start = Date.now()
     res = res.submitForm({
       fields: {
-        'scopes-email': 'email',
-        'scopes-phone': 'phone',
-        prompt: 'none',
         '2fa': 'Cl.Cm',
-        loc: '',
-        'claims-core-identity': 'https://vocab.account.gov.uk/v1/coreIdentityJWT',
-        'claims-passport': 'https://vocab.account.gov.uk/v1/passport',
-        'claims-address': 'https://vocab.account.gov.uk/v1/address',
         lng: ''
       }
     })

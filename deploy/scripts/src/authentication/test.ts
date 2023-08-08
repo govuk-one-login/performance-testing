@@ -125,8 +125,7 @@ const dataSignIn: signInData[] = new SharedArray('data', () => Array.from({ leng
   }
 ))
 const env = {
-  rpStub: __ENV.ACCOUNT_RP_STUB,
-  baseUrl: __ENV.ACCOUNT_BASE_URL
+  rpStub: __ENV.ACCOUNT_RP_STUB
 }
 const credentials = {
   authAppKey: __ENV.ACCOUNT_APP_KEY,
@@ -138,7 +137,6 @@ const durations = new Trend('duration', true)
 
 export function signUp (): void {
   let res: Response
-  let csrfToken: string
   const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
   const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0')
   const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
@@ -166,8 +164,8 @@ export function signUp (): void {
 
   group('POST - {RP Stub} /oidc/auth', () => {
     const start = Date.now()
-    res = http.post(env.rpStub + '/oidc/auth',
-      {
+    res = res.submitForm({
+      fields: {
         'scopes-email': 'email',
         'scopes-phone': 'phone',
         prompt: 'none',
@@ -178,7 +176,7 @@ export function signUp (): void {
         'claims-address': 'https://vocab.account.gov.uk/v1/address',
         lng: ''
       }
-    )
+    })
     const end = Date.now()
     check(res, {
       'is status 200': r => r.status === 200,
@@ -186,20 +184,18 @@ export function signUp (): void {
     })
       ? durations.add(end - start)
       : fail('Checks failed')
-    csrfToken = getCSRF(res)
   })
 
   sleep(1)
 
   group('POST - /sign-in-or-create', () => {
     const start = Date.now()
-    res = http.post(env.baseUrl + '/sign-in-or-create',
-      {
-        _csrf: csrfToken,
+    res = res.submitForm({
+      fields: {
         supportInternationalNumbers: 'true',
         optionSelected: 'create'
       }
-    )
+    })
     const end = Date.now()
     check(res, {
       'is status 200': r => r.status === 200,
@@ -207,19 +203,15 @@ export function signUp (): void {
     })
       ? durations.add(end - start)
       : fail('Checks failed')
-    csrfToken = getCSRF(res)
   })
 
   sleep(1)
 
   group('POST - /enter-email-create', () => {
     const start = Date.now()
-    res = http.post(env.baseUrl + '/enter-email-create',
-      {
-        _csrf: csrfToken,
-        email: testEmail
-      }
-    )
+    res = res.submitForm({
+      fields: { email: testEmail }
+    })
     const end = Date.now()
     check(res, {
       'is status 200': r => r.status === 200,
@@ -227,20 +219,18 @@ export function signUp (): void {
     })
       ? durations.add(end - start)
       : fail('Checks failed')
-    csrfToken = getCSRF(res)
   })
 
   sleep(1)
 
   group('POST - /check-your-email', () => {
     const start = Date.now()
-    res = http.post(env.baseUrl + '/check-your-email',
-      {
-        _csrf: csrfToken,
+    res = res.submitForm({
+      fields: {
         email: testEmail.toLowerCase(),
         code: credentials.emailOTP
       }
-    )
+    })
     const end = Date.now()
     check(res, {
       'is status 200': r => r.status === 200,
@@ -248,20 +238,18 @@ export function signUp (): void {
     })
       ? durations.add(end - start)
       : fail('Checks failed')
-    csrfToken = getCSRF(res)
   })
 
   sleep(1)
 
   group('POST - /create-password', () => {
     const start = Date.now()
-    res = http.post(env.baseUrl + '/create-password',
-      {
-        _csrf: csrfToken,
+    res = res.submitForm({
+      fields: {
         password: credentials.password,
         'confirm-password': credentials.password
       }
-    )
+    })
     const end = Date.now()
     check(res, {
       'is status 200': r => r.status === 200,
@@ -269,7 +257,6 @@ export function signUp (): void {
     })
       ? durations.add(end - start)
       : fail('Checks failed')
-    csrfToken = getCSRF(res)
   })
 
   sleep(1)
@@ -278,12 +265,9 @@ export function signUp (): void {
     case 'AUTH_APP': {
       group('POST - /get-security-codes', () => {
         const start = Date.now()
-        res = http.post(env.baseUrl + '/get-security-codes',
-          {
-            _csrf: csrfToken,
-            mfaOptions: mfaOption
-          }
-        )
+        res = res.submitForm({
+          fields: { mfaOptions: mfaOption }
+        })
         const end = Date.now()
         check(res, {
           'is status 200': r => r.status === 200,
@@ -293,20 +277,15 @@ export function signUp (): void {
           : fail('Checks failed')
         secretKey = res.html().find("span[class*='secret-key-fragment']").text() ?? ''
         totp = new TOTP(secretKey)
-        csrfToken = getCSRF(res)
       })
 
       sleep(1)
 
       group('POST - /setup-authenticator-app', () => {
         const start = Date.now()
-        res = http.post(env.baseUrl + '/setup-authenticator-app',
-          {
-            _csrf: csrfToken,
-            _secretKey: secretKey,
-            code: totp.generateTOTP()
-          }
-        )
+        res = res.submitForm({
+          fields: { code: totp.generateTOTP() }
+        })
         const end = Date.now()
         check(res, {
           'is status 200': r => r.status === 200,
@@ -314,19 +293,15 @@ export function signUp (): void {
         })
           ? durations.add(end - start)
           : fail('Checks failed')
-        csrfToken = getCSRF(res)
       })
       break
     }
     case 'SMS': {
       group('POST - /get-security-codes', () => {
         const start = Date.now()
-        res = http.post(env.baseUrl + '/get-security-codes',
-          {
-            _csrf: csrfToken,
-            mfaOptions: mfaOption
-          }
-        )
+        res = res.submitForm({
+          fields: { mfaOptions: mfaOption }
+        })
         const end = Date.now()
         check(res, {
           'is status 200': r => r.status === 200,
@@ -334,23 +309,15 @@ export function signUp (): void {
         })
           ? durations.add(end - start)
           : fail('Checks failed')
-        csrfToken = getCSRF(res)
       })
 
       sleep(1)
 
-      let censoredPhoneNumber = ''
       group('POST - /enter-phone-number', () => {
         const start = Date.now()
-        res = http.post(env.baseUrl + '/enter-phone-number',
-          {
-            _csrf: csrfToken,
-            supportInternationalNumbers: '',
-            isAccountPartCreated: 'false',
-            phoneNumber,
-            internationalPhoneNumber: ''
-          }
-        )
+        res = res.submitForm({
+          fields: { phoneNumber }
+        })
         const end = Date.now()
         check(res, {
           'is status 200': r => r.status === 200,
@@ -358,21 +325,15 @@ export function signUp (): void {
         })
           ? durations.add(end - start)
           : fail('Checks failed')
-        censoredPhoneNumber = getPhoneNumber(res)
-        csrfToken = getCSRF(res)
       })
 
       sleep(1)
 
       group('POST - /check-your-phone', () => {
         const start = Date.now()
-        res = http.post(env.baseUrl + '/check-your-phone',
-          {
-            _csrf: csrfToken,
-            phoneNumber: censoredPhoneNumber,
-            code: credentials.phoneOTP
-          }
-        )
+        res = res.submitForm({
+          fields: { code: credentials.phoneOTP }
+        })
         const end = Date.now()
         check(res, {
           'is status 200': r => r.status === 200,
@@ -380,7 +341,6 @@ export function signUp (): void {
         })
           ? durations.add(end - start)
           : fail('Checks failed')
-        csrfToken = getCSRF(res)
       })
       break
     }
@@ -390,12 +350,7 @@ export function signUp (): void {
 
   group('POST - /account-created', () => {
     const start = Date.now()
-    res = http.post(env.baseUrl + '/account-created',
-      {
-        _csrf: csrfToken,
-        phoneNumber: ''
-      }
-    )
+    res = res.submitForm()
     const end = Date.now()
     check(res, {
       'is status 200': r => r.status === 200,
@@ -411,11 +366,7 @@ export function signUp (): void {
 
     group('POST - {RP Stub} /logout', () => {
       const start = Date.now()
-      res = http.post(env.rpStub + '/logout',
-        {
-          logout: ''
-        }
-      )
+      res = res.submitForm()
       const end = Date.now()
       check(res, {
         'is status 200': r => r.status === 200,
@@ -424,12 +375,11 @@ export function signUp (): void {
         ? durations.add(end - start)
         : fail('Checks failed')
     })
-  };
-};
+  }
+}
 
 export function signIn (): void {
   let res: Response
-  let csrfToken: string
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
 
   group('GET - {RP Stub}', function () {
@@ -451,8 +401,8 @@ export function signIn (): void {
 
   group('POST - {RP Stub} /oidc/auth', () => {
     const start = Date.now()
-    res = http.post(env.rpStub + '/oidc/auth',
-      {
+    res = res.submitForm({
+      fields: {
         'scopes-email': 'email',
         'scopes-phone': 'phone',
         prompt: 'none',
@@ -463,7 +413,7 @@ export function signIn (): void {
         'claims-address': 'https://vocab.account.gov.uk/v1/address',
         lng: ''
       }
-    )
+    })
     const end = Date.now()
     check(res, {
       'is status 200': r => r.status === 200,
@@ -471,20 +421,13 @@ export function signIn (): void {
     })
       ? durations.add(end - start)
       : fail('Checks failed')
-
-    csrfToken = getCSRF(res)
   })
 
   sleep(1)
 
   group('GET - /sign-in-or-create', function () {
     const start = Date.now()
-    res = http.post(env.baseUrl + '/sign-in-or-create',
-      {
-        _csrf: csrfToken,
-        supportInternationalNumbers: 'true'
-      }
-    )
+    res = res.submitForm()
     const end = Date.now()
 
     check(res, {
@@ -493,20 +436,15 @@ export function signIn (): void {
     })
       ? durations.add(end - start)
       : fail('Checks failed')
-
-    csrfToken = getCSRF(res)
   })
 
   sleep(1)
 
   group('POST - /enter-email', () => {
     const start = Date.now()
-    res = http.post(env.baseUrl + '/enter-email',
-      {
-        _csrf: csrfToken,
-        email: userData.email
-      }
-    )
+    res = res.submitForm({
+      fields: { email: userData.email }
+    })
     const end = Date.now()
     check(res, {
       'is status 200': r => r.status === 200,
@@ -514,7 +452,6 @@ export function signIn (): void {
     })
       ? durations.add(end - start)
       : fail('Checks failed')
-    csrfToken = getCSRF(res)
   })
 
   sleep(1)
@@ -524,12 +461,9 @@ export function signIn (): void {
     case 'AUTH_APP': {
       group('POST - /enter-password', () => {
         const start = Date.now()
-        res = http.post(env.baseUrl + '/enter-password',
-          {
-            _csrf: csrfToken,
-            password: credentials.password
-          }
-        )
+        res = res.submitForm({
+          fields: { password: credentials.password }
+        })
         const end = Date.now()
         check(res, {
           'is status 200': r => r.status === 200,
@@ -537,7 +471,6 @@ export function signIn (): void {
         })
           ? durations.add(end - start)
           : fail('Checks failed')
-        csrfToken = getCSRF(res)
       })
 
       sleep(1)
@@ -545,12 +478,9 @@ export function signIn (): void {
       group('POST - /enter-authenticator-app-code', () => {
         const totp = new TOTP(credentials.authAppKey)
         const start = Date.now()
-        res = http.post(env.baseUrl + '/enter-authenticator-app-code',
-          {
-            _csrf: csrfToken,
-            code: totp.generateTOTP()
-          }
-        )
+        res = res.submitForm({
+          fields: { code: totp.generateTOTP() }
+        })
         const end = Date.now()
 
         acceptNewTerms = (res.body as string).includes('terms of use update')
@@ -564,15 +494,11 @@ export function signIn (): void {
       break
     }
     case 'SMS': {
-      let phoneNumber = ''
       group('POST - /enter-password', () => {
         const start = Date.now()
-        res = http.post(env.baseUrl + '/enter-password',
-          {
-            _csrf: csrfToken,
-            password: credentials.password
-          }
-        )
+        res = res.submitForm({
+          fields: { password: credentials.password }
+        })
         const end = Date.now()
         check(res, {
           'is status 200': r => r.status === 200,
@@ -580,21 +506,15 @@ export function signIn (): void {
         })
           ? durations.add(end - start)
           : fail('Checks failed')
-        phoneNumber = getPhoneNumber(res)
-        csrfToken = getCSRF(res)
       })
 
       sleep(1)
 
       group('POST - /enter-code', () => {
         const start = Date.now()
-        res = http.post(env.baseUrl + '/enter-code',
-          {
-            _csrf: csrfToken,
-            phoneNumber,
-            code: credentials.phoneOTP
-          }
-        )
+        res = res.submitForm({
+          fields: { code: credentials.phoneOTP }
+        })
         const end = Date.now()
 
         acceptNewTerms = (res.body as string).includes('terms of use update')
@@ -632,11 +552,7 @@ export function signIn (): void {
 
     group('POST - {RP Stub} /logout', () => {
       const start = Date.now()
-      res = http.post(env.rpStub + '/logout',
-        {
-          logout: ''
-        }
-      )
+      res = res.submitForm()
       const end = Date.now()
       check(res, {
         'is status 200': r => r.status === 200,
@@ -645,13 +561,5 @@ export function signIn (): void {
         ? durations.add(end - start)
         : fail('Checks failed')
     })
-  };
-}
-
-function getCSRF (r: Response): string {
-  return r.html().find("input[name='_csrf']").val() ?? ''
-}
-
-function getPhoneNumber (r: Response): string {
-  return r.html().find("input[name='phoneNumber']").val() ?? ''
+  }
 }

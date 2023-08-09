@@ -82,29 +82,26 @@ export function kbvScenario1 (): void {
   }
   const kbvAnsJSON: kbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
 
-  group(
-    'B01_KBV_01_CoreStubEditUserContinue POST',
-    function () {
-      const startTime = Date.now()
-      res = http.get(
-        env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197',
-        {
-          headers: { Authorization: `Basic ${encodedCredentials}` },
-          tags: { name: 'B01_KBV_01_CoreStubEditUserContinue' }
-        }
-      )
-      const endTime = Date.now()
-      isStatusCode200(res) && validatePageContent(res, 'You can find this amount on your loan agreement')
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
+  group('B01_KBV_01_CoreStubEditUserContinue POST', () => {
+    const startTime = Date.now()
+    res = http.get(
+      env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197',
+      {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B01_KBV_01_CoreStubEditUserContinue' }
+      }
+    )
+    const endTime = Date.now()
+    isStatusCode200(res) && validatePageContent(res, 'You can find this amount on your loan agreement')
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
 
-      csrfToken = getCSRF(res)
-    }
-  )
+    csrfToken = getCSRF(res)
+  })
 
   sleep(Math.random() * 3)
 
-  group('B01_KBV_02_KBVQuestion1 POST', function () {
+  group('B01_KBV_02_KBVQuestion1 POST', () => {
     const startTime = Date.now()
     res = http.post(
       env.kbvEndPoint + '/kbv/question',
@@ -127,7 +124,7 @@ export function kbvScenario1 (): void {
 
   sleep(Math.random() * 3)
 
-  group('B01_KBV_03_KBVQuestion2 POST', function () {
+  group('B01_KBV_03_KBVQuestion2 POST', () => {
     const startTime = Date.now()
     res = http.post(
       env.kbvEndPoint + '/kbv/question',
@@ -150,7 +147,7 @@ export function kbvScenario1 (): void {
 
   sleep(Math.random() * 3)
 
-  group('B01_KBV_04_KBVQuestion3 POST', function () {
+  group('B01_KBV_04_KBVQuestion3 POST', () => {
     const startTime1 = Date.now()
     res = http.post(
       env.kbvEndPoint + '/kbv/question',

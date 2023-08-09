@@ -72,7 +72,7 @@ interface Address {
   postcode: string
 }
 
-const csvData1: Address[] = new SharedArray('csvDataAddress', function () {
+const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
   return open('./data/addressCRIData.csv').split('\n').slice(1).map((postcode) => {
     return {
       postcode
@@ -89,28 +89,25 @@ export function addressScenario1 (): void {
   let addDetails: any
   const user1Address = csvData1[exec.scenario.iterationInTest % csvData1.length]
 
-  group(
-    'B02_Address_01_AddressCRIEntryFromStub  GET',
-    function () {
-      const startTime = Date.now()
-      res = http.get(
-        env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName,
-        {
-          headers: { Authorization: `Basic ${encodedCredentials}` },
-          tags: { name: 'B02_Address_01_AddressCRIEntryFromStub' }
-        }
-      )
-      const endTime = Date.now()
-      isStatusCode200(res) && validatePageContent(res, 'Find your address')
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
-      csrfToken = getCSRF(res)
-    }
-  )
+  group('B02_Address_01_AddressCRIEntryFromStub  GET', () => {
+    const startTime = Date.now()
+    res = http.get(
+      env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName,
+      {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B02_Address_01_AddressCRIEntryFromStub' }
+      }
+    )
+    const endTime = Date.now()
+    isStatusCode200(res) && validatePageContent(res, 'Find your address')
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
 
   sleep(Math.random() * 3)
 
-  group('B02_Address_02_SearchPostCode POST', function () {
+  group('B02_Address_02_SearchPostCode POST', () => {
     const startTime = Date.now()
     res = http.post(
       env.addressEndPoint + '/search',
@@ -132,7 +129,7 @@ export function addressScenario1 (): void {
     csrfToken = getCSRF(res)
   })
 
-  group('B02_Address_03_SelectAddress POST', function () {
+  group('B02_Address_03_SelectAddress POST', () => {
     const startTime = Date.now()
     res = http.post(
       env.addressEndPoint + '/results',
@@ -156,7 +153,7 @@ export function addressScenario1 (): void {
 
   sleep(Math.random() * 3)
 
-  group('B02_Address_04_VerifyAddress POST', function () {
+  group('B02_Address_04_VerifyAddress POST', () => {
     const startTime = Date.now()
     res = http.post(
       env.addressEndPoint + '/address',
@@ -184,7 +181,7 @@ export function addressScenario1 (): void {
 
   sleep(Math.random() * 3)
 
-  group('B02_Address_05_ConfirmDetails POST', function () {
+  group('B02_Address_05_ConfirmDetails POST', () => {
     const startTime1 = Date.now()
     res = http.post(
       env.addressEndPoint + '/summary/confirm',

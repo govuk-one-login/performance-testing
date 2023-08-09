@@ -4,7 +4,6 @@ import http, { type Response } from 'k6/http'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
 import { Trend } from 'k6/metrics'
-import TOTP from '../common/utils/authentication/totp'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 
 const profiles: ProfileList = {
@@ -126,52 +125,6 @@ export const options: Options = {
   }
 }
 
-type mfaType = 'SMS' | 'AUTH_APP'
-
-interface changeEmailData {
-  email: string
-  mfaOption: mfaType
-}
-
-const dataChangeEmail: changeEmailData[] = new SharedArray('data1', () => {
-  const data: changeEmailData[] = []
-
-  for (let i = 1; i <= 10000; i++) {
-    const id = i.toString().padStart(5, '0')
-    const emailAPP = `perftestAM2_App_${id}@digital.cabinet-office.gov.uk`
-    const emailSMS = `perftestAM2_SMS_${id}@digital.cabinet-office.gov.uk`
-    const mfaOptionAPP = 'AUTH_APP' as mfaType
-    const mfaOptionSMS = 'SMS' as mfaType
-
-    data.push({ email: emailAPP, mfaOption: mfaOptionAPP })
-    data.push({ email: emailSMS, mfaOption: mfaOptionSMS })
-  }
-
-  return data
-})
-
-interface changePasswordData {
-  email: string
-  mfaOption: mfaType
-}
-
-const dataChangePassword: changePasswordData[] = new SharedArray('data2', () => {
-  const data: changePasswordData[] = []
-
-  for (let i = 1; i <= 10000; i++) {
-    const id = i.toString().padStart(5, '0')
-    const emailAPP = `perftestAM1_App_${id}@digital.cabinet-office.gov.uk`
-    const emailSMS = `perftestAM1_SMS_${id}@digital.cabinet-office.gov.uk`
-    const mfaOptionAPP = 'AUTH_APP' as mfaType
-    const mfaOptionSMS = 'SMS' as mfaType
-
-    data.push({ email: emailAPP, mfaOption: mfaOptionAPP })
-    data.push({ email: emailSMS, mfaOption: mfaOptionSMS })
-  }
-
-  return data
-})
-
 interface UserPhoneNumberChange {
   currEmail: string
 }
@@ -184,28 +137,6 @@ const csvData3: UserPhoneNumberChange[] = new SharedArray('csvPhoneNumChange', f
   })
 }
 )
-
-interface deleteAccountData {
-  email: string
-  mfaOption: mfaType
-}
-
-const dataDeleteAccount: deleteAccountData[] = new SharedArray('data4', () => {
-  const data: deleteAccountData[] = []
-
-  for (let i = 1; i <= 10000; i++) {
-    const id = i.toString().padStart(5, '0')
-    const emailAPP = `perftestAM4_App_${id}@digital.cabinet-office.gov.uk`
-    const emailSMS = `perftestAM4_SMS_${id}@digital.cabinet-office.gov.uk`
-    const mfaOptionAPP = 'AUTH_APP' as mfaType
-    const mfaOptionSMS = 'SMS' as mfaType
-
-    data.push({ email: emailAPP, mfaOption: mfaOptionAPP })
-    data.push({ email: emailSMS, mfaOption: mfaOptionSMS })
-  }
-
-  return data
-})
 
 export function setup (): void {
   describeProfile(loadProfile)
@@ -233,250 +164,29 @@ const transactionDuration = new Trend('duration', true)
 
 export function changeEmail (): void {
   let res: Response
-  let csrfToken: string
-  let phoneNumber: string
-  let currentEmail: string
   const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
   const iteration = exec.scenario.iterationInInstance.toString().padStart(6, '0')
-  let newEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
-
-  const emailChangeData = dataChangeEmail[exec.scenario.iterationInInstance % dataChangeEmail.length]
-
-  currentEmail = emailChangeData.email
-  const totp = new TOTP(credentials.authAppKey)
+  const newEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
 
   group('B01_ChangeEmail_01_LaunchAccountsHome GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL, {
-      tags: { name: 'B01_ChangeEmail_01_LaunchAccountsHome' }
-    })
+    res = http.get(env.envURL)
     const endTime = Date.now()
 
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Create a GOV.UK One Login or sign in')
+        (r.body as string).includes('Services you can use with GOV.UK One Login')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
-    csrfToken = getCSRF(res)
   })
 
   sleep(Math.random() * 3)
 
-  group('B01_ChangeEmail_02_ClickSignIn POST', function () {
+  group('B01_ChangeEmail_02_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.post(env.signinURL + '/sign-in-or-create', {
-
-      _csrf: csrfToken,
-      supportInternationalNumbers: 'true'
-    },
-    {
-      tags: { name: 'B01_ChangeEmail_02_ClickSignIn' }
-    })
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes(
-          'Enter your email address to sign in to your GOV.UK One Login'
-        )
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B01_ChangeEmail_03_EnterEmailID POST', () => {
-    const startTime = Date.now()
-    res = http.post(
-      env.signinURL + '/enter-email',
-      {
-        _csrf: csrfToken,
-        email: currentEmail
-      },
-      {
-        tags: { name: 'B01_ChangeEmail_03_EnterEmailID' }
-      }
-    )
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your password')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  switch (emailChangeData.mfaOption) {
-    case 'SMS': {
-      group('B01_ChangeEmail_04_SMS_EnterLoginPassword POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.signinURL + '/enter-password',
-          {
-            _csrf: csrfToken,
-            password: credentials.currPassword
-          },
-          {
-            tags: { name: 'B01_ChangeEmail_04_SMS_EnterLoginPassword' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes(
-              'We have sent a code to your phone number'
-            )
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        csrfToken = getCSRF(res)
-        phoneNumber = getPhone(res)
-      })
-
-      group('B01_ChangeEmail_05_01_SMS_EnterOTP POST', () => {
-        const startTime = Date.now()
-        res = http.post(env.signinURL + '/enter-code',
-          {
-            phoneNumber,
-            _csrf: csrfToken,
-            supportAccountRecovery: 'true',
-            checkEmailLink: '/check-email-change-security-codes?type=SMS',
-            code: credentials.fixedPhoneOTP
-          },
-          {
-            tags: { name: 'B01_ChangeEmail_05_01_SMS_EnterOTP' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        if ((res.body as string).includes('terms of use update')) {
-          group('B01_ChangeEmail_05_02_SMS_AcceptTerms', () => {
-            const startTime = Date.now()
-            res = http.post(
-              env.signinURL + '/updated-terms-and-conditions',
-              {
-                _csrf: csrfToken,
-                termsAndConditionsResult: 'accept'
-              },
-              {
-                tags: { name: 'B01_ChangeEmail_05_02_SMS_AcceptTerms' }
-              }
-            )
-
-            const endTime = Date.now()
-            check(res, {
-              'is status 200': r => r.status === 200,
-              'verify page content': r => (r.body as string).includes('Your services')
-            })
-              ? transactionDuration.add(endTime - startTime)
-              : fail('Response Validation Failed')
-          })
-        }
-      })
-      break
-    }
-    case 'AUTH_APP': {
-      group('B01_ChangeEmail_06_APP_EnterLoginPassword POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.signinURL + '/enter-password',
-          {
-            _csrf: csrfToken,
-            password: credentials.currPassword
-          },
-          {
-            tags: { name: 'B01_ChangeEmail_06_APP_EnterLoginPassword' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Enter the 6 digit security code shown in your authenticator app')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        csrfToken = getCSRF(res)
-      })
-
-      sleep(2)
-
-      group('B01_ChangeEmail_07_01_APP_EnterAuthAppOTP POST', () => {
-        const startTime = Date.now()
-        res = http.post(env.signinURL + '/enter-authenticator-app-code',
-          {
-            _csrf: csrfToken,
-            code: totp.generateTOTP()
-          },
-          {
-            tags: { name: 'B01_ChangeEmail_07_APP_EnterAuthAppOTP' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-        if ((res.body as string).includes('terms of use update')) {
-          group('B01_ChangeEmail_07_02_APP_AcceptTerms POST', () => {
-            const startTime = Date.now()
-            res = http.post(env.signinURL + '/updated-terms-and-conditions',
-              {
-                _csrf: csrfToken,
-                termsAndConditionsResult: 'accept'
-              },
-              {
-                tags: { name: 'B02_ChangeEmail_07_02_APP_AcceptTerms' }
-              }
-            )
-            const endTime = Date.now()
-            check(res, {
-              'is status 200': r => r.status === 200,
-              'verify page content': r => (r.body as string).includes('Your services')
-            })
-              ? transactionDuration.add(endTime - startTime)
-              : fail('Respone Validation Failed')
-          })
-        }
-      })
-      break
-    }
-  }
-
-  sleep(Math.random() * 3)
-
-  group('B01_ChangeEmail_08_ClickSecurityTab GET', () => {
-    const startTime = Date.now()
-    res = http.get(env.envURL + '/security', {
-      tags: { name: 'B01_ChangeEmail_08_ClickSecurityTab' }
-    })
+    res = http.get(env.envURL + '/security')
     const endTime = Date.now()
 
     check(res, {
@@ -489,141 +199,103 @@ export function changeEmail (): void {
 
   sleep(Math.random() * 3)
 
-  function changeEmailSteps (loopCount: number): void {
-    for (let i = 1; i <= loopCount; i++) {
-      group('B01_ChangeEmail_09_ClickChangeEmailLink GET', function () {
-        const startTime = Date.now()
-        res = http.get(env.envURL + '/enter-password?type=changeEmail', {
-          tags: { name: 'B01_ChangeEmail_09_ClickChangeEmailLink' }
-        })
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Enter your password')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        csrfToken = getCSRF(res)
-      })
-
-      sleep(Math.random() * 3)
-
-      group('B01_ChangeEmail_10_EnterCurrentPassword POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.envURL + '/enter-password',
-          {
-            _csrf: csrfToken,
-            requestType: 'changeEmail',
-            password: credentials.currPassword
-          },
-          {
-            tags: { name: 'B01_ChangeEmail_10_EnterCurrentPassword' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Enter your new email address')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        csrfToken = getCSRF(res)
-      })
-
-      sleep(Math.random() * 3)
-
-      group('B01_ChangeEmail_11_EnterNewEmailID POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.envURL + '/change-email',
-          {
-            _csrf: csrfToken,
-            email: newEmail
-          },
-          {
-            tags: { name: 'B01_ChangeEmail_11_EnterNewEmailID' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Check your email')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        csrfToken = getCSRF(res)
-      })
-
-      sleep(Math.random() * 3)
-
-      group('B01_ChangeEmail_12_EnterEmailOTP POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.envURL + '/check-your-email',
-          {
-            _csrf: csrfToken,
-            email: newEmail,
-            code: credentials.fixedEmailOTP
-          },
-          {
-            tags: { name: 'B01_ChangeEmail_12_EnterEmailOTP' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('You’ve changed your email address')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        csrfToken = getCSRF(res)
-      })
-
-      sleep(Math.random() * 3)
-
-      group('B01_ChangeEmail_13_ClickBackToSecurity GET', function () {
-        const startTime = Date.now()
-        res = http.get(env.envURL + '/manage-your-account', {
-          tags: { name: 'B01_ChangeEmail_13_ClickBackToMyAccount' }
-        })
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Delete your GOV.UK One Login')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-      })
-
-      sleep(Math.random() * 3);
-
-      // Swap the value of passwords by destructuring assignment
-      [currentEmail, newEmail] = [newEmail, currentEmail]
-    }
-  }
-
-  changeEmailSteps(2) // Calling the email change function
-
-  group('B01_ChangeEmail_14_SignOut GET', function () {
+  group('B01_ChangeEmail_03_ClickChangeEmailLink GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/sign-out', {
-      tags: { name: 'B01_ChangeEmail_14_SignOut' }
+    res = http.get(env.envURL + '/enter-password?type=changeEmail')
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Enter your password')
     })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B01_ChangeEmail_04_EnterCurrentPassword POST', () => {
+    const startTime = Date.now()
+    res = res.submitForm({
+      fields: {
+        requestType: 'changeEmail',
+        password: credentials.currPassword
+      }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Enter your new email address')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B01_ChangeEmail_05_EnterNewEmailID POST', () => {
+    const startTime = Date.now()
+    res = res.submitForm({
+      fields: {
+        email: newEmail
+      }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Check your email')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B01_ChangeEmail_06_EnterEmailOTP POST', () => {
+    const startTime = Date.now()
+    res = res.submitForm({
+      fields: {
+        email: newEmail,
+        code: credentials.fixedEmailOTP
+      }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('You’ve changed your email address')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B01_ChangeEmail_07_ClickBackToSecurity GET', function () {
+    const startTime = Date.now()
+    res = http.get(env.envURL + '/manage-your-account')
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Delete your GOV.UK One Login')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B01_ChangeEmail_08_SignOut GET', function () {
+    const startTime = Date.now()
+    res = http.get(env.envURL + '/sign-out')
     const endTime = Date.now()
 
     check(res, {
@@ -638,23 +310,16 @@ export function changeEmail (): void {
 
 export function changePassword (): void {
   let res: Response
-  let csrfToken: string
-  let phoneNumber: string
-  const passwordChangeData = dataChangePassword[exec.scenario.iterationInInstance % dataChangePassword.length]
-  const currentEmail = passwordChangeData.email
-  const totp = new TOTP(credentials.authAppKey)
 
   group('B02_ChangePassword_01_LaunchAccountsHome GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL, {
-      tags: { name: 'B02_ChangePassword_01_LaunchAccountsHome' }
-    })
+    res = http.get(env.envURL)
     const endTime = Date.now()
 
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Create a GOV.UK One Login or sign in')
+        (r.body as string).includes('Services you can use with GOV.UK One Login')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -662,220 +327,9 @@ export function changePassword (): void {
 
   sleep(Math.random() * 3)
 
-  group('B02_ChangePassword_02_ClickSignIn GET', function () {
+  group('B02_ChangePassword_02_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.signinURL + '/sign-in-or-create?redirectPost=true', {
-      tags: { name: 'B02_ChangePassword_02_ClickSignIn' }
-    })
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes(
-          'Enter your email address to sign in to your GOV.UK One Login'
-        )
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B02_ChangePassword_03_EnterEmailID POST', () => {
-    const startTime = Date.now()
-    res = http.post(
-      env.signinURL + '/enter-email',
-      {
-        _csrf: csrfToken,
-        email: currentEmail
-      },
-      {
-        tags: { name: 'B02_ChangePassword_03_EnterEmailID' }
-      }
-    )
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your password')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  switch (passwordChangeData.mfaOption) {
-    case 'SMS': {
-      group('B02_ChangePassword_04_SMS_EnterLoginPassword POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.signinURL + '/enter-password',
-          {
-            _csrf: csrfToken,
-            password: credentials.currPassword
-          },
-          {
-            tags: { name: 'B02_ChangePassword_04_SMS_EnterLoginPassword' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes(
-              'We have sent a code to your phone number'
-            )
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        csrfToken = getCSRF(res)
-        phoneNumber = getPhone(res)
-      })
-
-      sleep(Math.random() * 3)
-
-      group('B02_ChangePassword_05_01_SMS_EnterOTP POST', () => {
-        const startTime = Date.now()
-        res = http.post(env.signinURL + '/enter-code',
-          {
-            phoneNumber,
-            _csrf: csrfToken,
-            supportAccountRecovery: 'true',
-            checkEmailLink: '/check-email-change-security-codes?type=SMS',
-            code: credentials.fixedPhoneOTP
-          },
-          {
-            tags: { name: 'B02_ChangePassword_05_01_SMS_EnterOTP' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        if ((res.body as string).includes('terms of use update')) {
-          group('B02_ChangePassword_05_02_SMS_AcceptTerms', () => {
-            const startTime = Date.now()
-            res = http.post(
-              env.signinURL + '/updated-terms-and-conditions',
-              {
-                _csrf: csrfToken,
-                termsAndConditionsResult: 'accept'
-              },
-              {
-                tags: { name: 'B02_ChangePassword_05_02_SMS_AcceptTerms' }
-              }
-            )
-
-            const endTime = Date.now()
-            check(res, {
-              'is status 200': r => r.status === 200,
-              'verify page content': r => (r.body as string).includes('Your services')
-            })
-              ? transactionDuration.add(endTime - startTime)
-              : fail('Response Validation Failed')
-          })
-        }
-      })
-
-      break
-    }
-    case 'AUTH_APP': {
-      group('B02_ChangePassword_06_APP_EnterLoginPassword POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.signinURL + '/enter-password',
-          {
-            _csrf: csrfToken,
-            password: credentials.currPassword
-          },
-          {
-            tags: { name: 'B02_ChangePassword_06_APP_EnterLoginPassword' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes(
-              'Enter the 6 digit security code shown in your authenticator app'
-            )
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        csrfToken = getCSRF(res)
-      })
-
-      sleep(Math.random() * 3)
-
-      group('B02_ChangePassword_07_01_APP_EnterAuthAppOTP POST', () => {
-        const startTime = Date.now()
-        res = http.post(env.signinURL + '/enter-authenticator-app-code',
-          {
-            _csrf: csrfToken,
-            code: totp.generateTOTP()
-          },
-          {
-            tags: { name: 'B02_ChangePassword_07_APP_EnterAuthAppOTP' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        if ((res.body as string).includes('terms of use update')) {
-          group('B02_ChangePassword_07_02_APP_AcceptTerms POST', () => {
-            const startTime = Date.now()
-            res = http.post(env.signinURL + '/updated-terms-and-conditions',
-              {
-                _csrf: csrfToken,
-                termsAndConditionsResult: 'accept'
-              },
-              {
-                tags: { name: 'B02_ChangePassword_07_02_APP_AcceptTerms' }
-              }
-            )
-            const endTime = Date.now()
-            check(res, {
-              'is status 200': r => r.status === 200,
-              'verify page content': r => (r.body as string).includes('Your services')
-            })
-              ? transactionDuration.add(endTime - startTime)
-              : fail('Respone Validation Failed')
-          })
-        }
-      })
-      break
-    }
-  }
-
-  sleep(Math.random() * 3)
-
-  group('B02_ChangePassword_08_ClickSecurityTab GET', () => {
-    const startTime = Date.now()
-    res = http.get(env.envURL + '/security', {
-      tags: { name: 'B02_ChangePassword_08_ClickSecurityTab' } // pragma: allowlist secret
-    })
+    res = http.get(env.envURL + '/security')
     const endTime = Date.now()
 
     check(res, {
@@ -888,109 +342,81 @@ export function changePassword (): void {
 
   sleep(Math.random() * 3)
 
-  function changePassSteps (loopCount: number): void {
-    for (let i = 1; i <= loopCount; i++) {
-      group('B02_ChangePassword_09_ClickChangePasswordLink GET', function () {
-        const startTime = Date.now()
-        res = http.get(env.envURL + '/enter-password?type=changePassword', {
-          tags: { name: 'B02_ChangePassword_09_ClickChangePasswordLink' }
-        })
-        const endTime = Date.now()
+  group('B02_ChangePassword_03_ClickChangePasswordLink GET', function () {
+    const startTime = Date.now()
+    res = http.get(env.envURL + '/enter-password?type=changePassword')
+    const endTime = Date.now()
 
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Enter your current password')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Enter your current password')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
 
-        csrfToken = getCSRF(res)
-      })
+  sleep(Math.random() * 3)
 
-      sleep(Math.random() * 3)
+  group('B02_ChangePassword_04_EnterCurrentPassword POST', () => {
+    const startTime = Date.now()
+    res = res.submitForm({
+      fields: {
+        requestType: 'changePassword',
+        password: credentials.currPassword
+      }
+    })
+    const endTime = Date.now()
 
-      group('B02_ChangePassword_10_EnterCurrentPassword POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.envURL + '/enter-password',
-          {
-            _csrf: csrfToken,
-            requestType: 'changePassword',
-            password: credentials.currPassword
-          },
-          {
-            tags: { name: 'B02_ChangePassword_10_EnterCurrentPassword' }
-          }
-        )
-        const endTime = Date.now()
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Enter your new password')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
 
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Enter your new password')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
+  sleep(Math.random() * 3)
 
-        csrfToken = getCSRF(res)
-      })
+  group('B02_ChangePassword_05_EnterNewPassword POST', () => {
+    const startTime = Date.now()
+    res = res.submitForm({
+      fields: {
+        password: credentials.newPassword,
+        'confirm-password': credentials.newPassword
+      }
+    })
+    const endTime = Date.now()
 
-      sleep(Math.random() * 3)
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('You’ve changed your password')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
 
-      group('B02_ChangePassword_11_EnterNewPassword POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.envURL + '/change-password',
-          {
-            _csrf: csrfToken,
-            password: credentials.newPassword,
-            'confirm-password': credentials.newPassword
-          },
-          {
-            tags: { name: 'B02_ChangePassword_11_EnterNewPassword' }
-          }
-        )
-        const endTime = Date.now()
+  sleep(Math.random() * 3)
 
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('You’ve changed your password')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
+  group('B02_ChangePassword_06_ClickBackToSecurity GET', function () {
+    const startTime = Date.now()
+    res = http.get(env.envURL + '/manage-your-account')
+    const endTime = Date.now()
 
-        csrfToken = getCSRF(res)
-      })
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Delete your GOV.UK One Login')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
 
-      sleep(Math.random() * 3)
+  sleep(Math.random() * 3)
 
-      group('B02_ChangePassword_12_ClickBackToSecurity GET', function () {
-        const startTime = Date.now()
-        res = http.get(env.envURL + '/manage-your-account', {
-          tags: { name: 'B02_ChangePassword_12_ClickBackToSecurity' } // pragma: allowlist secret
-        })
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Delete your GOV.UK One Login')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-      });
-
-      [credentials.currPassword, credentials.newPassword] = [credentials.newPassword, credentials.currPassword]
-
-      sleep(Math.random() * 3)
-    }
-  }
-
-  changePassSteps(2) // Calling the password change function twice to change the password back to the original one
-
-  group('B02_ChangePassword_13_SignOut GET', function () {
+  group('B02_ChangePassword_07_SignOut GET', function () {
     const startTime = Date.now()
     res = http.get(env.envURL + '/sign-out', {
       tags: { name: 'B02_ChangePassword_13_SignOut' }
@@ -1341,23 +767,16 @@ export function changePhone (): void {
 
 export function deleteAccount (): void {
   let res: Response
-  let csrfToken: string
-  let phoneNumber: string
-  const deleteAccountData = dataDeleteAccount[exec.scenario.iterationInInstance % dataDeleteAccount.length]
-  const currentEmail = deleteAccountData.email
-  const totp = new TOTP(credentials.authAppKey)
 
   group('B04_DeleteAccount_01_LaunchAccountsHome GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL, {
-      tags: { name: 'B04_DeleteAccount_01_LaunchAccountsHome' }
-    })
+    res = http.get(env.envURL)
     const endTime = Date.now()
 
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Create a GOV.UK One Login or sign in')
+        (r.body as string).includes('Services you can use with GOV.UK One Login')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
@@ -1365,218 +784,9 @@ export function deleteAccount (): void {
 
   sleep(Math.random() * 3)
 
-  group('B04_DeleteAccount_02_ClickSignIn GET', function () {
+  group('B04_DeleteAccount_02_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.signinURL + '/sign-in-or-create?redirectPost=true', {
-      tags: { name: 'B04_DeleteAccount_02_ClickSignIn' }
-    })
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes(
-          'Enter your email address to sign in to your GOV.UK One Login'
-        )
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B04_DeleteAccount_03_EnterEmailID POST', () => {
-    const startTime = Date.now()
-    res = http.post(
-      env.signinURL + '/enter-email',
-      {
-        _csrf: csrfToken,
-        email: currentEmail
-      },
-      {
-        tags: { name: 'B04_DeleteAccount_03_EnterEmailID' }
-      }
-    )
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your password')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  switch (deleteAccountData.mfaOption) {
-    case 'SMS': {
-      group('B04_DeleteAccount_04_SMS_EnterLoginPassword POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.signinURL + '/enter-password',
-          {
-            _csrf: csrfToken,
-            password: credentials.currPassword
-          },
-          {
-            tags: { name: 'B04_DeleteAccount_04_SMS_EnterLoginPassword' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes(
-              'We have sent a code to your phone number'
-            )
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        csrfToken = getCSRF(res)
-        phoneNumber = getPhone(res)
-      })
-
-      sleep(Math.random() * 3)
-
-      group('B04_DeleteAccount_05_01_SMS_EnterOTP POST', () => {
-        const startTime = Date.now()
-        res = http.post(env.signinURL + '/enter-code',
-          {
-            phoneNumber,
-            _csrf: csrfToken,
-            supportAccountRecovery: 'true',
-            checkEmailLink: '/check-email-change-security-codes?type=SMS',
-            code: credentials.fixedPhoneOTP
-          },
-          {
-            tags: { name: 'B04_DeleteAccount_05_01_SMS_EnterOTP' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        if ((res.body as string).includes('terms of use update')) {
-          group('B04_DeleteAccount_05_02_SMS_AcceptTerms', () => {
-            const startTime = Date.now()
-            res = http.post(
-              env.signinURL + '/updated-terms-and-conditions',
-              {
-                _csrf: csrfToken,
-                termsAndConditionsResult: 'accept'
-              },
-              {
-                tags: { name: 'B04_DeleteAccount_05_02_SMS_AcceptTerms' }
-              }
-            )
-            const endTime = Date.now()
-            check(res, {
-              'is status 200': r => r.status === 200,
-              'verify page content': r => (r.body as string).includes('Your services')
-            })
-              ? transactionDuration.add(endTime - startTime)
-              : fail('Response Validation Failed')
-          })
-        }
-      })
-      break
-    }
-    case 'AUTH_APP': {
-      group('B04_DeleteAccount_06_APP_EnterLoginPassword POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.signinURL + '/enter-password',
-          {
-            _csrf: csrfToken,
-            password: credentials.currPassword
-          },
-          {
-            tags: { name: 'B04_DeleteAccount_06_APP_EnterLoginPassword' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes(
-              'Enter the 6 digit security code shown in your authenticator app'
-            )
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        csrfToken = getCSRF(res)
-      })
-
-      sleep(Math.random() * 3)
-
-      group('B04_DeleteAccount_07_01_APP_EnterAuthAppOTP POST', () => {
-        const startTime = Date.now()
-        res = http.post(env.signinURL + '/enter-authenticator-app-code',
-          {
-            _csrf: csrfToken,
-            code: totp.generateTOTP()
-          },
-          {
-            tags: { name: 'B04_DeleteAccount_07_01_APP_EnterAuthAppOTP' }
-          }
-        )
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-
-        if ((res.body as string).includes('terms of use update')) {
-          group('B04_DeleteAccount_07_02_APP_AcceptTerms POST', () => {
-            const startTime = Date.now()
-            res = http.post(env.signinURL + '/updated-terms-and-conditions',
-              {
-                _csrf: csrfToken,
-                termsAndConditionsResult: 'accept'
-              },
-              {
-                tags: { name: 'B04_DeleteAccount_07_02_APP_AcceptTerms' }
-              }
-            )
-            const endTime = Date.now()
-            check(res, {
-              'is status 200': r => r.status === 200,
-              'verify page content': r => (r.body as string).includes('Your services')
-            })
-              ? transactionDuration.add(endTime - startTime)
-              : fail('Respone Validation Failed')
-          })
-        }
-      })
-      break
-    }
-  }
-
-  sleep(Math.random() * 3)
-
-  group('B04_DeleteAccount_08_ClickSecurityTab GET', () => {
-    const startTime = Date.now()
-    res = http.get(env.envURL + '/security', {
-      tags: { name: 'B04_DeleteAccount_08_ClickSecurityTab' }
-    })
+    res = http.get(env.envURL + '/security')
     const endTime = Date.now()
 
     check(res, {
@@ -1589,11 +799,9 @@ export function deleteAccount (): void {
 
   sleep(Math.random() * 3)
 
-  group('B04_DeleteAccount_07_ClickDeleteAccountLink GET', function () {
+  group('B04_DeleteAccount_03_ClickDeleteAccountLink GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/enter-password?type=deleteAccount', {
-      tags: { name: 'B04_DeleteAccount_07_ClickDeleteAccountLink' }
-    })
+    res = http.get(env.envURL + '/enter-password?type=deleteAccount')
     const endTime = Date.now()
 
     check(res, {
@@ -1603,25 +811,18 @@ export function deleteAccount (): void {
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
   })
 
   sleep(Math.random() * 3)
 
-  group('B04_DeleteAccount_08_EnterCurrentPassword POST', () => {
+  group('B04_DeleteAccount_04_EnterCurrentPassword POST', () => {
     const startTime = Date.now()
-    res = http.post(
-      env.envURL + '/enter-password',
-      {
-        _csrf: csrfToken,
+    res = res.submitForm({
+      fields: {
         requestType: 'deleteAccount',
         password: credentials.currPassword
-      },
-      {
-        tags: { name: 'B04_DeleteAccount_08_EnterCurrentPassword' }
       }
-    )
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -1633,29 +834,19 @@ export function deleteAccount (): void {
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
   })
 
   sleep(Math.random() * 3)
 
-  group('B04_DeleteAccount_09_DeleteAccountConfirm POST', () => {
+  group('B04_DeleteAccount_05_DeleteAccountConfirm POST', () => {
     const startTime = Date.now()
-    res = http.post(
-      env.envURL + '/delete-account',
-      {
-        _csrf: csrfToken
-      },
-      {
-        tags: { name: 'B04_DeleteAccount_09_DeleteAccountConfirm' }
-      }
-    )
+    res = res.submitForm()
     const endTime = Date.now()
 
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('You’ve deleted your GOV.UK One Login')
+        (r.body as string).includes('You have signed out')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')

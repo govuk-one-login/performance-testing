@@ -177,7 +177,7 @@ interface DrivingLicenseUserDVLA extends DrivingLicenseUser {
 }
 interface DrivingLicenseUserDVA extends DrivingLicenseUser {}
 
-const csvData1: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', function () {
+const csvData1: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', () => {
   return open('./data/drivingLicenceDVLAData.csv').split('\n').slice(1).map((s) => {
     const data = s.split(',')
     return {
@@ -200,7 +200,7 @@ const csvData1: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA',
   })
 })
 
-const csvData2: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', function () {
+const csvData2: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', () => {
   return open('./data/drivingLicenceDVAData.csv').split('\n').slice(1).map((s) => {
     const data = s.split(',')
     return {
@@ -236,7 +236,7 @@ interface PassportUser {
   expiryYear: string
 }
 
-const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', function () {
+const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => {
   return open('./data/passportData.csv').split('\n').slice(1).map((s) => {
     const data = s.split(',')
     return {
@@ -263,64 +263,62 @@ export function fraudScenario1 (): void {
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
 
-  group(
-    'B01_Fraud_01_CoreStubEditUserContinue POST',
-    function () {
-      const startTime = Date.now()
-      res = http.post(
-        env.ipvCoreStub + '/edit-user',
-        {
-          cri: `fraud-cri-${env.envName}`,
-          rowNumber: '197',
-          firstName: userDetails.firstName,
-          surname: userDetails.lastName,
-          'dateOfBirth-day': `${userDetails.day}`,
-          'dateOfBirth-month': `${userDetails.month}`,
-          'dateOfBirth-year': `${userDetails.year}`,
-          buildingNumber: `${userDetails.buildNum}`,
-          buildingName: userDetails.buildName,
-          street: userDetails.street,
-          townCity: userDetails.city,
-          postCode: userDetails.postCode,
-          validFromDay: '26',
-          validFromMonth: '02',
-          validFromYear: '2021',
-          validUntilDay: '',
-          validUntilMonth: '',
-          validUntilYear: '',
-          'SecondaryUKAddress.buildingNumber': '',
-          'SecondaryUKAddress.buildingName': '',
-          'SecondaryUKAddress.street': '',
-          'SecondaryUKAddress.townCity': '',
-          'SecondaryUKAddress.postCode': '',
-          'SecondaryUKAddress.validFromDay': '',
-          'SecondaryUKAddress.validFromMonth': '',
-          'SecondaryUKAddress.validFromYear': '',
-          'SecondaryUKAddress.validUntilDay': '',
-          'SecondaryUKAddress.validUntilMonth': '',
-          'SecondaryUKAddress.validUntilYear': ''
-        },
-        {
-          headers: { Authorization: `Basic ${encodedCredentials}` },
-          tags: { name: 'B01_Fraud_01_CoreStubEditUserContinue' }
-        }
-      )
-      const endTime = Date.now()
+  group('B01_Fraud_01_CoreStubEditUserContinue POST', () => {
+    const startTime = Date.now()
+    res = http.post(
+      env.ipvCoreStub + '/edit-user',
+      {
+        cri: `fraud-cri-${env.envName}`,
+        rowNumber: '197',
+        firstName: userDetails.firstName,
+        surname: userDetails.lastName,
+        'dateOfBirth-day': `${userDetails.day}`,
+        'dateOfBirth-month': `${userDetails.month}`,
+        'dateOfBirth-year': `${userDetails.year}`,
+        buildingNumber: `${userDetails.buildNum}`,
+        buildingName: userDetails.buildName,
+        street: userDetails.street,
+        townCity: userDetails.city,
+        postCode: userDetails.postCode,
+        validFromDay: '26',
+        validFromMonth: '02',
+        validFromYear: '2021',
+        validUntilDay: '',
+        validUntilMonth: '',
+        validUntilYear: '',
+        'SecondaryUKAddress.buildingNumber': '',
+        'SecondaryUKAddress.buildingName': '',
+        'SecondaryUKAddress.street': '',
+        'SecondaryUKAddress.townCity': '',
+        'SecondaryUKAddress.postCode': '',
+        'SecondaryUKAddress.validFromDay': '',
+        'SecondaryUKAddress.validFromMonth': '',
+        'SecondaryUKAddress.validFromYear': '',
+        'SecondaryUKAddress.validUntilDay': '',
+        'SecondaryUKAddress.validUntilMonth': '',
+        'SecondaryUKAddress.validUntilYear': ''
+      },
+      {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B01_Fraud_01_CoreStubEditUserContinue' }
+      }
+    )
+    const endTime = Date.now()
 
-      check(res, {
-        'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('We need to check your details')
-      })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('We need to check your details')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
 
-      csrfToken = getCSRF(res)
-    }
+    csrfToken = getCSRF(res)
+  }
   )
 
   sleep(Math.random() * 3)
 
-  group('B01_Fraud_02_ContinueToCheckFraudDetails POST', function () {
+  group('B01_Fraud_02_ContinueToCheckFraudDetails POST', () => {
     const startTime1 = Date.now()
     res = http.post(
       env.fraudUrl + '/check',
@@ -369,31 +367,30 @@ export function drivingScenario (): void {
   const user1DVLA = csvData1[exec.scenario.iterationInTest % csvData1.length]
   const user1DVA = csvData2[exec.scenario.iterationInTest % csvData2.length]
 
-  group('B02_Driving_01_DLEntryFromCoreStub GET',
-    function () {
-      const startTime = Date.now()
-      res = http.get(env.ipvCoreStub + '/authorize?cri=driving-licence-cri-' +
+  group('B02_Driving_01_DLEntryFromCoreStub GET', () => {
+    const startTime = Date.now()
+    res = http.get(env.ipvCoreStub + '/authorize?cri=driving-licence-cri-' +
         env.envName + '&rowNumber=197',
-      {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B02_Driving_01_DLEntryFromCoreStub' }
-      })
-      const endTime = Date.now()
-
-      check(res, {
-        'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('Who was your UK driving licence issued by?')
-      })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
-      csrfToken = getCSRF(res)
+    {
+      headers: { Authorization: `Basic ${encodedCredentials}` },
+      tags: { name: 'B02_Driving_01_DLEntryFromCoreStub' }
     })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('Who was your UK driving licence issued by?')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
 
   sleep(Math.random() * 3)
 
   switch (optionLicence) {
     case 'DVLA':
-      group('B02_Driving_02_SelectDVLA POST', function () {
+      group('B02_Driving_02_SelectDVLA POST', () => {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/licence-issuer',
           {
@@ -417,7 +414,7 @@ export function drivingScenario (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_Driving_03_DVLA_EnterDetailsConfirm POST', function () {
+      group('B02_Driving_03_DVLA_EnterDetailsConfirm POST', () => {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/details', {
           surname: user1DVLA.surname,
@@ -472,7 +469,7 @@ export function drivingScenario (): void {
       break
 
     case 'DVA': {
-      group('B02_Driving_02_SelectDVA POST', function () {
+      group('B02_Driving_02_SelectDVA POST', () => {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/licence-issuer',
           {
@@ -496,7 +493,7 @@ export function drivingScenario (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_Driving_03_DVA_EnterDetailsConfirm POST', function () {
+      group('B02_Driving_03_DVA_EnterDetailsConfirm POST', () => {
         const startTime = Date.now()
         res = http.post(env.drivingUrl + '/details', {
           surname: user1DVA.surname,
@@ -557,75 +554,73 @@ export function passportScenario (): void {
   const encodedCredentials = encoding.b64encode(credentials)
   const userPassport = csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)]
 
-  group('B03_Passport_01_PassportCRIEntryFromStub GET',
-    function () {
-      const startTime = Date.now()
-      res = http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' +
+  group('B03_Passport_01_PassportCRIEntryFromStub GET', () => {
+    const startTime = Date.now()
+    res = http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' +
         env.envName + '&rowNumber=197',
-      {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B03_Passport_01_PassportCRIEntryFromStub' }
-      })
-      const endTime = Date.now()
-
-      check(res, {
-        'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK passport')
-
-      })
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
-      csrfToken = getCSRF(res)
+    {
+      headers: { Authorization: `Basic ${encodedCredentials}` },
+      tags: { name: 'B03_Passport_01_PassportCRIEntryFromStub' }
     })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK passport')
+
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+    csrfToken = getCSRF(res)
+  })
 
   sleep(Math.random() * 3)
 
-  group('B03_Passport_02_EnterPassportDetailsAndContinue POST',
-    function () {
-      const startTime1 = Date.now()
-      res = http.post(env.passportURL + '/details',
-        {
-          passportNumber: userPassport.passportNumber,
-          surname: userPassport.surname,
-          firstName: userPassport.firstName,
-          middleNames: userPassport.middleName,
-          'dateOfBirth-day': userPassport.birthday,
-          'dateOfBirth-month': userPassport.birthmonth,
-          'dateOfBirth-year': userPassport.birthyear,
-          'expiryDate-day': userPassport.expiryDay,
-          'expiryDate-month': userPassport.expiryMonth,
-          'expiryDate-year': userPassport.expiryYear,
-          submitButton: '',
-          'x-csrf-token': csrfToken
-        },
-        {
-          redirects: 2,
-          tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_01_PassCRICall' }
-        })
-      const endTime1 = Date.now()
-
-      check(res, {
-        'is status 302': (r) => r.status === 302
+  group('B03_Passport_02_EnterPassportDetailsAndContinue POST', () => {
+    const startTime1 = Date.now()
+    res = http.post(env.passportURL + '/details',
+      {
+        passportNumber: userPassport.passportNumber,
+        surname: userPassport.surname,
+        firstName: userPassport.firstName,
+        middleNames: userPassport.middleName,
+        'dateOfBirth-day': userPassport.birthday,
+        'dateOfBirth-month': userPassport.birthmonth,
+        'dateOfBirth-year': userPassport.birthyear,
+        'expiryDate-day': userPassport.expiryDay,
+        'expiryDate-month': userPassport.expiryMonth,
+        'expiryDate-year': userPassport.expiryYear,
+        submitButton: '',
+        'x-csrf-token': csrfToken
+      },
+      {
+        redirects: 2,
+        tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_01_PassCRICall' }
       })
-        ? transactionDuration.add(endTime1 - startTime1)
-        : fail('Response Validation Failed')
+    const endTime1 = Date.now()
 
-      const startTime2 = Date.now()
-      res = http.get(res.headers.Location,
-        {
-          headers: { Authorization: `Basic ${encodedCredentials}` },
-          tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_02_CoreStubCall' }
-        }
-      )
-      const endTime2 = Date.now()
+    check(res, {
+      'is status 302': (r) => r.status === 302
+    })
+      ? transactionDuration.add(endTime1 - startTime1)
+      : fail('Response Validation Failed')
 
-      check(res, {
-        'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
-      })
-        ? transactionDuration.add(endTime2 - startTime2)
-        : fail('Response Validation Failed')
-    }
+    const startTime2 = Date.now()
+    res = http.get(res.headers.Location,
+      {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_02_CoreStubCall' }
+      }
+    )
+    const endTime2 = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
+    })
+      ? transactionDuration.add(endTime2 - startTime2)
+      : fail('Response Validation Failed')
+  }
   )
 }
 

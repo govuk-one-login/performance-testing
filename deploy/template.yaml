@@ -355,7 +355,6 @@ Resources:
               ACCOUNT_APP_KEY: "/perfTest/account/accounts/appKey"
               ACCOUNT_APP_PASSWORD_NEW: "/perfTest/account/testUserNewPassword"
               ACCOUNT_APP_PASSWORD: "/perfTest/account/testUserPassword"
-              ACCOUNT_BASE_URL: "/perfTest/account/authentication/baseUrl"
               ACCOUNT_BRAVO_ID_REUSE_API_KEY: "/perfTest/account/bravo/idReuseApiKey"
               ACCOUNT_BRAVO_ID_REUSE_API_KEY_SUMMARISE: "/perfTest/account/bravo/idReuseApiKeySummarise"
               ACCOUNT_BRAVO_ID_REUSE_MOCK: "/perfTest/account/bravo/idReuseMock"

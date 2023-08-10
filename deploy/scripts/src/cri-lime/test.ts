@@ -476,7 +476,6 @@ export function drivingLicence (): void {
 
 export function passport (): void {
   let res: Response
-  let csrfToken: string
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   const userPassport = csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)]
@@ -498,15 +497,14 @@ export function passport (): void {
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
-    csrfToken = getCSRF(res)
   })
 
   sleep(Math.random() * 3)
 
   group('B03_Passport_02_EnterPassportDetailsAndContinue POST', () => {
     const startTime1 = Date.now()
-    res = http.post(env.passportURL + '/details',
-      {
+    res = res.submitForm({
+      fields: {
         passportNumber: userPassport.passportNumber,
         surname: userPassport.surname,
         firstName: userPassport.firstName,
@@ -516,14 +514,14 @@ export function passport (): void {
         'dateOfBirth-year': userPassport.birthyear,
         'expiryDate-day': userPassport.expiryDay,
         'expiryDate-month': userPassport.expiryMonth,
-        'expiryDate-year': userPassport.expiryYear,
-        submitButton: '',
-        'x-csrf-token': csrfToken
+        'expiryDate-year': userPassport.expiryYear
       },
-      {
+      params: {
         redirects: 2,
         tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_01_PassCRICall' }
-      })
+      },
+      submitSelector: '#submitButton'
+    })
     const endTime1 = Date.now()
 
     check(res, {

@@ -9,7 +9,7 @@ import exec from 'k6/execution'
 
 const profiles: ProfileList = {
   smoke: {
-    fraudScenario1: {
+    fraud: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -18,9 +18,9 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
-      exec: 'fraudScenario1'
+      exec: 'fraud'
     },
-    drivingScenario: {
+    drivingLicence: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -29,9 +29,9 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
-      exec: 'drivingScenario'
+      exec: 'drivingLicence'
     },
-    passportScenario: {
+    passport: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -40,11 +40,11 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
-      exec: 'passportScenario'
+      exec: 'passport'
     }
   },
   lowVolumeTest: {
-    fraudScenario1: {
+    fraud: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -55,9 +55,9 @@ const profiles: ProfileList = {
         { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'fraudScenario1'
+      exec: 'fraud'
     },
-    drivingScenario: {
+    drivingLicence: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -68,9 +68,9 @@ const profiles: ProfileList = {
         { target: 5, duration: '15m' }, // Maintain steady state at 5 iterations per second for 15 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'drivingScenario'
+      exec: 'drivingLicence'
     },
-    passportScenario: {
+    passport: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -81,11 +81,11 @@ const profiles: ProfileList = {
         { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'passportScenario'
+      exec: 'passport'
     }
   },
   stress: {
-    fraudScenario1: {
+    fraud: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -96,9 +96,9 @@ const profiles: ProfileList = {
         { target: 63, duration: '30m' }, // Maintain steady state at 63 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'fraudScenario1'
+      exec: 'fraud'
     },
-    drivingScenario: {
+    drivingLicence: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -109,9 +109,9 @@ const profiles: ProfileList = {
         { target: 14, duration: '30m' }, // Maintain steady state at 14 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'drivingScenario'
+      exec: 'drivingLicence'
     },
-    passportScenario: {
+    passport: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -122,7 +122,7 @@ const profiles: ProfileList = {
         { target: 55, duration: '30m' }, // Maintain steady state at 55 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'passportScenario'
+      exec: 'passport'
     }
 
   }
@@ -256,7 +256,7 @@ const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => 
 
 const transactionDuration = new Trend('duration', true)
 
-export function fraudScenario1 (): void {
+export function fraud (): void {
   let res: Response
   let csrfToken: string
   const userDetails = getUserDetails()
@@ -357,7 +357,7 @@ export function fraudScenario1 (): void {
   })
 }
 
-export function drivingScenario (): void {
+export function drivingLicence (): void {
   let res: Response
   let csrfToken: string
   type drivingLicenceIssuer = 'DVA' | 'DVLA'
@@ -547,7 +547,7 @@ export function drivingScenario (): void {
   }
 }
 
-export function passportScenario (): void {
+export function passport (): void {
   let res: Response
   let csrfToken: string
   const credentials = `${stubCreds.userName}:${stubCreds.password}`

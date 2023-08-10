@@ -102,7 +102,9 @@ export function passport (): void {
 
   group('B01_Passport_01_LaunchOrchestratorStub GET', () => {
     const startTime = Date.now()
-    res = http.get(env.orchStubEndPoint)
+    res = http.get(env.orchStubEndPoint, {
+      tags: { name: 'B01_Passport_01_LaunchOrchestratorStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime = Date.now()
 
@@ -118,7 +120,9 @@ export function passport (): void {
 
   group('B01_Passport_02_GoToFullJourneyRoute GET', () => {
     const startTime = Date.now()
-    res = http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=')
+    res = http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=', {
+      tags: { name: 'B01_Passport_02_GoToFullJourneyRoute' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime = Date.now()
 
@@ -136,7 +140,10 @@ export function passport (): void {
     const startTime1 = Date.now()
     res = res.submitForm({
       fields: { journey: 'next' },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B01_Passport_03_ClickContinueStartPage_01_CoreCall' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -147,7 +154,9 @@ export function passport (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B01_Passport_03_ClickContStartPage_02_DCMAWStub' } // pragma: allowlist secret
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -168,7 +177,10 @@ export function passport (): void {
         requested_oauth_error_endpoint: 'auth',
         requested_oauth_error: 'access_denied'
       },
-      params: { redirects: 1 }
+      params: {
+        redirects: 1,
+        tags: { name: 'B01_Passport_04_DCMAWContinue_01_DCMAWStub' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -179,7 +191,9 @@ export function passport (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(env.ipvCoreURL + res.headers.Location)
+    res = http.get(env.ipvCoreURL + res.headers.Location, {
+      tags: { name: 'B01_Passport_04_DCMAWContinue_02_CoreCall' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -197,7 +211,10 @@ export function passport (): void {
     const startTime1 = Date.now()
     res = res.submitForm({
       fields: { journey: 'next/passport' },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B01_Passport_05_ContOnPYIStartPage_01_CoreCall' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -208,7 +225,9 @@ export function passport (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B01_Passport_05_ContOnPYIStartPage_02_PassStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -230,7 +249,10 @@ export function passport (): void {
         strengthScore: '4',
         validityScore: '2'
       },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B01_Passport_06_PassDataContinue_01_PassStub' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -242,7 +264,11 @@ export function passport (): void {
 
     const startTime2 = Date.now()
     res = http.get(res.headers.Location,
-      { redirects: 0 })
+      {
+        redirects: 0,
+        tags: { name: 'B01_Passport_06_PassDataContinue_02_CoreCall' }
+      }
+    )
     const endTime2 = Date.now()
 
     check(res, {
@@ -252,7 +278,9 @@ export function passport (): void {
       : fail('Response Validation Failed')
 
     const startTime3 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B01_Passport_06_PassDataContinue_03_AddStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime3 = Date.now()
 
@@ -270,7 +298,10 @@ export function passport (): void {
     const startTime1 = Date.now()
     res = res.submitForm({
       fields: { jsonPayload: JSON.stringify(passportData.address) },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B01_Passport_07_AddrDataContinue_01_AddStub' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -282,7 +313,10 @@ export function passport (): void {
 
     const startTime2 = Date.now()
     res = http.get(res.headers.Location,
-      { redirects: 0 })
+      {
+        redirects: 0,
+        tags: { name: 'B01_Passport_07_AddrDataContinue_02_CoreCall' }
+      })
     const endTime2 = Date.now()
 
     check(res, {
@@ -292,7 +326,9 @@ export function passport (): void {
       : fail('Response Validation Failed')
 
     const startTime3 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B01_Passport_07_AddrDataContinue_03_FraudStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime3 = Date.now()
 
@@ -313,7 +349,10 @@ export function passport (): void {
         jsonPayload: JSON.stringify(passportData.fraud),
         identityFraudScore: '2'
       },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B01_Passport_08_FraudDataContinue_01_FraudStub' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -324,7 +363,9 @@ export function passport (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B01_Passport_08_FraudDataContinue_02_CoreCall' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -341,7 +382,10 @@ export function passport (): void {
   group('B01_Passport_09_PreKBVTransition POST', () => {
     const startTime1 = Date.now()
     res = res.submitForm({
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B01_Passport_09_PreKBVTransition_01_CoreCall' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -352,7 +396,9 @@ export function passport (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B01_Passport_09_PreKBVTransition_02_KBVStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -373,7 +419,10 @@ export function passport (): void {
         jsonPayload: JSON.stringify(passportData.kbv),
         verificationScore: '2'
       },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B01_Passport_10_KBVDataContinue_01_KBVStub' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -384,7 +433,9 @@ export function passport (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B01_Passport_10_KBVDataContinue_02_CoreCall' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -401,7 +452,10 @@ export function passport (): void {
   group('B01_Passport_11_ContinuePYISuccessPage POST', () => {
     const startTime1 = Date.now()
     res = res.submitForm({
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B01_Passport_11_ContPYISuccessPage_01_CoreCall' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -412,7 +466,9 @@ export function passport (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B01_Passport_11_ContPYISuccessPage_02_OrchStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -434,7 +490,9 @@ export function drivingLicence (): void {
 
   group('B02_DrivingLicence_01_LaunchOrchestratorStub GET', () => {
     const startTime = Date.now()
-    res = http.get(env.orchStubEndPoint)
+    res = http.get(env.orchStubEndPoint, {
+      tags: { name: 'B02_DrivingLicence_01_LaunchOrchestratorStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime = Date.now()
 
@@ -450,7 +508,9 @@ export function drivingLicence (): void {
 
   group('B02_DrivingLicence_02_SelectUserIDContinue GET', () => {
     const startTime = Date.now()
-    res = http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=')
+    res = http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=', {
+      tags: { name: 'B02_DrivingLicence_02_SelectUserIDContinue' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime = Date.now()
 
@@ -464,11 +524,14 @@ export function drivingLicence (): void {
 
   sleep(Math.random() * 3)
 
-  group('B02_DrivingLicence_03_ClickContinueStartPage POST', () => {
+  group('B02_DrivingLicence_03_ContinueStartPage POST', () => {
     const startTime1 = Date.now()
     res = res.submitForm({
       fields: { journey: 'next' },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B02_DrivingLicence_03_ContStartPage_01_CoreCall' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -479,7 +542,9 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B02_DrivingLicence_03_ContStartPage_02_DCMAWStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -500,7 +565,10 @@ export function drivingLicence (): void {
         requested_oauth_error_endpoint: 'auth',
         requested_oauth_error: 'access_denied'
       },
-      params: { redirects: 1 }
+      params: {
+        redirects: 1,
+        tags: { name: 'B02_DrivingLicence_04_DCMAWContinue_01_DCMAWStub' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -511,7 +579,9 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(env.ipvCoreURL + res.headers.Location)
+    res = http.get(env.ipvCoreURL + res.headers.Location, {
+      tags: { name: 'B02_DrivingLicence_04_DCMAWContinue_02_CoreCall' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -527,7 +597,10 @@ export function drivingLicence (): void {
     const startTime1 = Date.now()
     res = res.submitForm({
       fields: { journey: 'next/driving-licence' },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B02_DrivingLicence_05_ContPYIStartPage_01_CoreCall' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -538,7 +611,9 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B02_DrivingLicence_05_ContPYIStartPage_02_DLStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -559,7 +634,10 @@ export function drivingLicence (): void {
         validityScore: '2',
         activityHistoryScore: '1'
       },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B02_DrivingLicence_06_DLDataContinue_01_DLStub' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -570,8 +648,10 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location,
-      { redirects: 0 })
+    res = http.get(res.headers.Location, {
+      redirects: 0,
+      tags: { name: 'B02_DrivingLicence_06_DLDataContinue_02_CoreCall' }
+    })
     const endTime2 = Date.now()
 
     check(res, {
@@ -581,7 +661,9 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime3 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B02_DrivingLicence_06_DLDataContinue_03_AddStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime3 = Date.now()
 
@@ -599,7 +681,10 @@ export function drivingLicence (): void {
     const startTime1 = Date.now()
     res = res.submitForm({
       fields: { jsonPayload: JSON.stringify(drivingLicenceData.address) },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B02_DrivingLicence_07_AddrDataCont_01_AddStub' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -610,8 +695,10 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location,
-      { redirects: 0 })
+    res = http.get(res.headers.Location, {
+      redirects: 0,
+      tags: { name: 'B02_DrivingLicence_07_AddrDataCont_02_CoreCall' }
+    })
     const endTime2 = Date.now()
 
     check(res, {
@@ -621,7 +708,9 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime3 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B02_DrivingLicence_07_AddrDataCont_03_FraudStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime3 = Date.now()
 
@@ -643,7 +732,10 @@ export function drivingLicence (): void {
         identityFraudScore: '2',
         activityHistoryScore: '2'
       },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B02_DrivingLicence_08_FraudDataCont_01_FraudStub' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -654,7 +746,9 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B02_DrivingLicence_08_FraudDataCont_02_CoreCall' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -671,7 +765,10 @@ export function drivingLicence (): void {
   group('B02_DrivingLicence_09_PreKBVTransition POST', () => {
     const startTime1 = Date.now()
     res = res.submitForm({
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B02_DrivingLicence_09_PreKBVTransition_01_CoreCall' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -682,7 +779,9 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B02_DrivingLicence_09_PreKBVTransition_02_KBVStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -703,7 +802,10 @@ export function drivingLicence (): void {
         jsonPayload: JSON.stringify(drivingLicenceData.kbv),
         verificationScore: '2'
       },
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B02_DrivingLicence_10_KBVDataContinue_01_KBVStub' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -714,7 +816,9 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B02_DrivingLicence_10_KBVDataContinue_02_CoreCall' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
@@ -731,7 +835,10 @@ export function drivingLicence (): void {
   group('B02_DrivingLicence_11_ContinueDrivingLicenceSuccessPage POST', () => {
     const startTime1 = Date.now()
     res = res.submitForm({
-      params: { redirects: 0 }
+      params: {
+        redirects: 0,
+        tags: { name: 'B02_DrivingLicence_11_ContDLSuccess_01_CoreCall' }
+      }
     })
     const endTime1 = Date.now()
 
@@ -742,7 +849,9 @@ export function drivingLicence (): void {
       : fail('Response Validation Failed')
 
     const startTime2 = Date.now()
-    res = http.get(res.headers.Location)
+    res = http.get(res.headers.Location, {
+      tags: { name: 'B02_DrivingLicence_11_ContDLSuccess_02_OrchStub' }
+    })
     if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 

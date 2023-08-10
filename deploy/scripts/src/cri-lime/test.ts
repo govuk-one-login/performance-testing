@@ -257,7 +257,6 @@ const transactionDuration = new Trend('duration', true)
 
 export function fraud (): void {
   let res: Response
-  let csrfToken: string
   const userDetails = getUserDetails()
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
@@ -310,26 +309,19 @@ export function fraud (): void {
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
-  }
-  )
+  })
 
   sleep(Math.random() * 3)
 
   group('B01_Fraud_02_ContinueToCheckFraudDetails POST', () => {
     const startTime1 = Date.now()
-    res = http.post(
-      env.fraudUrl + '/check',
-      {
-        continue: '',
-        'x-csrf-token': csrfToken
-      },
-      {
+    res = res.submitForm({
+      params: {
         redirects: 1,
         tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_01_FraudCall' }
-      }
-    )
+      },
+      submitSelector: '#continue'
+    })
     const endTime1 = Date.now()
 
     check(res, {
@@ -547,10 +539,6 @@ export function passport (): void {
       : fail('Response Validation Failed')
   }
   )
-}
-
-function getCSRF (r: Response): string {
-  return r.html().find("input[name='x-csrf-token']").val() ?? ''
 }
 
 interface User {

@@ -318,7 +318,7 @@ export function fraud (): void {
     res = res.submitForm({
       params: {
         redirects: 1,
-        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_01_FraudCall' }
+        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_CRI' }
       },
       submitSelector: '#continue'
     })
@@ -334,7 +334,7 @@ export function fraud (): void {
     res = http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_01_StubCall' }
+        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_CoreStub' }
       }
     )
     const endTime2 = Date.now()
@@ -510,7 +510,7 @@ export function passport (): void {
       },
       params: {
         redirects: 2,
-        tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_01_PassCRICall' }
+        tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_CRI' }
       },
       submitSelector: '#submitButton'
     })
@@ -526,7 +526,7 @@ export function passport (): void {
     res = http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_02_CoreStubCall' }
+        tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_CoreStub' }
       }
     )
     const endTime2 = Date.now()

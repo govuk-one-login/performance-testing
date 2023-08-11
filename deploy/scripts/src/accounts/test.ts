@@ -170,7 +170,9 @@ export function changeEmail (): void {
 
   group('B01_ChangeEmail_01_LaunchAccountsHome GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL)
+    res = http.get(env.envURL, {
+      tags: { name: 'B01_ChangeEmail_01_LaunchAccountsHome' }
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -186,7 +188,9 @@ export function changeEmail (): void {
 
   group('B01_ChangeEmail_02_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/security')
+    res = http.get(env.envURL + '/security', {
+      tags: { name: 'B01_ChangeEmail_02_ClickSecurityTab' }
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -201,7 +205,9 @@ export function changeEmail (): void {
 
   group('B01_ChangeEmail_03_ClickChangeEmailLink GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/enter-password?type=changeEmail')
+    res = http.get(env.envURL + '/enter-password?type=changeEmail', {
+      tags: { name: 'B01_ChangeEmail_03_ClickChangeEmailLink' }
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -221,6 +227,9 @@ export function changeEmail (): void {
       fields: {
         requestType: 'changeEmail',
         password: credentials.currPassword
+      },
+      params: {
+        tags: { name: 'B01_ChangeEmail_04_EnterCurrentPassword' }
       }
     })
     const endTime = Date.now()
@@ -241,6 +250,9 @@ export function changeEmail (): void {
     res = res.submitForm({
       fields: {
         email: newEmail
+      },
+      params: {
+        tags: { name: 'B01_ChangeEmail_05_EnterNewEmailID' }
       }
     })
     const endTime = Date.now()
@@ -262,6 +274,9 @@ export function changeEmail (): void {
       fields: {
         email: newEmail,
         code: credentials.fixedEmailOTP
+      },
+      params: {
+        tags: { name: 'B01_ChangeEmail_06_EnterEmailOTP' }
       }
     })
     const endTime = Date.now()
@@ -279,7 +294,9 @@ export function changeEmail (): void {
 
   group('B01_ChangeEmail_07_ClickBackToSecurity GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/manage-your-account')
+    res = http.get(env.envURL + '/manage-your-account', {
+      tags: { name: 'B01_ChangeEmail_07_ClickBackToSecurity' }
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -295,7 +312,9 @@ export function changeEmail (): void {
 
   group('B01_ChangeEmail_08_SignOut GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/sign-out')
+    res = http.get(env.envURL + '/sign-out', {
+      tags: { name: 'B01_ChangeEmail_08_SignOut' }
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -313,7 +332,9 @@ export function changePassword (): void {
 
   group('B02_ChangePassword_01_LaunchAccountsHome GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL)
+    res = http.get(env.envURL, {
+      tags: { name: 'B02_ChangePassword_01_LaunchAccountsHome' }
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -329,7 +350,9 @@ export function changePassword (): void {
 
   group('B02_ChangePassword_02_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/security')
+    res = http.get(env.envURL + '/security', {
+      tags: { name: 'B02_ChangePassword_02_ClickSecurityTab' } // pragma: allowlist secret
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -344,7 +367,9 @@ export function changePassword (): void {
 
   group('B02_ChangePassword_03_ClickChangePasswordLink GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/enter-password?type=changePassword')
+    res = http.get(env.envURL + '/enter-password?type=changePassword', {
+      tags: { name: 'B02_ChangePassword_03_ClickChangePasswordLink' }
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -364,6 +389,9 @@ export function changePassword (): void {
       fields: {
         requestType: 'changePassword',
         password: credentials.currPassword
+      },
+      params: {
+        tags: { name: 'B02_ChangePassword_04_EnterCurrentPassword' }
       }
     })
     const endTime = Date.now()
@@ -385,6 +413,9 @@ export function changePassword (): void {
       fields: {
         password: credentials.newPassword,
         'confirm-password': credentials.newPassword
+      },
+      params: {
+        tags: { name: 'B02_ChangePassword_05_EnterNewPassword' }
       }
     })
     const endTime = Date.now()
@@ -402,7 +433,9 @@ export function changePassword (): void {
 
   group('B02_ChangePassword_06_ClickBackToSecurity GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/manage-your-account')
+    res = http.get(env.envURL + '/manage-your-account', {
+      tags: { name: 'B02_ChangePassword_06_ClickBackToSecurity' } // pragma: allowlist secret
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -419,7 +452,7 @@ export function changePassword (): void {
   group('B02_ChangePassword_07_SignOut GET', function () {
     const startTime = Date.now()
     res = http.get(env.envURL + '/sign-out', {
-      tags: { name: 'B02_ChangePassword_13_SignOut' }
+      tags: { name: 'B02_ChangePassword_07_SignOut' }
     })
     const endTime = Date.now()
 
@@ -770,7 +803,9 @@ export function deleteAccount (): void {
 
   group('B04_DeleteAccount_01_LaunchAccountsHome GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL)
+    res = http.get(env.envURL, {
+      tags: { name: 'B04_DeleteAccount_01_LaunchAccountsHome' }
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -786,7 +821,9 @@ export function deleteAccount (): void {
 
   group('B04_DeleteAccount_02_ClickSecurityTab GET', () => {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/security')
+    res = http.get(env.envURL + '/security', {
+      tags: { name: 'B04_DeleteAccount_02_ClickSecurityTab' }
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -801,7 +838,9 @@ export function deleteAccount (): void {
 
   group('B04_DeleteAccount_03_ClickDeleteAccountLink GET', function () {
     const startTime = Date.now()
-    res = http.get(env.envURL + '/enter-password?type=deleteAccount')
+    res = http.get(env.envURL + '/enter-password?type=deleteAccount', {
+      tags: { name: 'B04_DeleteAccount_03_ClickDeleteAccountLink' }
+    })
     const endTime = Date.now()
 
     check(res, {
@@ -821,6 +860,9 @@ export function deleteAccount (): void {
       fields: {
         requestType: 'deleteAccount',
         password: credentials.currPassword
+      },
+      params: {
+        tags: { name: 'B04_DeleteAccount_04_EnterCurrentPassword' }
       }
     })
     const endTime = Date.now()
@@ -840,7 +882,11 @@ export function deleteAccount (): void {
 
   group('B04_DeleteAccount_05_DeleteAccountConfirm POST', () => {
     const startTime = Date.now()
-    res = res.submitForm()
+    res = res.submitForm({
+      params: {
+        tags: { name: 'B04_DeleteAccount_05_DeleteAccountConfirm' }
+      }
+    })
     const endTime = Date.now()
 
     check(res, {

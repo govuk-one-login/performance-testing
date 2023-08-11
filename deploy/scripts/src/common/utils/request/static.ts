@@ -16,7 +16,7 @@ function getResourceURLs (res: Response): string[] {
   res.html('link[href]').each((_, el) => { // Link elements with a `href` attribute
     resources.push(resolveUrl(el.attributes().href.value, res.url))
   })
-  return resources
+  return resources.filter(url => new URL(url).hostname.endsWith('.account.gov.uk')) // Only retrieve URLs accessible to the load injector
 }
 
 // Calls a GET request for static resources defined in the HTML page of a response

@@ -1,4 +1,4 @@
-import http, { type Response } from 'k6/http'
+import http, { type ObjectBatchRequest, type Response } from 'k6/http'
 import { URL } from '../jslib/url'
 
 // Resolves relative and absolute `src` and `href` paths
@@ -21,5 +21,13 @@ function getResourceURLs (res: Response): string[] {
 
 // Calls a GET request for static resources defined in the HTML page of a response
 export function getStaticResources (res: Response): Response[] {
-  return http.batch(getResourceURLs(res))
+  const urls = getResourceURLs(res)
+  const requests: ObjectBatchRequest[] = urls.map(url => {
+    return {
+      method: 'GET',
+      url,
+      params: { responseType: 'none' }
+    }
+  })
+  return http.batch(requests)
 }

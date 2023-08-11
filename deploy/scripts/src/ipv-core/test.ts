@@ -105,7 +105,6 @@ export function passport (): void {
     res = http.get(env.orchStubEndPoint, {
       tags: { name: 'B01_Passport_01_LaunchOrchestratorStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime = Date.now()
 
     check(res, {
@@ -157,7 +156,6 @@ export function passport (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B01_Passport_03_ClickContStartPage_02_DCMAWStub' } // pragma: allowlist secret
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
     check(res, {
@@ -228,7 +226,6 @@ export function passport (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B01_Passport_05_ContOnPYIStartPage_02_PassStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
     check(res, {
@@ -281,7 +278,6 @@ export function passport (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B01_Passport_06_PassDataContinue_03_AddStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime3 = Date.now()
 
     check(res, {
@@ -329,7 +325,6 @@ export function passport (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B01_Passport_07_AddrDataContinue_03_FraudStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime3 = Date.now()
 
     check(res, {
@@ -399,7 +394,6 @@ export function passport (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B01_Passport_09_PreKBVTransition_02_KBVStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
     check(res, {
@@ -469,7 +463,6 @@ export function passport (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B01_Passport_11_ContPYISuccessPage_02_OrchStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
     const passed = check(res, {
@@ -493,7 +486,6 @@ export function drivingLicence (): void {
     res = http.get(env.orchStubEndPoint, {
       tags: { name: 'B02_DrivingLicence_01_LaunchOrchestratorStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime = Date.now()
 
     check(res, {
@@ -545,7 +537,6 @@ export function drivingLicence (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B02_DrivingLicence_03_ContStartPage_02_DCMAWStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
     check(res, {
@@ -614,7 +605,6 @@ export function drivingLicence (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B02_DrivingLicence_05_ContPYIStartPage_02_DLStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
     check(res, {
@@ -664,7 +654,6 @@ export function drivingLicence (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B02_DrivingLicence_06_DLDataContinue_03_AddStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime3 = Date.now()
 
     check(res, {
@@ -711,7 +700,6 @@ export function drivingLicence (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B02_DrivingLicence_07_AddrDataCont_03_FraudStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime3 = Date.now()
 
     check(res, {
@@ -782,7 +770,6 @@ export function drivingLicence (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B02_DrivingLicence_09_PreKBVTransition_02_KBVStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
     check(res, {
@@ -852,7 +839,6 @@ export function drivingLicence (): void {
     res = http.get(res.headers.Location, {
       tags: { name: 'B02_DrivingLicence_11_ContDLSuccess_02_OrchStub' }
     })
-    if (env.staticResources) getStaticResources(res)
     const endTime2 = Date.now()
 
     check(res, {

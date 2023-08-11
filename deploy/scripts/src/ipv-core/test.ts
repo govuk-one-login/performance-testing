@@ -35,7 +35,7 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
-      preAllocatedVUs: 1,
+      preAllocatedVUs: 1000,
       maxVUs: 5000,
       stages: [
         { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
@@ -48,7 +48,7 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
-      preAllocatedVUs: 1,
+      preAllocatedVUs: 1000,
       maxVUs: 5000,
       stages: [
         { target: 30, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes

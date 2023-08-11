@@ -271,7 +271,7 @@ export function FaceToFace (): void {
 
   group('B02_FaceToFace_02_Authorize GET', () => {
     const startTime = Date.now()
-    const endpoint = `/oauth2/authorize?request=${requestValue}`
+    const endpoint = `/oauth2/authorize?request=${requestValue}&response_type=code&client_id=${clientId}`
     res = http.get(env.envURL + endpoint, {
       tags: { name: 'B02_FaceToFace_02_Authorize' }
     })
@@ -364,6 +364,25 @@ export function FaceToFace (): void {
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
+            (r.body as string).includes('Does your national identity card have an expiry date?')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+      })
+
+      sleep(Math.random() * 3)
+
+      group('B02_FaceToFace_05_NationalIDEEA_ExpiryOption POST', () => {
+        const startTime = Date.now()
+        res = res.submitForm({
+          fields: { idHasExpiryDate: 'Yes' },
+          params: { tags: { name: 'B02_FaceToFace_05_NationalIDEEA_ExpiryOption' } },
+          submitSelector: '#continue'
+        })
+        const endTime = Date.now()
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) =>
             (r.body as string).includes('When does your national identity card expire?')
         })
           ? transactionDuration.add(endTime - startTime)
@@ -372,7 +391,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_05_NationalIDEEA_Details POST', () => {
+      group('B02_FaceToFace_06_NationalIDEEA_Details POST', () => {
         const startTime = Date.now()
         res = res.submitForm({
           fields: {
@@ -380,7 +399,7 @@ export function FaceToFace (): void {
             'eeaIdCardExpiryDate-month': expiryMonth,
             'eeaIdCardExpiryDate-year': expiryYear
           },
-          params: { tags: { name: 'B02_FaceToFace_05_NationalIDEEA_Details' } },
+          params: { tags: { name: 'B02_FaceToFace_06_NationalIDEEA_Details' } },
           submitSelector: '#continue'
         })
         const endTime = Date.now()
@@ -395,11 +414,11 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_06_NationalIDEEA_CurrentAddress POST', () => {
+      group('B02_FaceToFace_07_NationalIDEEA_CurrentAddress POST', () => {
         const startTime = Date.now()
         res = res.submitForm({
           fields: { eeaIdCardAddressCheck: 'Yes, it has my current address on it' },
-          params: { tags: { name: 'B02_FaceToFace_06_NationalIDEEA_CurrentAddress' } },
+          params: { tags: { name: 'B02_FaceToFace_07_NationalIDEEA_CurrentAddress' } },
           submitSelector: '#continue'
         })
         const endTime = Date.now()
@@ -415,11 +434,11 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_07_NationalIDEEA_WhichCountry POST', () => {
+      group('B02_FaceToFace_08_NationalIDEEA_WhichCountry POST', () => {
         const startTime = Date.now()
         res = res.submitForm({
           fields: { eeaIdentityCardCountrySelector: 'Romania' },
-          params: { tags: { name: 'B02_FaceToFace_07_NationalIDEEA_WhichCountry' } }, // pragma: allowlist secret
+          params: { tags: { name: 'B02_FaceToFace_08_NationalIDEEA_WhichCountry' } }, // pragma: allowlist secret
           submitSelector: '#continue'
         })
         const endTime = Date.now()
@@ -446,7 +465,7 @@ export function FaceToFace (): void {
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('When does your driving licence expire?')
+            (r.body as string).includes('Does your driving licence have an expiry date?')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -454,7 +473,26 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_05_EUDL_Details POST', () => {
+      group('B02_FaceToFace_05_EUDL_ExpiryOption POST', () => {
+        const startTime = Date.now()
+        res = res.submitForm({
+          fields: { idHasExpiryDate: 'Yes' },
+          params: { tags: { name: 'B02_FaceToFace_05_EUDL_ExpiryOption' } },
+          submitSelector: '#continue'
+        })
+        const endTime = Date.now()
+
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) =>
+            (r.body as string).includes('When does your driving licence expire?')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+      })
+      sleep(Math.random() * 3)
+
+      group('B02_FaceToFace_06_EUDL_Details POST', () => {
         const startTime = Date.now()
         res = res.submitForm({
           fields: {
@@ -462,7 +500,7 @@ export function FaceToFace (): void {
             'euPhotocardDlExpiryDate-month': expiryMonth,
             'euPhotocardDlExpiryDate-year': expiryYear
           },
-          params: { tags: { name: 'B02_FaceToFace_05_EUDL_Details' } },
+          params: { tags: { name: 'B02_FaceToFace_06_EUDL_Details' } },
           submitSelector: '#continue'
         })
         const endTime = Date.now()
@@ -478,18 +516,18 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_06_EUDL_CurrentAddress POST', () => {
+      group('B02_FaceToFace_07_EUDL_CurrentAddress POST', () => {
         const startTime = Date.now()
         res = res.submitForm({
           fields: { euDrivingLicenceAddressCheck: 'Yes, it has my current address on it' },
-          params: { tags: { name: 'B02_FaceToFace_06_EUDL_CurrentAddress' } },
+          params: { tags: { name: 'B02_FaceToFace_07_EUDL_CurrentAddress' } },
           submitSelector: '#continue'
         })
         const endTime = Date.now()
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
-            (r.body as string).includes('Select which country driving licence is from')
+            (r.body as string).includes('Select which country your driving licence is from')
         })
           ? transactionDuration.add(endTime - startTime)
           : fail('Response Validation Failed')
@@ -497,11 +535,11 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_07_EUDL_WhichCountry POST', () => {
+      group('B02_FaceToFace_08_EUDL_WhichCountry POST', () => {
         const startTime = Date.now()
         res = res.submitForm({
           fields: { euDrivingLicenceCountrySelector: 'Romania' },
-          params: { tags: { name: 'B02_FaceToFace_07_EUDL_WhichCountry' } },
+          params: { tags: { name: 'B02_FaceToFace_08_EUDL_WhichCountry' } },
           submitSelector: '#continue'
         })
         const endTime = Date.now()
@@ -528,6 +566,26 @@ export function FaceToFace (): void {
         check(res, {
           'is status 200': (r) => r.status === 200,
           'verify page content': (r) =>
+            (r.body as string).includes('Does your passport have an expiry date?')
+        })
+          ? transactionDuration.add(endTime - startTime)
+          : fail('Response Validation Failed')
+      })
+
+      sleep(Math.random() * 3)
+
+      group('B02_FaceToFace_05_NonUKPassport_ExpiryOption POST', () => {
+        const startTime = Date.now()
+        res = res.submitForm({
+          fields: { idHasExpiryDate: 'Yes' },
+          params: { tags: { name: 'B02_FaceToFace_05_NonUKPassport_ExpiryOption' } },
+          submitSelector: '#continue'
+        })
+        const endTime = Date.now()
+
+        check(res, {
+          'is status 200': (r) => r.status === 200,
+          'verify page content': (r) =>
             (r.body as string).includes('When does your passport expire?')
         })
           ? transactionDuration.add(endTime - startTime)
@@ -536,7 +594,7 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_05_NonUKPassport_Details POST', () => {
+      group('B02_FaceToFace_06_NonUKPassport_Details POST', () => {
         const startTime = Date.now()
         res = res.submitForm({
           fields: {
@@ -544,7 +602,7 @@ export function FaceToFace (): void {
             'nonUKPassportExpiryDate-month': expiryMonth,
             'nonUKPassportExpiryDate-year': expiryYear
           },
-          params: { tags: { name: 'B02_FaceToFace_05_NonUKPassport_Details' } },
+          params: { tags: { name: 'B02_FaceToFace_06_NonUKPassport_Details' } },
           submitSelector: '#continue'
         })
         const endTime = Date.now()
@@ -560,11 +618,11 @@ export function FaceToFace (): void {
 
       sleep(Math.random() * 3)
 
-      group('B02_FaceToFace_06_NonUKPassport_WhichCountry POST', () => {
+      group('B02_FaceToFace_07_NonUKPassport_WhichCountry POST', () => {
         const startTime = Date.now()
         res = res.submitForm({
           fields: { nonUkPassportCountrySelector: 'Romania' },
-          params: { tags: { name: 'B02_FaceToFace_06_NonUKPassport_WhichCountry' } }, // pragma: allowlist secret
+          params: { tags: { name: 'B02_FaceToFace_07_NonUKPassport_WhichCountry' } }, // pragma: allowlist secret
           submitSelector: '#continue'
         })
         const endTime = Date.now()
@@ -718,7 +776,7 @@ export function FaceToFace (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Check your details')
+        (r.body as string).includes('Check your answers')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')

@@ -30,6 +30,34 @@ const profiles: ProfileList = {
       exec: 'drivingLicence'
     }
   },
+  lowVolumeTest: {
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 3000,
+      stages: [
+        { target: 20, duration: '5m' }, // Ramp up to 20 iterations per second in 5 minutes
+        { target: 20, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 20 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'passport'
+    },
+    drivingLicence: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 3000,
+      stages: [
+        { target: 20, duration: '5m' }, // Ramp up to 20 iterations per second in 5 minutes
+        { target: 20, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 20 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'drivingLicence'
+    }
+  },
   load: {
     passport: {
       executor: 'ramping-arrival-rate',

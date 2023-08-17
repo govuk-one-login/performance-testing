@@ -4,58 +4,6 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { uuidv4 } from '../common/utils/jslib/index'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 
-const loadProfileVar = {
-  smokeMaxVU: __ENV.DATA_BTM_PROFILE_SMOKE_MAX_VU,
-  smokeTarget: __ENV.DATA_BTM_PROFILE_SMOKE_TARGET,
-  smokeDuration: __ENV.DATA_BTM_PROFILE_SMOKE_DURATION,
-
-  loadMaxVU1: __ENV.DATA_BTM_PROFILE_LOAD_MAX_VU1,
-  loadTarget1: __ENV.DATA_BTM_PROFILE_LOAD_TARGET1,
-  loadDuration: __ENV.DATA_BTM_PROFILE_LOAD_DURATION,
-
-  loadMaxVU2: __ENV.DATA_BTM_PROFILE_LOAD_MAX_VU2,
-  loadTarget2: __ENV.DATA_BTM_PROFILE_LOAD_TARGET2,
-
-  loadMaxVU3: __ENV.DATA_BTM_PROFILE_LOAD_MAX_VU3,
-  loadTarget3: __ENV.DATA_BTM_PROFILE_LOAD_TARGET3,
-
-  loadMaxVU4: __ENV.DATA_BTM_PROFILE_LOAD_MAX_VU4,
-  loadTarget4: __ENV.DATA_BTM_PROFILE_LOAD_TARGET4,
-
-  loadMaxVU5: __ENV.DATA_BTM_PROFILE_LOAD_MAX_VU5,
-  loadTarget5: __ENV.DATA_BTM_PROFILE_LOAD_TARGET5,
-
-  loadMaxVU6: __ENV.DATA_BTM_PROFILE_LOAD_MAX_VU6,
-  loadTarget6: __ENV.DATA_BTM_PROFILE_LOAD_TARGET6,
-
-  loadMaxVU7: __ENV.DATA_BTM_PROFILE_LOAD_MAX_VU7,
-  loadTarget7: __ENV.DATA_BTM_PROFILE_LOAD_TARGET7
-}
-
-const smokeMaxVUInt = parseInt(loadProfileVar.smokeMaxVU, 10)
-const smokeTargetInt = parseInt(loadProfileVar.smokeTarget, 10)
-
-const loadMaxVUInt1 = parseInt(loadProfileVar.loadMaxVU1, 10)
-const loadTargetInt1 = parseInt(loadProfileVar.loadTarget1, 10)
-
-const loadMaxVUInt2 = parseInt(loadProfileVar.loadMaxVU2, 10)
-const loadTargetInt2 = parseInt(loadProfileVar.loadTarget2, 10)
-
-const loadMaxVUInt3 = parseInt(loadProfileVar.loadMaxVU3, 10)
-const loadTargetInt3 = parseInt(loadProfileVar.loadTarget3, 10)
-
-const loadMaxVUInt4 = parseInt(loadProfileVar.loadMaxVU4, 10)
-const loadTargetInt4 = parseInt(loadProfileVar.loadTarget4, 10)
-
-const loadMaxVUInt5 = parseInt(loadProfileVar.loadMaxVU5, 10)
-const loadTargetInt5 = parseInt(loadProfileVar.loadTarget5, 10)
-
-const loadMaxVUInt6 = parseInt(loadProfileVar.loadMaxVU6, 10)
-const loadTargetInt6 = parseInt(loadProfileVar.loadTarget6, 10)
-
-const loadMaxVUInt7 = parseInt(loadProfileVar.loadMaxVU7, 10)
-const loadTargetInt7 = parseInt(loadProfileVar.loadTarget7, 10)
-
 const profiles: ProfileList = {
   smoke: {
     sendEventSmokeTest1: {
@@ -63,9 +11,9 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: smokeMaxVUInt,
+      maxVUs: 1,
       stages: [
-        { target: smokeTargetInt, duration: loadProfileVar.smokeDuration }
+        { target: 1, duration: '10s' }
       ],
       exec: 'sendEvent1'
     },
@@ -74,9 +22,9 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: smokeMaxVUInt,
+      maxVUs: 1,
       stages: [
-        { target: smokeTargetInt, duration: loadProfileVar.smokeDuration }
+        { target: 1, duration: '10s' }
       ],
       exec: 'sendEvent2'
     },
@@ -85,9 +33,9 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: smokeMaxVUInt,
+      maxVUs: 1,
       stages: [
-        { target: smokeTargetInt, duration: loadProfileVar.smokeDuration }
+        { target: 1, duration: '10s' }
       ],
       exec: 'sendEvent3'
     },
@@ -96,9 +44,9 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: smokeMaxVUInt,
+      maxVUs: 1,
       stages: [
-        { target: smokeTargetInt, duration: loadProfileVar.smokeDuration }
+        { target: 1, duration: '10s' }
       ],
       exec: 'sendEvent4'
     },
@@ -107,9 +55,9 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: smokeMaxVUInt,
+      maxVUs: 1,
       stages: [
-        { target: smokeTargetInt, duration: loadProfileVar.smokeDuration }
+        { target: 1, duration: '10s' }
       ],
       exec: 'sendEvent5'
     },
@@ -118,9 +66,9 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: smokeMaxVUInt,
+      maxVUs: 1,
       stages: [
-        { target: smokeTargetInt, duration: loadProfileVar.smokeDuration }
+        { target: 1, duration: '10s' }
       ],
       exec: 'sendEvent6'
     },
@@ -129,22 +77,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: smokeMaxVUInt,
+      maxVUs: 1,
       stages: [
-        { target: smokeTargetInt, duration: loadProfileVar.smokeDuration }
+        { target: 1, duration: '10s' }
       ],
       exec: 'sendEvent7'
-    },
-    sendEventSmokeTest8: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: smokeMaxVUInt,
-      stages: [
-        { target: smokeTargetInt, duration: loadProfileVar.smokeDuration }
-      ],
-      exec: 'sendEventDebug'
     }
   },
   load: {
@@ -153,9 +90,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: loadMaxVUInt1,
+      maxVUs: 150,
       stages: [
-        { target: loadTargetInt1, duration: loadProfileVar.loadDuration }
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent1'
     },
@@ -164,9 +103,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: loadMaxVUInt2,
+      maxVUs: 150,
       stages: [
-        { target: loadTargetInt2, duration: loadProfileVar.loadDuration }
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent2'
     },
@@ -175,9 +116,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: loadMaxVUInt3,
+      maxVUs: 150,
       stages: [
-        { target: loadTargetInt3, duration: loadProfileVar.smokeDuration }
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent3'
     },
@@ -186,9 +129,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: loadMaxVUInt4,
+      maxVUs: 150,
       stages: [
-        { target: loadTargetInt4, duration: loadProfileVar.smokeDuration }
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent4'
     },
@@ -197,9 +142,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: loadMaxVUInt5,
+      maxVUs: 150,
       stages: [
-        { target: loadTargetInt5, duration: loadProfileVar.loadDuration }
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent5'
     },
@@ -208,9 +155,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: loadMaxVUInt6,
+      maxVUs: 150,
       stages: [
-        { target: loadTargetInt6, duration: loadProfileVar.loadDuration }
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent6'
     },
@@ -219,9 +168,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: loadMaxVUInt7,
+      maxVUs: 150,
       stages: [
-        { target: loadTargetInt7, duration: loadProfileVar.loadDuration }
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent7'
     }

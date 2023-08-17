@@ -79,9 +79,14 @@ export function setup (): void {
 }
 
 const env = {
-  envURL: __ENV.IDENTITY_KIWI_URL,
-  envIPVStub: __ENV.IDENTITY_KIWI_STUB_URL,
-  envTarget: __ENV.IDENTITY_KIWI_TARGET
+  CIC: {
+    ipvStub: __ENV.IDENTITY_KIWI_CIC_STUB_URL,
+    target: __ENV.IDENTITY_KIWI_CIC_TARGET
+  },
+  F2F: {
+    ipvStub: __ENV.IDENTITY_KIWI_F2F_STUB_URL,
+    target: __ENV.IDENTITY_KIWI_F2F_TARGET
+  }
 }
 
 const transactionDuration = new Trend('duration', true)
@@ -95,9 +100,9 @@ export function CIC (): void {
 
   group('B01_CIC_01_IPVStubCall POST', () => {
     const startTime = Date.now()
-    res = http.post(env.envIPVStub + '/start',
+    res = http.post(env.CIC.ipvStub + '/start',
       JSON.stringify({
-        target: env.envTarget
+        target: env.CIC.target
       }),
       {
         tags: { name: 'B01_CIC_01_IPVStubCall' }
@@ -196,10 +201,10 @@ export function CIC (): void {
 
   group('B01_CIC_06_SendAuthorizationCode POST', () => {
     const startTime = Date.now()
-    res = http.post(env.envTarget + '/token', {
+    res = http.post(env.CIC.target + '/token', {
       grant_type: 'authorization_code',
       code: codeUrl,
-      redirect_uri: env.envIPVStub + '/redirect'
+      redirect_uri: env.CIC.ipvStub + '/redirect'
     }, {
       tags: { name: 'B01_CIC_06_SendAuthorizationCode' }
     })
@@ -223,7 +228,7 @@ export function CIC (): void {
       headers: { Authorization: authHeader },
       tags: { name: 'B01_CIC_07_SendBearerToken' }
     }
-    res = http.post(env.envTarget + '/userinfo', {}, options)
+    res = http.post(env.CIC.target + '/userinfo', {}, options)
     const endTime = Date.now()
 
     check(res, {
@@ -251,7 +256,7 @@ export function FaceToFace (): void {
 
   group('B02_FaceToFace_01_IPVStubCall POST', () => {
     const startTime = Date.now()
-    res = http.post(env.envIPVStub + '/start',
+    res = http.post(env.F2F.ipvStub + '/start',
       JSON.stringify({
         yotiMockID: '0000'
       }),
@@ -805,10 +810,10 @@ export function FaceToFace (): void {
 
   group('B02_FaceToFace_11_SendAuthorizationCode POST', () => {
     const startTime = Date.now()
-    res = http.post(env.envTarget + '/token', {
+    res = http.post(env.F2F.target + '/token', {
       grant_type: 'authorization_code',
       code: codeUrl,
-      redirect_uri: env.envIPVStub + '/redirect'
+      redirect_uri: env.F2F.ipvStub + '/redirect'
     }, {
       tags: { name: 'B02_FaceToFace_11_SendAuthorizationCode' }
     })
@@ -834,7 +839,7 @@ export function FaceToFace (): void {
       },
       tags: { name: 'B02_FaceToFace_12_SendBearerToken' }
     }
-    res = http.post(env.envTarget + '/userinfo', {}, options)
+    res = http.post(env.F2F.target + '/userinfo', {}, options)
     const endTime = Date.now()
 
     check(res, {

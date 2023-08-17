@@ -1,4 +1,3 @@
-import { sleep } from 'k6'
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { uuidv4 } from '../common/utils/jslib/index'
@@ -321,27 +320,4 @@ export function sendEvent7 (): void {
   messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted).replace('Z', '')
   console.log('sendEvent7 === debug === messageBody \n', messageBody)
   sqs.sendMessage(env.sqs_queue, messageBody)
-}
-
-export function sendEventDebug (): void {
-  console.log('1 === debug === executing sendEventDebug \n')
-  console.log('2 === debug === env.sqs_queue \n', env.sqs_queue)
-  console.log('3 === debug === awsConfig \n', awsConfig)
-  console.log('4 === debug === payload \n', eventData.payload)
-  randomTimestamp = Math.floor(Math.random() * (payloadTimestampMax - payloadTimestampMin + 1)) + payloadTimestampMin
-  timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
-  messageBody = eventData.payload.replace('UUID', uuidv4())
-  messageBody = messageBody.replace('DATA1', payloadData1Array[0])
-  messageBody = messageBody.replace('DATA2', payloadData2Array[0])
-  messageBody = messageBody.replace('DATA3', payloadData3Array[0])
-  messageBody = messageBody.replace(/""timestamp"":\s*""\d+""/, `""timestamp"": ${randomTimestamp}`)
-  messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
-  messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted).replace('Z', '')
-  console.log('5 === debug === messageBody \n\n', messageBody)
-  console.log('6 === debug === payloadData1Array \n', payloadData1Array)
-  console.log('7 === debug === payloadData2Array \n', payloadData2Array)
-  console.log('8 === debug === payloadData3Array \n', payloadData3Array)
-  console.log('9 === debug === payloadTimestampArray \n', payloadTimestampArray)
-  sqs.sendMessage(env.sqs_queue, messageBody)
-  sleep(2)
 }

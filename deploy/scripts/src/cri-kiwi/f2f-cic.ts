@@ -136,7 +136,7 @@ export function CIC (): void {
 
   group('B01_CIC_03_UserDetails POST', () => {
     const startTime = Date.now()
-    res.submitForm({
+    res = res.submitForm({
       fields: {
         surname: 'NameTest',
         firstName: 'FirstNameTest'
@@ -159,7 +159,7 @@ export function CIC (): void {
 
   group('B01_CIC_04_UserBirthdate POST', () => {
     const startTime = Date.now()
-    res.submitForm({
+    res = res.submitForm({
       fields: {
         'dateOfBirth-day': '1',
         'dateOfBirth-month': '1',
@@ -181,7 +181,7 @@ export function CIC (): void {
 
   group('B01_CIC_05_CheckDetails POST', () => {
     const startTime = Date.now()
-    res.submitForm({
+    res = res.submitForm({
       params: { tags: { name: 'B01_CIC_05_CheckDetails' } },
       submitSelector: '#continue'
     })

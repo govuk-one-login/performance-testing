@@ -93,8 +93,8 @@ const transactionDuration = new Trend('duration', true)
 
 export function CIC (): void {
   let res: Response
-  let requestValue: string
   let clientId: string
+  let authorizeLocation: string
   let codeUrl: string
   let accessToken: string
 
@@ -114,14 +114,13 @@ export function CIC (): void {
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
-    requestValue = getRequestCode(res)
+    authorizeLocation = getAuthorizeauthorizeLocation(res)
     clientId = getClientID(res)
   })
 
   group('B01_CIC_02_Authorize GET', () => {
     const startTime = Date.now()
-    const endpoint = `/oauth2/authorize?request=${requestValue}&response_type=code&client_id=${clientId}`
-    res = http.get(env.envURL + endpoint, {
+    res = http.get(authorizeLocation, {
       tags: { name: 'B01_CIC_02_Authorize' }
     })
     const endTime = Date.now()
@@ -242,7 +241,7 @@ export function CIC (): void {
 
 export function FaceToFace (): void {
   let res: Response
-  let requestValue: string
+  let authorizeLocation: string
   let clientId: string
   let accessToken: string
   let codeUrl: string
@@ -270,14 +269,13 @@ export function FaceToFace (): void {
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
-    requestValue = getRequestCode(res)
+    authorizeLocation = getAuthorizeauthorizeLocation(res)
     clientId = getClientID(res)
   })
 
   group('B02_FaceToFace_02_Authorize GET', () => {
     const startTime = Date.now()
-    const endpoint = `/oauth2/authorize?request=${requestValue}&response_type=code&client_id=${clientId}`
-    res = http.get(env.envURL + endpoint, {
+    res = http.get(authorizeLocation, {
       tags: { name: 'B02_FaceToFace_02_Authorize' }
     })
     const endTime = Date.now()
@@ -857,12 +855,6 @@ function randomDate (start: Date, end: Date): Date {
   return new Date(min + (diff * Math.random()))
 }
 
-function getRequestCode (r: Response): string {
-  const request = r.json('request')
-  if (request !== null && typeof request === 'string') return request
-  fail('Request not found')
-}
-
 function getClientID (r: Response): string {
   const clientId = r.json('clientId')
   if (clientId !== null && typeof clientId === 'string') return clientId
@@ -879,4 +871,10 @@ function getAccessToken (r: Response): string {
   const accessToken = r.json('access_token')
   if (accessToken !== null && typeof accessToken === 'string') return accessToken
   fail('AccessToken not found')
+}
+
+function getAuthorizeauthorizeLocation (r: Response): string {
+  const authorizeLocation = r.json('AuthorizeLocation')
+  if (authorizeLocation !== null && typeof authorizeLocation === 'string') return authorizeLocation
+  fail('AuthorizeLocation not found')
 }

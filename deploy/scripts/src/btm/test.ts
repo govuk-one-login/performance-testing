@@ -233,7 +233,7 @@ export function sendEvent1 (): void {
   messageBody = messageBody.replace('DATA3', payloadData3Array[0])
   messageBody = messageBody.replace(/""timestamp"":\s*""\d+""/, `""timestamp"": ${randomTimestamp}`)
   messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
-  messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted).replace('Z', '')
+  messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted.replace('Z', ''))
   console.log('sendEvent1 === debug === messageBody \n', messageBody)
   sqs.sendMessage(env.sqs_queue, messageBody)
 }

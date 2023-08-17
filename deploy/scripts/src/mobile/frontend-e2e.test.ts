@@ -49,7 +49,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 100, duration: '15m' }, // linear increase from 0 iteration per second to 100 iterations per second for 15 min -> 0.11 t/s/s
         // { target: 100, duration: '30m' } // maintain 100 iterations per second for 30 min
-        { target: 100, duration: '5m' } // Temporary reduction for running iterative load tests on the ECS Scaling Policy
+        { target: 100, duration: '5m' } // Temporary reduction for running iterative load tests for https://govukverify.atlassian.net/browse/DCMAW-6497
       ],
       exec: 'mamIphonePassport'
     }

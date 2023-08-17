@@ -1,4 +1,4 @@
-import http, { type Response } from 'k6/http'
+import http, { type ObjectBatchRequest, type Response } from 'k6/http'
 import { URL } from '../jslib/url'
 
 // Resolves relative and absolute `src` and `href` paths
@@ -16,10 +16,18 @@ function getResourceURLs (res: Response): string[] {
   res.html('link[href]').each((_, el) => { // Link elements with a `href` attribute
     resources.push(resolveUrl(el.attributes().href.value, res.url))
   })
-  return resources
+  return resources.filter(url => new URL(url).hostname.endsWith('.account.gov.uk')) // Only retrieve URLs accessible to the load injector
 }
 
 // Calls a GET request for static resources defined in the HTML page of a response
 export function getStaticResources (res: Response): Response[] {
-  return http.batch(getResourceURLs(res))
+  const urls = getResourceURLs(res)
+  const requests: ObjectBatchRequest[] = urls.map(url => {
+    return {
+      method: 'GET',
+      url,
+      params: { responseType: 'none' }
+    }
+  })
+  return http.batch(requests)
 }

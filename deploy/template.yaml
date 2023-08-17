@@ -34,6 +34,9 @@ Mappings:
   SPOT:
     AWS:
       AccountID: "429671060046"
+  TxMA:
+    AWS:
+      AccountID: "750703655225"
 
 Resources:
   CodeBuildServiceRole:
@@ -150,7 +153,7 @@ Resources:
           !Ref AWS::NoValue,
         ]
 
-  PerofrmanceTesterPolicy:
+  PerformanceTesterPolicy:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName: !Sub ${AWS::StackName}-PerformanceTesterPolicy-${Environment}
@@ -164,11 +167,16 @@ Resources:
               - "kms:Decrypt"
               - "kms:GenerateDataKey"
             Resource:
-              Fn::Join:
-                - ":"
-                - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
-                  - !FindInMap [SPOT, AWS, AccountID]
-                  - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [SPOT, AWS, AccountID]
+                    - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [TxMA, AWS, AccountID]
+                    - "key/*"
           - Effect: "Allow"
             Action:
               - "sqs:SendMessage"
@@ -177,11 +185,16 @@ Resources:
               - "sqs:DeleteMessage"
               - "sqs:ChangeMessageVisibility"
             Resource:
-              Fn::Join:
-                - ":"
-                - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
-                  - !FindInMap [SPOT, AWS, AccountID]
-                  - "di-ipv-spot-app-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [SPOT, AWS, AccountID]
+                    - "di-ipv-spot-app-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [TxMA, AWS, AccountID]
+                    - "event-processing-*"
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"
@@ -334,13 +347,14 @@ Resources:
           env:
             variables:
               WORK_DIR: /home/k6/scripts
+              REPORTING_DIR: /home/k6/reporting
               JSON_RESULTS: results.gz
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
+              SLACK_NOTIFY_CHANNEL: C05J07H48UE
             parameter-store:
               ACCOUNT_APP_KEY: "/perfTest/account/accounts/appKey"
               ACCOUNT_APP_PASSWORD_NEW: "/perfTest/account/testUserNewPassword"
               ACCOUNT_APP_PASSWORD: "/perfTest/account/testUserPassword"
-              ACCOUNT_BASE_URL: "/perfTest/account/authentication/baseUrl"
               ACCOUNT_BRAVO_ID_REUSE_API_KEY: "/perfTest/account/bravo/idReuseApiKey"
               ACCOUNT_BRAVO_ID_REUSE_API_KEY_SUMMARISE: "/perfTest/account/bravo/idReuseApiKeySummarise"
               ACCOUNT_BRAVO_ID_REUSE_MOCK: "/perfTest/account/bravo/idReuseMock"
@@ -375,6 +389,7 @@ Resources:
               MOBILE_BACKEND_URL: "/perfTest/mobile/backendUrl"
               MOBILE_FRONTEND_URL: "/perfTest/mobile/frontendUrl"
               MOBILE_TEST_CLIENT_EXECUTE_URL: "/perfTest/mobile/testClientUrl"
+              SLACK_OAUTH_TOKEN: "/perfTest/slack/OAuthToken"
           phases:
             pre_build:
               commands:
@@ -382,9 +397,9 @@ Resources:
                   sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_NUMBER#" $OTEL_TEMPLATE > $OTEL_CONFIG
                 - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &
                 - export EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name $CODEBUILD_BUILD_NUMBER)
+                - source ${REPORTING_DIR}/slack.sh POST
             build:
               commands:
-                - start=`date +"%Y-%m-%dT%H:%M:%SZ"`
                 - echo "Run performance test"
                 - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out statsd --out json=$JSON_RESULTS
             post_build:
@@ -398,9 +413,7 @@ Resources:
                 - kill $OTEL_PID
                 - TIMEOUT=0
                 - while kill -0 $OTEL_PID && (( TIMEOUT < 300 )); do sleep 1; (( TIMEOUT++ )); done
-                - end=`date +"%Y-%m-%dT%H:%M:%SZ"`
-                - |
-                  echo "Dashboard link: /#dashboard;gtf="$start"%20to%20"$end";id="$K6_DYNATRACE_DASHBOARD_ID";gf=all;es=CUSTOM_DIMENSION-build_id:"$CODEBUILD_BUILD_NUMBER
+                - source ${REPORTING_DIR}/slack.sh UPDATE
                 - echo "Performance test complete"
 
       Tags:

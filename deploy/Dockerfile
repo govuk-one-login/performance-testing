@@ -15,7 +15,7 @@ RUN cd scripts && \
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.81.0 as otel
+FROM otel/opentelemetry-collector-contrib:0.82.0 as otel
 ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---
@@ -35,10 +35,11 @@ ENV WORKDIR=/home/k6
 WORKDIR ${WORKDIR}
 
 USER root
-RUN apk add --no-cache aws-cli
+RUN apk add --no-cache aws-cli curl jq
 
 USER k6
 RUN mkdir ${WORKDIR}/scripts
 COPY --from=node-build /home/node/scripts/dist ${WORKDIR}/scripts
+ADD reporting ${WORKDIR}/reporting
 
 ENTRYPOINT ["sh"]

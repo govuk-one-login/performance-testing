@@ -74,7 +74,6 @@ const transactionDuration = new Trend('duration', true)
 
 export function kbvScenario1 (): void {
   let res: Response
-  let csrfToken: string
   interface kbvAnswers {
     kbvAns1: string
     kbvAns2: string
@@ -82,88 +81,63 @@ export function kbvScenario1 (): void {
   }
   const kbvAnsJSON: kbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
 
-  group(
-    'B01_KBV_01_CoreStubEditUserContinue POST',
-    function () {
-      const startTime = Date.now()
-      res = http.get(
-        env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197',
-        {
-          headers: { Authorization: `Basic ${encodedCredentials}` },
-          tags: { name: 'B01_KBV_01_CoreStubEditUserContinue' }
-        }
-      )
-      const endTime = Date.now()
-      isStatusCode200(res) && validatePageContent(res, 'You can find this amount on your loan agreement')
-        ? transactionDuration.add(endTime - startTime)
-        : fail('Response Validation Failed')
-
-      csrfToken = getCSRF(res)
-    }
-  )
+  group('B01_KBV_01_CoreStubEditUserContinue POST', () => {
+    const startTime = Date.now()
+    res = http.get(
+      env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197',
+      {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B01_KBV_01_CoreStubEditUserContinue' }
+      }
+    )
+    const endTime = Date.now()
+    isStatusCode200(res) && validatePageContent(res, 'You can find this amount on your loan agreement')
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
 
   sleep(Math.random() * 3)
 
-  group('B01_KBV_02_KBVQuestion1 POST', function () {
+  group('B01_KBV_02_KBVQuestion1 POST', () => {
     const startTime = Date.now()
-    res = http.post(
-      env.kbvEndPoint + '/kbv/question',
-      {
-        Q00042: kbvAnsJSON.kbvAns1,
-        continue: '',
-        'x-csrf-token': csrfToken
-      },
-      {
-        tags: { name: 'B01_KBV_02_KBVQuestion1' }
-      }
-    )
+    res = res.submitForm({
+      fields: { Q00042: kbvAnsJSON.kbvAns1 },
+      params: { tags: { name: 'B01_KBV_02_KBVQuestion1' } },
+      submitSelector: '#continue'
+    })
     const endTime = Date.now()
     isStatusCode200(res) && validatePageContent(res, 'This includes any interest')
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
   })
 
   sleep(Math.random() * 3)
 
-  group('B01_KBV_03_KBVQuestion2 POST', function () {
+  group('B01_KBV_03_KBVQuestion2 POST', () => {
     const startTime = Date.now()
-    res = http.post(
-      env.kbvEndPoint + '/kbv/question',
-      {
-        Q00015: kbvAnsJSON.kbvAns2,
-        continue: '',
-        'x-csrf-token': csrfToken
-      },
-      {
-        tags: { name: 'B01_KBV_03_KBVQuestion2' }
-      }
-    )
+    res = res.submitForm({
+      fields: { Q00015: kbvAnsJSON.kbvAns2 },
+      params: { tags: { name: 'B01_KBV_03_KBVQuestion2' } },
+      submitSelector: '#continue'
+    })
     const endTime = Date.now()
     isStatusCode200(res) && validatePageContent(res, 'Think about the amount you agreed to pay back every month')
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
   })
 
   sleep(Math.random() * 3)
 
-  group('B01_KBV_04_KBVQuestion3 POST', function () {
+  group('B01_KBV_04_KBVQuestion3 POST', () => {
     const startTime1 = Date.now()
-    res = http.post(
-      env.kbvEndPoint + '/kbv/question',
-      {
-        Q00018: kbvAnsJSON.kbvAns3,
-        continue: '',
-        'x-csrf-token': csrfToken
-      },
-      {
+    res = res.submitForm({
+      fields: { Q00018: kbvAnsJSON.kbvAns3 },
+      params: {
         redirects: 2,
         tags: { name: 'B01_KBV_04_KBVQuestion3_KBVCall' }
-      }
-    )
+      },
+      submitSelector: '#continue'
+    })
     const endTime1 = Date.now()
     isStatusCode302(res)
       ? transactionDuration.add(endTime1 - startTime1)
@@ -181,8 +155,4 @@ export function kbvScenario1 (): void {
       ? transactionDuration.add(endTime2 - startTime2)
       : fail('Response Validation Failed')
   })
-}
-
-function getCSRF (r: Response): string {
-  return r.html().find("input[name='x-csrf-token']").val() ?? ''
 }

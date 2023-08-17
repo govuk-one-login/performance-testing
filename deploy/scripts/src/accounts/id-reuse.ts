@@ -3,6 +3,8 @@ import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { SharedArray } from 'k6/data'
+import { uuidv4 } from '../common/utils/jslib'
 
 const profiles: ProfileList = {
   smoke: {
@@ -108,6 +110,18 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
+interface SummariseSubjectID {
+  subID: string
+}
+
+const csvData: SummariseSubjectID[] = new SharedArray('Summarise Subject ID', function () {
+  return open('./data/summariseSubjectID.csv').split('\n').slice(1).map((subID) => {
+    return {
+      subID
+    }
+  })
+})
+
 const transactionDuration = new Trend('duration', true)
 
 const env = {
@@ -119,11 +133,13 @@ const env = {
 export function persistID (): void {
   let res: Response
   let token: string
+  const userID = uuidv4()
+  const subjectID = `urn:fdc:gov.uk:2022:${userID}`
   group('R01_persistID_01_GenerateToken POST', function () {
     const startTime = Date.now()
     res = http.post(env.envMock + '/generate',
       JSON.stringify({
-        sub: 'ValidTest'
+        sub: subjectID
       }),
       {
         tags: { name: 'R01_idReuse_01_GenerateToken' }
@@ -154,7 +170,7 @@ export function persistID (): void {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.6PIinUiv_RExeCq3XlTQqIAPqLv_jkpeFtqDc1PcWwQ', // pragma: allowlist secret
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' // pragma: allowlist secret
     ])
-    res = http.post(env.envURL + '/vcs/ValidTest', body, options)
+    res = http.post(env.envURL + `/vcs/${subjectID}`, body, options)
     const endTime = Date.now()
     check(res, {
       'is status 202': (r) => r.status === 202,
@@ -164,7 +180,7 @@ export function persistID (): void {
       : fail('Response Validation Failed')
   })
 
-  sleep(Math.random() * 3)
+  sleep(2 + Math.random() * 2) // Random sleep between 2-4 seconds
 
   group('R01_persistID_03_Retrieve GET', function () {
     const startTime = Date.now()
@@ -175,7 +191,7 @@ export function persistID (): void {
       },
       tags: { name: 'R01_idReuse_03_Retrieve' }
     }
-    res = http.get(env.envURL + '/vcs/ValidTest', options)
+    res = http.get(env.envURL + `/vcs/${subjectID}`, options)
     const endTime = Date.now()
     check(res, {
       'is status 200': (r) => r.status === 200,
@@ -189,12 +205,13 @@ export function persistID (): void {
 export function retrieveID (): void {
   let res: Response
   let token: string
+  const summariseData = csvData[Math.floor(Math.random() * csvData.length)]
 
   group('R02_RetrieveID_01_GenerateTokenSummary POST', function () {
     const startTime = Date.now()
     res = http.post(env.envMock + '/generate',
       JSON.stringify({
-        sub: 'ValidTest',
+        sub: summariseData.subID,
         aud: 'accountManagementAudience',
         ttl: 120
       }),
@@ -220,7 +237,7 @@ export function retrieveID (): void {
       },
       tags: { name: 'R01_idReuse_05_Summarise' }
     }
-    res = http.get(env.envURL + '/summarise-vcs/ValidTest', options)
+    res = http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options)
     const endTime = Date.now()
     check(res, {
       'is status 200': (r) => r.status === 200,

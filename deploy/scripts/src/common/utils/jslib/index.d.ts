@@ -88,9 +88,11 @@ export function randomString (length: number, charset?: string): string
 * Function returns a random uuid v4 in a string form.
 * https://k6.io/docs/javascript-api/jslib/utils/uuidv4/
 *
-* @param {boolean} [secure] By default, uuidv4() uses a standard random number generator.
-*        If the secure option is set to true, uuidv4 uses a cryptographically secure random number generator instead.
-*        While this adds security, the secure option also makes the function an order of magnitude slower.
+* @param {boolean} [secure] By default, uuidv4() uses a standard random number
+*        generator. If the secure option is set to true, uuidv4 uses a
+*        cryptographically secure random number generator instead. While this
+*        adds security, the secure option also makes the function an order of
+*        magnitude slower.
 * @returns {string} Random UUID v4 string
 * @example
 * const randomUUID = uuidv4()

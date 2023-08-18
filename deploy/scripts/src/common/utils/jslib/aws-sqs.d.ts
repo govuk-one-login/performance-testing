@@ -19,7 +19,12 @@ export class AWSConfig {
    * })
    * const sqs = new SQSClient(awsConfig)
    */
-  constructor (region: string, accessKeyId: string, secretAccessKey: string, sessionToken?: string)
+  constructor (options: {
+    region: string
+    accessKeyId: string
+    secretAccessKey: string
+    sessionToken?: string
+  })
 
   /**
    * Creates an AWSConfig using the `AWS_REGION`, `AWS_ACCESS_KEY_ID`,

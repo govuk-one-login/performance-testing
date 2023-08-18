@@ -33,12 +33,16 @@ export class SQSClient {
    * SQSClient interacts with the AWS Simple Queue Service (SQS). With it, the
    * user can send messages to specified queues and list available queues in
    * the current region.
+   * https://k6.io/docs/javascript-api/jslib/aws/sqsclient/
+   *
    * @param {AWSConfig} config AWS Config to use to initialise the SQS client
    */
   constructor (config: AWSConfig)
 
   /**
    * Retrieves a list of available Amazon Simple Queue Service (SQS) queues
+   * https://k6.io/docs/javascript-api/jslib/aws/sqsclient/sqsclient-listqueues/
+   *
    * @param {object} [options] Options for the request. Accepted properties are:
    *        `queueNamePrefix` (optional string) setting the prefix filter for
    *        the returned queue list, `maxResults` (optional number) setting the
@@ -72,6 +76,8 @@ export class SQSClient {
 
   /**
    * Sends a message to the specified Amazon Simple Queue Service (SQS) queue.
+   * https://k6.io/docs/javascript-api/jslib/aws/sqsclient/sqsclient-sendmessage/
+   *
    * @param {string} queueUrl The URL of the Amazon SQS queue to which a
    *        message is sent. Queue URLs and names are case-sensitive.
    * @param {string} messageBody The message to send. The minimum size is one

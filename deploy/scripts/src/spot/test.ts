@@ -62,7 +62,7 @@ const awsConfig = new AWSConfig({
 })
 const sqs = new SQSClient(awsConfig)
 
-export function spotScenario (): void {
+export async function spotScenario (): Promise<void> {
   const currTime = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
   const payload = generateRequest(currTime)
 
@@ -70,5 +70,5 @@ export function spotScenario (): void {
     messageBody: JSON.stringify(payload)
   }
 
-  sqs.sendMessage(env.sqs_queue, spotMessage.messageBody)
+  await sqs.sendMessage(env.sqs_queue, spotMessage.messageBody)
 }

@@ -1,5 +1,5 @@
 import { type AUTH_IPV_AUTHORISATION_REQUESTED, type F2F_YOTI_START, type IPV_F2F_CRI_VC_CONSUMED } from '../requestGenerator/ipvrReqFormat'
-import { uuidv4 } from '../../common/utils/jslib/index'
+import { uuidv4, randomString } from '../../common/utils/jslib/index'
 
 const userID = uuidv4()
 const signinJourneyID = uuidv4()
@@ -9,13 +9,13 @@ const randomEmail = `perfSPOT${randomNum}@digital.cabinet-office.gov.uk`
 
 export function generateAuthRequest (): AUTH_IPV_AUTHORISATION_REQUESTED {
   const timestamp = new Date().toISOString()
-  const sampleAuthRequest: AUTH_IPV_AUTHORISATION_REQUESTED = {
+  return {
     event_id: uuidv4(),
     client_id: uuidv4(),
     clientLandingPageUrl: 'https://www.gov.uk/request-copy-criminal-record',
     event_name: 'AUTH_IPV_AUTHORISATION_REQUESTED',
     rp_name: 'replay',
-    timestamp: Date.now().toString().substring(0, 10),
+    timestamp: Math.floor(Date.now() / 1000).toString(),
     timestamp_formatted: timestamp,
     user: {
       user_id: userURN,
@@ -23,13 +23,11 @@ export function generateAuthRequest (): AUTH_IPV_AUTHORISATION_REQUESTED {
       govuk_signin_journey_id: signinJourneyID
     }
   }
-
-  return sampleAuthRequest
 }
 
 export function generateF2FRequest (): F2F_YOTI_START {
   const timestamp = new Date().toISOString()
-  const sampleF2FRequest: F2F_YOTI_START = {
+  return {
     event_id: uuidv4(),
     client_id: uuidv4(),
     clientLandingPageUrl: 'https://www.gov.uk/request-copy-criminal-record',
@@ -42,13 +40,11 @@ export function generateF2FRequest (): F2F_YOTI_START {
       govuk_signin_journey_id: signinJourneyID
     }
   }
-
-  return sampleF2FRequest
 }
 
 export function generateIPVRequest (): IPV_F2F_CRI_VC_CONSUMED {
   const timestamp = new Date().toISOString()
-  const sampleIPVRequest: IPV_F2F_CRI_VC_CONSUMED = {
+  return {
     event_id: uuidv4(),
     client_id: uuidv4(),
     clientLandingPageUrl: 'https://www.gov.uk/request-copy-criminal-record',
@@ -64,26 +60,17 @@ export function generateIPVRequest (): IPV_F2F_CRI_VC_CONSUMED {
       nameParts: [
         {
           type: 'GivenName',
-          value: randomStringGenerator(6)
+          value: randomString(6)
         },
         {
           type: 'GivenName',
-          value: randomStringGenerator(6)
+          value: randomString(6)
         },
         {
           type: 'FamilyName',
-          value: randomStringGenerator(6)
+          value: randomString(6)
         }
       ]
     }
   }
-
-  return sampleIPVRequest
-}
-
-function randomStringGenerator (charLen: number): string {
-  let result = ''
-  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' // pragma: allowlist secret
-  for (let i = charLen; i > 0; i--) result += characters[Math.round(Math.random() * (characters.length - 1))]
-  return result
 }

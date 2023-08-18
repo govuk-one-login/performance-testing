@@ -1,7 +1,6 @@
 import { sleep, group, check, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
 import { Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
@@ -698,12 +697,4 @@ export function deleteAccount (): void {
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
   })
-}
-
-function getCSRF (r: Response): string {
-  return r.html().find("input[name='_csrf']").val() ?? ''
-}
-
-function getPhone (r: Response): string {
-  return r.html().find("input[name='phoneNumber']").val() ?? ''
 }

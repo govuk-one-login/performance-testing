@@ -26,11 +26,18 @@ export class AWSConfig {
     sessionToken?: string
   })
 
+  declare region
+  declare accessKeyId
+  declare secretAccessKey
+  declare sessionToken
+  declare scheme
+  declare endpoint
+
   /**
    * Creates an AWSConfig using the `AWS_REGION`, `AWS_ACCESS_KEY_ID`,
    * `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables.
    */
-  fromEnvironment (): AWSConfig
+  declare static fromEnvironment (): AWSConfig
 }
 
 export class SQSClient {

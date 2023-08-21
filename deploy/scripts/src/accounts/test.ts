@@ -581,10 +581,10 @@ export function changePhone (): void {
 
   sleep(Math.random() * 3)
 
-  group('B01_ChangePhone_07_ClickBackToSecurity GET', function () {
+  group('B03_ChangePhone_07_ClickBackToSecurity GET', function () {
     const startTime = Date.now()
     res = http.get(env.envURL + '/manage-your-account', {
-      tags: { name: 'B01_ChangePhone_07_ClickBackToSecurity' }
+      tags: { name: 'B03_ChangePhone_07_ClickBackToSecurity' }
     })
     const endTime = Date.now()
 
@@ -592,6 +592,24 @@ export function changePhone (): void {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
         (r.body as string).includes('Delete your GOV.UK One Login')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
+
+  sleep(Math.random() * 3)
+
+  group('B03_ChangePhone_08_SignOut GET', function () {
+    const startTime = Date.now()
+    res = http.get(env.envURL + '/sign-out', {
+      tags: { name: 'B03_ChangePhone_08_SignOut' }
+    })
+    const endTime = Date.now()
+
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('You have signed out')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')

@@ -15,13 +15,13 @@ RUN cd scripts && \
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.82.0 as otel
+FROM otel/opentelemetry-collector-contrib:0.83.0 as otel
 ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---
 # Run
 # ---
-FROM grafana/k6:0.45.0
+FROM grafana/k6:0.46.0
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true
 ENV K6_STATSD_BUFFER_SIZE=100

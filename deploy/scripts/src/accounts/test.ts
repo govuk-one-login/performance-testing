@@ -1,7 +1,6 @@
 import { sleep, group, check, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
 import { Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
@@ -125,19 +124,6 @@ export const options: Options = {
   }
 }
 
-interface UserPhoneNumberChange {
-  currEmail: string
-}
-
-const csvData3: UserPhoneNumberChange[] = new SharedArray('csvPhoneNumChange', function () {
-  return open('./data/changePhoneNumber_TestData.csv').split('\n').slice(1).map((email) => {
-    return {
-      currEmail: email
-    }
-  })
-}
-)
-
 export function setup (): void {
   describeProfile(loadProfile)
 }
@@ -156,7 +142,6 @@ const credentials = {
 }
 
 const phoneData = {
-  currentPhone: __ENV.ACCOUNT_CURR_PHONE,
   newPhone: __ENV.ACCOUNT_NEW_PHONE
 }
 
@@ -468,10 +453,6 @@ export function changePassword (): void {
 
 export function changePhone (): void {
   let res: Response
-  let csrfToken: string
-  let phoneNumHidden: string
-
-  const user3 = csvData3[exec.scenario.iterationInTest % csvData3.length]
 
   group('B03_ChangePhone_01_LaunchAccountsHome GET', function () {
     const startTime = Date.now()
@@ -483,156 +464,18 @@ export function changePhone (): void {
     check(res, {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) =>
-        (r.body as string).includes('Create a GOV.UK One Login or sign in')
+        (r.body as string).includes('Services you can use with GOV.UK One Login')
     })
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
   })
 
   sleep(Math.random() * 3)
 
-  group('B03_ChangePhone_02_ClickSignIn GET', function () {
-    const startTime = Date.now()
-    res = http.post(env.signinURL + '/sign-in-or-create?redirectPost=true',
-      {
-        _csrf: csrfToken,
-        supportInternationalNumbers: 'true'
-      },
-      {
-        tags: { name: 'B03_ChangePhone_02_ClickSignIn' }
-      }
-    )
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes(
-          'Enter your email address to sign in to your GOV.UK One Login'
-        )
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B03_ChangePhone_03_EnterEmailID POST', () => {
-    const startTime = Date.now()
-    res = http.post(
-      env.signinURL + '/enter-email',
-      {
-        _csrf: csrfToken,
-        email: user3.currEmail
-      },
-      {
-        tags: { name: 'B03_ChangePhone_03_EnterEmailID' }
-      }
-    )
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your password')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B03_ChangePhone_04_EnterSignInPassword POST', () => {
-    const startTime = Date.now()
-    res = http.post(
-      env.signinURL + '/enter-password',
-      {
-        _csrf: csrfToken,
-        password: credentials.currPassword
-      },
-      {
-        tags: { name: 'B03_ChangePhone_04_EnterSignInPassword' }
-      }
-    )
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes(
-          'We have sent a code to your phone number'
-        )
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    csrfToken = getCSRF(res)
-    phoneNumHidden = getPhone(res)
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B03_ChangePhone_05_EnterSMSOTP POST', () => {
-    const startTime = Date.now()
-    res = http.post(
-      env.signinURL + '/enter-code',
-      {
-        phoneNumber: phoneNumHidden,
-        _csrf: csrfToken,
-        supportAccountRecovery: 'true',
-        checkEmailLink: '/check-email-change-security-codes?type=SMS',
-        code: credentials.fixedPhoneOTP
-      },
-      {
-        tags: { name: 'B03_ChangePhone_05_01_EnterSMSOTP' }
-      }
-    )
-    const endTime = Date.now()
-
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Your services') || (r.body as string).includes('terms of use update')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    if ((res.body as string).includes('terms of use update')) {
-      group('B03_ChangePhone_05_02_SMS_AcceptTerms', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.signinURL + '/updated-terms-and-conditions',
-          {
-            _csrf: csrfToken,
-            termsAndConditionsResult: 'accept'
-          },
-          {
-            tags: { name: 'B03_ChangePhone_05_02_SMS_AcceptTerms' }
-          }
-        )
-
-        const endTime = Date.now()
-        check(res, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Your services')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-      })
-    }
-  })
-
-  sleep(Math.random() * 3)
-
-  group('B03_ChangePhone_06_ClickSecurityTab GET', () => {
+  group('B03_ChangePhone_02_ClickSecurityTab GET', () => {
     const startTime = Date.now()
     res = http.get(env.envURL + '/security', {
-      tags: { name: 'B03_ChangePhone_06_ClickSecurityTab' }
+      tags: { name: 'B03_ChangePhone_02_ClickSecurityTab' }
     })
     const endTime = Date.now()
 
@@ -646,145 +489,120 @@ export function changePhone (): void {
 
   sleep(Math.random() * 3)
 
-  function changePhoneSteps (loopCount: number): void {
-    for (let i = 1; i <= loopCount; i++) {
-      group('B03_ChangePhone_07_ClickChangePhoneNumber GET', function () {
-        const startTime = Date.now()
-        res = http.get(
-          env.envURL + '/enter-password?type=changePhoneNumber',
-          {
-            tags: { name: 'B03_ChangePhone_07_ClickChangePhoneNumber' }
-          }
-        )
-        const endTime = Date.now()
+  group('B03_ChangePhone_03_ClickChangePhoneNumberLink GET', function () {
+    const startTime = Date.now()
+    res = http.get(env.envURL + '/enter-password?type=changePhoneNumber', {
+      tags: { name: 'B03_ChangePhone_03_ClickChangePhoneNumberLink' }
+    })
+    const endTime = Date.now()
 
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('We need to make sure it’s you before you can change your phone number.')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Enter your password')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
 
-        csrfToken = getCSRF(res)
-      })
+  sleep(Math.random() * 3)
 
-      sleep(Math.random() * 3)
+  group('B03_ChangePhone_04_EnterCurrentPassword POST', () => {
+    const startTime = Date.now()
+    res = res.submitForm({
+      fields: {
+        requestType: 'changePhoneNumber',
+        password: credentials.currPassword
+      },
+      params: {
+        tags: { name: 'B03_ChangePhone_04_EnterCurrentPassword' }
+      }
+    })
+    const endTime = Date.now()
 
-      group('B03_ChangePhone_08_EnterCurrentPassword POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.envURL + '/enter-password',
-          {
-            _csrf: csrfToken,
-            requestType: 'changePhoneNumber',
-            password: credentials.currPassword
-          },
-          {
-            tags: { name: 'B03_ChangePhone_08_EnterCurrentPassword' }
-          }
-        )
-        const endTime = Date.now()
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Enter your new mobile phone number')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
 
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Enter your new mobile phone number')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
+  sleep(Math.random() * 3)
 
-        csrfToken = getCSRF(res)
-      })
+  group('B03_ChangePhone_05_EnterNewPhoneID POST', () => {
+    const startTime = Date.now()
+    res = res.submitForm({
+      fields: {
+        phoneNumber: phoneData.newPhone,
+        internationalPhoneNumber: ''
+      },
+      params: {
+        tags: { name: 'B03_ChangePhone_05_EnterNewPhoneID' }
+      }
+    })
+    const endTime = Date.now()
 
-      sleep(Math.random() * 3)
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Check your phone')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
 
-      group('B03_ChangePhone_09_EnterNewPhoneNumber POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.envURL + '/change-phone-number',
-          {
-            _csrf: csrfToken,
-            phoneNumber: phoneData.newPhone,
-            internationalPhoneNumber: ''
-          },
-          {
-            tags: { name: 'B03_ChangePhone_09_EnterNewPhoneNumber' }
-          }
-        )
-        const endTime = Date.now()
+  sleep(Math.random() * 3)
 
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Check your phone')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
+  group('B03_ChangePhone_06_EnterSMSOTP POST', () => {
+    const startTime = Date.now()
+    res = res.submitForm({
+      fields: {
+        phoneNumber: phoneData.newPhone,
+        resendCodeLink: '/resend-phone-code',
+        changePhoneNumberLink: '/change-phone-number',
+        code: credentials.fixedPhoneOTP
+      },
+      params: {
+        tags: { name: 'B03_ChangePhone_06_EnterSMSOTP' }
+      }
+    })
+    const endTime = Date.now()
 
-        csrfToken = getCSRF(res)
-        phoneNumHidden = getPhone(res)
-      })
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('You’ve changed your phone number')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
 
-      sleep(Math.random() * 3)
+  sleep(Math.random() * 3)
 
-      group('B03_ChangePhone_10_EnteNewPhoneOTP POST', () => {
-        const startTime = Date.now()
-        res = http.post(
-          env.envURL + '/check-your-phone',
-          {
-            _csrf: csrfToken,
-            phoneNumber: phoneNumHidden,
-            code: credentials.fixedPhoneOTP
-          },
-          {
-            tags: { name: 'B03_ChangePhone_10_EnteNewPhoneOTP' }
-          }
-        )
-        const endTime = Date.now()
+  group('B03_ChangePhone_07_ClickBackToSecurity GET', function () {
+    const startTime = Date.now()
+    res = http.get(env.envURL + '/manage-your-account', {
+      tags: { name: 'B03_ChangePhone_07_ClickBackToSecurity' }
+    })
+    const endTime = Date.now()
 
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('You’ve changed your phone number')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
+    check(res, {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) =>
+        (r.body as string).includes('Delete your GOV.UK One Login')
+    })
+      ? transactionDuration.add(endTime - startTime)
+      : fail('Response Validation Failed')
+  })
 
-        csrfToken = getCSRF(res)
-      })
+  sleep(Math.random() * 3)
 
-      sleep(Math.random() * 3)
-
-      group('B03_ChangePhone_11_ClickBackToSecurity GET', function () {
-        const startTime = Date.now()
-        res = http.get(env.envURL + '/manage-your-account', {
-          tags: { name: 'B03_ChangePhone_11_ClickBackToSecurity' }
-        })
-        const endTime = Date.now()
-
-        check(res, {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Delete your GOV.UK One Login')
-        })
-          ? transactionDuration.add(endTime - startTime)
-          : fail('Response Validation Failed')
-      });
-
-      // Swap the value of the variables by destructuring assignment
-      [phoneData.currentPhone, phoneData.newPhone] = [phoneData.newPhone, phoneData.currentPhone]
-
-      sleep(Math.random() * 3)
-    }
-  }
-
-  changePhoneSteps(2) // Calling the password change function
-
-  group('B03_ChangePhone_12_SignOut GET', function () {
+  group('B03_ChangePhone_08_SignOut GET', function () {
     const startTime = Date.now()
     res = http.get(env.envURL + '/sign-out', {
-      tags: { name: 'B03_ChangePhone_12_SignOut' }
+      tags: { name: 'B03_ChangePhone_08_SignOut' }
     })
     const endTime = Date.now()
 
@@ -897,12 +715,4 @@ export function deleteAccount (): void {
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
   })
-}
-
-function getCSRF (r: Response): string {
-  return r.html().find("input[name='_csrf']").val() ?? ''
-}
-
-function getPhone (r: Response): string {
-  return r.html().find("input[name='phoneNumber']").val() ?? ''
 }

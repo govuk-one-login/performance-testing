@@ -2,6 +2,7 @@ import { check, group } from 'k6'
 import TOTP from './utils/authentication/totp'
 import { type Profile, type ProfileList, selectProfile } from './utils/config/load-profiles'
 import { resolveUrl } from './utils/request/static'
+import { AWSConfig, SQSClient } from './utils/jslib/aws-sqs'
 
 export const options = {
   vus: 1,
@@ -75,6 +76,21 @@ export default (): void => {
       'Multi Scenario       ': () => checkProfile(multiScenario, 'stress', 2), // Only specified scenarios enabled
       'Scenario "all" String': () => checkProfile(scenarioAll, 'smoke', 2), // All scenarios enabled
       'Scenario Empty String': () => checkProfile(scenarioBlank, 'stress', 3) // All scenarios enabled
+    })
+  })
+
+  group('jslib/aws-sqs', () => {
+    const config = new AWSConfig({
+      region: 'eu-west-2',
+      accessKeyId: 'A'.repeat(16),
+      secretAccessKey: 'X'.repeat(16)
+    })
+    const client = new SQSClient(config)
+
+    check(null, {
+      'AWSConfig.fromEnvironment() exists': () => typeof (AWSConfig.fromEnvironment) === 'function',
+      'SQSClient.listQueues() exists': () => typeof client.listQueues === 'function',
+      'SQSClient.sendMessage() exists': () => typeof client.sendMessage === 'function'
     })
   })
 

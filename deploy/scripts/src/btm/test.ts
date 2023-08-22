@@ -107,14 +107,14 @@ const eventData = {
 
 const sqs = new SQSClient(awsConfig)
 
-export function sendEvent (): void {
+export async function sendEvent (): Promise<void> {
   const messageBody = eventData.payload.replace('UUID', uuidv4())
-  sqs.sendMessage(env.sqs_queue, messageBody)
+  await sqs.sendMessage(env.sqs_queue, messageBody)
 }
 
-export function sendEventDebug (): void {
+export async function sendEventDebug (): Promise<void> {
   const messageBody = eventData.payload.replace('UUID', uuidv4())
-  sqs.sendMessage(env.sqs_queue, messageBody)
+  await sqs.sendMessage(env.sqs_queue, messageBody)
   console.log('1 === debug === env.sqs_queue', env.sqs_queue)
   console.log('2 === debug === awsConfig', awsConfig)
   console.log('3 === debug === payload', eventData.payload)

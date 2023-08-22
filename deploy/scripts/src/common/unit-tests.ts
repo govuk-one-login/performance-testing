@@ -4,6 +4,7 @@ import { type Profile, type ProfileList, selectProfile } from './utils/config/lo
 import { resolveUrl } from './utils/request/static'
 import { AWSConfig, SQSClient } from './utils/jslib/aws-sqs'
 import { findBetween, normalDistributionStages, randomIntBetween, randomItem, randomString, uuidv4 } from './utils/jslib'
+import { URL, URLSearchParams } from './utils/jslib/url'
 
 export const options = {
   vus: 1,
@@ -170,6 +171,37 @@ export default (): void => {
       check(null, {
         'Valid uuid v4': () => regex.test(uuid),
         'Valid uuid v4 (secure)': () => regex.test(secureUuid)
+      })
+    })
+  })
+
+  group('jslib/url', () => {
+    const url = new URL('https://account.gov.uk/path/to/page?query=val&q=2#anchor')
+    const relative = new URL('../new', url)
+    const absolute = new URL('/root', url)
+
+    group('URL', () => {
+      check(null, {
+        'host property': () => url.hostname === 'account.gov.uk',
+        'origin property': () => url.origin === 'https://account.gov.uk',
+        'pathname property': () => url.pathname === '/path/to/page',
+        'protocol property': () => url.protocol === 'https:',
+        'search property': () => url.search === '?query=val&q=2',
+        'Relative redirect': () => relative.href === 'https://account.gov.uk/path/new',
+        'Absolute redirect': () => absolute.href === 'https://account.gov.uk/root'
+      })
+    })
+
+    const paramsString = new URLSearchParams(url.search)
+    const paramsObject = new URLSearchParams({ param: '4', search: 'term' })
+    paramsObject.append('append', 'New Value')
+    paramsObject.delete('param')
+    group('URLSearchParams', () => {
+      check(null, {
+        'has()': () => paramsString.has('query', 'val'),
+        'get()': () => paramsObject.get('search') === 'term',
+        'getAll()': () => paramsString.getAll('q').join() === '2',
+        'append() & delete()': () => paramsObject.toString() === 'search=term&append=New+Value'
       })
     })
   })

@@ -85,5 +85,9 @@ export async function spotScenario (): Promise<void> {
     messageBody: JSON.stringify(payload)
   }
 
-  await sqs.sendMessage(env.sqs_queue, spotMessage.messageBody)
+  try {
+    await sqs.sendMessage(env.sqs_queue, spotMessage.messageBody)
+  } catch (error: any) {
+    console.log(error.message)
+  }
 }

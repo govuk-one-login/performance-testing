@@ -1,7 +1,6 @@
 import { check, group } from 'k6'
 import TOTP from './utils/authentication/totp'
 import { type Profile, type ProfileList, selectProfile } from './utils/config/load-profiles'
-import { resolveUrl } from './utils/request/static'
 import { AWSConfig, SQSClient } from './utils/jslib/aws-sqs'
 import { findBetween, normalDistributionStages, randomIntBetween, randomItem, randomString, uuidv4 } from './utils/jslib'
 import { URL, URLSearchParams } from './utils/jslib/url'
@@ -203,13 +202,6 @@ export default (): void => {
         'getAll()': () => paramsString.getAll('q').join() === '2',
         'append() & delete()': () => paramsObject.toString() === 'search=term&append=New+Value'
       })
-    })
-  })
-
-  group('request/static', () => {
-    check(null, {
-      'Resolve absolute path': () => resolveUrl('https://gov.uk/assets/static/default.css', 'https://gov.uk/page/') === 'https://gov.uk/assets/static/default.css',
-      'Resolve relative path': () => resolveUrl('/assets/script.js', 'https://gov.uk/page/') === 'https://gov.uk/assets/script.js'
     })
   })
 }

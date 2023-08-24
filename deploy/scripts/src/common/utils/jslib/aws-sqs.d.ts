@@ -101,13 +101,13 @@ export class SQSClient {
    * @example
    * const sqs = new SQSClient(awsConfig)
    * const testQueue = 'https://sqs.us-east-1.amazonaws.com/000000000/test-queue'
-   * await sqs.sendMessage(testQueue, JSON.stringify({value: '123'}))
+   * const sentMessage = sqs.sendMessage(testQueue, JSON.stringify({value: '123'}))
    */
   sendMessage (queueUrl: string, messageBody: string, options?: {
     messageDeduplicationId?: string
     messageGroupId?: string
-  }): Promise<{
+  }): {
     id: string
     bodyMD5: string
-  }>
+  }
 }

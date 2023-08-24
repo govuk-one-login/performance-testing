@@ -151,32 +151,32 @@ const awsConfig = new AWSConfig({
 })
 const sqs = new SQSClient(awsConfig)
 
-export async function authEvent (): Promise<void> {
+export function authEvent (): void {
   const payload = generateAuthRequest()
 
   const authEventMessage = {
     messageBody: JSON.stringify(payload)
   }
 
-  await sqs.sendMessage(env.sqs_queue, authEventMessage.messageBody)
+  sqs.sendMessage(env.sqs_queue, authEventMessage.messageBody)
 }
 
-export async function f2fEvent (): Promise<void> {
+export function f2fEvent (): void {
   const payload = generateF2FRequest()
 
   const f2fEventMessage = {
     messageBody: JSON.stringify(payload)
   }
 
-  await sqs.sendMessage(env.sqs_queue, f2fEventMessage.messageBody)
+  sqs.sendMessage(env.sqs_queue, f2fEventMessage.messageBody)
 }
 
-export async function ipvEvent (): Promise<void> {
+export function ipvEvent (): void {
   const payload = generateIPVRequest()
 
   const ipvEventMessage = {
     messageBody: JSON.stringify(payload)
   }
 
-  await sqs.sendMessage(env.sqs_queue, ipvEventMessage.messageBody)
+  sqs.sendMessage(env.sqs_queue, ipvEventMessage.messageBody)
 }

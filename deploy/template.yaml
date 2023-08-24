@@ -37,6 +37,9 @@ Mappings:
   TxMA:
     AWS:
       AccountID: "750703655225"
+  IPVR:
+    AWS:
+      AccountID: "073717171046"
 
 Resources:
   CodeBuildServiceRole:
@@ -188,6 +191,11 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
                     - !FindInMap [TxMA, AWS, AccountID]
                     - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [IPVR, AWS, AccountID]
+                    - "key/*"
           - Effect: "Allow"
             Action:
               - "sqs:SendMessage"
@@ -206,6 +214,11 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [TxMA, AWS, AccountID]
                     - "event-processing-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [IPVR, AWS, AccountID]
+                    - "ipvreturn-*"
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"

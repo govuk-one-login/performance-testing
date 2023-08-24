@@ -216,7 +216,7 @@ Resources:
                     - "event-processing-*"
               - Fn::Join:
                   - ":"
-                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [IPVR, AWS, AccountID]
                     - "ipvreturn-*"
           - Effect: "Allow"

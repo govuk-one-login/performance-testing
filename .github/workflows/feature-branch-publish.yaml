@@ -41,7 +41,7 @@ jobs:
           python-version: "3.8"
 
       - name: Set up AWS creds
-        uses: aws-actions/configure-aws-credentials@v2.2.0
+        uses: aws-actions/configure-aws-credentials@v3.0.1
         with:
           role-to-assume: ${{ secrets.PERF_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2

@@ -205,9 +205,6 @@ const awsConfig = new AWSConfig({
 
 const eventData = {
   payload: __ENV.DATA_BTM_SQS_PAYLOAD,
-  payloadData1: __ENV.DATA_BTM_SQS_PAYLOAD_DATA1,
-  payloadData2: __ENV.DATA_BTM_SQS_PAYLOAD_DATA2,
-  payloadData3: __ENV.DATA_BTM_SQS_PAYLOAD_DATA3,
   payloadTimestamp: __ENV.DATA_BTM_SQS_PAYLOAD_TIMESTAMP
 }
 

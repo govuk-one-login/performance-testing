@@ -220,100 +220,16 @@ let timestampFormatted: string
 
 const sqs = new SQSClient(awsConfig)
 
-export function sendEvent1 (): void {
+export function sendEventType1 (): void {
+  messageBody = JSON.stringify(payloadEventsArray[0])
+  sendSQSMessage()
+}
+
+export function sendSQSMessage (): void {
   randomTimestamp = Math.floor(Math.random() * (payloadTimestampMax - payloadTimestampMin + 1)) + payloadTimestampMin
   timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
-  messageBody = eventData.payload.replace('UUID', uuidv4())
-  messageBody = messageBody.replace('DATA1', payloadData1Array[0])
-  messageBody = messageBody.replace('DATA2', payloadData2Array[0])
-  messageBody = messageBody.replace('DATA3', payloadData3Array[0])
-  messageBody = messageBody.replace(/""timestamp"":\s*""\d+""/, `""timestamp"": ${randomTimestamp}`)
   messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
   messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted.replace('Z', ''))
-  console.log('sendEvent1 === debug === messageBody \n', messageBody)
-  sqs.sendMessage(env.sqs_queue, messageBody)
-}
-
-export function sendEvent2 (): void {
-  randomTimestamp = Math.floor(Math.random() * (payloadTimestampMax - payloadTimestampMin + 1)) + payloadTimestampMin
-  timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
-  messageBody = eventData.payload.replace('UUID', uuidv4())
-  messageBody = messageBody.replace('DATA1', payloadData1Array[1])
-  messageBody = messageBody.replace('DATA2', payloadData2Array[1])
-  messageBody = messageBody.replace('DATA3', payloadData3Array[1])
-  messageBody = messageBody.replace(/""timestamp"":\s*""\d+""/, `""timestamp"": ${randomTimestamp}`)
-  messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
-  messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted).replace('Z', '')
-  console.log('sendEvent2 === debug === messageBody \n', messageBody)
-  sqs.sendMessage(env.sqs_queue, messageBody)
-}
-
-export function sendEvent3 (): void {
-  randomTimestamp = Math.floor(Math.random() * (payloadTimestampMax - payloadTimestampMin + 1)) + payloadTimestampMin
-  timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
-  messageBody = eventData.payload.replace('UUID', uuidv4())
-  messageBody = messageBody.replace('DATA1', payloadData1Array[2])
-  messageBody = messageBody.replace('DATA2', payloadData2Array[2])
-  messageBody = messageBody.replace('DATA3', payloadData3Array[2])
-  messageBody = messageBody.replace(/""timestamp"":\s*""\d+""/, `""timestamp"": ${randomTimestamp}`)
-  messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
-  messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted).replace('Z', '')
-  console.log('sendEvent3 === debug === messageBody \n', messageBody)
-  sqs.sendMessage(env.sqs_queue, messageBody)
-}
-
-export function sendEvent4 (): void {
-  randomTimestamp = Math.floor(Math.random() * (payloadTimestampMax - payloadTimestampMin + 1)) + payloadTimestampMin
-  timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
-  messageBody = eventData.payload.replace('UUID', uuidv4())
-  messageBody = messageBody.replace('DATA1', payloadData1Array[3])
-  messageBody = messageBody.replace('DATA2', payloadData2Array[3])
-  messageBody = messageBody.replace('DATA3', payloadData3Array[3])
-  messageBody = messageBody.replace(/""timestamp"":\s*""\d+""/, `""timestamp"": ${randomTimestamp}`)
-  messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
-  messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted).replace('Z', '')
-  console.log('sendEvent4 === debug === messageBody \n', messageBody)
-  sqs.sendMessage(env.sqs_queue, messageBody)
-}
-
-export function sendEvent5 (): void {
-  randomTimestamp = Math.floor(Math.random() * (payloadTimestampMax - payloadTimestampMin + 1)) + payloadTimestampMin
-  timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
-  messageBody = eventData.payload.replace('UUID', uuidv4())
-  messageBody = messageBody.replace('DATA1', payloadData1Array[4])
-  messageBody = messageBody.replace('DATA2', payloadData2Array[4])
-  messageBody = messageBody.replace('DATA3', payloadData3Array[4])
-  messageBody = messageBody.replace(/""timestamp"":\s*""\d+""/, `""timestamp"": ${randomTimestamp}`)
-  messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
-  messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted).replace('Z', '')
-  console.log('sendEvent5 === debug === messageBody \n', messageBody)
-  sqs.sendMessage(env.sqs_queue, messageBody)
-}
-
-export function sendEvent6 (): void {
-  randomTimestamp = Math.floor(Math.random() * (payloadTimestampMax - payloadTimestampMin + 1)) + payloadTimestampMin
-  timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
-  messageBody = eventData.payload.replace('UUID', uuidv4())
-  messageBody = messageBody.replace('DATA1', payloadData1Array[5])
-  messageBody = messageBody.replace('DATA2', payloadData2Array[5])
-  messageBody = messageBody.replace('DATA3', payloadData3Array[5])
-  messageBody = messageBody.replace(/""timestamp"":\s*""\d+""/, `""timestamp"": ${randomTimestamp}`)
-  messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
-  messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted).replace('Z', '')
-  console.log('sendEvent6 === debug === messageBody \n', messageBody)
-  sqs.sendMessage(env.sqs_queue, messageBody)
-}
-
-export function sendEvent7 (): void {
-  randomTimestamp = Math.floor(Math.random() * (payloadTimestampMax - payloadTimestampMin + 1)) + payloadTimestampMin
-  timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
-  messageBody = eventData.payload.replace('UUID', uuidv4())
-  messageBody = messageBody.replace('DATA1', payloadData1Array[6])
-  messageBody = messageBody.replace('DATA2', payloadData2Array[6])
-  messageBody = messageBody.replace('DATA3', payloadData3Array[6])
-  messageBody = messageBody.replace(/""timestamp"":\s*""\d+""/, `""timestamp"": ${randomTimestamp}`)
-  messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
-  messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted).replace('Z', '')
-  console.log('sendEvent7 === debug === messageBody \n', messageBody)
+  messageBody = messageBody.replace('UUID', uuidv4())
   sqs.sendMessage(env.sqs_queue, messageBody)
 }

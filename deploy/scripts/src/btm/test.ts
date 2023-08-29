@@ -95,7 +95,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent1'
+      exec: 'sendEventType1'
     },
     sendEventLoadTest2: {
       executor: 'ramping-arrival-rate',
@@ -108,7 +108,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent2'
+      exec: 'sendEventType2'
     },
     sendEventLoadTest3: {
       executor: 'ramping-arrival-rate',
@@ -121,7 +121,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent3'
+      exec: 'sendEventType3'
     },
     sendEventLoadTest4: {
       executor: 'ramping-arrival-rate',
@@ -134,7 +134,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent4'
+      exec: 'sendEventType4'
     },
     sendEventLoadTest5: {
       executor: 'ramping-arrival-rate',
@@ -147,7 +147,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent5'
+      exec: 'sendEventType5'
     },
     sendEventLoadTest6: {
       executor: 'ramping-arrival-rate',
@@ -160,7 +160,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent6'
+      exec: 'sendEventType6'
     },
     sendEventLoadTest7: {
       executor: 'ramping-arrival-rate',
@@ -173,7 +173,7 @@ const profiles: ProfileList = {
         { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent7'
+      exec: 'sendEventType7'
     }
   }
 }
@@ -204,7 +204,7 @@ const awsConfig = new AWSConfig({
 })
 
 const eventData = {
-  payload: __ENV.DATA_BTM_SQS_PAYLOAD,
+  payloadEventsString: __ENV.DATA_BTM_SQS_PAYLOAD_EVENTS,
   payloadTimestamp: __ENV.DATA_BTM_SQS_PAYLOAD_TIMESTAMP
 }
 
@@ -222,6 +222,36 @@ const sqs = new SQSClient(awsConfig)
 
 export function sendEventType1 (): void {
   messageBody = JSON.stringify(payloadEventsArray[0])
+  sendSQSMessage()
+}
+
+export function sendEventType2 (): void {
+  messageBody = JSON.stringify(payloadEventsArray[1])
+  sendSQSMessage()
+}
+
+export function sendEventType3 (): void {
+  messageBody = JSON.stringify(payloadEventsArray[2])
+  sendSQSMessage()
+}
+
+export function sendEventType4 (): void {
+  messageBody = JSON.stringify(payloadEventsArray[3])
+  sendSQSMessage()
+}
+
+export function sendEventType5 (): void {
+  messageBody = JSON.stringify(payloadEventsArray[4])
+  sendSQSMessage()
+}
+
+export function sendEventType6 (): void {
+  messageBody = JSON.stringify(payloadEventsArray[5])
+  sendSQSMessage()
+}
+
+export function sendEventType7 (): void {
+  messageBody = JSON.stringify(payloadEventsArray[6])
   sendSQSMessage()
 }
 

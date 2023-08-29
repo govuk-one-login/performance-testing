@@ -208,14 +208,13 @@ const eventData = {
   payloadTimestamp: __ENV.DATA_BTM_SQS_PAYLOAD_TIMESTAMP
 }
 
-const payloadData1Array = eventData.payloadData1.split(',')
-const payloadData2Array = eventData.payloadData2.split(',')
-const payloadData3Array = eventData.payloadData3.split(',')
+const payloadEventsArray = JSON.parse(eventData.payloadEventsString)
+
 const payloadTimestampArray = eventData.payloadTimestamp.split(',')
 const payloadTimestampMin: number = Number(payloadTimestampArray[0])
 const payloadTimestampMax: number = Number(payloadTimestampArray[1])
 
-let messageBody: string
+let messageBody: string = ''
 let randomTimestamp: number
 let timestampFormatted: string
 

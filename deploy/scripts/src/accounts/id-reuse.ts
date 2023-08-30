@@ -3,10 +3,12 @@ import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { SharedArray } from 'k6/data'
+import { uuidv4 } from '../common/utils/jslib'
 
 const profiles: ProfileList = {
   smoke: {
-    idReuse: {
+    persistID: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -15,12 +17,24 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
-      exec: 'idReuse'
+      exec: 'persistID'
+    },
+
+    retrieveID: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '60s' } // Ramps up to target load
+      ],
+      exec: 'retrieveID'
     }
 
   },
   initialLoad: {
-    idReuse: {
+    persistID: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -31,13 +45,41 @@ const profiles: ProfileList = {
         { target: 30, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
-      exec: 'idReuse'
+      exec: 'persistID'
+    },
+
+    retrieveID: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 400,
+      stages: [
+        { target: 30, duration: '15m' }, // Ramps up to target load
+        { target: 30, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'retrieveID'
     }
 
   },
 
   load: {
-    idReuse: {
+    persistID: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1900,
+      stages: [
+        { target: 100, duration: '15m' }, // Ramps up to target load
+        { target: 100, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 100 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'persistID'
+    },
+
+    retrieveID: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -48,7 +90,7 @@ const profiles: ProfileList = {
         { target: 1900, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 1900 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
-      exec: 'idReuse'
+      exec: 'retrieveID'
     }
 
   }
@@ -68,7 +110,19 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
-const transactionDuration = new Trend('duration')
+interface SummariseSubjectID {
+  subID: string
+}
+
+const csvData: SummariseSubjectID[] = new SharedArray('Summarise Subject ID', function () {
+  return open('./data/summariseSubjectID.csv').split('\n').slice(1).map((subID) => {
+    return {
+      subID
+    }
+  })
+})
+
+const transactionDuration = new Trend('duration', true)
 
 const env = {
   envURL: __ENV.ACCOUNT_BRAVO_ID_REUSE_URL,
@@ -76,14 +130,16 @@ const env = {
   envApiKey: __ENV.ACCOUNT_BRAVO_ID_REUSE_API_KEY,
   envApiKeySummarise: __ENV.ACCOUNT_BRAVO_ID_REUSE_API_KEY_SUMMARISE
 }
-export function idReuse (): void {
+export function persistID (): void {
   let res: Response
   let token: string
-  group('R01_idReuse_01_GenerateToken POST', function () {
+  const userID = uuidv4()
+  const subjectID = `urn:fdc:gov.uk:2022:${userID}`
+  group('R01_persistID_01_GenerateToken POST', function () {
     const startTime = Date.now()
     res = http.post(env.envMock + '/generate',
       JSON.stringify({
-        sub: 'ValidTest'
+        sub: subjectID
       }),
       {
         tags: { name: 'R01_idReuse_01_GenerateToken' }
@@ -100,7 +156,7 @@ export function idReuse (): void {
 
   sleep(Math.random() * 3)
 
-  group('R02_idReuse_02_CreateVC POST', function () {
+  group('R02_persistID_02_CreateVC POST', function () {
     const startTime = Date.now()
     const options = {
       headers: {
@@ -111,9 +167,10 @@ export function idReuse (): void {
     }
     const body = JSON.stringify([
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkphbmUgRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.LeLQg33PXWySMBwXi0KnJsKwO3Cb7a2pd501orGEyEo', // pragma: allowlist secret
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.6PIinUiv_RExeCq3XlTQqIAPqLv_jkpeFtqDc1PcWwQ' // pragma: allowlist secret
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.6PIinUiv_RExeCq3XlTQqIAPqLv_jkpeFtqDc1PcWwQ', // pragma: allowlist secret
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' // pragma: allowlist secret
     ])
-    res = http.post(env.envURL + '/vcs/ValidTest', body, options)
+    res = http.post(env.envURL + `/vcs/${subjectID}`, body, options)
     const endTime = Date.now()
     check(res, {
       'is status 202': (r) => r.status === 202,
@@ -123,9 +180,9 @@ export function idReuse (): void {
       : fail('Response Validation Failed')
   })
 
-  sleep(Math.random() * 3)
+  sleep(2 + Math.random() * 2) // Random sleep between 2-4 seconds
 
-  group('R01_idReuse_03_Retrieve GET', function () {
+  group('R01_persistID_03_Retrieve GET', function () {
     const startTime = Date.now()
     const options = {
       headers: {
@@ -134,7 +191,7 @@ export function idReuse (): void {
       },
       tags: { name: 'R01_idReuse_03_Retrieve' }
     }
-    res = http.get(env.envURL + '/vcs/ValidTest', options)
+    res = http.get(env.envURL + `/vcs/${subjectID}`, options)
     const endTime = Date.now()
     check(res, {
       'is status 200': (r) => r.status === 200,
@@ -143,12 +200,18 @@ export function idReuse (): void {
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
   })
+}
 
-  group('R01_idReuse_04_GenerateTokenSummary POST', function () {
+export function retrieveID (): void {
+  let res: Response
+  let token: string
+  const summariseData = csvData[Math.floor(Math.random() * csvData.length)]
+
+  group('R02_RetrieveID_01_GenerateTokenSummary POST', function () {
     const startTime = Date.now()
     res = http.post(env.envMock + '/generate',
       JSON.stringify({
-        sub: 'ValidTest',
+        sub: summariseData.subID,
         aud: 'accountManagementAudience',
         ttl: 120
       }),
@@ -165,7 +228,7 @@ export function idReuse (): void {
     token = getToken(res)
   })
 
-  group('R01_idReuse_05_Summarise GET', function () {
+  group('R02_RetrieveID_02_Summarise GET', function () {
     const startTime = Date.now()
     const options = {
       headers: {
@@ -174,7 +237,7 @@ export function idReuse (): void {
       },
       tags: { name: 'R01_idReuse_05_Summarise' }
     }
-    res = http.get(env.envURL + '/summarise-vcs/ValidTest', options)
+    res = http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options)
     const endTime = Date.now()
     check(res, {
       'is status 200': (r) => r.status === 200,

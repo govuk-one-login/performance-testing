@@ -2,6 +2,7 @@ import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generateRequest } from './requestGenerator/spotReqGen'
+import { type AssumeRoleOutput } from '../common/utils/aws/types'
 
 const profiles: ProfileList = {
   smoke: {
@@ -31,6 +32,21 @@ const profiles: ProfileList = {
       ],
       exec: 'spotScenario'
     }
+  },
+  stress: {
+    spotScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 5000,
+      stages: [
+        { target: 500, duration: '15m' }, // Ramp up to 500 iterations per second in 15 minutes
+        { target: 500, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 500 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'spotScenario'
+    }
   }
 }
 
@@ -52,13 +68,13 @@ const env = {
   sqs_queue: __ENV.IDENTITY_SPOT_SQS
 }
 
+const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
-  region: __ENV.IDENTITY_SPOT_AWS_REGION,
-  accessKeyId: __ENV.IDENTITY_SPOT_AWS_ACCESS_KEY_ID,
-  secretAccessKey: __ENV.IDENTITY_SPOT_AWS_SECRET_ACCESS_KEY,
-  sessionToken: __ENV.IDENTITY_SPOT_AWS_SESSION_TOKEN
+  region: __ENV.AWS_REGION,
+  accessKeyId: credentials.AccessKeyId,
+  secretAccessKey: credentials.SecretAccessKey,
+  sessionToken: credentials.SessionToken
 })
-
 const sqs = new SQSClient(awsConfig)
 
 export function spotScenario (): void {

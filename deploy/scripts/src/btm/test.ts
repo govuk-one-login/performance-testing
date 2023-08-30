@@ -1,6 +1,6 @@
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
-import { uuidv4 } from '../common/utils/jslib/index'
+import { uuidv4,randomIntBetween } from '../common/utils/jslib/index'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 
 const profiles: ProfileList = {
@@ -221,42 +221,43 @@ let timestampFormatted: string
 const sqs = new SQSClient(awsConfig)
 
 export function sendEventType1 (): void {
+  let messageBody: string = ''
   messageBody = JSON.stringify(payloadEventsArray[0])
-  sendSQSMessage()
+  sendSQSMessage(messageBody)
 }
 
 export function sendEventType2 (): void {
   messageBody = JSON.stringify(payloadEventsArray[1])
-  sendSQSMessage()
+  sendSQSMessage(messageBody)
 }
 
 export function sendEventType3 (): void {
   messageBody = JSON.stringify(payloadEventsArray[2])
-  sendSQSMessage()
+  sendSQSMessage(messageBody)
 }
 
 export function sendEventType4 (): void {
   messageBody = JSON.stringify(payloadEventsArray[3])
-  sendSQSMessage()
+  sendSQSMessage(messageBody)
 }
 
 export function sendEventType5 (): void {
   messageBody = JSON.stringify(payloadEventsArray[4])
-  sendSQSMessage()
+  sendSQSMessage( messageBody)
 }
 
 export function sendEventType6 (): void {
   messageBody = JSON.stringify(payloadEventsArray[5])
-  sendSQSMessage()
+  sendSQSMessage( messageBody)
 }
 
 export function sendEventType7 (): void {
   messageBody = JSON.stringify(payloadEventsArray[6])
-  sendSQSMessage()
+  sendSQSMessage(messageBody)
 }
 
-export function sendSQSMessage (): void {
-  randomTimestamp = Math.floor(Math.random() * (payloadTimestampMax - payloadTimestampMin + 1)) + payloadTimestampMin
+export function sendSQSMessage (messageBody: string): void {
+  randomTimestamp = randomIntBetween(payloadTimestampMin, payloadTimestampMax)
   timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
   messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
   messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted.replace('Z', ''))

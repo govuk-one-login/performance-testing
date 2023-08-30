@@ -1,6 +1,6 @@
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
-import { uuidv4,randomIntBetween } from '../common/utils/jslib/index'
+import { uuidv4, randomIntBetween } from '../common/utils/jslib/index'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 
 const profiles: ProfileList = {
@@ -243,12 +243,12 @@ export function sendEventType4 (): void {
 
 export function sendEventType5 (): void {
   messageBody = JSON.stringify(payloadEventsArray[4])
-  sendSQSMessage( messageBody)
+  sendSQSMessage(messageBody)
 }
 
 export function sendEventType6 (): void {
   messageBody = JSON.stringify(payloadEventsArray[5])
-  sendSQSMessage( messageBody)
+  sendSQSMessage(messageBody)
 }
 
 export function sendEventType7 (): void {

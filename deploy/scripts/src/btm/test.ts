@@ -214,10 +214,6 @@ const payloadTimestampArray = eventData.payloadTimestamp.split(',')
 const payloadTimestampMin: number = Number(payloadTimestampArray[0])
 const payloadTimestampMax: number = Number(payloadTimestampArray[1])
 
-let messageBody: string = ''
-let randomTimestamp: number
-let timestampFormatted: string
-
 const sqs = new SQSClient(awsConfig)
 
 export function sendEventType1 (): void {
@@ -227,36 +223,44 @@ export function sendEventType1 (): void {
 }
 
 export function sendEventType2 (): void {
+  let messageBody: string = ''
   messageBody = JSON.stringify(payloadEventsArray[1])
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType3 (): void {
+  let messageBody: string = ''
   messageBody = JSON.stringify(payloadEventsArray[2])
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType4 (): void {
+  let messageBody: string = ''
   messageBody = JSON.stringify(payloadEventsArray[3])
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType5 (): void {
+  let messageBody: string = ''
   messageBody = JSON.stringify(payloadEventsArray[4])
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType6 (): void {
+  let messageBody: string = ''
   messageBody = JSON.stringify(payloadEventsArray[5])
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType7 (): void {
+  let messageBody: string = ''
   messageBody = JSON.stringify(payloadEventsArray[6])
   sendSQSMessage(messageBody)
 }
 
 export function sendSQSMessage (messageBody: string): void {
+  let randomTimestamp: number = 0
+  let timestampFormatted: string = ''
   randomTimestamp = randomIntBetween(payloadTimestampMin, payloadTimestampMax)
   timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
   messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())

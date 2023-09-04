@@ -6,6 +6,7 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
 import { Trend } from 'k6/metrics'
+import { timeRequest } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
   smoke: {
@@ -164,250 +165,167 @@ export function signUp (): void {
 
   sleep(1)
 
-  group('B01_SignUp_02_OIDCAuthRequest POST', () => {
-    const start = Date.now()
-    res = res.submitForm({
-      fields: {
-        '2fa': 'Cl.Cm',
-        lng: ''
-      },
-      params: {
-        tags: { name: 'B01_SignUp_02_OIDCAuthRequest' }
-      }
-    })
-    const end = Date.now()
-    check(res, {
+  res = group('B01_SignUp_02_OIDCAuthRequest POST', () =>
+    timeRequest(() =>
+      res.submitForm({
+        fields: {
+          '2fa': 'Cl.Cm',
+          lng: ''
+        },
+        params: { tags: { name: 'B01_SignUp_02_OIDCAuthRequest' } }
+      }),
+    {
       'is status 200': r => r.status === 200,
       'verify page content': r => (r.body as string).includes('Create a GOV.UK One Login or sign in')
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+    }))
 
   sleep(1)
 
-  group('B01_SignUp_03_CreateOneLogin POST', () => {
-    const start = Date.now()
-    res = res.submitForm({
-      fields: {
-        supportInternationalNumbers: 'true',
-        optionSelected: 'create'
-      },
-      params: {
-        tags: { name: 'B01_SignUp_03_CreateOneLogin' }
-      }
-    })
-    const end = Date.now()
-    check(res, {
+  res = group('B01_SignUp_03_CreateOneLogin POST', () =>
+    timeRequest(() =>
+      res.submitForm({
+        fields: {
+          supportInternationalNumbers: 'true',
+          optionSelected: 'create'
+        },
+        params: { tags: { name: 'B01_SignUp_03_CreateOneLogin' } }
+      }),
+    {
       'is status 200': r => r.status === 200,
       'verify page content': r => (r.body as string).includes('Enter your email address')
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+    }))
 
   sleep(1)
 
-  group('B01_SignUp_04_EnterEmailAddress POST', () => {
-    const start = Date.now()
-    res = res.submitForm({
-      fields: { email: testEmail },
-      params: {
-        tags: { name: 'B01_SignUp_04_EnterEmailAddress' }
-      }
-    })
-    const end = Date.now()
-    check(res, {
+  res = group('B01_SignUp_04_EnterEmailAddress POST', () =>
+    timeRequest(() =>
+      res.submitForm({
+        fields: { email: testEmail },
+        params: { tags: { name: 'B01_SignUp_04_EnterEmailAddress' } }
+      }),
+    {
       'is status 200': r => r.status === 200,
       'verify page content': r => (r.body as string).includes('Check your email')
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+    }))
 
   sleep(1)
 
-  group('B01_SignUp_05_EnterOTP POST', () => {
-    const start = Date.now()
-    res = res.submitForm({
-      fields: {
-        email: testEmail.toLowerCase(),
-        code: credentials.emailOTP
-      },
-      params: {
-        tags: { name: 'B01_SignUp_05_EnterOTP' }
-      }
-    })
-    const end = Date.now()
-    check(res, {
+  res = group('B01_SignUp_05_EnterOTP POST', () =>
+    timeRequest(() =>
+      res.submitForm({
+        fields: {
+          email: testEmail.toLowerCase(),
+          code: credentials.emailOTP
+        },
+        params: { tags: { name: 'B01_SignUp_05_EnterOTP' } }
+      }), {
       'is status 200': r => r.status === 200,
       'verify page content': r => (r.body as string).includes('Create your password')
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+    }))
 
   sleep(1)
 
-  group('B01_SignUp_06_CreatePassword POST', () => {
-    const start = Date.now()
-    res = res.submitForm({
-      fields: {
-        password: credentials.password,
-        'confirm-password': credentials.password
-      },
-      params: {
-        tags: { name: 'B01_SignUp_06_CreatePassword' }
-      }
-    })
-    const end = Date.now()
-    check(res, {
+  res = group('B01_SignUp_06_CreatePassword POST', () =>
+    timeRequest(() =>
+      res.submitForm({
+        fields: {
+          password: credentials.password,
+          'confirm-password': credentials.password
+        },
+        params: { tags: { name: 'B01_SignUp_06_CreatePassword' } }
+      }), {
       'is status 200': r => r.status === 200,
       'verify page content': r => (r.body as string).includes('Choose how to get security codes')
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+    }))
 
   sleep(1)
 
   switch (mfaOption) { // Switch statement for either Auth App or SMS paths
     case 'AUTH_APP': {
-      group('B01_SignUp_07_MFA_AuthApp POST', () => {
-        const start = Date.now()
-        res = res.submitForm({
-          fields: { mfaOptions: mfaOption },
-          params: {
-            tags: { name: 'B01_SignUp_07_MFA_AuthApp' }
-          }
-        })
-        const end = Date.now()
-        check(res, {
+      res = group('B01_SignUp_07_MFA_AuthApp POST', () =>
+        timeRequest(() =>
+          res.submitForm({
+            fields: { mfaOptions: mfaOption },
+            params: { tags: { name: 'B01_SignUp_07_MFA_AuthApp' } }
+          }), {
           'is status 200': r => r.status === 200,
           'verify page content': r => (r.body as string).includes('Set up an authenticator app')
-        })
-          ? durations.add(end - start)
-          : fail('Checks failed')
-        secretKey = res.html().find("span[class*='secret-key-fragment']").text() ?? ''
-        totp = new TOTP(secretKey)
-      })
+        }))
 
+      secretKey = res.html().find("span[class*='secret-key-fragment']").text() ?? ''
+      totp = new TOTP(secretKey)
       sleep(1)
 
-      group('B01_SignUp_08_MFA_EnterTOTP POST', () => {
-        const start = Date.now()
-        res = res.submitForm({
-          fields: { code: totp.generateTOTP() },
-          params: {
-            tags: { name: 'B01_SignUp_08_MFA_EnterTOTP' }
-          }
-        })
-        const end = Date.now()
-        check(res, {
+      res = group('B01_SignUp_08_MFA_EnterTOTP POST', () =>
+        timeRequest(() =>
+          res.submitForm({
+            fields: { code: totp.generateTOTP() },
+            params: { tags: { name: 'B01_SignUp_08_MFA_EnterTOTP' } }
+          }), {
           'is status 200': r => r.status === 200,
           'verify page content': r => (r.body as string).includes('You’ve created your GOV.UK One Login')
-        })
-          ? durations.add(end - start)
-          : fail('Checks failed')
-      })
+        }))
       break
     }
     case 'SMS': {
-      group('B01_SignUp_08_MFA_SMS POST', () => {
-        const start = Date.now()
-        res = res.submitForm({
-          fields: { mfaOptions: mfaOption },
-          params: {
-            tags: { name: 'B01_SignUp_08_MFA_SMS' }
-          }
-        })
-        const end = Date.now()
-        check(res, {
+      res = group('B01_SignUp_08_MFA_SMS POST', () =>
+        timeRequest(() =>
+          res.submitForm({
+            fields: { mfaOptions: mfaOption },
+            params: { tags: { name: 'B01_SignUp_08_MFA_SMS' } }
+          }), {
           'is status 200': r => r.status === 200,
           'verify page content': r => (r.body as string).includes('Enter your mobile phone number')
-        })
-          ? durations.add(end - start)
-          : fail('Checks failed')
-      })
+        }))
 
       sleep(1)
 
-      group('B01_SignUp_09_MFA_EnterPhoneNum POST', () => {
-        const start = Date.now()
-        res = res.submitForm({
-          fields: { phoneNumber },
-          params: {
-            tags: { name: 'B01_SignUp_09_MFA_EnterPhoneNum' }
-          }
-        })
-        const end = Date.now()
-        check(res, {
+      res = group('B01_SignUp_09_MFA_EnterPhoneNum POST', () =>
+        timeRequest(() =>
+          res.submitForm({
+            fields: { phoneNumber },
+            params: { tags: { name: 'B01_SignUp_09_MFA_EnterPhoneNum' } }
+          }), {
           'is status 200': r => r.status === 200,
           'verify page content': r => (r.body as string).includes('Check your phone')
-        })
-          ? durations.add(end - start)
-          : fail('Checks failed')
-      })
+        }))
 
       sleep(1)
 
-      group('B01_SignUp_10_MFA_EnterSMSOTP POST', () => {
-        const start = Date.now()
-        res = res.submitForm({
-          fields: { code: credentials.phoneOTP },
-          params: {
-            tags: { name: 'B01_SignUp_10_MFA_EnterSMSOTP' }
-          }
-        })
-        const end = Date.now()
-        check(res, {
+      res = group('B01_SignUp_10_MFA_EnterSMSOTP POST', () =>
+        timeRequest(() =>
+          res.submitForm({
+            fields: { code: credentials.phoneOTP },
+            params: { tags: { name: 'B01_SignUp_10_MFA_EnterSMSOTP' } }
+          }), {
           'is status 200': r => r.status === 200,
           'verify page content': r => (r.body as string).includes('You’ve created your GOV.UK One Login')
-        })
-          ? durations.add(end - start)
-          : fail('Checks failed')
-      })
+        }))
       break
     }
   }
 
   sleep(1)
 
-  group('B01_SignUp_11_ContinueAccountCreated POST', () => {
-    const start = Date.now()
-    res = res.submitForm({
-      params: {
-        tags: { name: 'B01_SignUp_11_ContinueAccountCreated' }
-      }
-    })
-    const end = Date.now()
-    check(res, {
+  res = group('B01_SignUp_11_ContinueAccountCreated POST', () =>
+    timeRequest(() => res.submitForm({
+      params: { tags: { name: 'B01_SignUp_11_ContinueAccountCreated' } }
+    }), {
       'is status 200': r => r.status === 200,
       'verify page content': r => (r.body as string).includes('User information')
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+    }))
 
   // 25% of users logout
   if (Math.random() <= 0.25) {
     sleep(1)
 
-    group('B01_SignUp_12_Logout POST', () => {
-      const start = Date.now()
-      res = res.submitForm({
-        params: {
-          tags: { name: 'B01_SignUp_12_Logout' }
-        }
-      })
-      const end = Date.now()
-      check(res, {
+    res = group('B01_SignUp_12_Logout', () =>
+      timeRequest(() => res.submitForm({
+        params: { tags: { name: 'B01_SignUp_12_Logout' } }
+      }), {
         'is status 200': r => r.status === 200,
         'verify page content': r => (r.body as string).includes('Successfully signed out')
-      })
-        ? durations.add(end - start)
-        : fail('Checks failed')
-    })
+      }))
   }
 }
 
@@ -415,208 +333,138 @@ export function signIn (): void {
   let res: Response
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
 
-  group('B01_SignIn_01_LaunchRPStub GET', function () {
-    const start = Date.now()
-    res = http.get(env.rpStub, {
+  res = group('B01_SignIn_01_LaunchRPStub GET', () =>
+    timeRequest(() => http.get(env.rpStub, {
       tags: { name: 'B01_SignIn_01_LaunchRPStub' }
-    })
-    const end = Date.now()
-    const jar = http.cookieJar()
-    const cookies = jar.cookiesForURL(env.rpStub)
-    check(res, {
+    }), {
       'is status 200': r => r.status === 200,
-      "has cookie 'JSESSIONID'": () => cookies.JSESSIONID.length > 0,
-      "has cookie '__VCAP_ID__'": () => cookies.__VCAP_ID__.length > 0 && cookies.__VCAP_ID__[0].length === 28
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+      'check cookies exist': () => {
+        const jar = http.cookieJar()
+        const cookies = jar.cookiesForURL(env.rpStub)
+        return cookies.JSESSIONID.length > 0 && cookies.__VCAP_ID__.length > 0 && cookies.__VCAP_ID__[0].length === 28
+      }
+    }))
 
   sleep(1)
 
-  group('B01_SignIn_02_OIDCAuthRequest POST', () => {
-    const start = Date.now()
-    res = res.submitForm({
-      fields: {
-        '2fa': 'Cl.Cm',
-        lng: ''
-      },
-      params: {
-        tags: { name: 'B01_SignIn_02_OIDCAuthRequest' }
-      }
-    })
-    const end = Date.now()
-    check(res, {
+  res = group('B01_SignIn_02_OIDCAuthRequest POST', () =>
+    timeRequest(() =>
+      res.submitForm({
+        fields: {
+          '2fa': 'Cl.Cm',
+          lng: ''
+        },
+        params: { tags: { name: 'B01_SignIn_02_OIDCAuthRequest' } }
+      }), {
       'is status 200': r => r.status === 200,
       'verify page content': r => (r.body as string).includes('Create a GOV.UK One Login or sign in')
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+    }))
 
   sleep(1)
 
-  group('B01_SignIn_03_ClickSignIn POST', function () {
-    const start = Date.now()
-    res = res.submitForm({
-      params: {
-        tags: { name: 'B01_SignIn_03_ClickSignIn' }
-      }
-    })
-    const end = Date.now()
-
-    check(res, {
+  res = group('B01_SignIn_03_ClickSignIn POST', () =>
+    timeRequest(() => res.submitForm({
+      params: { tags: { name: 'B01_SignIn_03_ClickSignIn' } }
+    }), {
       'is status 200': r => r.status === 200,
       'verify page content': r => (r.body as string).includes('Enter your email address to sign in to your GOV.UK One Login')
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+    }))
 
   sleep(1)
 
-  group('B01_SignIn_04_EnterEmailAddress POST', () => {
-    const start = Date.now()
-    res = res.submitForm({
-      fields: { email: userData.email },
-      params: {
-        tags: { name: 'B01_SignIn_04_EnterEmailAddress' }
-      }
-    })
-    const end = Date.now()
-    check(res, {
+  res = group('B01_SignIn_04_EnterEmailAddress POST', () =>
+    timeRequest(() =>
+      res.submitForm({
+        fields: { email: userData.email },
+        params: { tags: { name: 'B01_SignIn_04_EnterEmailAddress' } }
+      }), {
       'is status 200': r => r.status === 200,
       'verify page content': r => (r.body as string).includes('Enter your password')
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+    }))
 
   sleep(1)
 
   let acceptNewTerms = false
   switch (userData.mfaOption) {
     case 'AUTH_APP': {
-      group('B01_SignIn_05_AuthMFA_EnterPassword POST', () => {
-        const start = Date.now()
-        res = res.submitForm({
-          fields: { password: credentials.password },
-          params: {
-            tags: { name: 'B01_SignIn_05_AuthMFA_EnterPassword' }
-          }
-        })
-        const end = Date.now()
-        check(res, {
+      res = group('B01_SignIn_05_AuthMFA_EnterPassword POST', () =>
+        timeRequest(() =>
+          res.submitForm({
+            fields: { password: credentials.password },
+            params: { tags: { name: 'B01_SignIn_05_AuthMFA_EnterPassword' } }
+          }), {
           'is status 200': r => r.status === 200,
           'verify page content': r => (r.body as string).includes('Enter the 6 digit security code shown in your authenticator app')
-        })
-          ? durations.add(end - start)
-          : fail('Checks failed')
-      })
+        }))
 
       sleep(1)
 
-      group('B01_SignIn_06_AuthMFA_EnterTOTP POST', () => {
-        const totp = new TOTP(credentials.authAppKey)
-        const start = Date.now()
-        res = res.submitForm({
-          fields: { code: totp.generateTOTP() },
-          params: {
-            tags: { name: 'B01_SignIn_06_AuthMFA_EnterTOTP' }
-          }
-        })
-        const end = Date.now()
-
-        acceptNewTerms = (res.body as string).includes('terms of use update')
-        check(res, {
+      const totp = new TOTP(credentials.authAppKey)
+      res = group('B01_SignIn_06_AuthMFA_EnterTOTP POST', () =>
+        timeRequest(() => {
+          const response = res.submitForm({
+            fields: { code: totp.generateTOTP() },
+            params: { tags: { name: 'B01_SignIn_06_AuthMFA_EnterTOTP' } }
+          })
+          acceptNewTerms = (response.body as string).includes('terms of use update')
+          return response
+        }, {
           'is status 200': r => r.status === 200,
           'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
-        })
-          ? durations.add(end - start)
-          : fail('Checks failed')
-      })
+        }))
       break
     }
     case 'SMS': {
-      group('B01_SignIn_07_SMSMFA_EnterPassword POST', () => {
-        const start = Date.now()
-        res = res.submitForm({
-          fields: { password: credentials.password },
-          params: {
-            tags: { name: 'B01_SignIn_07_SMSMFA_EnterPassword' }
-          }
-        })
-        const end = Date.now()
-        check(res, {
+      res = group('B01_SignIn_07_SMSMFA_EnterPassword POST', () =>
+        timeRequest(() =>
+          res.submitForm({
+            fields: { password: credentials.password },
+            params: { tags: { name: 'B01_SignIn_07_SMSMFA_EnterPassword' } }
+          }), {
           'is status 200': r => r.status === 200,
           'verify page content': r => (r.body as string).includes('Check your phone')
-        })
-          ? durations.add(end - start)
-          : fail('Checks failed')
-      })
+        }))
 
       sleep(1)
 
-      group('B01_SignIn_08_SMSMFA_EnterOTP POST', () => {
-        const start = Date.now()
-        res = res.submitForm({
-          fields: { code: credentials.phoneOTP },
-          params: {
-            tags: { name: 'B01_SignIn_08_SMSMFA_EnterOTP' }
-          }
-        })
-        const end = Date.now()
-
-        acceptNewTerms = (res.body as string).includes('terms of use update')
-        check(res, {
+      res = group('B01_SignIn_08_SMSMFA_EnterOTP POST', () =>
+        timeRequest(() => {
+          const response = res.submitForm({
+            fields: { code: credentials.phoneOTP },
+            params: { tags: { name: 'B01_SignIn_08_SMSMFA_EnterOTP' } }
+          })
+          acceptNewTerms = (response.body as string).includes('terms of use update')
+          return response
+        }, {
           'is status 200': r => r.status === 200,
           'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
-        })
-          ? durations.add(end - start)
-          : fail('Checks failed')
-      })
+        }))
       break
     }
   }
 
   if (acceptNewTerms) {
-    group('B01_SignIn_09_AcceptTermsConditions POST', () => {
-      const start = Date.now()
-      res = res.submitForm({
-        fields: { termsAndConditionsResult: 'accept' },
-        params: {
-          tags: { name: 'B01_SignIn_09_AcceptTermsConditions' }
-        }
-      })
-      const end = Date.now()
-
-      check(res, {
+    res = group('B01_SignIn_09_AcceptTermsConditions POST', () =>
+      timeRequest(() =>
+        res.submitForm({
+          fields: { termsAndConditionsResult: 'accept' },
+          params: { tags: { name: 'B01_SignIn_09_AcceptTermsConditions' } }
+        }), {
         'is status 200': r => r.status === 200,
         'verify page content': r => (r.body as string).includes('User information')
-      })
-        ? durations.add(end - start)
-        : fail('Checks failed')
-    })
+      }))
   }
 
   // 25% of users logout
   if (Math.random() <= 0.25) {
     sleep(1)
 
-    group('B01_SignIn_10_Logout POST', () => {
-      const start = Date.now()
-      res = res.submitForm({
-        params: {
-          tags: { name: 'B01_SignIn_10_Logout' }
-        }
-      })
-      const end = Date.now()
-      check(res, {
+    res = group('B01_SignIn_10_Logout POST', () =>
+      timeRequest(() => res.submitForm({
+        params: { tags: { name: 'B01_SignIn_10_Logout' } }
+      }), {
         'is status 200': r => r.status === 200,
         'verify page content': r => (r.body as string).includes('Successfully signed out')
-      })
-        ? durations.add(end - start)
-        : fail('Checks failed')
-    })
+      }))
   }
 }

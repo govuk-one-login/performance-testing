@@ -218,43 +218,43 @@ const sqs = new SQSClient(awsConfig)
 
 export function sendEventType1 (): void {
   let messageBody: string = ''
-  messageBody = JSON.stringify(payloadEventsArray[0])
+  messageBody = payloadEventsArray[0])
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType2 (): void {
   let messageBody: string = ''
-  messageBody = JSON.stringify(payloadEventsArray[1])
+  messageBody = payloadEventsArray[1]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType3 (): void {
   let messageBody: string = ''
-  messageBody = JSON.stringify(payloadEventsArray[2])
+  messageBody = payloadEventsArray[2]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType4 (): void {
   let messageBody: string = ''
-  messageBody = JSON.stringify(payloadEventsArray[3])
+  messageBody = payloadEventsArray[3]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType5 (): void {
   let messageBody: string = ''
-  messageBody = JSON.stringify(payloadEventsArray[4])
+  messageBody = payloadEventsArray[4]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType6 (): void {
   let messageBody: string = ''
-  messageBody = JSON.stringify(payloadEventsArray[5])
+  messageBody = payloadEventsArray[5]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType7 (): void {
   let messageBody: string = ''
-  messageBody = JSON.stringify(payloadEventsArray[6])
+  messageBody = payloadEventsArray[6]
   sendSQSMessage(messageBody)
 }
 
@@ -266,5 +266,5 @@ export function sendSQSMessage (messageBody: string): void {
   messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
   messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted.replace('Z', ''))
   messageBody = messageBody.replace('UUID', uuidv4())
-  sqs.sendMessage(env.sqs_queue, messageBody)
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(messageBody))
 }

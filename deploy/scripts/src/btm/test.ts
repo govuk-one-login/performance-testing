@@ -12,9 +12,9 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '10s' }
+        { target: 1, duration: '2s' }
       ],
-      exec: 'sendEvent1'
+      exec: 'sendEventType1'
     },
     sendEventSmokeTest2: {
       executor: 'ramping-arrival-rate',
@@ -209,6 +209,7 @@ const eventData = {
 }
 
 const payloadEventsArray = JSON.parse(eventData.payloadEventsString)
+console.log('1 payloadEventsArray[0] = ', payloadEventsArray[0])
 
 const payloadTimestampArray = eventData.payloadTimestamp.split(',')
 const payloadTimestampMin: number = Number(payloadTimestampArray[0])
@@ -217,54 +218,45 @@ const payloadTimestampMax: number = Number(payloadTimestampArray[1])
 const sqs = new SQSClient(awsConfig)
 
 export function sendEventType1 (): void {
-  let messageBody: string = ''
-  messageBody = payloadEventsArray[0])
+  const messageBody: Record<string, unknown> = payloadEventsArray[0]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType2 (): void {
-  let messageBody: string = ''
-  messageBody = payloadEventsArray[1]
+  const messageBody: Record<string, unknown> = payloadEventsArray[0]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType3 (): void {
-  let messageBody: string = ''
-  messageBody = payloadEventsArray[2]
+  const messageBody: Record<string, unknown> = payloadEventsArray[0]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType4 (): void {
-  let messageBody: string = ''
-  messageBody = payloadEventsArray[3]
+  const messageBody: Record<string, unknown> = payloadEventsArray[0]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType5 (): void {
-  let messageBody: string = ''
-  messageBody = payloadEventsArray[4]
+  const messageBody: Record<string, unknown> = payloadEventsArray[0]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType6 (): void {
-  let messageBody: string = ''
-  messageBody = payloadEventsArray[5]
+  const messageBody: Record<string, unknown> = payloadEventsArray[0]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType7 (): void {
-  let messageBody: string = ''
-  messageBody = payloadEventsArray[6]
+  const messageBody: Record<string, unknown> = payloadEventsArray[0]
   sendSQSMessage(messageBody)
 }
 
-export function sendSQSMessage (messageBody: string): void {
-  let randomTimestamp: number = 0
-  let timestampFormatted: string = ''
-  randomTimestamp = randomIntBetween(payloadTimestampMin, payloadTimestampMax)
-  timestampFormatted = new Date(randomTimestamp * 1000).toISOString()
-  messageBody = messageBody.replace('TIMESTAMP', randomTimestamp.toString())
-  messageBody = messageBody.replace('TIMESTAMP_FORMATTED', timestampFormatted.replace('Z', ''))
-  messageBody = messageBody.replace('UUID', uuidv4())
+export function sendSQSMessage(messageBody: Record<string, unknown>): void {
+  const randomTimestamp: number = randomIntBetween(payloadTimestampMin, payloadTimestampMax)
+  const timestampFormatted: string = new Date(randomTimestamp * 1000).toISOString()
+  messageBody.event_id = uuidv4()
+  messageBody.timestamp = randomTimestamp.toString();
+  messageBody.timestamp_formatted = timestampFormatted.replace('Z', '')
   sqs.sendMessage(env.sqs_queue, JSON.stringify(messageBody))
 }

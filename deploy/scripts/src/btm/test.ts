@@ -252,11 +252,11 @@ export function sendEventType7 (): void {
   sendSQSMessage(messageBody)
 }
 
-export function sendSQSMessage(messageBody: Record<string, unknown>): void {
+export function sendSQSMessage (messageBody: Record<string, unknown>): void {
   const randomTimestamp: number = randomIntBetween(payloadTimestampMin, payloadTimestampMax)
   const timestampFormatted: string = new Date(randomTimestamp * 1000).toISOString()
   messageBody.event_id = uuidv4()
-  messageBody.timestamp = randomTimestamp.toString();
+  messageBody.timestamp = randomTimestamp.toString()
   messageBody.timestamp_formatted = timestampFormatted.replace('Z', '')
   sqs.sendMessage(env.sqs_queue, JSON.stringify(messageBody))
 }

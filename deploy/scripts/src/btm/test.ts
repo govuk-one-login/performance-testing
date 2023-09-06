@@ -25,7 +25,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '10s' }
       ],
-      exec: 'sendEvent2'
+      exec: 'sendEventType2'
     },
     sendEventSmokeTest3: {
       executor: 'ramping-arrival-rate',
@@ -36,7 +36,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '10s' }
       ],
-      exec: 'sendEvent3'
+      exec: 'sendEventType3'
     },
     sendEventSmokeTest4: {
       executor: 'ramping-arrival-rate',
@@ -47,7 +47,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '10s' }
       ],
-      exec: 'sendEvent4'
+      exec: 'sendEventType4'
     },
     sendEventSmokeTest5: {
       executor: 'ramping-arrival-rate',
@@ -58,7 +58,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '10s' }
       ],
-      exec: 'sendEvent5'
+      exec: 'sendEventType5'
     },
     sendEventSmokeTest6: {
       executor: 'ramping-arrival-rate',
@@ -69,7 +69,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '10s' }
       ],
-      exec: 'sendEvent6'
+      exec: 'sendEventType6'
     },
     sendEventSmokeTest7: {
       executor: 'ramping-arrival-rate',
@@ -80,7 +80,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '10s' }
       ],
-      exec: 'sendEvent7'
+      exec: 'sendEventType7'
     }
   },
   load: {
@@ -223,32 +223,32 @@ export function sendEventType1 (): void {
 }
 
 export function sendEventType2 (): void {
-  const messageBody: Record<string, unknown> = payloadEventsArray[0]
+  const messageBody: Record<string, unknown> = payloadEventsArray[1]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType3 (): void {
-  const messageBody: Record<string, unknown> = payloadEventsArray[0]
+  const messageBody: Record<string, unknown> = payloadEventsArray[2]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType4 (): void {
-  const messageBody: Record<string, unknown> = payloadEventsArray[0]
+  const messageBody: Record<string, unknown> = payloadEventsArray[3]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType5 (): void {
-  const messageBody: Record<string, unknown> = payloadEventsArray[0]
+  const messageBody: Record<string, unknown> = payloadEventsArray[4]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType6 (): void {
-  const messageBody: Record<string, unknown> = payloadEventsArray[0]
+  const messageBody: Record<string, unknown> = payloadEventsArray[5]
   sendSQSMessage(messageBody)
 }
 
 export function sendEventType7 (): void {
-  const messageBody: Record<string, unknown> = payloadEventsArray[0]
+  const messageBody: Record<string, unknown> = payloadEventsArray[6]
   sendSQSMessage(messageBody)
 }
 

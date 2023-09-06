@@ -1,9 +1,10 @@
-import { check, group } from 'k6'
+import { check, group, sleep } from 'k6'
 import TOTP from './utils/authentication/totp'
 import { type Profile, type ProfileList, selectProfile } from './utils/config/load-profiles'
 import { AWSConfig, SQSClient } from './utils/jslib/aws-sqs'
 import { findBetween, normalDistributionStages, randomIntBetween, randomItem, randomString, uuidv4 } from './utils/jslib'
 import { URL, URLSearchParams } from './utils/jslib/url'
+import { timeFunction, timeRequest } from './utils/request/timing'
 
 export const options = {
   vus: 1,
@@ -201,6 +202,30 @@ export default (): void => {
         'get()': () => paramsObject.get('search') === 'term',
         'getAll()': () => paramsString.getAll('q').join() === '2',
         'append() & delete()': () => paramsObject.toString() === 'search=term&append=New+Value'
+      })
+    })
+  })
+
+  group('request/timing', () => {
+    group('timeFunction()', () => {
+      const [result, duration] = timeFunction(() => {
+        const string = 'AB'
+        sleep(1)
+        return string + 'C'
+      })
+
+      check(null, {
+        'check result is returned': () => result === 'ABC',
+        'check duration is returned': () => typeof duration === 'number' && duration >= 1000
+      })
+    })
+
+    group('timeRequest()', () => {
+      timeRequest(() => {
+        const string = 'BA'
+        return 'C' + string
+      }, {
+        'check result': s => s === 'CBA'
       })
     })
   })

@@ -4,8 +4,6 @@ import { uuidv4, randomString } from '../../common/utils/jslib/index'
 const userID = uuidv4()
 const signinJourneyID = uuidv4()
 const userURN = `urn:fdc:gov.uk:2022:${userID}`
-const randomNum = Math.floor(Math.random() * 9999999) // Random sleep between 2-4 seconds
-const randomEmail = `perfSPOT${randomNum}@digital.cabinet-office.gov.uk`
 
 export function generateAuthRequest (): AUTH_IPV_AUTHORISATION_REQUESTED {
   const timestamp = new Date().toISOString()
@@ -19,7 +17,7 @@ export function generateAuthRequest (): AUTH_IPV_AUTHORISATION_REQUESTED {
     timestamp_formatted: timestamp,
     user: {
       user_id: userURN,
-      email: randomEmail,
+      email: 'test.user@digital.cabinet-office.gov.uk',
       govuk_signin_journey_id: signinJourneyID
     }
   }

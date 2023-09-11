@@ -17,7 +17,7 @@ const profiles: ProfileList = {
       ],
       exec: 'authEvent'
     },
-    f2fEvent: {
+    allEvents: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -26,18 +26,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
-      exec: 'authEvent'
-    },
-    ipvEvent: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'authEvent'
+      exec: 'allEvents'
     }
   },
   lowVolumeTest: {
@@ -54,7 +43,7 @@ const profiles: ProfileList = {
       ],
       exec: 'authEvent'
     },
-    f2fEvent: {
+    allEvents: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -65,20 +54,7 @@ const profiles: ProfileList = {
         { target: 3, duration: '15m' }, // Maintain a steady state of 3 messages per second for 15 minutes
         { target: 0, duration: '3m' } // Total ramp down in 3 minutes
       ],
-      exec: 'authEvent'
-    },
-    ipvEvent: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 6,
-      stages: [
-        { target: 3, duration: '2m' }, // Ramp up to 3 iterations/messages per second in 2 minutes
-        { target: 3, duration: '15m' }, // Maintain a steady state of 3 messages per second for 15 minutes
-        { target: 0, duration: '3m' } // Total ramp down in 3 minutes
-      ],
-      exec: 'authEvent'
+      exec: 'allEvents'
     }
   },
   stress: {
@@ -95,31 +71,18 @@ const profiles: ProfileList = {
       ],
       exec: 'authEvent'
     },
-    f2fEvent: {
+    allEvents: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
       maxVUs: 12,
       stages: [
-        { target: 6, duration: '15m' }, // Ramp up to 6 iterations/messages per second in 15 minutes
-        { target: 6, duration: '30m' }, // Maintain a steady state of 6 messages per second for 30 minutes
+        { target: 12, duration: '15m' }, // Ramp up to 12 iterations/messages per second in 15 minutes
+        { target: 12, duration: '30m' }, // Maintain a steady state of 12 messages per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'authEvent'
-    },
-    ipvEvent: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 12,
-      stages: [
-        { target: 6, duration: '15m' }, // Ramp up to 6 iterations/messages per second in 15 minutes
-        { target: 6, duration: '30m' }, // Maintain a steady state of 6 messages per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'authEvent'
+      exec: 'allEvents'
     }
   }
 }
@@ -152,31 +115,18 @@ const awsConfig = new AWSConfig({
 const sqs = new SQSClient(awsConfig)
 
 export function authEvent (): void {
-  const payload = generateAuthRequest()
+  const authPayload = generateAuthRequest()
 
-  const authEventMessage = {
-    messageBody: JSON.stringify(payload)
-  }
+  const authEventMessage = JSON.stringify(authPayload)
 
-  sqs.sendMessage(env.sqs_queue, authEventMessage.messageBody)
+  sqs.sendMessage(env.sqs_queue, authEventMessage)
 }
 
-export function f2fEvent (): void {
-  const payload = generateF2FRequest()
-
-  const f2fEventMessage = {
-    messageBody: JSON.stringify(payload)
-  }
-
-  sqs.sendMessage(env.sqs_queue, f2fEventMessage.messageBody)
-}
-
-export function ipvEvent (): void {
-  const payload = generateIPVRequest()
-
-  const ipvEventMessage = {
-    messageBody: JSON.stringify(payload)
-  }
-
-  sqs.sendMessage(env.sqs_queue, ipvEventMessage.messageBody)
+export function allEvents (): void {
+  const authPayload = generateAuthRequest()
+  const f2fPayload = generateF2FRequest()
+  const ipvPayload = generateIPVRequest()
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(authPayload))
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(f2fPayload))
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
 }

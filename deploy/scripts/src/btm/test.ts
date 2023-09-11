@@ -1,6 +1,6 @@
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
-import { uuidv4 } from '../common/utils/jslib/index'
+import { uuidv4, randomIntBetween } from '../common/utils/jslib/index'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 
 const profiles: ProfileList = {
@@ -10,22 +10,77 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 2,
+      maxVUs: 1,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 1, duration: '2s' }
       ],
-      exec: 'sendEvent'
+      exec: 'sendEventType1'
     },
     sendEventSmokeTest2: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 2,
+      maxVUs: 1,
       stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
+        { target: 1, duration: '10s' }
       ],
-      exec: 'sendEventDebug'
+      exec: 'sendEventType2'
+    },
+    sendEventSmokeTest3: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '10s' }
+      ],
+      exec: 'sendEventType3'
+    },
+    sendEventSmokeTest4: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '10s' }
+      ],
+      exec: 'sendEventType4'
+    },
+    sendEventSmokeTest5: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '10s' }
+      ],
+      exec: 'sendEventType5'
+    },
+    sendEventSmokeTest6: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '10s' }
+      ],
+      exec: 'sendEventType6'
+    },
+    sendEventSmokeTest7: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '10s' }
+      ],
+      exec: 'sendEventType7'
     }
   },
   load: {
@@ -34,44 +89,91 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 350,
+      maxVUs: 150,
       stages: [
-        { target: 10, duration: '10m' } // Ramp up to 10 iterations per second in 10 minutes
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent'
+      exec: 'sendEventType1'
     },
     sendEventLoadTest2: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 700,
+      maxVUs: 150,
       stages: [
-        { target: 20, duration: '10m' } // Ramp up to 20 iterations per second in 10 minutes
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent'
+      exec: 'sendEventType2'
     },
     sendEventLoadTest3: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 150,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent'
+      exec: 'sendEventType3'
     },
     sendEventLoadTest4: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 150,
       stages: [
-        { target: 30, duration: '60m' } // Ramp up to 30 iterations per second in 60 minutes
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
-      exec: 'sendEvent'
+      exec: 'sendEventType4'
+    },
+    sendEventLoadTest5: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 150,
+      stages: [
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'sendEventType5'
+    },
+    sendEventLoadTest6: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 150,
+      stages: [
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'sendEventType6'
+    },
+    sendEventLoadTest7: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 150,
+      stages: [
+        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
+        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'sendEventType7'
     }
   }
 }
@@ -102,21 +204,59 @@ const awsConfig = new AWSConfig({
 })
 
 const eventData = {
-  payload: __ENV.DATA_BTM_SQS_PAYLOAD
+  payloadEventsString: __ENV.DATA_BTM_SQS_PAYLOAD_EVENTS,
+  payloadTimestamp: __ENV.DATA_BTM_SQS_PAYLOAD_TIMESTAMP
 }
+
+const payloadEventsArray = JSON.parse(eventData.payloadEventsString)
+console.log('1 payloadEventsArray[0] = ', payloadEventsArray[0])
+
+const payloadTimestampArray = eventData.payloadTimestamp.split(',')
+const payloadTimestampMin: number = Number(payloadTimestampArray[0])
+const payloadTimestampMax: number = Number(payloadTimestampArray[1])
 
 const sqs = new SQSClient(awsConfig)
 
-export function sendEvent (): void {
-  const messageBody = eventData.payload.replace('UUID', uuidv4())
-  sqs.sendMessage(env.sqs_queue, messageBody)
+export function sendEventType1 (): void {
+  const messageBody: Record<string, unknown> = payloadEventsArray[0]
+  sendSQSMessage(messageBody)
 }
 
-export function sendEventDebug (): void {
-  const messageBody = eventData.payload.replace('UUID', uuidv4())
-  sqs.sendMessage(env.sqs_queue, messageBody)
-  console.log('1 === debug === env.sqs_queue', env.sqs_queue)
-  console.log('2 === debug === awsConfig', awsConfig)
-  console.log('3 === debug === payload', eventData.payload)
-  console.log('4 === debug === messageBody', messageBody)
+export function sendEventType2 (): void {
+  const messageBody: Record<string, unknown> = payloadEventsArray[1]
+  sendSQSMessage(messageBody)
+}
+
+export function sendEventType3 (): void {
+  const messageBody: Record<string, unknown> = payloadEventsArray[2]
+  sendSQSMessage(messageBody)
+}
+
+export function sendEventType4 (): void {
+  const messageBody: Record<string, unknown> = payloadEventsArray[3]
+  sendSQSMessage(messageBody)
+}
+
+export function sendEventType5 (): void {
+  const messageBody: Record<string, unknown> = payloadEventsArray[4]
+  sendSQSMessage(messageBody)
+}
+
+export function sendEventType6 (): void {
+  const messageBody: Record<string, unknown> = payloadEventsArray[5]
+  sendSQSMessage(messageBody)
+}
+
+export function sendEventType7 (): void {
+  const messageBody: Record<string, unknown> = payloadEventsArray[6]
+  sendSQSMessage(messageBody)
+}
+
+export function sendSQSMessage (messageBody: Record<string, unknown>): void {
+  const randomTimestamp: number = randomIntBetween(payloadTimestampMin, payloadTimestampMax)
+  const timestampFormatted: string = new Date(randomTimestamp * 1000).toISOString()
+  messageBody.event_id = uuidv4()
+  messageBody.timestamp = randomTimestamp.toString()
+  messageBody.timestamp_formatted = timestampFormatted.replace('Z', '')
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(messageBody))
 }

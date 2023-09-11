@@ -1,11 +1,10 @@
-import { sleep, group, check, fail } from 'k6'
+import { sleep, group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import TOTP from '../common/utils/authentication/totp'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
-import { Trend } from 'k6/metrics'
 import { timeRequest } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
@@ -134,7 +133,6 @@ const credentials = {
   emailOTP: __ENV.ACCOUNT_EMAIL_OTP,
   phoneOTP: __ENV.ACCOUNT_PHONE_OTP
 }
-const durations = new Trend('duration', true)
 
 export function signUp (): void {
   let res: Response
@@ -146,22 +144,17 @@ export function signUp (): void {
   let totp: TOTP
   const mfaOption: mfaType = (Math.random() <= 0.5) ? 'SMS' : 'AUTH_APP'
 
-  group('B01_SignUp_01_LaunchRPStub GET', function () {
-    const start = Date.now()
-    res = http.get(env.rpStub, {
+  res = group('B01_SignUp_01_LaunchRPStub GET', () =>
+    timeRequest(() => http.get(env.rpStub, {
       tags: { name: 'B01_SignUp_01_LaunchRPStub' }
-    })
-    const end = Date.now()
-    const jar = http.cookieJar()
-    const cookies = jar.cookiesForURL(env.rpStub)
-    check(res, {
+    }), {
       'is status 200': r => r.status === 200,
-      "has cookie 'JSESSIONID'": () => cookies.JSESSIONID.length > 0,
-      "has cookie '__VCAP_ID__'": () => cookies.__VCAP_ID__.length > 0 && cookies.__VCAP_ID__[0].length === 28
-    })
-      ? durations.add(end - start)
-      : fail('Checks failed')
-  })
+      'check cookies exist': () => {
+        const jar = http.cookieJar()
+        const cookies = jar.cookiesForURL(env.rpStub)
+        return cookies.JSESSIONID.length > 0 && cookies.__VCAP_ID__.length > 0 && cookies.__VCAP_ID__[0].length === 28
+      }
+    }))
 
   sleep(1)
 

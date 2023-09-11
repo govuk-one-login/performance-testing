@@ -1,10 +1,9 @@
-import { sleep, group, fail } from 'k6'
+import { sleep, group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
-import { isStatusCode200, isStatusCode302, validatePageContent } from './utils/assertions'
+import { timeRequest } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
   smoke: {
@@ -70,8 +69,6 @@ const kbvAnswersOBJ = {
   kbvAnswers: __ENV.IDENTITY_KBV_ANSWERS
 }
 
-const transactionDuration = new Trend('duration', true)
-
 export function kbvScenario1 (): void {
   let res: Response
   interface kbvAnswers {
@@ -81,78 +78,66 @@ export function kbvScenario1 (): void {
   }
   const kbvAnsJSON: kbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
 
-  group('B01_KBV_01_CoreStubEditUserContinue POST', () => {
-    const startTime = Date.now()
-    res = http.get(
+  res = group('B01_KBV_01_CoreStubEditUserContinue POST', () =>
+    timeRequest(() => http.get(
       env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197',
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B01_KBV_01_CoreStubEditUserContinue' }
-      }
-    )
-    const endTime = Date.now()
-    isStatusCode200(res) && validatePageContent(res, 'You can find this amount on your loan agreement')
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+      }),
+    {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('You can find this amount on your loan agreement')
+    }))
 
   sleep(Math.random() * 3)
 
-  group('B01_KBV_02_KBVQuestion1 POST', () => {
-    const startTime = Date.now()
-    res = res.submitForm({
+  res = group('B01_KBV_02_KBVQuestion1 POST', () =>
+    timeRequest(() => res.submitForm({
       fields: { Q00042: kbvAnsJSON.kbvAns1 },
       params: { tags: { name: 'B01_KBV_02_KBVQuestion1' } },
       submitSelector: '#continue'
-    })
-    const endTime = Date.now()
-    isStatusCode200(res) && validatePageContent(res, 'This includes any interest')
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+    }),
+    {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('This includes any interest')
+    }))
 
   sleep(Math.random() * 3)
 
-  group('B01_KBV_03_KBVQuestion2 POST', () => {
-    const startTime = Date.now()
-    res = res.submitForm({
+  res = group('B01_KBV_03_KBVQuestion2 POST', () =>
+    timeRequest(() => res.submitForm({
       fields: { Q00015: kbvAnsJSON.kbvAns2 },
       params: { tags: { name: 'B01_KBV_03_KBVQuestion2' } },
       submitSelector: '#continue'
-    })
-    const endTime = Date.now()
-    isStatusCode200(res) && validatePageContent(res, 'Think about the amount you agreed to pay back every month')
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+    }),
+    {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('Think about the amount you agreed to pay back every month')
+    }))
 
   sleep(Math.random() * 3)
 
   group('B01_KBV_04_KBVQuestion3 POST', () => {
-    const startTime1 = Date.now()
-    res = res.submitForm({
+    res = timeRequest(() => res.submitForm({
       fields: { Q00018: kbvAnsJSON.kbvAns3 },
       params: {
         redirects: 2,
         tags: { name: 'B01_KBV_04_KBVQuestion3_KBVCall' }
       },
       submitSelector: '#continue'
+    }),
+    {
+      'is status 302': (r) => r.status === 302
     })
-    const endTime1 = Date.now()
-    isStatusCode302(res)
-      ? transactionDuration.add(endTime1 - startTime1)
-      : fail('Response Validation Failed')
-
-    const startTime2 = Date.now()
-    res = http.get(res.headers.Location,
+    res = timeRequest(() => http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B01_KBV_04_KBVQuestion3_CoreStubCall' }
-      }
-    )
-    const endTime2 = Date.now()
-    isStatusCode200(res) && validatePageContent(res, 'verificationScore&quot;: 2')
-      ? transactionDuration.add(endTime2 - startTime2)
-      : fail('Response Validation Failed')
+      }),
+    {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('verificationScore&quot;: 2')
+    })
   })
 }

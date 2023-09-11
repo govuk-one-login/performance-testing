@@ -1,11 +1,11 @@
-import { sleep, group, check, fail } from 'k6'
+import { sleep, group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import encoding from 'k6/encoding'
-import { Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
+import { timeRequest } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
   smoke: {
@@ -253,17 +253,14 @@ const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => 
   })
 })
 
-const transactionDuration = new Trend('duration', true)
-
 export function fraud (): void {
   let res: Response
   const userDetails = getUserDetails()
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
 
-  group('B01_Fraud_01_CoreStubEditUserContinue POST', () => {
-    const startTime = Date.now()
-    res = http.post(
+  res = group('B01_Fraud_01_CoreStubEditUserContinue POST', () =>
+    timeRequest(() => http.post(
       env.ipvCoreStub + '/edit-user',
       {
         cri: `fraud-cri-${env.envName}`,
@@ -300,51 +297,35 @@ export function fraud (): void {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B01_Fraud_01_CoreStubEditUserContinue' }
       }
-    )
-    const endTime = Date.now()
-
-    check(res, {
+    ),
+    {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('We need to check your details')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+    }))
 
   sleep(Math.random() * 3)
 
   group('B01_Fraud_02_ContinueToCheckFraudDetails POST', () => {
-    const startTime1 = Date.now()
-    res = res.submitForm({
+    res = timeRequest(() => res.submitForm({
       params: {
         redirects: 1,
         tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_CRI' }
       },
       submitSelector: '#continue'
-    })
-    const endTime1 = Date.now()
-
-    check(res, {
+    }),
+    {
       'is status 302': (r) => r.status === 302
     })
-      ? transactionDuration.add(endTime1 - startTime1)
-      : fail('Response Validation Failed')
-
-    const startTime2 = Date.now()
-    res = http.get(res.headers.Location,
+    res = timeRequest(() => http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_CoreStub' }
       }
-    )
-    const endTime2 = Date.now()
-
-    check(res, {
+    ),
+    {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
     })
-      ? transactionDuration.add(endTime2 - startTime2)
-      : fail('Response Validation Failed')
   })
 }
 
@@ -357,112 +338,90 @@ export function drivingLicence (): void {
   const userDVLA = csvDVLA[exec.scenario.iterationInTest % csvDVLA.length]
   const userDVA = csvDVA[exec.scenario.iterationInTest % csvDVA.length]
 
-  group('B02_Driving_01_DLEntryFromCoreStub GET', () => {
-    const startTime = Date.now()
-    res = http.get(`${env.ipvCoreStub}/authorize?cri=driving-licence-cri-${env.envName}&rowNumber=197`,
+  res = group('B02_Driving_01_DLEntryFromCoreStub GET', () =>
+    timeRequest(() => http.get(`${env.ipvCoreStub}/authorize?cri=driving-licence-cri-${env.envName}&rowNumber=197`,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Driving_01_DLEntryFromCoreStub' }
-      })
-    const endTime = Date.now()
-
-    check(res, {
+      }),
+    {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Who was your UK driving licence issued by?')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+    }))
 
   sleep(Math.random() * 3)
 
-  group(`B02_Driving_02_Select${licenceIssuer} POST`, () => {
-    const startTime = Date.now()
-    res = res.submitForm({
+  res = group(`B02_Driving_02_Select${licenceIssuer} POST`, () =>
+    timeRequest(() => res.submitForm({
       fields: { licenceIssuer },
       params: { tags: { name: 'B02_Driving_02_Select' + licenceIssuer } },
       submitSelector: '#submitButton'
-    })
-    const endTime = Date.now()
-
-    check(res, {
+    }),
+    {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK driving licence')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+    }))
 
   sleep(Math.random() * 3)
 
-  group(`B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm POST`, () => {
-    const fields: Record<string, string> = (licenceIssuer === 'DVLA')
-      ? { // DVLA Licence Fields
-          surname: userDVLA.surname,
-          firstName: userDVLA.firstName,
-          middleNames: userDVLA.middleNames,
-          'dateOfBirth-day': userDVLA.birthday,
-          'dateOfBirth-month': userDVLA.birthmonth,
-          'dateOfBirth-year': userDVLA.birthyear,
-          'issueDate-day': userDVLA.issueDay,
-          'issueDate-month': userDVLA.issueMonth,
-          'issueDate-year': userDVLA.issueYear,
-          'expiryDate-day': userDVLA.expiryDay,
-          'expiryDate-month': userDVLA.expiryMonth,
-          'expiryDate-year': userDVLA.expiryYear,
-          drivingLicenceNumber: userDVLA.licenceNumber,
-          issueNumber: userDVLA.issueNumber,
-          postcode: userDVLA.postcode,
-          consentCheckbox: 'true'
-        }
-      : { // DVA Licence Fields
-          surname: userDVA.surname,
-          firstName: userDVA.firstName,
-          middleNames: userDVA.middleNames,
-          'dvaDateOfBirth-day': userDVA.birthday,
-          'dvaDateOfBirth-month': userDVA.birthmonth,
-          'dvaDateOfBirth-year': userDVA.birthyear,
-          'dateOfIssue-day': userDVA.issueDay,
-          'dateOfIssue-month': userDVA.issueMonth,
-          'dateOfIssue-year': userDVA.issueYear,
-          'expiryDate-day': userDVA.expiryDay,
-          'expiryDate-month': userDVA.expiryMonth,
-          'expiryDate-year': userDVA.expiryYear,
-          dvaLicenceNumber: userDVA.licenceNumber,
-          postcode: userDVA.postcode,
-          consentDVACheckbox: 'true'
-        }
+  const fields: Record<string, string> = (licenceIssuer === 'DVLA')
+    ? { // DVLA Licence Fields
+        surname: userDVLA.surname,
+        firstName: userDVLA.firstName,
+        middleNames: userDVLA.middleNames,
+        'dateOfBirth-day': userDVLA.birthday,
+        'dateOfBirth-month': userDVLA.birthmonth,
+        'dateOfBirth-year': userDVLA.birthyear,
+        'issueDate-day': userDVLA.issueDay,
+        'issueDate-month': userDVLA.issueMonth,
+        'issueDate-year': userDVLA.issueYear,
+        'expiryDate-day': userDVLA.expiryDay,
+        'expiryDate-month': userDVLA.expiryMonth,
+        'expiryDate-year': userDVLA.expiryYear,
+        drivingLicenceNumber: userDVLA.licenceNumber,
+        issueNumber: userDVLA.issueNumber,
+        postcode: userDVLA.postcode,
+        consentCheckbox: 'true'
+      }
+    : { // DVA Licence Fields
+        surname: userDVA.surname,
+        firstName: userDVA.firstName,
+        middleNames: userDVA.middleNames,
+        'dvaDateOfBirth-day': userDVA.birthday,
+        'dvaDateOfBirth-month': userDVA.birthmonth,
+        'dvaDateOfBirth-year': userDVA.birthyear,
+        'dateOfIssue-day': userDVA.issueDay,
+        'dateOfIssue-month': userDVA.issueMonth,
+        'dateOfIssue-year': userDVA.issueYear,
+        'expiryDate-day': userDVA.expiryDay,
+        'expiryDate-month': userDVA.expiryMonth,
+        'expiryDate-year': userDVA.expiryYear,
+        dvaLicenceNumber: userDVA.licenceNumber,
+        postcode: userDVA.postcode,
+        consentDVACheckbox: 'true'
+      }
 
-    const startTime = Date.now()
-    res = res.submitForm({
+  group(`B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm POST`, () => {
+    res = timeRequest(() => res.submitForm({
       fields,
       params: {
         redirects: 2,
         tags: { name: `B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm_CRI` }
       },
       submitSelector: '#continue'
-    })
-    const endTime = Date.now()
-    check(res, {
+    }),
+    {
       'is status 302': (r) => r.status === 302
     })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-
-    const startTime2 = Date.now()
-    res = http.get(res.headers.Location,
+    res = timeRequest(() => http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: `B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm_CoreStub` } // pragma: allowlist secret
-      })
-    const endTime2 = Date.now()
-
-    check(res, {
+      }),
+    {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
     })
-      ? transactionDuration.add(endTime2 - startTime2)
-      : fail('Response Validation Failed')
   })
 }
 
@@ -472,30 +431,23 @@ export function passport (): void {
   const encodedCredentials = encoding.b64encode(credentials)
   const userPassport = csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)]
 
-  group('B03_Passport_01_PassportCRIEntryFromStub GET', () => {
-    const startTime = Date.now()
-    res = http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' +
+  res = group('B03_Passport_01_PassportCRIEntryFromStub GET', () =>
+    timeRequest(() => http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' +
         env.envName + '&rowNumber=197',
     {
       headers: { Authorization: `Basic ${encodedCredentials}` },
       tags: { name: 'B03_Passport_01_PassportCRIEntryFromStub' }
-    })
-    const endTime = Date.now()
-
-    check(res, {
+    }),
+    {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK passport')
 
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+    }))
 
   sleep(Math.random() * 3)
 
   group('B03_Passport_02_EnterPassportDetailsAndContinue POST', () => {
-    const startTime1 = Date.now()
-    res = res.submitForm({
+    res = timeRequest(() => res.submitForm({
       fields: {
         passportNumber: userPassport.passportNumber,
         surname: userPassport.surname,
@@ -513,30 +465,20 @@ export function passport (): void {
         tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_CRI' }
       },
       submitSelector: '#submitButton'
-    })
-    const endTime1 = Date.now()
-
-    check(res, {
+    }),
+    {
       'is status 302': (r) => r.status === 302
     })
-      ? transactionDuration.add(endTime1 - startTime1)
-      : fail('Response Validation Failed')
-
-    const startTime2 = Date.now()
-    res = http.get(res.headers.Location,
+    res = timeRequest(() => http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_CoreStub' }
       }
-    )
-    const endTime2 = Date.now()
-
-    check(res, {
+    ),
+    {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
     })
-      ? transactionDuration.add(endTime2 - startTime2)
-      : fail('Response Validation Failed')
   }
   )
 }

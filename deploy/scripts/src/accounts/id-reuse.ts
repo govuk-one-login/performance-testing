@@ -1,10 +1,10 @@
-import { sleep, group, check, fail } from 'k6'
+import { sleep, group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib'
+import { timeRequest } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
   smoke: {
@@ -122,8 +122,6 @@ const csvData: SummariseSubjectID[] = new SharedArray('Summarise Subject ID', fu
   })
 })
 
-const transactionDuration = new Trend('duration', true)
-
 const env = {
   envURL: __ENV.ACCOUNT_BRAVO_ID_REUSE_URL,
   envMock: __ENV.ACCOUNT_BRAVO_ID_REUSE_MOCK,
@@ -132,84 +130,66 @@ const env = {
 }
 export function persistID (): void {
   let res: Response
-  let token: string
   const userID = uuidv4()
   const subjectID = `urn:fdc:gov.uk:2022:${userID}`
-  group('R01_persistID_01_GenerateToken POST', function () {
-    const startTime = Date.now()
-    res = http.post(env.envMock + '/generate',
+  res = group('R01_persistID_01_GenerateToken POST', () =>
+    timeRequest(() => http.post(env.envMock + '/generate',
       JSON.stringify({
         sub: subjectID
       }),
       {
         tags: { name: 'R01_idReuse_01_GenerateToken' }
-      })
-    const endTime = Date.now()
-    check(res, {
+      }),
+    {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('token')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-    token = getToken(res)
-  })
+    }))
+  const token = getToken(res)
 
   sleep(Math.random() * 3)
 
-  group('R02_persistID_02_CreateVC POST', function () {
-    const startTime = Date.now()
-    const options = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'x-api-key': env.envApiKey
-      },
-      tags: { name: 'R02_idReuse_02_CreateVC' }
-    }
-    const body = JSON.stringify([
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkphbmUgRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.LeLQg33PXWySMBwXi0KnJsKwO3Cb7a2pd501orGEyEo', // pragma: allowlist secret
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.6PIinUiv_RExeCq3XlTQqIAPqLv_jkpeFtqDc1PcWwQ', // pragma: allowlist secret
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' // pragma: allowlist secret
-    ])
-    res = http.post(env.envURL + `/vcs/${subjectID}`, body, options)
-    const endTime = Date.now()
-    check(res, {
-      'is status 202': (r) => r.status === 202,
-      'verify page content': (r) => (r.body as string).includes('messageId')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+  let options = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'x-api-key': env.envApiKey
+    },
+    tags: { name: 'R02_idReuse_02_CreateVC' }
+  }
+  const body = JSON.stringify([
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkphbmUgRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.LeLQg33PXWySMBwXi0KnJsKwO3Cb7a2pd501orGEyEo', // pragma: allowlist secret
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.6PIinUiv_RExeCq3XlTQqIAPqLv_jkpeFtqDc1PcWwQ', // pragma: allowlist secret
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' // pragma: allowlist secret
+  ])
+  res = group('R01_persistID_02_CreateVC POST', () =>
+    timeRequest(() => http.post(env.envURL + `/vcs/${subjectID}`, body, options),
+      {
+        'is status 202': (r) => r.status === 202,
+        'verify page content': (r) => (r.body as string).includes('messageId')
+      }))
 
   sleep(2 + Math.random() * 2) // Random sleep between 2-4 seconds
 
-  group('R01_persistID_03_Retrieve GET', function () {
-    const startTime = Date.now()
-    const options = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'x-api-key': env.envApiKey
-      },
-      tags: { name: 'R01_idReuse_03_Retrieve' }
-    }
-    res = http.get(env.envURL + `/vcs/${subjectID}`, options)
-    const endTime = Date.now()
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('vcs')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+  options = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'x-api-key': env.envApiKey
+    },
+    tags: { name: 'R01_idReuse_03_Retrieve' }
+  }
+  res = group('R01_persistID_03_Retrieve GET', () =>
+    timeRequest(() => http.get(env.envURL + `/vcs/${subjectID}`, options),
+      {
+        'is status 200': (r) => r.status === 200,
+        'verify page content': (r) => (r.body as string).includes('vcs')
+      }))
 }
 
 export function retrieveID (): void {
   let res: Response
-  let token: string
   const summariseData = csvData[Math.floor(Math.random() * csvData.length)]
 
-  group('R02_RetrieveID_01_GenerateTokenSummary POST', function () {
-    const startTime = Date.now()
-    res = http.post(env.envMock + '/generate',
+  res = group('R02_RetrieveID_01_GenerateTokenSummary POST', () =>
+    timeRequest(() => http.post(env.envMock + '/generate',
       JSON.stringify({
         sub: summariseData.subID,
         aud: 'accountManagementAudience',
@@ -217,35 +197,26 @@ export function retrieveID (): void {
       }),
       {
         tags: { name: 'R01_idReuse_04_GenerateTokenSummary' }
-      })
-    const endTime = Date.now()
-    check(res, {
+      }),
+    {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('token')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-    token = getToken(res)
-  })
+    }))
+  const token = getToken(res)
 
-  group('R02_RetrieveID_02_Summarise GET', function () {
-    const startTime = Date.now()
-    const options = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'x-api-key': env.envApiKeySummarise
-      },
-      tags: { name: 'R01_idReuse_05_Summarise' }
-    }
-    res = http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options)
-    const endTime = Date.now()
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('vcs')
-    })
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+  const options = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'x-api-key': env.envApiKeySummarise
+    },
+    tags: { name: 'R01_idReuse_05_Summarise' }
+  }
+  res = group('R02_RetrieveID_02_Summarise GET', () =>
+    timeRequest(() => http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options),
+      {
+        'is status 200': (r) => r.status === 200,
+        'verify page content': (r) => (r.body as string).includes('vcs')
+      }))
 }
 
 function getToken (r: Response): string {

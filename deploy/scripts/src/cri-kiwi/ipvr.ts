@@ -117,11 +117,9 @@ const sqs = new SQSClient(awsConfig)
 export function authEvent (): void {
   const authPayload = generateAuthRequest()
 
-  const authEventMessage = {
-    messageBody: JSON.stringify(authPayload)
-  }
+  const authEventMessage = JSON.stringify(authPayload)
 
-  sqs.sendMessage(env.sqs_queue, authEventMessage.messageBody)
+  sqs.sendMessage(env.sqs_queue, authEventMessage)
 }
 
 export function allEvents (): void {
@@ -129,17 +127,12 @@ export function allEvents (): void {
   const f2fPayload = generateF2FRequest()
   const ipvPayload = generateIPVRequest()
 
-  const authEventMessage = {
-    messageBody: JSON.stringify(authPayload)
-  }
-  const f2fEventMessage = {
-    messageBody: JSON.stringify(f2fPayload)
-  }
+  const authEventMessage = JSON.stringify(authPayload)
+  const f2fEventMessage = JSON.stringify(f2fPayload)
 
-  const ipvEventMessage = {
-    messageBody: JSON.stringify(ipvPayload)
-  }
-  sqs.sendMessage(env.sqs_queue, authEventMessage.messageBody)
-  sqs.sendMessage(env.sqs_queue, f2fEventMessage.messageBody)
-  sqs.sendMessage(env.sqs_queue, ipvEventMessage.messageBody)
+  const ipvEventMessage = JSON.stringify(ipvPayload)
+
+  sqs.sendMessage(env.sqs_queue, authEventMessage)
+  sqs.sendMessage(env.sqs_queue, f2fEventMessage)
+  sqs.sendMessage(env.sqs_queue, ipvEventMessage)
 }

@@ -126,13 +126,7 @@ export function allEvents (): void {
   const authPayload = generateAuthRequest()
   const f2fPayload = generateF2FRequest()
   const ipvPayload = generateIPVRequest()
-
-  const authEventMessage = JSON.stringify(authPayload)
-  const f2fEventMessage = JSON.stringify(f2fPayload)
-
-  const ipvEventMessage = JSON.stringify(ipvPayload)
-
-  sqs.sendMessage(env.sqs_queue, authEventMessage)
-  sqs.sendMessage(env.sqs_queue, f2fEventMessage)
-  sqs.sendMessage(env.sqs_queue, ipvEventMessage)
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(authPayload))
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(f2fPayload))
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
 }

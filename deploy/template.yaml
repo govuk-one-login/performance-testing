@@ -130,12 +130,6 @@ Resources:
               - "cloudformation:DescribeStacks"
             Resource:
               - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*/*"
-          - Effect: "Allow"
-            Action:
-              - "ssm:GetParameters"
-              - "ssm:GetParametersByPath"
-            Resource:
-              - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path
 
   PerformanceTesterRole:
     Type: AWS::IAM::Role
@@ -228,6 +222,12 @@ Resources:
                 - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
                   - !FindInMap [SPOT, AWS, AccountID]
                   - "function:*"
+          - Effect: "Allow"
+            Action:
+              - "ssm:GetParameters"
+              - "ssm:GetParametersByPath"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path
 
   VPCTestPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -405,7 +405,6 @@ Resources:
               IDENTITY_KIWI_F2F_STUB_URL: "/perfTest/identity/kiwi/f2f/stubUrl"
               IDENTITY_KIWI_F2F_TARGET: "/perfTest/identity/kiwi/f2f/target"
               IDENTITY_KIWI_STUB_SQS: "/perfTest/identity/kiwi/stubTxMAConsumer"
-              IDENTITY_ORCH_STUB_URL: "/perfTest/identity/orchStubUrl"
               IDENTITY_PASSPORT_URL: "/perfTest/identity/lime/passportUrl"
               IDENTITY_SPOT_SQS: "/perfTest/identity/spot/SQS"
               IDENTITY_STUB_PASSWORD: "/perfTest/identity/coreStubPassword"

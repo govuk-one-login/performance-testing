@@ -1,9 +1,12 @@
 import { sleep, group, check, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
+import TOTP from '../common/utils/authentication/totp'
 import exec from 'k6/execution'
 import { Trend } from 'k6/metrics'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { SharedArray } from 'k6/data'
+import { timeRequest } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
   smoke: {
@@ -53,6 +56,18 @@ const profiles: ProfileList = {
         { target: 1, duration: '30s' } // Ramps up to target load
       ],
       exec: 'deleteAccount'
+    },
+
+    validateUser: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '30s' } // Ramps up to target load
+      ],
+      exec: 'validateUser'
     }
   },
   load: {
@@ -110,6 +125,20 @@ const profiles: ProfileList = {
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'deleteAccount'
+    },
+
+    validateUser: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 3000,
+      stages: [
+        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
+        { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'validateUser'
     }
   }
 }
@@ -127,6 +156,28 @@ export const options: Options = {
 export function setup (): void {
   describeProfile(loadProfile)
 }
+
+type mfaType = 'SMS' | 'AUTH_APP'
+interface signInData {
+  email: string
+  mfaOption: mfaType
+}
+const dataSignIn: signInData[] = new SharedArray('data', () => Array.from({ length: 10000 },
+  (_, i) => {
+    const id: string = Math.floor((i / 2) + 1).toString().padStart(5, '0')
+    if (i % 2 === 0) {
+      return {
+        email: `perftestAM1_App_${id}@digital.cabinet-office.gov.uk`,
+        mfaOption: 'AUTH_APP' as mfaType
+      }
+    } else {
+      return {
+        email: `perftestAM1_SMS_${id}@digital.cabinet-office.gov.uk`,
+        mfaOption: 'SMS' as mfaType
+      }
+    }
+  }
+))
 
 const env = {
   envURL: __ENV.ACCOUNT_HOME_URL,
@@ -715,4 +766,130 @@ export function deleteAccount (): void {
       ? transactionDuration.add(endTime - startTime)
       : fail('Response Validation Failed')
   })
+}
+
+export function validateUser (): void {
+  let res: Response
+  const userData = dataSignIn[exec.scenario.iterationInInstance % dataSignIn.length]
+
+  res = group('B05_ValidateUser_01_LaunchAccountsHome GET', () =>
+    timeRequest(() => http.get(env.envURL, {
+      tags: { name: 'B05_ValidateUser_01_LaunchAccountsHome' }
+    }),
+    {
+      'is status 200': (r) => r.status === 200
+    }))
+
+  sleep(Math.random() * 3)
+
+  res = group('B05_ValidateUser_02_ClickSignIn POST', () =>
+    timeRequest(() => res.submitForm({
+      params: { tags: { name: 'B05_ValidateUser_02_ClickSignIn' } }
+    }), {
+      'is status 200': r => r.status === 200,
+      'verify page content': r => (r.body as string).includes('Enter your email address to sign in to your GOV.UK One Login')
+    }))
+
+  sleep(Math.random() * 3)
+
+  res = group('B05_ValidateUser_03_EnterEmailAddress POST', () =>
+    timeRequest(() =>
+      res.submitForm({
+        fields: { email: userData.email },
+        params: { tags: { name: 'B05_ValidateUser_03_EnterEmailAddress' } }
+      }), {
+      'is status 200': r => r.status === 200,
+      'verify page content': r => (r.body as string).includes('Enter your password')
+    }))
+
+  sleep(Math.random() * 3)
+
+  let acceptNewTerms = false
+  switch (userData.mfaOption) {
+    case 'AUTH_APP': {
+      res = group('B05_ValidateUser_04_AuthMFA_EnterPassword POST', () =>
+        timeRequest(() =>
+          res.submitForm({
+            fields: { password: credentials.currPassword },
+            params: { tags: { name: 'B05_ValidateUser_04_AuthMFA_EnterPassword' } }
+          }), {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as string).includes('Enter the 6 digit security code shown in your authenticator app')
+        }))
+
+      sleep(Math.random() * 3)
+
+      const totp = new TOTP(credentials.authAppKey)
+      res = group('B05_ValidateUser_05_AuthMFA_EnterTOTP POST', () =>
+        timeRequest(() => {
+          const response = res.submitForm({
+            fields: { code: totp.generateTOTP() },
+            params: { tags: { name: 'B05_ValidateUser_05_AuthMFA_EnterTOTP' } }
+          })
+          acceptNewTerms = (response.body as string).includes('terms of use update')
+          return response
+        }, {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
+        }))
+      break
+    }
+    case 'SMS': {
+      res = group('B05_ValidateUser_06_SMSMFA_EnterPassword POST', () =>
+        timeRequest(() =>
+          res.submitForm({
+            fields: { password: credentials.currPassword },
+            params: { tags: { name: 'B05_ValidateUser_06_SMSMFA_EnterPassword' } }
+          }), {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as string).includes('Check your phone')
+        }))
+
+      sleep(1)
+
+      res = group('B05_ValidateUser_07_SMSMFA_EnterOTP POST', () =>
+        timeRequest(() => res.submitForm({
+          fields: { code: credentials.fixedPhoneOTP },
+          params: { tags: { name: 'B05_ValidateUser_07_SMSMFA_EnterOTP' } }
+        }),
+        {
+          'is status 200': r => r.status === 200,
+          'verify page content': r => (r.body as string).includes('Services you can use with GOV.UK One Login')
+        }))
+      break
+    }
+  }
+
+  if (acceptNewTerms) {
+    res = group('B05_ValidateUser_08_AcceptTermsConditions POST', () =>
+      timeRequest(() =>
+        res.submitForm({
+          fields: { termsAndConditionsResult: 'accept' },
+          params: { tags: { name: 'B05_ValidateUser_08_AcceptTermsConditions' } }
+        }), {
+        'is status 200': r => r.status === 200,
+        'verify page content': r => (r.body as string).includes('User information')
+      }))
+  }
+
+  sleep(Math.random() * 3)
+
+  res = group('B05_ValidateUser_09_ClickSecurityTab GET', () =>
+    timeRequest(() => http.get(env.envURL + '/security', {
+      tags: { name: 'B05_ValidateUser_09_ClickSecurityTab' }
+    }),
+    {
+      'is status 200': r => r.status === 200,
+      'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
+    }))
+
+  sleep(Math.random() * 3)
+
+  res = group('B05_ValidateUser_10_Logout POST', () =>
+    timeRequest(() => res.submitForm({
+      params: { tags: { name: 'B05_ValidateUser_10_Logout' } }
+    }), {
+      'is status 200': r => r.status === 200,
+      'verify page content': r => (r.body as string).includes('Successfully signed out')
+    }))
 }

@@ -158,11 +158,11 @@ export function setup (): void {
 }
 
 type mfaType = 'SMS' | 'AUTH_APP'
-interface signInData {
+interface validateUserData {
   email: string
   mfaOption: mfaType
 }
-const dataSignIn: signInData[] = new SharedArray('data', () => Array.from({ length: 10000 },
+const validateData: validateUserData[] = new SharedArray('data', () => Array.from({ length: 10000 },
   (_, i) => {
     const id: string = Math.floor((i / 2) + 1).toString().padStart(5, '0')
     if (i % 2 === 0) {
@@ -770,7 +770,7 @@ export function deleteAccount (): void {
 
 export function validateUser (): void {
   let res: Response
-  const userData = dataSignIn[exec.scenario.iterationInInstance % dataSignIn.length]
+  const userData = validateData[exec.scenario.iterationInInstance % validateData.length]
 
   res = group('B05_ValidateUser_01_LaunchAccountsHome GET', () =>
     timeRequest(() => http.get(env.envURL, {
@@ -830,7 +830,7 @@ export function validateUser (): void {
           return response
         }, {
           'is status 200': r => r.status === 200,
-          'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
+          'verify page content': r => acceptNewTerms || (r.body as string).includes('Services you can use with GOV.UK One Login')
         }))
       break
     }
@@ -868,28 +868,37 @@ export function validateUser (): void {
           params: { tags: { name: 'B05_ValidateUser_08_AcceptTermsConditions' } }
         }), {
         'is status 200': r => r.status === 200,
-        'verify page content': r => (r.body as string).includes('User information')
+        'verify page content': r => (r.body as string).includes('Services you can use with GOV.UK One Login')
       }))
   }
 
   sleep(Math.random() * 3)
 
-  res = group('B05_ValidateUser_09_ClickSecurityTab GET', () =>
-    timeRequest(() => http.get(env.envURL + '/security', {
-      tags: { name: 'B05_ValidateUser_09_ClickSecurityTab' }
-    }),
-    {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
-    }))
+  for (let i = 0; i < 5; i++) {
+    res = group('B05_ValidateUser_09_ClickSecurityTab GET', () =>
+      timeRequest(() => http.get(env.envURL + '/security', {
+        tags: { name: 'B05_ValidateUser_09_ClickSecurityTab' }
+      }),
+      {
+        'is status 200': r => r.status === 200,
+        'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
+      }))
+
+    const emailAddress = res.html().find('dd.govuk-summary-list__value').first().text().trim() ?? 'ValueNotFound'
+    if (emailAddress !== userData.email.toLowerCase()) {
+      console.log(`Value of email address in response is ${emailAddress}`)
+      fail('Email address does not match the email of the current user')
+    }
+  }
 
   sleep(Math.random() * 3)
 
   res = group('B05_ValidateUser_10_Logout POST', () =>
-    timeRequest(() => res.submitForm({
-      params: { tags: { name: 'B05_ValidateUser_10_Logout' } }
-    }), {
+    timeRequest(() => http.get(env.envURL + '/sign-out', {
+      tags: { name: 'B05_ValidateUser_10_Logout' }
+    }),
+    {
       'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Successfully signed out')
+      'verify page content': r => (r.body as string).includes('You have signed out')
     }))
 }

@@ -140,7 +140,17 @@ const profiles: ProfileList = {
       ],
       exec: 'validateUser'
     }
+  },
+  smokePerVUIterations: {
+    validateUser: {
+      executor: 'per-vu-iterations',
+      vus: 1,
+      iterations: 5,
+      maxDuration: '2m',
+      exec: 'validateUser'
+    }
   }
+
 }
 
 const loadProfile = selectProfile(profiles)
@@ -167,12 +177,12 @@ const validateData: validateUserData[] = new SharedArray('data', () => Array.fro
     const id: string = Math.floor((i / 2) + 1).toString().padStart(5, '0')
     if (i % 2 === 0) {
       return {
-        email: `perftestAM1_App_${id}@digital.cabinet-office.gov.uk`,
+        email: `perftestam1_app_${id}@digital.cabinet-office.gov.uk`,
         mfaOption: 'AUTH_APP' as mfaType
       }
     } else {
       return {
-        email: `perftestAM1_SMS_${id}@digital.cabinet-office.gov.uk`,
+        email: `perftestam1_sms_${id}@digital.cabinet-office.gov.uk`,
         mfaOption: 'SMS' as mfaType
       }
     }
@@ -881,14 +891,8 @@ export function validateUser (): void {
       }),
       {
         'is status 200': r => r.status === 200,
-        'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
+        'verify current email address': r => (r.body as string).includes(`${userData.email}`)
       }))
-
-    const emailAddress = res.html().find('dd.govuk-summary-list__value').first().text().trim() ?? 'ValueNotFound'
-    if (emailAddress !== userData.email.toLowerCase()) {
-      console.log(`Value of email address in response is ${emailAddress}`)
-      fail('Email address does not match the email of the current user')
-    }
   }
 
   sleep(Math.random() * 3)

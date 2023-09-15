@@ -1,5 +1,6 @@
 import { type Checkers, check, fail } from 'k6'
 import { Trend } from 'k6/metrics'
+import { getStaticResources } from './static'
 
 // Trend to store all recorded durations
 const durations = new Trend('duration', true)
@@ -35,6 +36,22 @@ export function timeFunction<T> (fn: () => T): [T, number] {
  */
 export function timeRequest<T> (fn: () => T, checks: Checkers<T>): T {
   const [res, duration] = timeFunction(fn)
+  check(res, checks)
+    ? durations.add(duration)
+    : fail('Response validation failed')
+  return res
+}
+
+export function timeFunctionWithStaticResources<T> (fn: () => T): [T, number] {
+  const start = Date.now()
+  const res = fn()
+  getStaticResources(res)
+  const end = Date.now()
+  return [res, end - start]
+}
+
+export function timeRequestWithStaticResources<T> (fn: () => T, checks: Checkers<T>): T {
+  const [res, duration] = timeFunctionWithStaticResources(fn)
   check(res, checks)
     ? durations.add(duration)
     : fail('Response validation failed')

@@ -91,9 +91,6 @@ const env = {
 
 export function CIC (): void {
   let res: Response
-  let clientId: string
-  let authorizeLocation: string
-  let codeUrl: string
 
   res = group('B01_CIC_01_IPVStubCall POST', () =>
     timeRequest(() => http.post(env.CIC.ipvStub + '/start',
@@ -107,6 +104,8 @@ export function CIC (): void {
       'is status 201': (r) => r.status === 201,
       'verify page content': (r) => (r.body as string).includes(b64encode('{"alg":"RSA', 'rawstd'))
     }))
+  const authorizeLocation = getAuthorizeauthorizeLocation(res)
+  const clientId = getClientID(res)
 
   res = group('B01_CIC_02_Authorize GET', () =>
     timeRequest(() => http.get(authorizeLocation, {
@@ -163,6 +162,7 @@ export function CIC (): void {
       'verify url body': (r) =>
         (r.url).includes(clientId)
     }))
+  const codeUrl = getCodeFromUrl(res.url)
 
   sleep(Math.random() * 3)
 

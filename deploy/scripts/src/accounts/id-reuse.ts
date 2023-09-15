@@ -169,13 +169,7 @@ export function persistID (): void {
 
   sleep(2 + Math.random() * 2) // Random sleep between 2-4 seconds
 
-  options = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'x-api-key': env.envApiKey
-    },
-    tags: { name: 'R01_idReuse_03_Retrieve' }
-  }
+  options.tags.name = 'R01_idReuse_03_Retrieve'
   res = group('R01_persistID_03_Retrieve GET', () =>
     timeRequest(() => http.get(env.envURL + `/vcs/${subjectID}`, options),
       {

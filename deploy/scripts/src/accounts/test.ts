@@ -57,7 +57,6 @@ const profiles: ProfileList = {
       ],
       exec: 'deleteAccount'
     },
-
     validateUser: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -126,7 +125,6 @@ const profiles: ProfileList = {
       ],
       exec: 'deleteAccount'
     },
-
     validateUser: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -138,15 +136,6 @@ const profiles: ProfileList = {
         { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
-      exec: 'validateUser'
-    }
-  },
-  smokePerVUIterations: {
-    validateUser: {
-      executor: 'per-vu-iterations',
-      vus: 1,
-      iterations: 5,
-      maxDuration: '2m',
       exec: 'validateUser'
     }
   }
@@ -882,7 +871,7 @@ export function validateUser (): void {
       }))
   }
 
-  sleep(Math.random() * 3)
+  sleep((5000 - (Date.now() % 5000))/1000)
 
   for (let i = 0; i < 5; i++) {
     res = group('B05_ValidateUser_09_ClickSecurityTab GET', () =>

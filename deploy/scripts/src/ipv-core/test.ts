@@ -207,11 +207,7 @@ export function passport (): void {
     {
       'is status 302': (r) => r.status === 302
     })
-    res = timeRequest(() => {
-      const response = http.get(res.headers.Location, { tags: { name: 'B01_Passport_05_ContOnPYIStartPage_02_PassStub' } })
-      if (env.staticResources) getStaticResources(response)
-      return response
-    },
+    res = timeRequest(() => http.get(res.headers.Location, { tags: { name: 'B01_Passport_05_ContOnPYIStartPage_02_PassStub' } }),
     {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('UK Passport (Stub)')

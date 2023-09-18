@@ -137,15 +137,15 @@ export function passport (): void {
   sleep(Math.random() * 3)
 
   res = group('B01_Passport_02_GoToFullJourneyRoute GET', () =>
-    timeRequest(() => http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=', {
-      tags: { name: 'B01_Passport_02_GoToFullJourneyRoute' }
-    }),
+    timeRequest(() => {
+      const response = http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=', { tags: { name: 'B01_Passport_02_GoToFullJourneyRoute' } })
+      if (env.staticResources) getStaticResources(response)
+      return response
+    },
     {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Tell us if you have one of the following types of photo ID')
     }))
-
-  if (env.staticResources) getStaticResources(res)
 
   sleep(Math.random() * 3)
 
@@ -194,8 +194,6 @@ export function passport (): void {
     })
   })
 
-  if (env.staticResources) getStaticResources(res)
-
   sleep(Math.random() * 3)
 
   group('B01_Passport_05_ContinueOnPYIStartPage POST', () => {
@@ -209,9 +207,11 @@ export function passport (): void {
     {
       'is status 302': (r) => r.status === 302
     })
-    res = timeRequest(() => http.get(res.headers.Location, {
-      tags: { name: 'B01_Passport_05_ContOnPYIStartPage_02_PassStub' }
-    }),
+    res = timeRequest(() => {
+      const response = http.get(res.headers.Location, { tags: { name: 'B01_Passport_05_ContOnPYIStartPage_02_PassStub' } })
+      if (env.staticResources) getStaticResources(response)
+      return response
+    },
     {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('UK Passport (Stub)')
@@ -299,15 +299,16 @@ export function passport (): void {
     {
       'is status 302': (r) => r.status === 302
     })
-    res = timeRequest(() => http.get(res.headers.Location, {
-      tags: { name: 'B01_Passport_08_FraudDataContinue_02_CoreCall' }
-    }),
+    res = timeRequest(() => {
+      const response = http.get(res.headers.Location, { tags: { name: 'B01_Passport_08_FraudDataContinue_02_CoreCall' } })
+      if (env.staticResources) getStaticResources(response)
+      return response
+    },
     {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Answer security questions')
     })
   })
-  if (env.staticResources) getStaticResources(res)
 
   sleep(Math.random() * 3)
 
@@ -346,15 +347,16 @@ export function passport (): void {
     {
       'is status 302': (r) => r.status === 302
     })
-    res = timeRequest(() => http.get(res.headers.Location, {
-      tags: { name: 'B01_Passport_10_KBVDataContinue_02_CoreCall' }
-    }),
+    res = timeRequest(() => {
+      const response = http.get(res.headers.Location, { tags: { name: 'B01_Passport_10_KBVDataContinue_02_CoreCall' } })
+      if (env.staticResources) getStaticResources(response)
+      return response
+    },
     {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('You’ve successfully proved your identity')
     })
   })
-  if (env.staticResources) getStaticResources(res)
 
   sleep(Math.random() * 3)
 
@@ -393,14 +395,15 @@ export function drivingLicence (): void {
   sleep(Math.random() * 3)
 
   res = group('B02_DrivingLicence_02_SelectUserIDContinue GET', () =>
-    timeRequest(() => http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=', {
-      tags: { name: 'B02_DrivingLicence_02_SelectUserIDContinue' }
-    }),
+    timeRequest(() => {
+      const response = http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=', { tags: { name: 'B02_DrivingLicence_02_SelectUserIDContinue' } })
+      if (env.staticResources) getStaticResources(response)
+      return response
+    },
     {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Tell us if you have one of the following types of photo ID')
     }))
-  if (env.staticResources) getStaticResources(res)
 
   sleep(Math.random() * 3)
 
@@ -440,15 +443,16 @@ export function drivingLicence (): void {
     {
       'is status 302': (r) => r.status === 302
     })
-    res = timeRequest(() => http.get(env.ipvCoreURL + res.headers.Location, {
-      tags: { name: 'B02_DrivingLicence_04_DCMAWContinue_02_CoreCall' }
-    }),
+    res = timeRequest(() => {
+      const response = http.get(env.ipvCoreURL + res.headers.Location, { tags: { name: 'B02_DrivingLicence_04_DCMAWContinue_02_CoreCall' } })
+      if (env.staticResources) getStaticResources(response)
+      return response
+    },
     {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Enter your UK driving licence details and answer security questions online')
     })
   })
-  if (env.staticResources) getStaticResources(res)
 
   group('B02_DrivingLicence_05_ContinueOnPYIStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -548,15 +552,16 @@ export function drivingLicence (): void {
     {
       'is status 302': (r) => r.status === 302
     })
-    res = timeRequest(() => http.get(res.headers.Location, {
-      tags: { name: 'B02_DrivingLicence_08_FraudDataCont_02_CoreCall' }
-    }),
+    res = timeRequest(() => {
+      const response = http.get(res.headers.Location, { tags: { name: 'B02_DrivingLicence_08_FraudDataCont_02_CoreCall' } })
+      if (env.staticResources) getStaticResources(response)
+      return response
+    },
     {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Answer security questions')
     })
   })
-  if (env.staticResources) getStaticResources(res)
 
   sleep(Math.random() * 3)
 
@@ -595,15 +600,16 @@ export function drivingLicence (): void {
     {
       'is status 302': (r) => r.status === 302
     })
-    res = timeRequest(() => http.get(res.headers.Location, {
-      tags: { name: 'B02_DrivingLicence_10_KBVDataContinue_02_CoreCall' }
-    }),
+    res = timeRequest(() => {
+      const response = http.get(res.headers.Location, { tags: { name: 'B02_DrivingLicence_10_KBVDataContinue_02_CoreCall' } })
+      if (env.staticResources) getStaticResources(response)
+      return response
+    },
     {
       'is status 200': (r) => r.status === 200,
       'verify page content': (r) => (r.body as string).includes('Continue to the service you want to use')
     })
   })
-  if (env.staticResources) getStaticResources(res)
 
   sleep(Math.random() * 3)
 

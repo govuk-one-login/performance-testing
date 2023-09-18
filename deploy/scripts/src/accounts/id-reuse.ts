@@ -148,7 +148,7 @@ export function persistID (): void {
 
   sleep(Math.random() * 3)
 
-  let options = {
+  const options = {
     headers: {
       Authorization: `Bearer ${token}`,
       'x-api-key': env.envApiKey

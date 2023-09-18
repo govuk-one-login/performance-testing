@@ -871,7 +871,7 @@ export function validateUser (): void {
       }))
   }
 
-  sleep((5000 - (Date.now() % 5000))/1000)
+  sleep((5000 - (Date.now() % 5000)) / 1000)
 
   for (let i = 0; i < 5; i++) {
     res = group('B05_ValidateUser_09_ClickSecurityTab GET', () =>

@@ -446,7 +446,7 @@ export function drivingLicence (): void {
     },
     {
       'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Enter your UK driving licence details and answer security questions online')
+      'verify page content': (r) => (r.body as string).includes('Enter your UK photocard driving licence details and answer security questions online')
     })
   })
 

@@ -871,6 +871,7 @@ export function validateUser (): void {
       }))
   }
 
+  // Wait for end of the next 5 second window to synchronise requests across VUs
   sleep((5000 - (Date.now() % 5000)) / 1000)
 
   for (let i = 0; i < 5; i++) {

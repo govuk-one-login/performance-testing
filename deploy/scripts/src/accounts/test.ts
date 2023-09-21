@@ -130,11 +130,11 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 3000,
+      maxVUs: 300,
       stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+        { target: 10, duration: '3m' }, // Ramp up to 10 iterations per second in 3 minutes
+        { target: 10, duration: '6m' }, // Steady State of 6 minutes at the ramp up load i.e. 10 iterations/second
+        { target: 0, duration: '1m' } // Ramp down duration of 1 minute.
       ],
       exec: 'validateUser'
     }

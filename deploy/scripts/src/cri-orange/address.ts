@@ -1,12 +1,11 @@
 import { sleep, group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { Trend } from 'k6/metrics'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
-import { isStatusCode200, isStatusCode302, validatePageContent } from './utils/assertions'
+import { timeRequest } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
   smoke: {
@@ -80,98 +79,81 @@ const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
   })
 })
 
-const transactionDuration = new Trend('duration', true)
-
 export function addressScenario1 (): void {
   let res: Response
-  let fullAddress: string
   const user1Address = csvData1[exec.scenario.iterationInTest % csvData1.length]
 
-  group('B02_Address_01_AddressCRIEntryFromStub  GET', () => {
-    const startTime = Date.now()
-    res = http.get(
+  res = group('B02_Address_01_AddressCRIEntryFromStub  GET', () =>
+    timeRequest(() => http.get(
       env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Address_01_AddressCRIEntryFromStub' }
-      }
-    )
-    const endTime = Date.now()
-    isStatusCode200(res) && validatePageContent(res, 'Find your address')
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+      }),
+    {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('Find your address')
+    }))
 
   sleep(Math.random() * 3)
 
-  group('B02_Address_02_SearchPostCode POST', () => {
-    const startTime = Date.now()
-    res = res.submitForm({
+  res = group('B02_Address_02_SearchPostCode POST', () =>
+    timeRequest(() => res.submitForm({
       fields: { addressSearch: user1Address.postcode },
       submitSelector: '#continue',
       params: { tags: { name: 'B02_Address_02_SearchPostCode' } }
-    })
-    const endTime = Date.now()
-    isStatusCode200(res) && validatePageContent(res, 'Choose your address')
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
+    }),
+    {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('Choose your address')
+    }))
 
-    fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found')
-  })
+  const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found')
 
-  group('B02_Address_03_SelectAddress POST', () => {
-    const startTime = Date.now()
-    res = res.submitForm({
+  res = group('B02_Address_03_SelectAddress POST', () =>
+    timeRequest(() => res.submitForm({
       fields: { addressResults: fullAddress },
       submitSelector: '#continue',
       params: { tags: { name: 'B02_Address_03_SelectAddress' } }
-    })
-    const endTime = Date.now()
-    isStatusCode200(res) && validatePageContent(res, 'Check your address')
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+    }),
+    {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('Check your address')
+    }))
 
   sleep(Math.random() * 3)
 
-  group('B02_Address_04_VerifyAddress POST', () => {
-    const startTime = Date.now()
-    res = res.submitForm({
+  res = group('B02_Address_04_VerifyAddress POST', () =>
+    timeRequest(() => res.submitForm({
       fields: { addressYearFrom: '2021' },
       submitSelector: '#continue',
       params: { tags: { name: 'B02_Address_04_VerifyAddress' } }
-    })
-    const endTime = Date.now()
-    isStatusCode200(res) && validatePageContent(res, 'Confirm your details')
-      ? transactionDuration.add(endTime - startTime)
-      : fail('Response Validation Failed')
-  })
+    }),
+    {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('Confirm your details')
+    }))
 
   sleep(Math.random() * 3)
 
   group('B02_Address_05_ConfirmDetails POST', () => {
-    const startTime1 = Date.now()
-    res = res.submitForm({
+    res = timeRequest(() => res.submitForm({
       params: {
         redirects: 1,
         tags: { name: 'B02_Address_05_ConfirmDetails_AddCRI' }
       }
+    }),
+    {
+      'is status 302': (r) => r.status === 302
     })
-    const endTime1 = Date.now()
-    isStatusCode302(res)
-      ? transactionDuration.add(endTime1 - startTime1)
-      : fail('Response Validation Failed')
-
-    const startTime2 = Date.now()
-    res = http.get(res.headers.Location,
+    res = timeRequest(() => http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Address_05_ConfirmDetails_CoreStub' }
-      }
-    )
-    const endTime2 = Date.now()
-    isStatusCode200(res) && validatePageContent(res, 'Verifiable Credentials')
-      ? transactionDuration.add(endTime2 - startTime2)
-      : fail('Response Validation Failed')
+      }),
+    {
+      'is status 200': (r) => r.status === 200,
+      'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
+    })
   })
 }

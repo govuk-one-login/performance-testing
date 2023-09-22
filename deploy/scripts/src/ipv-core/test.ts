@@ -64,7 +64,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1000,
-      maxVUs: 5000,
+      maxVUs: 7500,
       stages: [
         { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
         { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
@@ -134,7 +134,7 @@ export function passport (): void {
       'verify page content': (r) => (r.body as string).includes('Enter userId manually')
     }))
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 2)
 
   res = group('B01_Passport_02_GoToFullJourneyRoute GET', () =>
     timeRequest(() => {
@@ -147,7 +147,7 @@ export function passport (): void {
       'verify page content': (r) => (r.body as string).includes('Tell us if you have one of the following types of photo ID')
     }))
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 2)
 
   group('B01_Passport_03_ClickContinueStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -169,7 +169,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 2)
 
   group('B01_Passport_04_DCMAWContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -194,7 +194,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 2)
 
   group('B01_Passport_05_ContinueOnPYIStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -214,7 +214,7 @@ export function passport (): void {
       })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 2)
 
   group('B01_Passport_06_PassportDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -249,7 +249,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 2)
 
   group('B01_Passport_07_AddrDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -279,7 +279,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 2)
 
   group('B01_Passport_08_FraudDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -306,7 +306,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 2)
 
   group('B01_Passport_09_PreKBVTransition POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -327,7 +327,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 2)
 
   group('B01_Passport_10_KBVDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -354,7 +354,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 2)
 
   group('B01_Passport_11_ContinuePYISuccessPage POST', () => {
     res = timeRequest(() => res.submitForm({

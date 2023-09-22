@@ -34,6 +34,9 @@ Mappings:
   SPOT:
     AWS:
       AccountID: "429671060046"
+  ContraIndicators:
+    AWS:
+      AccountID: "755415363251"
   TxMA:
     AWS:
       AccountID: "750703655225"
@@ -223,11 +226,16 @@ Resources:
             Action:
               - "lambda:InvokeFunction"
             Resource:
-              Fn::Join:
-                - ":"
-                - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
-                  - !FindInMap [SPOT, AWS, AccountID]
-                  - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [SPOT, AWS, AccountID]
+                    - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [ContraIndicators, AWS, AccountID]
+                    - "function:*"
 
   VPCTestPolicy:
     Type: AWS::IAM::ManagedPolicy

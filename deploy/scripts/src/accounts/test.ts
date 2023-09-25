@@ -686,13 +686,17 @@ export function validateUser (): void {
       sleep(1)
 
       res = group('B05_ValidateUser_07_SMSMFA_EnterOTP POST', () =>
-        timeRequest(() => res.submitForm({
-          fields: { code: credentials.fixedPhoneOTP },
-          params: { tags: { name: 'B05_ValidateUser_07_SMSMFA_EnterOTP' } }
-        }),
+        timeRequest(() => {
+          const response = res.submitForm({
+            fields: { code: credentials.fixedPhoneOTP },
+            params: { tags: { name: 'B05_ValidateUser_07_SMSMFA_EnterOTP' } }
+          })
+          acceptNewTerms = (response.body as string).includes('terms of use update')
+          return response
+        },
         {
           'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Services you can use with GOV.UK One Login')
+          'verify page content': r => acceptNewTerms || (r.body as string).includes('Services you can use with GOV.UK One Login')
         }))
       break
     }

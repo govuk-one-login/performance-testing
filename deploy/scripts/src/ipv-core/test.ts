@@ -4,6 +4,8 @@ import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { getStaticResources } from '../common/utils/request/static'
 import { timeRequest } from '../common/utils/request/timing'
+import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
+import { addressPayloadDL, kbvPayloaDL, fraudPayloadDL, drivingLicencePayload } from './data/drivingLicenceData'
 
 const profiles: ProfileList = {
   smoke: {
@@ -97,20 +99,6 @@ export const options: Options = {
     http_req_failed: ['rate<0.05'] // Error rate <5%
   }
 }
-
-interface testData {
-  address: Record<string, any>
-  fraud: Record<string, any>
-  kbv: Record<string, any>
-}
-interface passportDataType extends testData {
-  passport: Record<string, any>
-}
-interface drivingLicenceDataType extends testData {
-  drivingLicence: Record<string, any>
-}
-const passportData: passportDataType = JSON.parse(open('./data/passport.json'))
-const drivingLicenceData: drivingLicenceDataType = JSON.parse(open('./data/drivingLicence.json'))
 
 export function setup (): void {
   describeProfile(loadProfile)
@@ -219,7 +207,7 @@ export function passport (): void {
   group('B01_Passport_06_PassportDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
       fields: {
-        jsonPayload: JSON.stringify(passportData.passport),
+        jsonPayload: passportPayload,
         strengthScore: '4',
         validityScore: '2'
       },
@@ -253,7 +241,7 @@ export function passport (): void {
 
   group('B01_Passport_07_AddrDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
-      fields: { jsonPayload: JSON.stringify(passportData.address) },
+      fields: { jsonPayload: addressPayloadP },
       params: {
         redirects: 0,
         tags: { name: 'B01_Passport_07_AddrDataContinue_01_AddStub' }
@@ -284,7 +272,7 @@ export function passport (): void {
   group('B01_Passport_08_FraudDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
       fields: {
-        jsonPayload: JSON.stringify(passportData.fraud),
+        jsonPayload: fraudPayloadP,
         identityFraudScore: '2'
       },
       params: {
@@ -332,7 +320,7 @@ export function passport (): void {
   group('B01_Passport_10_KBVDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
       fields: {
-        jsonPayload: JSON.stringify(passportData.kbv),
+        jsonPayload: kbvPayloadP,
         verificationScore: '2'
       },
       params: {
@@ -473,7 +461,7 @@ export function drivingLicence (): void {
   group('B02_DrivingLicence_06_DrivingLicenceDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
       fields: {
-        jsonPayload: JSON.stringify(drivingLicenceData.drivingLicence),
+        jsonPayload: drivingLicencePayload,
         strengthScore: '3',
         validityScore: '2',
         activityHistoryScore: '1'
@@ -506,7 +494,7 @@ export function drivingLicence (): void {
 
   group('B02_DrivingLicence_07_AddrDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
-      fields: { jsonPayload: JSON.stringify(drivingLicenceData.address) },
+      fields: { jsonPayload: addressPayloadDL },
       params: {
         redirects: 0,
         tags: { name: 'B02_DrivingLicence_07_AddrDataCont_01_AddStub' }
@@ -536,7 +524,7 @@ export function drivingLicence (): void {
   group('B02_DrivingLicence_08_FraudDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
       fields: {
-        jsonPayload: JSON.stringify(drivingLicenceData.fraud),
+        jsonPayload: fraudPayloadDL,
         identityFraudScore: '2',
         activityHistoryScore: '2'
       },
@@ -585,7 +573,7 @@ export function drivingLicence (): void {
   group('B02_DrivingLicence_10_KBVDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
       fields: {
-        jsonPayload: JSON.stringify(drivingLicenceData.kbv),
+        jsonPayload: kbvPayloaDL,
         verificationScore: '2'
       },
       params: {

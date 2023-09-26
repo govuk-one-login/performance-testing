@@ -6,6 +6,8 @@ import exec from 'k6/execution'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { timeRequest } from '../common/utils/request/timing'
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
@@ -204,36 +206,25 @@ export function changeEmail (): void {
     timeRequest(() => http.get(env.envURL, {
       tags: { name: 'B01_ChangeEmail_01_LaunchAccountsHome' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Services you can use with GOV.UK One Login')
-    }))
+    { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_ChangeEmail_02_ClickSecurityTab GET', () =>
     timeRequest(() => http.get(env.envURL + '/security', {
       tags: { name: 'B01_ChangeEmail_02_ClickSecurityTab' }
     }),
-    {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
-    }))
+    { isStatusCode200, 'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_ChangeEmail_03_ClickChangeEmailLink GET', () =>
     timeRequest(() => http.get(env.envURL + '/enter-password?type=changeEmail', {
       tags: { name: 'B01_ChangeEmail_03_ClickChangeEmailLink' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your password')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your password') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_ChangeEmail_04_EnterCurrentPassword POST', () =>
     timeRequest(() =>
@@ -246,13 +237,9 @@ export function changeEmail (): void {
           tags: { name: 'B01_ChangeEmail_04_EnterCurrentPassword' }
         }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your new email address')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your new email address') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_ChangeEmail_05_EnterNewEmailID POST', () =>
     timeRequest(() =>
@@ -264,13 +251,9 @@ export function changeEmail (): void {
           tags: { name: 'B01_ChangeEmail_05_EnterNewEmailID' }
         }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Check your email')
-    }))
+    { isStatusCode200, ...pageContentCheck('Check your email') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_ChangeEmail_06_EnterEmailOTP POST', () =>
     timeRequest(() =>
@@ -283,35 +266,23 @@ export function changeEmail (): void {
           tags: { name: 'B01_ChangeEmail_06_EnterEmailOTP' }
         }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('You’ve changed your email address')
-    }))
+    { isStatusCode200, ...pageContentCheck('You’ve changed your email address') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_ChangeEmail_07_ClickBackToSecurity GET', () =>
     timeRequest(() => http.get(env.envURL + '/manage-your-account', {
       tags: { name: 'B01_ChangeEmail_07_ClickBackToSecurity' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Delete your GOV.UK One Login')
-    }))
+    { isStatusCode200, ...pageContentCheck('Delete your GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_ChangeEmail_08_SignOut GET', () =>
     timeRequest(() => http.get(env.envURL + '/sign-out', {
       tags: { name: 'B01_ChangeEmail_08_SignOut' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('You have signed out')
-    }))
+    { isStatusCode200, ...pageContentCheck('You have signed out') }))
 }
 
 export function changePassword (): void {
@@ -321,36 +292,25 @@ export function changePassword (): void {
     timeRequest(() => http.get(env.envURL, {
       tags: { name: 'B02_ChangePassword_01_LaunchAccountsHome' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Services you can use with GOV.UK One Login')
-    }))
+    { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_ChangePassword_02_ClickSecurityTab GET', () =>
     timeRequest(() => http.get(env.envURL + '/security', {
       tags: { name: 'B02_ChangePassword_02_ClickSecurityTab' } // pragma: allowlist secret
     }),
-    {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
-    }))
+    { isStatusCode200, 'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_ChangePassword_03_ClickChangePasswordLink GET', () =>
     timeRequest(() => http.get(env.envURL + '/enter-password?type=changePassword', {
       tags: { name: 'B02_ChangePassword_03_ClickChangePasswordLink' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your current password')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your current password') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_ChangePassword_04_EnterCurrentPassword POST', () =>
     timeRequest(() =>
@@ -363,13 +323,9 @@ export function changePassword (): void {
           tags: { name: 'B02_ChangePassword_04_EnterCurrentPassword' }
         }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your new password')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your new password') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_ChangePassword_05_EnterNewPassword POST', () =>
     timeRequest(() =>
@@ -382,35 +338,23 @@ export function changePassword (): void {
           tags: { name: 'B02_ChangePassword_05_EnterNewPassword' }
         }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('You’ve changed your password')
-    }))
+    { isStatusCode200, ...pageContentCheck('You’ve changed your password') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_ChangePassword_06_ClickBackToSecurity GET', () =>
     timeRequest(() => http.get(env.envURL + '/manage-your-account', {
       tags: { name: 'B02_ChangePassword_06_ClickBackToSecurity' } // pragma: allowlist secret
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Delete your GOV.UK One Login')
-    }))
+    { isStatusCode200, ...pageContentCheck('Delete your GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_ChangePassword_07_SignOut GET', () =>
     timeRequest(() => http.get(env.envURL + '/sign-out', {
       tags: { name: 'B02_ChangePassword_07_SignOut' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('You have signed out')
-    }))
+    { isStatusCode200, ...pageContentCheck('You have signed out') }))
 }
 
 export function changePhone (): void {
@@ -420,36 +364,25 @@ export function changePhone (): void {
     timeRequest(() => http.get(env.envURL, {
       tags: { name: 'B03_ChangePhone_01_LaunchAccountsHome' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Services you can use with GOV.UK One Login')
-    }))
+    { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B03_ChangePhone_02_ClickSecurityTab GET', () =>
     timeRequest(() => http.get(env.envURL + '/security', {
       tags: { name: 'B03_ChangePhone_02_ClickSecurityTab' }
     }),
-    {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
-    }))
+    { isStatusCode200, 'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B03_ChangePhone_03_ClickChangePhoneNumberLink GET', () =>
     timeRequest(() => http.get(env.envURL + '/enter-password?type=changePhoneNumber', {
       tags: { name: 'B03_ChangePhone_03_ClickChangePhoneNumberLink' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your password')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your password') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B03_ChangePhone_04_EnterCurrentPassword POST', () =>
     timeRequest(() =>
@@ -462,13 +395,9 @@ export function changePhone (): void {
           tags: { name: 'B03_ChangePhone_04_EnterCurrentPassword' }
         }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your new mobile phone number')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your new mobile phone number') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B03_ChangePhone_05_EnterNewPhoneID POST', () =>
     timeRequest(() =>
@@ -481,13 +410,9 @@ export function changePhone (): void {
           tags: { name: 'B03_ChangePhone_05_EnterNewPhoneID' }
         }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Check your phone')
-    }))
+    { isStatusCode200, ...pageContentCheck('Check your phone') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B03_ChangePhone_06_EnterSMSOTP POST', () =>
     timeRequest(() =>
@@ -502,35 +427,23 @@ export function changePhone (): void {
           tags: { name: 'B03_ChangePhone_06_EnterSMSOTP' }
         }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('You’ve changed your phone number')
-    }))
+    { isStatusCode200, ...pageContentCheck('You’ve changed your phone number') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B03_ChangePhone_07_ClickBackToSecurity GET', () =>
     timeRequest(() => http.get(env.envURL + '/manage-your-account', {
       tags: { name: 'B03_ChangePhone_07_ClickBackToSecurity' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Delete your GOV.UK One Login')
-    }))
+    { isStatusCode200, ...pageContentCheck('Delete your GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B03_ChangePhone_08_SignOut GET', () =>
     timeRequest(() => http.get(env.envURL + '/sign-out', {
       tags: { name: 'B03_ChangePhone_08_SignOut' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('You have signed out')
-    }))
+    { isStatusCode200, ...pageContentCheck('You have signed out') }))
 }
 
 export function deleteAccount (): void {
@@ -540,36 +453,25 @@ export function deleteAccount (): void {
     timeRequest(() => http.get(env.envURL, {
       tags: { name: 'B04_DeleteAccount_01_LaunchAccountsHome' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Services you can use with GOV.UK One Login')
-    }))
+    { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B04_DeleteAccount_02_ClickSecurityTab GET', () =>
     timeRequest(() => http.get(env.envURL + '/security', {
       tags: { name: 'B04_DeleteAccount_02_ClickSecurityTab' }
     }),
-    {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login')
-    }))
+    { isStatusCode200, 'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B04_DeleteAccount_03_ClickDeleteAccountLink GET', () =>
     timeRequest(() => http.get(env.envURL + '/enter-password?type=deleteAccount', {
       tags: { name: 'B04_DeleteAccount_03_ClickDeleteAccountLink' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your password')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your password') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B04_DeleteAccount_04_EnterCurrentPassword POST', () =>
     timeRequest(() =>
@@ -582,15 +484,9 @@ export function deleteAccount (): void {
           tags: { name: 'B04_DeleteAccount_04_EnterCurrentPassword' }
         }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes(
-          'Are you sure you want to delete your GOV.UK One Login'
-        )
-    }))
+    { isStatusCode200, ...pageContentCheck('Are you sure you want to delete your GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B04_DeleteAccount_05_DeleteAccountConfirm POST', () =>
     timeRequest(() =>
@@ -599,11 +495,7 @@ export function deleteAccount (): void {
           tags: { name: 'B04_DeleteAccount_05_DeleteAccountConfirm' }
         }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('You have signed out')
-    }))
+    { isStatusCode200, ...pageContentCheck('You have signed out') }))
 }
 
 export function validateUser (): void {
@@ -618,29 +510,23 @@ export function validateUser (): void {
       'is status 200': (r) => r.status === 200
     }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B05_ValidateUser_02_ClickSignIn POST', () =>
     timeRequest(() => res.submitForm({
       params: { tags: { name: 'B05_ValidateUser_02_ClickSignIn' } }
-    }), {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Enter your email address to sign in to your GOV.UK One Login')
-    }))
+    }), { isStatusCode200, 'verify page content': r => (r.body as string).includes('Enter your email address to sign in to your GOV.UK One Login') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B05_ValidateUser_03_EnterEmailAddress POST', () =>
     timeRequest(() =>
       res.submitForm({
         fields: { email: userData.email },
         params: { tags: { name: 'B05_ValidateUser_03_EnterEmailAddress' } }
-      }), {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Enter your password')
-    }))
+      }), { isStatusCode200, 'verify page content': r => (r.body as string).includes('Enter your password') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   let acceptNewTerms = false
   switch (userData.mfaOption) {
@@ -650,12 +536,9 @@ export function validateUser (): void {
           res.submitForm({
             fields: { password: credentials.currPassword },
             params: { tags: { name: 'B05_ValidateUser_04_AuthMFA_EnterPassword' } }
-          }), {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Enter the 6 digit security code shown in your authenticator app')
-        }))
+          }), { isStatusCode200, 'verify page content': r => (r.body as string).includes('Enter the 6 digit security code shown in your authenticator app') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       const totp = new TOTP(credentials.authAppKey)
       res = group('B05_ValidateUser_05_AuthMFA_EnterTOTP POST', () =>
@@ -666,10 +549,7 @@ export function validateUser (): void {
           })
           acceptNewTerms = (response.body as string).includes('terms of use update')
           return response
-        }, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => acceptNewTerms || (r.body as string).includes('Services you can use with GOV.UK One Login')
-        }))
+        }, { isStatusCode200, 'verify page content': r => acceptNewTerms || (r.body as string).includes('Services you can use with GOV.UK One Login') }))
       break
     }
     case 'SMS': {
@@ -678,10 +558,7 @@ export function validateUser (): void {
           res.submitForm({
             fields: { password: credentials.currPassword },
             params: { tags: { name: 'B05_ValidateUser_06_SMSMFA_EnterPassword' } }
-          }), {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Check your phone')
-        }))
+          }), { isStatusCode200, 'verify page content': r => (r.body as string).includes('Check your phone') }))
 
       sleep(1)
 
@@ -694,10 +571,7 @@ export function validateUser (): void {
           acceptNewTerms = (response.body as string).includes('terms of use update')
           return response
         },
-        {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => acceptNewTerms || (r.body as string).includes('Services you can use with GOV.UK One Login')
-        }))
+        { isStatusCode200, 'verify page content': r => acceptNewTerms || (r.body as string).includes('Services you can use with GOV.UK One Login') }))
       break
     }
   }
@@ -708,10 +582,7 @@ export function validateUser (): void {
         res.submitForm({
           fields: { termsAndConditionsResult: 'accept' },
           params: { tags: { name: 'B05_ValidateUser_08_AcceptTermsConditions' } }
-        }), {
-        'is status 200': r => r.status === 200,
-        'verify page content': r => (r.body as string).includes('Services you can use with GOV.UK One Login')
-      }))
+        }), { isStatusCode200, 'verify page content': r => (r.body as string).includes('Services you can use with GOV.UK One Login') }))
   }
 
   // Wait for end of the next 5 second window to synchronise requests across VUs
@@ -722,20 +593,14 @@ export function validateUser (): void {
       timeRequest(() => http.get(env.envURL + '/security', {
         tags: { name: 'B05_ValidateUser_09_ClickSecurityTab' }
       }),
-      {
-        'is status 200': r => r.status === 200,
-        'verify current email address': r => (r.body as string).includes(`${userData.email}`)
-      }))
+      { isStatusCode200, 'verify current email address': r => (r.body as string).includes(`${userData.email}`) }))
   }
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B05_ValidateUser_10_Logout POST', () =>
     timeRequest(() => http.get(env.envURL + '/sign-out', {
       tags: { name: 'B05_ValidateUser_10_Logout' }
     }),
-    {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('You have signed out')
-    }))
+    { isStatusCode200, 'verify page content': r => (r.body as string).includes('You have signed out') }))
 }

@@ -6,6 +6,7 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
 import { timeRequest } from '../common/utils/request/timing'
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 
 const profiles: ProfileList = {
   smoke: {
@@ -148,7 +149,7 @@ export function signUp (): void {
     timeRequest(() => http.get(env.rpStub, {
       tags: { name: 'B01_SignUp_01_LaunchRPStub' }
     }), {
-      'is status 200': r => r.status === 200,
+      isStatusCode200,
       'check cookies exist': () => {
         const jar = http.cookieJar()
         const cookies = jar.cookiesForURL(env.rpStub)
@@ -168,8 +169,7 @@ export function signUp (): void {
         params: { tags: { name: 'B01_SignUp_02_OIDCAuthRequest' } }
       }),
     {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Create a GOV.UK One Login or sign in')
+      isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in')
     }))
 
   sleep(1)
@@ -184,8 +184,7 @@ export function signUp (): void {
         params: { tags: { name: 'B01_SignUp_03_CreateOneLogin' } }
       }),
     {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Enter your email address')
+      isStatusCode200, ...pageContentCheck('Enter your email address')
     }))
 
   sleep(1)
@@ -197,8 +196,7 @@ export function signUp (): void {
         params: { tags: { name: 'B01_SignUp_04_EnterEmailAddress' } }
       }),
     {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Check your email')
+      isStatusCode200, ...pageContentCheck('Check your email')
     }))
 
   sleep(1)
@@ -212,8 +210,7 @@ export function signUp (): void {
         },
         params: { tags: { name: 'B01_SignUp_05_EnterOTP' } }
       }), {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Create your password')
+      isStatusCode200, ...pageContentCheck('Create your password')
     }))
 
   sleep(1)
@@ -227,8 +224,7 @@ export function signUp (): void {
         },
         params: { tags: { name: 'B01_SignUp_06_CreatePassword' } }
       }), {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Choose how to get security codes')
+      isStatusCode200, ...pageContentCheck('Choose how to get security codes')
     }))
 
   sleep(1)
@@ -241,8 +237,7 @@ export function signUp (): void {
             fields: { mfaOptions: mfaOption },
             params: { tags: { name: 'B01_SignUp_07_MFA_AuthApp' } }
           }), {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Set up an authenticator app')
+          isStatusCode200, ...pageContentCheck('Set up an authenticator app')
         }))
 
       secretKey = res.html().find("span[class*='secret-key-fragment']").text() ?? ''
@@ -255,8 +250,7 @@ export function signUp (): void {
             fields: { code: totp.generateTOTP() },
             params: { tags: { name: 'B01_SignUp_08_MFA_EnterTOTP' } }
           }), {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('You’ve created your GOV.UK One Login')
+          isStatusCode200, ...pageContentCheck('You’ve created your GOV.UK One Login')
         }))
       break
     }
@@ -267,8 +261,7 @@ export function signUp (): void {
             fields: { mfaOptions: mfaOption },
             params: { tags: { name: 'B01_SignUp_08_MFA_SMS' } }
           }), {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Enter your mobile phone number')
+          isStatusCode200, ...pageContentCheck('Enter your mobile phone number')
         }))
 
       sleep(1)
@@ -279,8 +272,7 @@ export function signUp (): void {
             fields: { phoneNumber },
             params: { tags: { name: 'B01_SignUp_09_MFA_EnterPhoneNum' } }
           }), {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Check your phone')
+          isStatusCode200, ...pageContentCheck('Check your phone')
         }))
 
       sleep(1)
@@ -291,8 +283,7 @@ export function signUp (): void {
             fields: { code: credentials.phoneOTP },
             params: { tags: { name: 'B01_SignUp_10_MFA_EnterSMSOTP' } }
           }), {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('You’ve created your GOV.UK One Login')
+          isStatusCode200, ...pageContentCheck('You’ve created your GOV.UK One Login')
         }))
       break
     }
@@ -304,8 +295,7 @@ export function signUp (): void {
     timeRequest(() => res.submitForm({
       params: { tags: { name: 'B01_SignUp_11_ContinueAccountCreated' } }
     }), {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('User information')
+      isStatusCode200, ...pageContentCheck('User information')
     }))
 
   // 25% of users logout
@@ -316,8 +306,7 @@ export function signUp (): void {
       timeRequest(() => res.submitForm({
         params: { tags: { name: 'B01_SignUp_12_Logout' } }
       }), {
-        'is status 200': r => r.status === 200,
-        'verify page content': r => (r.body as string).includes('Successfully signed out')
+        isStatusCode200, ...pageContentCheck('Successfully signed out')
       }))
   }
 }
@@ -330,7 +319,7 @@ export function signIn (): void {
     timeRequest(() => http.get(env.rpStub, {
       tags: { name: 'B01_SignIn_01_LaunchRPStub' }
     }), {
-      'is status 200': r => r.status === 200,
+      isStatusCode200,
       'check cookies exist': () => {
         const jar = http.cookieJar()
         const cookies = jar.cookiesForURL(env.rpStub)
@@ -349,8 +338,7 @@ export function signIn (): void {
         },
         params: { tags: { name: 'B01_SignIn_02_OIDCAuthRequest' } }
       }), {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Create a GOV.UK One Login or sign in')
+      isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in')
     }))
 
   sleep(1)
@@ -359,8 +347,7 @@ export function signIn (): void {
     timeRequest(() => res.submitForm({
       params: { tags: { name: 'B01_SignIn_03_ClickSignIn' } }
     }), {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Enter your email address to sign in to your GOV.UK One Login')
+      isStatusCode200, ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
     }))
 
   sleep(1)
@@ -371,8 +358,7 @@ export function signIn (): void {
         fields: { email: userData.email },
         params: { tags: { name: 'B01_SignIn_04_EnterEmailAddress' } }
       }), {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => (r.body as string).includes('Enter your password')
+      isStatusCode200, ...pageContentCheck('Enter your password')
     }))
 
   sleep(1)
@@ -386,8 +372,7 @@ export function signIn (): void {
             fields: { password: credentials.password },
             params: { tags: { name: 'B01_SignIn_05_AuthMFA_EnterPassword' } }
           }), {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Enter the 6 digit security code shown in your authenticator app')
+          isStatusCode200, ...pageContentCheck('Enter the 6 digit security code shown in your authenticator app')
         }))
 
       sleep(1)
@@ -402,7 +387,7 @@ export function signIn (): void {
           acceptNewTerms = (response.body as string).includes('terms of use update')
           return response
         }, {
-          'is status 200': r => r.status === 200,
+          isStatusCode200,
           'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
         }))
       break
@@ -414,8 +399,7 @@ export function signIn (): void {
             fields: { password: credentials.password },
             params: { tags: { name: 'B01_SignIn_07_SMSMFA_EnterPassword' } }
           }), {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => (r.body as string).includes('Check your phone')
+          isStatusCode200, ...pageContentCheck('Check your phone')
         }))
 
       sleep(1)
@@ -429,8 +413,7 @@ export function signIn (): void {
           acceptNewTerms = (response.body as string).includes('terms of use update')
           return response
         }, {
-          'is status 200': r => r.status === 200,
-          'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
+          isStatusCode200, 'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
         }))
       break
     }
@@ -443,8 +426,7 @@ export function signIn (): void {
           fields: { termsAndConditionsResult: 'accept' },
           params: { tags: { name: 'B01_SignIn_09_AcceptTermsConditions' } }
         }), {
-        'is status 200': r => r.status === 200,
-        'verify page content': r => (r.body as string).includes('User information')
+        isStatusCode200, ...pageContentCheck('User information')
       }))
   }
 
@@ -456,8 +438,7 @@ export function signIn (): void {
       timeRequest(() => res.submitForm({
         params: { tags: { name: 'B01_SignIn_10_Logout' } }
       }), {
-        'is status 200': r => r.status === 200,
-        'verify page content': r => (r.body as string).includes('Successfully signed out')
+        isStatusCode200, ...pageContentCheck('Successfully signed out')
       }))
   }
 }

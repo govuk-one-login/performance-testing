@@ -3,6 +3,7 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generateAuthRequest, generateF2FRequest, generateIPVRequest } from './requestGenerator/ipvrReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
+import { uuidv4 } from '../common/utils/jslib/index'
 
 const profiles: ProfileList = {
   smoke: {
@@ -115,17 +116,19 @@ const awsConfig = new AWSConfig({
 const sqs = new SQSClient(awsConfig)
 
 export function authEvent (): void {
-  const authPayload = generateAuthRequest()
-
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const signinJourneyID = uuidv4()
+  const authPayload = generateAuthRequest(userID, signinJourneyID)
   const authEventMessage = JSON.stringify(authPayload)
-
   sqs.sendMessage(env.sqs_queue, authEventMessage)
 }
 
 export function allEvents (): void {
-  const authPayload = generateAuthRequest()
-  const f2fPayload = generateF2FRequest()
-  const ipvPayload = generateIPVRequest()
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const signinJourneyID = uuidv4()
+  const authPayload = generateAuthRequest(userID, signinJourneyID)
+  const f2fPayload = generateF2FRequest(userID, signinJourneyID)
+  const ipvPayload = generateIPVRequest(userID, signinJourneyID)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(authPayload))
   sqs.sendMessage(env.sqs_queue, JSON.stringify(f2fPayload))
   sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))

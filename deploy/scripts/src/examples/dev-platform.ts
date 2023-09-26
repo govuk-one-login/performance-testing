@@ -1,6 +1,6 @@
-import http, { type Response } from 'k6/http'
+import http from 'k6/http'
 import { type Options } from 'k6/options'
-import { check, group, sleep } from 'k6'
+import { group, sleep } from 'k6'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { isStatusCode200 } from '../common/utils/checks/assertions'
 import { timeRequest } from '../common/utils/request/timing'

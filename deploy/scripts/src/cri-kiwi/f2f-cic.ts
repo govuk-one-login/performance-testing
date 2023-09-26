@@ -1,10 +1,12 @@
-import { sleep, group, fail } from 'k6'
+import { group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import execution from 'k6/execution'
 import { b64encode } from 'k6/encoding'
 import { timeRequest } from '../common/utils/request/timing'
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
@@ -102,7 +104,7 @@ export function CIC (): void {
       }),
     {
       'is status 201': (r) => r.status === 201,
-      'verify page content': (r) => (r.body as string).includes(b64encode('{"alg":"RSA', 'rawstd'))
+      ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
     }))
   const authorizeLocation = getAuthorizeauthorizeLocation(res)
   const clientId = getClientID(res)
@@ -111,11 +113,7 @@ export function CIC (): void {
     timeRequest(() => http.get(authorizeLocation, {
       tags: { name: 'B01_CIC_02_Authorize' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your name exactly as it appears on your photo ID')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your name exactly as it appears on your photo ID') }))
 
   res = group('B01_CIC_03_UserDetails POST', () =>
     timeRequest(() =>
@@ -127,13 +125,9 @@ export function CIC (): void {
         params: { tags: { name: 'B01_CIC_03_UserDetails' } },
         submitSelector: '#continue'
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Enter your date of birth')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your date of birth') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_CIC_04_UserBirthdate POST', () =>
     timeRequest(() =>
@@ -146,11 +140,7 @@ export function CIC (): void {
         params: { tags: { name: 'B01_CIC_04_UserBirthdate' } },
         submitSelector: '#continue'
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Confirm your details')
-    }))
+    { isStatusCode200, ...pageContentCheck('Confirm your details') }))
 
   res = group('B01_CIC_05_CheckDetails POST', () =>
     timeRequest(() =>
@@ -164,7 +154,7 @@ export function CIC (): void {
     }))
   const codeUrl = getCodeFromUrl(res.url)
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_CIC_06_SendAuthorizationCode POST', () =>
     timeRequest(() => http.post(env.CIC.target + '/token', {
@@ -174,14 +164,11 @@ export function CIC (): void {
     }, {
       tags: { name: 'B01_CIC_06_SendAuthorizationCode' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify response body': (r) => (r.body as string).includes('access_token')
-    }))
+    { isStatusCode200, 'verify response body': (r) => (r.body as string).includes('access_token') }))
 
   const accessToken = getAccessToken(res)
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   const authHeader = `Bearer ${accessToken}`
   const options = {
@@ -190,10 +177,7 @@ export function CIC (): void {
   }
   res = group('B01_CIC_07_SendBearerToken POST', () =>
     timeRequest(() => http.post(env.CIC.target + '/userinfo', {}, options),
-      {
-        'is status 200': (r) => r.status === 200,
-        'verify response body': (r) => (r.body as string).includes('credentialJWT')
-      }))
+      { isStatusCode200, 'verify response body': (r) => (r.body as string).includes('credentialJWT') }))
 }
 
 export function FaceToFace (): void {
@@ -216,7 +200,7 @@ export function FaceToFace (): void {
       }),
     {
       'is status 201': (r) => r.status === 201,
-      'verify page content': (r) => (r.body as string).includes(b64encode('{"alg":"RSA', 'rawstd'))
+      ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
     }))
   const authorizeLocation = getAuthorizeauthorizeLocation(res)
   const clientId = getClientID(res)
@@ -225,13 +209,9 @@ export function FaceToFace (): void {
     timeRequest(() => http.get(authorizeLocation, {
       tags: { name: 'B02_FaceToFace_02_Authorize' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('How to prove your identity at a Post Office')
-    }))
+    { isStatusCode200, ...pageContentCheck('How to prove your identity at a Post Office') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_FaceToFace_03_Continue POST', () =>
     timeRequest(() =>
@@ -239,13 +219,9 @@ export function FaceToFace (): void {
         params: { tags: { name: 'B02_FaceToFace_03_Continue' } },
         submitSelector: '#landingPageContinue'
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Choose which photo ID you can take to a Post Office')
-    }))
+    { isStatusCode200, ...pageContentCheck('Choose which photo ID you can take to a Post Office') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   switch (path) {
     case 'UKPassport':
@@ -257,12 +233,10 @@ export function FaceToFace (): void {
             params: { tags: { name: 'B02_FaceToFace_04_UKPassport_ChoosePhotoId' } }
           }),
         {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('When does your passport expire?')
+          isStatusCode200, ...pageContentCheck('When does your passport expire?')
         }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_05_UKPassport_PassportDetails POST', () =>
         timeRequest(() =>
@@ -275,11 +249,7 @@ export function FaceToFace (): void {
             params: { tags: { name: 'B02_FaceToFace_05_UKPassport_PassportDetails' } },
             submitSelector: '#continue'
           }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Find a Post Office where you can prove your identity')
-        }))
+        { isStatusCode200, ...pageContentCheck('Find a Post Office where you can prove your identity') }))
       break
     case 'NationalIDEEA':
       res = group('B02_FaceToFace_04_NationalIDEEA_ChoosePhotoId POST', () =>
@@ -288,13 +258,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_04_NationalIDEEA_ChoosePhotoId' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Does your national identity card have an expiry date?')
-        }))
+        { isStatusCode200, ...pageContentCheck('Does your national identity card have an expiry date?') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_05_NationalIDEEA_ExpiryOption POST', () =>
         timeRequest(() => res.submitForm({
@@ -302,13 +268,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_05_NationalIDEEA_ExpiryOption' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('When does your national identity card expire?')
-        }))
+        { isStatusCode200, ...pageContentCheck('When does your national identity card expire?') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_06_NationalIDEEA_Details POST', () =>
         timeRequest(() => res.submitForm({
@@ -320,13 +282,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_06_NationalIDEEA_Details' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Does your national identity card have your current address on it?')
-        }))
+        { isStatusCode200, ...pageContentCheck('Does your national identity card have your current address on it?') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_07_NationalIDEEA_CurrentAddress POST', () =>
         timeRequest(() => res.submitForm({
@@ -334,13 +292,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_07_NationalIDEEA_CurrentAddress' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Select which country your national identity card is from')
-        }))
+        { isStatusCode200, ...pageContentCheck('Select which country your national identity card is from') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_08_NationalIDEEA_WhichCountry POST', () =>
         timeRequest(() => res.submitForm({
@@ -348,11 +302,7 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_08_NationalIDEEA_WhichCountry' } }, // pragma: allowlist secret
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Find a Post Office where you can prove your identity')
-        }))
+        { isStatusCode200, ...pageContentCheck('Find a Post Office where you can prove your identity') }))
       break
     case 'EU-DL':
       res = group('B02_FaceToFace_04_EUDL_ChoosePhotoId POST', () =>
@@ -361,13 +311,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_04_EUDL_ChoosePhotoId' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Does your driving licence have an expiry date?')
-        }))
+        { isStatusCode200, ...pageContentCheck('Does your driving licence have an expiry date?') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_05_EUDL_ExpiryOption POST', () =>
         timeRequest(() => res.submitForm({
@@ -375,12 +321,8 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_05_EUDL_ExpiryOption' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('When does your driving licence expire?')
-        }))
-      sleep(Math.random() * 3)
+        { isStatusCode200, ...pageContentCheck('When does your driving licence expire?') }))
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_06_EUDL_Details POST', () =>
         timeRequest(() => res.submitForm({
@@ -392,13 +334,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_06_EUDL_Details' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Does your driving licence have your current address on it?')
-        }))
+        { isStatusCode200, ...pageContentCheck('Does your driving licence have your current address on it?') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_07_EUDL_CurrentAddress POST', () =>
         timeRequest(() => res.submitForm({
@@ -406,13 +344,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_07_EUDL_CurrentAddress' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Select which country your driving licence is from')
-        }))
+        { isStatusCode200, ...pageContentCheck('Select which country your driving licence is from') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_08_EUDL_WhichCountry POST', () =>
         timeRequest(() => res.submitForm({
@@ -420,11 +354,7 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_08_EUDL_WhichCountry' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Find a Post Office where you can prove your identity')
-        }))
+        { isStatusCode200, ...pageContentCheck('Find a Post Office where you can prove your identity') }))
       break
     case 'Non-UKPassport':
       res = group('B02_FaceToFace_04_NonUKPassport_ChoosePhotoId POST', () =>
@@ -433,13 +363,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_04_NonUKPassport_ChoosePhotoId' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Does your passport have an expiry date?')
-        }))
+        { isStatusCode200, ...pageContentCheck('Does your passport have an expiry date?') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_05_NonUKPassport_ExpiryOption POST', () =>
         timeRequest(() => res.submitForm({
@@ -447,13 +373,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_05_NonUKPassport_ExpiryOption' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('When does your passport expire?')
-        }))
+        { isStatusCode200, ...pageContentCheck('When does your passport expire?') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_06_NonUKPassport_Details POST', () =>
         timeRequest(() => res.submitForm({
@@ -465,13 +387,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_06_NonUKPassport_Details' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Select which country your passport is from')
-        }))
+        { isStatusCode200, ...pageContentCheck('Select which country your passport is from') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_07_NonUKPassport_WhichCountry POST', () =>
         timeRequest(() => res.submitForm({
@@ -479,11 +397,7 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_07_NonUKPassport_WhichCountry' } }, // pragma: allowlist secret
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Find a Post Office where you can prove your identity')
-        }))
+        { isStatusCode200, ...pageContentCheck('Find a Post Office where you can prove your identity') }))
       break
     case 'BRP':
       res = group('B02_FaceToFace_04_BRP_ChoosePhotoId POST', () =>
@@ -492,13 +406,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_04_BRP_ChoosePhotoId' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('When does your biometric residence permit (BRP) expire?')
-        }))
+        { isStatusCode200, ...pageContentCheck('When does your biometric residence permit (BRP) expire?') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_05_BRP_Details POST', () =>
         timeRequest(() => res.submitForm({
@@ -510,11 +420,7 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_05_BRP_Details' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Find a Post Office where you can prove your identity')
-        }))
+        { isStatusCode200, ...pageContentCheck('Find a Post Office where you can prove your identity') }))
       break
     case 'UKDL':
       res = group('B02_FaceToFace_04_UKDL_ChoosePhotoId POST', () =>
@@ -523,13 +429,9 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_04_UKDL_ChoosePhotoId' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('When does your driving licence expire?')
-        }))
+        { isStatusCode200, ...pageContentCheck('When does your driving licence expire?') }))
 
-      sleep(Math.random() * 3)
+      sleepBetween(1, 3)
 
       res = group('B02_FaceToFace_05_UKDL_Details POST', () =>
         timeRequest(() => res.submitForm({
@@ -541,11 +443,7 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_05_UKDL_Details' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Does your driving licence have your current address on it?')
-        }))
+        { isStatusCode200, ...pageContentCheck('Does your driving licence have your current address on it?') }))
 
       res = group('B02_FaceToFace_06_UKDL_CurrentAddress POST', () =>
         timeRequest(() => res.submitForm({
@@ -553,17 +451,13 @@ export function FaceToFace (): void {
           params: { tags: { name: 'B02_FaceToFace_06_UKDL_CurrentAddress' } },
           submitSelector: '#continue'
         }),
-        {
-          'is status 200': (r) => r.status === 200,
-          'verify page content': (r) =>
-            (r.body as string).includes('Find a Post Office where you can prove your identity')
-        }))
+        { isStatusCode200, ...pageContentCheck('Find a Post Office where you can prove your identity') }))
       break
     default:
       fail('Invalid path')
   }
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_FaceToFace_08_FindPostOffice POST', () =>
     timeRequest(() => res.submitForm({
@@ -571,13 +465,9 @@ export function FaceToFace (): void {
       params: { tags: { name: 'B02_FaceToFace_08_FindPostOffice' } },
       submitSelector: '#continue'
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Choose a Post Office where you can prove your identity')
-    }))
+    { isStatusCode200, ...pageContentCheck('Choose a Post Office where you can prove your identity') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_FaceToFace_09_ChoosePostOffice POST', () =>
     timeRequest(() => res.submitForm({
@@ -585,13 +475,9 @@ export function FaceToFace (): void {
       params: { tags: { name: 'B02_FaceToFace_09_ChoosePostOffice' } },
       submitSelector: '#continue'
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) =>
-        (r.body as string).includes('Check your answers')
-    }))
+    { isStatusCode200, ...pageContentCheck('Check your answers') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_FaceToFace_10_CheckDetails POST', () =>
     timeRequest(() => res.submitForm({
@@ -604,23 +490,20 @@ export function FaceToFace (): void {
     }))
   const codeUrl = getCodeFromUrl(res.url)
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_FaceToFace_11_SendAuthorizationCode POST', () =>
     timeRequest(() => http.post(env.F2F.target + '/token', {
       grant_type: 'authorization_code',
       code: codeUrl,
-      redirect_uri: env.F2F.ipvStub + '/redirect'
+      redirect_uri: env.F2F.ipvStub + '/redirect?id=f2f'
     }, {
       tags: { name: 'B02_FaceToFace_11_SendAuthorizationCode' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify response body': (r) => (r.body as string).includes('access_token')
-    }))
+    { isStatusCode200, ...pageContentCheck('access_token') }))
   const accessToken = getAccessToken(res)
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   const authHeader = `Bearer ${accessToken}`
   const options = {
@@ -633,7 +516,7 @@ export function FaceToFace (): void {
     timeRequest(() => http.post(env.F2F.target + '/userinfo', {}, options),
       {
         'is status 202': (r) => r.status === 202,
-        'verify response body': (r) => (r.body as string).includes('sub')
+        ...pageContentCheck('sub')
       }))
 }
 

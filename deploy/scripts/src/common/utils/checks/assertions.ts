@@ -2,7 +2,7 @@ import { type Response } from 'k6/http'
 import { type Checkers } from 'k6'
 
 /**
- * Function to check that a `Response` has status code 200
+ * Function to check that a `Response` has status code 200/OK
  * @param response - `Response` to check that status code of
  * @returns `true` if status code is `200`, `false` otherwise
  * @example
@@ -16,7 +16,21 @@ export function isStatusCode200 (response: Response): boolean {
 }
 
 /**
- * Function to check that a `Response` has status code 302
+ * Function to check that a `Response` has status code 201/Created
+ * @param response - `Response` to check that status code of
+ * @returns `true` if status code is `201`, `false` otherwise
+ * @example
+ * const res = timeRequest(
+ *   () => http.get(url),
+ *   { isStatusCode201 }
+ * )
+ */
+export function isStatusCode201 (response: Response): boolean {
+  return response.status === 201
+}
+
+/**
+ * Function to check that a `Response` has status code 302/Found
  * @param response - `Response` to check that status code of
  * @returns `true` if status code is `302`, `false` otherwise
  * @example

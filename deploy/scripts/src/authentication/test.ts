@@ -168,9 +168,7 @@ export function signUp (): void {
         },
         params: { tags: { name: 'B01_SignUp_02_OIDCAuthRequest' } }
       }),
-    {
-      isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in')
-    }))
+    { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') }))
 
   sleep(1)
 
@@ -183,9 +181,7 @@ export function signUp (): void {
         },
         params: { tags: { name: 'B01_SignUp_03_CreateOneLogin' } }
       }),
-    {
-      isStatusCode200, ...pageContentCheck('Enter your email address')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your email address') }))
 
   sleep(1)
 
@@ -195,9 +191,7 @@ export function signUp (): void {
         fields: { email: testEmail },
         params: { tags: { name: 'B01_SignUp_04_EnterEmailAddress' } }
       }),
-    {
-      isStatusCode200, ...pageContentCheck('Check your email')
-    }))
+    { isStatusCode200, ...pageContentCheck('Check your email') }))
 
   sleep(1)
 
@@ -209,9 +203,7 @@ export function signUp (): void {
           code: credentials.emailOTP
         },
         params: { tags: { name: 'B01_SignUp_05_EnterOTP' } }
-      }), {
-      isStatusCode200, ...pageContentCheck('Create your password')
-    }))
+      }), { isStatusCode200, ...pageContentCheck('Create your password') }))
 
   sleep(1)
 
@@ -223,9 +215,7 @@ export function signUp (): void {
           'confirm-password': credentials.password
         },
         params: { tags: { name: 'B01_SignUp_06_CreatePassword' } }
-      }), {
-      isStatusCode200, ...pageContentCheck('Choose how to get security codes')
-    }))
+      }), { isStatusCode200, ...pageContentCheck('Choose how to get security codes') }))
 
   sleep(1)
 
@@ -236,9 +226,7 @@ export function signUp (): void {
           res.submitForm({
             fields: { mfaOptions: mfaOption },
             params: { tags: { name: 'B01_SignUp_07_MFA_AuthApp' } }
-          }), {
-          isStatusCode200, ...pageContentCheck('Set up an authenticator app')
-        }))
+          }), { isStatusCode200, ...pageContentCheck('Set up an authenticator app') }))
 
       secretKey = res.html().find("span[class*='secret-key-fragment']").text() ?? ''
       totp = new TOTP(secretKey)
@@ -249,9 +237,7 @@ export function signUp (): void {
           res.submitForm({
             fields: { code: totp.generateTOTP() },
             params: { tags: { name: 'B01_SignUp_08_MFA_EnterTOTP' } }
-          }), {
-          isStatusCode200, ...pageContentCheck('You’ve created your GOV.UK One Login')
-        }))
+          }), { isStatusCode200, ...pageContentCheck('You’ve created your GOV.UK One Login') }))
       break
     }
     case 'SMS': {
@@ -260,9 +246,7 @@ export function signUp (): void {
           res.submitForm({
             fields: { mfaOptions: mfaOption },
             params: { tags: { name: 'B01_SignUp_08_MFA_SMS' } }
-          }), {
-          isStatusCode200, ...pageContentCheck('Enter your mobile phone number')
-        }))
+          }), { isStatusCode200, ...pageContentCheck('Enter your mobile phone number') }))
 
       sleep(1)
 
@@ -271,9 +255,7 @@ export function signUp (): void {
           res.submitForm({
             fields: { phoneNumber },
             params: { tags: { name: 'B01_SignUp_09_MFA_EnterPhoneNum' } }
-          }), {
-          isStatusCode200, ...pageContentCheck('Check your phone')
-        }))
+          }), { isStatusCode200, ...pageContentCheck('Check your phone') }))
 
       sleep(1)
 
@@ -282,9 +264,7 @@ export function signUp (): void {
           res.submitForm({
             fields: { code: credentials.phoneOTP },
             params: { tags: { name: 'B01_SignUp_10_MFA_EnterSMSOTP' } }
-          }), {
-          isStatusCode200, ...pageContentCheck('You’ve created your GOV.UK One Login')
-        }))
+          }), { isStatusCode200, ...pageContentCheck('You’ve created your GOV.UK One Login') }))
       break
     }
   }
@@ -294,9 +274,7 @@ export function signUp (): void {
   res = group('B01_SignUp_11_ContinueAccountCreated POST', () =>
     timeRequest(() => res.submitForm({
       params: { tags: { name: 'B01_SignUp_11_ContinueAccountCreated' } }
-    }), {
-      isStatusCode200, ...pageContentCheck('User information')
-    }))
+    }), { isStatusCode200, ...pageContentCheck('User information') }))
 
   // 25% of users logout
   if (Math.random() <= 0.25) {
@@ -305,9 +283,7 @@ export function signUp (): void {
     res = group('B01_SignUp_12_Logout', () =>
       timeRequest(() => res.submitForm({
         params: { tags: { name: 'B01_SignUp_12_Logout' } }
-      }), {
-        isStatusCode200, ...pageContentCheck('Successfully signed out')
-      }))
+      }), { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
   }
 }
 
@@ -337,18 +313,14 @@ export function signIn (): void {
           lng: ''
         },
         params: { tags: { name: 'B01_SignIn_02_OIDCAuthRequest' } }
-      }), {
-      isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in')
-    }))
+      }), { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') }))
 
   sleep(1)
 
   res = group('B01_SignIn_03_ClickSignIn POST', () =>
     timeRequest(() => res.submitForm({
       params: { tags: { name: 'B01_SignIn_03_ClickSignIn' } }
-    }), {
-      isStatusCode200, ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
-    }))
+    }), { isStatusCode200, ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login') }))
 
   sleep(1)
 
@@ -357,9 +329,7 @@ export function signIn (): void {
       res.submitForm({
         fields: { email: userData.email },
         params: { tags: { name: 'B01_SignIn_04_EnterEmailAddress' } }
-      }), {
-      isStatusCode200, ...pageContentCheck('Enter your password')
-    }))
+      }), { isStatusCode200, ...pageContentCheck('Enter your password') }))
 
   sleep(1)
 
@@ -371,9 +341,7 @@ export function signIn (): void {
           res.submitForm({
             fields: { password: credentials.password },
             params: { tags: { name: 'B01_SignIn_05_AuthMFA_EnterPassword' } }
-          }), {
-          isStatusCode200, ...pageContentCheck('Enter the 6 digit security code shown in your authenticator app')
-        }))
+          }), { isStatusCode200, ...pageContentCheck('Enter the 6 digit security code shown in your authenticator app') }))
 
       sleep(1)
 
@@ -398,9 +366,7 @@ export function signIn (): void {
           res.submitForm({
             fields: { password: credentials.password },
             params: { tags: { name: 'B01_SignIn_07_SMSMFA_EnterPassword' } }
-          }), {
-          isStatusCode200, ...pageContentCheck('Check your phone')
-        }))
+          }), { isStatusCode200, ...pageContentCheck('Check your phone') }))
 
       sleep(1)
 
@@ -412,9 +378,7 @@ export function signIn (): void {
           })
           acceptNewTerms = (response.body as string).includes('terms of use update')
           return response
-        }, {
-          isStatusCode200, 'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
-        }))
+        }, { isStatusCode200, 'verify page content': r => acceptNewTerms || (r.body as string).includes('User information') }))
       break
     }
   }
@@ -425,9 +389,7 @@ export function signIn (): void {
         res.submitForm({
           fields: { termsAndConditionsResult: 'accept' },
           params: { tags: { name: 'B01_SignIn_09_AcceptTermsConditions' } }
-        }), {
-        isStatusCode200, ...pageContentCheck('User information')
-      }))
+        }), { isStatusCode200, ...pageContentCheck('User information') }))
   }
 
   // 25% of users logout
@@ -437,8 +399,6 @@ export function signIn (): void {
     res = group('B01_SignIn_10_Logout POST', () =>
       timeRequest(() => res.submitForm({
         params: { tags: { name: 'B01_SignIn_10_Logout' } }
-      }), {
-        isStatusCode200, ...pageContentCheck('Successfully signed out')
-      }))
+      }), { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
   }
 }

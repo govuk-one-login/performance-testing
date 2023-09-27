@@ -435,12 +435,9 @@ Resources:
             build:
               commands:
                 - echo "Run performance test"
-                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out statsd --out json=$JSON_RESULTS
+                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out statsd
             post_build:
               commands:
-                - echo "Uploading test results to s3"
-                - S3_LOCATION=s3://${S3_BUCKET}/${TEST_SCRIPT%.*}/$(date +%F/%T)
-                - aws s3 cp $JSON_RESULTS ${S3_LOCATION}/$JSON_RESULTS
                 - echo "Shutting down OpenTelemetry collector"
                 - sleep 120
                 - OTEL_PID=$(pgrep /otel/otelcol-contrib)

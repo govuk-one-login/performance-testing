@@ -4,7 +4,7 @@ export interface AUTH_IPV_AUTHORISATION_REQUESTED {
   clientLandingPageUrl: string
   event_name: string
   rp_name: string
-  timestamp: string
+  timestamp: number
   timestamp_formatted: string
   user: {
     user_id: string
@@ -19,7 +19,7 @@ export interface F2F_YOTI_START {
   clientLandingPageUrl: string
   event_name: string
   rp_name: string
-  timestamp: string
+  timestamp: number
   timestamp_formatted: string
   user: {
     user_id: string
@@ -33,7 +33,7 @@ export interface IPV_F2F_CRI_VC_CONSUMED {
   clientLandingPageUrl: string
   event_name: string
   rp_name: string
-  timestamp: string
+  timestamp: number
   timestamp_formatted: string
   user: {
     user_id: string

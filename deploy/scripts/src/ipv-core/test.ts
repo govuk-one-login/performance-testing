@@ -121,7 +121,7 @@ export function passport (): void {
     }),
     { isStatusCode200, ...pageContentCheck('Enter userId manually') }))
 
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
 
   res = group('B01_Passport_02_GoToFullJourneyRoute GET', () =>
     timeRequest(() => {
@@ -131,7 +131,7 @@ export function passport (): void {
     },
     { isStatusCode200, ...pageContentCheck('Tell us if you have one of the following types of photo ID') }))
 
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
 
   group('B01_Passport_03_ClickContinueStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -148,7 +148,7 @@ export function passport (): void {
     { isStatusCode200, ...pageContentCheck('DOC Checking App (Stub)') })
   })
 
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
 
   group('B01_Passport_04_DCMAWContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -168,7 +168,7 @@ export function passport (): void {
     { isStatusCode200, ...pageContentCheck('Enter your UK passport details and answer security questions online') })
   })
 
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
 
   group('B01_Passport_05_ContinueOnPYIStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -183,7 +183,7 @@ export function passport (): void {
       { isStatusCode200, ...pageContentCheck('UK Passport (Stub)') })
   })
 
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
 
   group('B01_Passport_06_PassportDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -211,7 +211,7 @@ export function passport (): void {
     { isStatusCode200, ...pageContentCheck('Address (Stub)') })
   })
 
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
 
   group('B01_Passport_07_AddrDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -234,7 +234,7 @@ export function passport (): void {
     { isStatusCode200, ...pageContentCheck('Fraud Check (Stub)') })
   })
 
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
 
   group('B01_Passport_08_FraudDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -256,7 +256,7 @@ export function passport (): void {
     { isStatusCode200, ...pageContentCheck('Answer security questions') })
   })
 
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
 
   group('B01_Passport_09_PreKBVTransition POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -272,7 +272,7 @@ export function passport (): void {
     { isStatusCode200, ...pageContentCheck('Knowledge Based Verification (Stub)') })
   })
 
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
 
   group('B01_Passport_10_KBVDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -294,7 +294,7 @@ export function passport (): void {
     { isStatusCode200, ...pageContentCheck('You’ve successfully proved your identity') })
   })
 
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
 
   group('B01_Passport_11_ContinuePYISuccessPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -320,7 +320,7 @@ export function drivingLicence (): void {
     }),
     { isStatusCode200, ...pageContentCheck('Enter userId manually') }))
 
-  sleepBetween(1, 3)
+  sleepBetween(0.5, 1)
 
   res = group('B02_DrivingLicence_02_SelectUserIDContinue GET', () =>
     timeRequest(() => {
@@ -330,7 +330,7 @@ export function drivingLicence (): void {
     },
     { isStatusCode200, ...pageContentCheck('Tell us if you have one of the following types of photo ID') }))
 
-  sleepBetween(1, 3)
+  sleepBetween(0.5, 1)
 
   group('B02_DrivingLicence_03_ContinueStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -347,7 +347,7 @@ export function drivingLicence (): void {
     { isStatusCode200, ...pageContentCheck('DOC Checking App (Stub)') })
   })
 
-  sleepBetween(1, 3)
+  sleepBetween(0.5, 1)
 
   group('B02_DrivingLicence_04_DCMAWContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -369,7 +369,7 @@ export function drivingLicence (): void {
     { isStatusCode200, ...pageContentCheck('Enter your UK photocard driving licence details and answer security questions online') })
   })
 
-  sleepBetween(1, 3)
+  sleepBetween(0.5, 1)
 
   group('B02_DrivingLicence_05_ContinueOnPYIStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -386,7 +386,7 @@ export function drivingLicence (): void {
     { isStatusCode200, ...pageContentCheck('Driving Licence (Stub)') })
   })
 
-  sleepBetween(1, 3)
+  sleepBetween(0.5, 1)
 
   group('B02_DrivingLicence_06_DrivingLicenceDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -413,7 +413,7 @@ export function drivingLicence (): void {
     { isStatusCode200, ...pageContentCheck('Address (Stub)') })
   })
 
-  sleepBetween(1, 3)
+  sleepBetween(0.5, 1)
 
   group('B02_DrivingLicence_07_AddrDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -435,7 +435,7 @@ export function drivingLicence (): void {
     { isStatusCode200, ...pageContentCheck('Fraud Check (Stub)') })
   })
 
-  sleepBetween(1, 3)
+  sleepBetween(0.5, 1)
 
   group('B02_DrivingLicence_08_FraudDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -458,7 +458,7 @@ export function drivingLicence (): void {
     { isStatusCode200, ...pageContentCheck('Answer security questions') })
   })
 
-  sleepBetween(1, 3)
+  sleepBetween(0.5, 1)
 
   group('B02_DrivingLicence_09_PreKBVTransition POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -474,7 +474,7 @@ export function drivingLicence (): void {
     { isStatusCode200, ...pageContentCheck('Knowledge Based Verification (Stub)') })
   })
 
-  sleepBetween(1, 3)
+  sleepBetween(0.5, 1)
 
   group('B02_DrivingLicence_10_KBVDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -496,7 +496,7 @@ export function drivingLicence (): void {
     { isStatusCode200, ...pageContentCheck('Continue to the service you want to use') })
   })
 
-  sleepBetween(1, 3)
+  sleepBetween(0.5, 1)
 
   group('B02_DrivingLicence_11_ContinueDrivingLicenceSuccessPage POST', () => {
     res = timeRequest(() => res.submitForm({

@@ -369,7 +369,7 @@ export function drivingLicence (): void {
     { isStatusCode200, ...pageContentCheck('Enter your UK photocard driving licence details and answer security questions online') })
   })
 
-  sleep(Math.random() * 1)
+  sleepBetween(1, 3)
 
   group('B02_DrivingLicence_05_ContinueOnPYIStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -386,7 +386,7 @@ export function drivingLicence (): void {
     { isStatusCode200, ...pageContentCheck('Driving Licence (Stub)') })
   })
 
-  sleep(Math.random() * 1)
+  sleepBetween(1, 3)
 
   group('B02_DrivingLicence_06_DrivingLicenceDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({

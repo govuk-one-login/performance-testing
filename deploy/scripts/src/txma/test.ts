@@ -35,9 +35,9 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 350,
+      maxVUs: 300,
       stages: [
-        { target: 10, duration: '10m' } // Ramp up to 10 iterations per second in 10 minutes
+        { target: 30, duration: '10m' } // Ramp up to 10 iterations per second in 10 minutes
       ],
       exec: 'sendEvent'
     },
@@ -46,9 +46,9 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 700,
+      maxVUs: 1000,
       stages: [
-        { target: 20, duration: '10m' } // Ramp up to 20 iterations per second in 10 minutes
+        { target: 100, duration: '10m' } // Ramp up to 20 iterations per second in 10 minutes
       ],
       exec: 'sendEvent'
     },
@@ -59,7 +59,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1500,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 500, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
       ],
       exec: 'sendEvent'
     },
@@ -68,9 +68,42 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 2000,
       stages: [
-        { target: 30, duration: '60m' } // Ramp up to 30 iterations per second in 60 minutes
+        { target: 1000, duration: '10m' } // Ramp up to 30 iterations per second in 60 minutes
+      ],
+      exec: 'sendEvent'
+    },
+    sendEventLoadTest5: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 3000,
+      stages: [
+        { target: 1500, duration: '10m' } // Ramp up to 30 iterations per second in 60 minutes
+      ],
+      exec: 'sendEvent'
+    },
+    sendEventLoadTest6: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 3000,
+      stages: [
+        { target: 2000, duration: '10m' } // Ramp up to 30 iterations per second in 60 minutes
+      ],
+      exec: 'sendEvent'
+    },
+    sendEventLoadTest7: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 3000,
+      stages: [
+        { target: 2000, duration: '60m' } // Ramp up to 30 iterations per second in 60 minutes
       ],
       exec: 'sendEvent'
     }
@@ -117,8 +150,4 @@ export function sendEvent (): void {
 export function sendEventDebug (): void {
   const messageBody = eventData.payload.replace('UUID', uuidv4())
   sqs.sendMessage(env.sqs_queue, messageBody)
-  console.log('1 === debug === env.sqs_queue', env.sqs_queue)
-  console.log('2 === debug === awsConfig', awsConfig)
-  console.log('3 === debug === payload', eventData.payload)
-  console.log('4 === debug === messageBody', messageBody)
 }

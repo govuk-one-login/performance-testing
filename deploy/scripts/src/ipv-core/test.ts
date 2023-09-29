@@ -2,7 +2,7 @@ import { sleep, group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
-import { getStaticResources } from '../common/utils/request/static'
+// import { getStaticResources } from '../common/utils/request/static'
 import { timeRequest } from '../common/utils/request/timing'
 import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
 import { addressPayloadDL, kbvPayloaDL, fraudPayloadDL, drivingLicencePayload } from './data/drivingLicenceData'
@@ -66,7 +66,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1000,
-      maxVUs: 7500,
+      maxVUs: 3000,
       stages: [
         { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
         { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
@@ -79,7 +79,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1000,
-      maxVUs: 5000,
+      maxVUs: 3000,
       stages: [
         { target: 30, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
         { target: 30, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
@@ -106,8 +106,8 @@ export function setup (): void {
 
 const env = {
   orchStubEndPoint: __ENV.IDENTITY_ORCH_STUB_URL,
-  ipvCoreURL: __ENV.IDENTITY_CORE_URL,
-  staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
+  ipvCoreURL: __ENV.IDENTITY_CORE_URL
+  // staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
 }
 
 export function passport (): void {
@@ -122,12 +122,12 @@ export function passport (): void {
       'verify page content': (r) => (r.body as string).includes('Enter userId manually')
     }))
 
-  sleep(Math.random() * 2)
+  sleep(Math.random() * 1)
 
   res = group('B01_Passport_02_GoToFullJourneyRoute GET', () =>
     timeRequest(() => {
       const response = http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=', { tags: { name: 'B01_Passport_02_GoToFullJourneyRoute' } })
-      if (env.staticResources) getStaticResources(response)
+      // if (env.staticResources) getStaticResources(response)
       return response
     },
     {
@@ -135,7 +135,7 @@ export function passport (): void {
       'verify page content': (r) => (r.body as string).includes('Tell us if you have one of the following types of photo ID')
     }))
 
-  sleep(Math.random() * 2)
+  sleep(Math.random() * 1)
 
   group('B01_Passport_03_ClickContinueStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -157,7 +157,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 2)
+  sleep(Math.random() * 1)
 
   group('B01_Passport_04_DCMAWContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -182,7 +182,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 2)
+  sleep(Math.random() * 1)
 
   group('B01_Passport_05_ContinueOnPYIStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -202,7 +202,7 @@ export function passport (): void {
       })
   })
 
-  sleep(Math.random() * 2)
+  sleep(Math.random() * 1)
 
   group('B01_Passport_06_PassportDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -237,7 +237,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 2)
+  sleep(Math.random() * 1)
 
   group('B01_Passport_07_AddrDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -267,7 +267,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 2)
+  sleep(Math.random() * 1)
 
   group('B01_Passport_08_FraudDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -285,7 +285,7 @@ export function passport (): void {
     })
     res = timeRequest(() => {
       const response = http.get(res.headers.Location, { tags: { name: 'B01_Passport_08_FraudDataContinue_02_CoreCall' } })
-      if (env.staticResources) getStaticResources(response)
+      // if (env.staticResources) getStaticResources(response)
       return response
     },
     {
@@ -294,7 +294,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 2)
+  sleep(Math.random() * 1)
 
   group('B01_Passport_09_PreKBVTransition POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -315,7 +315,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 2)
+  sleep(Math.random() * 1)
 
   group('B01_Passport_10_KBVDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -333,7 +333,7 @@ export function passport (): void {
     })
     res = timeRequest(() => {
       const response = http.get(res.headers.Location, { tags: { name: 'B01_Passport_10_KBVDataContinue_02_CoreCall' } })
-      if (env.staticResources) getStaticResources(response)
+      // if (env.staticResources) getStaticResources(response)
       return response
     },
     {
@@ -342,7 +342,7 @@ export function passport (): void {
     })
   })
 
-  sleep(Math.random() * 2)
+  sleep(Math.random() * 1)
 
   group('B01_Passport_11_ContinuePYISuccessPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -376,12 +376,12 @@ export function drivingLicence (): void {
       'verify page content': (r) => (r.body as string).includes('Enter userId manually')
     }))
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 1)
 
   res = group('B02_DrivingLicence_02_SelectUserIDContinue GET', () =>
     timeRequest(() => {
       const response = http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=', { tags: { name: 'B02_DrivingLicence_02_SelectUserIDContinue' } })
-      if (env.staticResources) getStaticResources(response)
+      // if (env.staticResources) getStaticResources(response)
       return response
     },
     {
@@ -389,7 +389,7 @@ export function drivingLicence (): void {
       'verify page content': (r) => (r.body as string).includes('Tell us if you have one of the following types of photo ID')
     }))
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 1)
 
   group('B02_DrivingLicence_03_ContinueStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -411,7 +411,7 @@ export function drivingLicence (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 1)
 
   group('B02_DrivingLicence_04_DCMAWContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -429,7 +429,7 @@ export function drivingLicence (): void {
     })
     res = timeRequest(() => {
       const response = http.get(env.ipvCoreURL + res.headers.Location, { tags: { name: 'B02_DrivingLicence_04_DCMAWContinue_02_CoreCall' } })
-      if (env.staticResources) getStaticResources(response)
+      // if (env.staticResources) getStaticResources(response)
       return response
     },
     {
@@ -437,6 +437,8 @@ export function drivingLicence (): void {
       'verify page content': (r) => (r.body as string).includes('Enter your UK photocard driving licence details and answer security questions online')
     })
   })
+
+  sleep(Math.random() * 1)
 
   group('B02_DrivingLicence_05_ContinueOnPYIStartPage POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -457,6 +459,8 @@ export function drivingLicence (): void {
       'verify page content': (r) => (r.body as string).includes('Driving Licence (Stub)')
     })
   })
+
+  sleep(Math.random() * 1)
 
   group('B02_DrivingLicence_06_DrivingLicenceDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -490,7 +494,7 @@ export function drivingLicence (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 1)
 
   group('B02_DrivingLicence_07_AddrDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -519,7 +523,7 @@ export function drivingLicence (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 1)
 
   group('B02_DrivingLicence_08_FraudDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -538,7 +542,7 @@ export function drivingLicence (): void {
     })
     res = timeRequest(() => {
       const response = http.get(res.headers.Location, { tags: { name: 'B02_DrivingLicence_08_FraudDataCont_02_CoreCall' } })
-      if (env.staticResources) getStaticResources(response)
+      // if (env.staticResources) getStaticResources(response)
       return response
     },
     {
@@ -547,7 +551,7 @@ export function drivingLicence (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 1)
 
   group('B02_DrivingLicence_09_PreKBVTransition POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -568,7 +572,7 @@ export function drivingLicence (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 1)
 
   group('B02_DrivingLicence_10_KBVDataContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -586,7 +590,7 @@ export function drivingLicence (): void {
     })
     res = timeRequest(() => {
       const response = http.get(res.headers.Location, { tags: { name: 'B02_DrivingLicence_10_KBVDataContinue_02_CoreCall' } })
-      if (env.staticResources) getStaticResources(response)
+      // if (env.staticResources) getStaticResources(response)
       return response
     },
     {
@@ -595,7 +599,7 @@ export function drivingLicence (): void {
     })
   })
 
-  sleep(Math.random() * 3)
+  sleep(Math.random() * 1)
 
   group('B02_DrivingLicence_11_ContinueDrivingLicenceSuccessPage POST', () => {
     res = timeRequest(() => res.submitForm({

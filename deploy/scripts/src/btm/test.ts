@@ -2,6 +2,7 @@ import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { uuidv4, randomIntBetween } from '../common/utils/jslib/index'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
+import { type AssumeRoleOutput } from '../common/utils/aws/types'
 
 const profiles: ProfileList = {
   smoke: {
@@ -196,12 +197,14 @@ const env = {
   sqs_queue: __ENV.DATA_BTM_SQS
 }
 
+const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
-  region: __ENV.DATA_BTM_AWS_REGION,
-  accessKeyId: __ENV.DATA_BTM_AWS_ACCESS_KEY_ID,
-  secretAccessKey: __ENV.DATA_BTM_AWS_SECRET_ACCESS_KEY,
-  sessionToken: __ENV.DATA_BTM_AWS_SESSION_TOKEN
+  region: __ENV.AWS_REGION,
+  accessKeyId: credentials.AccessKeyId,
+  secretAccessKey: credentials.SecretAccessKey,
+  sessionToken: credentials.SessionToken
 })
+const sqs = new SQSClient(awsConfig)
 
 const eventData = {
   payloadEventsString: __ENV.DATA_BTM_SQS_PAYLOAD_EVENTS,
@@ -214,8 +217,6 @@ console.log('1 payloadEventsArray[0] = ', payloadEventsArray[0])
 const payloadTimestampArray = eventData.payloadTimestamp.split(',')
 const payloadTimestampMin: number = Number(payloadTimestampArray[0])
 const payloadTimestampMax: number = Number(payloadTimestampArray[1])
-
-const sqs = new SQSClient(awsConfig)
 
 export function sendEventType1 (): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[0]

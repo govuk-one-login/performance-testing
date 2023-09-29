@@ -23,6 +23,7 @@ import {
   getBiometricTokenV2,
   postFinishBiometricSession
 } from './testSteps/backend'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
@@ -102,5 +103,5 @@ export function mamIphonePassport (): void {
 }
 
 function simulateUserWait (): void {
-  sleep(1 + Math.random()) // Simulate random time between 1s and 2s for user to stay on page
+  sleepBetween(1, 2) // Simulate random time between 1s and 2s for user to stay on page
 }

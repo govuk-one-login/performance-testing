@@ -1,4 +1,4 @@
-import { sleep, group } from 'k6'
+import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import encoding from 'k6/encoding'
@@ -6,6 +6,8 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
 import { timeRequest } from '../common/utils/request/timing'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
@@ -298,12 +300,9 @@ export function fraud (): void {
         tags: { name: 'B01_Fraud_01_CoreStubEditUserContinue' }
       }
     ),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('We need to check your details')
-    }))
+    { isStatusCode200, ...pageContentCheck('We need to check your details') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   group('B01_Fraud_02_ContinueToCheckFraudDetails POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -313,19 +312,14 @@ export function fraud (): void {
       },
       submitSelector: '#continue'
     }),
-    {
-      'is status 302': (r) => r.status === 302
-    })
+    { isStatusCode302 })
     res = timeRequest(() => http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_CoreStub' }
       }
     ),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
-    })
+    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
   })
 }
 
@@ -344,12 +338,9 @@ export function drivingLicence (): void {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Driving_01_DLEntryFromCoreStub' }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Who was your UK driving licence issued by?')
-    }))
+    { isStatusCode200, ...pageContentCheck('Who was your UK driving licence issued by?') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group(`B02_Driving_02_Select${licenceIssuer} POST`, () =>
     timeRequest(() => res.submitForm({
@@ -357,12 +348,9 @@ export function drivingLicence (): void {
       params: { tags: { name: 'B02_Driving_02_Select' + licenceIssuer } },
       submitSelector: '#submitButton'
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK driving licence')
-    }))
+    { isStatusCode200, ...pageContentCheck('Enter your details exactly as they appear on your UK driving licence') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   const fields: Record<string, string> = (licenceIssuer === 'DVLA')
     ? { // DVLA Licence Fields
@@ -410,18 +398,13 @@ export function drivingLicence (): void {
       },
       submitSelector: '#continue'
     }),
-    {
-      'is status 302': (r) => r.status === 302
-    })
+    { isStatusCode302 })
     res = timeRequest(() => http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: `B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm_CoreStub` } // pragma: allowlist secret
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
-    })
+    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
   })
 }
 
@@ -438,13 +421,9 @@ export function passport (): void {
       headers: { Authorization: `Basic ${encodedCredentials}` },
       tags: { name: 'B03_Passport_01_PassportCRIEntryFromStub' }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Enter your details exactly as they appear on your UK passport')
+    { isStatusCode200, ...pageContentCheck('Enter your details exactly as they appear on your UK passport') }))
 
-    }))
-
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   group('B03_Passport_02_EnterPassportDetailsAndContinue POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -466,19 +445,14 @@ export function passport (): void {
       },
       submitSelector: '#submitButton'
     }),
-    {
-      'is status 302': (r) => r.status === 302
-    })
+    { isStatusCode302 })
     res = timeRequest(() => http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_CoreStub' }
       }
     ),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
-    })
+    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
   }
   )
 }

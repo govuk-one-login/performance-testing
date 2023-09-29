@@ -1,9 +1,11 @@
-import { sleep, group } from 'k6'
+import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeRequest } from '../common/utils/request/timing'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
@@ -85,12 +87,9 @@ export function kbvScenario1 (): void {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B01_KBV_01_CoreStubEditUserContinue' }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('You can find this amount on your loan agreement')
-    }))
+    { isStatusCode200, ...pageContentCheck('You can find this amount on your loan agreement') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_KBV_02_KBVQuestion1 POST', () =>
     timeRequest(() => res.submitForm({
@@ -98,12 +97,9 @@ export function kbvScenario1 (): void {
       params: { tags: { name: 'B01_KBV_02_KBVQuestion1' } },
       submitSelector: '#continue'
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('This includes any interest')
-    }))
+    { isStatusCode200, ...pageContentCheck('This includes any interest') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B01_KBV_03_KBVQuestion2 POST', () =>
     timeRequest(() => res.submitForm({
@@ -111,12 +107,9 @@ export function kbvScenario1 (): void {
       params: { tags: { name: 'B01_KBV_03_KBVQuestion2' } },
       submitSelector: '#continue'
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Think about the amount you agreed to pay back every month')
-    }))
+    { isStatusCode200, ...pageContentCheck('Think about the amount you agreed to pay back every month') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   group('B01_KBV_04_KBVQuestion3 POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -127,17 +120,12 @@ export function kbvScenario1 (): void {
       },
       submitSelector: '#continue'
     }),
-    {
-      'is status 302': (r) => r.status === 302
-    })
+    { isStatusCode302 })
     res = timeRequest(() => http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B01_KBV_04_KBVQuestion3_CoreStubCall' }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('verificationScore&quot;: 2')
-    })
+    { isStatusCode200, ...pageContentCheck('verificationScore&quot;: 2') })
   })
 }

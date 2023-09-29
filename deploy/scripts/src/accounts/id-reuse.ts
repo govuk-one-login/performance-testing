@@ -1,10 +1,12 @@
-import { sleep, group, fail } from 'k6'
+import { group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib'
 import { timeRequest } from '../common/utils/request/timing'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 
 const profiles: ProfileList = {
   smoke: {
@@ -140,13 +142,10 @@ export function persistID (): void {
       {
         tags: { name: 'R01_idReuse_01_GenerateToken' }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('token')
-    }))
+    { isStatusCode200, ...pageContentCheck('token') }))
   const token = getToken(res)
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   const options = {
     headers: {
@@ -163,19 +162,16 @@ export function persistID (): void {
   res = group('R01_persistID_02_CreateVC POST', () =>
     timeRequest(() => http.post(env.envURL + `/vcs/${subjectID}`, body, options),
       {
-        'is status 202': (r) => r.status === 202,
-        'verify page content': (r) => (r.body as string).includes('messageId')
+        isStatusCode202: (r) => r.status === 202,
+        ...pageContentCheck('messageId')
       }))
 
-  sleep(2 + Math.random() * 2) // Random sleep between 2-4 seconds
+  sleepBetween(2, 4) // Random sleep between 2-4 seconds
 
   options.tags.name = 'R01_idReuse_03_Retrieve'
   res = group('R01_persistID_03_Retrieve GET', () =>
     timeRequest(() => http.get(env.envURL + `/vcs/${subjectID}`, options),
-      {
-        'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('vcs')
-      }))
+      { isStatusCode200, ...pageContentCheck('vcs') }))
 }
 
 export function retrieveID (): void {
@@ -192,10 +188,7 @@ export function retrieveID (): void {
       {
         tags: { name: 'R01_idReuse_04_GenerateTokenSummary' }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('token')
-    }))
+    { isStatusCode200, ...pageContentCheck('token') }))
   const token = getToken(res)
 
   const options = {
@@ -207,10 +200,7 @@ export function retrieveID (): void {
   }
   res = group('R02_RetrieveID_02_Summarise GET', () =>
     timeRequest(() => http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options),
-      {
-        'is status 200': (r) => r.status === 200,
-        'verify page content': (r) => (r.body as string).includes('vcs')
-      }))
+      { isStatusCode200, ...pageContentCheck('vcs') }))
 }
 
 function getToken (r: Response): string {

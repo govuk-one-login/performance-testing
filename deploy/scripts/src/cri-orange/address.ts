@@ -1,4 +1,4 @@
-import { sleep, group, fail } from 'k6'
+import { group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { SharedArray } from 'k6/data'
@@ -6,6 +6,8 @@ import exec from 'k6/execution'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeRequest } from '../common/utils/request/timing'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
@@ -90,12 +92,9 @@ export function addressScenario1 (): void {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Address_01_AddressCRIEntryFromStub' }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Find your address')
-    }))
+    { isStatusCode200, ...pageContentCheck('Find your address') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_Address_02_SearchPostCode POST', () =>
     timeRequest(() => res.submitForm({
@@ -103,10 +102,7 @@ export function addressScenario1 (): void {
       submitSelector: '#continue',
       params: { tags: { name: 'B02_Address_02_SearchPostCode' } }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Choose your address')
-    }))
+    { isStatusCode200, ...pageContentCheck('Choose your address') }))
 
   const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found')
 
@@ -116,12 +112,9 @@ export function addressScenario1 (): void {
       submitSelector: '#continue',
       params: { tags: { name: 'B02_Address_03_SelectAddress' } }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Check your address')
-    }))
+    { isStatusCode200, ...pageContentCheck('Check your address') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   res = group('B02_Address_04_VerifyAddress POST', () =>
     timeRequest(() => res.submitForm({
@@ -129,12 +122,9 @@ export function addressScenario1 (): void {
       submitSelector: '#continue',
       params: { tags: { name: 'B02_Address_04_VerifyAddress' } }
     }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Confirm your details')
-    }))
+    { isStatusCode200, ...pageContentCheck('Confirm your details') }))
 
-  sleep(Math.random() * 3)
+  sleepBetween(1, 3)
 
   group('B02_Address_05_ConfirmDetails POST', () => {
     res = timeRequest(() => res.submitForm({
@@ -143,17 +133,12 @@ export function addressScenario1 (): void {
         tags: { name: 'B02_Address_05_ConfirmDetails_AddCRI' }
       }
     }),
-    {
-      'is status 302': (r) => r.status === 302
-    })
+    { isStatusCode302 })
     res = timeRequest(() => http.get(res.headers.Location,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Address_05_ConfirmDetails_CoreStub' }
       }),
-    {
-      'is status 200': (r) => r.status === 200,
-      'verify page content': (r) => (r.body as string).includes('Verifiable Credentials')
-    })
+    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
   })
 }

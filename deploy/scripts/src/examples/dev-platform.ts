@@ -1,7 +1,9 @@
-import http, { type Response } from 'k6/http'
+import http from 'k6/http'
 import { type Options } from 'k6/options'
-import { check, group, sleep } from 'k6'
+import { group, sleep } from 'k6'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { isStatusCode200 } from '../common/utils/checks/assertions'
+import { timeRequest } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
   smoke: {
@@ -77,31 +79,19 @@ const env = {
 }
 
 export function demoSamApp (): void {
-  let res: Response
-
-  group('GET - {demoSamApp} /test', function () {
-    res = http.get(env.BE_URL + '/test')
-
-    check(res, {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => JSON.parse(r.body as string).code === 'success'
-    })
-  })
+  group('GET - {demoSamApp} /test', () =>
+    timeRequest(() => http.get(env.BE_URL + '/test'),
+      { isStatusCode200, 'verify page content': r => JSON.parse(r.body as string).code === 'success' }
+    ))
 
   sleep(1)
 }
 
 export function demoNodeApp (): void {
-  let res: Response
-
-  group('GET - {demoNodeApp}', function () {
-    res = http.get(env.FE_URL)
-
-    check(res, {
-      'is status 200': r => r.status === 200,
-      'verify page content': r => JSON.parse(r.body as string).message === 'hello world'
-    })
-  })
+  group('GET - {demoNodeApp}', () =>
+    timeRequest(() => http.get(env.FE_URL),
+      { isStatusCode200, 'verify page content': r => JSON.parse(r.body as string).message === 'hello world' }
+    ))
 
   sleep(1)
 }

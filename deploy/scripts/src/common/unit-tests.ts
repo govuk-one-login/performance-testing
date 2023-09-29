@@ -1,10 +1,14 @@
-import { check, group, sleep } from 'k6'
+import { type JSONValue, check, group, sleep } from 'k6'
 import TOTP from './utils/authentication/totp'
 import { type Profile, type ProfileList, selectProfile } from './utils/config/load-profiles'
 import { AWSConfig, SQSClient } from './utils/jslib/aws-sqs'
 import { findBetween, normalDistributionStages, randomIntBetween, randomItem, randomString, uuidv4 } from './utils/jslib'
 import { URL, URLSearchParams } from './utils/jslib/url'
 import { timeFunction, timeRequest } from './utils/request/timing'
+import { sleepBetween } from './utils/sleep/sleepBetween'
+import { isStatusCode200, isStatusCode201, isStatusCode302, pageContentCheck } from './utils/checks/assertions'
+import { type RefinedParams, type RefinedResponse, type ResponseType, type Response } from 'k6/http'
+import { type Selection } from 'k6/html'
 
 export const options = {
   vus: 1,
@@ -31,6 +35,25 @@ export default (): void => {
       '| SHA1   | T+1234567890  |': () => sha1otp.generateTOTP(1234567890 * 1000) === '89005924',
       '| SHA256 | T+2000000000  |': () => sha256otp.generateTOTP(2000000000 * 1000) === '90698825',
       '| SHA512 | T+20000000000 |': () => sha512otp.generateTOTP(20000000000 * 1000) === '47863826'
+    })
+  })
+
+  group('checks/assertion', () => {
+    const response: Response = blankResponse()
+
+    group('status code checks', () => {
+      response.status = 200
+      check(response, { isStatusCode200 })
+      response.status = 201
+      check(response, { isStatusCode201 })
+      response.status = 302
+      check(response, { isStatusCode302 })
+    })
+
+    group('pageContentCheck()', () => {
+      const title = 'Page Title'
+      response.body = `<html><body><h1>${title}</h1></body></html>`
+      check(response, { ...pageContentCheck(title) })
     })
   })
 
@@ -97,7 +120,6 @@ export default (): void => {
   })
 
   group('jslib/index', () => {
-    // findBetween()
     group('findBetween()', () => {
       const response = '<div class="message">Message 1</div><div class="message">Message 2</div>'
       const message = findBetween(response, '<div class="message">', '</div>')
@@ -229,4 +251,52 @@ export default (): void => {
       })
     })
   })
+
+  group('sleep/sleepBetween', () => {
+    const time1 = Date.now()
+    sleepBetween(0.2, 0.3) // Sleep between 200 to 300 milliseconds
+    const time2 = Date.now()
+    sleepBetween(2, 3) // Sleep between 2 to 3 seconds
+    const time3 = Date.now()
+
+    const diff1 = time2 - time1
+    const diff2 = time3 - time2
+    check(null, {
+      'sleepBetween() 200-300ms': () => diff1 >= 200 && diff1 <= 350,
+      'sleepBetween() 2-3s': () => diff2 >= 2000 && diff2 <= 3050
+    })
+  })
+}
+
+function blankResponse (): Response {
+  return { // Default Response values
+    body: null,
+    cookies: {},
+    error: '',
+    error_code: 0,
+    headers: {},
+    ocsp: { produced_at: 0, this_update: 0, next_update: 0, revocation_reason: '', revoked_at: 0, status: '' },
+    proto: 'HTTP/1.0',
+    remote_ip: '',
+    remote_port: 0,
+    request: { body: '', cookies: {}, headers: {}, method: '', url: '' },
+    status: 0,
+    status_text: '',
+    timings: { blocked: 0, connecting: 0, tls_handshaking: 0, sending: 0, waiting: 0, receiving: 0, duration: 0 },
+    tls_cipher_suite: 'TLS_RSA_WITH_RC4_128_SHA',
+    tls_version: '',
+    url: '',
+    clickLink: function <RT extends ResponseType | undefined>(args?: { selector?: string | undefined, params?: RefinedParams<RT> | null | undefined } | undefined): RefinedResponse<RT> {
+      throw new Error('Function not implemented.')
+    },
+    html: function (selector?: string | undefined): Selection {
+      throw new Error('Function not implemented.')
+    },
+    json: function (selector?: string | undefined): JSONValue {
+      throw new Error('Function not implemented.')
+    },
+    submitForm: function <RT extends ResponseType | undefined>(args?: { formSelector?: string | undefined, fields?: Record<string, string> | undefined, submitSelector?: string | undefined, params?: RefinedParams<RT> | null | undefined } | undefined): RefinedResponse<RT> {
+      throw new Error('Function not implemented.')
+    }
+  }
 }

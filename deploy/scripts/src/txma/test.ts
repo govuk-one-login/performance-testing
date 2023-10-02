@@ -29,7 +29,7 @@ const profiles: ProfileList = {
         { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
       ],
       exec: 'sendEvent'
-    },
+    }
   },
   load100: {
     ssendEventScenario: {
@@ -42,7 +42,7 @@ const profiles: ProfileList = {
         { target: 100, duration: '10m' } // Ramp up to 100 iterations per second in 10 minutes
       ],
       exec: 'sendEvent'
-    },
+    }
   },
   load500: {
     sendEventScenario: {
@@ -55,7 +55,7 @@ const profiles: ProfileList = {
         { target: 500, duration: '10m' } // Ramp up to 500 iterations per second in 10 minutes
       ],
       exec: 'sendEvent'
-    },
+    }
   },
     load1000: {
       sendEventScenario: {
@@ -68,7 +68,7 @@ const profiles: ProfileList = {
         { target: 1000, duration: '10m' } // Ramp up to 1000 iterations per second in 10 minutes
       ],
       exec: 'sendEvent'
-    },
+    }
   },
     load1500: {
       sendEventScenario: {
@@ -81,7 +81,7 @@ const profiles: ProfileList = {
         { target: 1500, duration: '10m' } // Ramp up to 1500 iterations per second in 10 minutes
       ],
       exec: 'sendEvent'
-    },
+    }
   },
     load2000: {
       sendEventScenario: {
@@ -94,7 +94,7 @@ const profiles: ProfileList = {
         { target: 2000, duration: '10m' } // Ramp up to 2000 iterations per second in 10 minutes
       ],
       exec: 'sendEvent'
-    },
+    }
   },
     loadFull2000: {
       sendEventScenario: {

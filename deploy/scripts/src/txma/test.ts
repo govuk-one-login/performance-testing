@@ -6,7 +6,7 @@ import { type AssumeRoleOutput } from '../common/utils/aws/types'
 
 const profiles: ProfileList = {
   smoke: {
-    sendEventSmokeTest1: {
+    sendEventSmokeTest: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -16,17 +16,6 @@ const profiles: ProfileList = {
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'sendEvent'
-    },
-    sendEventSmokeTest2: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 2,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'sendEventDebug'
     }
   },
   load30: {
@@ -156,10 +145,5 @@ const sqs = new SQSClient(awsConfig)
 
 export function sendEvent (): void {
   const messageBody = eventData.payload.replace(/UUID/g, () => uuidv4())
-  sqs.sendMessage(env.sqs_queue, messageBody)
-}
-
-export function sendEventDebug (): void {
-  const messageBody = eventData.payload.replace('UUID', uuidv4())
   sqs.sendMessage(env.sqs_queue, messageBody)
 }

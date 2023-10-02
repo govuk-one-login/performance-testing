@@ -6,7 +6,7 @@ import { type AssumeRoleOutput } from '../common/utils/aws/types'
 
 const profiles: ProfileList = {
   smoke: {
-    sendEventSmokeTest1: {
+    sendEventSmokeTest: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -16,61 +16,95 @@ const profiles: ProfileList = {
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'sendEvent'
-    },
-    sendEventSmokeTest2: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 2,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'sendEventDebug'
     }
   },
-  load: {
-    sendEventLoadTest1: {
+  load30: {
+    sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 350,
-      stages: [
-        { target: 10, duration: '10m' } // Ramp up to 10 iterations per second in 10 minutes
-      ],
-      exec: 'sendEvent'
-    },
-    sendEventLoadTest2: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 700,
-      stages: [
-        { target: 20, duration: '10m' } // Ramp up to 20 iterations per second in 10 minutes
-      ],
-      exec: 'sendEvent'
-    },
-    sendEventLoadTest3: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 300,
       stages: [
         { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
       ],
       exec: 'sendEvent'
-    },
-    sendEventLoadTest4: {
+    }
+  },
+  load100: {
+    ssendEventScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1000,
+      stages: [
+        { target: 100, duration: '10m' } // Ramp up to 100 iterations per second in 10 minutes
+      ],
+      exec: 'sendEvent'
+    }
+  },
+  load500: {
+    sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
       maxVUs: 1500,
       stages: [
-        { target: 30, duration: '60m' } // Ramp up to 30 iterations per second in 60 minutes
+        { target: 500, duration: '10m' } // Ramp up to 500 iterations per second in 10 minutes
+      ],
+      exec: 'sendEvent'
+    }
+  },
+  load1000: {
+    sendEventScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 2000,
+      stages: [
+        { target: 1000, duration: '10m' } // Ramp up to 1000 iterations per second in 10 minutes
+      ],
+      exec: 'sendEvent'
+    }
+  },
+  load1500: {
+    sendEventScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 3000,
+      stages: [
+        { target: 1500, duration: '10m' } // Ramp up to 1500 iterations per second in 10 minutes
+      ],
+      exec: 'sendEvent'
+    }
+  },
+  load2000: {
+    sendEventScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 3000,
+      stages: [
+        { target: 2000, duration: '10m' } // Ramp up to 2000 iterations per second in 10 minutes
+      ],
+      exec: 'sendEvent'
+    }
+  },
+  loadFull2000: {
+    sendEventScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 3000,
+      stages: [
+        { target: 2000, duration: '60m' } // Ramp up to 2000 iterations per second in 60 minutes
       ],
       exec: 'sendEvent'
     }
@@ -112,13 +146,4 @@ const sqs = new SQSClient(awsConfig)
 export function sendEvent (): void {
   const messageBody = eventData.payload.replace(/UUID/g, () => uuidv4())
   sqs.sendMessage(env.sqs_queue, messageBody)
-}
-
-export function sendEventDebug (): void {
-  const messageBody = eventData.payload.replace('UUID', uuidv4())
-  sqs.sendMessage(env.sqs_queue, messageBody)
-  console.log('1 === debug === env.sqs_queue', env.sqs_queue)
-  console.log('2 === debug === awsConfig', awsConfig)
-  console.log('3 === debug === payload', eventData.payload)
-  console.log('4 === debug === messageBody', messageBody)
 }

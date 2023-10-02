@@ -57,8 +57,8 @@ const profiles: ProfileList = {
       exec: 'sendEvent'
     }
   },
-    load1000: {
-      sendEventScenario: {
+  load1000: {
+    sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -70,8 +70,8 @@ const profiles: ProfileList = {
       exec: 'sendEvent'
     }
   },
-    load1500: {
-      sendEventScenario: {
+  load1500: {
+    sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -83,8 +83,8 @@ const profiles: ProfileList = {
       exec: 'sendEvent'
     }
   },
-    load2000: {
-      sendEventScenario: {
+  load2000: {
+    sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -96,8 +96,8 @@ const profiles: ProfileList = {
       exec: 'sendEvent'
     }
   },
-    loadFull2000: {
-      sendEventScenario: {
+  loadFull2000: {
+    sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',

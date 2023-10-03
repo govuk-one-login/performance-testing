@@ -49,8 +49,6 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: 'true' # pragma: allowlist secret
 
       - name: Upload Fargates to S3
         env:

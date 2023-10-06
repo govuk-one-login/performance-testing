@@ -31,6 +31,9 @@ Parameters:
     Default: "none"
 
 Mappings:
+  BTM:
+    AWS:
+      AccountID: "716404857987"
   SPOT:
     AWS:
       AccountID: "429671060046"
@@ -187,6 +190,11 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [BTM, AWS, AccountID]
+                    - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
                     - !FindInMap [SPOT, AWS, AccountID]
                     - "key/*"
               - Fn::Join:
@@ -207,6 +215,11 @@ Resources:
               - "sqs:DeleteMessage"
               - "sqs:ChangeMessageVisibility"
             Resource:
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [BTM, AWS, AccountID]
+                    - "di-btm-*"
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"

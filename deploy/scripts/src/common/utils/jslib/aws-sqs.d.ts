@@ -37,7 +37,7 @@ export class AWSConfig {
    * Creates an AWSConfig using the `AWS_REGION`, `AWS_ACCESS_KEY_ID`,
    * `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables.
    */
-  declare static fromEnvironment (): AWSConfig
+  static fromEnvironment (): AWSConfig
 }
 
 export class SQSClient {

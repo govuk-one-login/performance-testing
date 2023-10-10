@@ -1,5 +1,5 @@
 import { type AUTH_IPV_AUTHORISATION_REQUESTED, type F2F_YOTI_START, type IPV_F2F_CRI_VC_CONSUMED, type F2F_DOCUMENT_UPLOADED } from '../requestGenerator/ipvrReqFormat'
-import { uuidv4, randomString } from '../../common/utils/jslib/index'
+import { uuidv4, randomString, randomIntBetween } from '../../common/utils/jslib/index'
 
 export function generateAuthRequest (userID: string, signinJourneyID: string): AUTH_IPV_AUTHORISATION_REQUESTED {
   const timestamp = new Date().toISOString()
@@ -40,8 +40,8 @@ export function generateF2FRequest (userID: string, signinJourneyID: string): F2
           address: randomString(6),
           location: [
             {
-              latitude: randomString(6),
-              longitude: randomString(6)
+              latitude: randomIntBetween(-90, 90),
+              longitude: randomIntBetween(-180, 180)
             }
           ],
           postcode: randomString(6)
@@ -51,7 +51,7 @@ export function generateF2FRequest (userID: string, signinJourneyID: string): F2
     restricted: {
       document_details: [
         {
-          documentType: randomString(6)
+          documentType: 'PASSPORT'
         }
       ]
     }

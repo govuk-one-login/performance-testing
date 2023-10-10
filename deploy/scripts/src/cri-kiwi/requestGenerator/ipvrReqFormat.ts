@@ -25,6 +25,44 @@ export interface F2F_YOTI_START {
     user_id: string
     govuk_signin_journey_id: string
   }
+  extensions: {
+    post_office_details: [
+      {
+        name: string
+        address: string
+        location: [
+          {
+            latitude: string
+            longitude: string
+          }
+        ]
+        postcode: string
+      }
+    ]
+  }
+  restricted: {
+    document_details: [
+      {
+        documentType: string
+      }
+    ]
+  }
+}
+
+export interface F2F_DOCUMENT_UPLOADED {
+  event_name: string
+  event_id: string
+  user: {
+    user_id: string
+  }
+  extensions: {
+    post_office_visit_details: [ {
+      post_office_date_of_visit: string
+      post_office_time_of_visit: string
+    }
+    ]
+  }
+  timestamp: number
 }
 
 export interface IPV_F2F_CRI_VC_CONSUMED {
@@ -54,5 +92,6 @@ export interface IPV_F2F_CRI_VC_CONSUMED {
         value: string
       }
     ]
+    docExpiryDate: string
   }
 }

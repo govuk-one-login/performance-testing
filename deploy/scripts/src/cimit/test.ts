@@ -1,6 +1,6 @@
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
-import { AWSConfig, SignatureV4 } from '../common/utils/jslib/aws-signatureV4'
+import { AWSConfig, SignatureV4 } from '../common/utils/jslib/aws'
 import { generatePutCI, generateGetCIC, generatePostMitigations } from './requestGenerator/cimitReqGen'
 import { group } from 'k6'
 import http from 'k6/http'
@@ -79,106 +79,79 @@ const awsConfig = new AWSConfig({
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken
 })
+const signer = new SignatureV4({
+  service: 'lambda',
+  region: awsConfig.region,
+  credentials: {
+    accessKeyId: awsConfig.accessKeyId,
+    secretAccessKey: awsConfig.secretAccessKey,
+    sessionToken: awsConfig.sessionToken
+  },
+  uriEscapePath: true,
+  applyChecksum: false
+})
 
 export function putContraIndicators (): void {
   const putContraIndicatorPayload = JSON.stringify(generatePutCI())
-  const signer = new SignatureV4({
-    service: 'lambda',
-    region: awsConfig.region,
-    credentials: {
-      accessKeyId: awsConfig.accessKeyId,
-      secretAccessKey: awsConfig.secretAccessKey,
-      sessionToken: awsConfig.sessionToken
-    },
-    uriEscapePath: false,
-    applyChecksum: false
-  })
-  const signedRequest = signer.sign(
-    'POST',
-    'https',
-    env.putCIURL,
-    '/',
-    {
-      header1: 'value1',
-      header2: 'value2'
-    }
-  )
-  group('B01_CIMIT_01_PutContraIndicator POST', () =>
+  const request = {
+    method: 'POST',
+    protocol: 'https' as const,
+    hostname: `lambda.${awsConfig.region}.amazonaws.com`,
+    path: `/2015-03-31/functions/${env.putCIURL}/invocations`,
+    headers: {},
+    body: putContraIndicatorPayload
+  }
+  const signedRequest = signer.sign(request)
+
+  group('B01_CIMIT_01_PutContraIndicator POST', () => {
     timeRequest(() => http.post(signedRequest.url, putContraIndicatorPayload,
       {
         headers: signedRequest.headers,
         tags: { name: 'B01_CIMIT_01_PutContraIndicator' }
       }),
-    {
-      isStatusCode200
-    }))
+    { isStatusCode200 })
+  })
 }
 
 export function getContraIndicatorCredentials (): void {
   const user = getCIC[Math.floor(Math.random() * getCIC.length)]
   const getCICPayload = JSON.stringify(generateGetCIC(user.journeyID, user.userID))
-  const signer = new SignatureV4({
-    service: 'lambda',
-    region: awsConfig.region,
-    credentials: {
-      accessKeyId: awsConfig.accessKeyId,
-      secretAccessKey: awsConfig.secretAccessKey,
-      sessionToken: awsConfig.sessionToken
-    },
-    uriEscapePath: false,
-    applyChecksum: false
-  })
-  const signedRequest = signer.sign(
-    'POST',
-    'https',
-    env.getCICURL,
-    '/',
-    {
-      header1: 'value1',
-      header2: 'value2'
-    }
-  )
+  const request = {
+    method: 'POST',
+    protocol: 'https' as const,
+    hostname: `lambda.${awsConfig.region}.amazonaws.com`,
+    path: `/2015-03-31/functions/${env.getCICURL}/invocations`,
+    headers: {},
+    body: getCICPayload
+  }
+  const signedRequest = signer.sign(request)
+
   group('B02_CIMIT_01_GetContraIndicatorCredentials GET', () =>
-    timeRequest(() => http.get(signedRequest.url + getCICPayload,
+    timeRequest(() => http.post(signedRequest.url, getCICPayload,
       {
         headers: signedRequest.headers,
         tags: { name: 'B02_CIMIT_01_GetContraIndicatorCredentials' }
       }),
-    {
-      isStatusCode200
-    }))
+    { isStatusCode200 }))
 }
 
 export function postMitigations (): void {
   const postMitigationsPayload = JSON.stringify(generatePostMitigations())
-  const signer = new SignatureV4({
-    service: 'lambda',
-    region: awsConfig.region,
-    credentials: {
-      accessKeyId: awsConfig.accessKeyId,
-      secretAccessKey: awsConfig.secretAccessKey,
-      sessionToken: awsConfig.sessionToken
-    },
-    uriEscapePath: false,
-    applyChecksum: false
-  })
-  const signedRequest = signer.sign(
-    'POST',
-    'https',
-    env.postMitigationURL,
-    '/',
-    {
-      header1: 'value1',
-      header2: 'value2'
-    }
-  )
+  const request = {
+    method: 'POST',
+    protocol: 'https' as const,
+    hostname: `lambda.${awsConfig.region}.amazonaws.com`,
+    path: `/2015-03-31/functions/${env.postMitigationURL}/invocations`,
+    headers: {},
+    body: postMitigationsPayload
+  }
+  const signedRequest = signer.sign(request)
+
   group('B03_CIMIT_01_PostMitigations POST', () =>
     timeRequest(() => http.post(signedRequest.url, postMitigationsPayload,
       {
         headers: signedRequest.headers,
         tags: { name: 'B03_CIMIT_01_PostMitigations' }
       }),
-    {
-      isStatusCode200
-    }))
+    { isStatusCode200 }))
 }

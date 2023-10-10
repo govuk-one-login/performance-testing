@@ -1,6 +1,7 @@
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
-import { AWSConfig, SignatureV4 } from '../common/utils/jslib/aws'
+import { AWSConfig } from '../common/utils/jslib/aws-sqs'
+import { SignatureV4 } from '../common/utils/jslib/aws-signature'
 import { generatePutCI, generateGetCIC, generatePostMitigations } from './requestGenerator/cimitReqGen'
 import { group } from 'k6'
 import http from 'k6/http'
@@ -103,14 +104,13 @@ export function putContraIndicators (): void {
   }
   const signedRequest = signer.sign(request)
 
-  group('B01_CIMIT_01_PutContraIndicator POST', () => {
+  group('B01_CIMIT_01_PutContraIndicator POST', () =>
     timeRequest(() => http.post(signedRequest.url, putContraIndicatorPayload,
       {
         headers: signedRequest.headers,
         tags: { name: 'B01_CIMIT_01_PutContraIndicator' }
       }),
-    { isStatusCode200 })
-  })
+    { isStatusCode200 }))
 }
 
 export function getContraIndicatorCredentials (): void {

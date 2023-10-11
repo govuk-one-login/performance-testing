@@ -1,7 +1,7 @@
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
-import { generateAuthRequest, generateF2FRequest, generateIPVRequest } from './requestGenerator/ipvrReqGen'
+import { generateAuthRequest, generateF2FRequest, generateIPVRequest, generateDocumentUploadedRequest } from './requestGenerator/ipvrReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 
@@ -128,8 +128,10 @@ export function allEvents (): void {
   const signinJourneyID = uuidv4()
   const authPayload = generateAuthRequest(userID, signinJourneyID)
   const f2fPayload = generateF2FRequest(userID, signinJourneyID)
+  const docUploadPayload = generateDocumentUploadedRequest(userID)
   const ipvPayload = generateIPVRequest(userID, signinJourneyID)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(authPayload))
   sqs.sendMessage(env.sqs_queue, JSON.stringify(f2fPayload))
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(docUploadPayload))
   sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
 }

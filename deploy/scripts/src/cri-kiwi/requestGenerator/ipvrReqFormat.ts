@@ -32,8 +32,8 @@ export interface F2F_YOTI_START {
         address: string
         location: [
           {
-            latitude: string
-            longitude: string
+            latitude: number
+            longitude: number
           }
         ]
         postcode: string

@@ -12,6 +12,15 @@ RUN cd scripts && \
     npm install && \
     npm start
 
+# -------------------------------
+# Build k6 binary with extensions
+# -------------------------------
+FROM golang:1.20-alpine as k6-build
+WORKDIR $GOPATH/src/go.k6.io/k6
+
+RUN go install go.k6.io/xk6/cmd/xk6@v0.9.2
+RUN xk6 build v0.47.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --output /k6
+
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
@@ -21,7 +30,8 @@ ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 # ---
 # Run
 # ---
-FROM grafana/k6:0.46.0
+FROM grafana/k6:0.47.0
+COPY --from=k6-build /k6 /usr/bin/k6
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true
 ENV K6_STATSD_BUFFER_SIZE=100

@@ -18,6 +18,21 @@ const profiles: ProfileList = {
       exec: 'spotScenario'
     }
   },
+  lowVolumeTest: {
+    spotScenario: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 500,
+      stages: [
+        { target: 50, duration: '15m' }, // Ramp up to 50 iterations per second in 15 minutes
+        { target: 50, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 50 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'spotScenario'
+    }
+  },
   load: {
     spotScenario: {
       executor: 'ramping-arrival-rate',

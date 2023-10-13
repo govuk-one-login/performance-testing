@@ -1,17 +1,17 @@
 # Global owners
-* @alphagov/di-dev-platform @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers
+* @alphagov/di-dev-platform @govuk-one-login/performance-testers
 
 # Test Scripts
-/deploy/scripts @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers
+/deploy/scripts @govuk-one-login/performance-testers
 
 # Team Specific Test Script Directories
-/deploy/scripts/src/accounts @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers @alphagov/gov-uk-accounts
-/deploy/scripts/src/authentication @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers
-/deploy/scripts/src/btm @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers @alphagov/di-billing-and-transaction-monitoring
-/deploy/scripts/src/cri-kiwi @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers @alphagov/di-ipv-kiwi-devs
-/deploy/scripts/src/cri-lime @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers @alphagov/digital-identity-ipv
-/deploy/scripts/src/cri-orange @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers @alphagov/di-ipv-orange-cri-maintainers
-/deploy/scripts/src/ipv-core @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers @alphagov/digital-identity-ipv
-/deploy/scripts/src/mobile @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers @alphagov/di-doc-checking-narwhal-codeowners
-/deploy/scripts/src/spot @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers @alphagov/di-ipv-spot-team
-/deploy/scripts/src/txma @alphagov/digital-identity-performance-test @govuk-one-login/performance-testers @alphagov/digital-identity-txma
+/deploy/scripts/src/accounts @govuk-one-login/performance-testers @alphagov/gov-uk-accounts
+/deploy/scripts/src/authentication @govuk-one-login/performance-testers
+/deploy/scripts/src/btm @govuk-one-login/performance-testers @alphagov/di-billing-and-transaction-monitoring
+/deploy/scripts/src/cri-kiwi @govuk-one-login/performance-testers @alphagov/di-ipv-kiwi-devs
+/deploy/scripts/src/cri-lime @govuk-one-login/performance-testers @alphagov/digital-identity-ipv
+/deploy/scripts/src/cri-orange @govuk-one-login/performance-testers @alphagov/di-ipv-orange-cri-maintainers
+/deploy/scripts/src/ipv-core @govuk-one-login/performance-testers @alphagov/digital-identity-ipv
+/deploy/scripts/src/mobile @govuk-one-login/performance-testers @alphagov/di-doc-checking-narwhal-codeowners
+/deploy/scripts/src/spot @govuk-one-login/performance-testers @alphagov/di-ipv-spot-team
+/deploy/scripts/src/txma @govuk-one-login/performance-testers @alphagov/digital-identity-txma

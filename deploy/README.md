@@ -5,9 +5,9 @@ Changes to the CloudFormation Infrastructure-as-Code [`template.yaml`](template.
 
 To deploy a feature branch to the Development environment:
 
-1. Go to the '[Feature Branch Publish](https://github.com/alphagov/di-devplatform-performance/actions/workflows/feature-branch-publish.yaml)' GitHub action
+1. Go to the '[Feature Branch Publish](https://github.com/govuk-one-login/performance-testing/actions/workflows/feature-branch-publish.yaml)' GitHub action
 
-    [![Feature Branch Publish](https://github.com/alphagov/di-devplatform-performance/actions/workflows/feature-branch-publish.yaml/badge.svg?event=workflow_dispatch)](https://github.com/alphagov/di-devplatform-performance/actions/workflows/feature-branch-publish.yaml)
+    [![Feature Branch Publish](https://github.com/govuk-one-login/performance-testing/actions/workflows/feature-branch-publish.yaml/badge.svg?event=workflow_dispatch)](https://github.com/govuk-one-login/performance-testing/actions/workflows/feature-branch-publish.yaml)
 
 2. Click the 'Run Workflow' dropdown
 

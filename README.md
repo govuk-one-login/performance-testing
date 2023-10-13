@@ -1,4 +1,4 @@
-[![Publish](https://github.com/alphagov/di-devplatform-performance/actions/workflows/publish.yaml/badge.svg?branch=main)](https://github.com/alphagov/di-devplatform-performance/actions/workflows/publish.yaml)
+[![Publish](https://github.com/govuk-one-login/performance-testing/actions/workflows/publish.yaml/badge.svg?branch=main)](https://github.com/govuk-one-login/performance-testing/actions/workflows/publish.yaml)
 
 ---
 

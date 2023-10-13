@@ -1,7 +1,7 @@
 {
   "name": "scripts",
   "version": "1.0.0",
-  "repository": "git@github.com:alphagov/di-devplatform-performance.git",
+  "repository": "git@github.com:govuk-one-login/performance-testing.git",
   "description": "Performance Testing for Digital Identity",
   "main": "index.js",
   "devDependencies": {

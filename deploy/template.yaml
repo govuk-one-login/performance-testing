@@ -472,7 +472,7 @@ Resources:
         - Key: "Service"
           Value: "ci/cd"
         - Key: "Source"
-          Value: "alphagov/di-devplatform-performance"
+          Value: "govuk-one-login/performance-testing"
 
   TestContainerSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"

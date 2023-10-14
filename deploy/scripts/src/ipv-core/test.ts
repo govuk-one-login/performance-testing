@@ -1,3 +1,4 @@
+import encoding from 'k6/encoding'
 import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -112,20 +113,34 @@ const env = {
   // staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
 }
 
+const stubCreds = {
+  userName: __ENV.IDENTITY_ORCH_STUB_USERNAME,
+  password: __ENV.IDENTITY_ORCH_STUB_PASSWORD
+}
+
 export function passport (): void {
   let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
 
   res = group('B01_Passport_01_LaunchOrchestratorStub GET', () =>
     timeRequest(() => http.get(env.orchStubEndPoint, {
+      headers: { Authorization: `Basic ${encodedCredentials}` },
       tags: { name: 'B01_Passport_01_LaunchOrchestratorStub' }
     }),
     { isStatusCode200, ...pageContentCheck('Enter userId manually') }))
+
+  const userId = getUserId(res)
+  const signInJourneyId = getSignInJourneyId(res)
 
   sleepBetween(0.5, 1)
 
   res = group('B01_Passport_02_GoToFullJourneyRoute GET', () =>
     timeRequest(() => {
-      const response = http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=', { tags: { name: 'B01_Passport_02_GoToFullJourneyRoute' } })
+      const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}`, {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B01_Passport_02_GoToFullJourneyRoute' }
+      })
       // if (env.staticResources) getStaticResources(response)
       return response
     },
@@ -305,6 +320,7 @@ export function passport (): void {
     }),
     { isStatusCode302 })
     res = timeRequest(() => http.get(res.headers.Location, {
+      headers: { Authorization: `Basic ${encodedCredentials}` },
       tags: { name: 'B01_Passport_11_ContPYISuccessPage_02_OrchStub' }
     }),
     { isStatusCode200, ...pageContentCheck('User information') })
@@ -313,18 +329,26 @@ export function passport (): void {
 
 export function drivingLicence (): void {
   let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
 
   res = group('B02_DrivingLicence_01_LaunchOrchestratorStub GET', () =>
     timeRequest(() => http.get(env.orchStubEndPoint, {
+      headers: { Authorization: `Basic ${encodedCredentials}` },
       tags: { name: 'B02_DrivingLicence_01_LaunchOrchestratorStub' }
     }),
     { isStatusCode200, ...pageContentCheck('Enter userId manually') }))
+  const userId = getUserId(res)
+  const signInJourneyId = getSignInJourneyId(res)
 
   sleepBetween(0.5, 1)
 
   res = group('B02_DrivingLicence_02_SelectUserIDContinue GET', () =>
     timeRequest(() => {
-      const response = http.get(env.orchStubEndPoint + '/authorize?journeyType=full&userIdText=', { tags: { name: 'B02_DrivingLicence_02_SelectUserIDContinue' } })
+      const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}`, {
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B02_DrivingLicence_02_SelectUserIDContinue' }
+      })
       // if (env.staticResources) getStaticResources(response)
       return response
     },
@@ -507,8 +531,17 @@ export function drivingLicence (): void {
     }),
     { isStatusCode302 })
     res = timeRequest(() => http.get(res.headers.Location, {
+      headers: { Authorization: `Basic ${encodedCredentials}` },
       tags: { name: 'B02_DrivingLicence_11_ContDLSuccess_02_OrchStub' }
     }),
     { isStatusCode200, ...pageContentCheck('User information') })
   })
+}
+
+function getUserId (r: Response): string {
+  return r.html().find("input[name='userIdText']").val() ?? 'User ID not found'
+}
+
+function getSignInJourneyId (r: Response): string {
+  return r.html().find("input[name='signInJourneyIdText']").val() ?? 'Sign In Journey ID not found'
 }

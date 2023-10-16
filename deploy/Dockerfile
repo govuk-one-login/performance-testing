@@ -15,7 +15,7 @@ RUN cd scripts && \
 # -------------------------------
 # Build k6 binary with extensions
 # -------------------------------
-FROM golang:1.20-alpine as k6-build
+FROM golang:1.21-alpine as k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.9.2

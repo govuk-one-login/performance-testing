@@ -153,8 +153,8 @@ const env = {
 }
 
 const stubCreds = {
-  userName: __ENV.IDENTITY_STUB_USERNAME,
-  password: __ENV.IDENTITY_STUB_PASSWORD
+  userName: __ENV.IDENTITY_CORE_STUB_USERNAME,
+  password: __ENV.IDENTITY_CORE_STUB_PASSWORD
 }
 
 interface DrivingLicenseUser {

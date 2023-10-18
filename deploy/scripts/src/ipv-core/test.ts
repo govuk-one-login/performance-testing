@@ -1,4 +1,4 @@
-import { Counter } from 'k6/metrics'
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import encoding from 'k6/encoding'
 import { group } from 'k6'
 import { type Options } from 'k6/options'
@@ -95,8 +95,6 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
-const iterationsStarted = new Counter('Iterations_Started')
-const iterationsCompleted = new Counter('Iterations_Completed')
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,

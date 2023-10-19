@@ -9,16 +9,20 @@ import { sleepBetween } from './utils/sleep/sleepBetween'
 import { isStatusCode200, isStatusCode201, isStatusCode302, pageContentCheck } from './utils/checks/assertions'
 import { type RefinedParams, type RefinedResponse, type ResponseType, type Response } from 'k6/http'
 import { type Selection } from 'k6/html'
+import { iterationsCompleted, iterationsStarted } from './utils/custom_metric/counter'
 
 export const options = {
   vus: 1,
   iterations: 1,
   thresholds: {
-    checks: ['rate==1.00']
+    checks: ['rate==1.00'],
+    Iterations_Started: ['count===1'],
+    Iterations_Completed: ['count===1']
   }
 }
 
 export default (): void => {
+  iterationsStarted.add(1)
   group('authentication/totp', () => {
     // Examples from https://www.rfc-editor.org/rfc/rfc6238
     const sha1seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ' // Ascii string "12345678901234567890" in base32
@@ -266,6 +270,7 @@ export default (): void => {
       'sleepBetween() 2-3s': () => diff2 >= 2000 && diff2 <= 3050
     })
   })
+  iterationsCompleted.add(1)
 }
 
 function blankResponse (): Response {

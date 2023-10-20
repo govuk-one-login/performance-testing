@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import encoding from 'k6/encoding'
 import { group } from 'k6'
 import { type Options } from 'k6/options'
@@ -122,7 +123,7 @@ export function passport (): void {
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
-
+  iterationsStarted.add(1)
   res = group('B01_Passport_01_LaunchOrchestratorStub GET', () =>
     timeRequest(() => http.get(env.orchStubEndPoint, {
       headers: { Authorization: `Basic ${encodedCredentials}` },
@@ -324,6 +325,7 @@ export function passport (): void {
       tags: { name: 'B01_Passport_11_ContPYISuccessPage_02_OrchStub' }
     }),
     { isStatusCode200, ...pageContentCheck('User information') })
+    iterationsCompleted.add(1)
   })
 }
 
@@ -331,6 +333,7 @@ export function drivingLicence (): void {
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
+  iterationsStarted.add(1)
 
   res = group('B02_DrivingLicence_01_LaunchOrchestratorStub GET', () =>
     timeRequest(() => http.get(env.orchStubEndPoint, {
@@ -535,6 +538,7 @@ export function drivingLicence (): void {
       tags: { name: 'B02_DrivingLicence_11_ContDLSuccess_02_OrchStub' }
     }),
     { isStatusCode200, ...pageContentCheck('User information') })
+    iterationsCompleted.add(1)
   })
 }
 

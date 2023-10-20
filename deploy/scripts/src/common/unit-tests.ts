@@ -16,8 +16,8 @@ export const options = {
   iterations: 1,
   thresholds: {
     checks: ['rate==1.00'],
-    Iterations_Started: ['count===1'],
-    Iterations_Completed: ['count===1']
+    iterations_started: ['count===1'],
+    iterations_completed: ['count===1']
   }
 }
 

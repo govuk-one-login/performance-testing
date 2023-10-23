@@ -1,7 +1,7 @@
 # -----------------------
 # Typescript > Javascript
 # -----------------------
-FROM node:16-alpine3.18 as node-build
+FROM node:21-alpine3.18 as node-build
 
 ENV WORKDIR=/home/node
 

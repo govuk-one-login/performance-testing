@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { sleep, group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -144,6 +145,7 @@ export function signUp (): void {
   let secretKey: string
   let totp: TOTP
   const mfaOption: mfaType = (Math.random() <= 0.5) ? 'SMS' : 'AUTH_APP'
+  iterationsStarted.add(1)
 
   res = group('B01_SignUp_01_LaunchRPStub GET', () =>
     timeRequest(() => http.get(env.rpStub, {
@@ -284,12 +286,14 @@ export function signUp (): void {
       timeRequest(() => res.submitForm({
         params: { tags: { name: 'B01_SignUp_12_Logout' } }
       }), { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
+    iterationsCompleted.add(1)
   }
 }
 
 export function signIn (): void {
   let res: Response
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
+  iterationsStarted.add(1)
 
   res = group('B01_SignIn_01_LaunchRPStub GET', () =>
     timeRequest(() => http.get(env.rpStub, {
@@ -401,4 +405,5 @@ export function signIn (): void {
         params: { tags: { name: 'B01_SignIn_10_Logout' } }
       }), { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
   }
+  iterationsCompleted.add(1)
 }

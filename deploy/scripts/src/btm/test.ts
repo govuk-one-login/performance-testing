@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { uuidv4, randomIntBetween } from '../common/utils/jslib/index'
@@ -220,44 +221,60 @@ const payloadTimestampMax: number = Number(payloadTimestampArray[1])
 
 export function sendEventType1 (): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[0]
+  iterationsStarted.add(1)
   sendSQSMessage(messageBody)
+  iterationsCompleted.add(1)
 }
 
 export function sendEventType2 (): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[1]
+  iterationsStarted.add(1)
   sendSQSMessage(messageBody)
+  iterationsCompleted.add(1)
 }
 
 export function sendEventType3 (): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[2]
+  iterationsStarted.add(1)
   sendSQSMessage(messageBody)
+  iterationsCompleted.add(1)
 }
 
 export function sendEventType4 (): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[3]
+  iterationsStarted.add(1)
   sendSQSMessage(messageBody)
+  iterationsCompleted.add(1)
 }
 
 export function sendEventType5 (): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[4]
+  iterationsStarted.add(1)
   sendSQSMessage(messageBody)
+  iterationsCompleted.add(1)
 }
 
 export function sendEventType6 (): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[5]
+  iterationsStarted.add(1)
   sendSQSMessage(messageBody)
+  iterationsCompleted.add(1)
 }
 
 export function sendEventType7 (): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[6]
+  iterationsStarted.add(1)
   sendSQSMessage(messageBody)
+  iterationsCompleted.add(1)
 }
 
 export function sendSQSMessage (messageBody: Record<string, unknown>): void {
   const randomTimestamp: number = randomIntBetween(payloadTimestampMin, payloadTimestampMax)
   const timestampFormatted: string = new Date(randomTimestamp * 1000).toISOString()
+  iterationsStarted.add(1)
   messageBody.event_id = uuidv4()
   messageBody.timestamp = randomTimestamp.toString()
   messageBody.timestamp_formatted = timestampFormatted.replace('Z', '')
   sqs.sendMessage(env.sqs_queue, JSON.stringify(messageBody))
+  iterationsCompleted.add(1)
 }

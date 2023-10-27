@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
@@ -120,7 +121,9 @@ export function authEvent (): void {
   const signinJourneyID = uuidv4()
   const authPayload = generateAuthRequest(userID, signinJourneyID)
   const authEventMessage = JSON.stringify(authPayload)
+  iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, authEventMessage)
+  iterationsCompleted.add(1)
 }
 
 export function allEvents (): void {
@@ -130,8 +133,10 @@ export function allEvents (): void {
   const f2fPayload = generateF2FRequest(userID, signinJourneyID)
   const docUploadPayload = generateDocumentUploadedRequest(userID)
   const ipvPayload = generateIPVRequest(userID, signinJourneyID)
+  iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(authPayload))
   sqs.sendMessage(env.sqs_queue, JSON.stringify(f2fPayload))
   sqs.sendMessage(env.sqs_queue, JSON.stringify(docUploadPayload))
   sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
+  iterationsCompleted.add(1)
 }

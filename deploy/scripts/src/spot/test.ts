@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
@@ -99,6 +100,7 @@ export function spotScenario (): void {
   const spotMessage = {
     messageBody: JSON.stringify(payload)
   }
-
+  iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, spotMessage.messageBody)
+  iterationsCompleted.add(1)
 }

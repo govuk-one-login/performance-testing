@@ -20,7 +20,7 @@ jobs:
       contents: read
     steps:
       - name: Deploy SAM app to ECR
-        uses: alphagov/di-devplatform-upload-action-ecr@1.0.2
+        uses: govuk-one-login/devplatform-upload-action-ecr@1.0.4
         with:
           artifact-bucket-name: ${{ secrets.PERF_ARTIFACT_SOURCE_BUCKET_NAME }}
           container-sign-kms-key-arn: ${{ secrets.PERF_CONTAINER_SIGN_KMS_KEY }}

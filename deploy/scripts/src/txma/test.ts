@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { uuidv4 } from '../common/utils/jslib/index.js'
@@ -145,5 +146,7 @@ const sqs = new SQSClient(awsConfig)
 
 export function sendEvent (): void {
   const messageBody = eventData.payload.replace(/UUID/g, () => uuidv4())
+  iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, messageBody)
+  iterationsCompleted.add(1)
 }

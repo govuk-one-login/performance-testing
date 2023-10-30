@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { sleep, group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -201,6 +202,7 @@ export function changeEmail (): void {
   const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
   const iteration = exec.scenario.iterationInInstance.toString().padStart(6, '0')
   const newEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
+  iterationsStarted.add(1)
 
   res = group('B01_ChangeEmail_01_LaunchAccountsHome GET', () =>
     timeRequest(() => http.get(env.envURL, {
@@ -283,10 +285,12 @@ export function changeEmail (): void {
       tags: { name: 'B01_ChangeEmail_08_SignOut' }
     }),
     { isStatusCode200, ...pageContentCheck('You have signed out') }))
+  iterationsCompleted.add(1)
 }
 
 export function changePassword (): void {
   let res: Response
+  iterationsStarted.add(1)
 
   res = group('B02_ChangePassword_01_LaunchAccountsHome GET', () =>
     timeRequest(() => http.get(env.envURL, {
@@ -355,10 +359,12 @@ export function changePassword (): void {
       tags: { name: 'B02_ChangePassword_07_SignOut' }
     }),
     { isStatusCode200, ...pageContentCheck('You have signed out') }))
+  iterationsCompleted.add(1)
 }
 
 export function changePhone (): void {
   let res: Response
+  iterationsStarted.add(1)
 
   res = group('B03_ChangePhone_01_LaunchAccountsHome GET', () =>
     timeRequest(() => http.get(env.envURL, {
@@ -444,10 +450,12 @@ export function changePhone (): void {
       tags: { name: 'B03_ChangePhone_08_SignOut' }
     }),
     { isStatusCode200, ...pageContentCheck('You have signed out') }))
+  iterationsCompleted.add(1)
 }
 
 export function deleteAccount (): void {
   let res: Response
+  iterationsStarted.add(1)
 
   res = group('B04_DeleteAccount_01_LaunchAccountsHome GET', () =>
     timeRequest(() => http.get(env.envURL, {
@@ -496,11 +504,13 @@ export function deleteAccount (): void {
         }
       }),
     { isStatusCode200, ...pageContentCheck('You have signed out') }))
+  iterationsCompleted.add(1)
 }
 
 export function validateUser (): void {
   let res: Response
   const userData = validateData[exec.scenario.iterationInInstance % validateData.length]
+  iterationsStarted.add(1)
 
   res = group('B05_ValidateUser_01_LaunchAccountsHome GET', () =>
     timeRequest(() => http.get(env.envURL, {
@@ -603,4 +613,5 @@ export function validateUser (): void {
       tags: { name: 'B05_ValidateUser_10_Logout' }
     }),
     { isStatusCode200, 'verify page content': r => (r.body as string).includes('You have signed out') }))
+  iterationsCompleted.add(1)
 }

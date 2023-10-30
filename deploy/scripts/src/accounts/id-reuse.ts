@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -134,6 +135,7 @@ export function persistID (): void {
   let res: Response
   const userID = uuidv4()
   const subjectID = `urn:fdc:gov.uk:2022:${userID}`
+  iterationsStarted.add(1)
   res = group('R01_persistID_01_GenerateToken POST', () =>
     timeRequest(() => http.post(env.envMock + '/generate',
       JSON.stringify({
@@ -172,11 +174,13 @@ export function persistID (): void {
   res = group('R01_persistID_03_Retrieve GET', () =>
     timeRequest(() => http.get(env.envURL + `/vcs/${subjectID}`, options),
       { isStatusCode200, ...pageContentCheck('vcs') }))
+  iterationsCompleted.add(1)
 }
 
 export function retrieveID (): void {
   let res: Response
   const summariseData = csvData[Math.floor(Math.random() * csvData.length)]
+  iterationsStarted.add(1)
 
   res = group('R02_RetrieveID_01_GenerateTokenSummary POST', () =>
     timeRequest(() => http.post(env.envMock + '/generate',
@@ -201,6 +205,7 @@ export function retrieveID (): void {
   res = group('R02_RetrieveID_02_Summarise GET', () =>
     timeRequest(() => http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options),
       { isStatusCode200, ...pageContentCheck('vcs') }))
+  iterationsCompleted.add(1)
 }
 
 function getToken (r: Response): string {

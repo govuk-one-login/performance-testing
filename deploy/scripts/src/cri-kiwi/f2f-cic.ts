@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -93,6 +94,7 @@ const env = {
 
 export function CIC (): void {
   let res: Response
+  iterationsStarted.add(1)
 
   res = group('B01_CIC_01_IPVStubCall POST', () =>
     timeRequest(() => http.post(env.CIC.ipvStub + '/start',
@@ -178,6 +180,7 @@ export function CIC (): void {
   res = group('B01_CIC_07_SendBearerToken POST', () =>
     timeRequest(() => http.post(env.CIC.target + '/userinfo', {}, options),
       { isStatusCode200, 'verify response body': (r) => (r.body as string).includes('credentialJWT') }))
+  iterationsCompleted.add(1)
 }
 
 export function FaceToFace (): void {
@@ -189,6 +192,7 @@ export function FaceToFace (): void {
   const expiryDay = expiry.getDate().toString()
   const expiryMonth = (expiry.getMonth() + 1).toString()
   const expiryYear = expiry.getFullYear().toString()
+  iterationsStarted.add(1)
 
   res = group('B02_FaceToFace_01_IPVStubCall POST', () =>
     timeRequest(() => http.post(env.F2F.ipvStub + '/start',
@@ -518,6 +522,7 @@ export function FaceToFace (): void {
         'is status 202': (r) => r.status === 202,
         ...pageContentCheck('sub')
       }))
+  iterationsCompleted.add(1)
 }
 
 function randomDate (start: Date, end: Date): Date {

@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -260,6 +261,7 @@ export function fraud (): void {
   const userDetails = getUserDetails()
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
+  iterationsStarted.add(1)
 
   res = group('B01_Fraud_01_CoreStubEditUserContinue POST', () =>
     timeRequest(() => http.post(
@@ -321,6 +323,7 @@ export function fraud (): void {
     ),
     { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
   })
+  iterationsCompleted.add(1)
 }
 
 export function drivingLicence (): void {
@@ -331,6 +334,7 @@ export function drivingLicence (): void {
   const encodedCredentials = encoding.b64encode(credentials)
   const userDVLA = csvDVLA[exec.scenario.iterationInTest % csvDVLA.length]
   const userDVA = csvDVA[exec.scenario.iterationInTest % csvDVA.length]
+  iterationsStarted.add(1)
 
   res = group('B02_Driving_01_DLEntryFromCoreStub GET', () =>
     timeRequest(() => http.get(`${env.ipvCoreStub}/authorize?cri=driving-licence-cri-${env.envName}&rowNumber=197`,
@@ -406,6 +410,7 @@ export function drivingLicence (): void {
       }),
     { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
   })
+  iterationsCompleted.add(1)
 }
 
 export function passport (): void {
@@ -413,6 +418,7 @@ export function passport (): void {
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   const userPassport = csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)]
+  iterationsStarted.add(1)
 
   res = group('B03_Passport_01_PassportCRIEntryFromStub GET', () =>
     timeRequest(() => http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' +
@@ -455,6 +461,7 @@ export function passport (): void {
     { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
   }
   )
+  iterationsCompleted.add(1)
 }
 
 interface User {

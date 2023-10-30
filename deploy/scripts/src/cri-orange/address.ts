@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -84,6 +85,7 @@ const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
 export function addressScenario1 (): void {
   let res: Response
   const user1Address = csvData1[exec.scenario.iterationInTest % csvData1.length]
+  iterationsStarted.add(1)
 
   res = group('B02_Address_01_AddressCRIEntryFromStub  GET', () =>
     timeRequest(() => http.get(
@@ -141,4 +143,5 @@ export function addressScenario1 (): void {
       }),
     { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
   })
+  iterationsCompleted.add(1)
 }

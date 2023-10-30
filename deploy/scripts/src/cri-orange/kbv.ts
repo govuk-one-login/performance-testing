@@ -1,3 +1,4 @@
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -79,6 +80,7 @@ export function kbvScenario1 (): void {
     kbvAns3: string
   }
   const kbvAnsJSON: kbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
+  iterationsStarted.add(1)
 
   res = group('B01_KBV_01_CoreStubEditUserContinue POST', () =>
     timeRequest(() => http.get(
@@ -128,4 +130,5 @@ export function kbvScenario1 (): void {
       }),
     { isStatusCode200, ...pageContentCheck('verificationScore&quot;: 2') })
   })
+  iterationsCompleted.add(1)
 }

@@ -57,8 +57,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 5000,
       stages: [
-        { target: 500, duration: '15m' }, // Ramp up to 500 iterations per second in 15 minutes
-        { target: 500, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 500 iterations/second
+        { target: 1200, duration: '15m' }, // Ramp up to 1,200 iterations per second in 15 minutes
+        { target: 1200, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 1,200 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'spotScenario'

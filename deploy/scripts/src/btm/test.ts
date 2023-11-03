@@ -273,7 +273,7 @@ export function sendSQSMessage (messageBody: Record<string, unknown>): void {
   const timestampFormatted: string = new Date(randomTimestamp * 1000).toISOString()
   iterationsStarted.add(1)
   messageBody.event_id = uuidv4()
-  messageBody.timestamp = randomTimestamp.toString()
+  messageBody.timestamp = randomTimestamp
   messageBody.timestamp_formatted = timestampFormatted.replace('Z', '')
   sqs.sendMessage(env.sqs_queue, JSON.stringify(messageBody))
   iterationsCompleted.add(1)

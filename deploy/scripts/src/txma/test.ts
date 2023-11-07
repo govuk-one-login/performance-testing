@@ -12,14 +12,14 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 2,
+      maxVUs: 1,
       stages: [
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'sendEvent'
     }
   },
-  load30: {
+  lowVolumeTest: {
     sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -27,25 +27,14 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 300,
       stages: [
-        { target: 30, duration: '10m' } // Ramp up to 30 iterations per second in 10 minutes
+        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
+        { target: 30, duration: '30m' }, // Maintain steady state at 30 interations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent'
     }
   },
-  load100: {
-    ssendEventScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1000,
-      stages: [
-        { target: 100, duration: '10m' } // Ramp up to 100 iterations per second in 10 minutes
-      ],
-      exec: 'sendEvent'
-    }
-  },
-  load500: {
+  load: {
     sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -53,25 +42,14 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1500,
       stages: [
-        { target: 500, duration: '10m' } // Ramp up to 500 iterations per second in 10 minutes
+        { target: 500, duration: '15m' }, // Ramp up to 500 iterations per second in 15 minutes
+        { target: 500, duration: '30m' }, // Maintain steady state at 500 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total rap down in 5 minutes
       ],
       exec: 'sendEvent'
     }
   },
-  load1000: {
-    sendEventScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 2000,
-      stages: [
-        { target: 1000, duration: '10m' } // Ramp up to 1000 iterations per second in 10 minutes
-      ],
-      exec: 'sendEvent'
-    }
-  },
-  load1500: {
+  stress: {
     sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -79,33 +57,25 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 3000,
       stages: [
-        { target: 1500, duration: '10m' } // Ramp up to 1500 iterations per second in 10 minutes
+        { target: 2000, duration: '15m' }, // Ramp up to 2000 iterations per second in 15 minutes
+        { target: 2000, duration: '30m' }, // Maintain steady state at 2000 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+
       ],
       exec: 'sendEvent'
     }
   },
-  load2000: {
+  peakStress: {
     sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 3000,
+      maxVUs: 5000,
       stages: [
-        { target: 2000, duration: '10m' } // Ramp up to 2000 iterations per second in 10 minutes
-      ],
-      exec: 'sendEvent'
-    }
-  },
-  loadFull2000: {
-    sendEventScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 3000,
-      stages: [
-        { target: 2000, duration: '60m' } // Ramp up to 2000 iterations per second in 60 minutes
+        { target: 5000, duration: '15m' }, // Ramp up to 5000 iterations per second in 15 minutes
+        { target: 5000, duration: '30m' }, // Maintain steady state at 5000 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent'
     }

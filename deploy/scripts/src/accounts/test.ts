@@ -23,7 +23,6 @@ const profiles: ProfileList = {
       ],
       exec: 'changeEmail'
     },
-
     changePassword: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -35,7 +34,6 @@ const profiles: ProfileList = {
       ],
       exec: 'changePassword'
     },
-
     changePhone: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -47,7 +45,6 @@ const profiles: ProfileList = {
       ],
       exec: 'changePhone'
     },
-
     deleteAccount: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -79,13 +76,12 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 3000,
       stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
+        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
+        { target: 30, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changeEmail'
     },
-
     changePassword: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -93,13 +89,12 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 3000,
       stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
+        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
+        { target: 30, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changePassword'
     },
-
     changePhone: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -107,13 +102,12 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 3000,
       stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
+        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
+        { target: 30, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'changePhone'
     },
-
     deleteAccount: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -121,8 +115,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 3000,
       stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
+        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
+        { target: 30, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'deleteAccount'
@@ -141,7 +135,6 @@ const profiles: ProfileList = {
       exec: 'validateUser'
     }
   }
-
 }
 
 const loadProfile = selectProfile(profiles)

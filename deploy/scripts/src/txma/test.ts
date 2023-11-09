@@ -4,6 +4,7 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
+import { group, check, fail } from 'k6'
 
 const profiles: ProfileList = {
   smoke: {
@@ -116,7 +117,14 @@ const sqs = new SQSClient(awsConfig)
 
 export function sendEvent (): void {
   const messageBody = eventData.payload.replace(/UUID/g, () => uuidv4())
-  iterationsStarted.add(1)
-  sqs.sendMessage(env.sqs_queue, messageBody)
-  iterationsCompleted.add(1)
+  group('B01__01_AuthEventRequest', function () {
+    iterationsStarted.add(1)
+    const res = sqs.sendMessage(env.sqs_queue, messageBody)
+    check(res, {
+      'verify id exists': (r) =>
+        (r.id) !== null
+    })
+      ? iterationsCompleted.add(1)
+      : fail('Response Validation Failed')
+  })
 }

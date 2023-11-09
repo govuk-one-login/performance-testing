@@ -5,6 +5,7 @@ import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generateAuthRequest, generateF2FRequest, generateIPVRequest, generateDocumentUploadedRequest } from './requestGenerator/ipvrReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
+import { group, check, fail } from 'k6'
 
 const profiles: ProfileList = {
   smoke: {
@@ -121,9 +122,16 @@ export function authEvent (): void {
   const signinJourneyID = uuidv4()
   const authPayload = generateAuthRequest(userID, signinJourneyID)
   const authEventMessage = JSON.stringify(authPayload)
-  iterationsStarted.add(1)
-  sqs.sendMessage(env.sqs_queue, authEventMessage)
-  iterationsCompleted.add(1)
+  group('B01__01_AuthEventRequest', function () {
+    iterationsStarted.add(1)
+    const res = sqs.sendMessage(env.sqs_queue, authEventMessage)
+    check(res, {
+      'verify id exists': (r) =>
+        (r.id) !== null
+    })
+      ? iterationsCompleted.add(1)
+      : fail('Response Validation Failed')
+  })
 }
 
 export function allEvents (): void {
@@ -134,9 +142,40 @@ export function allEvents (): void {
   const docUploadPayload = generateDocumentUploadedRequest(userID)
   const ipvPayload = generateIPVRequest(userID, signinJourneyID)
   iterationsStarted.add(1)
-  sqs.sendMessage(env.sqs_queue, JSON.stringify(authPayload))
-  sqs.sendMessage(env.sqs_queue, JSON.stringify(f2fPayload))
-  sqs.sendMessage(env.sqs_queue, JSON.stringify(docUploadPayload))
-  sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
-  iterationsCompleted.add(1)
+  group('B02__01_AuthEventRequest', function () {
+    const res = sqs.sendMessage(env.sqs_queue, JSON.stringify(authPayload))
+    check(res, {
+      'verify id exists': (r) =>
+        (r.id) !== null
+    })
+      ? iterationsCompleted.add(1)
+      : fail('Response Validation Failed')
+  })
+  group('B02__02_F2FEventRequest', function () {
+    const res = sqs.sendMessage(env.sqs_queue, JSON.stringify(f2fPayload))
+    check(res, {
+      'verify id exists': (r) =>
+        (r.id) !== null
+    })
+      ? iterationsCompleted.add(1)
+      : fail('Response Validation Failed')
+  })
+  group('B02__03_DocUploadEventRequest', function () {
+    const res = sqs.sendMessage(env.sqs_queue, JSON.stringify(docUploadPayload))
+    check(res, {
+      'verify id exists': (r) =>
+        (r.id) !== null
+    })
+      ? iterationsCompleted.add(1)
+      : fail('Response Validation Failed')
+  })
+  group('B02__04_IPVEventRequest', function () {
+    const res = sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
+    check(res, {
+      'verify id exists': (r) =>
+        (r.id) !== null
+    })
+      ? iterationsCompleted.add(1)
+      : fail('Response Validation Failed')
+  })
 }

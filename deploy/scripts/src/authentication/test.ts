@@ -286,8 +286,8 @@ export function signUp (): void {
       timeRequest(() => res.submitForm({
         params: { tags: { name: 'B01_SignUp_12_Logout' } }
       }), { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
-    iterationsCompleted.add(1)
   }
+  iterationsCompleted.add(1)
 }
 
 export function signIn (): void {

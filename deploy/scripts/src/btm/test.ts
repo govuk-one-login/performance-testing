@@ -93,8 +93,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 150,
       stages: [
-        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
-        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
+        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEventType1'
@@ -106,8 +106,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 150,
       stages: [
-        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
-        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
+        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEventType2'
@@ -119,8 +119,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 150,
       stages: [
-        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
-        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
+        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEventType3'
@@ -132,8 +132,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 150,
       stages: [
-        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
-        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
+        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEventType4'
@@ -145,8 +145,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 150,
       stages: [
-        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
-        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
+        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEventType5'
@@ -158,8 +158,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 150,
       stages: [
-        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
-        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
+        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEventType6'
@@ -171,8 +171,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 150,
       stages: [
-        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
-        { target: 5, duration: '10m' }, // Maintain steady state at 5 iterations per second for 10 minutes
+        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
+        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEventType7'

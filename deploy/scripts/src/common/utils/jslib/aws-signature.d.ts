@@ -7,14 +7,15 @@ export class SignatureV4 {
    * string parameters
    * https://k6.io/docs/javascript-api/jslib/aws/
    *
-   * @param {string} service The AWS service to sign or pre-sign requests for
-   * @param {string} region The AWS region to sign or pre-sign requests for
-   * @param {object} credentials The AWS credentials to sign or pre-sign requests with.
+   * @param {object} options Object containing the details of the AWS properties to initialise the class
+   * @param {string} options.service The AWS service to sign or pre-sign requests for
+   * @param {string} options.region The AWS region to sign or pre-sign requests for
+   * @param {object} options.credentials The AWS credentials to sign or pre-sign requests with.
    *                             An object with accessKeyId, secretAccessKeyId,
    *                             and optional sessionToken properties
-   * @param {boolean} uriEscapePath Whether to uri-escape the request URI path
+   * @param {boolean} options.uriEscapePath Whether to uri-escape the request URI path
    *                                as part of computing the canonical request string
-   * @param {boolean} applyChecksum Whether to calculate a checksum of the request body
+   * @param {boolean} options.applyChecksum Whether to calculate a checksum of the request body
    *                                and include it as either a request header (when signing)
    *                                or as a query string parameter (when pre-signing)
    * @example
@@ -46,13 +47,16 @@ export class SignatureV4 {
    * SignatureV4.sign() signs an HTTP request with the AWS Signature V4 algorithm.
    * https://k6.io/docs/javascript-api/jslib/aws/signaturev4/sign/
    *
-   * @param {string} method The HTTP method of the request
-   * @param {string} protocol The network protocol of the request. Accepted values 'http' and 'https'
-   * @param {string} hostname The hostname the request is sent to
-   * @param {string} path The path of the request
-   * @param {object} headers The headers of the HTTP request
-   * @param {string or ArrayBuffer} body The optional body of the HTTP request
-   * @param {object} query The optional query parameters of the HTTP request
+   * @param {object} request Details of the request to sign
+   * @param {string} request.method The HTTP method of the request
+   * @param {string} request.protocol The network protocol of the request. Accepted values 'http' and 'https'
+   * @param {string} request.hostname The hostname the request is sent to
+   * @param {string} request.path The path of the request
+   * @param {Record<string, string>} request.headers The headers of the HTTP request
+   * @param {string | ArrayBuffer} [request.body] The optional body of the HTTP request
+   * @param {Record<string, string>} [request.query] The optional query parameters of the HTTP request
+   * @param {object} [overrides] Options overrides object for signingDate, signingService, signingRegion, unsignableHeaders, signableHeaders
+   * @returns Object with the signed request's headers to use in the context of a k6 HTTP request and the signed url to use in the context of a k6 HTTP request
    * @example
    * const signedRequest = signer.sign(
    *  method: 'GET',

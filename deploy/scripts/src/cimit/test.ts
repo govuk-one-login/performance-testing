@@ -45,6 +45,88 @@ const profiles: ProfileList = {
       ],
       exec: 'postMitigations'
     }
+  },
+  lowVolumeTest: {
+    putContraIndicators: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 150,
+      stages: [
+        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'putContraIndicators'
+    },
+    getContraIndicatorCredentials: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 150,
+      stages: [
+        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'getContraIndicatorCredentials'
+    },
+    postMitigations: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 150,
+      stages: [
+        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
+        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'postMitigations'
+    }
+  },
+  load: {
+    putContraIndicators: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 500,
+      stages: [
+        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
+        { target: 100, duration: '30m' }, // Maintain steady state at 100 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'putContraIndicators'
+    },
+    getContraIndicatorCredentials: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 500,
+      stages: [
+        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
+        { target: 100, duration: '30m' }, // Maintain steady state at 100 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'getContraIndicatorCredentials'
+    },
+    postMitigations: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 500,
+      stages: [
+        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
+        { target: 100, duration: '30m' }, // Maintain steady state at 100 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'postMitigations'
+    }
   }
 }
 

@@ -3,11 +3,10 @@ import { group } from 'k6'
 import { SharedArray } from 'k6/data'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import encoding from 'k6/encoding'
 import exec from 'k6/execution'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { timeRequest } from '../common/utils/request/timing'
-import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
@@ -19,7 +18,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 1,
       stages: [
-        { target: 1, duration: '5s' } // Ramps up to target load
+        { target: 1, duration: '30s' } // Ramps up to target load
       ],
       exec: 'ninoScenario1'
     }
@@ -55,14 +54,6 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
-const env = {
-ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL}
-
-const stubCreds = {
-userName: __ENV.IDENTITY_CORE_STUB_USERNAME,
-password: __ENV.IDENTITY_CORE_STUB_PASSWORD
-}
-
 interface nino {
   niNumber: string
 }
@@ -76,52 +67,28 @@ const csvData1: nino[] = new SharedArray('csvDataNino', () => {
 export function ninoScenario1 (): void {
   let res: Response
   const user1Nino = csvData1[exec.scenario.iterationInTest % csvData1.length]
-  const credentials = `${stubCreds.userName}:${stubCreds.password}`
-  const encodedCredentials = encoding.b64encode(credentials)
   iterationsStarted.add(1)
 
-  res = group('B02_Nino_01_EntryFromStub  GET', () =>
-    timeRequest(() => http.get( env.ipvCoreStub + '/edit-user?cri=check-hmrc-build',
-      {
-         headers: { Authorization: `Basic ${encodedCredentials}` },
-         tags: { name: 'B02_Nino_01_EntryFromStub' }
-      }
-     ),
-    { isStatusCode200, ...pageContentCheck('Edit User') })
+  res = group('B02_Nino_01_EntryFromLocal  GET', () =>
+    timeRequest(() => {
+      const res = http.get('http://localhost:5010/oauth2/authorize?request=lorem&client_id=success', { redirects: 1 })
+      const jar = http.cookieJar()
+      const cookie = res.cookies.service_session[0]
+      jar.set(res.url, cookie.name, cookie.value)
+      return http.get('http://localhost:5010' + res.headers.Location, { jar })
+    },
+    { isStatusCode200, ...pageContentCheck('national insurance') })
   )
 
   sleepBetween(1, 3)
 
-  res = group('B02_Nino_02_AddUser POST', () =>
+  res = group('B02_Nino_02_SearchNiNo POST', () =>
     timeRequest(() => res.submitForm({
-      fields: { firstName: "Jim", surname: "Ferguson", "dateOfBirth-day":"23", "dateOfBirth-month": "4", "dateOfBirth-year": "1948" },
-      params: {
-        redirects: 1},
-      submitSelector: '#govuk-button button',
-      params: {
-      headers: { Authorization: `Basic ${encodedCredentials}` },
-      tags: { name: 'B02_Nino_02_AddUser' } }
-    }),
-    { isStatusCode200, ...pageContentCheck('national insurance number') }))
-
-  sleepBetween(1, 3)
-
-  group('B02_Nino_03_SearchNiNo POST', () => {
-    res = timeRequest(() => res.submitForm({
       fields: { nationalInsuranceNumber: user1Nino.niNumber },
-      params: {
-        redirects: 1,
-        tags: { name: 'B02_Nino_03_SearchNiNo' }
-      },
-      submitSelector: '#continue'
+      submitSelector: '#continue',
+      params: { tags: { name: 'B02_Nino_02_SearchNiNo' } }
     }),
-    { isStatusCode302 })
-    res = timeRequest(() => http.get(res.headers.Location,
-          {
-            headers: { Authorization: `Basic ${encodedCredentials}` },
-            tags: { name: 'B02_Nino_03_SearchNiNo' }
-          }),
-    { isStatusCode200, ...pageContentCheck('Verifiable') })
-    })
+    { isStatusCode200, ...pageContentCheck('Example Domain') }))
+
   iterationsCompleted.add(1)
 }

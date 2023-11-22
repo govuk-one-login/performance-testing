@@ -55,8 +55,7 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
-const env = {
-  ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL }
+const env = { ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL }
 
 const stubCreds = {
   userName: __ENV.IDENTITY_CORE_STUB_USERNAME,
@@ -83,7 +82,6 @@ const csvData1: nino[] = new SharedArray('csvDataNino', () => {
 
 export function ninoScenario1 (): void {
   let res: Response
-  const user1Nino = csvData1[exec.scenario.iterationInTest % csvData1.length]
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   const userNino = csvData1[Math.floor(Math.random() * csvData1.length)]
@@ -109,12 +107,12 @@ export function ninoScenario1 (): void {
         'dateOfBirth-day': userNino.birthDay,
         'dateOfBirth-month': userNino.birthMonth,
         'dateOfBirth-year': userNino.birthYear
-        },
+      },
       submitSelector: '#govuk-button button',
       params: {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         tags: { name: 'B02_Nino_02_AddUser' }
-        }
+      }
     }),
     { isStatusCode200, ...pageContentCheck('national insurance number') }))
 
@@ -132,8 +130,8 @@ export function ninoScenario1 (): void {
     { isStatusCode302 })
     res = timeRequest(() => http.get(res.headers.Location,
       {
-      headers: { Authorization: `Basic ${encodedCredentials}` },
-      tags: { name: 'B02_Nino_03_SearchNiNo' }
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B02_Nino_03_SearchNiNo' }
       }),
     { isStatusCode200, ...pageContentCheck('Verifiable') })
   })

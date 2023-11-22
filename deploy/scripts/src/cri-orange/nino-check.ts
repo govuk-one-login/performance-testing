@@ -68,8 +68,16 @@ interface nino {
 }
 
 const csvData1: nino[] = new SharedArray('csvDataNino', () => {
-  return open('./data/ninoCRIData.csv').split('\n').slice(1).map(niNumber => {
-    return { niNumber }
+  return open('./data/ninoCRIDataStub.csv').split('\n').slice(1).map((s) => {
+    const data = s.split(',')
+    return {
+     firstName: data[0],
+     lastName: data[1],
+     birthDay: data[2],
+     birthMonth: data[3],
+     birthYear: data[4],
+     niNumber: data[5],
+      }
   })
 })
 
@@ -78,6 +86,7 @@ export function ninoScenario1 (): void {
   const user1Nino = csvData1[exec.scenario.iterationInTest % csvData1.length]
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
+  const userNino = csvData1[Math.floor(Math.random() * csvData1.length)]
   iterationsStarted.add(1)
 
   res = group('B02_Nino_01_EntryFromStub  GET', () =>
@@ -94,9 +103,12 @@ export function ninoScenario1 (): void {
 
   res = group('B02_Nino_02_AddUser POST', () =>
     timeRequest(() => res.submitForm({
-      fields: { firstName: "Jim", surname: "Ferguson", "dateOfBirth-day":"23", "dateOfBirth-month": "4", "dateOfBirth-year": "1948" },
-      params: {
-        redirects: 1},
+      fields: {
+      firstName: userNino.firstName,
+      surname: userNino.lastName,
+      "dateOfBirth-day": userNino.birthDay,
+      "dateOfBirth-month": userNino.birthMonth,
+      "dateOfBirth-year": userNino.birthYear },
       submitSelector: '#govuk-button button',
       params: {
       headers: { Authorization: `Basic ${encodedCredentials}` },
@@ -108,9 +120,9 @@ export function ninoScenario1 (): void {
 
   group('B02_Nino_03_SearchNiNo POST', () => {
     res = timeRequest(() => res.submitForm({
-      fields: { nationalInsuranceNumber: user1Nino.niNumber },
-      params: {
-        redirects: 1,
+      fields: { nationalInsuranceNumber: userNino.niNumber },
+       params: {
+         redirects: 1,
         tags: { name: 'B02_Nino_03_SearchNiNo' }
       },
       submitSelector: '#continue'

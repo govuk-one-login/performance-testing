@@ -56,11 +56,11 @@ export function setup (): void {
 }
 
 const env = {
-ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL}
+  ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL }
 
 const stubCreds = {
-userName: __ENV.IDENTITY_CORE_STUB_USERNAME,
-password: __ENV.IDENTITY_CORE_STUB_PASSWORD
+  userName: __ENV.IDENTITY_CORE_STUB_USERNAME,
+  password: __ENV.IDENTITY_CORE_STUB_PASSWORD
 }
 
 interface nino {
@@ -71,13 +71,13 @@ const csvData1: nino[] = new SharedArray('csvDataNino', () => {
   return open('./data/ninoCRIDataStub.csv').split('\n').slice(1).map((s) => {
     const data = s.split(',')
     return {
-     firstName: data[0],
-     lastName: data[1],
-     birthDay: data[2],
-     birthMonth: data[3],
-     birthYear: data[4],
-     niNumber: data[5],
-      }
+      firstName: data[0],
+      lastName: data[1],
+      birthDay: data[2],
+      birthMonth: data[3],
+      birthYear: data[4],
+      niNumber: data[5]
+    }
   })
 })
 
@@ -90,12 +90,12 @@ export function ninoScenario1 (): void {
   iterationsStarted.add(1)
 
   res = group('B02_Nino_01_EntryFromStub  GET', () =>
-    timeRequest(() => http.get( env.ipvCoreStub + '/edit-user?cri=check-hmrc-build',
+    timeRequest(() => http.get(env.ipvCoreStub + '/edit-user?cri=check-hmrc-build',
       {
-         headers: { Authorization: `Basic ${encodedCredentials}` },
-         tags: { name: 'B02_Nino_01_EntryFromStub' }
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B02_Nino_01_EntryFromStub' }
       }
-     ),
+    ),
     { isStatusCode200, ...pageContentCheck('Edit User') })
   )
 
@@ -104,15 +104,17 @@ export function ninoScenario1 (): void {
   res = group('B02_Nino_02_AddUser POST', () =>
     timeRequest(() => res.submitForm({
       fields: {
-      firstName: userNino.firstName,
-      surname: userNino.lastName,
-      "dateOfBirth-day": userNino.birthDay,
-      "dateOfBirth-month": userNino.birthMonth,
-      "dateOfBirth-year": userNino.birthYear },
+        firstName: userNino.firstName,
+        surname: userNino.lastName,
+        'dateOfBirth-day': userNino.birthDay,
+        'dateOfBirth-month': userNino.birthMonth,
+        'dateOfBirth-year': userNino.birthYear
+        },
       submitSelector: '#govuk-button button',
       params: {
-      headers: { Authorization: `Basic ${encodedCredentials}` },
-      tags: { name: 'B02_Nino_02_AddUser' } }
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        tags: { name: 'B02_Nino_02_AddUser' }
+        }
     }),
     { isStatusCode200, ...pageContentCheck('national insurance number') }))
 
@@ -121,19 +123,19 @@ export function ninoScenario1 (): void {
   group('B02_Nino_03_SearchNiNo POST', () => {
     res = timeRequest(() => res.submitForm({
       fields: { nationalInsuranceNumber: userNino.niNumber },
-       params: {
-         redirects: 1,
+      params: {
+        redirects: 1,
         tags: { name: 'B02_Nino_03_SearchNiNo' }
       },
       submitSelector: '#continue'
     }),
     { isStatusCode302 })
     res = timeRequest(() => http.get(res.headers.Location,
-          {
-            headers: { Authorization: `Basic ${encodedCredentials}` },
-            tags: { name: 'B02_Nino_03_SearchNiNo' }
-          }),
+      {
+      headers: { Authorization: `Basic ${encodedCredentials}` },
+      tags: { name: 'B02_Nino_03_SearchNiNo' }
+      }),
     { isStatusCode200, ...pageContentCheck('Verifiable') })
-    })
+  })
   iterationsCompleted.add(1)
 }

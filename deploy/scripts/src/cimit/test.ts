@@ -9,6 +9,7 @@ import { type Options } from 'k6/options'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200 } from '../common/utils/checks/assertions'
 import { SharedArray } from 'k6/data'
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 
 const profiles: ProfileList = {
   smoke: {
@@ -185,7 +186,7 @@ export function putContraIndicators (): void {
     body: putContraIndicatorPayload
   }
   const signedRequest = signer.sign(request)
-
+  iterationsStarted.add(1)
   group('B01_CIMIT_01_PutContraIndicator POST', () =>
     timeRequest(() => http.post(signedRequest.url, putContraIndicatorPayload,
       {
@@ -193,6 +194,7 @@ export function putContraIndicators (): void {
         tags: { name: 'B01_CIMIT_01_PutContraIndicator' }
       }),
     { isStatusCode200 }))
+  iterationsCompleted.add(1)
 }
 
 export function getContraIndicatorCredentials (): void {
@@ -207,7 +209,7 @@ export function getContraIndicatorCredentials (): void {
     body: getCICPayload
   }
   const signedRequest = signer.sign(request)
-
+  iterationsStarted.add(1)
   group('B02_CIMIT_01_GetContraIndicatorCredentials GET', () =>
     timeRequest(() => http.post(signedRequest.url, getCICPayload,
       {
@@ -215,6 +217,7 @@ export function getContraIndicatorCredentials (): void {
         tags: { name: 'B02_CIMIT_01_GetContraIndicatorCredentials' }
       }),
     { isStatusCode200 }))
+  iterationsCompleted.add(1)
 }
 
 export function postMitigations (): void {
@@ -228,7 +231,7 @@ export function postMitigations (): void {
     body: postMitigationsPayload
   }
   const signedRequest = signer.sign(request)
-
+  iterationsStarted.add(1)
   group('B03_CIMIT_01_PostMitigations POST', () =>
     timeRequest(() => http.post(signedRequest.url, postMitigationsPayload,
       {
@@ -236,4 +239,5 @@ export function postMitigations (): void {
         tags: { name: 'B03_CIMIT_01_PostMitigations' }
       }),
     { isStatusCode200 }))
+  iterationsCompleted.add(1)
 }

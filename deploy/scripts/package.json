@@ -6,7 +6,7 @@
   "main": "index.js",
   "devDependencies": {
     "@types/k6": "^0.47.3",
-    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
     "core-js": "^3.33.2",
     "esbuild": "^0.19.6",
     "esbuild-plugin-copy": "^2.1.1",

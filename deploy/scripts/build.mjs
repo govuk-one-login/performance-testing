@@ -1,18 +1,18 @@
-const { build } = require('esbuild')
-const { copy } = require('esbuild-plugin-copy')
-const glob = require('glob')
+import { build } from 'esbuild'
+import { copy } from 'esbuild-plugin-copy'
+import { sync } from 'glob'
 const outbase = './src'
 const outdir = './dist'
 
 build({
-  entryPoints: glob.sync('src/*/*.ts'),
+  entryPoints: sync('src/*/*.ts'),
   outbase,
   outdir,
   target: 'es6',
   format: 'esm',
   bundle: true,
-  sourcemap: true,
-  minify: false,
+  sourcemap: false,
+  minify: true,
   external: ['k6*', 'https://*'],
   plugins: [
     copy({
@@ -25,7 +25,7 @@ build({
 })
   .then(() => {
     console.log('Test scripts transpiled:')
-    glob.sync(outdir + '/*/*.js').sort().forEach(file => {
+    sync(outdir + '/*/*.js').sort().forEach(file => {
       console.log(`+ \x1b[32m${file}\x1b[0m`)
     })
   })

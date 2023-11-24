@@ -33,7 +33,7 @@ Further, you can add the `--fix` flag to fix any auto-fixable problems in your T
 
 ## Local Testing
 
-Test scripts are contained in the `src` folder, with a folder for each product team. Test script files must match the path ( `src/<team_name>/*.ts`) specified in the [build.js](build.js#L8) file. Static data files are kept in `src/<team_name>/data` folders, they are copied to `dist/<team_name>/data` by esbuild as defined [here](build.js#L17-L24).
+Test scripts are contained in the `src` folder, with a folder for each product team. Test script files must match the path ( `src/<team_name>/*.ts`) specified in the [build.mjs](build.mjs#L8) file. Static data files are kept in `src/<team_name>/data` folders, they are copied to `dist/<team_name>/data` by esbuild as defined [here](build.mjs#L17-L24).
 
 To run a TypeScript test locally, navigate to the `deploy/scripts` folder and run the following
 

@@ -10,7 +10,7 @@
         "sourceType": "module",
         "project": "**/tsconfig.json"
     },
-    "ignorePatterns": ["src/common/utils/jslib/*.js", "dist/**", "build.js"],
+    "ignorePatterns": ["src/common/utils/jslib/*.js", "dist/**"],
     "rules": {
     }
 }

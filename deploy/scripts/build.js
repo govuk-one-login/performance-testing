@@ -11,8 +11,8 @@ build({
   target: 'es6',
   format: 'esm',
   bundle: true,
-  sourcemap: true,
-  minify: false,
+  sourcemap: false,
+  minify: true,
   external: ['k6*', 'https://*'],
   plugins: [
     copy({

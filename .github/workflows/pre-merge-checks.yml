@@ -32,7 +32,7 @@ jobs:
         run: npm start
 
       - name: Run local k6 unit test script
-        uses: grafana/k6-action@v0.3.0
+        uses: grafana/k6-action@v0.3.1
         with:
           filename: ./deploy/scripts/dist/common/unit-tests.js
 

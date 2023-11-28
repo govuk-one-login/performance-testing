@@ -10,6 +10,8 @@ import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './
 import { addressPayloadDL, kbvPayloaDL, fraudPayloadDL, drivingLicencePayload } from './data/drivingLicenceData'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { SharedArray } from 'k6/data'
+import { uuidv4 } from '../common/utils/jslib/index'
 
 const profiles: ProfileList = {
   smoke: {
@@ -34,6 +36,17 @@ const profiles: ProfileList = {
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
       exec: 'drivingLicence'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 5,
+      stages: [
+        { target: 1, duration: '60s' } // Ramps up to target load
+      ],
+      exec: 'idReuse'
     }
   },
   lowVolumeTest: {
@@ -62,6 +75,19 @@ const profiles: ProfileList = {
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'drivingLicence'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 3000,
+      stages: [
+        { target: 20, duration: '5m' }, // Ramp up to 20 iterations per second in 5 minutes
+        { target: 20, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 20 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'idReuse'
     }
   },
   load: {
@@ -90,6 +116,19 @@ const profiles: ProfileList = {
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'drivingLicence'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1000,
+      maxVUs: 5000,
+      stages: [
+        { target: 1900, duration: '15m' }, // Ramp up to 1,900 iterations per second in 15 minutes
+        { target: 1900, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 1,900 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'idReuse'
     }
   }
 }
@@ -107,6 +146,18 @@ export const options: Options = {
 export function setup (): void {
   describeProfile(loadProfile)
 }
+
+interface IDReuseUserID {
+  userID: string
+}
+
+const csvData: IDReuseUserID[] = new SharedArray('ID Reuse User ID', function () {
+  return open('./data/idReuseTestData.csv').split('\n').slice(1).map((userID) => {
+    return {
+      userID
+    }
+  })
+})
 
 const env = {
   orchStubEndPoint: __ENV.IDENTITY_ORCH_STUB_URL,
@@ -536,6 +587,47 @@ export function drivingLicence (): void {
     res = timeRequest(() => http.get(res.headers.Location, {
       headers: { Authorization: `Basic ${encodedCredentials}` },
       tags: { name: 'B02_DrivingLicence_11_ContDLSuccess_02_OrchStub' }
+    }),
+    { isStatusCode200, ...pageContentCheck('User information') })
+    iterationsCompleted.add(1)
+  })
+}
+
+export function idReuse (): void {
+  let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  const idReuseUserID = csvData[Math.floor(Math.random() * csvData.length)]
+  iterationsStarted.add(1)
+  const signInJourneyId = uuidv4()
+
+  group('B03_IDReuse_01_LoginToCore GET', () => {
+    res = timeRequest(() => http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${idReuseUserID.userID}&signInJourneyIdText=${signInJourneyId}`, {
+      headers: { Authorization: `Basic ${encodedCredentials}` },
+      redirects: 0,
+      tags: { name: 'B03_IDReuse_01_LoginToCore_01_OrchStub' }
+    }),
+    { isStatusCode302 })
+    res = timeRequest(() => http.get(res.headers.Location, {
+      tags: { name: 'B03_IDReuse_01_LoginToCore_02_CoreCall' }
+    }),
+    { isStatusCode200, ...pageContentCheck('You have already proved your identity') })
+  })
+
+  sleepBetween(0.5, 1)
+
+  group('B03_IDReuse_02_ClickContinue POST', () => {
+    res = timeRequest(() => res.submitForm({
+      fields: { submitButton: '' },
+      params: {
+        redirects: 0,
+        tags: { name: 'B03_IDReuse_02_ClickContinue_01_CoreCall' }
+      }
+    }),
+    { isStatusCode302 })
+    res = timeRequest(() => http.get(res.headers.Location, {
+      headers: { Authorization: `Basic ${encodedCredentials}` },
+      tags: { name: 'B03_IDReuse_02_ClickContinue_02_OrchStub' }
     }),
     { isStatusCode200, ...pageContentCheck('User information') })
     iterationsCompleted.add(1)

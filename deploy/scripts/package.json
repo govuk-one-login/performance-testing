@@ -13,7 +13,7 @@
     "eslint": "^8.55.0",
     "eslint-config-standard-with-typescript": "^42.0.0",
     "eslint-plugin-import": "^2.29.0",
-    "eslint-plugin-n": "^16.3.1",
+    "eslint-plugin-n": "^16.4.0",
     "eslint-plugin-promise": "^6.1.1",
     "glob": "^10.3.10",
     "k6": "0.0.0",

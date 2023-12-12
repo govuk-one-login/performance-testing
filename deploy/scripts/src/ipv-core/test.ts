@@ -49,6 +49,47 @@ const profiles: ProfileList = {
       exec: 'idReuse'
     }
   },
+  deployment: {
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 60,
+      stages: [
+        { target: 2, duration: '5m' }, // Ramp up to 2 iterations per second over 5 minutes
+        { target: 2, duration: '20m' }, // Steady State of 20 minutes at the ramp up load i.e. 2 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes
+      ],
+      exec: 'passport'
+    },
+    drivingLicence: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 60,
+      stages: [
+        { target: 2, duration: '5m' }, // Ramp up to 2 iterations per second over 5 minutes
+        { target: 2, duration: '20m' }, // Steady State of 20 minutes at the ramp up load i.e. 2 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes
+      ],
+      exec: 'drivingLicence'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 30,
+      stages: [
+        { target: 10, duration: '5m' }, // Ramp up to 10 iterations per second over 5 minutes
+        { target: 10, duration: '20m' }, // Steady State of 20 minutes at the ramp up load i.e. 10 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes
+      ],
+      exec: 'idReuse'
+    }
+  },
   lowVolumeTest: {
     passport: {
       executor: 'ramping-arrival-rate',

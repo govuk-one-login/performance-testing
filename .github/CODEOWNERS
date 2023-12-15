@@ -12,6 +12,6 @@
 /deploy/scripts/src/cri-lime @govuk-one-login/performance-testers @govuk-one-login/cri-lime-team
 /deploy/scripts/src/cri-orange @govuk-one-login/performance-testers @govuk-one-login/cri-orange-team
 /deploy/scripts/src/ipv-core @govuk-one-login/performance-testers @govuk-one-login/core-team
-/deploy/scripts/src/mobile @govuk-one-login/performance-testers @govuk-one-login/mobile-narwhal-team
+/deploy/scripts/src/mobile @govuk-one-login/performance-testers @govuk-one-login/mobile-id-check
 /deploy/scripts/src/spot @govuk-one-login/performance-testers @govuk-one-login/spot-team
 /deploy/scripts/src/txma @govuk-one-login/performance-testers @govuk-one-login/txma-team

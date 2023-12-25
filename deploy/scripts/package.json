@@ -8,7 +8,7 @@
     "@types/k6": "^0.48.0",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "core-js": "^3.34.0",
-    "esbuild": "^0.19.9",
+    "esbuild": "^0.19.10",
     "esbuild-plugin-copy": "^2.1.1",
     "eslint": "^8.56.0",
     "eslint-config-standard-with-typescript": "^43.0.0",

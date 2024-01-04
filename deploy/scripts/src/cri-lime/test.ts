@@ -108,8 +108,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 411,
       stages: [
-        { target: 14, duration: '15m' }, // Ramp up to 14 iterations per second in 15 minutes
-        { target: 14, duration: '30m' }, // Maintain steady state at 14 iterations per second for 30 minutes
+        { target: 55, duration: '15m' }, // Ramp up to 55 iterations per second in 15 minutes
+        { target: 55, duration: '30m' }, // Maintain steady state at 55 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'drivingLicence'

@@ -106,7 +106,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 411,
+      maxVUs: 1500,
       stages: [
         { target: 55, duration: '15m' }, // Ramp up to 55 iterations per second in 15 minutes
         { target: 55, duration: '30m' }, // Maintain steady state at 55 iterations per second for 30 minutes

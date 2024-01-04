@@ -205,7 +205,7 @@ const validEnvironments = ['BUILD', 'DEV']
 if (!validEnvironments.includes(environment)) throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 
 const env = {
-  orchStubEndPoint: __ENV.IDENTITY_ORCH_STUB_URL,
+  orchStubEndPoint: __ENV[`IDENTITY_${environment}_ORCH_STUB_URL`],
   ipvCoreURL: __ENV[`IDENTITY_${environment}_CORE_URL`]
   // staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
 }

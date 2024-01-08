@@ -12,6 +12,7 @@ import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/ut
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib/index'
+import execution from 'k6/execution'
 
 const profiles: ProfileList = {
   smoke: {
@@ -219,6 +220,9 @@ export function passport (): void {
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
+  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
+  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0')
+  const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
   iterationsStarted.add(1)
   res = group('B01_Passport_01_LaunchOrchestratorStub GET', () =>
     timeRequest(() => http.get(env.orchStubEndPoint, {
@@ -234,10 +238,11 @@ export function passport (): void {
 
   res = group('B01_Passport_02_GoToFullJourneyRoute GET', () =>
     timeRequest(() => {
-      const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}`, {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B01_Passport_02_GoToFullJourneyRoute' }
-      })
+      const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}`,
+        {
+          headers: { Authorization: `Basic ${encodedCredentials}` },
+          tags: { name: 'B01_Passport_02_GoToFullJourneyRoute' }
+        })
       // if (env.staticResources) getStaticResources(response)
       return response
     },
@@ -429,6 +434,9 @@ export function drivingLicence (): void {
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
+  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
+  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0')
+  const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
   iterationsStarted.add(1)
 
   res = group('B02_DrivingLicence_01_LaunchOrchestratorStub GET', () =>
@@ -444,10 +452,11 @@ export function drivingLicence (): void {
 
   res = group('B02_DrivingLicence_02_SelectUserIDContinue GET', () =>
     timeRequest(() => {
-      const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}`, {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B02_DrivingLicence_02_SelectUserIDContinue' }
-      })
+      const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}`,
+        {
+          headers: { Authorization: `Basic ${encodedCredentials}` },
+          tags: { name: 'B02_DrivingLicence_02_SelectUserIDContinue' }
+        })
       // if (env.staticResources) getStaticResources(response)
       return response
     },

@@ -66,6 +66,17 @@ const profiles: ProfileList = {
         { target: 1, duration: '30s' } // Ramps up to target load
       ],
       exec: 'validateUser'
+    },
+    contactsPage: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 1, duration: '30s' } // Ramps up to target load
+      ],
+      exec: 'contactsPage'
     }
   },
   load: {
@@ -133,6 +144,19 @@ const profiles: ProfileList = {
         { target: 0, duration: '1m' } // Ramp down duration of 1 minute.
       ],
       exec: 'validateUser'
+    },
+    contactsPage: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 300,
+      stages: [
+        { target: 10, duration: '3m' }, // Ramp up to 10 iterations per second in 3 minutes
+        { target: 10, duration: '6m' }, // Steady State of 6 minutes at the ramp up load i.e. 10 iterations/second
+        { target: 0, duration: '1m' } // Ramp down duration of 1 minute.
+      ],
+      exec: 'contactsPage'
     }
   }
 }
@@ -606,5 +630,17 @@ export function validateUser (): void {
       tags: { name: 'B05_ValidateUser_10_Logout' }
     }),
     { isStatusCode200, 'verify page content': r => (r.body as string).includes('You have signed out') }))
+  iterationsCompleted.add(1)
+}
+
+export function contactsPage (): void {
+  iterationsStarted.add(1)
+
+  group('B06_01_ContactsPage GET', () =>
+    timeRequest(() => http.get(env.envURL + '/contact-gov-uk-one-login',
+      {
+        tags: { name: 'B06_01_ContactsPage' }
+      }),
+    { isStatusCode200, ...pageContentCheck('Contact GOV.UK One Login') }))
   iterationsCompleted.add(1)
 }

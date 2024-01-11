@@ -31,11 +31,11 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1, // start with one iteration
       timeUnit: '1s',
-      preAllocatedVUs: 15, // Calculation: 1 journeys / second * 15 seconds average journey time
+      preAllocatedVUs: 75, // Calculation: 5 journeys / second * 15 seconds average journey time
       maxVUs: 120, // Calculation: 5 journeys / second * 24 seconds maximum journey time
       stages: [
-        { target: 1, duration: '30s' }, // linear increase from 1 iteration per second to 1 iterations per second for 30 seconds
-        { target: 1, duration: '25m' } // maintain 1 iterations per second for 25 seconds
+        { target: 5, duration: '30s' }, // linear increase from 1 iteration per second to 5 iterations per second for 30 seconds
+        { target: 5, duration: '30s' } // maintain 5 iterations per second for 30 seconds
       ],
       exec: 'mamIphonePassport'
     }
@@ -51,6 +51,19 @@ const profiles: ProfileList = {
         { target: 100, duration: '15m' }, // linear increase from 0 iteration per second to 100 iterations per second for 15 min -> 0.11 t/s/s
         // { target: 100, duration: '30m' } // maintain 100 iterations per second for 30 min
         { target: 100, duration: '5m' } // Temporary reduction for running iterative load tests for https://govukverify.atlassian.net/browse/DCMAW-6497
+      ],
+      exec: 'mamIphonePassport'
+    }
+  },
+  deploy: {
+    mamIphonePassport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1, // start with one iteration
+      timeUnit: '1s',
+      preAllocatedVUs: 15, // Calculation: 1 journeys / second * 15 seconds average journey time
+      maxVUs: 75, // Calculation: 1 journeys / second * 24 seconds maximum journey time + 50 buffer
+      stages: [
+        { target: 1, duration: '25m' } // maintain 1 iterations per second for 25 min
       ],
       exec: 'mamIphonePassport'
     }

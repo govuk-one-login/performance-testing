@@ -39,19 +39,6 @@ const profiles: ProfileList = {
       ],
       exec: 'backendJourney'
     }
-  },
-  deploy: {
-    backendJourney: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1, // start with one iteration
-      timeUnit: '1s',
-      preAllocatedVUs: 10, // Calculation: 1 journeys / second * 10 seconds average journey time
-      maxVUs: 65, // Calculation: 1 journeys / second * 14 seconds maximum journey time + 50 buffer
-      stages: [
-        { target: 1, duration: '25m' } // maintain 1 iterations per second for 25 min
-      ],
-      exec: 'backendJourney'
-    }
   }
 }
 

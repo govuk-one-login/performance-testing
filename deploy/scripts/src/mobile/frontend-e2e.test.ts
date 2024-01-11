@@ -57,14 +57,12 @@ const profiles: ProfileList = {
   },
   deploy: {
     mamIphonePassport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1, // start with one iteration
+      executor: 'constant-arrival-rate',
+      rate: 1,
       timeUnit: '1s',
+      duration: '25m',
       preAllocatedVUs: 15, // Calculation: 1 journeys / second * 15 seconds average journey time
       maxVUs: 75, // Calculation: 1 journeys / second * 24 seconds maximum journey time + 50 buffer
-      stages: [
-        { target: 1, duration: '25m' } // maintain 1 iterations per second for 25 min
-      ],
       exec: 'mamIphonePassport'
     }
   }

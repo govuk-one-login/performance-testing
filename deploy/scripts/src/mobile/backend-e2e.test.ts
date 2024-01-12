@@ -39,6 +39,17 @@ const profiles: ProfileList = {
       ],
       exec: 'backendJourney'
     }
+  },
+  deploy: {
+    backendJourney: {
+      executor: 'constant-arrival-rate',
+      rate: 1,
+      timeUnit: '1s',
+      duration: '25m',
+      preAllocatedVUs: 10, // Calculation: 1 journeys / second * 10 seconds average journey time
+      maxVUs: 65, // Calculation: 1 journeys / second * 14 seconds maximum journey time + 50 buffer
+      exec: 'backendJourney'
+    }
   }
 }
 

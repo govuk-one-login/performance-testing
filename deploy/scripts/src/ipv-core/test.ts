@@ -238,7 +238,7 @@ export function passport (): void {
 
   res = group('B01_Passport_02_GoToFullJourneyRoute GET', () =>
     timeRequest(() => {
-      const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}`,
+      const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}`,
         {
           headers: { Authorization: `Basic ${encodedCredentials}` },
           tags: { name: 'B01_Passport_02_GoToFullJourneyRoute' }

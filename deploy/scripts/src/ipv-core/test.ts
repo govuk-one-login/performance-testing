@@ -452,7 +452,7 @@ export function drivingLicence (): void {
 
   res = group('B02_DrivingLicence_02_SelectUserIDContinue GET', () =>
     timeRequest(() => {
-      const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}`,
+      const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}`,
         {
           headers: { Authorization: `Basic ${encodedCredentials}` },
           tags: { name: 'B02_DrivingLicence_02_SelectUserIDContinue' }

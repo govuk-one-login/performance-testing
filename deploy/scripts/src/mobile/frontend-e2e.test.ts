@@ -76,11 +76,11 @@ const profiles: ProfileList = {
       stages: [
         { target: 25, duration: '4m' }, // linear increase from 0 iteration per second to 25 iterations per second for 4 mins -> 0.1 t/s/s
         { target: 25, duration: '10m' }, // maintain 25 iterations per second for 10 min
-        { target: 50, duration: '4m' }, // linear increase from 0 iteration per second to 50 iterations per second for 4 mins -> 0.1 t/s/s
+        { target: 50, duration: '4m' }, // linear increase from 25 iteration per second to 50 iterations per second for 4 mins -> 0.1 t/s/s
         { target: 50, duration: '10m' }, // maintain 50 iterations per second for 10 min
-        { target: 75, duration: '4m' }, // linear increase from 0 iteration per second to 75 iterations per second for 4 mins -> 0.1 t/s/s
+        { target: 75, duration: '4m' }, // linear increase from 50 iteration per second to 75 iterations per second for 4 mins -> 0.1 t/s/s
         { target: 75, duration: '10m' }, // maintain 75 iterations per second for 10 min
-        { target: 100, duration: '4m' }, // linear increase from 0 iteration per second to 100 iterations per second for 4 mins -> 0.1 t/s/s
+        { target: 100, duration: '4m' }, // linear increase from 75 iteration per second to 100 iterations per second for 4 mins -> 0.1 t/s/s
         { target: 100, duration: '10m' } // maintain 100 iterations per second for 10 min
       ],
       exec: 'mamIphonePassport'

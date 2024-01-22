@@ -656,7 +656,7 @@ export function idReuse (): void {
   const signInJourneyId = uuidv4()
 
   group('B03_IDReuse_01_LoginToCore GET', () => {
-    res = timeRequest(() => http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${idReuseUserID.userID}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${idReuseUserID.emailID}`,
+    res = timeRequest(() => http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${idReuseUserID.userID}&signInJourneyIdText=${signInJourneyId}&vtrText=P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${idReuseUserID.emailID}&votText=&jsonPayload=&evidenceJsonPayload=`,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` },
         redirects: 0,

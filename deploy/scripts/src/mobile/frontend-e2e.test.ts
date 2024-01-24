@@ -55,6 +55,20 @@ const profiles: ProfileList = {
       exec: 'mamIphonePassport'
     }
   },
+  loadSelfAssessment: {
+    mamIphonePassport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 68,
+      maxVUs: 300, 
+      stages: [
+        { target: 4, duration: '15m' },
+        { target: 4, duration: '30m' }
+      ],
+      exec: 'mamIphonePassport'
+    }
+  },
   deploy: {
     mamIphonePassport: {
       executor: 'constant-arrival-rate',

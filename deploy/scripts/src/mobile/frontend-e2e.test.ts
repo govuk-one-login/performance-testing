@@ -60,11 +60,11 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
-      preAllocatedVUs: 68,
-      maxVUs: 300,
+      preAllocatedVUs: 100,
+      maxVUs: 450,
       stages: [
-        { target: 4, duration: '15m' },
-        { target: 4, duration: '30m' }
+        { target: 6, duration: '15m' },
+        { target: 6, duration: '30m' }
       ],
       exec: 'mamIphonePassport'
     }

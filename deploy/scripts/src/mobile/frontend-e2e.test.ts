@@ -61,7 +61,7 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 68,
-      maxVUs: 300, 
+      maxVUs: 300,
       stages: [
         { target: 4, duration: '15m' },
         { target: 4, duration: '30m' }

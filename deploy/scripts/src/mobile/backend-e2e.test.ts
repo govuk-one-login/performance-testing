@@ -40,6 +40,20 @@ const profiles: ProfileList = {
       exec: 'backendJourney'
     }
   },
+  loadSelfAssessment: {
+    backendJourney: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 60,
+      maxVUs: 450,
+      stages: [
+        { target: 6, duration: '15m' },
+        { target: 6, duration: '30m' }
+      ],
+      exec: 'backendJourney'
+    }
+  },
   deploy: {
     backendJourney: {
       executor: 'constant-arrival-rate',

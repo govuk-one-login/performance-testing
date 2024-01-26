@@ -48,8 +48,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 60,
       maxVUs: 450,
       stages: [
-        { target: 6, duration: '15m' },
-        { target: 6, duration: '30m' }
+        { target: 10, duration: '15m' },
+        { target: 10, duration: '10m' }
       ],
       exec: 'backendJourney'
     }

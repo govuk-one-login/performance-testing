@@ -45,12 +45,11 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
-      preAllocatedVUs: 1700, // Calculation: 100 journeys / second * 17 seconds average journey time
-      maxVUs: 3000, // Calculation: 100 journeys / second * 2.5 seconds maximum expected from NFR (2.5 per request, 10 user-facing requests + safety)
+      preAllocatedVUs: 700, // Calculation: 40 journeys / second * 17 seconds average journey time
+      maxVUs: 1500, // Calculation: 40 journeys / second * 2.5 seconds maximum expected from NFR (2.5 per request, 10 user-facing requests + safety)
       stages: [
-        { target: 100, duration: '15m' }, // linear increase from 0 iteration per second to 100 iterations per second for 15 min -> 0.11 t/s/s
-        // { target: 100, duration: '30m' } // maintain 100 iterations per second for 30 min
-        { target: 100, duration: '5m' } // Temporary reduction for running iterative load tests for https://govukverify.atlassian.net/browse/DCMAW-6497
+        { target: 40, duration: '15m' }, // linear increase from 0 iteration per second to 40 iterations per second for 15 min -> 0.044 t/s/s
+        { target: 40, duration: '30m' } // maintain 40 iterations per second for 30 min
       ],
       exec: 'mamIphonePassport'
     }

@@ -40,9 +40,12 @@ Mappings:
   ContraIndicators:
     AWS:
       AccountID: "755415363251"
-  TxMA:
+  TxMABuild:
     AWS:
       AccountID: "750703655225"
+  TxMAStaging:
+    AWS:
+      AccountID: "178023842775"
   IPVR:
     AWS:
       AccountID: "073717171046"
@@ -200,12 +203,17 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
-                    - !FindInMap [TxMA, AWS, AccountID]
+                    - !FindInMap [TxMABuild, AWS, AccountID]
                     - "key/*"
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
                     - !FindInMap [IPVR, AWS, AccountID]
+                    - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [TxMAStaging, AWS, AccountID]
                     - "key/*"
           - Effect: "Allow"
             Action:
@@ -228,13 +236,18 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
-                    - !FindInMap [TxMA, AWS, AccountID]
+                    - !FindInMap [TxMABuild, AWS, AccountID]
                     - "event-processing-*"
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [IPVR, AWS, AccountID]
                     - "ipvreturn-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [TxMAStaging, AWS, AccountID]
+                    - "self-staging-*"
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"
@@ -248,6 +261,11 @@ Resources:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
                     - !FindInMap [ContraIndicators, AWS, AccountID]
+                    - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [TxMAStaging, AWS, AccountID]
                     - "function:*"
 
   VPCTestPolicy:

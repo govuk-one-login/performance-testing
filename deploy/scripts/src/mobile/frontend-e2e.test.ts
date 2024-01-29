@@ -50,7 +50,6 @@ const profiles: ProfileList = {
       stages: [
         { target: 40, duration: '15m' }, // linear increase from 0 iteration per second to 40 iterations per second for 15 min -> 0.044 t/s/s
         { target: 40, duration: '30m' } // maintain 40 iterations per second for 30 min
-        // { target: 100, duration: '5m' } // Temporary reduction for running iterative load tests for https://govukverify.atlassian.net/browse/DCMAW-6497
       ],
       exec: 'mamIphonePassport'
     }

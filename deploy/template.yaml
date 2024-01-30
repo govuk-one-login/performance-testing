@@ -419,6 +419,7 @@ Resources:
               ACCOUNT_APP_PASSWORD_NEW: "/perfTest/account/testUserNewPassword"
               ACCOUNT_APP_PASSWORD: "/perfTest/account/testUserPassword"
               ACCOUNT_BRAVO_AIS_TxMASQS: "/perfTest/account/bravo/postInterventionTxMASQS"
+              ACCOUNT_BRAVO_AIS_URL: "/perfTest/account/bravo/retrieveInterventionURL"
               ACCOUNT_BRAVO_ID_REUSE_API_KEY: "/perfTest/account/bravo/idReuseApiKey"
               ACCOUNT_BRAVO_ID_REUSE_API_KEY_SUMMARISE: "/perfTest/account/bravo/idReuseApiKeySummarise"
               ACCOUNT_BRAVO_ID_REUSE_MOCK: "/perfTest/account/bravo/idReuseMock"

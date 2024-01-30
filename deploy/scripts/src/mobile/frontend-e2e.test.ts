@@ -99,6 +99,26 @@ const profiles: ProfileList = {
       ],
       exec: 'mamIphonePassport'
     }
+  },
+  incrementalSmallVolumes: {
+    mamIphonePassport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 700, // Calculation: 40 journeys / second * 17 seconds average journey time
+      maxVUs: 1500, // Calculation: 40 journeys / second * 2.5 seconds maximum expected from NFR (2.5 per request, 10 user-facing requests + safety)
+      stages: [
+        { target: 5, duration: '4m' }, // linear increase from 0 iteration per second to 5 iterations per second for 4 mins
+        { target: 5, duration: '10m' }, // maintain 5 iterations per second for 10 min
+        { target: 15, duration: '4m' }, // linear increase from 15 iteration per second to 50 iterations per second for 4 mins
+        { target: 15, duration: '10m' }, // maintain 15 iterations per second for 10 min
+        { target: 30, duration: '4m' }, // linear increase from 15 iteration per second to 30 iterations per second for 4 mins
+        { target: 30, duration: '10m' }, // maintain 30 iterations per second for 10 min
+        { target: 40, duration: '4m' }, // linear increase from 30 iteration per second to 40 iterations per second for 4 mins
+        { target: 40, duration: '10m' } // maintain 40 iterations per second for 10 min
+      ],
+      exec: 'mamIphonePassport'
+    }
   }
 }
 

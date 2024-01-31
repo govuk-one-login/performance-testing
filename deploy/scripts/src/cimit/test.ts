@@ -94,10 +94,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 500,
+      maxVUs: 1200,
       stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Maintain steady state at 100 iterations per second for 30 minutes
+        { target: 400, duration: '15m' }, // Ramp up to 400 iterations per second in 15 minutes
+        { target: 400, duration: '30m' }, // Maintain steady state at 400 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'putContraIndicators'

@@ -41,8 +41,10 @@ Mappings:
     AWS:
       AccountID: "755415363251"
   TxMA:
-    AWS:
+    Build:
       AccountID: "750703655225"
+    Staging:
+      AccountID: "178023842775"
   IPVR:
     AWS:
       AccountID: "073717171046"
@@ -200,12 +202,17 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
-                    - !FindInMap [TxMA, AWS, AccountID]
+                    - !FindInMap [TxMA, Build, AccountID]
                     - "key/*"
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
                     - !FindInMap [IPVR, AWS, AccountID]
+                    - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [TxMA, Staging, AccountID]
                     - "key/*"
           - Effect: "Allow"
             Action:
@@ -228,13 +235,18 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
-                    - !FindInMap [TxMA, AWS, AccountID]
+                    - !FindInMap [TxMA, Build, AccountID]
                     - "event-processing-*"
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [IPVR, AWS, AccountID]
                     - "ipvreturn-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [TxMA, Staging, AccountID]
+                    - "self-staging-*"
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"
@@ -248,6 +260,11 @@ Resources:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
                     - !FindInMap [ContraIndicators, AWS, AccountID]
+                    - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [TxMA, Staging, AccountID]
                     - "function:*"
 
   VPCTestPolicy:
@@ -400,6 +417,8 @@ Resources:
               ACCOUNT_APP_KEY: "/perfTest/account/accounts/appKey"
               ACCOUNT_APP_PASSWORD_NEW: "/perfTest/account/testUserNewPassword"
               ACCOUNT_APP_PASSWORD: "/perfTest/account/testUserPassword"
+              ACCOUNT_BRAVO_AIS_TxMASQS: "/perfTest/account/bravo/postInterventionTxMASQS"
+              ACCOUNT_BRAVO_AIS_URL: "/perfTest/account/bravo/retrieveInterventionURL"
               ACCOUNT_BRAVO_ID_REUSE_API_KEY: "/perfTest/account/bravo/idReuseApiKey"
               ACCOUNT_BRAVO_ID_REUSE_API_KEY_SUMMARISE: "/perfTest/account/bravo/idReuseApiKeySummarise"
               ACCOUNT_BRAVO_ID_REUSE_MOCK: "/perfTest/account/bravo/idReuseMock"

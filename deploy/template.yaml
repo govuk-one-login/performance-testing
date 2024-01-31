@@ -40,11 +40,10 @@ Mappings:
   ContraIndicators:
     AWS:
       AccountID: "755415363251"
-  TxMABuild:
-    AWS:
+  TxMA:
+    Build:
       AccountID: "750703655225"
-  TxMAStaging:
-    AWS:
+    Staging:
       AccountID: "178023842775"
   IPVR:
     AWS:
@@ -203,7 +202,7 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
-                    - !FindInMap [TxMABuild, AWS, AccountID]
+                    - !FindInMap [TxMA, Build, AccountID]
                     - "key/*"
               - Fn::Join:
                   - ":"
@@ -213,7 +212,7 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
-                    - !FindInMap [TxMAStaging, AWS, AccountID]
+                    - !FindInMap [TxMA, Staging, AccountID]
                     - "key/*"
           - Effect: "Allow"
             Action:
@@ -236,7 +235,7 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
-                    - !FindInMap [TxMABuild, AWS, AccountID]
+                    - !FindInMap [TxMA, Build, AccountID]
                     - "event-processing-*"
               - Fn::Join:
                   - ":"
@@ -246,7 +245,7 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
-                    - !FindInMap [TxMAStaging, AWS, AccountID]
+                    - !FindInMap [TxMA, Staging, AccountID]
                     - "self-staging-*"
           - Effect: "Allow"
             Action:
@@ -265,7 +264,7 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
-                    - !FindInMap [TxMAStaging, AWS, AccountID]
+                    - !FindInMap [TxMA, Staging, AccountID]
                     - "function:*"
 
   VPCTestPolicy:

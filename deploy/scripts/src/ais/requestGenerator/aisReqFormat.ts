@@ -1,4 +1,4 @@
-export interface TICF_ACCOUNT_INTERVENTION {
+export interface TicfAccountIntervention {
   timestamp: number
   event_timestamp_ms: number
   event_name: string

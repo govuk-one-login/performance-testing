@@ -1,7 +1,7 @@
-import { type TICF_ACCOUNT_INTERVENTION } from '../requestGenerator/aisReqFormat'
+import { type TicfAccountIntervention } from '../requestGenerator/aisReqFormat'
 import { uuidv4 } from '../../common/utils/jslib/index'
 
-export function generatePersistIVRequest (userID: string, interventionCode: string): TICF_ACCOUNT_INTERVENTION {
+export function generatePersistIVRequest (userID: string, interventionCode: string): TicfAccountIntervention {
   return {
     timestamp: Math.floor(Date.now() / 1000),
     event_timestamp_ms: Date.now(),

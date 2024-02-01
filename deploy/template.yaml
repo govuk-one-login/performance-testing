@@ -324,7 +324,6 @@ Resources:
   ResultsBucket:
     Type: AWS::S3::Bucket
     Properties:
-      AccessControl: Private
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:

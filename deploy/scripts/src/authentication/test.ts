@@ -128,9 +128,7 @@ const dataSignIn: signInData[] = new SharedArray('data', () => Array.from({ leng
     }
   }
 ))
-const env = {
-  rpStub: __ENV.ACCOUNT_RP_STUB
-}
+
 const credentials = {
   authAppKey: __ENV.ACCOUNT_APP_KEY,
   password: __ENV.ACCOUNT_APP_PASSWORD,
@@ -161,30 +159,10 @@ export function signUp (): void {
   const mfaOption: mfaType = (Math.random() <= 0.5) ? 'SMS' : 'AUTH_APP'
   iterationsStarted.add(1)
 
-  res = group('B01_SignUp_01_LaunchRPStub GET', () =>
-    timeRequest(() => http.get(env.rpStub, {
-      tags: { name: 'B01_SignUp_01_LaunchRPStub' }
-    }), {
-      isStatusCode200,
-      'check cookies exist': () => {
-        const jar = http.cookieJar()
-        const cookies = jar.cookiesForURL(env.rpStub)
-        return cookies.JSESSIONID.length > 0 && cookies.__VCAP_ID__.length > 0 && cookies.__VCAP_ID__[0].length === 28
-      }
-    }))
-
-  sleep(1)
-
-  res = group('B01_SignUp_02_OIDCAuthRequest POST', () =>
-    timeRequest(() =>
-      res.submitForm({
-        fields: {
-          '2fa': 'Cl.Cm',
-          lng: ''
-        },
-        params: { tags: { name: 'B01_SignUp_02_OIDCAuthRequest' } }
-      }),
-    { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') }))
+  res = group('B01_SignUp_01_InitializeJourney GET', () =>
+    timeRequest(() => http.get(startJourneyUrl(), {
+      tags: { name: 'B01_SignUp_01_InitializeJourney' }
+    }), { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') }))
 
   sleep(1)
 
@@ -309,29 +287,10 @@ export function signIn (): void {
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
   iterationsStarted.add(1)
 
-  res = group('B01_SignIn_01_LaunchRPStub GET', () =>
-    timeRequest(() => http.get(env.rpStub, {
-      tags: { name: 'B01_SignIn_01_LaunchRPStub' }
-    }), {
-      isStatusCode200,
-      'check cookies exist': () => {
-        const jar = http.cookieJar()
-        const cookies = jar.cookiesForURL(env.rpStub)
-        return cookies.JSESSIONID.length > 0 && cookies.__VCAP_ID__.length > 0 && cookies.__VCAP_ID__[0].length === 28
-      }
-    }))
-
-  sleep(1)
-
-  res = group('B01_SignIn_02_OIDCAuthRequest POST', () =>
-    timeRequest(() =>
-      res.submitForm({
-        fields: {
-          '2fa': 'Cl.Cm',
-          lng: ''
-        },
-        params: { tags: { name: 'B01_SignIn_02_OIDCAuthRequest' } }
-      }), { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') }))
+  res = group('B01_SignIn_01_InitializeJourney GET', () =>
+    timeRequest(() => http.get(startJourneyUrl(), {
+      tags: { name: 'B01_SignIn_01_InitializeJourney' }
+    }), { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') }))
 
   sleep(1)
 

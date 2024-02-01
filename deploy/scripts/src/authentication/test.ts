@@ -8,6 +8,8 @@ import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { randomString } from '../common/utils/jslib'
+import { URL } from '../common/utils/jslib/url'
 
 const profiles: ProfileList = {
   smoke: {
@@ -134,6 +136,18 @@ const credentials = {
   password: __ENV.ACCOUNT_APP_PASSWORD,
   emailOTP: __ENV.ACCOUNT_EMAIL_OTP,
   phoneOTP: __ENV.ACCOUNT_PHONE_OTP
+}
+
+function startJourneyUrl (): string {
+  const url = new URL(__ENV.ACCOUNT_OP_URL)
+  url.searchParams.append('client_id', __ENV.ACCOUNT_RP_STUB_CLIENT_ID)
+  url.searchParams.append('nonce', randomString(20))
+  url.searchParams.append('state', randomString(20))
+  url.searchParams.append('vtr', '["Cl.Cm"]')
+  url.searchParams.append('scope', 'openid email phone')
+  url.searchParams.append('response_type', 'code')
+  url.searchParams.append('redirect_uri', `${__ENV.ACCOUNT_RP_STUB}/oidc/authorization-code/callback`)
+  return url.toString()
 }
 
 export function signUp (): void {

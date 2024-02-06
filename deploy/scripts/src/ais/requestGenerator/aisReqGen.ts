@@ -25,7 +25,7 @@ export function generatePersistIVRequest (userID: string, interventionCode: stri
     timestamp: Math.floor(Date.now() / 1000),
     event_timestamp_ms: Date.now(),
     event_name: 'TICF_ACCOUNT_INTERVENTION',
-    event_id: 'AUTH_IPV_AUTHORISATION_REQUESTED',
+    event_id: uuidv4(),
     component_id: 'TICF_CRI',
     user: {
       user_id: userID

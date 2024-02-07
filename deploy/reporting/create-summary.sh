@@ -183,42 +183,6 @@ jq -r '(
 )
 | @tsv' iterationsCompleted-pivot.json | column -ts$'\t'
 
-#Generate Total Request (Passed + Failed) Count By Group
-echo ''
-echo '┌-----------------------------------------┐'
-echo '| Total Request Count by Group and Status |'
-echo '└-----------------------------------------┘'
-if [[ ! -f "passed.json" ]]; then # Do not filter if this has already been done
-    jq 'select(
-      .type=="Point"
-      and .metric=="http_reqs"
-      and .data.value == 1
-    )
-    | {
-      "group":.data.tags.group,
-      "status":.data.tags.status
-    }' results.json >passed.json
-fi
-if [[ ! -f "passed-pivot.json" ]]; then # Do not pivot if this has already been done
-    jq -s 'group_by(.group,.status)
-    | map({
-        "group":first.group,
-        "status":first.status,
-        "count":length
-    })
-    | sort_by(.count)
-    | reverse' passed.json >passed-pivot.json
-fi
-# Pretty print to stdout using column
-jq -r '(
-  ["Group Name","Status","Count"]
-  | (., map(length*"-"))
-), (
-  .[]
-  | [.group, .status, .count]
-)
-| @tsv' passed-pivot.json | column -ts$'\t'
-
 #Generate Total Request (Passed + Failed) Count By Group and filter by time
 echo ''
 echo '┌-----------------------------------------------------------┐'

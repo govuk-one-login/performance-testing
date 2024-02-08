@@ -7,7 +7,7 @@ import { b64encode } from 'k6/encoding'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
-import { bankingPayload } from './BAVdata'
+import { bankingPayload } from './data/BAVdata'
 
 const profiles: ProfileList = {
   smoke: {

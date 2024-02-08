@@ -3,11 +3,11 @@ import { group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
-// import execution from 'k6/execution'
 import { b64encode } from 'k6/encoding'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { bankingPayload } from './BAVdata'
 
 const profiles: ProfileList = {
   smoke: {
@@ -32,7 +32,7 @@ const profiles: ProfileList = {
       maxVUs: 900,
       stages: [
         { target: 30, duration: '15m' }, // Ramps up to target load
-        { target: 30, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 3 iterations/second
+        { target: 30, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
       exec: 'BAV'
@@ -63,33 +63,13 @@ const env = {
 
 export function BAV (): void {
   let res: Response
+  const testAccountNumber = '31926819'
+  const testSortCode = '12-34-56'
   iterationsStarted.add(1)
 
   res = group('B01_BAV_01_IPVStubCall POST', () =>
     timeRequest(() => http.post(env.BAV.ipvStub + '/start',
-      JSON.stringify({
-        shared_claims: {
-          name: [
-            {
-              nameParts: [
-                {
-                  value: 'Yasmine',
-                  type: 'GivenName'
-                },
-                {
-                  value: 'Young',
-                  type: 'FamilyName'
-                }
-              ]
-            }
-          ],
-          birthDate: [
-            {
-              value: '1960-02-02'
-            }
-          ]
-        }
-      }),
+      JSON.stringify({ bankingPayload }),
       {
         tags: { name: 'B01_BAV_01_IPVStubCall' }
       }),
@@ -120,8 +100,8 @@ export function BAV (): void {
     timeRequest(() =>
       res.submitForm({
         fields: {
-          sortCode: '12-34-56',
-          accountNumber: '31926819'
+          sortCode: testSortCode,
+          accountNumber: testAccountNumber
         },
         params: { tags: { name: 'B01_BAV_04_BankDetails' } },
         submitSelector: '#continue'

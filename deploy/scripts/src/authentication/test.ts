@@ -7,7 +7,7 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
 import { timeRequest } from '../common/utils/request/timing'
-import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { randomString } from '../common/utils/jslib'
 import { URL } from '../common/utils/jslib/url'
 
@@ -159,78 +159,86 @@ export function signUp (): void {
   const mfaOption: mfaType = (Math.random() <= 0.5) ? 'SMS' : 'AUTH_APP'
   iterationsStarted.add(1)
 
-  res = group('B01_SignUp_01_InitializeJourney GET', () =>
-    timeRequest(() => http.get(startJourneyUrl(), {
-      tags: { name: 'B01_SignUp_01_InitializeJourney' }
-    }), { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') }))
+  group('B01_SignUp_01_InitializeJourney GET', () => {
+    res = timeRequest(() => http.get(startJourneyUrl(), {
+      redirects: 0,
+      tags: { name: 'B01_SignUp_01_InitializeJourney_01_OIDCCall' }
+    }),
+    { isStatusCode302 })
 
+    res = timeRequest(() => http.get(res.headers.Location,
+      {
+        tags: { name: 'B01_SignUp_01_InitializeJourney_02_AuthCall' }
+      }),
+    { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') })
+  })
   sleep(1)
 
-  res = group('B01_SignUp_03_CreateOneLogin POST', () =>
+  res = group('B01_SignUp_02_CreateOneLogin POST', () =>
     timeRequest(() =>
       res.submitForm({
         fields: {
           supportInternationalNumbers: 'true',
           optionSelected: 'create'
         },
-        params: { tags: { name: 'B01_SignUp_03_CreateOneLogin' } }
+        params: { tags: { name: 'B01_SignUp_02_CreateOneLogin' } }
       }),
     { isStatusCode200, ...pageContentCheck('Enter your email address') }))
 
   sleep(1)
 
-  res = group('B01_SignUp_04_EnterEmailAddress POST', () =>
+  res = group('B01_SignUp_03_EnterEmailAddress POST', () =>
     timeRequest(() =>
       res.submitForm({
         fields: { email: testEmail },
-        params: { tags: { name: 'B01_SignUp_04_EnterEmailAddress' } }
+        params: { tags: { name: 'B01_SignUp_03_EnterEmailAddress' } }
       }),
     { isStatusCode200, ...pageContentCheck('Check your email') }))
 
   sleep(1)
 
-  res = group('B01_SignUp_05_EnterOTP POST', () =>
+  res = group('B01_SignUp_04_EnterOTP POST', () =>
     timeRequest(() =>
       res.submitForm({
         fields: {
           email: testEmail.toLowerCase(),
           code: credentials.emailOTP
         },
-        params: { tags: { name: 'B01_SignUp_05_EnterOTP' } }
+        params: { tags: { name: 'B01_SignUp_04_EnterOTP' } }
       }), { isStatusCode200, ...pageContentCheck('Create your password') }))
 
   sleep(1)
 
-  res = group('B01_SignUp_06_CreatePassword POST', () =>
+  res = group('B01_SignUp_05_CreatePassword POST', () =>
     timeRequest(() =>
       res.submitForm({
         fields: {
           password: credentials.password,
           'confirm-password': credentials.password
         },
-        params: { tags: { name: 'B01_SignUp_06_CreatePassword' } }
+        params: { tags: { name: 'B01_SignUp_05_CreatePassword' } }
       }), { isStatusCode200, ...pageContentCheck('Choose how to get security codes') }))
 
   sleep(1)
 
   switch (mfaOption) { // Switch statement for either Auth App or SMS paths
     case 'AUTH_APP': {
-      res = group('B01_SignUp_07_MFA_AuthApp POST', () =>
+      res = group('B01_SignUp_06_MFA_AuthApp POST', () =>
         timeRequest(() =>
           res.submitForm({
             fields: { mfaOptions: mfaOption },
-            params: { tags: { name: 'B01_SignUp_07_MFA_AuthApp' } }
+            params: { tags: { name: 'B01_SignUp_06_MFA_AuthApp' } }
           }), { isStatusCode200, ...pageContentCheck('Set up an authenticator app') }))
 
       secretKey = res.html().find("span[class*='secret-key-fragment']").text() ?? ''
       totp = new TOTP(secretKey)
       sleep(1)
 
-      res = group('B01_SignUp_08_MFA_EnterTOTP POST', () =>
+      res = group('B01_SignUp_07_MFA_EnterTOTP POST', () =>
         timeRequest(() =>
           res.submitForm({
             fields: { code: totp.generateTOTP() },
-            params: { tags: { name: 'B01_SignUp_08_MFA_EnterTOTP' } }
+            params: { tags: { name: 'B01_SignUp_07_MFA_EnterTOTP' } }
           }), { isStatusCode200, ...pageContentCheck('You’ve created your GOV.UK One Login') }))
       break
     }
@@ -265,21 +273,34 @@ export function signUp (): void {
 
   sleep(1)
 
-  res = group('B01_SignUp_11_ContinueAccountCreated POST', () =>
-    timeRequest(() => res.submitForm({
-      params: { tags: { name: 'B01_SignUp_11_ContinueAccountCreated' } }
-    }), { isStatusCode200, ...pageContentCheck('User information') }))
+  group('B01_SignUp_11_ContinueAccountCreated POST', () => {
+    res = timeRequest(() => res.submitForm({
+      params: {
+        redirects: 1,
+        tags: { name: 'B01_SignUp_11_ContinueAccountCreated_01_AuthCall' }
+      }
+    }),
+    { isStatusCode302 })
+    res = timeRequest(() => http.get(res.headers.Location, {
+      redirects: 0,
+      tags: { name: 'B01_SignUp_11_ContinueAccountCreated_02_OIDCCall' }
+    }),
+    { isStatusCode302 })
+    res = timeRequest(() => http.get(res.headers.Location, {
+      tags: { name: 'B01_SignUp_11_ContinueAccountCreated_03_RPStub' }
+    }),
+    { isStatusCode200, ...pageContentCheck('User information') })
+    iterationsCompleted.add(1)
+  })
 
   // 25% of users logout
   if (Math.random() <= 0.25) {
     sleep(1)
-
     res = group('B01_SignUp_12_Logout', () =>
       timeRequest(() => res.submitForm({
         params: { tags: { name: 'B01_SignUp_12_Logout' } }
       }), { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
   }
-  iterationsCompleted.add(1)
 }
 
 export function signIn (): void {
@@ -287,96 +308,149 @@ export function signIn (): void {
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
   iterationsStarted.add(1)
 
-  res = group('B01_SignIn_01_InitializeJourney GET', () =>
-    timeRequest(() => http.get(startJourneyUrl(), {
-      tags: { name: 'B01_SignIn_01_InitializeJourney' }
-    }), { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') }))
+  group('B02_SignIn_01_InitializeJourney GET', () => {
+    res = timeRequest(() => http.get(startJourneyUrl(), {
+      redirects: 0,
+      tags: { name: 'B02_SignIn_01_InitializeJourney_01_OIDCCall' }
+    }),
+    { isStatusCode302 })
 
+    res = timeRequest(() => http.get(res.headers.Location,
+      {
+        tags: { name: 'B02_SignIn_01_InitializeJourney_02_AuthCall' }
+      }),
+    { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') })
+  })
   sleep(1)
 
-  res = group('B01_SignIn_03_ClickSignIn POST', () =>
+  res = group('B02_SignIn_02_ClickSignIn POST', () =>
     timeRequest(() => res.submitForm({
-      params: { tags: { name: 'B01_SignIn_03_ClickSignIn' } }
+      params: { tags: { name: 'B02_SignIn_02_ClickSignIn' } }
     }), { isStatusCode200, ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login') }))
 
   sleep(1)
 
-  res = group('B01_SignIn_04_EnterEmailAddress POST', () =>
+  res = group('B02_SignIn_03_EnterEmailAddress POST', () =>
     timeRequest(() =>
       res.submitForm({
         fields: { email: userData.email },
-        params: { tags: { name: 'B01_SignIn_04_EnterEmailAddress' } }
+        params: { tags: { name: 'B02_SignIn_03_EnterEmailAddress' } }
       }), { isStatusCode200, ...pageContentCheck('Enter your password') }))
 
   sleep(1)
 
+  let rpStubCheck = false
   let acceptNewTerms = false
   switch (userData.mfaOption) {
     case 'AUTH_APP': {
-      res = group('B01_SignIn_05_AuthMFA_EnterPassword POST', () =>
+      res = group('B02_SignIn_04_AuthMFA_EnterPassword POST', () =>
         timeRequest(() =>
           res.submitForm({
             fields: { password: credentials.password },
-            params: { tags: { name: 'B01_SignIn_05_AuthMFA_EnterPassword' } }
+            params: { tags: { name: 'B02_SignIn_04_AuthMFA_EnterPassword' } }
           }), { isStatusCode200, ...pageContentCheck('Enter the 6 digit security code shown in your authenticator app') }))
 
       sleep(1)
 
       const totp = new TOTP(credentials.authAppKey)
-      res = group('B01_SignIn_06_AuthMFA_EnterTOTP POST', () =>
-        timeRequest(() => {
-          const response = res.submitForm({
-            fields: { code: totp.generateTOTP() },
-            params: { tags: { name: 'B01_SignIn_06_AuthMFA_EnterTOTP' } }
-          })
-          acceptNewTerms = (response.body as string).includes('terms of use update')
-          return response
-        }, {
-          isStatusCode200,
-          'verify page content': r => acceptNewTerms || (r.body as string).includes('User information')
-        }))
+      group('B02_SignIn_05_AuthMFA_EnterTOTP POST', () => {
+        res = timeRequest(() => res.submitForm({
+          fields: { code: totp.generateTOTP() },
+          params: {
+            redirects: 1,
+            tags: { name: 'B02_SignIn_05_AuthMFA_EnterTOTP_01_AuthCall' }
+          }
+        }),
+        { isStatusCode302 })
+        res = timeRequest(() => http.get(res.headers.Location, {
+          redirects: 0,
+          tags: { name: 'B02_SignIn_05_AuthMFA_EnterTOTP_02_OIDCCall' }
+        }),
+        { isStatusCode302 })
+
+        rpStubCheck = (res.headers.Location).includes('auth-stub')
+        acceptNewTerms = (res.headers.Location).includes('signin')
+
+        if (rpStubCheck) {
+          res = timeRequest(() => http.get(res.headers.Location, {
+            tags: { name: 'B02_SignIn_05_AuthMFA_EnterTOTP_03_RPStub' }
+          }),
+          { isStatusCode200, ...pageContentCheck('User information') })
+        }
+
+        if (acceptNewTerms) {
+          res = timeRequest(() => http.get(res.headers.Location, {
+            tags: { name: 'B02_SignIn_05_AuthMFA_EnterTOTP_04_AuthAcceptTerms' }
+          }),
+          { isStatusCode200, ...pageContentCheck('terms of use update') })
+        }
+      })
       break
     }
     case 'SMS': {
-      res = group('B01_SignIn_07_SMSMFA_EnterPassword POST', () =>
+      res = group('B02_SignIn_06_SMSMFA_EnterPassword POST', () =>
         timeRequest(() =>
           res.submitForm({
             fields: { password: credentials.password },
-            params: { tags: { name: 'B01_SignIn_07_SMSMFA_EnterPassword' } }
+            params: { tags: { name: 'B02_SignIn_06_SMSMFA_EnterPassword' } }
           }), { isStatusCode200, ...pageContentCheck('Check your phone') }))
 
       sleep(1)
 
-      res = group('B01_SignIn_08_SMSMFA_EnterOTP POST', () =>
-        timeRequest(() => {
-          const response = res.submitForm({
-            fields: { code: credentials.phoneOTP },
-            params: { tags: { name: 'B01_SignIn_08_SMSMFA_EnterOTP' } }
-          })
-          acceptNewTerms = (response.body as string).includes('terms of use update')
-          return response
-        }, { isStatusCode200, 'verify page content': r => acceptNewTerms || (r.body as string).includes('User information') }))
+      group('B02_SignIn_07_SMSMFA_EnterOTP POST', () => {
+        res = timeRequest(() => res.submitForm({
+          fields: { code: credentials.phoneOTP },
+          params: {
+            redirects: 1,
+            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_01_AuthCall' }
+          }
+        }),
+        { isStatusCode302 })
+        res = timeRequest(() => http.get(res.headers.Location, {
+          redirects: 0,
+          tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_02_OIDCCall' }
+        }),
+        { isStatusCode302 })
+
+        rpStubCheck = (res.headers.Location).includes('auth-stub')
+        acceptNewTerms = (res.headers.Location).includes('signin')
+
+        if (rpStubCheck) {
+          res = timeRequest(() => http.get(res.headers.Location, {
+            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_RPStub' }
+          }),
+          { isStatusCode200, ...pageContentCheck('User information') })
+        }
+
+        if (acceptNewTerms) {
+          res = timeRequest(() => http.get(res.headers.Location, {
+            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_AuthAcceptTerms' } // pragma: allowlist secret
+          }),
+          { isStatusCode200, ...pageContentCheck('terms of use update') })
+        }
+      })
       break
     }
   }
 
   if (acceptNewTerms) {
-    res = group('B01_SignIn_09_AcceptTermsConditions POST', () =>
+    res = group('B02_SignIn_08_AcceptTermsConditions POST', () =>
       timeRequest(() =>
         res.submitForm({
           fields: { termsAndConditionsResult: 'accept' },
-          params: { tags: { name: 'B01_SignIn_09_AcceptTermsConditions' } }
+          params: { tags: { name: 'B02_SignIn_08_AcceptTermsConditions' } }
         }), { isStatusCode200, ...pageContentCheck('User information') }))
   }
+
+  iterationsCompleted.add(1)
 
   // 25% of users logout
   if (Math.random() <= 0.25) {
     sleep(1)
 
-    res = group('B01_SignIn_10_Logout POST', () =>
+    res = group('B02_SignIn_09_Logout POST', () =>
       timeRequest(() => res.submitForm({
-        params: { tags: { name: 'B01_SignIn_10_Logout' } }
+        params: { tags: { name: 'B02_SignIn_09_Logout' } }
       }), { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
   }
-  iterationsCompleted.add(1)
 }

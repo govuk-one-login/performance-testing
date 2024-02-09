@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: '0'
 
@@ -32,12 +32,12 @@ jobs:
         run: npm start
 
       - name: Run local k6 unit test script
-        uses: grafana/k6-action@v0.3.1
+        uses: grafana/k6-action@e4714b734f2b0afaabeb7b4a69142745548ab9ec # v0.3.1
         with:
           filename: ./deploy/scripts/dist/common/unit-tests.js
 
       - run: git fetch origin main
       - name:  Run pre-commit action
-        uses: pre-commit/action@v3.0.0
+        uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
         with:
           extra_args: --from-ref FETCH_HEAD --to-ref HEAD

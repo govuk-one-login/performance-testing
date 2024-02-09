@@ -71,7 +71,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 5, duration: '5m' }, // Ramp up to 5 iterations per minute in 5 minutes
         { target: 5, duration: '5m' }, // Maintain steady state at 5 iterations per minute for 5 minutes
-        { target: 25, duration: '15m' }, // Ramp up to 25 iterations per minute in 25 minutes
+        { target: 25, duration: '10m' }, // Ramp up to 25 iterations per minute in 10 minutes
         { target: 25, duration: '5m' }, // Maintain steady state at 25 iterations per minute for 5 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],

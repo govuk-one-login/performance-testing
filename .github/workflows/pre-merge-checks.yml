@@ -38,6 +38,6 @@ jobs:
 
       - run: git fetch origin main
       - name:  Run pre-commit action
-        uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
         with:
           extra_args: --from-ref FETCH_HEAD --to-ref HEAD

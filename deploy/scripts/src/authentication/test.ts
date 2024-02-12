@@ -376,9 +376,7 @@ export function signIn (): void {
             tags: { name: 'B02_SignIn_05_AuthMFA_EnterTOTP_03_RPStub' }
           }),
           { isStatusCode200, ...pageContentCheck('User information') })
-        }
-
-        if (acceptNewTerms) {
+        } else if (acceptNewTerms) {
           res = timeRequest(() => http.get(res.headers.Location, {
             tags: { name: 'B02_SignIn_05_AuthMFA_EnterTOTP_04_AuthAcceptTerms' }
           }),
@@ -420,9 +418,7 @@ export function signIn (): void {
             tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_RPStub' }
           }),
           { isStatusCode200, ...pageContentCheck('User information') })
-        }
-
-        if (acceptNewTerms) {
+        } else if (acceptNewTerms) {
           res = timeRequest(() => http.get(res.headers.Location, {
             tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_AuthAcceptTerms' } // pragma: allowlist secret
           }),

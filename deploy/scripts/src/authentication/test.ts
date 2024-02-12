@@ -368,8 +368,8 @@ export function signIn (): void {
         }),
         { isStatusCode302 })
 
-        rpStubCheck = (res.headers.Location).includes('auth-stub')
-        acceptNewTerms = (res.headers.Location).includes('signin')
+        rpStubCheck = res.headers.Location.includes('auth-stub')
+        acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
 
         if (rpStubCheck) {
           res = timeRequest(() => http.get(res.headers.Location, {
@@ -410,8 +410,8 @@ export function signIn (): void {
         }),
         { isStatusCode302 })
 
-        rpStubCheck = (res.headers.Location).includes('auth-stub')
-        acceptNewTerms = (res.headers.Location).includes('signin')
+        rpStubCheck = res.headers.Location.includes('auth-stub')
+        acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
 
         if (rpStubCheck) {
           res = timeRequest(() => http.get(res.headers.Location, {

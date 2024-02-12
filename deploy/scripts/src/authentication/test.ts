@@ -290,17 +290,33 @@ export function signUp (): void {
       tags: { name: 'B01_SignUp_11_ContinueAccountCreated_03_RPStub' }
     }),
     { isStatusCode200, ...pageContentCheck('User information') })
-    iterationsCompleted.add(1)
   })
 
   // 25% of users logout
   if (Math.random() <= 0.25) {
     sleep(1)
-    res = group('B01_SignUp_12_Logout', () =>
-      timeRequest(() => res.submitForm({
-        params: { tags: { name: 'B01_SignUp_12_Logout' } }
-      }), { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
+
+    group('B01_SignUp_12_Logout POST', () => {
+      res = timeRequest(() => res.submitForm({
+        params: {
+          redirects: 0,
+          tags: { name: 'B01_SignUp_12_Logout_01_RPStub' }
+        }
+      }),
+      { isStatusCode302 })
+      res = timeRequest(() => http.get(res.headers.Location, {
+        redirects: 0,
+        tags: { name: 'B01_SignUp_12_Logout_02_OIDCCall' }
+      }),
+      { isStatusCode302 })
+      res = timeRequest(() => http.get(res.headers.Location, {
+        tags: { name: 'B01_SignUp_12_Logout_03_RPStub' }
+      }),
+      { isStatusCode200, ...pageContentCheck('Successfully signed out') })
+    })
   }
+
+  iterationsCompleted.add(1)
 }
 
 export function signIn (): void {
@@ -438,15 +454,29 @@ export function signIn (): void {
         }), { isStatusCode200, ...pageContentCheck('User information') }))
   }
 
-  iterationsCompleted.add(1)
-
   // 25% of users logout
   if (Math.random() <= 0.25) {
     sleep(1)
 
-    res = group('B02_SignIn_09_Logout POST', () =>
-      timeRequest(() => res.submitForm({
-        params: { tags: { name: 'B02_SignIn_09_Logout' } }
-      }), { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
+    group('B02_SignIn_09_Logout POST', () => {
+      res = timeRequest(() => res.submitForm({
+        params: {
+          redirects: 0,
+          tags: { name: 'B02_SignIn_09_Logout_01_RPStub' }
+        }
+      }),
+      { isStatusCode302 })
+      res = timeRequest(() => http.get(res.headers.Location, {
+        redirects: 0,
+        tags: { name: 'B02_SignIn_09_Logout_02_OIDCCall' }
+      }),
+      { isStatusCode302 })
+      res = timeRequest(() => http.get(res.headers.Location, {
+        tags: { name: 'B02_SignIn_09_Logout_03_RPStub' }
+      }),
+      { isStatusCode200, ...pageContentCheck('Successfully signed out') })
+    })
   }
+
+  iterationsCompleted.add(1)
 }

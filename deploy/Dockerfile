@@ -15,7 +15,7 @@ RUN cd scripts && \
 # -------------------------------
 # Build k6 binary with extensions
 # -------------------------------
-FROM golang:1.21-alpine as k6-build
+FROM golang:1.22-alpine as k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.10.0
@@ -24,7 +24,7 @@ RUN xk6 build v0.49.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --out
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.93.0 as otel
+FROM otel/opentelemetry-collector-contrib:0.94.0 as otel
 ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---

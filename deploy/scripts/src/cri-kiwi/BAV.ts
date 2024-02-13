@@ -1,5 +1,5 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
-import { group, fail } from 'k6'
+import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
@@ -8,6 +8,7 @@ import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { bankingPayload } from './data/BAVdata'
+import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl, getAccessToken } from './utils/authorization'
 
 const profiles: ProfileList = {
   smoke: {
@@ -147,28 +148,4 @@ export function BAV (): void {
     timeRequest(() => http.post(env.BAV.target + '/userinfo', {}, options),
       { isStatusCode200, 'verify response body': (r) => (r.body as string).includes('credentialJWT') }))
   iterationsCompleted.add(1)
-}
-
-function getClientID (r: Response): string {
-  const clientId = r.json('clientId')
-  if (clientId !== null && typeof clientId === 'string') return clientId
-  fail('Client ID not found')
-}
-
-function getCodeFromUrl (url: string): string {
-  const code = url.match(/code=([^&]*)/)
-  if (code?.[1] != null) return code[1]
-  fail('Code not found')
-}
-
-function getAccessToken (r: Response): string {
-  const accessToken = r.json('access_token')
-  if (accessToken !== null && typeof accessToken === 'string') return accessToken
-  fail('AccessToken not found')
-}
-
-function getAuthorizeauthorizeLocation (r: Response): string {
-  const authorizeLocation = r.json('AuthorizeLocation')
-  if (authorizeLocation !== null && typeof authorizeLocation === 'string') return authorizeLocation
-  fail('AuthorizeLocation not found')
 }

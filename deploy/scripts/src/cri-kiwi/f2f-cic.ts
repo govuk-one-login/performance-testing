@@ -8,6 +8,7 @@ import { b64encode } from 'k6/encoding'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl, getAccessToken } from './utils/authorization'
 
 const profiles: ProfileList = {
   smoke: {
@@ -529,28 +530,4 @@ function randomDate (start: Date, end: Date): Date {
   const diff = Math.abs(+end - +start)
   const min = Math.min(+end, +start)
   return new Date(min + (diff * Math.random()))
-}
-
-function getClientID (r: Response): string {
-  const clientId = r.json('clientId')
-  if (clientId !== null && typeof clientId === 'string') return clientId
-  fail('Client ID not found')
-}
-
-function getCodeFromUrl (url: string): string {
-  const code = url.match(/code=([^&]*)/)
-  if (code?.[1] != null) return code[1]
-  fail('Code not found')
-}
-
-function getAccessToken (r: Response): string {
-  const accessToken = r.json('access_token')
-  if (accessToken !== null && typeof accessToken === 'string') return accessToken
-  fail('AccessToken not found')
-}
-
-function getAuthorizeauthorizeLocation (r: Response): string {
-  const authorizeLocation = r.json('AuthorizeLocation')
-  if (authorizeLocation !== null && typeof authorizeLocation === 'string') return authorizeLocation
-  fail('AuthorizeLocation not found')
 }

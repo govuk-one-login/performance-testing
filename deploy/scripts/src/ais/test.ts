@@ -2,7 +2,7 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
-import { generatePersistIVRequest } from './requestGenerator/aisReqGen'
+import { generatePersistIVRequest, type TicfAccountIntervention } from './requestGenerator/aisReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 import { group } from 'k6'
@@ -91,6 +91,15 @@ const profiles: ProfileList = {
       ],
       exec: 'retrieveIV'
     }
+  },
+  dataCreation: {
+    dataCreationPersist: {
+      executor: 'per-vu-iterations',
+      vus: 1,
+      iterations: 5,
+      maxDuration: '60s',
+      exec: 'dataCreationPersist'
+    }
   }
 }
 
@@ -108,9 +117,15 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
-const interventionCode = __ENV.ACCOUNT_BRAVO_AIS_IVCODE
-const validIVCode = ['01', '02', '03', '04', '05', '06', '07']
-if (!validIVCode.includes(interventionCode)) throw new Error(`Intervention Code '${interventionCode}' not in [${validIVCode.toString()}]`)
+const interventionCodes = {
+  suspend: '01',
+  unsuspend: '02',
+  block: '03',
+  pass_reset: '04',
+  id_reset: '05',
+  id_pass_reset: '06',
+  unblock: '07'
+}
 
 const env = {
   sqs_queue: __ENV.ACCOUNT_BRAVO_AIS_TxMASQS,
@@ -140,7 +155,7 @@ const sqs = new SQSClient(awsConfig)
 
 export function persistIV (): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
-  const persistIVPayload = generatePersistIVRequest(userID, interventionCode)
+  const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend)
   const persistIVMessage = JSON.stringify(persistIVPayload)
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, persistIVMessage)
@@ -154,5 +169,19 @@ export function retrieveIV (): void {
   group('B02_RetrieveIV_01_GetInterventionData GET', () =>
     timeRequest(() => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`),
       { isStatusCode200, ...pageContentCheck('Perf Testing') }))
+  iterationsCompleted.add(1)
+}
+
+export function dataCreationPersist (): void {
+  iterationsStarted.add(1)
+  let persistIVPayload: TicfAccountIntervention
+  let persistIVMessage: string
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend)
+  persistIVMessage = JSON.stringify(persistIVPayload)
+  sqs.sendMessage(env.sqs_queue, persistIVMessage)
+  persistIVPayload = generatePersistIVRequest(userID, interventionCodes.block)
+  persistIVMessage = JSON.stringify(persistIVPayload)
+  sqs.sendMessage(env.sqs_queue, persistIVMessage)
   iterationsCompleted.add(1)
 }

@@ -1,6 +1,6 @@
 import { uuidv4 } from '../../common/utils/jslib/index'
 
-interface TicfAccountIntervention {
+export interface TicfAccountIntervention {
   timestamp: number
   event_timestamp_ms: number
   event_name: string

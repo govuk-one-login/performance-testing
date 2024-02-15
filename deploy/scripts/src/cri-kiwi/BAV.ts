@@ -32,7 +32,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1,
       maxVUs: 900,
       stages: [
-        { target: 30, duration: '15m' }, // Ramps up to target load
+        { target: 30, duration: '5m' }, // Ramps up to target load
         { target: 30, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],

@@ -1,6 +1,6 @@
 import { uuidv4 } from '../../common/utils/jslib/index'
 
-interface TicfAccountIntervention {
+export interface TicfAccountIntervention {
   timestamp: number
   event_timestamp_ms: number
   event_name: string
@@ -40,4 +40,14 @@ export function generatePersistIVRequest (userID: string, interventionCode: stri
       }
     }
   }
+}
+
+export enum interventionCodes {
+  suspend = '01',
+  unsuspend = '02',
+  block = '03',
+  pass_reset = '04',
+  id_reset = '05',
+  id_pass_reset = '06',
+  unblock = '07'
 }

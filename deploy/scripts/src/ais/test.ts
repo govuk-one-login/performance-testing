@@ -2,7 +2,7 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
-import { generatePersistIVRequest } from './requestGenerator/aisReqGen'
+import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 import { group } from 'k6'
@@ -91,6 +91,15 @@ const profiles: ProfileList = {
       ],
       exec: 'retrieveIV'
     }
+  },
+  dataCreation: {
+    dataCreationForRetrieve: {
+      executor: 'per-vu-iterations',
+      vus: 100,
+      iterations: 500,
+      maxDuration: '60m',
+      exec: 'dataCreationForRetrieve'
+    }
   }
 }
 
@@ -107,10 +116,6 @@ export const options: Options = {
 export function setup (): void {
   describeProfile(loadProfile)
 }
-
-const interventionCode = __ENV.ACCOUNT_BRAVO_AIS_IVCODE
-const validIVCode = ['01', '02', '03', '04', '05', '06', '07']
-if (!validIVCode.includes(interventionCode)) throw new Error(`Intervention Code '${interventionCode}' not in [${validIVCode.toString()}]`)
 
 const env = {
   sqs_queue: __ENV.ACCOUNT_BRAVO_AIS_TxMASQS,
@@ -140,7 +145,7 @@ const sqs = new SQSClient(awsConfig)
 
 export function persistIV (): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
-  const persistIVPayload = generatePersistIVRequest(userID, interventionCode)
+  const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend)
   const persistIVMessage = JSON.stringify(persistIVPayload)
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, persistIVMessage)
@@ -154,5 +159,15 @@ export function retrieveIV (): void {
   group('B02_RetrieveIV_01_GetInterventionData GET', () =>
     timeRequest(() => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`),
       { isStatusCode200, ...pageContentCheck('Perf Testing') }))
+  iterationsCompleted.add(1)
+}
+
+export function dataCreationForRetrieve (): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  iterationsStarted.add(1)
+  const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.block)
+  const persistIVMessage = JSON.stringify(persistIVPayload)
+  sqs.sendMessage(env.sqs_queue, persistIVMessage)
+  console.log(userID)
   iterationsCompleted.add(1)
 }

@@ -248,6 +248,7 @@ export function changeEmail (): void {
   res = group('B01_ChangeEmail_04_EnterCurrentPassword POST', () =>
     timeRequest(() =>
       res.submitForm({
+        formSelector: "form[action='/enter-password']",
         fields: {
           requestType: 'changeEmail',
           password: credentials.currPassword
@@ -263,6 +264,7 @@ export function changeEmail (): void {
   res = group('B01_ChangeEmail_05_EnterNewEmailID POST', () =>
     timeRequest(() =>
       res.submitForm({
+        formSelector: "form[action='/change-email']",
         fields: {
           email: newEmail
         },
@@ -277,6 +279,7 @@ export function changeEmail (): void {
   res = group('B01_ChangeEmail_06_EnterEmailOTP POST', () =>
     timeRequest(() =>
       res.submitForm({
+        formSelector: "form[action='/check-your-email']",
         fields: {
           email: newEmail,
           code: credentials.fixedEmailOTP
@@ -297,11 +300,16 @@ export function changeEmail (): void {
 
   sleepBetween(1, 3)
 
-  res = group('B01_ChangeEmail_08_SignOut GET', () =>
-    timeRequest(() => http.get(env.envURL + '/sign-out', {
-      tags: { name: 'B01_ChangeEmail_08_SignOut' }
-    }),
+  res = group('B01_ChangeEmail_08_SignOut POST', () =>
+    timeRequest(() =>
+      res.submitForm({
+        formSelector: "form[action='/sign-out']",
+        params: {
+          tags: { name: 'B01_ChangeEmail_08_SignOut' }
+        }
+      }),
     { isStatusCode200, ...pageContentCheck('You have signed out') }))
+
   iterationsCompleted.add(1)
 }
 

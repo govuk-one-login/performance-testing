@@ -41,3 +41,23 @@ export function generatePersistIVRequest (userID: string, interventionCode: stri
     }
   }
 }
+
+interface IntervetnionCodes {
+  suspend: string
+  unsuspend: string
+  block: string
+  pass_reset: string
+  id_reset: string
+  id_pass_reset: string
+  unblock: string
+}
+
+export const interventionCodes: IntervetnionCodes = {
+  suspend: '01',
+  unsuspend: '02',
+  block: '03',
+  pass_reset: '04',
+  id_reset: '05',
+  id_pass_reset: '06',
+  unblock: '07'
+}

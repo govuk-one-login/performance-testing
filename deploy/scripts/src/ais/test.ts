@@ -2,7 +2,7 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
-import { generatePersistIVRequest } from './requestGenerator/aisReqGen'
+import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 import { group } from 'k6'
@@ -115,16 +115,6 @@ export const options: Options = {
 
 export function setup (): void {
   describeProfile(loadProfile)
-}
-
-const interventionCodes = {
-  suspend: '01',
-  unsuspend: '02',
-  block: '03',
-  pass_reset: '04',
-  id_reset: '05',
-  id_pass_reset: '06',
-  unblock: '07'
 }
 
 const env = {

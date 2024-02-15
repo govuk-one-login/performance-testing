@@ -1,3 +1,27 @@
+export interface BankingPayload {
+  shared_claims: {
+    name: [
+      {
+        nameParts: [
+          {
+            value: string
+            type: string
+          },
+          {
+            value: string
+            type: string
+          }
+        ]
+      }
+    ]
+    birthDate: [
+      {
+        value: string
+      }
+    ]
+  }
+}
+
 export const bankingPayload = JSON.stringify({
   shared_claims: {
     name: [
@@ -20,5 +44,4 @@ export const bankingPayload = JSON.stringify({
       }
     ]
   }
-}
-)
+} satisfies BankingPayload)

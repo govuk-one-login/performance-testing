@@ -2,7 +2,7 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
-import { generatePersistIVRequest, type TicfAccountIntervention } from './requestGenerator/aisReqGen'
+import { generatePersistIVRequest } from './requestGenerator/aisReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 import { group } from 'k6'
@@ -93,12 +93,12 @@ const profiles: ProfileList = {
     }
   },
   dataCreation: {
-    dataCreationPersist: {
+    dataCreationForRetrieve: {
       executor: 'per-vu-iterations',
-      vus: 1,
-      iterations: 5,
-      maxDuration: '60s',
-      exec: 'dataCreationPersist'
+      vus: 100,
+      iterations: 500,
+      maxDuration: '60m',
+      exec: 'dataCreationForRetrieve'
     }
   }
 }
@@ -172,16 +172,12 @@ export function retrieveIV (): void {
   iterationsCompleted.add(1)
 }
 
-export function dataCreationPersist (): void {
-  iterationsStarted.add(1)
-  let persistIVPayload: TicfAccountIntervention
-  let persistIVMessage: string
+export function dataCreationForRetrieve (): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
-  persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend)
-  persistIVMessage = JSON.stringify(persistIVPayload)
+  iterationsStarted.add(1)
+  const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.block)
+  const persistIVMessage = JSON.stringify(persistIVPayload)
   sqs.sendMessage(env.sqs_queue, persistIVMessage)
-  persistIVPayload = generatePersistIVRequest(userID, interventionCodes.block)
-  persistIVMessage = JSON.stringify(persistIVPayload)
-  sqs.sendMessage(env.sqs_queue, persistIVMessage)
+  console.log(userID)
   iterationsCompleted.add(1)
 }

@@ -344,6 +344,7 @@ export function changePassword (): void {
   res = group('B02_ChangePassword_04_EnterCurrentPassword POST', () =>
     timeRequest(() =>
       res.submitForm({
+        formSelector: "form[action='/enter-password']",
         fields: {
           requestType: 'changePassword',
           password: credentials.currPassword
@@ -359,6 +360,7 @@ export function changePassword (): void {
   res = group('B02_ChangePassword_05_EnterNewPassword POST', () =>
     timeRequest(() =>
       res.submitForm({
+        formSelector: "form[action='/change-password']",
         fields: {
           password: credentials.newPassword,
           'confirm-password': credentials.newPassword
@@ -380,9 +382,13 @@ export function changePassword (): void {
   sleepBetween(1, 3)
 
   res = group('B02_ChangePassword_07_SignOut GET', () =>
-    timeRequest(() => http.get(env.envURL + '/sign-out', {
-      tags: { name: 'B02_ChangePassword_07_SignOut' }
-    }),
+    timeRequest(() =>
+      res.submitForm({
+        formSelector: "form[action='/sign-out']",
+        params: {
+          tags: { name: 'B02_ChangePassword_07_SignOut' }
+        }
+      }),
     { isStatusCode200, ...pageContentCheck('You have signed out') }))
   iterationsCompleted.add(1)
 }
@@ -418,6 +424,7 @@ export function changePhone (): void {
   res = group('B03_ChangePhone_04_EnterCurrentPassword POST', () =>
     timeRequest(() =>
       res.submitForm({
+        formSelector: "form[action='/enter-password']",
         fields: {
           requestType: 'changePhoneNumber',
           password: credentials.currPassword
@@ -433,6 +440,7 @@ export function changePhone (): void {
   res = group('B03_ChangePhone_05_EnterNewPhoneID POST', () =>
     timeRequest(() =>
       res.submitForm({
+        formSelector: "form[action='/change-phone-number']",
         fields: {
           phoneNumber: phoneData.newPhone,
           internationalPhoneNumber: ''
@@ -448,6 +456,7 @@ export function changePhone (): void {
   res = group('B03_ChangePhone_06_EnterSMSOTP POST', () =>
     timeRequest(() =>
       res.submitForm({
+        formSelector: "form[action='/check-your-phone']",
         fields: {
           phoneNumber: phoneData.newPhone,
           resendCodeLink: '/resend-phone-code',
@@ -471,9 +480,13 @@ export function changePhone (): void {
   sleepBetween(1, 3)
 
   res = group('B03_ChangePhone_08_SignOut GET', () =>
-    timeRequest(() => http.get(env.envURL + '/sign-out', {
-      tags: { name: 'B03_ChangePhone_08_SignOut' }
-    }),
+    timeRequest(() =>
+      res.submitForm({
+        formSelector: "form[action='/sign-out']",
+        params: {
+          tags: { name: 'B03_ChangePhone_08_SignOut' }
+        }
+      }),
     { isStatusCode200, ...pageContentCheck('You have signed out') }))
   iterationsCompleted.add(1)
 }
@@ -509,6 +522,7 @@ export function deleteAccount (): void {
   res = group('B04_DeleteAccount_04_EnterCurrentPassword POST', () =>
     timeRequest(() =>
       res.submitForm({
+        formSelector: "form[action='/enter-password']",
         fields: {
           requestType: 'deleteAccount',
           password: credentials.currPassword
@@ -524,6 +538,7 @@ export function deleteAccount (): void {
   res = group('B04_DeleteAccount_05_DeleteAccountConfirm POST', () =>
     timeRequest(() =>
       res.submitForm({
+        formSelector: "form[action='/delete-account']",
         params: {
           tags: { name: 'B04_DeleteAccount_05_DeleteAccountConfirm' }
         }
@@ -634,9 +649,13 @@ export function validateUser (): void {
   sleepBetween(1, 3)
 
   res = group('B05_ValidateUser_10_Logout POST', () =>
-    timeRequest(() => http.get(env.envURL + '/sign-out', {
-      tags: { name: 'B05_ValidateUser_10_Logout' }
-    }),
+    timeRequest(() =>
+      res.submitForm({
+        formSelector: "form[action='/sign-out']",
+        params: {
+          tags: { name: 'B05_ValidateUser_10_Logout' }
+        }
+      }),
     { isStatusCode200, 'verify page content': r => (r.body as string).includes('You have signed out') }))
   iterationsCompleted.add(1)
 }

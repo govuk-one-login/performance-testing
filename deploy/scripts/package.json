@@ -7,8 +7,8 @@
   "devDependencies": {
     "@types/k6": "^0.49.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "core-js": "^3.35.1",
-    "esbuild": "^0.20.0",
+    "core-js": "^3.36.0",
+    "esbuild": "^0.20.1",
     "esbuild-plugin-copy": "^2.1.1",
     "eslint": "^8.56.0",
     "eslint-config-standard-with-typescript": "^43.0.1",

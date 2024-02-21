@@ -172,6 +172,15 @@ const profiles: ProfileList = {
       ],
       exec: 'idReuse'
     }
+  },
+  dataCreationForIDReuse: {
+    passport: {
+      executor: 'per-vu-iterations',
+      vus: 250,
+      iterations: 200,
+      maxDuration: '120m',
+      exec: 'passport'
+    }
   }
 }
 

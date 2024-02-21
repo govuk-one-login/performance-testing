@@ -11,7 +11,7 @@ import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assert
 
 const profiles: ProfileList = {
   smoke: {
-    persistID: {
+    persistVC: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -20,10 +20,10 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
-      exec: 'persistID'
+      exec: 'persistVC'
     },
 
-    retrieveID: {
+    summariseVC: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -32,12 +32,12 @@ const profiles: ProfileList = {
       stages: [
         { target: 1, duration: '60s' } // Ramps up to target load
       ],
-      exec: 'retrieveID'
+      exec: 'summariseVC'
     }
 
   },
   initialLoad: {
-    persistID: {
+    persistVC: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -48,10 +48,10 @@ const profiles: ProfileList = {
         { target: 30, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
-      exec: 'persistID'
+      exec: 'persistVC'
     },
 
-    retrieveID: {
+    summariseVC: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -62,12 +62,12 @@ const profiles: ProfileList = {
         { target: 30, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
-      exec: 'retrieveID'
+      exec: 'summariseVC'
     }
 
   },
   load: {
-    persistID: {
+    persistVC: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -78,10 +78,10 @@ const profiles: ProfileList = {
         { target: 100, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 100 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
-      exec: 'persistID'
+      exec: 'persistVC'
     },
 
-    retrieveID: {
+    summariseVC: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
@@ -92,17 +92,17 @@ const profiles: ProfileList = {
         { target: 1900, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 1900 iterations/second
         { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
       ],
-      exec: 'retrieveID'
+      exec: 'summariseVC'
     }
 
   },
   dataCreationForSummarise: {
-    persistID: {
+    persistVC: {
       executor: 'per-vu-iterations',
       vus: 250,
       iterations: 200,
       maxDuration: '120m',
-      exec: 'persistID'
+      exec: 'persistVC'
     }
   }
 }
@@ -139,18 +139,18 @@ const env = {
   envApiKey: __ENV.ACCOUNT_BRAVO_ID_REUSE_API_KEY,
   envApiKeySummarise: __ENV.ACCOUNT_BRAVO_ID_REUSE_API_KEY_SUMMARISE
 }
-export function persistID (): void {
+export function persistVC (): void {
   let res: Response
   const userID = uuidv4()
   const subjectID = `urn:fdc:gov.uk:2022:${userID}`
   iterationsStarted.add(1)
-  res = group('R01_persistID_01_GenerateToken POST', () =>
+  res = group('R01_PersistVC_01_GenerateToken POST', () =>
     timeRequest(() => http.post(env.envMock + '/generate',
       JSON.stringify({
         sub: subjectID
       }),
       {
-        tags: { name: 'R01_idReuse_01_GenerateToken' }
+        tags: { name: 'R01_PersistVC_01_GenerateToken' }
       }),
     { isStatusCode200, ...pageContentCheck('token') }))
   const token = getToken(res)
@@ -162,14 +162,14 @@ export function persistID (): void {
       Authorization: `Bearer ${token}`,
       'x-api-key': env.envApiKey
     },
-    tags: { name: 'R02_idReuse_02_CreateVC' }
+    tags: { name: 'R01_PersistVC_02_CreateVC' }
   }
   const body = JSON.stringify([
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkphbmUgRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.LeLQg33PXWySMBwXi0KnJsKwO3Cb7a2pd501orGEyEo', // pragma: allowlist secret
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.6PIinUiv_RExeCq3XlTQqIAPqLv_jkpeFtqDc1PcWwQ', // pragma: allowlist secret
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' // pragma: allowlist secret
   ])
-  res = group('R01_persistID_02_CreateVC POST', () =>
+  res = group('R01_PersistVC_02_CreateVC POST', () =>
     timeRequest(() => http.post(env.envURL + `/vcs/${subjectID}`, body, options),
       {
         isStatusCode202: (r) => r.status === 202,
@@ -178,19 +178,19 @@ export function persistID (): void {
 
   sleepBetween(2, 4) // Random sleep between 2-4 seconds
 
-  options.tags.name = 'R01_idReuse_03_Retrieve'
-  res = group('R01_persistID_03_Retrieve GET', () =>
+  options.tags.name = 'R01_PersistVC_03_RetrieveVC'
+  res = group('R01_PersistVC_03_Retrieve GET', () =>
     timeRequest(() => http.get(env.envURL + `/vcs/${subjectID}`, options),
       { isStatusCode200, ...pageContentCheck('vcs') }))
   iterationsCompleted.add(1)
 }
 
-export function retrieveID (): void {
+export function summariseVC (): void {
   let res: Response
   const summariseData = csvData[Math.floor(Math.random() * csvData.length)]
   iterationsStarted.add(1)
 
-  res = group('R02_RetrieveID_01_GenerateTokenSummary POST', () =>
+  res = group('R02_SummariseVC_01_GenerateTokenSummary POST', () =>
     timeRequest(() => http.post(env.envMock + '/generate',
       JSON.stringify({
         sub: summariseData.subID,
@@ -198,7 +198,7 @@ export function retrieveID (): void {
         ttl: 120
       }),
       {
-        tags: { name: 'R01_idReuse_04_GenerateTokenSummary' }
+        tags: { name: 'R02_SummariseVC_01_GenerateTokenSummary' }
       }),
     { isStatusCode200, ...pageContentCheck('token') }))
   const token = getToken(res)
@@ -208,9 +208,9 @@ export function retrieveID (): void {
       Authorization: `Bearer ${token}`,
       'x-api-key': env.envApiKeySummarise
     },
-    tags: { name: 'R01_idReuse_05_Summarise' }
+    tags: { name: 'R02_SummariseVC_02_Summarise' }
   }
-  res = group('R02_RetrieveID_02_Summarise GET', () =>
+  res = group('R02_SummariseVC_02_Summarise GET', () =>
     timeRequest(() => http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options),
       { isStatusCode200, ...pageContentCheck('vcs') }))
   iterationsCompleted.add(1)

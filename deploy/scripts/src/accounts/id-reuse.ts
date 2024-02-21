@@ -66,7 +66,6 @@ const profiles: ProfileList = {
     }
 
   },
-
   load: {
     persistID: {
       executor: 'ramping-arrival-rate',
@@ -96,6 +95,15 @@ const profiles: ProfileList = {
       exec: 'retrieveID'
     }
 
+  },
+  dataCreationForSummarise: {
+    persistID: {
+      executor: 'per-vu-iterations',
+      vus: 250,
+      iterations: 200,
+      maxDuration: '120m',
+      exec: 'persistID'
+    }
   }
 }
 

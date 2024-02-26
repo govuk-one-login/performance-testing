@@ -175,13 +175,6 @@ export function persistVC (): void {
         isStatusCode202: (r) => r.status === 202,
         ...pageContentCheck('messageId')
       }))
-
-  sleepBetween(2, 4) // Random sleep between 2-4 seconds
-
-  options.tags.name = 'R01_PersistVC_03_RetrieveVC'
-  res = group('R01_PersistVC_03_Retrieve GET', () =>
-    timeRequest(() => http.get(env.envURL + `/vcs/${subjectID}`, options),
-      { isStatusCode200, ...pageContentCheck('vcs') }))
   iterationsCompleted.add(1)
 }
 

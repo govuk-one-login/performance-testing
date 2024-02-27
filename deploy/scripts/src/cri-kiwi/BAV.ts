@@ -24,7 +24,22 @@ const profiles: ProfileList = {
       exec: 'BAV'
     }
   },
-  load: {
+  lowVolume: {
+    BAV: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 300,
+      stages: [
+        { target: 10, duration: '5m' }, // Ramps up to target load
+        { target: 10, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 10 iterations/second
+        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
+      ],
+      exec: 'BAV'
+    }
+  },
+  stress: {
     BAV: {
       executor: 'ramping-arrival-rate',
       startRate: 1,

@@ -1,10 +1,11 @@
 /*
-To get p95 and p99 for each group in durations.csv file
-    1. Install the required dependencies by running the following command:
+To get p95 and p99 durations for each group in durations.csv file
+    1. First, run the create-summary.sh file to get the durations.csv file (make sure durations.csv file is in the same directory as this file)
+    2. Install the required dependencies by running the following command:
      npm install csv-parser
-    2. Compile the TypeScript file by running the following command:
+    3. Compile the TypeScript file by running the following command:
      npx tsc percentiles.ts
-    3. Run the JavaScript file by running the following command:
+    4. Run the JavaScript file by running the following command:
      node percentiles.js
 */
 

@@ -83,10 +83,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 11400,
+      maxVUs: 17100,
       stages: [
-        { target: 3800, duration: '15m' }, // Ramp up to 3800 iterations per second in 15 minutes
-        { target: 3800, duration: '30m' }, // Maintain a steady state of 3800 iterations per second for 30 minutes
+        { target: 5700, duration: '15m' }, // Ramp up to 5700 iterations per second in 15 minutes
+        { target: 5700, duration: '30m' }, // Maintain a steady state of 5700 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'retrieveIV'

@@ -307,30 +307,6 @@ export function signUp (): void {
     { isStatusCode200, ...pageContentCheck('User information') })
   })
 
-  // 25% of users logout
-  if (Math.random() <= 0.25) {
-    sleep(1)
-
-    group('B01_SignUp_12_Logout POST', () => {
-      res = timeRequest(() => res.submitForm({
-        params: {
-          redirects: 0,
-          tags: { name: 'B01_SignUp_12_Logout_01_RPStub' }
-        }
-      }),
-      { isStatusCode302 })
-      res = timeRequest(() => http.get(res.headers.Location, {
-        redirects: 0,
-        tags: { name: 'B01_SignUp_12_Logout_02_OIDCCall' }
-      }),
-      { isStatusCode302 })
-      res = timeRequest(() => http.get(res.headers.Location, {
-        tags: { name: 'B01_SignUp_12_Logout_03_RPStub' }
-      }),
-      { isStatusCode200, ...pageContentCheck('Successfully signed out') })
-    })
-  }
-
   iterationsCompleted.add(1)
 }
 

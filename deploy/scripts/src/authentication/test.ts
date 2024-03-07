@@ -370,7 +370,6 @@ export function signIn (): void {
 
   sleep(1)
 
-  let rpStubCheck = false
   let acceptNewTerms = false
   switch (userData.mfaOption) {
     case 'AUTH_APP': {
@@ -399,19 +398,18 @@ export function signIn (): void {
         }),
         { isStatusCode302 })
 
-        rpStubCheck = res.headers.Location.includes('auth-stub')
         acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
 
-        if (rpStubCheck) {
+        if (acceptNewTerms) {
           res = timeRequest(() => http.get(res.headers.Location, {
-            tags: { name: 'B02_SignIn_05_AuthMFA_EnterTOTP_03_RPStub' }
-          }),
-          { isStatusCode200, ...pageContentCheck('User information') })
-        } else if (acceptNewTerms) {
-          res = timeRequest(() => http.get(res.headers.Location, {
-            tags: { name: 'B02_SignIn_05_AuthMFA_EnterTOTP_04_AuthAcceptTerms' }
+            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_AuthAcceptTerms' } // pragma: allowlist secret
           }),
           { isStatusCode200, ...pageContentCheck('terms of use update') })
+        } else {
+          res = timeRequest(() => http.get(res.headers.Location, {
+            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_RPStub' }
+          }),
+          { isStatusCode200, ...pageContentCheck('User information') })
         }
       })
       break
@@ -441,19 +439,18 @@ export function signIn (): void {
         }),
         { isStatusCode302 })
 
-        rpStubCheck = res.headers.Location.includes('auth-stub')
         acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
 
-        if (rpStubCheck) {
-          res = timeRequest(() => http.get(res.headers.Location, {
-            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_RPStub' }
-          }),
-          { isStatusCode200, ...pageContentCheck('User information') })
-        } else if (acceptNewTerms) {
+        if (acceptNewTerms) {
           res = timeRequest(() => http.get(res.headers.Location, {
             tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_AuthAcceptTerms' } // pragma: allowlist secret
           }),
           { isStatusCode200, ...pageContentCheck('terms of use update') })
+        } else {
+          res = timeRequest(() => http.get(res.headers.Location, {
+            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_RPStub' }
+          }),
+          { isStatusCode200, ...pageContentCheck('User information') })
         }
       })
       break
@@ -492,6 +489,5 @@ export function signIn (): void {
       { isStatusCode200, ...pageContentCheck('Successfully signed out') })
     })
   }
-
   iterationsCompleted.add(1)
 }

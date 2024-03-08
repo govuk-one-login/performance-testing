@@ -13,17 +13,17 @@ export const nfrs: NFRs = {
   ]
 }
 export type Thresholds = Options['thresholds']
-export type GroupMap = Record<string, string[]>
+export type GroupMap = Record<string, readonly string[]>
 
 /**
- * get
+ * TODO: Add JSDocs
  */
 export function getThresholds (groupMap: GroupMap, selections: string | undefined = defaultConfig.scenario): Thresholds {
   const thresholds: Thresholds = {
     http_req_duration: nfrs.rt,
     http_req_failed: nfrs.errors
   }
-  const addThresholds = (names: string[]): void => {
+  const addThresholds = (names: readonly string[]): void => {
     names.forEach(name => {
       thresholds[`duration{group:::${name}}`] = nfrs.rt
     })

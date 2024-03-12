@@ -19,31 +19,16 @@ const profiles: ProfileList = {
       exec: 'sendEvent'
     }
   },
-  lowVolumeTest: {
-    sendEventScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 300,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
-        { target: 30, duration: '30m' }, // Maintain steady state at 30 interations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'sendEvent'
-    }
-  },
   load: {
     sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 2250,
       stages: [
-        { target: 500, duration: '15m' }, // Ramp up to 500 iterations per second in 15 minutes
-        { target: 500, duration: '30m' }, // Maintain steady state at 500 iterations per second for 30 minutes
+        { target: 750, duration: '15m' }, // Ramp up to 750 iterations per second in 15 minutes
+        { target: 750, duration: '30m' }, // Maintain steady state at 750 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total rap down in 5 minutes
       ],
       exec: 'sendEvent'
@@ -55,26 +40,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 3000,
+      maxVUs: 22500,
       stages: [
-        { target: 2000, duration: '15m' }, // Ramp up to 2000 iterations per second in 15 minutes
-        { target: 2000, duration: '30m' }, // Maintain steady state at 2000 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-
-      ],
-      exec: 'sendEvent'
-    }
-  },
-  peakStress: {
-    sendEventScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5000,
-      stages: [
-        { target: 5000, duration: '15m' }, // Ramp up to 5000 iterations per second in 15 minutes
-        { target: 5000, duration: '30m' }, // Maintain steady state at 5000 iterations per second for 30 minutes
+        { target: 7500, duration: '15m' }, // Ramp up to 7500 iterations per second in 15 minutes
+        { target: 7500, duration: '30m' }, // Maintain steady state at 7500 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent'

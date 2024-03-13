@@ -10,6 +10,7 @@ import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { SharedArray } from 'k6/data'
 import http from 'k6/http'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -118,8 +119,8 @@ export function setup (): void {
 }
 
 const env = {
-  sqs_queue: __ENV.ACCOUNT_BRAVO_AIS_TxMASQS,
-  aisEnvURL: __ENV.ACCOUNT_BRAVO_AIS_URL
+  sqs_queue: getEnv('ACCOUNT_BRAVO_AIS_TxMASQS'),
+  aisEnvURL: getEnv('ACCOUNT_BRAVO_AIS_URL')
 }
 
 interface RetrieveUserID {
@@ -134,9 +135,9 @@ const csvData: RetrieveUserID[] = new SharedArray('Retrieve Intervention User ID
   })
 })
 
-const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
-  region: __ENV.AWS_REGION,
+  region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken

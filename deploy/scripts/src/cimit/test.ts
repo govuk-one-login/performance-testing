@@ -10,6 +10,7 @@ import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200 } from '../common/utils/checks/assertions'
 import { SharedArray } from 'k6/data'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -151,14 +152,14 @@ export function setup (): void {
 }
 
 const env = {
-  putCIURL: __ENV.IDENTITY_CIMIT_PUTCI,
-  getCICURL: __ENV.IDENTITY_CIMIT_GETCIC,
-  postMitigationURL: __ENV.IDENTITY_CIMIT_POSTMITIGATION
+  putCIURL: getEnv('IDENTITY_CIMIT_PUTCI'),
+  getCICURL: getEnv('IDENTITY_CIMIT_GETCIC'),
+  postMitigationURL: getEnv('IDENTITY_CIMIT_POSTMITIGATION')
 }
 
-const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
-  region: __ENV.AWS_REGION,
+  region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken

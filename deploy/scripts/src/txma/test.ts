@@ -4,6 +4,7 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -66,19 +67,19 @@ export function setup (): void {
 }
 
 const env = {
-  sqs_queue: __ENV.DATA_TXMA_SQS
+  sqs_queue: getEnv('DATA_TXMA_SQS')
 }
 
-const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
-  region: __ENV.AWS_REGION,
+  region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken
 })
 
 const eventData = {
-  payload: __ENV.DATA_TXMA_SQS_PAYLOAD
+  payload: getEnv('DATA_TXMA_SQS_PAYLOAD')
 }
 
 const sqs = new SQSClient(awsConfig)

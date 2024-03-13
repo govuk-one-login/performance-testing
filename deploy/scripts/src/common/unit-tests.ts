@@ -10,7 +10,7 @@ import { isStatusCode200, isStatusCode201, isStatusCode302, pageContentCheck } f
 import { type RefinedParams, type RefinedResponse, type ResponseType, type Response } from 'k6/http'
 import { type Selection } from 'k6/html'
 import { iterationsCompleted, iterationsStarted } from './utils/custom_metric/counter'
-import { getEnv, getEnvVar } from './utils/config/environment-variables'
+import { getEnv } from './utils/config/environment-variables'
 
 export const options = {
   vus: 1,

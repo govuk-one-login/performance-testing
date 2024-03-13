@@ -13,6 +13,7 @@ import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib/index'
 import execution from 'k6/execution'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -210,19 +211,19 @@ const csvData: IDReuseUserID[] = new SharedArray('ID Reuse User ID', function ()
   })
 })
 
-const environment = __ENV.ENVIRONMENT.toLocaleUpperCase()
+const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
 const validEnvironments = ['BUILD', 'DEV']
 if (!validEnvironments.includes(environment)) throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 
 const env = {
   orchStubEndPoint: __ENV[`IDENTITY_${environment}_ORCH_STUB_URL`],
   ipvCoreURL: __ENV[`IDENTITY_${environment}_CORE_URL`]
-  // staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
+  // staticResources: getEnv('K6_NO_STATIC_RESOURCES') !== 'true'
 }
 
 const stubCreds = {
-  userName: __ENV.IDENTITY_ORCH_STUB_USERNAME,
-  password: __ENV.IDENTITY_ORCH_STUB_PASSWORD
+  userName: getEnv('IDENTITY_ORCH_STUB_USERNAME'),
+  password: getEnv('IDENTITY_ORCH_STUB_PASSWORD')
 }
 
 export function passport (): void {

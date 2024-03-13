@@ -13,9 +13,9 @@ export class AWSConfig {
    * @param {string} [sessionToken] The AWS secret access token to use for authentication
    * @example
    * const awsConfig = new AWSConfig({
-   *  region: __ENV.AWS_REGION,
-   *  accessKeyId: __ENV.AWS_ACCESS_KEY_ID,
-   *  secretAccessKey: __ENV.AWS_SECRET_ACCESS_KEY,
+   *  region: getEnv('AWS_REGION'),
+   *  accessKeyId: getEnv('AWS_ACCESS_KEY_ID'),
+   *  secretAccessKey: getEnv('AWS_SECRET_ACCESS_KEY'),
    * })
    * const sqs = new SQSClient(awsConfig)
    */

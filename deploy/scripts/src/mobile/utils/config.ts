@@ -1,5 +1,3 @@
-// __ENV is the syntax in k6 for accessing environment variables
-
 import { getEnv } from '../../common/utils/config/environment-variables'
 
 // Refer to deploy/scripts/README.md for guidance on how to set environment variables

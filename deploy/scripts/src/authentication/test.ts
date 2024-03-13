@@ -10,6 +10,7 @@ import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { randomString } from '../common/utils/jslib'
 import { URL } from '../common/utils/jslib/url'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -145,21 +146,21 @@ const dataSignIn: signInData[] = new SharedArray('data', () => Array.from({ leng
 ))
 
 const credentials = {
-  authAppKey: __ENV.ACCOUNT_APP_KEY,
-  password: __ENV.ACCOUNT_APP_PASSWORD,
-  emailOTP: __ENV.ACCOUNT_EMAIL_OTP,
-  phoneOTP: __ENV.ACCOUNT_PHONE_OTP
+  authAppKey: getEnv('ACCOUNT_APP_KEY'),
+  password: getEnv('ACCOUNT_APP_PASSWORD'),
+  emailOTP: getEnv('ACCOUNT_EMAIL_OTP'),
+  phoneOTP: getEnv('ACCOUNT_PHONE_OTP')
 }
 
 function startJourneyUrl (): string {
-  const url = new URL(__ENV.ACCOUNT_OP_URL)
-  url.searchParams.append('client_id', __ENV.ACCOUNT_RP_STUB_CLIENT_ID)
+  const url = new URL(getEnv('ACCOUNT_OP_URL'))
+  url.searchParams.append('client_id', getEnv('ACCOUNT_RP_STUB_CLIENT_ID'))
   url.searchParams.append('nonce', randomString(20))
   url.searchParams.append('state', randomString(20))
   url.searchParams.append('vtr', '["Cl.Cm"]')
   url.searchParams.append('scope', 'openid email phone')
   url.searchParams.append('response_type', 'code')
-  url.searchParams.append('redirect_uri', `${__ENV.ACCOUNT_RP_STUB}/oidc/authorization-code/callback`)
+  url.searchParams.append('redirect_uri', `${getEnv('ACCOUNT_RP_STUB')}/oidc/authorization-code/callback`)
   return url.toString()
 }
 

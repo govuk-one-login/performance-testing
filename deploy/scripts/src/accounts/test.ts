@@ -9,6 +9,7 @@ import { SharedArray } from 'k6/data'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -198,20 +199,20 @@ const validateData: validateUserData[] = new SharedArray('data', () => Array.fro
 ))
 
 const env = {
-  envURL: __ENV.ACCOUNT_HOME_URL,
-  signinURL: __ENV.ACCOUNT_SIGNIN_URL
+  envURL: getEnv('ACCOUNT_HOME_URL'),
+  signinURL: getEnv('ACCOUNT_SIGNIN_URL')
 }
 
 const credentials = {
-  authAppKey: __ENV.ACCOUNT_APP_KEY,
-  currPassword: __ENV.ACCOUNT_APP_PASSWORD,
-  newPassword: __ENV.ACCOUNT_APP_PASSWORD_NEW,
-  fixedPhoneOTP: __ENV.ACCOUNT_PHONE_OTP,
-  fixedEmailOTP: __ENV.ACCOUNT_EMAIL_OTP
+  authAppKey: getEnv('ACCOUNT_APP_KEY'),
+  currPassword: getEnv('ACCOUNT_APP_PASSWORD'),
+  newPassword: getEnv('ACCOUNT_APP_PASSWORD_NEW'),
+  fixedPhoneOTP: getEnv('ACCOUNT_PHONE_OTP'),
+  fixedEmailOTP: getEnv('ACCOUNT_EMAIL_OTP')
 }
 
 const phoneData = {
-  newPhone: __ENV.ACCOUNT_NEW_PHONE
+  newPhone: getEnv('ACCOUNT_NEW_PHONE')
 }
 
 export function changeEmail (): void {

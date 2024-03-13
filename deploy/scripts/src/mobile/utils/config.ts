@@ -1,6 +1,7 @@
-// __ENV is the syntax in k6 for accessing environment variables
+import { getEnv } from '../../common/utils/config/environment-variables'
+
 // Refer to deploy/scripts/README.md for guidance on how to set environment variables
-export const environment = __ENV.ENVIRONMENT.toLocaleUpperCase()
+export const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
 const validEnvironments = ['BUILD', 'DEV']
 if (!validEnvironments.includes(environment)) throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 

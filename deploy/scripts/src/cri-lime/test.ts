@@ -177,16 +177,16 @@ export function setup (): void {
 }
 
 const env = {
-  ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL,
-  fraudUrl: __ENV.IDENTITY_FRAUD_URL,
-  drivingUrl: __ENV.IDENTITY_DRIVING_URL,
-  passportURL: __ENV.IDENTITY_PASSPORT_URL,
-  envName: __ENV.ENVIRONMENT
+  ipvCoreStub: getEnv('IDENTITY_CORE_STUB_URL'),
+  fraudUrl: getEnv('IDENTITY_FRAUD_URL'),
+  drivingUrl: getEnv('IDENTITY_DRIVING_URL'),
+  passportURL: getEnv('IDENTITY_PASSPORT_URL'),
+  envName: getEnv('ENVIRONMENT')
 }
 
 const stubCreds = {
-  userName: __ENV.IDENTITY_CORE_STUB_USERNAME,
-  password: __ENV.IDENTITY_CORE_STUB_PASSWORD
+  userName: getEnv('IDENTITY_CORE_STUB_USERNAME'),
+  password: getEnv('IDENTITY_CORE_STUB_PASSWORD')
 }
 
 interface DrivingLicenseUser {

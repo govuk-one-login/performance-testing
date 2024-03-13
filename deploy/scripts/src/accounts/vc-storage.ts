@@ -8,6 +8,7 @@ import { uuidv4 } from '../common/utils/jslib'
 import { timeRequest } from '../common/utils/request/timing'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -134,10 +135,10 @@ const csvData: SummariseSubjectID[] = new SharedArray('Summarise Subject ID', fu
 })
 
 const env = {
-  envURL: __ENV.ACCOUNT_BRAVO_ID_REUSE_URL,
-  envMock: __ENV.ACCOUNT_BRAVO_ID_REUSE_MOCK,
-  envApiKey: __ENV.ACCOUNT_BRAVO_ID_REUSE_API_KEY,
-  envApiKeySummarise: __ENV.ACCOUNT_BRAVO_ID_REUSE_API_KEY_SUMMARISE
+  envURL: getEnv('ACCOUNT_BRAVO_ID_REUSE_URL'),
+  envMock: getEnv('ACCOUNT_BRAVO_ID_REUSE_MOCK'),
+  envApiKey: getEnv('ACCOUNT_BRAVO_ID_REUSE_API_KEY'),
+  envApiKeySummarise: getEnv('ACCOUNT_BRAVO_ID_REUSE_API_KEY_SUMMARISE')
 }
 export function persistVC (): void {
   let res: Response

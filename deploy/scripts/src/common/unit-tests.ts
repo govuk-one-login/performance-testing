@@ -141,19 +141,19 @@ export default (): void => {
         ...createScenario('scenario5', LoadProfile.deployment, 2, 40)
       }
 
-      function checkScenario (exec: string, target: number, duration: number): boolean {
+      function checkScenario (exec: string, target: number, maxVUs: number): boolean {
         const scenario = scenarios[exec] as RampingArrivalRateScenario
         return scenario.exec === exec && // Exec function is named correctly
-          scenario.maxVUs === target * duration && // Max VUs = Max throughput * max iteration duration
+          scenario.maxVUs === maxVUs && // Max VUs = Max throughput * max iteration duration
           Math.max(...scenario.stages.map(s => s.target)) === target // Max thoughput target is correct
       }
 
       check(null, {
-        'Default target/duration': () => checkScenario('scenario1', 1, 30),
-        'Smoke load profile     ': () => checkScenario('scenario2', 1, 30),
-        'Short load profile     ': () => checkScenario('scenario3', 20, 30),
-        'Full load profile      ': () => checkScenario('scenario4', 50, 10),
-        'Deployment load profile': () => checkScenario('scenario5', 2, 40)
+        'Default target/duration': () => checkScenario('scenario1', 1, 1),
+        'Smoke load profile     ': () => checkScenario('scenario2', 1, 1),
+        'Short load profile     ': () => checkScenario('scenario3', 20, 600),
+        'Full load profile      ': () => checkScenario('scenario4', 50, 500),
+        'Deployment load profile': () => checkScenario('scenario5', 2, 80)
       })
     })
   })

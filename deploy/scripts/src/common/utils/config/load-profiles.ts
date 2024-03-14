@@ -109,12 +109,15 @@ function createStages (type: LoadProfile, target: number): Stage[] {
  */
 export function createScenario (exec: string, type: LoadProfile, target: number = 1, duration: number = 30): ScenarioList {
   const list: ScenarioList = {}
+  const smoke = type === LoadProfile.smoke
+  const preAllocatedVUs = smoke ? 1 : target * duration / 2
+  const maxVUs = smoke ? 1 : target * duration
   list[exec] = {
     executor: 'ramping-arrival-rate',
     startRate: 1,
     timeUnit: '1s',
-    preAllocatedVUs: target * duration / 2,
-    maxVUs: target * duration,
+    preAllocatedVUs,
+    maxVUs,
     stages: createStages(type, target),
     exec
   }

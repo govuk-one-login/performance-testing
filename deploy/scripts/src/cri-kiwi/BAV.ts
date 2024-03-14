@@ -57,8 +57,8 @@ export function setup (): void {
 
 const env = {
   BAV: {
-    ipvStub: __ENV.IDENTITY_KIWI_BAV_STUB_URL,
-    target: __ENV.IDENTITY_KIWI_BAV_TARGET
+    ipvStub: getEnv('IDENTITY_KIWI_BAV_STUB_URL'),
+    target: getEnv('IDENTITY_KIWI_BAV_TARGET')
   }
 }
 

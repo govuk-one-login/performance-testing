@@ -8,6 +8,7 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -54,11 +55,11 @@ export function setup (): void {
   describeProfile(loadProfile)
 }
 
-const env = { ipvCoreStub: __ENV.IDENTITY_CORE_STUB_URL }
+const env = { ipvCoreStub: getEnv('IDENTITY_CORE_STUB_URL') }
 
 const stubCreds = {
-  userName: __ENV.IDENTITY_CORE_STUB_USERNAME,
-  password: __ENV.IDENTITY_CORE_STUB_PASSWORD
+  userName: getEnv('IDENTITY_CORE_STUB_USERNAME'),
+  password: getEnv('IDENTITY_CORE_STUB_PASSWORD')
 }
 
 interface nino {

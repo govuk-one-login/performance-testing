@@ -5,6 +5,7 @@ import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generateAuthRequest, generateF2FRequest, generateIPVRequest, generateDocumentUploadedRequest } from './requestGenerator/ipvrReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -104,12 +105,12 @@ export function setup (): void {
 }
 
 const env = {
-  sqs_queue: __ENV.IDENTITY_KIWI_STUB_SQS
+  sqs_queue: getEnv('IDENTITY_KIWI_STUB_SQS')
 }
 
-const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
-  region: __ENV.AWS_REGION,
+  region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken

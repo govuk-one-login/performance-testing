@@ -4,6 +4,7 @@ import { group, sleep } from 'k6'
 import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
 import { isStatusCode200 } from '../common/utils/checks/assertions'
 import { timeRequest } from '../common/utils/request/timing'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -74,8 +75,8 @@ export function setup (): void {
 }
 
 const env = {
-  FE_URL: __ENV.CFN_HelloWorldApi.replace(/\/$/, ''), // Output from demoNodeApp
-  BE_URL: __ENV.CFN_ApiGatewayEndpoint.replace(/\/$/, '') // Output from demoNodeApp
+  FE_URL: getEnv('CFN_HelloWorldApi').replace(/\/$/, ''), // Output from demoNodeApp
+  BE_URL: getEnv('CFN_ApiGatewayEndpoint').replace(/\/$/, '') // Output from demoNodeApp
 }
 
 export function demoSamApp (): void {

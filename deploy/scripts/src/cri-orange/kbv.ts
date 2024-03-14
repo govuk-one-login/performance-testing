@@ -7,6 +7,7 @@ import { env, encodedCredentials } from './utils/config'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -69,7 +70,7 @@ export function setup (): void {
 }
 
 const kbvAnswersOBJ = {
-  kbvAnswers: __ENV.IDENTITY_KBV_ANSWERS
+  kbvAnswers: getEnv('IDENTITY_KBV_ANSWERS')
 }
 
 export function kbvScenario1 (): void {

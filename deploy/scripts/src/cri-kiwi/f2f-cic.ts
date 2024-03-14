@@ -84,12 +84,12 @@ export function setup (): void {
 
 const env = {
   CIC: {
-    ipvStub: __ENV.IDENTITY_KIWI_CIC_STUB_URL,
-    target: __ENV.IDENTITY_KIWI_CIC_TARGET
+    ipvStub: getEnv('IDENTITY_KIWI_CIC_STUB_URL'),
+    target: getEnv('IDENTITY_KIWI_CIC_TARGET')
   },
   F2F: {
-    ipvStub: __ENV.IDENTITY_KIWI_F2F_STUB_URL,
-    target: __ENV.IDENTITY_KIWI_F2F_TARGET
+    ipvStub: getEnv('IDENTITY_KIWI_F2F_STUB_URL'),
+    target: getEnv('IDENTITY_KIWI_F2F_TARGET')
   }
 }
 

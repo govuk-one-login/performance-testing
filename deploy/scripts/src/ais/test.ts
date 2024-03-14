@@ -10,6 +10,7 @@ import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { SharedArray } from 'k6/data'
 import http from 'k6/http'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -83,10 +84,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 11400,
+      maxVUs: 17100,
       stages: [
-        { target: 3800, duration: '15m' }, // Ramp up to 3800 iterations per second in 15 minutes
-        { target: 3800, duration: '30m' }, // Maintain a steady state of 3800 iterations per second for 30 minutes
+        { target: 5700, duration: '15m' }, // Ramp up to 5700 iterations per second in 15 minutes
+        { target: 5700, duration: '30m' }, // Maintain a steady state of 5700 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'retrieveIV'
@@ -118,8 +119,8 @@ export function setup (): void {
 }
 
 const env = {
-  sqs_queue: __ENV.ACCOUNT_BRAVO_AIS_TxMASQS,
-  aisEnvURL: __ENV.ACCOUNT_BRAVO_AIS_URL
+  sqs_queue: getEnv('ACCOUNT_BRAVO_AIS_TxMASQS'),
+  aisEnvURL: getEnv('ACCOUNT_BRAVO_AIS_URL')
 }
 
 interface RetrieveUserID {
@@ -134,9 +135,9 @@ const csvData: RetrieveUserID[] = new SharedArray('Retrieve Intervention User ID
   })
 })
 
-const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
-  region: __ENV.AWS_REGION,
+  region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken
@@ -157,8 +158,10 @@ export function retrieveIV (): void {
   iterationsStarted.add(1)
 
   group('B02_RetrieveIV_01_GetInterventionData GET', () =>
-    timeRequest(() => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`),
-      { isStatusCode200, ...pageContentCheck('Perf Testing') }))
+    timeRequest(() => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`, {
+      tags: { name: 'B02_RetrieveIV_01_GetInterventionData' }
+    }),
+    { isStatusCode200, ...pageContentCheck('Perf Testing') }))
   iterationsCompleted.add(1)
 }
 

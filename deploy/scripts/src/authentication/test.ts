@@ -10,6 +10,7 @@ import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { randomString } from '../common/utils/jslib'
 import { URL } from '../common/utils/jslib/url'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -59,6 +60,21 @@ const profiles: ProfileList = {
       stages: [
         { target: 30, duration: '15m' }, // Ramps up to 30 iterations per second in 15 minutes
         { target: 30, duration: '30m' }, // Maintain steady state at 30 iterations per second for 30 minutes
+        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
+      ],
+      exec: 'signIn'
+    }
+  },
+  load: {
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 15000,
+      stages: [
+        { target: 500, duration: '15m' }, // Ramps up to 500 iterations per second in 15 minutes
+        { target: 500, duration: '30m' }, // Maintain steady state at 500 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'signIn'
@@ -130,21 +146,21 @@ const dataSignIn: signInData[] = new SharedArray('data', () => Array.from({ leng
 ))
 
 const credentials = {
-  authAppKey: __ENV.ACCOUNT_APP_KEY,
-  password: __ENV.ACCOUNT_APP_PASSWORD,
-  emailOTP: __ENV.ACCOUNT_EMAIL_OTP,
-  phoneOTP: __ENV.ACCOUNT_PHONE_OTP
+  authAppKey: getEnv('ACCOUNT_APP_KEY'),
+  password: getEnv('ACCOUNT_APP_PASSWORD'),
+  emailOTP: getEnv('ACCOUNT_EMAIL_OTP'),
+  phoneOTP: getEnv('ACCOUNT_PHONE_OTP')
 }
 
 function startJourneyUrl (): string {
-  const url = new URL(__ENV.ACCOUNT_OP_URL)
-  url.searchParams.append('client_id', __ENV.ACCOUNT_RP_STUB_CLIENT_ID)
+  const url = new URL(getEnv('ACCOUNT_OP_URL'))
+  url.searchParams.append('client_id', getEnv('ACCOUNT_RP_STUB_CLIENT_ID'))
   url.searchParams.append('nonce', randomString(20))
   url.searchParams.append('state', randomString(20))
   url.searchParams.append('vtr', '["Cl.Cm"]')
   url.searchParams.append('scope', 'openid email phone')
   url.searchParams.append('response_type', 'code')
-  url.searchParams.append('redirect_uri', `${__ENV.ACCOUNT_RP_STUB}/oidc/authorization-code/callback`)
+  url.searchParams.append('redirect_uri', `${getEnv('ACCOUNT_RP_STUB')}/oidc/authorization-code/callback`)
   return url.toString()
 }
 
@@ -355,7 +371,6 @@ export function signIn (): void {
 
   sleep(1)
 
-  let rpStubCheck = false
   let acceptNewTerms = false
   switch (userData.mfaOption) {
     case 'AUTH_APP': {
@@ -384,19 +399,18 @@ export function signIn (): void {
         }),
         { isStatusCode302 })
 
-        rpStubCheck = res.headers.Location.includes('auth-stub')
         acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
 
-        if (rpStubCheck) {
+        if (acceptNewTerms) {
           res = timeRequest(() => http.get(res.headers.Location, {
-            tags: { name: 'B02_SignIn_05_AuthMFA_EnterTOTP_03_RPStub' }
-          }),
-          { isStatusCode200, ...pageContentCheck('User information') })
-        } else if (acceptNewTerms) {
-          res = timeRequest(() => http.get(res.headers.Location, {
-            tags: { name: 'B02_SignIn_05_AuthMFA_EnterTOTP_04_AuthAcceptTerms' }
+            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_AuthAcceptTerms' } // pragma: allowlist secret
           }),
           { isStatusCode200, ...pageContentCheck('terms of use update') })
+        } else {
+          res = timeRequest(() => http.get(res.headers.Location, {
+            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_RPStub' }
+          }),
+          { isStatusCode200, ...pageContentCheck('User information') })
         }
       })
       break
@@ -426,19 +440,18 @@ export function signIn (): void {
         }),
         { isStatusCode302 })
 
-        rpStubCheck = res.headers.Location.includes('auth-stub')
         acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
 
-        if (rpStubCheck) {
-          res = timeRequest(() => http.get(res.headers.Location, {
-            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_RPStub' }
-          }),
-          { isStatusCode200, ...pageContentCheck('User information') })
-        } else if (acceptNewTerms) {
+        if (acceptNewTerms) {
           res = timeRequest(() => http.get(res.headers.Location, {
             tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_AuthAcceptTerms' } // pragma: allowlist secret
           }),
           { isStatusCode200, ...pageContentCheck('terms of use update') })
+        } else {
+          res = timeRequest(() => http.get(res.headers.Location, {
+            tags: { name: 'B02_SignIn_07_SMSMFA_EnterOTP_03_RPStub' }
+          }),
+          { isStatusCode200, ...pageContentCheck('User information') })
         }
       })
       break
@@ -477,6 +490,5 @@ export function signIn (): void {
       { isStatusCode200, ...pageContentCheck('Successfully signed out') })
     })
   }
-
   iterationsCompleted.add(1)
 }

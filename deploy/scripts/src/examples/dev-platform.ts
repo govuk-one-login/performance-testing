@@ -103,10 +103,10 @@ export function demoSamApp (): void {
 }
 
 export function demoNodeApp (): void {
-  group('GET - {demoNodeApp} /toy', () => {
+  group('GET - {demoNodeApp} /toy', () =>
     timeRequest(() => http.get(env.FE_URL + '/toy'),
       { isStatusCode200, ...pageContentCheck('We need to ask you about your favourite toy') }
     )
-  })
+  )
   sleep(1)
 }

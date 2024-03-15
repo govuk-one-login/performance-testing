@@ -1,10 +1,6 @@
 import { sleep } from 'k6'
 import { type Options } from 'k6/options'
-import {
-  describeProfile,
-  type ProfileList,
-  selectProfile
-} from '../common/utils/config/load-profiles'
+import { describeProfile, type ProfileList, selectProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import {
   postSelectDevice,
   postSelectSmartphone,
@@ -27,32 +23,10 @@ import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
-    mamIphonePassport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1, // start with one iteration
-      timeUnit: '1s',
-      preAllocatedVUs: 75, // Calculation: 5 journeys / second * 15 seconds average journey time
-      maxVUs: 120, // Calculation: 5 journeys / second * 24 seconds maximum journey time
-      stages: [
-        { target: 5, duration: '30s' }, // linear increase from 1 iteration per second to 5 iterations per second for 30 seconds
-        { target: 5, duration: '30s' } // maintain 5 iterations per second for 30 seconds
-      ],
-      exec: 'mamIphonePassport'
-    }
+    ...createScenario('mamIphonePassport', LoadProfile.smoke)
   },
   load: {
-    mamIphonePassport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 700, // Calculation: 40 journeys / second * 17 seconds average journey time
-      maxVUs: 1500, // Calculation: 40 journeys / second * 2.5 seconds maximum expected from NFR (2.5 per request, 10 user-facing requests + safety)
-      stages: [
-        { target: 40, duration: '15m' }, // linear increase from 0 iteration per second to 40 iterations per second for 15 min -> 0.044 t/s/s
-        { target: 40, duration: '30m' } // maintain 40 iterations per second for 30 min
-      ],
-      exec: 'mamIphonePassport'
-    }
+    ...createScenario('mamIphonePassport', LoadProfile.full, 40, 37)
   },
   loadSelfAssessment: {
     mamIphonePassport: {

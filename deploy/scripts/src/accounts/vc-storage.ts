@@ -2,7 +2,7 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib'
 import { timeRequest } from '../common/utils/request/timing'
@@ -12,90 +12,16 @@ import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
-    persistVC: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'persistVC'
-    },
-
-    summariseVC: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'summariseVC'
-    }
-
+    ...createScenario('persistVC', LoadProfile.smoke),
+    ...createScenario('summariseVC', LoadProfile.smoke)
   },
   initialLoad: {
-    persistVC: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 400,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramps up to target load
-        { target: 30, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'persistVC'
-    },
-
-    summariseVC: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 400,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramps up to target load
-        { target: 30, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'summariseVC'
-    }
-
+    ...createScenario('persistVC', LoadProfile.full, 30, 15),
+    ...createScenario('summariseVC', LoadProfile.full, 30, 15)
   },
   load: {
-    persistVC: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1900,
-      stages: [
-        { target: 100, duration: '15m' }, // Ramps up to target load
-        { target: 100, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 100 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'persistVC'
-    },
-
-    summariseVC: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5000,
-      stages: [
-        { target: 1900, duration: '15m' }, // Ramps up to target load
-        { target: 1900, duration: '30m' }, // Steady State of 15 minutes at the ramp up load i.e. 1900 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'summariseVC'
-    }
-
+    ...createScenario('persistVC', LoadProfile.full, 100, 15),
+    ...createScenario('summariseVC', LoadProfile.full, 1900, 3)
   },
   dataCreationForSummarise: {
     persistVC: {

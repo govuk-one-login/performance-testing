@@ -11,6 +11,7 @@ import { type RefinedParams, type RefinedResponse, type ResponseType, type Respo
 import { type Selection } from 'k6/html'
 import { iterationsCompleted, iterationsStarted } from './utils/custom_metric/counter'
 import { type GroupMap, type Thresholds, getThresholds } from './utils/config/thresholds'
+import { getEnv } from './utils/config/environment-variables'
 
 export const options = {
   vus: 1,
@@ -59,6 +60,27 @@ export default (): void => {
       const title = 'Page Title'
       response.body = `<html><body><h1>${title}</h1></body></html>`
       check(response, { ...pageContentCheck(title) })
+    })
+  })
+
+  group('config/env-vars', () => {
+    group('getEnv()', () => {
+      let errorFound = false
+      try {
+        getEnv('NON_EXISTENT')
+      } catch (error) {
+        errorFound = true
+      }
+
+      const name = 'EXISTING VARIABLE'
+      const value = 'sampleValue1'
+      __ENV[name] = value
+
+      check(null, {
+        'Error when not variable not found': () => errorFound,
+        'Undefined when not found and not required': () => getEnv('NON_EXISTENT', false) === undefined,
+        'Value retrieved correctly': () => getEnv(name) === value
+      })
     })
   })
 

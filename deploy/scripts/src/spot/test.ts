@@ -4,6 +4,7 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generateRequest } from './requestGenerator/spotReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -81,12 +82,12 @@ export function setup (): void {
 }
 
 const env = {
-  sqs_queue: __ENV.IDENTITY_SPOT_SQS
+  sqs_queue: getEnv('IDENTITY_SPOT_SQS')
 }
 
-const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
-  region: __ENV.AWS_REGION,
+  region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken

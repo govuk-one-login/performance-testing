@@ -4,6 +4,7 @@ import { selectProfile, type ProfileList, describeProfile } from '../common/util
 import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
@@ -19,31 +20,16 @@ const profiles: ProfileList = {
       exec: 'sendEvent'
     }
   },
-  lowVolumeTest: {
-    sendEventScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 300,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
-        { target: 30, duration: '30m' }, // Maintain steady state at 30 interations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'sendEvent'
-    }
-  },
   load: {
     sendEventScenario: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 1500,
+      maxVUs: 2250,
       stages: [
-        { target: 500, duration: '15m' }, // Ramp up to 500 iterations per second in 15 minutes
-        { target: 500, duration: '30m' }, // Maintain steady state at 500 iterations per second for 30 minutes
+        { target: 750, duration: '15m' }, // Ramp up to 750 iterations per second in 15 minutes
+        { target: 750, duration: '30m' }, // Maintain steady state at 750 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total rap down in 5 minutes
       ],
       exec: 'sendEvent'
@@ -55,26 +41,10 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '1s',
       preAllocatedVUs: 1,
-      maxVUs: 3000,
+      maxVUs: 22500,
       stages: [
-        { target: 2000, duration: '15m' }, // Ramp up to 2000 iterations per second in 15 minutes
-        { target: 2000, duration: '30m' }, // Maintain steady state at 2000 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-
-      ],
-      exec: 'sendEvent'
-    }
-  },
-  peakStress: {
-    sendEventScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5000,
-      stages: [
-        { target: 5000, duration: '15m' }, // Ramp up to 5000 iterations per second in 15 minutes
-        { target: 5000, duration: '30m' }, // Maintain steady state at 5000 iterations per second for 30 minutes
+        { target: 7500, duration: '15m' }, // Ramp up to 7500 iterations per second in 15 minutes
+        { target: 7500, duration: '30m' }, // Maintain steady state at 7500 iterations per second for 30 minutes
         { target: 0, duration: '5m' } // Total ramp down in 5 minutes
       ],
       exec: 'sendEvent'
@@ -97,19 +67,19 @@ export function setup (): void {
 }
 
 const env = {
-  sqs_queue: __ENV.DATA_TXMA_SQS
+  sqs_queue: getEnv('DATA_TXMA_SQS')
 }
 
-const credentials = (JSON.parse(__ENV.EXECUTION_CREDENTIALS) as AssumeRoleOutput).Credentials
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
-  region: __ENV.AWS_REGION,
+  region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken
 })
 
 const eventData = {
-  payload: __ENV.DATA_TXMA_SQS_PAYLOAD
+  payload: getEnv('DATA_TXMA_SQS_PAYLOAD')
 }
 
 const sqs = new SQSClient(awsConfig)

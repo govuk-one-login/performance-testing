@@ -5,7 +5,7 @@
   "description": "Performance Testing for Digital Identity",
   "main": "index.js",
   "devDependencies": {
-    "@types/k6": "^0.49.0",
+    "@types/k6": "^0.49.1",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "core-js": "^3.36.0",
     "esbuild": "^0.20.1",
@@ -17,7 +17,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "glob": "^10.3.10",
     "k6": "0.0.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.2"
   },
   "scripts": {
     "lint": "npx eslint 'src/**/*.ts'",

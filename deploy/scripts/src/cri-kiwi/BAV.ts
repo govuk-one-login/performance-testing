@@ -2,42 +2,21 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { b64encode } from 'k6/encoding'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { bankingPayload } from './data/BAVdata'
 import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl, getAccessToken } from './utils/authorization'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
-    BAV: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'BAV'
-    }
+    ...createScenario('BAV', LoadProfile.smoke)
   },
   load: {
-    BAV: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 300,
-      stages: [
-        { target: 10, duration: '15m' }, // Ramps up to target load
-        { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'BAV'
-    }
+    ...createScenario('BAV', LoadProfile.full, 10)
   }
 }
 

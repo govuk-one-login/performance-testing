@@ -2,69 +2,23 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { group, fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import execution from 'k6/execution'
 import { b64encode } from 'k6/encoding'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl, getAccessToken } from './utils/authorization'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
-    FaceToFace: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 2, duration: '2m' } // Ramps up to target load
-      ],
-      exec: 'FaceToFace'
-    },
-
-    CIC: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'CIC'
-    }
-
+    ...createScenario('FaceToFace', LoadProfile.smoke),
+    ...createScenario('CIC', LoadProfile.smoke)
   },
   load: {
-    FaceToFace: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 70,
-      stages: [
-        { target: 3, duration: '15m' }, // Ramps up to target load
-        { target: 3, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 3 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'FaceToFace'
-    },
-    CIC: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 45,
-      stages: [
-        { target: 3, duration: '15m' }, // Ramps up to target load
-        { target: 3, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 3 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'CIC'
-    }
-
+    ...createScenario('FaceToFace', LoadProfile.short, 3),
+    ...createScenario('CIC', LoadProfile.short, 3, 3)
   }
 }
 

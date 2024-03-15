@@ -38,7 +38,7 @@ export function getScenarios (scenarios: ScenarioList, selections: string | unde
 // Default config uses the CLI flags
 // '--env PROFILE' specifies the load profile to use, defaults to 'smoke'
 // '--env SCENARIO' specifies which scenarios within the load profile to use, defaults to all
-const defaultConfig: ProfileConfig = {
+export const defaultConfig: ProfileConfig = {
   profile: __ENV.PROFILE ?? 'smoke',
   scenario: __ENV.SCENARIO ?? 'all'
 }

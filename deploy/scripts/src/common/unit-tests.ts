@@ -10,6 +10,7 @@ import { isStatusCode200, isStatusCode201, isStatusCode302, pageContentCheck } f
 import { type RefinedParams, type RefinedResponse, type ResponseType, type Response } from 'k6/http'
 import { type Selection } from 'k6/html'
 import { iterationsCompleted, iterationsStarted } from './utils/custom_metric/counter'
+import { type GroupMap, type Thresholds, getThresholds } from './utils/config/thresholds'
 import { getEnv } from './utils/config/environment-variables'
 
 export const options = {
@@ -127,6 +128,45 @@ export default (): void => {
       'Multi Scenario       ': () => checkProfile(multiScenario, 'stress', 2), // Only specified scenarios enabled
       'Scenario "all" String': () => checkProfile(scenarioAll, 'smoke', 2), // All scenarios enabled
       'Scenario Empty String': () => checkProfile(scenarioBlank, 'stress', 3) // All scenarios enabled
+    })
+  })
+
+  group('config/thresholds', () => {
+    const groups: GroupMap = {
+      scenario1: [
+        'group1a',
+        'group1b',
+        'group1c'
+      ],
+      scenario2: [
+        'group2a',
+        'group2b'
+      ],
+      scenario3: [
+        'group3a'
+      ]
+    }
+
+    const noGroups: Thresholds = getThresholds({})
+    const noFlags: Thresholds = getThresholds(groups)
+    const singleScenario: Thresholds = getThresholds(groups, 'scenario1')
+    const multiScenario: Thresholds = getThresholds(groups, 'scenario1,scenario2')
+    const scenarioAll: Thresholds = getThresholds(groups, 'all')
+    const scenarioBlank: Thresholds = getThresholds(groups, '')
+
+    function checkThresholds (thresholds: Thresholds, count: number): boolean {
+      return thresholds !== undefined &&
+        Object.keys(thresholds).length === count + 2 && // Threshold count is equal to no. of groups plus the base two
+        Object.keys(thresholds).filter(s => s.includes('duration{group:::')).length === count // Group duration thresholds equals no. of groups
+    }
+
+    check(null, {
+      'No Group             ': () => checkThresholds(noGroups, 0), // No group thresholds included
+      'No Flags             ': () => checkThresholds(noFlags, 6), // Default all scenarios enabled
+      'Single Scenario      ': () => checkThresholds(singleScenario, 3), // Only specified scenario enabled
+      'Multi Scenario       ': () => checkThresholds(multiScenario, 5), // Only specified scenarios enabled
+      'Scenario "all" String': () => checkThresholds(scenarioAll, 6), // All scenarios enabled
+      'Scenario Empty String': () => checkThresholds(scenarioBlank, 6) // All scenarios enabled
     })
   })
 

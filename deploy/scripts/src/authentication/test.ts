@@ -3,7 +3,7 @@ import { sleep, group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import TOTP from '../common/utils/authentication/totp'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
 import { timeRequest } from '../common/utils/request/timing'
@@ -14,99 +14,19 @@ import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
-    signUp: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '5s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'signUp'
-    },
-    signIn: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '5s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'signIn'
-    }
+    ...createScenario('signIn', LoadProfile.smoke),
+    ...createScenario('signUp', LoadProfile.smoke)
   },
-  lowVolumeTest: {
-    signUp: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 900,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramps up to 30 iterations per second in 15 minutes
-        { target: 30, duration: '30m' }, // Maintain steady state at 30 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'signUp'
-    },
-    signIn: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 900,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramps up to 30 iterations per second in 15 minutes
-        { target: 30, duration: '30m' }, // Maintain steady state at 30 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'signIn'
-    }
+  lowVolume: {
+    ...createScenario('signIn', LoadProfile.short, 30),
+    ...createScenario('signUp', LoadProfile.short, 30)
   },
   load: {
-    signIn: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 15000,
-      stages: [
-        { target: 500, duration: '15m' }, // Ramps up to 500 iterations per second in 15 minutes
-        { target: 500, duration: '30m' }, // Maintain steady state at 500 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'signIn'
-    }
+    ...createScenario('signIn', LoadProfile.full, 500)
   },
   stress: {
-    signUp: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 3000,
-      stages: [
-        { target: 100, duration: '15m' }, // Ramps up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Maintain steady state at 100 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'signUp'
-    },
-    signIn: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 60000,
-      stages: [
-        { target: 2000, duration: '15m' }, // Ramps up to 100 iterations per second in 15 minutes
-        { target: 2000, duration: '30m' }, // Maintain steady state at 100 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'signIn'
-    }
+    ...createScenario('signIn', LoadProfile.full, 2000),
+    ...createScenario('signUp', LoadProfile.full, 100)
   }
 }
 const loadProfile = selectProfile(profiles)

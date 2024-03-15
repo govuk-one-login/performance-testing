@@ -4,7 +4,7 @@ import { SharedArray } from 'k6/data'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import encoding from 'k6/encoding'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
@@ -12,32 +12,10 @@ import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
-    ninoScenario1: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '5s' } // Ramps up to target load
-      ],
-      exec: 'ninoScenario1'
-    }
+    ...createScenario('ninoCheck', LoadProfile.smoke)
   },
-  lowVolumeTest: {
-    ninoScenario1: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 900,
-      stages: [
-        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
-        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'ninoScenario1'
-    }
+  lowVolume: {
+    ...createScenario('ninoCheck', LoadProfile.short, 30)
   }
 }
 
@@ -85,7 +63,7 @@ const csvData1: nino[] = new SharedArray('csvDataNino', () => {
   })
 })
 
-export function ninoScenario1 (): void {
+export function ninoCheck (): void {
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)

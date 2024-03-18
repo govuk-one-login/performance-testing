@@ -2,7 +2,7 @@ import http from 'k6/http'
 import { type Options } from 'k6/options'
 import { group, sleep } from 'k6'
 import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
-import { isStatusCode200 } from '../common/utils/checks/assertions'
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { timeRequest } from '../common/utils/request/timing'
 import { getEnv } from '../common/utils/config/environment-variables'
 
@@ -36,6 +36,20 @@ const profiles: ProfileList = {
       ],
       exec: 'demoNodeApp'
     }
+  },
+  stress: {
+    demoNodeApp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 400,
+      stages: [
+        { target: 200, duration: '120s' }, // Ramps up to target load
+        { target: 200, duration: '120s' } // Holds at target load
+      ],
+      exec: 'demoNodeApp'
+    }
   }
 }
 const loadProfile = selectProfile(profiles)
@@ -53,8 +67,8 @@ export function setup (): void {
 }
 
 const env = {
-  FE_URL: getEnv('CFN_HelloWorldApi').replace(/\/$/, ''), // Output from demoNodeApp
-  BE_URL: getEnv('CFN_ApiGatewayEndpoint').replace(/\/$/, '') // Output from demoNodeApp
+  FE_URL: getEnv('DEMO_NODE_ENDPOINT').replace(/\/$/, ''), // Output from demoNodeApp `CFN_HelloWorldApi`
+  BE_URL: getEnv('DEMO_SAM_ENDPOINT').replace(/\/$/, '') // Output from demoSamApp `CFN_ApiGatewayEndpoint`
 }
 
 export function demoSamApp (): void {
@@ -67,10 +81,10 @@ export function demoSamApp (): void {
 }
 
 export function demoNodeApp (): void {
-  group('GET - {demoNodeApp}', () =>
-    timeRequest(() => http.get(env.FE_URL),
-      { isStatusCode200, 'verify page content': r => JSON.parse(r.body as string).message === 'hello world' }
-    ))
-
+  group('GET - {demoNodeApp} /toy', () =>
+    timeRequest(() => http.get(env.FE_URL + '/toy'),
+      { isStatusCode200, ...pageContentCheck('We need to ask you about your favourite toy') }
+    )
+  )
   sleep(1)
 }

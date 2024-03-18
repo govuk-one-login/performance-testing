@@ -435,6 +435,8 @@ Resources:
               DATA_BTM_SQS: "/perfTest/data/btm/perfSQS"
               DATA_BTM_SQS_PAYLOAD_EVENTS: "/perfTest/data/txma/SQSPayloadEvents"
               DATA_TXMA_SQS: "/perfTest/data/txma/perfSQS"
+              DEMO_NODE_ENDPOINT: "/perfTest/demo/nodeEndpoint"
+              DEMO_SAM_ENDPOINT: "/perfTest/demo/samEndpoint"
               IDENTITY_ADDRESS_URL: "/perfTest/identity/orange/addressUrl"
               IDENTITY_BUILD_CORE_URL: "/perfTest/identity/build/coreUrl"
               IDENTITY_BUILD_ORCH_STUB_URL: "/perfTest/identity/build/orchStubUrl"

@@ -11,6 +11,7 @@ import { isStatusCode200 } from '../common/utils/checks/assertions'
 import { SharedArray } from 'k6/data'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -138,13 +139,21 @@ const getCIC: GetCICData[] = new SharedArray('Get CIC Data', () => {
 })
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  putContraIndicators: [
+    'B01_CIMIT_01_PutContraIndicator'
+  ],
+  getContraIndicatorCredentials: [
+    'B02_CIMIT_01_GetContraIndicatorCredentials'
+  ],
+  postMitigations: [
+    'B03_CIMIT_01_PostMitigations'
+  ]
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
+  thresholds: getThresholds(groupMap)
 }
 
 export function setup (): void {
@@ -177,6 +186,7 @@ const signer = new SignatureV4({
 })
 
 export function putContraIndicators (): void {
+  const groups = groupMap.putContraIndicators
   const putContraIndicatorPayload = JSON.stringify(generatePutCI())
   const request = {
     method: 'POST',
@@ -188,17 +198,17 @@ export function putContraIndicators (): void {
   }
   const signedRequest = signer.sign(request)
   iterationsStarted.add(1)
-  group('B01_CIMIT_01_PutContraIndicator POST', () =>
-    timeRequest(() => http.post(signedRequest.url, putContraIndicatorPayload,
+  group(groups[0], () => timeRequest(() => // B01_CIMIT_01_PutContraIndicator
+    http.post(signedRequest.url, putContraIndicatorPayload,
       {
-        headers: signedRequest.headers,
-        tags: { name: 'B01_CIMIT_01_PutContraIndicator' }
+        headers: signedRequest.headers
       }),
-    { isStatusCode200 }))
+  { isStatusCode200 }))
   iterationsCompleted.add(1)
 }
 
 export function getContraIndicatorCredentials (): void {
+  const groups = groupMap.getContraIndicatorCredentials
   const user = getCIC[Math.floor(Math.random() * getCIC.length)]
   const getCICPayload = JSON.stringify(generateGetCIC(user.journeyID, user.userID))
   const request = {
@@ -211,17 +221,17 @@ export function getContraIndicatorCredentials (): void {
   }
   const signedRequest = signer.sign(request)
   iterationsStarted.add(1)
-  group('B02_CIMIT_01_GetContraIndicatorCredentials GET', () =>
-    timeRequest(() => http.post(signedRequest.url, getCICPayload,
+  group(groups[0], () => timeRequest(() => // B02_CIMIT_01_GetContraIndicatorCredentials
+    http.post(signedRequest.url, getCICPayload,
       {
-        headers: signedRequest.headers,
-        tags: { name: 'B02_CIMIT_01_GetContraIndicatorCredentials' }
+        headers: signedRequest.headers
       }),
-    { isStatusCode200 }))
+  { isStatusCode200 }))
   iterationsCompleted.add(1)
 }
 
 export function postMitigations (): void {
+  const groups = groupMap.postMitigations
   const postMitigationsPayload = JSON.stringify(generatePostMitigations())
   const request = {
     method: 'POST',
@@ -233,12 +243,11 @@ export function postMitigations (): void {
   }
   const signedRequest = signer.sign(request)
   iterationsStarted.add(1)
-  group('B03_CIMIT_01_PostMitigations POST', () =>
-    timeRequest(() => http.post(signedRequest.url, postMitigationsPayload,
+  group(groups[0], () => timeRequest(() => // B03_CIMIT_01_PostMitigations
+    http.post(signedRequest.url, postMitigationsPayload,
       {
-        headers: signedRequest.headers,
-        tags: { name: 'B03_CIMIT_01_PostMitigations' }
+        headers: signedRequest.headers
       }),
-    { isStatusCode200 }))
+  { isStatusCode200 }))
   iterationsCompleted.add(1)
 }

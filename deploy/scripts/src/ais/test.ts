@@ -11,6 +11,7 @@ import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assert
 import { SharedArray } from 'k6/data'
 import http from 'k6/http'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -105,13 +106,15 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  retrieveIV: [
+    'B02_RetrieveIV_01_GetInterventionData'
+  ]
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
+  thresholds: getThresholds(groupMap)
 }
 
 export function setup (): void {
@@ -154,14 +157,13 @@ export function persistIV (): void {
 }
 
 export function retrieveIV (): void {
+  const groups = groupMap.retrieveIV
   const retrieveData = csvData[Math.floor(Math.random() * csvData.length)]
   iterationsStarted.add(1)
 
-  group('B02_RetrieveIV_01_GetInterventionData GET', () =>
-    timeRequest(() => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`, {
-      tags: { name: 'B02_RetrieveIV_01_GetInterventionData' }
-    }),
-    { isStatusCode200, ...pageContentCheck('Perf Testing') }))
+  group(groups[0], () => timeRequest(() => // B02_RetrieveIV_01_GetInterventionData
+    http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`),
+  { isStatusCode200, ...pageContentCheck('Perf Testing') }))
   iterationsCompleted.add(1)
 }
 

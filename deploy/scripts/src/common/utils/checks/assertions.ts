@@ -3,8 +3,8 @@ import { type Checkers } from 'k6'
 
 /**
  * Function to check that a `Response` has status code 200/OK
- * @param response - `Response` to check that status code of
- * @returns `true` if status code is `200`, `false` otherwise
+ * @param {Response} response `Response` to check that status code of
+ * @returns {boolean} `true` if status code is `200`, `false` otherwise
  * @example
  * const res = timeRequest(
  *   () => http.get(url),
@@ -17,8 +17,8 @@ export function isStatusCode200 (response: Response): boolean {
 
 /**
  * Function to check that a `Response` has status code 201/Created
- * @param response - `Response` to check that status code of
- * @returns `true` if status code is `201`, `false` otherwise
+ * @param {Response} response `Response` to check that status code of
+ * @returns {boolean} `true` if status code is `201`, `false` otherwise
  * @example
  * const res = timeRequest(
  *   () => http.get(url),
@@ -31,8 +31,8 @@ export function isStatusCode201 (response: Response): boolean {
 
 /**
  * Function to check that a `Response` has status code 302/Found
- * @param response - `Response` to check that status code of
- * @returns `true` if status code is `302`, `false` otherwise
+ * @param {Response} response `Response` to check that status code of
+ * @returns {boolean} `true` if status code is `302`, `false` otherwise
  * @example
  * const res = timeRequest(
  *   () => http.get(url),
@@ -46,9 +46,9 @@ export function isStatusCode302 (response: Response): boolean {
 /**
  * Generates a `Checkers<Response>` Object to validate the content of a page
  * includes the given string
- * @param content - String that the page is expected to contain
- * @returns `Checkers<Response>` object containing one named `Checker<Response`
- * function
+ * @param {string} content String that the page is expected to contain
+ * @returns {Checkers<Response>} `Checkers<Response>` object containing one
+ * named `Checker<Response` function
  * @example
  * const res = timeRequest(
  *   () => http.get(url),

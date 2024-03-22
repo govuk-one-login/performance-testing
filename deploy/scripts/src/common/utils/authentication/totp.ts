@@ -1,11 +1,23 @@
 import crypto, { type Algorithm } from 'k6/crypto'
 
-// Implementation of RFC 6238 algorithm to generate TOTP codes
-// https://www.rfc-editor.org/rfc/rfc6238
+/**
+ * Implementation of RFC 6238 algorithm to generate TOTP codes
+ * https://www.rfc-editor.org/rfc/rfc6238
+ */
 export default class TOTP {
   key: ArrayBuffer
 
-  // TOTP key in base32 string RFC 4648 format is required
+  /**
+   * TOTP constructor class
+   * @param {string} base32key Required TOTP key in base32 string RFC 4648 format
+   * @param {number} [digits] Number of digits for the TOTP, defaults to `6`
+   * @param {Algorithm} [algorithm] Hashing algorithm to use, defaults to `sha1`
+   * @param {number} [period] Time period in seconds, defaults to `30`
+   * @param {number} [startTime] Unix start time to use in seconds, defaults to `0`
+   * @example
+   * const seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ' // Ascii string "12345678901234567890" in base32
+   * const totp = new TOTP(seed, 8)
+   */
   constructor (base32key: string,
     private readonly digits = 6,
     private readonly algorithm: Algorithm = 'sha1',
@@ -14,7 +26,11 @@ export default class TOTP {
     this.key = base32ToBytes(base32key)
   }
 
-  // Converts a timestamp in milliseconds to a byte array representing the number of time steps elapsed since the start time
+  /**
+   * Calculates the number of time steps
+   * @param {number} timestamp Timestamp in milliseconds
+   * @returns {ArrayBuffer}  Byte array representing the number of time steps elapsed since the start time
+   */
   calculateTime (timestamp: number): ArrayBuffer {
     const seconds = Math.round(timestamp / 1000) - this.startTime
     const steps = Math.floor(seconds / this.period)
@@ -22,8 +38,16 @@ export default class TOTP {
     return hexToBytes(hexSteps)
   }
 
-  // Returns TOTP with current time, or specified timestamp in milliseconds
-  // See RFC 6238 for more details
+  /**
+   * Returns TOTP with current time, or specified timestamp in milliseconds
+   * See RFC 6238 for more details
+   * @param {number} [timestamp] Unix timestamp, in milliseconds, to generate the TOTP for. Defaults to `Date.now()`
+   * @returns {string} String value of the time-based one-time password
+   * @example
+   * const seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ' // Ascii string "12345678901234567890" in base32
+   * const totp = new TOTP(seed)
+   * const password = totp.generateTOTP()
+   */
   public generateTOTP (timestamp: number = Date.now()): string {
     const time = this.calculateTime(timestamp)
 

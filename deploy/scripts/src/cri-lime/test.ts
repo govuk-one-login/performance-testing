@@ -9,6 +9,7 @@ import exec from 'k6/execution'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {

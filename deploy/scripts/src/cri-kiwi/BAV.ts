@@ -9,6 +9,7 @@ import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assert
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { bankingPayload } from './data/BAVdata'
 import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl, getAccessToken } from './utils/authorization'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {

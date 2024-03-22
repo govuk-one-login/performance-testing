@@ -275,7 +275,8 @@ export function changeEmail (): void {
   iterationsStarted.add(1)
 
   res = group(groups[0], () => timeRequest(() => // B01_ChangeEmail_01_LaunchAccountsHome
-    http.get(env.envURL), { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }))
+    http.get(env.envURL),
+  { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }))
 
   sleepBetween(1, 3)
 

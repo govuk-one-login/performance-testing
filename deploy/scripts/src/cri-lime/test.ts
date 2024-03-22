@@ -165,8 +165,6 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
-type drivingLicenceIssuer = 'DVA' | 'DVLA'
-const licenceIssuer: drivingLicenceIssuer = (Math.random() <= 0.5) ? 'DVA' : 'DVLA'
 const groupMap = {
   fraud: [
     'B01_Fraud_01_CoreStubEditUserContinue',
@@ -176,10 +174,14 @@ const groupMap = {
   ],
   drivingLicence: [
     'B02_Driving_01_DLEntryFromCoreStub',
-    `B02_Driving_02_Select${licenceIssuer}`,
-    `B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm`,
-    `B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm::01_CRICall`,
-    `B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm::02_CoreStubCall`
+    'B02_Driving_02_Select_DVA',
+    'B02_Driving_03_EnterDetailsConfirm_DVA',
+    'B02_Driving_03_EnterDetailsConfirm_DVA::01_CRICall',
+    'B02_Driving_03_EnterDetailsConfirm_DVA::02_CoreStubCall',
+    'B02_Driving_02_Select_DVLA',
+    'B02_Driving_03_EnterDetailsConfirm_DVLA',
+    'B02_Driving_03_EnterDetailsConfirm_DVLA::01_CRICall',
+    'B02_Driving_03_EnterDetailsConfirm_DVLA::02_CoreStubCall'
   ],
   passport: [
     'B03_Passport_01_PassportCRIEntryFromStub',
@@ -373,6 +375,8 @@ export function fraud (): void {
 
 export function drivingLicence (): void {
   const groups = groupMap.drivingLicence
+  type drivingLicenceIssuer = 'DVA' | 'DVLA'
+  const licenceIssuer: drivingLicenceIssuer = (Math.random() <= 0.5) ? 'DVA' : 'DVLA'
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
@@ -386,15 +390,6 @@ export function drivingLicence (): void {
         headers: { Authorization: `Basic ${encodedCredentials}` }
       }),
   { isStatusCode200, ...pageContentCheck('Who was your UK driving licence issued by?') }))
-
-  sleepBetween(1, 3)
-
-  res = group(groups[1], () => timeRequest(() => // B02_Driving_02_Select${licenceIssuer}
-    res.submitForm({
-      fields: { licenceIssuer },
-      submitSelector: '#submitButton'
-    }),
-  { isStatusCode200, ...pageContentCheck('Enter your details exactly as they appear on your UK driving licence') }))
 
   sleepBetween(1, 3)
 
@@ -435,16 +430,47 @@ export function drivingLicence (): void {
         consentDVACheckbox: 'true'
       }
 
-  group(groups[2], () => { // B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm
-    timeRequest(() => {
-      res = group(groups[3].split('::')[1], () => timeRequest(() => // 01_CRICall
-        res.submitForm({ fields, params: { redirects: 2 }, submitSelector: '#continue' }), { isStatusCode302 }))
-      res = group(groups[4].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
-        http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
-      { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }))
-    }, {})
-  })
-  iterationsCompleted.add(1)
+  if (licenceIssuer === 'DVA') {
+    res = group(groups[1], () => timeRequest(() => // B02_Driving_02_Select_DVA
+      res.submitForm({
+        fields: { licenceIssuer },
+        submitSelector: '#submitButton'
+      }),
+    { isStatusCode200, ...pageContentCheck('Enter your details exactly as they appear on your UK driving licence') }))
+
+    sleepBetween(1, 3)
+
+    group(groups[2], () => { // B02_Driving_03_EnterDetailsConfirm_DVA
+      timeRequest(() => {
+        res = group(groups[3].split('::')[1], () => timeRequest(() => // 01_CRICall
+          res.submitForm({ fields, params: { redirects: 2 }, submitSelector: '#continue' }), { isStatusCode302 }))
+        res = group(groups[4].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
+          http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
+        { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }))
+      }, {})
+    })
+    iterationsCompleted.add(1)
+  } else if (licenceIssuer === 'DVLA') {
+    res = group(groups[5], () => timeRequest(() => // B02_Driving_02_Select_DVLA
+      res.submitForm({
+        fields: { licenceIssuer },
+        submitSelector: '#submitButton'
+      }),
+    { isStatusCode200, ...pageContentCheck('Enter your details exactly as they appear on your UK driving licence') }))
+
+    sleepBetween(1, 3)
+
+    group(groups[6], () => { // B02_Driving_03_EnterDetailsConfirm_DVLA
+      timeRequest(() => {
+        res = group(groups[7].split('::')[1], () => timeRequest(() => // 01_CRICall
+          res.submitForm({ fields, params: { redirects: 2 }, submitSelector: '#continue' }), { isStatusCode302 }))
+        res = group(groups[8].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
+          http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
+        { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }))
+      }, {})
+    })
+    iterationsCompleted.add(1)
+  }
 }
 
 export function passport (): void {

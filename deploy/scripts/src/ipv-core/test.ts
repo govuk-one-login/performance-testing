@@ -493,7 +493,6 @@ export function passport (): void {
     }, {})
   })
   iterationsCompleted.add(1)
-  console.log(userId + ',' + testEmail)
 }
 
 export function drivingLicence (): void {

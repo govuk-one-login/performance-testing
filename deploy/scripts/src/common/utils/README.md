@@ -12,4 +12,4 @@ To generate [TypeDoc](https://typedoc.org/) documentation for these files run th
 % open ./docs/index.html
 ```
 
-This documentation is also avaialble on the GitHub page site for the repository.
+This documentation is also avaialble on the [GitHub pages site](https://govuk-one-login.github.io/performance-testing/) for the repository.

@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 defaults:
   run:
@@ -31,7 +30,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
-          path: ./docs
+          path: deploy/scripts/docs
 
   deploy:
     runs-on: ubuntu-latest

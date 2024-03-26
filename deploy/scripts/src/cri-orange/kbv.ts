@@ -17,7 +17,7 @@ const profiles: ProfileList = {
     ...createScenario('kbv', LoadProfile.short, 5)
   },
   stress: {
-    ...createScenario('kbv', LoadProfile.short, 14)
+    ...createScenario('kbv', LoadProfile.full, 14)
   }
 }
 

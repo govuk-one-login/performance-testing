@@ -377,8 +377,7 @@ export function fraud (): void {
 export function drivingLicence (): void {
   type drivingLicenceIssuer = 'DVA' | 'DVLA'
   const licenceIssuer: drivingLicenceIssuer = (Math.random() <= 0.5) ? 'DVA' : 'DVLA'
-  let groups: string[]
-  licenceIssuer === 'DVA' ? groups = groupMap.drivingLicence.filter((issuer) => issuer.includes('DVA')) : groups = groupMap.drivingLicence.filter((issuer) => issuer.includes('DVLA'))
+  const groups = groupMap.drivingLicence.filter(s => s.includes(licenceIssuer))
 
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`

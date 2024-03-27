@@ -4,7 +4,7 @@ import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
@@ -12,47 +12,13 @@ import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
-    addressScenario1: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '30s' } // Ramps up to target load
-      ],
-      exec: 'addressScenario1'
-    }
+    ...createScenario('address', LoadProfile.smoke)
   },
-  lowVolumeTest: {
-    addressScenario1: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 900,
-      stages: [
-        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
-        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'addressScenario1'
-    }
+  lowVolume: {
+    ...createScenario('address', LoadProfile.short, 30)
   },
   stress: {
-    addressScenario1: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1935,
-      stages: [
-        { target: 65, duration: '15m' }, // Ramp up to 65 iterations per second in 15 minutes
-        { target: 65, duration: '30m' }, // Maintain steady state at 65 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'addressScenario1'
-    }
+    ...createScenario('address', LoadProfile.full, 65)
   }
 }
 
@@ -82,7 +48,7 @@ const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
   })
 })
 
-export function addressScenario1 (): void {
+export function address (): void {
   let res: Response
   const user1Address = csvData1[exec.scenario.iterationInTest % csvData1.length]
   iterationsStarted.add(1)

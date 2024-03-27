@@ -1,4 +1,6 @@
-// AWS CLI Credential Output Format https://docs.aws.amazon.com/cli/latest/reference/sts/assume-role.html#examples
+/**
+ * AWS CLI Credential Output Format https://docs.aws.amazon.com/cli/latest/reference/sts/assume-role.html#examples
+ */
 export interface AssumeRoleOutput {
   AssumedRoleUser: {
     Arn: string

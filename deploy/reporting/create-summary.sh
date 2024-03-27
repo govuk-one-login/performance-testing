@@ -21,44 +21,6 @@ if [[ ! -f "$OUTPUT/results.json" ]]; then # Do not unzip or copy if this has al
 fi
 
 cd $OUTPUT
-echo ''
-echo '┌---------------------------------┐'
-echo '| Error Count by Group and Status |'
-echo '└---------------------------------┘'
-if [[ ! -f "errors.json" ]]; then # Do not filter if this has already been done
-    jq --arg startTime "$START_TIME" --arg endTime "$END_TIME" '
-      [($startTime, $endTime) | strptime("%Y-%m-%dT%H:%M:%S")[0:6]] as $r
-        | select(
-            .type=="Point"
-            and .metric=="http_req_failed"
-            and .data.value == 1
-            and ( .data.time[:19] | strptime("%Y-%m-%dT%H:%M:%S")[0:6]) as $timediff
-              | $timediff >= $r[0] and $timediff <= $r[1]
-    )
-    | {
-      "group":.data.tags.group,
-      "status":.data.tags.status
-    }' results.json >errors.json
-fi
-if [[ ! -f "error-pivot.json" ]]; then # Do not pivot if this has already been done
-    jq -s 'group_by(.group,.status)
-    | map({
-        "group":first.group,
-        "status":first.status,
-        "count":length
-    })
-    | sort_by(.count)
-    | reverse' errors.json >error-pivot.json
-fi
-# Pretty print to stdout using column
-jq -r '(
-  ["Group Name","Status","Count"]
-  | (., map(length*"-"))
-), (
-  .[]
-  | [.group, .status, .count]
-)
-| @tsv' error-pivot.json | column -ts$'\t'
 
 # Generate durations CSV
 echo ''
@@ -99,7 +61,6 @@ if [[ ! -f "http_req_duration.csv" ]]; then # Do not filter if this has already 
     )
     | [
       .data.time,
-      .data.tags.group,
       .data.tags.name,
       .data.value
     ]

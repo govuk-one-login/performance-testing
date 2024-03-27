@@ -1,7 +1,9 @@
 import { type Checkers, check, fail } from 'k6'
 import { Trend } from 'k6/metrics'
 
-// Trend to store all recorded durations
+/**
+ * Trend to store all recorded durations
+ */
 const durations = new Trend('duration', true)
 
 /**

@@ -4,7 +4,7 @@ import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import TOTP from '../common/utils/authentication/totp'
 import exec from 'k6/execution'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
@@ -13,152 +13,20 @@ import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
-    changeEmail: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'changeEmail'
-    },
-    changePassword: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'changePassword'
-    },
-    changePhone: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'changePhone'
-    },
-    deleteAccount: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '30s' } // Ramps up to target load
-      ],
-      exec: 'deleteAccount'
-    },
-    validateUser: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '30s' } // Ramps up to target load
-      ],
-      exec: 'validateUser'
-    },
-    contactsPage: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '30s' } // Ramps up to target load
-      ],
-      exec: 'contactsPage'
-    }
+    ...createScenario('changeEmail', LoadProfile.smoke),
+    ...createScenario('changePassword', LoadProfile.smoke),
+    ...createScenario('changePhone', LoadProfile.smoke),
+    ...createScenario('deleteAccount', LoadProfile.smoke),
+    ...createScenario('validateUser', LoadProfile.smoke),
+    ...createScenario('contactsPage', LoadProfile.smoke)
   },
   load: {
-    changeEmail: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 3000,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
-        { target: 30, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 30 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'changeEmail'
-    },
-    changePassword: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 3000,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
-        { target: 30, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 30 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'changePassword'
-    },
-    changePhone: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 3000,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
-        { target: 30, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 30 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'changePhone'
-    },
-    deleteAccount: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 3000,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
-        { target: 30, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 30 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'deleteAccount'
-    },
-    validateUser: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 300,
-      stages: [
-        { target: 10, duration: '3m' }, // Ramp up to 10 iterations per second in 3 minutes
-        { target: 10, duration: '6m' }, // Steady State of 6 minutes at the ramp up load i.e. 10 iterations/second
-        { target: 0, duration: '1m' } // Ramp down duration of 1 minute.
-      ],
-      exec: 'validateUser'
-    },
-    contactsPage: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 300,
-      stages: [
-        { target: 10, duration: '5m' }, // Ramp up to 10 iterations per second in 5 minutes
-        { target: 10, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 10 iterations/second
-        { target: 0, duration: '1m' } // Ramp down duration of 1 minute.
-      ],
-      exec: 'contactsPage'
-    }
+    ...createScenario('changeEmail', LoadProfile.full, 30),
+    ...createScenario('changePassword', LoadProfile.full, 30),
+    ...createScenario('changePhone', LoadProfile.full, 30),
+    ...createScenario('deleteAccount', LoadProfile.full, 30),
+    ...createScenario('validateUser', LoadProfile.full, 10),
+    ...createScenario('contactsPage', LoadProfile.full, 10)
   }
 }
 

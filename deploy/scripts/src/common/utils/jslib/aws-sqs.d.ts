@@ -6,11 +6,12 @@ export class AWSConfig {
    * use to authenticate.
    * https://k6.io/docs/javascript-api/jslib/aws/awsconfig/
    *
-   * @param {string} region The AWS region to connect to. As described by Amazon AWS docs
+   * @param {object} options Object containing the details of the AWS credentials to initialise the class
+   * @param {string} options.region The AWS region to connect to. As described by Amazon AWS docs
    *        https://docs.aws.amazon.com/general/latest/gr/rande.html
-   * @param {string} accessKeyId The AWS access key ID credential to use for authentication
-   * @param {string} secretAccessKey The AWS secret access credential to use for authentication
-   * @param {string} [sessionToken] The AWS secret access token to use for authentication
+   * @param {string} options.accessKeyId The AWS access key ID credential to use for authentication
+   * @param {string} options.secretAccessKey The AWS secret access credential to use for authentication
+   * @param {string} [options.sessionToken] The AWS secret access token to use for authentication
    * @example
    * const awsConfig = new AWSConfig({
    *  region: getEnv('AWS_REGION'),

@@ -9,7 +9,7 @@ To select a file and run the code:
   4. Compile the TypeScript file by running the following command:
        npx tsc create-durations-percentiles.ts
   5. Run the JavaScript file by running the following command:
-       node create-durations-percentiles.ts
+       node create-durations-percentiles.js
   6. The script will process the selected CSV file and output the 95th and 99th percentile durations for each request or group.
 */
 
@@ -61,8 +61,8 @@ fs.createReadStream(fileName)
       const n = durations.length;
       const p95Index = Math.floor(n * 0.95);
       const p99Index = Math.floor(n * 0.99);
-      const p95 = durations[p95Index];
-      const p99 = durations[p99Index];
+      const p95 = Math.round(durations[p95Index]);
+      const p99 = Math.round(durations[p99Index]);
       console.log(`Request: ${requestData.request}`);
       console.log(`95th percentile duration: ${p95} ms`);
       console.log(`99th percentile duration: ${p99} ms`);

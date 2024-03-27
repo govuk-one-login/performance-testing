@@ -1,6 +1,6 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { uuidv4, randomIntBetween } from '../common/utils/jslib/index'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
@@ -8,176 +8,22 @@ import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
-    sendEventSmokeTest1: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '2s' }
-      ],
-      exec: 'sendEventType1'
-    },
-    sendEventSmokeTest2: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '10s' }
-      ],
-      exec: 'sendEventType2'
-    },
-    sendEventSmokeTest3: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '10s' }
-      ],
-      exec: 'sendEventType3'
-    },
-    sendEventSmokeTest4: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '10s' }
-      ],
-      exec: 'sendEventType4'
-    },
-    sendEventSmokeTest5: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '10s' }
-      ],
-      exec: 'sendEventType5'
-    },
-    sendEventSmokeTest6: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '10s' }
-      ],
-      exec: 'sendEventType6'
-    },
-    sendEventSmokeTest7: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '10s' }
-      ],
-      exec: 'sendEventType7'
-    }
+    ...createScenario('sendEventType1', LoadProfile.smoke),
+    ...createScenario('sendEventType2', LoadProfile.smoke),
+    ...createScenario('sendEventType3', LoadProfile.smoke),
+    ...createScenario('sendEventType4', LoadProfile.smoke),
+    ...createScenario('sendEventType5', LoadProfile.smoke),
+    ...createScenario('sendEventType6', LoadProfile.smoke),
+    ...createScenario('sendEventType7', LoadProfile.smoke)
   },
   load: {
-    sendEventLoadTest1: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
-        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'sendEventType1'
-    },
-    sendEventLoadTest2: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
-        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'sendEventType2'
-    },
-    sendEventLoadTest3: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
-        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'sendEventType3'
-    },
-    sendEventLoadTest4: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
-        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'sendEventType4'
-    },
-    sendEventLoadTest5: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
-        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'sendEventType5'
-    },
-    sendEventLoadTest6: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
-        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'sendEventType6'
-    },
-    sendEventLoadTest7: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 5, duration: '15m' }, // Ramp up to 5 iterations per second in 15 minutes
-        { target: 5, duration: '30m' }, // Maintain steady state at 5 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'sendEventType7'
-    }
+    ...createScenario('sendEventType1', LoadProfile.full, 5),
+    ...createScenario('sendEventType2', LoadProfile.full, 5),
+    ...createScenario('sendEventType3', LoadProfile.full, 5),
+    ...createScenario('sendEventType4', LoadProfile.full, 5),
+    ...createScenario('sendEventType5', LoadProfile.full, 5),
+    ...createScenario('sendEventType6', LoadProfile.full, 5),
+    ...createScenario('sendEventType7', LoadProfile.full, 5)
   }
 }
 

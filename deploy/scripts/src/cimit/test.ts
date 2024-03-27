@@ -1,4 +1,4 @@
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { AWSConfig } from '../common/utils/jslib/aws-sqs'
 import { SignatureV4 } from '../common/utils/jslib/aws-signature'
@@ -15,121 +15,19 @@ import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
-    putContraIndicators: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'putContraIndicators'
-    },
-    getContraIndicatorCredentials: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'getContraIndicatorCredentials'
-    },
-    postMitigations: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'postMitigations'
-    }
+    ...createScenario('putContraIndicators', LoadProfile.smoke),
+    ...createScenario('getContraIndicatorCredentials', LoadProfile.smoke),
+    ...createScenario('postMitigations', LoadProfile.smoke)
   },
-  lowVolumeTest: {
-    putContraIndicators: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
-        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'putContraIndicators'
-    },
-    getContraIndicatorCredentials: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
-        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'getContraIndicatorCredentials'
-    },
-    postMitigations: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 30, duration: '5m' }, // Ramp up to 30 iterations per second in 5 minutes
-        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'postMitigations'
-    }
+  lowVolume: {
+    ...createScenario('putContraIndicators', LoadProfile.short, 30, 5),
+    ...createScenario('getContraIndicatorCredentials', LoadProfile.short, 30, 5),
+    ...createScenario('postMitigations', LoadProfile.short, 30, 5)
   },
   load: {
-    putContraIndicators: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1200,
-      stages: [
-        { target: 400, duration: '15m' }, // Ramp up to 400 iterations per second in 15 minutes
-        { target: 400, duration: '30m' }, // Maintain steady state at 400 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'putContraIndicators'
-    },
-    getContraIndicatorCredentials: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 500,
-      stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Maintain steady state at 100 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'getContraIndicatorCredentials'
-    },
-    postMitigations: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 500,
-      stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Maintain steady state at 100 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'postMitigations'
-    }
+    ...createScenario('putContraIndicators', LoadProfile.full, 400, 5),
+    ...createScenario('getContraIndicatorCredentials', LoadProfile.full, 100, 5),
+    ...createScenario('postMitigations', LoadProfile.full, 100, 5)
   }
 }
 

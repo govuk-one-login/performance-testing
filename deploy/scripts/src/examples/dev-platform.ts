@@ -1,37 +1,15 @@
 import http from 'k6/http'
 import { type Options } from 'k6/options'
 import { group, sleep } from 'k6'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { timeRequest } from '../common/utils/request/timing'
 import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
-    demoSamApp: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1m',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 6, duration: '10s' }, // Ramps up to target load
-        { target: 6, duration: '10s' } // Holds at target load
-      ],
-      exec: 'demoSamApp'
-    },
-    demoNodeApp: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1m',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 6, duration: '10s' }, // Ramps up to target load
-        { target: 6, duration: '10s' } // Holds at target load
-      ],
-      exec: 'demoNodeApp'
-    }
+    ...createScenario('demoSamApp', LoadProfile.smoke),
+    ...createScenario('demoNodeApp', LoadProfile.smoke)
   },
   load: {
     demoSamApp: {

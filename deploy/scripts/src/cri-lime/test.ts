@@ -3,7 +3,7 @@ import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import encoding from 'k6/encoding'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
 import { timeRequest } from '../common/utils/request/timing'
@@ -14,39 +14,9 @@ import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
-    fraud: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'fraud'
-    },
-    drivingLicence: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'drivingLicence'
-    },
-    passport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'passport'
-    }
+    ...createScenario('fraud', LoadProfile.smoke),
+    ...createScenario('drivingLicence', LoadProfile.smoke),
+    ...createScenario('passport', LoadProfile.smoke)
   },
   bau1x: {
     passport: {
@@ -81,86 +51,14 @@ const profiles: ProfileList = {
     }
   },
   lowVolume: {
-    fraud: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 900,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
-        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'fraud'
-    },
-    drivingLicence: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 5, duration: '5m' }, // Ramp up to 5 iterations per second in 5 minutes
-        { target: 5, duration: '15m' }, // Maintain steady state at 5 iterations per second for 15 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'drivingLicence'
-    },
-    passport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramp up to 30 iterations per second in 15 minutes
-        { target: 30, duration: '15m' }, // Maintain steady state at 30 iterations per second for 15 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'passport'
-    }
+    ...createScenario('fraud', LoadProfile.short, 30),
+    ...createScenario('drivingLicence', LoadProfile.short, 5),
+    ...createScenario('passport', LoadProfile.short, 30)
   },
   stress: {
-    fraud: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1878,
-      stages: [
-        { target: 63, duration: '15m' }, // Ramp up to 63 iterations per second in 15 minutes
-        { target: 63, duration: '30m' }, // Maintain steady state at 63 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'fraud'
-    },
-    drivingLicence: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1500,
-      stages: [
-        { target: 55, duration: '15m' }, // Ramp up to 55 iterations per second in 15 minutes
-        { target: 55, duration: '30m' }, // Maintain steady state at 55 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'drivingLicence'
-    },
-    passport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 1500,
-      stages: [
-        { target: 55, duration: '15m' }, // Ramp up to 55 iterations per second in 15 minutes
-        { target: 55, duration: '30m' }, // Maintain steady state at 55 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'passport'
-    }
+    ...createScenario('fraud', LoadProfile.full, 63),
+    ...createScenario('drivingLicence', LoadProfile.full, 55),
+    ...createScenario('passport', LoadProfile.full, 55)
   }
 }
 

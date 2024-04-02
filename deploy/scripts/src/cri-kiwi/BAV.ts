@@ -43,7 +43,7 @@ const env = {
 
 export function BAV (): void {
   let res: Response
-  const testAccountNumber = '31926819'
+  const testAccountNumber = '00111111'
   const testSortCode = '12-34-56'
   iterationsStarted.add(1)
 

@@ -1,10 +1,10 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
 import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
-import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { generateRequest } from './requestGenerator/txmaReqGen'
 
 const profiles: ProfileList = {
   smoke: {
@@ -44,15 +44,27 @@ const awsConfig = new AWSConfig({
   sessionToken: credentials.SessionToken
 })
 
-const eventData = {
-  payload: getEnv('DATA_TXMA_SQS_PAYLOAD')
-}
+// const eventData = {
+//   payload: getEnv('DATA_TXMA_SQS_PAYLOAD')
+// }
 
 const sqs = new SQSClient(awsConfig)
 
+// export function sendEvent (): void {
+//   const messageBody = eventData.payload.replace(/UUID/g, () => uuidv4())
+//   iterationsStarted.add(1)
+//   sqs.sendMessage(env.sqs_queue, messageBody)
+//   iterationsCompleted.add(1)
+// }
+
 export function sendEvent (): void {
-  const messageBody = eventData.payload.replace(/UUID/g, () => uuidv4())
+  const currTime = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
+  const payload = generateRequest(currTime)
+  console.log('Payload:', payload)
+  const txmaMessage = {
+    messageBody: JSON.stringify(payload)
+  }
   iterationsStarted.add(1)
-  sqs.sendMessage(env.sqs_queue, messageBody)
+  sqs.sendMessage(env.sqs_queue, txmaMessage.messageBody)
   iterationsCompleted.add(1)
 }

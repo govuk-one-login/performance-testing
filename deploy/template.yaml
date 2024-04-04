@@ -410,6 +410,7 @@ Resources:
             variables:
               WORK_DIR: /home/k6/scripts
               REPORTING_DIR: /home/k6/reporting
+              OTEL_LOG: otel.log
               JSON_RESULTS: results.gz
               K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
               SLACK_NOTIFY_CHANNEL: C05J07H48UE
@@ -477,7 +478,7 @@ Resources:
               commands:
                 - |
                   sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_NUMBER#" $OTEL_TEMPLATE > $OTEL_CONFIG
-                - /otel/otelcol-contrib  --config=$OTEL_CONFIG > otel.log 2>&1 &
+                - /otel/otelcol-contrib  --config=$OTEL_CONFIG > $OTEL_LOG 2>&1 &
                 - export EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name $CODEBUILD_BUILD_NUMBER)
                 - source ${REPORTING_DIR}/slack.sh POST
             build:
@@ -490,6 +491,7 @@ Resources:
                 - S3_LOCATION=s3://${S3_BUCKET}/${TEST_SCRIPT%.*}/$(date +%F/%T)
                 - aws s3 cp $K6_WEB_DASHBOARD_EXPORT $S3_LOCATION/$K6_WEB_DASHBOARD_EXPORT
                 - aws s3 cp $JSON_RESULTS $S3_LOCATION/$JSON_RESULTS
+                - aws s3 cp $OTEL_LOG $S3_LOCATION/$OTEL_LOG
                 - echo "Shutting down OpenTelemetry collector"
                 - sleep 120
                 - OTEL_PID=$(pgrep /otel/otelcol-contrib)

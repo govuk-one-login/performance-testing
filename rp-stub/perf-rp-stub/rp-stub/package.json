@@ -1,9 +1,8 @@
 {
-  "name": "hello_world",
+  "name": "rp-stub",
   "version": "1.0.0",
-  "description": "hello world sample for NodeJS",
+  "description": "rp-stub in nodeJS for performance",
   "main": "app.js",
-  "repository": "https://github.com/aws/aws-sam-cli-app-templates/tree/master/nodejs20.x/hello-ts-pt",
   "author": "SAM CLI",
   "license": "MIT",
   "dependencies": {

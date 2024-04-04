@@ -3,6 +3,8 @@ import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { setupClient } from './onelogin-client';
+import { generators } from 'openid-client';
+
 const metrics = new Metrics();
 const logger = new Logger();
 const tracer = new Tracer();
@@ -24,6 +26,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent, context: Contex
     const oneLoginClient = await setupClient();
 
     const params = oneLoginClient.callbackParams(JSON.stringify(event.body));
+    const nonce = generators.nonce()
     const tokenSet = await oneLoginClient.callback('https://localhost:3000/callback', params, { nonce });
     console.log('received and validated tokens %j', tokenSet);
     console.log('validated ID Token claims %j', tokenSet.claims());
@@ -71,11 +74,10 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent, context: Contex
     tracer.setSegment(subsegment);
 
     try {
-        // hello world code
         response = {
             statusCode: 200,
             body: JSON.stringify({
-                message: 'hello world',
+                userinfo: 'userInfo',
             }),
         };
         logger.info(`Successful response from API enpoint: ${event.path}`, response.body);

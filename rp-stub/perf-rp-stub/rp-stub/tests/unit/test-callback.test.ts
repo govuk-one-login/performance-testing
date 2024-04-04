@@ -1,8 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { lambdaHandler } from '../../start';
+import { lambdaHandler } from '../../callback';
 import { expect, describe, it } from '@jest/globals';
 
-describe('Unit test for start handler', function () {
+describe('Unit test for callback handler', function () {
     const event: APIGatewayProxyEvent = {
         httpMethod: 'get',
         body: '',
@@ -10,7 +10,7 @@ describe('Unit test for start handler', function () {
         isBase64Encoded: false,
         multiValueHeaders: {},
         multiValueQueryStringParameters: {},
-        path: '/start',
+        path: '/callback',
         pathParameters: {},
         queryStringParameters: {},
         requestContext: {
@@ -41,12 +41,12 @@ describe('Unit test for start handler', function () {
                 userAgent: '',
                 userArn: '',
             },
-            path: '/start',
+            path: '/callback',
             protocol: 'HTTP/1.1',
             requestId: 'c6af9ac6-7b61-11e6-9a41-93e8deadbeef',
             requestTimeEpoch: 1428582896000,
             resourceId: '123456',
-            resourcePath: '/start',
+            resourcePath: '/callback',
             stage: 'dev',
         },
         resource: '',
@@ -78,13 +78,6 @@ describe('Unit test for start handler', function () {
         const result: APIGatewayProxyResult = await lambdaHandler(event, context);
 
         expect(result.statusCode).toEqual(301);
-        expect(result.headers?.Location).toContain("response_type=code");
-        expect(result.headers?.Location).toContain("scope");
-        expect(result.headers?.Location).toContain("client_id");
-        expect(result.headers?.Location).toContain("state");
-        expect(result.headers?.Location).toContain("redirect_uri");
-        expect(result.headers?.Location).toContain("nonce");
-        expect(result.headers?.Location).toContain("vtr");
-        expect(result.headers?.Location).toContain("ui_locales");
+        expect(result.body).toContain("userinfo");
     });
 });

@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
-import { Issuer, generators } from 'openid-client';
+import { generators } from 'openid-client';
 import { setupClient } from './onelogin-client';
 
 const metrics = new Metrics();

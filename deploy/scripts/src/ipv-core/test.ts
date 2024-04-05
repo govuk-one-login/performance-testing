@@ -266,7 +266,8 @@ const groupMap = {
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: getThresholds(groupMap)
+  thresholds: getThresholds(groupMap),
+  tags: { name: '' }
 }
 
 export function setup (): void {

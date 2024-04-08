@@ -8,6 +8,7 @@ import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -22,13 +23,21 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  kbvScenario1: [
+    'B01_KBV_01_CoreStubEditUserContinue',
+    'B01_KBV_02_KBVQuestion1',
+    'B01_KBV_03_KBVQuestion2',
+    'B01_KBV_04_KBVQuestion3',
+    'B01_KBV_04_KBVQuestion3::01_KBVCRICall',
+    'B01_KBV_04_KBVQuestion3::02_CoreStubCall'
+  ]
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
+  thresholds: getThresholds(groupMap),
+  tags: { name: '' }
 }
 
 export function setup (): void {
@@ -40,6 +49,7 @@ const kbvAnswersOBJ = {
 }
 
 export function kbv (): void {
+  const groups = groupMap.kbvScenario1
   let res: Response
   interface kbvAnswers {
     kbvAns1: string
@@ -49,53 +59,47 @@ export function kbv (): void {
   const kbvAnsJSON: kbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
   iterationsStarted.add(1)
 
-  res = group('B01_KBV_01_CoreStubEditUserContinue POST', () =>
-    timeRequest(() => http.get(
+  res = group(groups[0], () => timeRequest(() => // B01_KBV_01_CoreStubEditUserContinue
+    http.get(
       env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197',
       {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B01_KBV_01_CoreStubEditUserContinue' }
+        headers: { Authorization: `Basic ${encodedCredentials}` }
       }),
-    { isStatusCode200, ...pageContentCheck('You can find this amount on your loan agreement') }))
+  { isStatusCode200, ...pageContentCheck('You can find this amount on your loan agreement') }))
 
   sleepBetween(1, 3)
 
-  res = group('B01_KBV_02_KBVQuestion1 POST', () =>
-    timeRequest(() => res.submitForm({
+  res = group(groups[1], () => timeRequest(() => // B01_KBV_02_KBVQuestion1
+    res.submitForm({
       fields: { Q00042: kbvAnsJSON.kbvAns1 },
-      params: { tags: { name: 'B01_KBV_02_KBVQuestion1' } },
       submitSelector: '#continue'
     }),
-    { isStatusCode200, ...pageContentCheck('This includes any interest') }))
+  { isStatusCode200, ...pageContentCheck('This includes any interest') }))
 
   sleepBetween(1, 3)
 
-  res = group('B01_KBV_03_KBVQuestion2 POST', () =>
-    timeRequest(() => res.submitForm({
+  res = group(groups[2], () => timeRequest(() => // B01_KBV_03_KBVQuestion2
+    res.submitForm({
       fields: { Q00015: kbvAnsJSON.kbvAns2 },
-      params: { tags: { name: 'B01_KBV_03_KBVQuestion2' } },
       submitSelector: '#continue'
     }),
-    { isStatusCode200, ...pageContentCheck('Think about the amount you agreed to pay back every month') }))
+  { isStatusCode200, ...pageContentCheck('Think about the amount you agreed to pay back every month') }))
 
   sleepBetween(1, 3)
 
-  group('B01_KBV_04_KBVQuestion3 POST', () => {
-    res = timeRequest(() => res.submitForm({
-      fields: { Q00018: kbvAnsJSON.kbvAns3 },
-      params: {
-        redirects: 2,
-        tags: { name: 'B01_KBV_04_KBVQuestion3_KBVCall' }
-      },
-      submitSelector: '#continue'
-    }),
-    { isStatusCode302 })
-    res = timeRequest(() => http.get(res.headers.Location,
-      {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B01_KBV_04_KBVQuestion3_CoreStubCall' }
-      }),
-    { isStatusCode200, ...pageContentCheck('verificationScore&quot;: 2') })
+  group(groups[3], () => { // B01_KBV_04_KBVQuestion3
+    timeRequest(() => {
+      res = group(groups[4].split('::')[1], () => timeRequest(() => // 01_KBVCRICall
+        res.submitForm({
+          fields: { Q00018: kbvAnsJSON.kbvAns3 },
+          params: { redirects: 2 },
+          submitSelector: '#continue'
+        }),
+      { isStatusCode302 }))
+      res = group(groups[5].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
+        http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
+      { isStatusCode200, ...pageContentCheck('verificationScore&quot;: 2') }))
+    }, {})
   })
   iterationsCompleted.add(1)
 }

@@ -9,6 +9,7 @@ import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -20,13 +21,20 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  ninoScenario1: [
+    'B02_Nino_01_EntryFromStub',
+    'B02_Nino_02_AddUser',
+    'B02_Nino_03_SearchNiNo',
+    'B02_Nino_03_SearchNiNo::01_NiNOCRICall',
+    'B02_Nino_03_SearchNiNo::02_CoreStubCall'
+  ]
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
+  thresholds: getThresholds(groupMap),
+  tags: { name: '' }
 }
 
 export function setup (): void {
@@ -64,26 +72,26 @@ const csvData1: nino[] = new SharedArray('csvDataNino', () => {
 })
 
 export function ninoCheck (): void {
+  const groups = groupMap.ninoScenario1
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   const userNino = csvData1[Math.floor(Math.random() * csvData1.length)]
   iterationsStarted.add(1)
 
-  res = group('B02_Nino_01_EntryFromStub  GET', () =>
-    timeRequest(() => http.get(env.ipvCoreStub + '/edit-user?cri=check-hmrc-build',
+  res = group(groups[0], () => timeRequest(() => // B02_Nino_01_EntryFromStub
+    http.get(env.ipvCoreStub + '/edit-user?cri=check-hmrc-build',
       {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B02_Nino_01_EntryFromStub' }
+        headers: { Authorization: `Basic ${encodedCredentials}` }
       }
     ),
-    { isStatusCode200, ...pageContentCheck('Edit User') })
+  { isStatusCode200, ...pageContentCheck('Edit User') })
   )
 
   sleepBetween(1, 3)
 
-  res = group('B02_Nino_02_AddUser POST', () =>
-    timeRequest(() => res.submitForm({
+  res = group(groups[1], () => timeRequest(() => // B02_Nino_02_AddUser
+    res.submitForm({
       fields: {
         firstName: userNino.firstName,
         surname: userNino.lastName,
@@ -93,30 +101,26 @@ export function ninoCheck (): void {
       },
       submitSelector: '#govuk-button button',
       params: {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B02_Nino_02_AddUser' }
+        headers: { Authorization: `Basic ${encodedCredentials}` }
       }
     }),
-    { isStatusCode200, ...pageContentCheck('national insurance number') }))
+  { isStatusCode200, ...pageContentCheck('national insurance number') }))
 
   sleepBetween(1, 3)
 
-  group('B02_Nino_03_SearchNiNo POST', () => {
-    res = timeRequest(() => res.submitForm({
-      fields: { nationalInsuranceNumber: userNino.niNumber },
-      params: {
-        redirects: 1,
-        tags: { name: 'B02_Nino_03_SearchNiNo' }
-      },
-      submitSelector: '#continue'
-    }),
-    { isStatusCode302 })
-    res = timeRequest(() => http.get(res.headers.Location,
-      {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B02_Nino_03_SearchNiNo' }
-      }),
-    { isStatusCode200, ...pageContentCheck('Verifiable') })
+  group(groups[2], () => { // B02_Nino_03_SearchNiNo
+    timeRequest(() => {
+      res = group(groups[3].split('::')[1], () => timeRequest(() => // 01_NiNOCRICall
+        res.submitForm({
+          fields: { nationalInsuranceNumber: userNino.niNumber },
+          params: { redirects: 1 },
+          submitSelector: '#continue'
+        }),
+      { isStatusCode302 }))
+      res = group(groups[4].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
+        http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
+      { isStatusCode200, ...pageContentCheck('Verifiable') }))
+    }, {})
   })
   iterationsCompleted.add(1)
 }

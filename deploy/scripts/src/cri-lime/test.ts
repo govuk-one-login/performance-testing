@@ -10,6 +10,7 @@ import { timeRequest } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -62,13 +63,37 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  fraud: [
+    'B01_Fraud_01_CoreStubEditUserContinue',
+    'B01_Fraud_02_ContinueToCheckFraudDetails',
+    'B01_Fraud_02_ContinueToCheckFraudDetails::01_CRICall',
+    'B01_Fraud_02_ContinueToCheckFraudDetails::02_CoreStubCall'
+  ],
+  drivingLicence: [
+    'B02_Driving_01_DLEntryFromCoreStub_DVA',
+    'B02_Driving_02_Select_DVA',
+    'B02_Driving_03_EnterDetailsConfirm_DVA',
+    'B02_Driving_03_EnterDetailsConfirm_DVA::01_CRICall',
+    'B02_Driving_03_EnterDetailsConfirm_DVA::02_CoreStubCall',
+    'B02_Driving_01_DLEntryFromCoreStub_DVLA',
+    'B02_Driving_02_Select_DVLA',
+    'B02_Driving_03_EnterDetailsConfirm_DVLA',
+    'B02_Driving_03_EnterDetailsConfirm_DVLA::01_CRICall',
+    'B02_Driving_03_EnterDetailsConfirm_DVLA::02_CoreStubCall'
+  ],
+  passport: [
+    'B03_Passport_01_PassportCRIEntryFromStub',
+    'B03_Passport_02_EnterPassportDetailsAndContinue',
+    'B03_Passport_02_EnterPassportDetailsAndContinue::01_CRICall',
+    'B03_Passport_02_EnterPassportDetailsAndContinue::02_CoreStubCall'
+  ]
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
+  thresholds: getThresholds(groupMap),
+  tags: { name: '' }
 }
 
 export function setup (): void {
@@ -187,14 +212,15 @@ const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => 
 })
 
 export function fraud (): void {
+  const groups = groupMap.fraud
   let res: Response
   const userDetails = getUserDetails()
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   iterationsStarted.add(1)
 
-  res = group('B01_Fraud_01_CoreStubEditUserContinue POST', () =>
-    timeRequest(() => http.post(
+  res = group(groups[0], () => timeRequest(() => // B01_Fraud_01_CoreStubEditUserContinue
+    http.post(
       env.ipvCoreStub + '/edit-user',
       {
         cri: `fraud-cri-${env.envName}`,
@@ -228,61 +254,43 @@ export function fraud (): void {
         'SecondaryUKAddress.validUntilYear': ''
       },
       {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B01_Fraud_01_CoreStubEditUserContinue' }
+        headers: { Authorization: `Basic ${encodedCredentials}` }
       }
     ),
-    { isStatusCode200, ...pageContentCheck('We need to check your details') }))
+  { isStatusCode200, ...pageContentCheck('We need to check your details') }))
 
   sleepBetween(1, 3)
 
-  group('B01_Fraud_02_ContinueToCheckFraudDetails POST', () => {
-    res = timeRequest(() => res.submitForm({
-      params: {
-        redirects: 1,
-        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_CRI' }
-      },
-      submitSelector: '#continue'
-    }),
-    { isStatusCode302 })
-    res = timeRequest(() => http.get(res.headers.Location,
-      {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B01_Fraud_02_ContinueToCheckFraudDetails_CoreStub' }
-      }
-    ),
-    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
+  group(groups[1], () => { // B01_Fraud_02_ContinueToCheckFraudDetails
+    timeRequest(() => {
+      res = group(groups[2].split('::')[1], () => timeRequest(() => // 01_CRICall
+        res.submitForm({ params: { redirects: 1 }, submitSelector: '#continue' }), { isStatusCode302 }))
+      res = group(groups[3].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
+        http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
+      { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }))
+    }, {})
   })
   iterationsCompleted.add(1)
 }
 
 export function drivingLicence (): void {
-  let res: Response
   type drivingLicenceIssuer = 'DVA' | 'DVLA'
   const licenceIssuer: drivingLicenceIssuer = (Math.random() <= 0.5) ? 'DVA' : 'DVLA'
+  const groups = groupMap.drivingLicence.filter(s => s.includes(licenceIssuer))
+
+  let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   const userDVLA = csvDVLA[exec.scenario.iterationInTest % csvDVLA.length]
   const userDVA = csvDVA[exec.scenario.iterationInTest % csvDVA.length]
   iterationsStarted.add(1)
 
-  res = group('B02_Driving_01_DLEntryFromCoreStub GET', () =>
-    timeRequest(() => http.get(`${env.ipvCoreStub}/authorize?cri=driving-licence-cri-${env.envName}&rowNumber=197`,
+  res = group(groups[0], () => timeRequest(() => // B02_Driving_01_DLEntryFromCoreStub_${licenceIssuer}
+    http.get(`${env.ipvCoreStub}/authorize?cri=driving-licence-cri-${env.envName}&rowNumber=197`,
       {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B02_Driving_01_DLEntryFromCoreStub' }
+        headers: { Authorization: `Basic ${encodedCredentials}` }
       }),
-    { isStatusCode200, ...pageContentCheck('Who was your UK driving licence issued by?') }))
-
-  sleepBetween(1, 3)
-
-  res = group(`B02_Driving_02_Select${licenceIssuer} POST`, () =>
-    timeRequest(() => res.submitForm({
-      fields: { licenceIssuer },
-      params: { tags: { name: 'B02_Driving_02_Select' + licenceIssuer } },
-      submitSelector: '#submitButton'
-    }),
-    { isStatusCode200, ...pageContentCheck('Enter your details exactly as they appear on your UK driving licence') }))
+  { isStatusCode200, ...pageContentCheck('Who was your UK driving licence issued by?') }))
 
   sleepBetween(1, 3)
 
@@ -323,74 +331,70 @@ export function drivingLicence (): void {
         consentDVACheckbox: 'true'
       }
 
-  group(`B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm POST`, () => {
-    res = timeRequest(() => res.submitForm({
-      fields,
-      params: {
-        redirects: 2,
-        tags: { name: `B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm_CRI` }
-      },
-      submitSelector: '#continue'
+  res = group(groups[1], () => timeRequest(() => // B02_Driving_02_Select_${licenceIssuer}
+    res.submitForm({
+      fields: { licenceIssuer },
+      submitSelector: '#submitButton'
     }),
-    { isStatusCode302 })
-    res = timeRequest(() => http.get(res.headers.Location,
-      {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: `B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm_CoreStub` } // pragma: allowlist secret
-      }),
-    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
+  { isStatusCode200, ...pageContentCheck('Enter your details exactly as they appear on your UK driving licence') }))
+
+  sleepBetween(1, 3)
+
+  group(groups[2], () => { // B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm
+    timeRequest(() => {
+      res = group(groups[3].split('::')[1], () => timeRequest(() => // 01_CRICall
+        res.submitForm({ fields, params: { redirects: 2 }, submitSelector: '#continue' }), { isStatusCode302 }))
+      res = group(groups[4].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
+        http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
+      { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }))
+    }, {})
   })
   iterationsCompleted.add(1)
 }
 
 export function passport (): void {
+  const groups = groupMap.passport
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   const userPassport = csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)]
   iterationsStarted.add(1)
 
-  res = group('B03_Passport_01_PassportCRIEntryFromStub GET', () =>
-    timeRequest(() => http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' +
+  res = group(groups[0], () => timeRequest(() => // B03_Passport_01_PassportCRIEntryFromStub
+    http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' +
         env.envName + '&rowNumber=197',
     {
-      headers: { Authorization: `Basic ${encodedCredentials}` },
-      tags: { name: 'B03_Passport_01_PassportCRIEntryFromStub' }
+      headers: { Authorization: `Basic ${encodedCredentials}` }
     }),
-    { isStatusCode200, ...pageContentCheck('Enter your details exactly as they appear on your UK passport') }))
+  { isStatusCode200, ...pageContentCheck('Enter your details exactly as they appear on your UK passport') }))
 
   sleepBetween(1, 3)
 
-  group('B03_Passport_02_EnterPassportDetailsAndContinue POST', () => {
-    res = timeRequest(() => res.submitForm({
-      fields: {
-        passportNumber: userPassport.passportNumber,
-        surname: userPassport.surname,
-        firstName: userPassport.firstName,
-        middleNames: userPassport.middleName,
-        'dateOfBirth-day': userPassport.birthday,
-        'dateOfBirth-month': userPassport.birthmonth,
-        'dateOfBirth-year': userPassport.birthyear,
-        'expiryDate-day': userPassport.expiryDay,
-        'expiryDate-month': userPassport.expiryMonth,
-        'expiryDate-year': userPassport.expiryYear
-      },
-      params: {
-        redirects: 2,
-        tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_CRI' }
-      },
-      submitSelector: '#submitButton'
-    }),
-    { isStatusCode302 })
-    res = timeRequest(() => http.get(res.headers.Location,
-      {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        tags: { name: 'B03_Passport_02_EnterPassportDetailsAndContinue_CoreStub' }
-      }
-    ),
-    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') })
-  }
-  )
+  group(groups[1], () => { // B03_Passport_02_EnterPassportDetailsAndContinue
+    timeRequest(() => {
+      res = group(groups[2].split('::')[1], () => timeRequest(() => // 01_CRICall
+        res.submitForm({
+          fields: {
+            passportNumber: userPassport.passportNumber,
+            surname: userPassport.surname,
+            firstName: userPassport.firstName,
+            middleNames: userPassport.middleName,
+            'dateOfBirth-day': userPassport.birthday,
+            'dateOfBirth-month': userPassport.birthmonth,
+            'dateOfBirth-year': userPassport.birthyear,
+            'expiryDate-day': userPassport.expiryDay,
+            'expiryDate-month': userPassport.expiryMonth,
+            'expiryDate-year': userPassport.expiryYear
+          },
+          params: { redirects: 2 },
+          submitSelector: '#continue'
+        }),
+      { isStatusCode302 }))
+      res = group(groups[3].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
+        http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
+      { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }))
+    }, {})
+  })
   iterationsCompleted.add(1)
 }
 

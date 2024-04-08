@@ -1,6 +1,6 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generateRequest } from './requestGenerator/spotReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
@@ -8,62 +8,16 @@ import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
-    spotScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '5m' } // Ramps up to target load
-      ],
-      exec: 'spotScenario'
-    }
+    ...createScenario('spot', LoadProfile.smoke)
   },
-  lowVolumeTest: {
-    spotScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 500,
-      stages: [
-        { target: 50, duration: '15m' }, // Ramp up to 50 iterations per second in 15 minutes
-        { target: 50, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 50 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'spotScenario'
-    }
+  lowVolume: {
+    ...createScenario('spot', LoadProfile.full, 50, 3)
   },
   load: {
-    spotScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5000,
-      stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'spotScenario'
-    }
+    ...createScenario('spot', LoadProfile.full, 100, 3)
   },
   stress: {
-    spotScenario: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 6000,
-      stages: [
-        { target: 2000, duration: '15m' }, // Ramp up to 2,000 iterations per second in 15 minutes
-        { target: 2000, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 2,000 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'spotScenario'
-    }
+    ...createScenario('spot', LoadProfile.full, 2000, 3)
   }
 }
 
@@ -94,7 +48,7 @@ const awsConfig = new AWSConfig({
 })
 const sqs = new SQSClient(awsConfig)
 
-export function spotScenario (): void {
+export function spot (): void {
   const currTime = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
   const payload = generateRequest(currTime)
 

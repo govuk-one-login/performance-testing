@@ -10,6 +10,17 @@ receivers:
       network:
 
 processors:
+  filter:
+    error_mode: ignore
+    metrics:
+      metric:
+        - 'name == "k6.http_req_blocked"'
+        - 'name == "k6.http_req_connecting"'
+        - 'name == "k6.http_req_tls_handshaking"'
+        - 'name == "k6.http_req_sending"'
+        - 'name == "k6.http_req_waiting"'
+        - 'name == "k6.http_req_receiving"'
+
   batch:
     send_batch_size: 1000
     send_batch_max_size: 1000
@@ -43,5 +54,5 @@ service:
   pipelines:
     metrics:
       receivers: [statsd, hostmetrics]
-      processors: [batch, metricstransform]
+      processors: [filter, batch, metricstransform]
       exporters: [otlphttp]

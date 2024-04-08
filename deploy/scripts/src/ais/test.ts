@@ -1,6 +1,6 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
@@ -15,84 +15,16 @@ import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
-    persistIV: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'persistIV'
-    },
-    retrieveIV: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'retrieveIV'
-    }
+    ...createScenario('persistIV', LoadProfile.smoke),
+    ...createScenario('retrieveIV', LoadProfile.smoke)
   },
-  lowVolumeTest: {
-    persistIV: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 150,
-      stages: [
-        { target: 30, duration: '15m' }, // Ramp up to 30 iterations/messages per second in 15 minutes
-        { target: 30, duration: '30m' }, // Maintain a steady state of 30 messages per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'persistIV'
-    },
-    retrieveIV: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 3000,
-      stages: [
-        { target: 1000, duration: '15m' }, // Ramp up to 1000 iterations per second in 15 minutes
-        { target: 1000, duration: '30m' }, // Maintain a steady state of 1000 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'retrieveIV'
-    }
+  lowVolume: {
+    ...createScenario('persistIV', LoadProfile.full, 30, 5),
+    ...createScenario('retrieveIV', LoadProfile.full, 1000, 3)
   },
   stress: {
-    persistIV: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 500,
-      stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations/messages per second in 15 minutes
-        { target: 100, duration: '30m' }, // Maintain a steady state of 100 messages per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'persistIV'
-    },
-    retrieveIV: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 17100,
-      stages: [
-        { target: 5700, duration: '15m' }, // Ramp up to 5700 iterations per second in 15 minutes
-        { target: 5700, duration: '30m' }, // Maintain a steady state of 5700 iterations per second for 30 minutes
-        { target: 0, duration: '5m' } // Total ramp down in 5 minutes
-      ],
-      exec: 'retrieveIV'
-    }
+    ...createScenario('persistIV', LoadProfile.full, 100, 5),
+    ...createScenario('retrieveIV', LoadProfile.full, 5700, 3)
   },
   dataCreation: {
     dataCreationForRetrieve: {

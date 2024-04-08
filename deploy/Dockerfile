@@ -24,13 +24,13 @@ RUN xk6 build v0.49.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --out
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.96.0 as otel
+FROM otel/opentelemetry-collector-contrib:0.97.0 as otel
 ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---
 # Run
 # ---
-FROM grafana/k6:0.49.0
+FROM grafana/k6:0.50.0
 COPY --from=k6-build /k6 /usr/bin/k6
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true

@@ -3,7 +3,7 @@ import encoding from 'k6/encoding'
 import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
-import { selectProfile, type ProfileList, describeProfile } from '../common/utils/config/load-profiles'
+import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
 // import { getStaticResources } from '../common/utils/request/static'
 import { timeRequest } from '../common/utils/request/timing'
 import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
@@ -18,162 +18,24 @@ import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
-    passport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'passport'
-    },
-    drivingLicence: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'drivingLicence'
-    },
-    idReuse: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 5,
-      stages: [
-        { target: 1, duration: '60s' } // Ramps up to target load
-      ],
-      exec: 'idReuse'
-    }
+    ...createScenario('passport', LoadProfile.smoke),
+    ...createScenario('drivingLicence', LoadProfile.smoke),
+    ...createScenario('idReuse', LoadProfile.smoke)
   },
   deployment: {
-    passport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 60,
-      stages: [
-        { target: 2, duration: '5m' }, // Ramp up to 2 iterations per second over 5 minutes
-        { target: 2, duration: '20m' }, // Steady State of 20 minutes at the ramp up load i.e. 2 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes
-      ],
-      exec: 'passport'
-    },
-    drivingLicence: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 60,
-      stages: [
-        { target: 2, duration: '5m' }, // Ramp up to 2 iterations per second over 5 minutes
-        { target: 2, duration: '20m' }, // Steady State of 20 minutes at the ramp up load i.e. 2 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes
-      ],
-      exec: 'drivingLicence'
-    },
-    idReuse: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 30,
-      stages: [
-        { target: 10, duration: '5m' }, // Ramp up to 10 iterations per second over 5 minutes
-        { target: 10, duration: '20m' }, // Steady State of 20 minutes at the ramp up load i.e. 10 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes
-      ],
-      exec: 'idReuse'
-    }
+    ...createScenario('passport', LoadProfile.deployment, 2),
+    ...createScenario('drivingLicence', LoadProfile.deployment, 2),
+    ...createScenario('idReuse', LoadProfile.deployment, 10)
   },
-  lowVolumeTest: {
-    passport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 3000,
-      stages: [
-        { target: 20, duration: '5m' }, // Ramp up to 20 iterations per second in 5 minutes
-        { target: 20, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 20 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'passport'
-    },
-    drivingLicence: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 3000,
-      stages: [
-        { target: 20, duration: '5m' }, // Ramp up to 20 iterations per second in 5 minutes
-        { target: 20, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 20 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'drivingLicence'
-    },
-    idReuse: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1,
-      maxVUs: 3000,
-      stages: [
-        { target: 20, duration: '5m' }, // Ramp up to 20 iterations per second in 5 minutes
-        { target: 20, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 20 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'idReuse'
-    }
+  lowVolume: {
+    ...createScenario('passport', LoadProfile.short, 20),
+    ...createScenario('drivingLicence', LoadProfile.short, 20),
+    ...createScenario('idReuse', LoadProfile.short, 20)
   },
   load: {
-    passport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1000,
-      maxVUs: 3000,
-      stages: [
-        { target: 100, duration: '15m' }, // Ramp up to 100 iterations per second in 15 minutes
-        { target: 100, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 100 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'passport'
-    },
-    drivingLicence: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1000,
-      maxVUs: 3000,
-      stages: [
-        { target: 30, duration: '30m' }, // Ramp up to 30 iterations per second in 30 minutes
-        { target: 30, duration: '15m' }, // Steady State of 15 minutes at the ramp up load i.e. 30 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'drivingLicence'
-    },
-    idReuse: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1000,
-      maxVUs: 9500,
-      stages: [
-        { target: 1900, duration: '15m' }, // Ramp up to 1,900 iterations per second in 15 minutes
-        { target: 1900, duration: '30m' }, // Steady State of 30 minutes at the ramp up load i.e. 1,900 iterations/second
-        { target: 0, duration: '5m' } // Ramp down duration of 5 minutes.
-      ],
-      exec: 'idReuse'
-    }
+    ...createScenario('passport', LoadProfile.full, 100),
+    ...createScenario('drivingLicence', LoadProfile.full, 30),
+    ...createScenario('idReuse', LoadProfile.full, 1900, 5)
   },
   dataCreationForIDReuse: {
     passport: {
@@ -322,7 +184,7 @@ export function passport (): void {
   sleepBetween(0.5, 1)
 
   res = group(groups[1], () => timeRequest(() => { // B01_Passport_02_GoToFullJourneyRoute
-    const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}`,
+    const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` }
       })
@@ -517,7 +379,7 @@ export function drivingLicence (): void {
   sleepBetween(0.5, 1)
 
   res = group(groups[1], () => timeRequest(() => { // B02_DrivingLicence_02_SelectUserIDContinue
-    const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}`,
+    const response = http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
       {
         headers: { Authorization: `Basic ${encodedCredentials}` }
       })
@@ -705,7 +567,7 @@ export function idReuse (): void {
   group(groups[0], () => { // B03_IDReuse_01_LoginToCore
     timeRequest(() => {
       res = group(groups[1].split('::')[1], () => timeRequest(() => // 01_OrchStub
-        http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${idReuseUserID.userID}&signInJourneyIdText=${signInJourneyId}&vtrText=P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${idReuseUserID.emailID}&votText=&jsonPayload=&evidenceJsonPayload=`,
+        http.get(env.orchStubEndPoint + `/authorize?journeyType=full&userIdText=${idReuseUserID.userID}&signInJourneyIdText=${signInJourneyId}&vtrText=P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${idReuseUserID.emailID}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
             redirects: 0

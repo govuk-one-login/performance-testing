@@ -2,6 +2,7 @@ export const passportPayload = JSON.stringify({
   passport: [
     {
       expiryDate: '2030-01-01',
+      icaoIssuerCode: 'GBR',
       documentNumber: '321654987'
     }
   ],

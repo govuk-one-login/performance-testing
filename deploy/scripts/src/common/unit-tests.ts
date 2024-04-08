@@ -1,6 +1,6 @@
 import { type JSONValue, check, group, sleep } from 'k6'
 import TOTP from './utils/authentication/totp'
-import { type Profile, type ProfileList, selectProfile } from './utils/config/load-profiles'
+import { type Profile, type ProfileList, selectProfile, createScenario, LoadProfile, type ScenarioList } from './utils/config/load-profiles'
 import { AWSConfig, SQSClient } from './utils/jslib/aws-sqs'
 import { findBetween, normalDistributionStages, randomIntBetween, randomItem, randomString, uuidv4 } from './utils/jslib'
 import { URL, URLSearchParams } from './utils/jslib/url'
@@ -12,6 +12,7 @@ import { type Selection } from 'k6/html'
 import { iterationsCompleted, iterationsStarted } from './utils/custom_metric/counter'
 import { type GroupMap, type Thresholds, getThresholds } from './utils/config/thresholds'
 import { getEnv } from './utils/config/environment-variables'
+import { type RampingArrivalRateScenario } from 'k6/options'
 
 export const options = {
   vus: 1,
@@ -85,49 +86,76 @@ export default (): void => {
   })
 
   group('config/load-profiles', () => {
-    const profiles: ProfileList = {
-      smoke: {
-        'scenario-1a': {
-          executor: 'constant-vus',
-          duration: '1s'
+    group('selectProfile()', () => {
+      const profiles: ProfileList = {
+        smoke: {
+          'scenario-1a': {
+            executor: 'constant-vus',
+            duration: '1s'
+          },
+          'scenario-1b': {
+            executor: 'shared-iterations'
+          }
         },
-        'scenario-1b': {
-          executor: 'shared-iterations'
-        }
-      },
-      stress: {
-        'scenario-2a': {
-          executor: 'ramping-vus',
-          stages: []
-        },
-        'scenario-2b': {
-          executor: 'externally-controlled',
-          duration: '2s'
-        },
-        'scenario-2c': {
-          executor: 'per-vu-iterations'
+        stress: {
+          'scenario-2a': {
+            executor: 'ramping-vus',
+            stages: []
+          },
+          'scenario-2b': {
+            executor: 'externally-controlled',
+            duration: '2s'
+          },
+          'scenario-2c': {
+            executor: 'per-vu-iterations'
+          }
         }
       }
-    }
 
-    const noFlags = selectProfile(profiles)
-    const profileOnly = selectProfile(profiles, { profile: 'stress' })
-    const singleScenario = selectProfile(profiles, { profile: 'smoke', scenario: 'scenario-1b' })
-    const multiScenario = selectProfile(profiles, { profile: 'stress', scenario: 'scenario-2a,scenario-2b' })
-    const scenarioAll = selectProfile(profiles, { profile: 'smoke', scenario: 'all' })
-    const scenarioBlank = selectProfile(profiles, { profile: 'stress', scenario: '' })
+      const noFlags = selectProfile(profiles)
+      const profileOnly = selectProfile(profiles, { profile: 'stress' })
+      const singleScenario = selectProfile(profiles, { profile: 'smoke', scenario: 'scenario-1b' })
+      const multiScenario = selectProfile(profiles, { profile: 'stress', scenario: 'scenario-2a,scenario-2b' })
+      const scenarioAll = selectProfile(profiles, { profile: 'smoke', scenario: 'all' })
+      const scenarioBlank = selectProfile(profiles, { profile: 'stress', scenario: '' })
 
-    function checkProfile (profile: Profile, name: string, scenarioCount: number): boolean {
-      return profile.name === name && Object.keys(profile.scenarios).length === scenarioCount
-    }
+      function checkProfile (profile: Profile, name: string, scenarioCount: number): boolean {
+        return profile.name === name && Object.keys(profile.scenarios).length === scenarioCount
+      }
 
-    check(null, {
-      'No Flags             ': () => checkProfile(noFlags, 'smoke', 2), // Default profile is smoke
-      'Profile Only         ': () => checkProfile(profileOnly, 'stress', 3), // All scenarios for given profile enabled
-      'Single Scenario      ': () => checkProfile(singleScenario, 'smoke', 1), // Only specified scenario enabled
-      'Multi Scenario       ': () => checkProfile(multiScenario, 'stress', 2), // Only specified scenarios enabled
-      'Scenario "all" String': () => checkProfile(scenarioAll, 'smoke', 2), // All scenarios enabled
-      'Scenario Empty String': () => checkProfile(scenarioBlank, 'stress', 3) // All scenarios enabled
+      check(null, {
+        'No Flags             ': () => checkProfile(noFlags, 'smoke', 2), // Default profile is smoke
+        'Profile Only         ': () => checkProfile(profileOnly, 'stress', 3), // All scenarios for given profile enabled
+        'Single Scenario      ': () => checkProfile(singleScenario, 'smoke', 1), // Only specified scenario enabled
+        'Multi Scenario       ': () => checkProfile(multiScenario, 'stress', 2), // Only specified scenarios enabled
+        'Scenario "all" String': () => checkProfile(scenarioAll, 'smoke', 2), // All scenarios enabled
+        'Scenario Empty String': () => checkProfile(scenarioBlank, 'stress', 3) // All scenarios enabled
+      })
+    })
+
+    group('createScenario()', () => {
+      const scenarios: ScenarioList = {
+        ...createScenario('scenario1', LoadProfile.smoke),
+        ...createScenario('scenario2', LoadProfile.smoke, 1),
+        ...createScenario('scenario3', LoadProfile.short, 20),
+        ...createScenario('scenario4', LoadProfile.full, 50, 10),
+        ...createScenario('scenario5', LoadProfile.deployment, 2, 40)
+      }
+
+      function checkScenario (exec: string, target: number, maxVUs: number): boolean {
+        const scenario = scenarios[exec] as RampingArrivalRateScenario
+        return scenario.exec === exec && // Exec function is named correctly
+          scenario.maxVUs === maxVUs && // Max VUs = Max throughput * max iteration duration
+          Math.max(...scenario.stages.map(s => s.target)) === target // Max thoughput target is correct
+      }
+
+      check(null, {
+        'Default target/duration': () => checkScenario('scenario1', 1, 1),
+        'Smoke load profile     ': () => checkScenario('scenario2', 1, 1),
+        'Short load profile     ': () => checkScenario('scenario3', 20, 600),
+        'Full load profile      ': () => checkScenario('scenario4', 50, 500),
+        'Deployment load profile': () => checkScenario('scenario5', 2, 80)
+      })
     })
   })
 

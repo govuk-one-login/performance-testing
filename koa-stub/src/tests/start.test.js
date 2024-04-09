@@ -9,6 +9,8 @@ const {
   DynamoDBClient,
   GetItemCommand,
 } = require("@aws-sdk/client-dynamodb");
+
+var expiry = new Date(); expiry.setDate(expiry.getDate()+1);
 const dynamoDB = new DynamoDBClient({});
 const dynamoDBMock = mockClient(dynamoDB);
 
@@ -18,7 +20,7 @@ dynamoDBMock.on(GetItemCommand).resolves({
   Item: {
     id: { S: "teststring" },
     state: { S: "teststring" },
-    expiry: { S: "1712667175.581" },
+    expiry: { S: `${expiry}` },
   },
 });
 

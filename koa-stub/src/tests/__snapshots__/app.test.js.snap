@@ -3,5 +3,3 @@
 exports[`Tests against the OIDC Servce The /callback endpoint returns 200 1`] = `{}`;
 
 exports[`Tests against the OIDC Servce The /test endpoint returns TestPage 1`] = `"TestPage"`;
-
-exports[`The /test endpoint returns TestPage 1`] = `"TestPage"`;

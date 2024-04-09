@@ -53,9 +53,6 @@ describe("Tests against the OIDC Servce", () => {
     expect(response.status).toBe(302);
     expect(response.text).toContain("authorize?");
     expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
-    // .redirects(0).then(res => {
-    //     console.log(res);
-    // })
   });
 
   test("The /callback endpoint returns 200", async () => {

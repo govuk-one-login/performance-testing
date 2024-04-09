@@ -59,7 +59,17 @@ koa-stub$ sam local start-api --env-vars example.json
 koa-stub$ curl http://localhost:3000/start
 ```
 
-### Unit tests
+### Deploy to an env
+
+To deploy to an env, for SSM parameters must be set:
+
+- CLIENT_ID: "{{resolve:ssm:StubClientId:1}}"
+- CLIENT_SECRET: "{{resolve:ssm:StubClientSecret:1}}"
+- OIDC_ENDPOINT: "{{resolve:ssm:StubOIDCEndpoint:1}}"
+- RESPONSE_ALG: "{{resolve:ssm:StubResponseAlgorithm:1}}"
+- CALLBACK_URL: "{{resolve:ssm:StubCallbackUrl:1}}"  # This unfortunately needs to be set to a holding value until after the first deployment.
+
+## Unit tests
 
 Tests are defined in the `src/test` folder in this project.
 

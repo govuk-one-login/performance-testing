@@ -22,12 +22,12 @@ Resources:
       MemorySize: 512
       Environment:
         Variables:
-          CLIENT_ID: "{{resolve:ssm:StubClientId:2}}"
-          CLIENT_SECRET: "{{resolve:ssm:StubClientSecret:2}}"
-          OIDC_ENDPOINT: "{{resolve:ssm:StubOIDCEndpoint:2}}"
-          RESPONSE_ALG: "{{resolve:ssm:StubResponseAlgorithm:2}}"
+          CLIENT_ID: "{{resolve:ssm:StubClientId:1}}"
+          CLIENT_SECRET: "{{resolve:ssm:StubClientSecret:1}}"
+          OIDC_ENDPOINT: "{{resolve:ssm:StubOIDCEndpoint:1}}"
+          RESPONSE_ALG: "{{resolve:ssm:StubResponseAlgorithm:1}}"
+          CALLBACK_URL: "{{resolve:ssm:StubCallbackUrl:1}}"  # This unfortunately needs to be set manually after first deploy.
           SESSION_TABLE: !Ref SessionTable
-          CALLBACK_URL: "https://ii196un2th.execute-api.eu-west-2.amazonaws.com/prod/callback"  # This unfortunately needs to be set manually after first deploy.
       Events:
         KoaFunctionProxy:
           Type: Api

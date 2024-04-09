@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  ExpressApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      BinaryMediaTypes: ['*/*']
+      
+  KoaFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: src/
+      Handler: serverless.handler
+      Runtime: nodejs20.x
+      MemorySize: 512
+      Environment:
+        Variables:
+          CLIENT_ID: "{{resolve:ssm:StubClientId:2}}"
+          CLIENT_SECRET: "{{resolve:ssm:StubClientSecret:2}}"
+          OIDC_ENDPOINT: "{{resolve:ssm:StubOIDCEndpoint:2}}"
+          RESPONSE_ALG: "{{resolve:ssm:StubResponseAlgorithm:2}}"
+          SESSION_TABLE: !Ref SessionTable
+          CALLBACK_URL: "https://ii196un2th.execute-api.eu-west-2.amazonaws.com/prod/callback"  # This unfortunately needs to be set manually after first deploy.
+      Events:
+        KoaFunctionProxy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExpressApi
+            Path: "/{proxy+}"
+            Method: ANY
+        KoaFunctionRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExpressApi
+            Path: "/"
+            Method: ANY
+    Connectors:
+      SessionsTableConnection:
+        Properties:
+          Destination:
+            Id: SessionTable
+          Permissions:
+            - Write
+            - Read
+  SessionTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-SessionTable"
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: expiry
+        Enabled: True
+
+Outputs:
+  KoaFunctiondApi:
+    Description: "API Gateway endpoint URL for Prod stage for Express function"
+    Value: !Sub "https://${ExpressApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"
+  KoaFunction:
+    Description: "Express Lambda Function ARN"
+    Value: !GetAtt KoaFunction.Arn
+  KoaFunctionIamRole:
+    Description: "Implicit IAM Role created for Express function"
+    Value: !GetAtt KoaFunctionRole.Arn

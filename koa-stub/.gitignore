@@ -1,0 +1,3 @@
+.aws-sam/
+src/node_modules/
+andy.json

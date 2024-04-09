@@ -27,19 +27,18 @@ dynamoDBMock.on(GetItemCommand).resolves({
 const { OAuth2Server } = require("oauth2-mock-server");
 const { setupClient } = require("../utils/onelogin.util");
 
-let server = new OAuth2Server();
-var testSession = null;
+let oidc_server = new OAuth2Server();
 
 beforeAll(async () => {
-  await server.start(8080, "localhost");
-  console.log("Issuer URL:", server.issuer.url);
-  process.env.OIDC_ENDPOINT = server.issuer.url;
+  await oidc_server.start(8080, "localhost");
+  console.log("Issuer URL:", oidc_server.issuer.url);
+  process.env.OIDC_ENDPOINT = oidc_server.issuer.url;
   process.env.SESSION_TABLE = "SessionTable";
   process.env.RESPONSE_ALG = "RS256";
   process.env.CLIENT_ID = "testclient";
   process.env.CLIENT_SECRET = "testsecret";
   // Generate a new RSA key and add it to the keystore
-  server.issuer.keys.generate(process.env.RESPONSE_ALG);
+  oidc_server.issuer.keys.generate(process.env.RESPONSE_ALG);
   // Setup the OIDC client
   app.context.ddbClient = dynamoDBMock;
   app.context.oneLogin = await setupClient();
@@ -80,5 +79,5 @@ describe("Tests against the OIDC Servce", () => {
 });
 
 afterAll(async () => {
-  await server.stop();
+  await oidc_server.stop();
 });

@@ -45,8 +45,10 @@ koa-stub$ aws dynamodb create-table --table-name SessionTable --attribute-defini
 
 Then, in a separate terminal create your SessionTable:
 ```bash
-koa-stub$ node ./src/test-oidc.js
-Issuer URL: http://localhost:8000
+koa-stub$ npx oauth2-mock-server
+Generated new RSA key with kid "7ea4a872d0360ed571aee8b216313c91753601cae3bc2f15751840c1d463fda58af017a2ac575ba3"
+OAuth 2 server listening on http://[::]:8080
+OAuth 2 issuer is http://localhost:8080
 ```
 Press ctrl-c to exit this server when you've finished with it.
 ##### Local API using SAM

@@ -1,6 +1,6 @@
 const { PutItemCommand } = require("@aws-sdk/client-dynamodb");
 const { generators } = require("openid-client");
-var crypto = require('crypto')
+const crypto = require('crypto')
 
 
 async function createSession(ctx) {
@@ -8,7 +8,7 @@ async function createSession(ctx) {
     const session = (Math.random() + 1).toString(36).substring(7);
     // Read this into a hash from session state long term, small hack to get this working as not touching prod data.    
     const state = crypto.createHash('md5').update(session).digest('hex');
-    var expiry = new Date(); expiry.setDate(expiry.getDate()+1);
+    const expiry = new Date(); expiry.setDate(expiry.getDate()+1);
     const input = {
         TableName: process.env.SESSION_TABLE,
         Item: {

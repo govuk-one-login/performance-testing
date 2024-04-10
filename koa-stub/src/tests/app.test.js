@@ -1,5 +1,4 @@
 const { expect } = require("expect");
-globalThis.expect = expect;
 require("aws-sdk-client-mock-jest");
 const request = require("supertest");
 const app = require("../app");
@@ -10,7 +9,7 @@ const {
   GetItemCommand,
 } = require("@aws-sdk/client-dynamodb");
 
-var expiry = new Date(); expiry.setDate(expiry.getDate()+1);
+const expiry = new Date(); expiry.setDate(expiry.getDate()+1);
 const dynamoDB = new DynamoDBClient({});
 const dynamoDBMock = mockClient(dynamoDB);
 
@@ -27,7 +26,7 @@ dynamoDBMock.on(GetItemCommand).resolves({
 const { OAuth2Server } = require("oauth2-mock-server");
 const { setupClient } = require("../utils/onelogin.util");
 
-let oidc_server = new OAuth2Server();
+const oidc_server = new OAuth2Server();
 
 beforeAll(async () => {
   await oidc_server.start(8080, "localhost");

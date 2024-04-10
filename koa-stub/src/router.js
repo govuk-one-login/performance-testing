@@ -10,9 +10,10 @@ router.use(cookie.default());
 router.get("/start", setNonceAndRedirect);
 router.get("/callback", processCallback);
 router.get("/logout", rpInitiateLogout);
-router.get("/test", (ctx, next) => {
+router.get("/test", (ctx) => {
     ctx.status = 200,
     ctx.body = "TestPage"
-})
+    }
+)
 
 module.exports = router;

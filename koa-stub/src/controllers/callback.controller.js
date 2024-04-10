@@ -17,7 +17,7 @@ async function checkUserStateAgainstDB(ctx, nonce, state) {
     console.log(JSON.stringify(dbresponse))
     // RP Check that the user is who they say they are.
     if (dbresponse.Item) {
-        console.log(dbresponse.Item.state.S == state)
+        console.log(dbresponse.Item.state.S === state)
         console.log("Yay! Correct state.")
     }
 }

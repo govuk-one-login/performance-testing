@@ -150,7 +150,7 @@ export function CIC (): void {
       code: codeUrl,
       redirect_uri: env.CIC.ipvStub + '/redirect'
     }),
-  { isStatusCode200, 'verify response body': (r) => (r.body as string).includes('access_token') }))
+  { isStatusCode200, ...pageContentCheck('access_token') }))
 
   const accessToken = getAccessToken(res)
 
@@ -162,7 +162,7 @@ export function CIC (): void {
   }
   res = group(groups[6], () => timeRequest(() => // B01_CIC_07_SendBearerToken
     http.post(env.CIC.target + '/userinfo', {}, options),
-  { isStatusCode200, 'verify response body': (r) => (r.body as string).includes('credentialJWT') }))
+  { isStatusCode200, ...pageContentCheck('credentialJWT') }))
   iterationsCompleted.add(1)
 }
 

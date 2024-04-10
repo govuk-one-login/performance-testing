@@ -151,7 +151,7 @@ export function changeEmail (): void {
 
   res = group(groups[1], () => timeRequest(() => // B01_ChangeEmail_02_ClickSecurityTab
     http.get(env.envURL + '/security'),
-  { isStatusCode200, 'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login') }))
+  { isStatusCode200, ...pageContentCheck('Delete your GOV.UK One Login') }))
 
   sleepBetween(1, 3)
 
@@ -224,7 +224,7 @@ export function changePassword (): void {
 
   res = group(groups[1], () => timeRequest(() => // B02_ChangePassword_02_ClickSecurityTab
     http.get(env.envURL + '/security'),
-  { isStatusCode200, 'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login') }))
+  { isStatusCode200, ...pageContentCheck('Delete your GOV.UK One Login') }))
 
   sleepBetween(1, 3)
 
@@ -285,7 +285,7 @@ export function changePhone (): void {
 
   res = group(groups[1], () => timeRequest(() => // B03_ChangePhone_02_ClickSecurityTab
     http.get(env.envURL + '/security'),
-  { isStatusCode200, 'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login') }))
+  { isStatusCode200, ...pageContentCheck('Delete your GOV.UK One Login') }))
 
   sleepBetween(1, 3)
 
@@ -360,7 +360,7 @@ export function deleteAccount (): void {
 
   res = group(groups[1], () => timeRequest(() => // B04_DeleteAccount_02_ClickSecurityTab
     http.get(env.envURL + '/security'),
-  { isStatusCode200, 'verify page content': r => (r.body as string).includes('Delete your GOV.UK One Login') }))
+  { isStatusCode200, ...pageContentCheck('Delete your GOV.UK One Login') }))
 
   sleepBetween(1, 3)
 
@@ -408,7 +408,7 @@ export function validateUser (): void {
         supportInternationalNumbers: 'true'
       }
     }),
-  { isStatusCode200, 'verify page content': r => (r.body as string).includes('Enter your email address to sign in to your GOV.UK One Login') }))
+  { isStatusCode200, ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login') }))
 
   sleepBetween(1, 3)
 
@@ -416,7 +416,7 @@ export function validateUser (): void {
     res.submitForm({
       fields: { email: userData.email }
     }),
-  { isStatusCode200, 'verify page content': r => (r.body as string).includes('Enter your password') }))
+  { isStatusCode200, ...pageContentCheck('Enter your password') }))
 
   sleepBetween(1, 3)
 
@@ -427,7 +427,7 @@ export function validateUser (): void {
         res.submitForm({
           fields: { password: credentials.currPassword }
         }),
-      { isStatusCode200, 'verify page content': r => (r.body as string).includes('Enter the 6 digit security code shown in your authenticator app') }))
+      { isStatusCode200, ...pageContentCheck('Enter the 6 digit security code shown in your authenticator app') }))
 
       sleepBetween(1, 3)
 
@@ -447,7 +447,7 @@ export function validateUser (): void {
         res.submitForm({
           fields: { password: credentials.currPassword }
         }),
-      { isStatusCode200, 'verify page content': r => (r.body as string).includes('Check your phone') }))
+      { isStatusCode200, ...pageContentCheck('Check your phone') }))
 
       sleep(1)
 
@@ -468,7 +468,7 @@ export function validateUser (): void {
       res.submitForm({
         fields: { termsAndConditionsResult: 'accept' }
       }),
-    { isStatusCode200, 'verify page content': r => (r.body as string).includes('Services you can use with GOV.UK One Login') }))
+    { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }))
   }
 
   // Wait for end of the next 5 second window to synchronise requests across VUs
@@ -477,7 +477,7 @@ export function validateUser (): void {
   for (let i = 0; i < 5; i++) {
     res = group(groups[8], () => timeRequest(() => // B05_ValidateUser_09_ClickSecurityTab
       http.get(env.envURL + '/security'),
-    { isStatusCode200, 'verify current email address': r => (r.body as string).includes(`${userData.email}`) }))
+    { isStatusCode200, ...pageContentCheck(`${userData.email}`) }))
   }
 
   sleepBetween(1, 3)
@@ -486,7 +486,7 @@ export function validateUser (): void {
     res.submitForm({
       formSelector: "form[action='/sign-out']"
     }),
-  { isStatusCode200, 'verify page content': r => (r.body as string).includes('You have signed out') }))
+  { isStatusCode200, ...pageContentCheck('You have signed out') }))
   iterationsCompleted.add(1)
 }
 

@@ -30,41 +30,6 @@ jobs:
   #       # Force to fail step after specific time
   #       timeout-minutes: 5
 
-  sam-validate:
-    permissions:
-      id-token: write
-      contents: read
-    name: SAM Validate
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: koa-stub/
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.PERF_GH_ACTIONS_ROLE_ARN }}
-
-      - name: Check out repository code
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-
-      - name: Setup nodeJS v20
-        uses: actions/setup-node@v3
-        with:
-          node-version:  0
-      - name: Setup SAM CLI
-        uses: aws-actions/setup-sam@v2
-        with:
-          use-installer: true
-      - name: SAM Validate
-        run: |
-          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          sam validate --lint
-
   run-unit-tests:
     permissions:
       id-token: write

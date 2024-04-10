@@ -275,7 +275,7 @@ export function fraud (): void {
     timeRequest(() => {
       res = group(groups[4].split('::')[1], () => timeRequest(() => // 01_CRICall
         res.submitForm({ params: { redirects: 1 }, submitSelector: '#continue' }), { isStatusCode302 }))
-      res = group(groups[5].split('::')[3], () => timeRequest(() => // 02_CoreStubCall
+      res = group(groups[5].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
         http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
       { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }))
     }, {})

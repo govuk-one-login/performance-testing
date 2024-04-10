@@ -29,11 +29,11 @@ Resources:
       ReservedConcurrentExecutions: 200
       Environment:
         Variables:
-          CLIENT_ID: "{{resolve:ssm:StubClientId:1}}"
-          CLIENT_SECRET: "{{resolve:ssm-secure:StubClientSecret:1}}"
-          OIDC_ENDPOINT: "{{resolve:ssm:StubOIDCEndpoint:1}}"
-          RESPONSE_ALG: "{{resolve:ssm:StubResponseAlgorithm:1}}"
-          CALLBACK_URL: "{{resolve:ssm:StubCallbackUrl:1}}"  # This unfortunately needs to be set manually after first deploy.
+          CLIENT_ID: "{{resolve:ssm:StubClientId}}"
+          CLIENT_SECRET: "{{resolve:ssm-secure:StubClientSecret}}"
+          OIDC_ENDPOINT: "{{resolve:ssm:StubOIDCEndpoint}}"
+          RESPONSE_ALG: "{{resolve:ssm:StubResponseAlgorithm}}"
+          CALLBACK_URL: "{{resolve:ssm:StubCallbackUrl}}"  # This unfortunately needs to be set manually after first deploy.
           SESSION_TABLE: !Ref SessionTable
       Events:
         KoaFunctionProxy:

@@ -2,9 +2,51 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
 
+Parameters:
+  CodeSigningConfigArn:
+    Type: String
+    Default: "none"
+    Description: >
+      The ARN of the Code Signing Config to use, provided by the deployment pipeline
+  Environment:
+    Description: "The environment type"
+    Type: "String"
+    Default: dev
+    AllowedValues:
+      - "dev"
+      - "build"
+      - "staging"
+    ConstraintDescription: only dev, build and staging setup for perf stacks.
+  PermissionsBoundary:
+    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
+    Type: String
+    Default: "none"
+
+Conditions:
+  UseCodeSigning:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref CodeSigningConfigArn
+          - "none"
+  UsePermissionsBoundary:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref PermissionsBoundary
+          - "none"
+
 Globals:
   Function:
+    AutoPublishAlias: live
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
     Timeout: 10
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
+
 
 Resources:
   ExpressApi:
@@ -35,6 +77,10 @@ Resources:
           RESPONSE_ALG: "{{resolve:ssm:StubResponseAlgorithm}}"
           CALLBACK_URL: "{{resolve:ssm:StubCallbackUrl}}"  # This unfortunately needs to be set manually after first deploy.
           SESSION_TABLE: !Ref SessionTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref SessionTable
       Events:
         KoaFunctionProxy:
           Type: Api
@@ -48,14 +94,7 @@ Resources:
             RestApiId: !Ref ExpressApi
             Path: "/"
             Method: ANY
-    Connectors:
-      SessionsTableConnection:
-        Properties:
-          Destination:
-            Id: SessionTable
-          Permissions:
-            - Write
-            - Read
+
   KoaFunctionLogGroup:
     #checkov:skip=CKV_AWS_158:This log group will not contain sensitive content.
     Type: AWS::Logs::LogGroup

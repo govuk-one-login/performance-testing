@@ -46,7 +46,7 @@ koa-stub$ aws dynamodb create-table --table-name SessionTable --attribute-defini
 Then, in a separate terminal create your SessionTable:
 ```bash
 koa-stub$ npx oauth2-mock-server
-Generated new RSA key with kid "7ea4a872d0360ed571aee8b216313c91753601cae3bc2f15751840c1d463fda58af017a2ac575ba3"
+Generated new RSA key with kid "..."
 OAuth 2 server listening on http://[::]:8080
 OAuth 2 issuer is http://localhost:8080
 ```

@@ -1,7 +1,7 @@
 {
   "KoaFunction": {
     "CLIENT_ID": "testclient",
-    "CLIENT_SECRET": "testsecret",
+    "CLIENT_SECRET": "testsecret", // `pragma: allowlist secret`
     "OIDC_ENDPOINT": "https://localhost:8000/.well-known/openid-configuration",
     "RESPONSE_ALG": "ES256",
     "SESSION_TABLE": "SessionTable"

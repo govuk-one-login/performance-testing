@@ -35,7 +35,7 @@ beforeAll(async () => {
   process.env.SESSION_TABLE = "SessionTable";
   process.env.RESPONSE_ALG = "RS256";
   process.env.CLIENT_ID = "testclient";
-  process.env.CLIENT_SECRET = "testsecret";
+  process.env.CLIENT_SECRET = "testsecret"; // `pragma: allowlist secret`
   // Generate a new RSA key and add it to the keystore
   oidc_server.issuer.keys.generate(process.env.RESPONSE_ALG);
   // Setup the OIDC client

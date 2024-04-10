@@ -73,11 +73,15 @@ jobs:
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
           sam validate --lint
+      - name: SAM Validate
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          sam build
       - name: Deploy SAM app
         uses: govuk-one-login/devplatform-upload-action@3.5
         with:
           artifact-bucket-name: ${{ secrets.PERF_STUB_ARTIFACT_SOURCE_BUCKET_NAME }}
-          signing-profile-name: ${{ secrets.SIGNING_PROFILE_NAME }}
+          signing-profile-name: ${{ secrets.PERF_STUB_SIGNING_PROFILE_NAME }}
           working-directory: ./koa-stub
           template-file: template.yaml
 

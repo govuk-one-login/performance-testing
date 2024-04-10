@@ -25,8 +25,10 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  addressScenario1: [
+  address: [
     'B02_Address_01_AddressCRIEntryFromStub',
+    'B02_Address_01_AddressCRIEntryFromStub::01_CoreStubCall',
+    'B02_Address_01_AddressCRIEntryFromStub::02_AddCRICall',
     'B02_Address_02_SearchPostCode',
     'B02_Address_03_SelectAddress',
     'B02_Address_04_VerifyAddress',
@@ -59,22 +61,26 @@ const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
 })
 
 export function address (): void {
-  const groups = groupMap.addressScenario1
+  const groups = groupMap.address
   let res: Response
   const user1Address = csvData1[exec.scenario.iterationInTest % csvData1.length]
   iterationsStarted.add(1)
 
-  res = group(groups[0], () => timeRequest(() => // B02_Address_01_AddressCRIEntryFromStub
-    http.get(
-      env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName,
-      {
-        headers: { Authorization: `Basic ${encodedCredentials}` }
-      }),
-  { isStatusCode200, ...pageContentCheck('Find your address') }))
+  group(groups[0], () => { // B02_Address_01_AddressCRIEntryFromStub
+    timeRequest(() => {
+      res = group(groups[1].split('::')[1], () => timeRequest(() => // 01_CoreStubCall
+        http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
+          redirects: 0,
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }), { isStatusCode302 }))
+      res = group(groups[2].split('::')[1], () => timeRequest(() => // 02_AddCRICall
+        http.get(res.headers.Location), { isStatusCode200, ...pageContentCheck('Find your address') }))
+    }, {})
+  })
 
   sleepBetween(1, 3)
 
-  res = group(groups[1], () => timeRequest(() => // B02_Address_02_SearchPostCode
+  res = group(groups[3], () => timeRequest(() => // B02_Address_02_SearchPostCode
     res.submitForm({
       fields: { addressSearch: user1Address.postcode },
       submitSelector: '#continue'
@@ -83,7 +89,7 @@ export function address (): void {
 
   const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found')
 
-  res = group(groups[2], () => timeRequest(() => // B02_Address_03_SelectAddress
+  res = group(groups[4], () => timeRequest(() => // B02_Address_03_SelectAddress
     res.submitForm({
       fields: { addressResults: fullAddress },
       submitSelector: '#continue'
@@ -92,7 +98,7 @@ export function address (): void {
 
   sleepBetween(1, 3)
 
-  res = group(groups[3], () => timeRequest(() => // B02_Address_04_VerifyAddress
+  res = group(groups[5], () => timeRequest(() => // B02_Address_04_VerifyAddress
     res.submitForm({
       fields: { addressYearFrom: '2021' },
       submitSelector: '#continue'
@@ -101,11 +107,11 @@ export function address (): void {
 
   sleepBetween(1, 3)
 
-  group(groups[4], () => { // B02_Address_05_ConfirmDetails
+  group(groups[6], () => { // B02_Address_05_ConfirmDetails
     timeRequest(() => {
-      res = group(groups[5].split('::')[1], () => timeRequest(() => // 01_AddCRICall
+      res = group(groups[7].split('::')[1], () => timeRequest(() => // 01_AddCRICall
         res.submitForm({ params: { redirects: 1 } }), { isStatusCode302 }))
-      res = group(groups[6].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
+      res = group(groups[8].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
         http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
       { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }))
     }, {})

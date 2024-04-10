@@ -1,4 +1,4 @@
-name: Kob StubPre-Merge Lint & Unit Test
+name: Kob Stub Pre-Merge Lint & Unit Test
 
 on:
   pull_request:
@@ -29,7 +29,7 @@ jobs:
         # Force to fail step after specific time
         timeout-minutes: 5
 
-  run-unit-tests:
+  sam-validate:
     permissions:
       id-token: write
       contents: read
@@ -50,6 +50,35 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
+    
+      - name: Setup nodeJS v20
+        uses: actions/setup-node@v3
+        with:
+          node-version:  0
+      - name: Setup SAM CLI
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+      - name: SAM Validate
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          sam validate --lint
+      
+  run-unit-tests:
+    permissions:
+      id-token: write
+      contents: read
+    name: Lint and Unit Tests; SAM Validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: koa-stub/
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup nodeJS v20
         uses: actions/setup-node@v3
@@ -63,13 +92,3 @@ jobs:
       - name: Run unit tests
         run: npm run test
         working-directory: koa-stub/src/
-    
-      - name: Setup SAM CLI
-        uses: aws-actions/setup-sam@v2
-        with:
-          use-installer: true
-
-      - name: SAM Validate
-        run: |
-          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          sam validate

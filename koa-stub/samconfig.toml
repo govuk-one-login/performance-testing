@@ -1,0 +1,8 @@
+version = 0.1
+[dev.deploy.parameters]
+stack_name = "koa-perf-stub"
+resolve_s3 = true
+s3_prefix = "koa-perf-stub"
+region = "eu-west-2"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []

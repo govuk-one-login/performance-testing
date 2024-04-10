@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+
+Parameters:
+  CodeSigningConfigArn:
+    Type: String
+    Default: "none"
+    Description: >
+      The ARN of the Code Signing Config to use, provided by the deployment pipeline
+  Environment:
+    Description: "The environment type"
+    Type: "String"
+    Default: dev
+    AllowedValues:
+      - "dev"
+      - "build"
+      - "staging"
+    ConstraintDescription: only dev, build and staging setup for perf stacks.
+  PermissionsBoundary:
+    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
+    Type: String
+    Default: "none"
+
+Conditions:
+  UseCodeSigning:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref CodeSigningConfigArn
+          - "none"
+  UsePermissionsBoundary:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref PermissionsBoundary
+          - "none"
+
+Globals:
+  Function:
+    AutoPublishAlias: live
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
+    Timeout: 10
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
+
+
+Resources:
+  ExpressApi:
+    #checkov:skip=CKV_AWS_73:Avoiding x-ray tracing for performance reasons
+    #checkov:skip=CKV_AWS_76:Avoiding access logging for performance reasons
+    #checkov:skip=CKV_AWS_120:Avoiding cache for cost reasons.
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      BinaryMediaTypes: ['*/*']
+
+  KoaFunction:
+    Type: AWS::Serverless::Function
+    #checkov:skip=CKV_AWS_173:This lambda function is not storing sensitive secrets, KMS cost not being incurred.
+    #checkov:skip=CKV_AWS_116:Lambda configured sync behind API Gatewya, no DLQ needed.
+    #checkov:skip=CKV_AWS_117:Lambda not processing sensitive data, wanting to avoid network congestion so using AWS networking layer.s
+    Properties:
+      CodeUri: src/
+      Handler: serverless.handler
+      Runtime: nodejs20.x
+      MemorySize: 512
+      ReservedConcurrentExecutions: 200
+      Environment:
+        Variables:
+          CLIENT_ID: "{{resolve:ssm:StubClientId}}"
+          CLIENT_SECRET: "{{resolve:ssm:StubClientSecret}}"
+          OIDC_ENDPOINT: "{{resolve:ssm:StubOIDCEndpoint}}"
+          RESPONSE_ALG: "{{resolve:ssm:StubResponseAlgorithm}}"
+          CALLBACK_URL: "{{resolve:ssm:StubCallbackUrl}}"  # This unfortunately needs to be set manually after first deploy.
+          SESSION_TABLE: !Ref SessionTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref SessionTable
+      Events:
+        KoaFunctionProxy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExpressApi
+            Path: "/{proxy+}"
+            Method: ANY
+        KoaFunctionRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExpressApi
+            Path: "/"
+            Method: ANY
+
+  KoaFunctionLogGroup:
+    #checkov:skip=CKV_AWS_158:This log group will not contain sensitive content.
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub "/aws/lambda/${KoaFunction}"
+  SessionTable:
+    #checkov:skip=CKV_AWS_28:This table contains transient data.
+    #checkov:skip=CKV_AWS_119:This table contains transient data that isn't sensitive.
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-SessionTable"
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: expiry
+        Enabled: True
+
+Outputs:
+  KoaFunctiondApi:
+    Description: "API Gateway endpoint URL for Prod stage for Express function"
+    Value: !Sub "https://${ExpressApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"
+  KoaFunction:
+    Description: "Express Lambda Function ARN"
+    Value: !GetAtt KoaFunction.Arn
+  KoaFunctionIamRole:
+    Description: "Implicit IAM Role created for Express function"
+    Value: !GetAtt KoaFunctionRole.Arn

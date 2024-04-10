@@ -1,0 +1,64 @@
+name: Kob Stub Pre-Merge Lint & Unit Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'koa-stub/**'
+
+jobs:
+  # Sonar is enabled through SaaS Integration, so workflow checks not needed to be explicit
+  # sonarcloud:
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   name: "Sonar Cloud Scan"
+  #   runs-on: "ubuntu-latest"
+  #   steps:
+  #     - name: "Checkout code"
+  #       uses: "actions/checkout@v4"
+  #       with:
+  #         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+  #     - name: "Run SonarCloud Scan"
+  #       if: ${{ success() }}
+  #       uses: SonarSource/sonarcloud-github-action@master
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: SonarQube Quality Gate check
+  #       uses: sonarsource/sonarqube-quality-gate-action@master
+  #       # Force to fail step after specific time
+  #       timeout-minutes: 5
+
+  run-unit-tests:
+    permissions:
+      id-token: write
+      contents: read
+    name: Lint and Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: koa-stub/
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup nodeJS v20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: koa-stub/src/
+
+      - name: Run eslint
+        run: npm run lint
+        working-directory: koa-stub/src/
+
+      - name: Run unit tests
+        run: npm run test
+        working-directory: koa-stub/src/

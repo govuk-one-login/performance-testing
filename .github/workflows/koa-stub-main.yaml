@@ -1,0 +1,90 @@
+name: Koa Stub Deploy
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - 'koa-stub/**'
+
+jobs:
+  run-unit-tests:
+    permissions:
+      id-token: write
+      contents: read
+    name: Lint and Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: koa-stub/
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup nodeJS v20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: koa-stub/src/
+
+      - name: Run eslint
+        run: npm run lint
+        working-directory: koa-stub/src/
+
+      - name: Run unit tests
+        run: npm run test
+        working-directory: koa-stub/src/
+  sam-validate:
+    permissions:
+      id-token: write
+      contents: read
+    name: SAM Validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: koa-stub/
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.PERF_GH_ACTIONS_ROLE_ARN }}
+
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup nodeJS v20
+        uses: actions/setup-node@v3
+        with:
+          node-version:  0
+      - name: Setup SAM CLI
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+      - name: SAM Validate
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          sam validate --lint
+      - name: SAM Validate
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          sam build
+      - name: Deploy SAM app
+        uses: govuk-one-login/devplatform-upload-action@v3.5
+        with:
+          artifact-bucket-name: ${{ secrets.PERF_STUB_ARTIFACT_SOURCE_BUCKET_NAME }}
+          signing-profile-name: ${{ secrets.PERF_STUB_SIGNING_PROFILE_NAME }}
+          working-directory: ./koa-stub
+          template-file: template.yaml
+
+

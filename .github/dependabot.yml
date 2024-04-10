@@ -19,3 +19,8 @@ updates:
     directory: "/deploy"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "npm"
+    directory: "/koa-stub/src"
+    schedule:
+      interval: "weekly"

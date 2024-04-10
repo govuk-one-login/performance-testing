@@ -1,0 +1,8 @@
+{
+  "KoaFunction": {
+    "CLIENT_ID": "testclient",
+    "OIDC_ENDPOINT": "https://localhost:8000/.well-known/openid-configuration",
+    "RESPONSE_ALG": "ES256",
+    "SESSION_TABLE": "SessionTable"
+  }
+}

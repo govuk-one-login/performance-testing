@@ -26,7 +26,7 @@ async function handleCallbackAndGetTokenSet(ctx, nonce, state) {
     const params = ctx.oneLogin.callbackParams(ctx.request)
     // Checks existing tokens for
     const tokenSet = await ctx.oneLogin.callback(
-        process.env.CALLBACK_URL,
+        `${process.env.CALLBACK_URL}`,
         params,
         {
             'nonce': nonce,

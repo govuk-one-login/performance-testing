@@ -3,8 +3,11 @@ name: Pre-Merge Lint & Unit Test
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths-ignore:
+      - 'koa-stub/**'
   merge_group:
   workflow_dispatch:
+  
 
 defaults:
   run:

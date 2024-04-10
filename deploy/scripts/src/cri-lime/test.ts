@@ -263,7 +263,7 @@ export function fraud (): void {
           }
         ),
       { isStatusCode302 }))
-      res = group(groups[2].split('::')[0], () => timeRequest(() => // 01_CRICall
+      res = group(groups[2].split('::')[1], () => timeRequest(() => // 01_CRICall
         http.get(res.headers.Location),
       { isStatusCode200, ...pageContentCheck('We need to check your details') }))
     }, {})

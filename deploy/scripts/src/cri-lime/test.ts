@@ -66,6 +66,8 @@ const loadProfile = selectProfile(profiles)
 const groupMap = {
   fraud: [
     'B01_Fraud_01_CoreStubEditUserContinue',
+    'B01_Fraud_01_CoreStubEditUserContinue::01_CoreStubCall',
+    'B01_Fraud_01_CoreStubEditUserContinue::02_CRICall',
     'B01_Fraud_02_ContinueToCheckFraudDetails',
     'B01_Fraud_02_ContinueToCheckFraudDetails::01_CRICall',
     'B01_Fraud_02_ContinueToCheckFraudDetails::02_CoreStubCall'
@@ -219,53 +221,61 @@ export function fraud (): void {
   const encodedCredentials = encoding.b64encode(credentials)
   iterationsStarted.add(1)
 
-  res = group(groups[0], () => timeRequest(() => // B01_Fraud_01_CoreStubEditUserContinue
-    http.post(
-      env.ipvCoreStub + '/edit-user',
-      {
-        cri: `fraud-cri-${env.envName}`,
-        rowNumber: '197',
-        firstName: userDetails.firstName,
-        surname: userDetails.lastName,
-        'dateOfBirth-day': `${userDetails.day}`,
-        'dateOfBirth-month': `${userDetails.month}`,
-        'dateOfBirth-year': `${userDetails.year}`,
-        buildingNumber: `${userDetails.buildNum}`,
-        buildingName: userDetails.buildName,
-        street: userDetails.street,
-        townCity: userDetails.city,
-        postCode: userDetails.postCode,
-        validFromDay: '26',
-        validFromMonth: '02',
-        validFromYear: '2021',
-        validUntilDay: '',
-        validUntilMonth: '',
-        validUntilYear: '',
-        'SecondaryUKAddress.buildingNumber': '',
-        'SecondaryUKAddress.buildingName': '',
-        'SecondaryUKAddress.street': '',
-        'SecondaryUKAddress.townCity': '',
-        'SecondaryUKAddress.postCode': '',
-        'SecondaryUKAddress.validFromDay': '',
-        'SecondaryUKAddress.validFromMonth': '',
-        'SecondaryUKAddress.validFromYear': '',
-        'SecondaryUKAddress.validUntilDay': '',
-        'SecondaryUKAddress.validUntilMonth': '',
-        'SecondaryUKAddress.validUntilYear': ''
-      },
-      {
-        headers: { Authorization: `Basic ${encodedCredentials}` }
-      }
-    ),
-  { isStatusCode200, ...pageContentCheck('We need to check your details') }))
+  group(groups[0], () => { // B01_Fraud_01_CoreStubEditUserContinue
+    timeRequest(() => {
+      res = group(groups[1].split('::')[0], () => timeRequest(() => // 01_CoreStubCall
+        http.post(
+          env.ipvCoreStub + '/edit-user',
+          {
+            cri: `fraud-cri-${env.envName}`,
+            rowNumber: '197',
+            firstName: userDetails.firstName,
+            surname: userDetails.lastName,
+            'dateOfBirth-day': `${userDetails.day}`,
+            'dateOfBirth-month': `${userDetails.month}`,
+            'dateOfBirth-year': `${userDetails.year}`,
+            buildingNumber: `${userDetails.buildNum}`,
+            buildingName: userDetails.buildName,
+            street: userDetails.street,
+            townCity: userDetails.city,
+            postCode: userDetails.postCode,
+            validFromDay: '26',
+            validFromMonth: '02',
+            validFromYear: '2021',
+            validUntilDay: '',
+            validUntilMonth: '',
+            validUntilYear: '',
+            'SecondaryUKAddress.buildingNumber': '',
+            'SecondaryUKAddress.buildingName': '',
+            'SecondaryUKAddress.street': '',
+            'SecondaryUKAddress.townCity': '',
+            'SecondaryUKAddress.postCode': '',
+            'SecondaryUKAddress.validFromDay': '',
+            'SecondaryUKAddress.validFromMonth': '',
+            'SecondaryUKAddress.validFromYear': '',
+            'SecondaryUKAddress.validUntilDay': '',
+            'SecondaryUKAddress.validUntilMonth': '',
+            'SecondaryUKAddress.validUntilYear': ''
+          },
+          {
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            redirects: 0
+          }
+        ),
+      { isStatusCode302 }))
+      res = group(groups[2].split('::')[0], () => timeRequest(() => // 01_CRICall
+        http.get(res.headers.Location),
+      { isStatusCode200, ...pageContentCheck('We need to check your details') }))
+    }, {})
+  })
 
   sleepBetween(1, 3)
 
-  group(groups[1], () => { // B01_Fraud_02_ContinueToCheckFraudDetails
+  group(groups[3], () => { // B01_Fraud_02_ContinueToCheckFraudDetails
     timeRequest(() => {
-      res = group(groups[2].split('::')[1], () => timeRequest(() => // 01_CRICall
+      res = group(groups[4].split('::')[3], () => timeRequest(() => // 01_CRICall
         res.submitForm({ params: { redirects: 1 }, submitSelector: '#continue' }), { isStatusCode302 }))
-      res = group(groups[3].split('::')[1], () => timeRequest(() => // 02_CoreStubCall
+      res = group(groups[5].split('::')[3], () => timeRequest(() => // 02_CoreStubCall
         http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),
       { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }))
     }, {})

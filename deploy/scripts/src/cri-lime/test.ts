@@ -223,7 +223,7 @@ export function fraud (): void {
 
   group(groups[0], () => { // B01_Fraud_01_CoreStubEditUserContinue
     timeRequest(() => {
-      res = group(groups[1].split('::')[0], () => timeRequest(() => // 01_CoreStubCall
+      res = group(groups[1].split('::')[1], () => timeRequest(() => // 01_CoreStubCall
         http.post(
           env.ipvCoreStub + '/edit-user',
           {

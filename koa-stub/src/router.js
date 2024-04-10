@@ -11,7 +11,7 @@ router.get("/start", setNonceAndRedirect);
 router.get("/callback", processCallback);
 router.get("/logout", rpInitiateLogout);
 router.get("/test", (ctx) => {
-    ctx.status = 200,
+    ctx.status = 200
     ctx.body = "TestPage"
     }
 )

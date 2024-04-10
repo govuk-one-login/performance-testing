@@ -6,7 +6,7 @@ const crypto = require('crypto')
 async function createSession(ctx) {
     const nonce = generators.nonce();
     const session = (Math.random() + 1).toString(36).substring(7);
-    // Read this into a hash from session state long term, small hack to get this working as not touching prod data.    
+    // Read this into a hash from session state long term, small hack to get this working as not touching prod data.
     const state = crypto.createHash('md5').update(session).digest('hex');
     const expiry = new Date(); expiry.setDate(expiry.getDate()+1);
     const input = {
@@ -38,8 +38,8 @@ const setNonceAndRedirect = async (ctx) => {
         // Generate nonce and store in dynamodb
 
         const session = await createSession(ctx);
-   
-        // Set cookies 
+
+        // Set cookies
         const cookieOptions = { httpOnly: true, secure: false }
         ctx.cookies.set('nonce', session.nonce, cookieOptions)
         ctx.cookies.set('session', session.state, cookieOptions)
@@ -52,7 +52,7 @@ const setNonceAndRedirect = async (ctx) => {
             vtr: '["Cl.Cm"]',
             ui_locales: "en",
         });
-      
+
         ctx.redirect(redirectUrl)
     }
     catch (e) {
@@ -60,7 +60,7 @@ const setNonceAndRedirect = async (ctx) => {
         ctx.status = 500
         throw(e)
     }
-    
+
 
 }
 

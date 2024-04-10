@@ -2,7 +2,7 @@ const { GetItemCommand } = require("@aws-sdk/client-dynamodb");
 
 // Check the data we have aligns with this user.
 async function checkUserStateAgainstDB(ctx, nonce, state) {
-    
+
     // Read the data from the DB
     const input = {
         TableName: process.env.SESSION_TABLE,
@@ -28,7 +28,7 @@ async function handleCallbackAndGetTokenSet(ctx, nonce, state) {
     const tokenSet = await ctx.oneLogin.callback(
         process.env.CALLBACK_URL,
         params,
-        { 
+        {
             'nonce': nonce,
             'state': state,
         });
@@ -41,7 +41,7 @@ const processCallback = async (ctx) => {
         const cookies = ctx.cookie;
         const nonce = cookies.nonce;
         const state = cookies.session;
-        
+
         await checkUserStateAgainstDB(ctx, nonce, state);
         console.log("User state correct.")
 
@@ -51,12 +51,12 @@ const processCallback = async (ctx) => {
         // Only doing this in perf to enable logout.
         const cookieOptions = { httpOnly: true, secure: false }
         ctx.cookies.set('id_token', tokenSet.id_token, cookieOptions)
-    
+
         // Call the userInfo endpoint with the accessToken
         let userinfo;
         if (tokenSet.access_token) {
             userinfo = await ctx.oneLogin.userinfo(tokenSet.access_token);
-        }  
+        }
 
         ctx.status = 200
         ctx.body = userinfo
@@ -66,7 +66,7 @@ const processCallback = async (ctx) => {
         ctx.status = 500
         throw(e)
     }
-    
+
 
 }
 

@@ -15,7 +15,7 @@ const rpInitiateLogout = async (ctx) => {
                     id_token_hint:id_token,
                     state: state
                 });
-        }  
+        }
 
         // Clear the cookies on the domain.
         const cookieOptions = { httpOnly: true, secure: false }
@@ -25,7 +25,7 @@ const rpInitiateLogout = async (ctx) => {
             console.log(`Deleting cookie ${cookie.name}`)
             ctx.cookies.set(cookie.name, '', cookieOptions);
         });
-        
+
         ctx.redirect(logout)
     }
     catch (e) {
@@ -33,7 +33,7 @@ const rpInitiateLogout = async (ctx) => {
         ctx.status = 500
         throw(e)
     }
-    
+
 
 }
 

@@ -44,7 +44,7 @@ beforeAll(async () => {
 });
 
 describe("Tests against the OIDC Servce", () => {
-  
+
 
   test('The /test endpoint returns TestPage', async () => {
     const response = await request(app.callback()).get('/test');

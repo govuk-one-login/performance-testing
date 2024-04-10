@@ -7,7 +7,7 @@ on:
       - 'koa-stub/**'
   merge_group:
   workflow_dispatch:
-  
+
 
 defaults:
   run:

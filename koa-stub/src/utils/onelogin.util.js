@@ -11,8 +11,8 @@ async function setupClient() {
             response_types: ['code'],
         });
     console.log(`Create client ${client}`);
-    return client 
-    
+    return client
+
 };
 
 module.exports = { setupClient }

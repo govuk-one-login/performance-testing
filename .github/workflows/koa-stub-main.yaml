@@ -1,4 +1,4 @@
-name: Kob Stub Deploy
+name: Koa Stub Deploy
 
 on:
   workflow_dispatch: {}

@@ -33,7 +33,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    name: Lint and Unit Tests; SAM Validate
+    name: SAM Validate
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -68,7 +68,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    name: Lint and Unit Tests; SAM Validate
+    name: Lint and Unit Tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -89,6 +89,10 @@ jobs:
         run: npm ci
         working-directory: koa-stub/src/
 
+      - name: Run eslint
+        run: npm run lint
+        working-directory: koa-stub/src/
+      
       - name: Run unit tests
         run: npm run test
         working-directory: koa-stub/src/

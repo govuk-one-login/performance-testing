@@ -30,7 +30,7 @@ Resources:
       Environment:
         Variables:
           CLIENT_ID: "{{resolve:ssm:StubClientId}}"
-          CLIENT_SECRET: "{{resolve:ssm-secure:StubClientSecret}}"
+          CLIENT_SECRET: "{{resolve:ssm:StubClientSecret}}"
           OIDC_ENDPOINT: "{{resolve:ssm:StubOIDCEndpoint}}"
           RESPONSE_ALG: "{{resolve:ssm:StubResponseAlgorithm}}"
           CALLBACK_URL: "{{resolve:ssm:StubCallbackUrl}}"  # This unfortunately needs to be set manually after first deploy.

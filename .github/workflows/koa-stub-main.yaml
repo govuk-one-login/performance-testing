@@ -1,6 +1,7 @@
 name: Kob Stub Deploy
 
 on:
+  workflow_dispatch: {}
   push:
     branches:
       - main

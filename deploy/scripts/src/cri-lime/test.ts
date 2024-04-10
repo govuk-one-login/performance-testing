@@ -273,7 +273,7 @@ export function fraud (): void {
 
   group(groups[3], () => { // B01_Fraud_02_ContinueToCheckFraudDetails
     timeRequest(() => {
-      res = group(groups[4].split('::')[3], () => timeRequest(() => // 01_CRICall
+      res = group(groups[4].split('::')[1], () => timeRequest(() => // 01_CRICall
         res.submitForm({ params: { redirects: 1 }, submitSelector: '#continue' }), { isStatusCode302 }))
       res = group(groups[5].split('::')[3], () => timeRequest(() => // 02_CoreStubCall
         http.get(res.headers.Location, { headers: { Authorization: `Basic ${encodedCredentials}` } }),

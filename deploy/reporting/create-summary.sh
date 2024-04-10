@@ -6,6 +6,11 @@
 # ARGUMENTS:
 #  $1: path to a .gz archive containing test results in JSON format
 #  $2: folder to use a working and output directory
+# STEPS TO USE:
+#  1: Download the test results as per the instructions here [Test Results File](https://github.com/govuk-one-login/performance-testing/blob/main/deploy/scripts/README.md#querying-the-test-result-file/) and save it in this folder (`deploy/scripts`).
+#  2: Update value of the environment variable 'START_TIME' to the start time of the test in YYYY-MM-DDTHH:MM:SS format e.g. 2024-04-05T15:20:00
+#  3: Update value of the environment variable 'END_TIME' to the end time of the test in YYYY-MM-DDTHH:MM:SS format e.g. 2024-04-05T15:35:00
+#  4: Run this script.
 
 set -e
 INPUT=${1:-results.gz}

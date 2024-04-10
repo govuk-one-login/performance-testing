@@ -8,6 +8,9 @@ Globals:
 
 Resources:
   ExpressApi:
+    #checkov:skip=CKV_AWS_73:Avoiding x-ray tracing for performance reasons
+    #checkov:skip=CKV_AWS_76:Avoiding access logging for performance reasons
+    #checkov:skip=CKV_AWS_120:Avoiding cache for cost reasons.
     Type: AWS::Serverless::Api
     Properties:
       StageName: prod
@@ -15,11 +18,15 @@ Resources:
 
   KoaFunction:
     Type: AWS::Serverless::Function
+    #checkov:skip=CKV_AWS_173:This lambda function is not storing sensitive secrets, KMS cost not being incurred.
+    #checkov:skip=CKV_AWS_116:Lambda configured sync behind API Gatewya, no DLQ needed.
+    #checkov:skip=CKV_AWS_117:Lambda not processing sensitive data, wanting to avoid network congestion so using AWS networking layer.s
     Properties:
       CodeUri: src/
       Handler: serverless.handler
       Runtime: nodejs20.x
       MemorySize: 512
+      ReservedConcurrentExecutions: 200
       Environment:
         Variables:
           CLIENT_ID: "{{resolve:ssm:StubClientId:1}}"
@@ -50,11 +57,14 @@ Resources:
             - Write
             - Read
   KoaFunctionLogGroup:
+    #checkov:skip=CKV_AWS_158:This log group will not contain sensitive content.
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 7
       LogGroupName: !Sub "/aws/lambda/${KoaFunction}"
   SessionTable:
+    #checkov:skip=CKV_AWS_28:This table contains transient data.
+    #checkov:skip=CKV_AWS_119:This table contains transient data that isn't sensitive.
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Sub "${AWS::StackName}-SessionTable"

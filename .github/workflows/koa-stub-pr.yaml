@@ -7,27 +7,28 @@ on:
       - 'koa-stub/**'
 
 jobs:
-  sonarcloud:
-    permissions:
-      id-token: write
-      contents: read
-    name: "Sonar Cloud Scan"
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: "Checkout code"
-        uses: "actions/checkout@v4"
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+  # Sonar is enabled through SaaS Integration, so workflow checks not needed to be explicit
+  # sonarcloud:
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   name: "Sonar Cloud Scan"
+  #   runs-on: "ubuntu-latest"
+  #   steps:
+  #     - name: "Checkout code"
+  #       uses: "actions/checkout@v4"
+  #       with:
+  #         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: "Run SonarCloud Scan"
-        if: ${{ success() }}
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: SonarQube Quality Gate check
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        # Force to fail step after specific time
-        timeout-minutes: 5
+  #     - name: "Run SonarCloud Scan"
+  #       if: ${{ success() }}
+  #       uses: SonarSource/sonarcloud-github-action@master
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: SonarQube Quality Gate check
+  #       uses: sonarsource/sonarqube-quality-gate-action@master
+  #       # Force to fail step after specific time
+  #       timeout-minutes: 5
 
   sam-validate:
     permissions:

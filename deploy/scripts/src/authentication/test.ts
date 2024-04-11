@@ -119,6 +119,10 @@ const credentials = {
   phoneOTP: getEnv('ACCOUNT_PHONE_OTP')
 }
 
+const env = {
+  rpStub: getEnv('ACCOUNT_RP_STUB')
+}
+
 function startJourneyUrl (): string {
   const url = new URL(getEnv('ACCOUNT_OP_URL'))
   url.searchParams.append('client_id', getEnv('ACCOUNT_RP_STUB_CLIENT_ID'))
@@ -251,14 +255,14 @@ export function signUp (): void {
     group(groups[16], () => { // B01_SignUp_12_Logout
       timeRequest(() => {
         res = group(groups[17].split('::')[1], () => timeRequest(() => // 01_RPStub
-          res.submitForm({ params: { redirects: 0 } }),
+          http.get(env.rpStub + '/logout', { redirects: 0 }),
         { isStatusCode302 }))
         res = group(groups[18].split('::')[1], () => timeRequest(() => // 02_OIDCCall
           http.get(res.headers.Location, { redirects: 0 }),
         { isStatusCode302 }))
-        res = group(groups[19].split('::')[1], () => timeRequest(() => // 03_RPStub
+        res = group(groups[19].split('::')[1], () => timeRequest(() => // 03_AuthCall
           http.get(res.headers.Location),
-        { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
+        { isStatusCode200, ...pageContentCheck('You have signed out') }))
       }, {})
     })
   }
@@ -383,14 +387,14 @@ export function signIn (): void {
     group(groups[18], () => { // B02_SignIn_09_Logout
       timeRequest(() => {
         res = group(groups[19].split('::')[1], () => timeRequest(() => // 01_RPStub
-          res.submitForm({ params: { redirects: 0 } }),
+          http.get(env.rpStub + '/logout', { redirects: 0 }),
         { isStatusCode302 }))
         res = group(groups[20].split('::')[1], () => timeRequest(() => // 02_OIDCCall
           http.get(res.headers.Location, { redirects: 0 }),
         { isStatusCode302 }))
-        res = group(groups[21].split('::')[1], () => timeRequest(() => // 03_RPStub
+        res = group(groups[21].split('::')[1], () => timeRequest(() => // 03_AuthCall
           http.get(res.headers.Location),
-        { isStatusCode200, ...pageContentCheck('Successfully signed out') }))
+        { isStatusCode200, ...pageContentCheck('You have signed out') }))
       }, {})
     })
   }

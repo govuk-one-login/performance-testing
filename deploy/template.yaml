@@ -163,6 +163,11 @@ Resources:
             Action:
               - "sts:AssumeRole"
           - Effect: "Allow"
+            Action:
+              - "execute-api:*"
+            Resource:
+              - "*"
+          - Effect: "Allow"
             Principal:
               AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
             Action:

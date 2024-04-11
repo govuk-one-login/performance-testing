@@ -57,6 +57,14 @@ Resources:
     Properties:
       StageName: prod
       BinaryMediaTypes: ['*/*']
+      Auth:
+        ResourcePolicy:
+          CustomStatements:
+          - Effect: 'Allow'
+            Action: 'execute-api:Invoke'
+            Resource: ['execute-api:/*/*/*']
+            Principal: '*'
+
 
   KoaFunction:
     Type: AWS::Serverless::Function

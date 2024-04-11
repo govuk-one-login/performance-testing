@@ -1,4 +1,4 @@
-import { Counter } from 'k6/metrics'
+import { Counter } from 'k6/metrics';
 
 /**
  * `Counter` metric to track the number of iterations started.
@@ -9,7 +9,7 @@ import { Counter } from 'k6/metrics'
  *  ...
  * }
  */
-export const iterationsStarted = new Counter('iterations_started')
+export const iterationsStarted = new Counter('iterations_started');
 
 /**
  * `Counter` metric to track the number of iterations completed.
@@ -20,4 +20,4 @@ export const iterationsStarted = new Counter('iterations_started')
  *  iterationsCompleted.add(1)
  * }
  */
-export const iterationsCompleted = new Counter('iterations_completed')
+export const iterationsCompleted = new Counter('iterations_completed');

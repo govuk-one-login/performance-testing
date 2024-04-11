@@ -1,8 +1,8 @@
-import { build } from 'esbuild'
-import { copy } from 'esbuild-plugin-copy'
-import { sync } from 'glob'
-const outbase = './src'
-const outdir = './dist'
+import { build } from 'esbuild';
+import { copy } from 'esbuild-plugin-copy';
+import { sync } from 'glob';
+const outbase = './src';
+const outdir = './dist';
 
 build({
   entryPoints: sync('src/*/*.ts'),
@@ -24,9 +24,12 @@ build({
   ]
 })
   .then(() => {
-    console.log('Test scripts transpiled:')
-    sync(outdir + '/*/*.js').sort().forEach(file => {
-      console.log(`+ \x1b[32m${file}\x1b[0m`)
-    })
+    console.log('Test scripts transpiled:');
+    sync(outdir + '/*/*.js')
+      .sort()
+      .forEach((file) => {
+        console.log(`+ \x1b[32m${file}\x1b[0m`);
+      });
   })
-  .catch(() => process.exit(1))
+  // eslint-disable-next-line no-undef
+  .catch(() => process.exit(1));

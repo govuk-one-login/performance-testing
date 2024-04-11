@@ -1,29 +1,36 @@
-import http from 'k6/http'
-import { group } from 'k6'
-import { uuidv4 } from '../../common/utils/jslib/index'
-import { buildBackendUrl } from '../utils/url'
+import http from 'k6/http';
+import { group } from 'k6';
+import { uuidv4 } from '../../common/utils/jslib/index';
+import { buildBackendUrl } from '../utils/url';
 import {
   parseTestClientResponse,
   postTestClientStart
-} from '../utils/test-client'
-import { timeRequest } from '../../common/utils/request/timing'
-import { isStatusCode200, isStatusCode201 } from '../../common/utils/checks/assertions'
+} from '../utils/test-client';
+import { timeRequest } from '../../common/utils/request/timing';
+import {
+  isStatusCode200,
+  isStatusCode201
+} from '../../common/utils/checks/assertions';
 
-export function postVerifyAuthorizeRequest (): string {
+export function postVerifyAuthorizeRequest(): string {
   const testClientRes = group('POST test client /start', () =>
     timeRequest(postTestClientStart, { isStatusCode201 })
-  )
-  const verifyUrl = parseTestClientResponse(testClientRes, 'ApiLocation')
+  );
+  const verifyUrl = parseTestClientResponse(testClientRes, 'ApiLocation');
 
   const verifyRes = group('POST /verifyAuthorizeRequest', () =>
-    timeRequest(() => http.post(verifyUrl, null, {
-      tags: { name: 'POST /verifyAuthorizeRequest' }
-    }), { isStatusCode200 })
-  )
-  return verifyRes.json('sessionId') as string
+    timeRequest(
+      () =>
+        http.post(verifyUrl, null, {
+          tags: { name: 'POST /verifyAuthorizeRequest' }
+        }),
+      { isStatusCode200 }
+    )
+  );
+  return verifyRes.json('sessionId') as string;
 }
 
-export function postResourceOwnerDocumentGroups (sessionId: string): void {
+export function postResourceOwnerDocumentGroups(sessionId: string): void {
   group('POST /resourceOwner/documentGroups', () => {
     const documentGroupsData = {
       resourceOwner: {
@@ -34,34 +41,38 @@ export function postResourceOwnerDocumentGroups (sessionId: string): void {
           }
         ]
       }
-    }
+    };
     const documentGroupsUrl = buildBackendUrl(
       `/resourceOwner/documentGroups/${sessionId}`
-    )
+    );
 
-    timeRequest(() =>
-      http.post(
-        documentGroupsUrl,
-        JSON.stringify(documentGroupsData),
-        { tags: { name: 'POST /resourceOwner/documentGroups' } }
-      ), { isStatusCode200 })
-  })
+    timeRequest(
+      () =>
+        http.post(documentGroupsUrl, JSON.stringify(documentGroupsData), {
+          tags: { name: 'POST /resourceOwner/documentGroups' }
+        }),
+      { isStatusCode200 }
+    );
+  });
 }
 
-export function getBiometricTokenV2 (sessionId: string): void {
+export function getBiometricTokenV2(sessionId: string): void {
   group('GET /biometricToken/v2', () => {
     const biometricTokenUrl = buildBackendUrl('/biometricToken/v2', {
       authSessionId: sessionId
-    })
+    });
 
-    timeRequest(() =>
-      http.get(biometricTokenUrl, {
-        tags: { name: 'GET /biometricToken/v2' }
-      }), { isStatusCode200 })
-  })
+    timeRequest(
+      () =>
+        http.get(biometricTokenUrl, {
+          tags: { name: 'GET /biometricToken/v2' }
+        }),
+      { isStatusCode200 }
+    );
+  });
 }
 
-export function postFinishBiometricSession (sessionId: string): void {
+export function postFinishBiometricSession(sessionId: string): void {
   group('POST /finishBiometricSession', () => {
     const finishBiometricSessionUrl = buildBackendUrl(
       '/finishBiometricSession',
@@ -69,64 +80,78 @@ export function postFinishBiometricSession (sessionId: string): void {
         authSessionId: sessionId,
         biometricSessionId: uuidv4()
       }
-    )
+    );
 
-    timeRequest(() => http.post(finishBiometricSessionUrl, null, {
-      tags: { name: 'POST /finishBiometricSession' }
-    }), { isStatusCode200 })
-  })
+    timeRequest(
+      () =>
+        http.post(finishBiometricSessionUrl, null, {
+          tags: { name: 'POST /finishBiometricSession' }
+        }),
+      { isStatusCode200 }
+    );
+  });
 }
 
-export function getRedirect (sessionId: string): {
-  authorizationCode: string
-  redirectUri: string
+export function getRedirect(sessionId: string): {
+  authorizationCode: string;
+  redirectUri: string;
 } {
   return group('GET /redirect', () => {
-    const redirectUrl = buildBackendUrl('/redirect', { sessionId })
+    const redirectUrl = buildBackendUrl('/redirect', { sessionId });
 
-    const redirectRes = timeRequest(() => http.get(redirectUrl, {
-      tags: { name: 'GET /redirect' }
-    }), { isStatusCode200 })
+    const redirectRes = timeRequest(
+      () =>
+        http.get(redirectUrl, {
+          tags: { name: 'GET /redirect' }
+        }),
+      { isStatusCode200 }
+    );
 
     return {
       authorizationCode: redirectRes.json('authorizationCode') as string,
       redirectUri: redirectRes.json('redirectUri') as string
-    }
-  })
+    };
+  });
 }
 
-export function postToken (
+export function postToken(
   authorizationCode: string,
   redirectUri: string
 ): string {
   return group('POST /token', () => {
-    const tokenUrl = buildBackendUrl('/token')
+    const tokenUrl = buildBackendUrl('/token');
 
-    const tokenResponse = timeRequest(() =>
-      http.post(
-        tokenUrl,
-        {
-          code: authorizationCode,
-          grant_type: 'authorization_code',
-          redirect_uri: redirectUri
-        },
-        { tags: { name: 'POST /token' } }
-      ), { isStatusCode200 })
-    return tokenResponse.json('access_token') as string
-  })
+    const tokenResponse = timeRequest(
+      () =>
+        http.post(
+          tokenUrl,
+          {
+            code: authorizationCode,
+            grant_type: 'authorization_code',
+            redirect_uri: redirectUri
+          },
+          { tags: { name: 'POST /token' } }
+        ),
+      { isStatusCode200 }
+    );
+    return tokenResponse.json('access_token') as string;
+  });
 }
 
-export function postUserInfoV2 (accessToken: string): void {
+export function postUserInfoV2(accessToken: string): void {
   group('POST /userinfo/v2', () => {
-    const userInfoV2Url = buildBackendUrl('/userinfo/v2')
+    const userInfoV2Url = buildBackendUrl('/userinfo/v2');
 
-    timeRequest(() =>
-      http.post(userInfoV2Url, null, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + accessToken
-        },
-        tags: { name: 'POST /userinfo/v2' }
-      }), { isStatusCode200 })
-  })
+    timeRequest(
+      () =>
+        http.post(userInfoV2Url, null, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + accessToken
+          },
+          tags: { name: 'POST /userinfo/v2' }
+        }),
+      { isStatusCode200 }
+    );
+  });
 }

@@ -3,13 +3,13 @@
  */
 export interface AssumeRoleOutput {
   AssumedRoleUser: {
-    Arn: string
-    AssumedRoleId: string
-  }
+    Arn: string;
+    AssumedRoleId: string;
+  };
   Credentials: {
-    AccessKeyId: string
-    Expiration: string
-    SecretAccessKey: string
-    SessionToken: string
-  }
+    AccessKeyId: string;
+    Expiration: string;
+    SecretAccessKey: string;
+    SessionToken: string;
+  };
 }

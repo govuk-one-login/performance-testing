@@ -4,22 +4,22 @@ export interface BankingPayload {
       {
         nameParts: [
           {
-            value: string
-            type: string
+            value: string;
+            type: string;
           },
           {
-            value: string
-            type: string
+            value: string;
+            type: string;
           }
-        ]
+        ];
       }
-    ]
+    ];
     birthDate: [
       {
-        value: string
+        value: string;
       }
-    ]
-  }
+    ];
+  };
 }
 
 export const bankingPayload = JSON.stringify({
@@ -44,4 +44,4 @@ export const bankingPayload = JSON.stringify({
       }
     ]
   }
-} satisfies BankingPayload)
+} satisfies BankingPayload);

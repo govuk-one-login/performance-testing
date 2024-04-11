@@ -1,10 +1,10 @@
-import { type Checkers, check, fail } from 'k6'
-import { Trend } from 'k6/metrics'
+import { type Checkers, check, fail } from 'k6';
+import { Trend } from 'k6/metrics';
 
 /**
  * Trend to store all recorded durations
  */
-const durations = new Trend('duration', true)
+const durations = new Trend('duration', true);
 
 /**
  * Run a code block and return the duration
@@ -16,11 +16,11 @@ const durations = new Trend('duration', true)
  *  ..
  * })
  */
-export function timeFunction<T> (fn: () => T): [T, number] {
-  const start = Date.now()
-  const res = fn()
-  const end = Date.now()
-  return [res, end - start]
+export function timeFunction<T>(fn: () => T): [T, number] {
+  const start = Date.now();
+  const res = fn();
+  const end = Date.now();
+  return [res, end - start];
 }
 
 /**
@@ -35,10 +35,10 @@ export function timeFunction<T> (fn: () => T): [T, number] {
  *   { 'status is 200': (r) => r.status === 200 }
  * )
  */
-export function timeRequest<T> (fn: () => T, checks: Checkers<T>): T {
-  const [res, duration] = timeFunction(fn)
+export function timeRequest<T>(fn: () => T, checks: Checkers<T>): T {
+  const [res, duration] = timeFunction(fn);
   check(res, checks)
     ? durations.add(duration)
-    : fail('Response validation failed')
-  return res
+    : fail('Response validation failed');
+  return res;
 }

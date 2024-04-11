@@ -244,7 +244,7 @@ export function signUp (): void {
       res = group(groups[14].split('::')[1], () => timeRequest(() => // 02_OIDCCall
         http.get(res.headers.Location, { redirects: 0 }), { isStatusCode302 }))
       res = group(groups[15].split('::')[1], () => timeRequest(() => // 03_RPStub
-        http.get(res.headers.Location), { isStatusCode200, ...pageContentCheck('User information') }))
+        http.get(res.headers.Location), { isStatusCode200, ...pageContentCheck(testEmail.toLowerCase()) }))
     }, {})
   })
 
@@ -365,7 +365,7 @@ export function signIn (): void {
           } else {
             res = group(groups[16].split('::')[1], () => timeRequest(() => // 03_RPStub
               http.get(res.headers.Location),
-            { isStatusCode200, ...pageContentCheck('User information') }))
+            { isStatusCode200, ...pageContentCheck(userData.email.toLowerCase()) }))
           }
         }, {})
       })

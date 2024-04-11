@@ -163,11 +163,6 @@ Resources:
             Action:
               - "sts:AssumeRole"
           - Effect: "Allow"
-            Action:
-              - "execute-api:*"
-            Resource:
-              - "*"
-          - Effect: "Allow"
             Principal:
               AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
             Action:
@@ -224,6 +219,11 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
                     - !FindInMap [TxMA, Staging, AccountID]
                     - "key/*"
+          - Effect: "Allow"
+            Action:
+              - "execute-api:*"
+            Resource:
+              - "*"
           - Effect: "Allow"
             Action:
               - "sqs:SendMessage"

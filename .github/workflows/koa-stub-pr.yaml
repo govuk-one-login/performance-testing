@@ -51,6 +51,7 @@ jobs:
         with:
           repository: 'govuk-one-login/devplatform-deploy'
           path: './devplatform-deploy'
+          ref: 'main'
 
       - name: Setup nodeJS v20
         uses: actions/setup-node@v4

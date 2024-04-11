@@ -148,7 +148,7 @@ export function signUp (): void {
       res = group(groups[1].split('::')[1], () => timeRequest(() => // 01_OIDCCall
         http.get(startJourneyUrl(), { redirects: 0 }), { isStatusCode302 }))
       res = group(groups[2].split('::')[1], () => timeRequest(() => // 02_AuthCall
-        http.get(res.headers.Location), { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') }))
+        http.get(res.headers.Location), { isStatusCode200, ...pageContentCheck('Create your GOV.UK One Login or sign in') }))
     }, {})
   })
 
@@ -277,7 +277,7 @@ export function signIn (): void {
       res = group(groups[1].split('::')[1], () => timeRequest(() =>
         http.get(startJourneyUrl(), { redirects: 0 }), { isStatusCode302 }))
       res = group(groups[2].split('::')[1], () => timeRequest(() =>
-        http.get(res.headers.Location), { isStatusCode200, ...pageContentCheck('Create a GOV.UK One Login or sign in') }))
+        http.get(res.headers.Location), { isStatusCode200, ...pageContentCheck('Create your GOV.UK One Login or sign in') }))
     }, {})
   })
 

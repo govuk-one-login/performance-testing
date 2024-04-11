@@ -56,7 +56,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
-          role-to-assume: ${{ secrets.PERF_GH_ACTIONS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.PERF_STUB_GH_ACTIONS_ROLE_ARN }}
 
       - name: Check out repository code
         uses: actions/checkout@v4

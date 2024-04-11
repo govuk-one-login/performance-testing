@@ -82,6 +82,6 @@ jobs:
         with:
           artifact-bucket-name: ${{ secrets.PERF_STUB_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.PERF_STUB_SIGNING_PROFILE_NAME }}
-          working-directory: ./koa-stub
+          working-directory: ./koa-stub/.aws-sam/build
 
 

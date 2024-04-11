@@ -69,8 +69,7 @@ jobs:
           node-version: 20
       - name: Setup SAM CLI
         uses: aws-actions/setup-sam@v2
-        with:
-          use-installer: true
+
       - name: SAM Validate
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV

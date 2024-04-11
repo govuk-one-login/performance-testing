@@ -46,6 +46,12 @@ jobs:
         with:
           submodules: true
 
+      - name: Check out an internal repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'https://github.com/govuk-one-login/devplatform-deploy'
+          path: './devplatform-deploy'
+
       - name: Setup nodeJS v20
         uses: actions/setup-node@v4
         with:

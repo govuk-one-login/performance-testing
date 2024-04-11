@@ -52,7 +52,7 @@ const groupMap = {
     'B01_SignUp_12_Logout',
     'B01_SignUp_12_Logout::01_RPStub',
     'B01_SignUp_12_Logout::02_OIDCCall',
-    'B01_SignUp_12_Logout::03_RPStub'
+    'B01_SignUp_12_Logout::03_AuthCall'
   ],
   signIn: [
     'B02_SignIn_01_InitializeJourney',
@@ -76,7 +76,7 @@ const groupMap = {
     'B02_SignIn_09_Logout',
     'B02_SignIn_09_Logout::01_RPStub',
     'B02_SignIn_09_Logout::02_OIDCCall',
-    'B02_SignIn_09_Logout::03_RPStub'
+    'B02_SignIn_09_Logout::03_AuthCall'
   ]
 } as const
 

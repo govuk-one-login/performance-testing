@@ -65,7 +65,7 @@ const csvData: SummariseSubjectID[] = new SharedArray('Summarise Subject ID', fu
   return open('./data/summariseSubjectID.csv')
     .split('\n')
     .slice(1)
-    .map((subID) => {
+    .map(subID => {
       return {
         subID
       }
@@ -115,7 +115,7 @@ export function persistVC(): void {
   // R01_PersistVC_02_CreateVC
   res = group(groups[1], () =>
     timeRequest(() => http.post(env.envURL + `/vcs/${subjectID}`, body, options), {
-      isStatusCode202: (r) => r.status === 202,
+      isStatusCode202: r => r.status === 202,
       ...pageContentCheck('messageId')
     })
   )

@@ -174,7 +174,7 @@ export default (): void => {
         return (
           scenario.exec === exec && // Exec function is named correctly
           scenario.maxVUs === maxVUs && // Max VUs = Max throughput * max iteration duration
-          Math.max(...scenario.stages.map((s) => s.target)) === target
+          Math.max(...scenario.stages.map(s => s.target)) === target
         ) // Max thoughput target is correct
       }
 
@@ -206,7 +206,7 @@ export default (): void => {
       return (
         thresholds !== undefined &&
         Object.keys(thresholds).length === count + 2 && // Threshold count is equal to no. of groups plus the base two
-        Object.keys(thresholds).filter((s) => s.includes('duration{group:::')).length === count
+        Object.keys(thresholds).filter(s => s.includes('duration{group:::')).length === count
       ) // Group duration thresholds equals no. of groups
     }
 
@@ -369,7 +369,7 @@ export default (): void => {
           return 'C' + string
         },
         {
-          'check result': (s) => s === 'CBA'
+          'check result': s => s === 'CBA'
         }
       )
     })

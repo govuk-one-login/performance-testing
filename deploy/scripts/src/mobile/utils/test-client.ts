@@ -30,7 +30,7 @@ export function parseTestClientResponse(response: Response, location: 'WebLocati
 
 function parseApiLocation(apiLocation: string): string {
   function parseQueryParams(queryParams: string[], parameterName: string): string {
-    return queryParams.filter((value) => value.startsWith(parameterName))[0].split('=')[1]
+    return queryParams.filter(value => value.startsWith(parameterName))[0].split('=')[1]
   }
 
   const queryParams = apiLocation.split('?')[1].split('&')

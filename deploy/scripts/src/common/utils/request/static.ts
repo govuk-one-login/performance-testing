@@ -16,7 +16,7 @@ function getResourceURLs(res: Response): URL[] {
     // Link elements with a `href` attribute
     resources.push(new URL(el.attributes().href.value, res.url))
   })
-  return resources.filter((url) => url.hostname.endsWith('.account.gov.uk')) // Only retrieve URLs accessible to the load injector
+  return resources.filter(url => url.hostname.endsWith('.account.gov.uk')) // Only retrieve URLs accessible to the load injector
 }
 
 /**
@@ -29,7 +29,7 @@ function getResourceURLs(res: Response): URL[] {
  */
 export function getStaticResources(res: Response): Response[] {
   const urls = getResourceURLs(res)
-  const requests: ObjectBatchRequest[] = urls.map((url) => {
+  const requests: ObjectBatchRequest[] = urls.map(url => {
     return {
       method: 'GET',
       url: url.href,

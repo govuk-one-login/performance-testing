@@ -57,6 +57,6 @@ export function isStatusCode302(response: Response): boolean {
  */
 export function pageContentCheck(content: string): Checkers<Response> {
   return {
-    validatePageContent: (r) => (r.body as string).includes(content)
+    validatePageContent: r => (r.body as string).includes(content)
   }
 }

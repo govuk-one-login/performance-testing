@@ -42,18 +42,18 @@ export function getThresholds(groupMap: GroupMap, selections: string | undefined
     http_req_failed: nfrs.errors
   }
   const addThresholds = (names: readonly string[]): void => {
-    names.forEach((name) => {
+    names.forEach(name => {
       thresholds[`duration{group:::${name}}`] = nfrs.rt
     })
   }
 
   if (selections == null || selections === '' || selections.toLowerCase() === 'all') {
     // Enable all scenarios is selection string is null, empty or set to 'all'
-    Object.values(groupMap).forEach((groupNames) => {
+    Object.values(groupMap).forEach(groupNames => {
       addThresholds(groupNames)
     })
   } else {
-    selections.split(',').forEach((scenario) => {
+    selections.split(',').forEach(scenario => {
       const groupNames = groupMap[scenario]
       if (groupNames === undefined) {
         console.warn(

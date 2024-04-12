@@ -81,7 +81,7 @@ export function demoSamApp(): void {
   group('GET - {demoSamApp} /test', () =>
     timeRequest(() => http.get(env.BE_URL + '/test'), {
       isStatusCode200,
-      'verify page content': (r) => JSON.parse(r.body as string).code === 'success'
+      'verify page content': r => JSON.parse(r.body as string).code === 'success'
     })
   )
 

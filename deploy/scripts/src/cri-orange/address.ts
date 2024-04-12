@@ -62,7 +62,7 @@ const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
   return open('./data/addressCRIData.csv')
     .split('\n')
     .slice(1)
-    .map((postcode) => {
+    .map(postcode => {
       return {
         postcode
       }

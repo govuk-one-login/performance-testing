@@ -41,7 +41,7 @@ export function getScenarios(scenarios: ScenarioList, selections: string | undef
   let enabled: ScenarioList = {}
   selections == null || selections === '' || selections.toLowerCase() === 'all' // Enable all scenarios is selection string is null, empty or set to 'all'
     ? (enabled = scenarios)
-    : selections.split(',').forEach((scenario) => {
+    : selections.split(',').forEach(scenario => {
         enabled[scenario] = scenarios[scenario]
       })
   return enabled

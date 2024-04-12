@@ -71,7 +71,7 @@ const csvData: RetrieveUserID[] = new SharedArray('Retrieve Intervention User ID
   return open('./data/retrieveInterventionUser.csv')
     .split('\n')
     .slice(1)
-    .map((userID) => {
+    .map(userID => {
       return {
         userID
       }

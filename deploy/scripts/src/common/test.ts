@@ -13,7 +13,7 @@ export const options: Options = {
 export default function (): void {
   const response = http.get('https://home.build.account.gov.uk/')
   check(response, {
-    'is status 200': (r) => r.status === 200
+    'is status 200': r => r.status === 200
   })
   sleep(2)
 }

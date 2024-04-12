@@ -37,7 +37,7 @@ const csvData: User[] = new SharedArray('csv', function () {
   return open('./data/example.csv')
     .split('\n')
     .slice(1)
-    .map((s) => {
+    .map(s => {
       const data = s.split(',')
       return { username: data[0], pass: data[1] }
     })

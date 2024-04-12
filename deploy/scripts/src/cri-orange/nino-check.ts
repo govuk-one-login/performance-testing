@@ -67,7 +67,7 @@ const csvData1: nino[] = new SharedArray('csvDataNino', () => {
   return open('./data/ninoCRIData.csv')
     .split('\n')
     .slice(1)
-    .map((s) => {
+    .map(s => {
       const data = s.split(',')
       return {
         firstName: data[0],

@@ -4,7 +4,7 @@ import { URL } from '../../common/utils/jslib/url'
 
 export function validatePageRedirect(pageUrl: string): Checkers<Response> {
   return {
-    'validate redirect url': (r) => {
+    'validate redirect url': r => {
       const url = new URL(r.url)
       return url.pathname.includes(pageUrl)
     }
@@ -18,7 +18,7 @@ export function validateLocationHeader(res: Response): boolean {
 
 export function validateQueryParam(param: string): Checkers<Response> {
   return {
-    'validate query param': (res) => {
+    'validate query param': res => {
       const queryParams = new URL(res.headers.Location).searchParams
       return queryParams.get(param) !== null
     }

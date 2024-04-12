@@ -612,7 +612,7 @@ export function validateUser(): void {
           },
           {
             isStatusCode200,
-            'verify page content': (r) =>
+            'verify page content': r =>
               acceptNewTerms || (r.body as string).includes('Services you can use with GOV.UK One Login')
           }
         )
@@ -645,7 +645,7 @@ export function validateUser(): void {
           },
           {
             isStatusCode200,
-            'verify page content': (r) =>
+            'verify page content': r =>
               acceptNewTerms || (r.body as string).includes('Services you can use with GOV.UK One Login')
           }
         )

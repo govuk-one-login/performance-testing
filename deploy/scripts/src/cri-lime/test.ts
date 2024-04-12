@@ -147,7 +147,7 @@ const csvDVLA: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', 
   return open('./data/drivingLicenceDVLAData.csv')
     .split('\n')
     .slice(1)
-    .map((s) => {
+    .map(s => {
       const data = s.split(',')
       return {
         surname: data[0],
@@ -173,7 +173,7 @@ const csvDVA: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', () 
   return open('./data/drivingLicenceDVAData.csv')
     .split('\n')
     .slice(1)
-    .map((s) => {
+    .map(s => {
       const data = s.split(',')
       return {
         surname: data[0],
@@ -211,7 +211,7 @@ const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => 
   return open('./data/passportData.csv')
     .split('\n')
     .slice(1)
-    .map((s) => {
+    .map(s => {
       const data = s.split(',')
       return {
         passportNumber: data[0],
@@ -328,7 +328,7 @@ export function fraud(): void {
 export function drivingLicence(): void {
   type drivingLicenceIssuer = 'DVA' | 'DVLA'
   const licenceIssuer: drivingLicenceIssuer = Math.random() <= 0.5 ? 'DVA' : 'DVLA'
-  const groups = groupMap.drivingLicence.filter((s) => s.includes(licenceIssuer))
+  const groups = groupMap.drivingLicence.filter(s => s.includes(licenceIssuer))
 
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`

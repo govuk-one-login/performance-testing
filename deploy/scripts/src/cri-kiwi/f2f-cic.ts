@@ -110,7 +110,7 @@ export function CIC(): void {
           })
         ),
       {
-        'is status 201': (r) => r.status === 201,
+        'is status 201': r => r.status === 201,
         ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
       }
     )
@@ -167,7 +167,7 @@ export function CIC(): void {
           submitSelector: '#continue'
         }),
       {
-        'verify url body': (r) => r.url.includes(clientId)
+        'verify url body': r => r.url.includes(clientId)
       }
     )
   )
@@ -229,7 +229,7 @@ export function FaceToFace(): void {
           })
         ),
       {
-        'is status 201': (r) => r.status === 201,
+        'is status 201': r => r.status === 201,
         ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
       }
     )
@@ -685,7 +685,7 @@ export function FaceToFace(): void {
           submitSelector: '#continue'
         }),
       {
-        'verify url body': (r) => r.url.includes(clientId)
+        'verify url body': r => r.url.includes(clientId)
       }
     )
   )
@@ -718,7 +718,7 @@ export function FaceToFace(): void {
   // B02_FaceToFace_12_SendBearerToken
   res = group(groups[28], () =>
     timeRequest(() => http.post(env.F2F.target + '/userinfo', {}, options), {
-      'is status 202': (r) => r.status === 202,
+      'is status 202': r => r.status === 202,
       ...pageContentCheck('sub')
     })
   )

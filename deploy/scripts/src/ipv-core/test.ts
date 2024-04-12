@@ -151,7 +151,7 @@ const csvData: IDReuseUserID[] = new SharedArray('ID Reuse User ID', function ()
   return open('./data/idReuseTestData.csv')
     .split('\n')
     .slice(1)
-    .map((s) => {
+    .map(s => {
       const data = s.split(',')
       return { userID: data[0], emailID: data[1] }
     })

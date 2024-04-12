@@ -67,7 +67,7 @@ export function BAV(): void {
   // B01_BAV_01_IPVStubCall
   res = group(groups[0], () =>
     timeRequest(() => http.post(env.BAV.ipvStub + '/start', JSON.stringify({ bankingPayload })), {
-      'is status 201': (r) => r.status === 201,
+      'is status 201': r => r.status === 201,
       ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
     })
   )
@@ -123,7 +123,7 @@ export function BAV(): void {
           submitSelector: '#submitDetails'
         }),
       {
-        'verify url body': (r) => r.url.includes(clientId)
+        'verify url body': r => r.url.includes(clientId)
       }
     )
   )

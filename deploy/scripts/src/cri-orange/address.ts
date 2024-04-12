@@ -1,5 +1,5 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
-import { group, fail } from 'k6'
+import { fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { SharedArray } from 'k6/data'
@@ -12,7 +12,7 @@ import {
   LoadProfile
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
-import { timeRequest } from '../common/utils/request/timing'
+import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getThresholds } from '../common/utils/config/thresholds'
@@ -76,93 +76,88 @@ export function address(): void {
   iterationsStarted.add(1)
 
   // B02_Address_01_AddressCRIEntryFromStub
-  group(groups[0], () => {
-    timeRequest(() => {
+  timeGroup(
+    groups[0],
+    () => {
       // 01_CoreStubCall
-      res = group(groups[1].split('::')[1], () =>
-        timeRequest(
-          () =>
-            http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
-              redirects: 0,
-              headers: { Authorization: `Basic ${encodedCredentials}` }
-            }),
-          { isStatusCode302 }
-        )
+      res = timeGroup(
+        groups[1].split('::')[1],
+        () =>
+          http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
+            redirects: 0,
+            headers: { Authorization: `Basic ${encodedCredentials}` }
+          }),
+        { isStatusCode302 }
       )
       // 02_AddCRICall
-      res = group(groups[2].split('::')[1], () =>
-        timeRequest(() => http.get(res.headers.Location), {
-          isStatusCode200,
-          ...pageContentCheck('Find your address')
-        })
-      )
-    }, {})
-  })
+      res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck('Find your address')
+      })
+    },
+    {}
+  )
 
   sleepBetween(1, 3)
 
   // B02_Address_02_SearchPostCode
-  res = group(groups[3], () =>
-    timeRequest(
-      () =>
-        res.submitForm({
-          fields: { addressSearch: user1Address.postcode },
-          submitSelector: '#continue'
-        }),
-      { isStatusCode200, ...pageContentCheck('Choose your address') }
-    )
+  res = timeGroup(
+    groups[3],
+    () =>
+      res.submitForm({
+        fields: { addressSearch: user1Address.postcode },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Choose your address') }
   )
 
   const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found')
 
   // B02_Address_03_SelectAddress
-  res = group(groups[4], () =>
-    timeRequest(
-      () =>
-        res.submitForm({
-          fields: { addressResults: fullAddress },
-          submitSelector: '#continue'
-        }),
-      { isStatusCode200, ...pageContentCheck('Check your address') }
-    )
+  res = timeGroup(
+    groups[4],
+    () =>
+      res.submitForm({
+        fields: { addressResults: fullAddress },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Check your address') }
   )
 
   sleepBetween(1, 3)
 
   // B02_Address_04_VerifyAddress
-  res = group(groups[5], () =>
-    timeRequest(
-      () =>
-        res.submitForm({
-          fields: { addressYearFrom: '2021' },
-          submitSelector: '#continue'
-        }),
-      { isStatusCode200, ...pageContentCheck('Confirm your details') }
-    )
+  res = timeGroup(
+    groups[5],
+    () =>
+      res.submitForm({
+        fields: { addressYearFrom: '2021' },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Confirm your details') }
   )
 
   sleepBetween(1, 3)
 
   // B02_Address_05_ConfirmDetails
-  group(groups[6], () => {
-    timeRequest(() => {
+  timeGroup(
+    groups[6],
+    () => {
       // 01_AddCRICall
-      res = group(groups[7].split('::')[1], () =>
-        timeRequest(() => res.submitForm({ params: { redirects: 1 } }), {
-          isStatusCode302
-        })
-      )
+      res = timeGroup(groups[7].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
+        isStatusCode302
+      })
       // 02_CoreStubCall
-      res = group(groups[8].split('::')[1], () =>
-        timeRequest(
-          () =>
-            http.get(res.headers.Location, {
-              headers: { Authorization: `Basic ${encodedCredentials}` }
-            }),
-          { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
-        )
+      res = timeGroup(
+        groups[8].split('::')[1],
+        () =>
+          http.get(res.headers.Location, {
+            headers: { Authorization: `Basic ${encodedCredentials}` }
+          }),
+        { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
       )
-    }, {})
-  })
+    },
+    {}
+  )
   iterationsCompleted.add(1)
 }

@@ -1,12 +1,12 @@
 import {
-  type AUTH_IPV_AUTHORISATION_REQUESTED,
-  type F2F_YOTI_START,
-  type IPV_F2F_CRI_VC_CONSUMED,
-  type F2F_DOCUMENT_UPLOADED
+  type AuthIpvAuthorisationRequested,
+  type F2fYotiStart,
+  type IpvF2fVcConsumed,
+  type F2fDocumentUploaded
 } from '../requestGenerator/ipvrReqFormat'
 import { uuidv4, randomString, randomIntBetween } from '../../common/utils/jslib/index'
 
-export function generateAuthRequest(userID: string, signinJourneyID: string): AUTH_IPV_AUTHORISATION_REQUESTED {
+export function generateAuthRequest(userID: string, signinJourneyID: string): AuthIpvAuthorisationRequested {
   const timestamp = new Date().toISOString()
   return {
     event_id: uuidv4(),
@@ -24,7 +24,7 @@ export function generateAuthRequest(userID: string, signinJourneyID: string): AU
   }
 }
 
-export function generateF2FRequest(userID: string, signinJourneyID: string): F2F_YOTI_START {
+export function generateF2FRequest(userID: string, signinJourneyID: string): F2fYotiStart {
   const timestamp = new Date().toISOString()
   return {
     event_id: uuidv4(),
@@ -63,7 +63,7 @@ export function generateF2FRequest(userID: string, signinJourneyID: string): F2F
   }
 }
 
-export function generateDocumentUploadedRequest(userID: string): F2F_DOCUMENT_UPLOADED {
+export function generateDocumentUploadedRequest(userID: string): F2fDocumentUploaded {
   return {
     event_name: 'F2F_DOCUMENT_UPLOADED',
     event_id: uuidv4(),
@@ -82,7 +82,7 @@ export function generateDocumentUploadedRequest(userID: string): F2F_DOCUMENT_UP
   }
 }
 
-export function generateIPVRequest(userID: string, signinJourneyID: string): IPV_F2F_CRI_VC_CONSUMED {
+export function generateIPVRequest(userID: string, signinJourneyID: string): IpvF2fVcConsumed {
   const timestamp = new Date().toISOString()
   return {
     event_id: uuidv4(),

@@ -1,4 +1,4 @@
-export interface AUTH_IPV_AUTHORISATION_REQUESTED {
+export interface AuthIpvAuthorisationRequested {
   event_id: string
   client_id: string
   clientLandingPageUrl: string
@@ -13,7 +13,7 @@ export interface AUTH_IPV_AUTHORISATION_REQUESTED {
   }
 }
 
-export interface F2F_YOTI_START {
+export interface F2fYotiStart {
   event_id: string
   client_id: string
   clientLandingPageUrl: string
@@ -49,7 +49,7 @@ export interface F2F_YOTI_START {
   }
 }
 
-export interface F2F_DOCUMENT_UPLOADED {
+export interface F2fDocumentUploaded {
   event_name: string
   event_id: string
   user: {
@@ -66,7 +66,7 @@ export interface F2F_DOCUMENT_UPLOADED {
   timestamp: number
 }
 
-export interface IPV_F2F_CRI_VC_CONSUMED {
+export interface IpvF2fVcConsumed {
   event_id: string
   client_id: string
   clientLandingPageUrl: string

@@ -101,11 +101,11 @@ export function setup(): void {
 }
 
 type mfaType = 'SMS' | 'AUTH_APP'
-interface validateUserData {
+interface ValidateUserData {
   email: string
   mfaOption: mfaType
 }
-const validateData: validateUserData[] = new SharedArray('data', () =>
+const validateData: ValidateUserData[] = new SharedArray('data', () =>
   Array.from({ length: 10000 }, (_, i) => {
     const id: string = Math.floor(i / 2 + 1)
       .toString()

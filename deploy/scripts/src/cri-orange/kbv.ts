@@ -57,12 +57,12 @@ const kbvAnswersOBJ = {
 export function kbv(): void {
   const groups = groupMap.kbvScenario1
   let res: Response
-  interface kbvAnswers {
+  interface KbvAnswers {
     kbvAns1: string
     kbvAns2: string
     kbvAns3: string
   }
-  const kbvAnsJSON: kbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
+  const kbvAnsJSON: KbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
   iterationsStarted.add(1)
 
   // B01_KBV_01_CoreStubEditUserContinue

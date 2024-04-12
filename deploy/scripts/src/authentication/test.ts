@@ -97,11 +97,11 @@ export function setup(): void {
 }
 
 type mfaType = 'SMS' | 'AUTH_APP'
-interface signInData {
+interface SignInData {
   email: string
   mfaOption: mfaType
 }
-const dataSignIn: signInData[] = new SharedArray('data', () =>
+const dataSignIn: SignInData[] = new SharedArray('data', () =>
   Array.from({ length: 10000 }, (_, i) => {
     const id: string = Math.floor(i / 2 + 1)
       .toString()

@@ -54,7 +54,7 @@ const stubCreds = {
   password: getEnv('IDENTITY_CORE_STUB_PASSWORD')
 }
 
-interface nino {
+interface Nino {
   firstName: string
   lastName: string
   birthDay: string
@@ -63,7 +63,7 @@ interface nino {
   niNumber: string
 }
 
-const csvData1: nino[] = new SharedArray('csvDataNino', () => {
+const csvData1: Nino[] = new SharedArray('csvDataNino', () => {
   return open('./data/ninoCRIData.csv')
     .split('\n')
     .slice(1)

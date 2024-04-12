@@ -1,23 +1,23 @@
-import { uuidv4 } from '../../common/utils/jslib/index';
+import { uuidv4 } from '../../common/utils/jslib/index'
 
 export interface TicfAccountIntervention {
-  timestamp: number;
-  event_timestamp_ms: number;
-  event_name: string;
-  event_id: string;
-  component_id: string;
+  timestamp: number
+  event_timestamp_ms: number
+  event_name: string
+  event_id: string
+  component_id: string
   user: {
-    user_id: string;
-  };
+    user_id: string
+  }
   extensions: {
     intervention: {
-      intervention_code: string;
-      intervention_reason: string;
-      originating_component_id: string;
-      originator_reference_id: string;
-      requester_id: string;
-    };
-  };
+      intervention_code: string
+      intervention_reason: string
+      originating_component_id: string
+      originator_reference_id: string
+      requester_id: string
+    }
+  }
 }
 
 export function generatePersistIVRequest(userID: string, interventionCode: string): TicfAccountIntervention {
@@ -39,7 +39,7 @@ export function generatePersistIVRequest(userID: string, interventionCode: strin
         requester_id: uuidv4()
       }
     }
-  };
+  }
 }
 
 export enum interventionCodes {

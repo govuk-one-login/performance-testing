@@ -1,22 +1,22 @@
-import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
-import { group, fail } from 'k6';
-import { type Options } from 'k6/options';
-import http, { type Response } from 'k6/http';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
+import { group, fail } from 'k6'
+import { type Options } from 'k6/options'
+import http, { type Response } from 'k6/http'
 import {
   selectProfile,
   type ProfileList,
   describeProfile,
   createScenario,
   LoadProfile
-} from '../common/utils/config/load-profiles';
-import execution from 'k6/execution';
-import { b64encode } from 'k6/encoding';
-import { timeRequest } from '../common/utils/request/timing';
-import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions';
-import { sleepBetween } from '../common/utils/sleep/sleepBetween';
-import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl, getAccessToken } from './utils/authorization';
-import { getEnv } from '../common/utils/config/environment-variables';
-import { getThresholds } from '../common/utils/config/thresholds';
+} from '../common/utils/config/load-profiles'
+import execution from 'k6/execution'
+import { b64encode } from 'k6/encoding'
+import { timeRequest } from '../common/utils/request/timing'
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl, getAccessToken } from './utils/authorization'
+import { getEnv } from '../common/utils/config/environment-variables'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -27,9 +27,9 @@ const profiles: ProfileList = {
     ...createScenario('FaceToFace', LoadProfile.short, 3),
     ...createScenario('CIC', LoadProfile.short, 3, 3)
   }
-};
+}
 
-const loadProfile = selectProfile(profiles);
+const loadProfile = selectProfile(profiles)
 const groupMap = {
   CIC: [
     'B01_BAV_01_IPVStubCall',
@@ -71,16 +71,16 @@ const groupMap = {
     'B02_FaceToFace_11_SendAuthorizationCode',
     'B02_FaceToFace_12_SendBearerToken'
   ]
-} as const;
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
   thresholds: getThresholds(groupMap),
   tags: { name: '' }
-};
+}
 
 export function setup(): void {
-  describeProfile(loadProfile);
+  describeProfile(loadProfile)
 }
 
 const env = {
@@ -92,12 +92,12 @@ const env = {
     ipvStub: getEnv('IDENTITY_KIWI_F2F_STUB_URL'),
     target: getEnv('IDENTITY_KIWI_F2F_TARGET')
   }
-};
+}
 
 export function CIC(): void {
-  const groups = groupMap.CIC;
-  let res: Response;
-  iterationsStarted.add(1);
+  const groups = groupMap.CIC
+  let res: Response
+  iterationsStarted.add(1)
 
   // B01_CIC_01_IPVStubCall
   res = group(groups[0], () =>
@@ -114,9 +114,9 @@ export function CIC(): void {
         ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
       }
     )
-  );
-  const authorizeLocation = getAuthorizeauthorizeLocation(res);
-  const clientId = getClientID(res);
+  )
+  const authorizeLocation = getAuthorizeauthorizeLocation(res)
+  const clientId = getClientID(res)
 
   // B01_CIC_02_Authorize
   res = group(groups[1], () =>
@@ -124,7 +124,7 @@ export function CIC(): void {
       isStatusCode200,
       ...pageContentCheck('Enter your name exactly as it appears on your photo ID')
     })
-  );
+  )
 
   // B01_CIC_03_UserDetails
   res = group(groups[2], () =>
@@ -139,9 +139,9 @@ export function CIC(): void {
         }),
       { isStatusCode200, ...pageContentCheck('Enter your date of birth') }
     )
-  );
+  )
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B01_CIC_04_UserBirthdate
   res = group(groups[3], () =>
@@ -157,7 +157,7 @@ export function CIC(): void {
         }),
       { isStatusCode200, ...pageContentCheck('Confirm your details') }
     )
-  );
+  )
 
   // B01_CIC_05_CheckDetails
   res = group(groups[4], () =>
@@ -170,10 +170,10 @@ export function CIC(): void {
         'verify url body': (r) => r.url.includes(clientId)
       }
     )
-  );
-  const codeUrl = getCodeFromUrl(res.url);
+  )
+  const codeUrl = getCodeFromUrl(res.url)
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B01_CIC_06_SendAuthorizationCode
   res = group(groups[5], () =>
@@ -186,37 +186,37 @@ export function CIC(): void {
         }),
       { isStatusCode200, ...pageContentCheck('access_token') }
     )
-  );
+  )
 
-  const accessToken = getAccessToken(res);
+  const accessToken = getAccessToken(res)
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
-  const authHeader = `Bearer ${accessToken}`;
+  const authHeader = `Bearer ${accessToken}`
   const options = {
     headers: { Authorization: authHeader }
-  };
+  }
   // B01_CIC_07_SendBearerToken
   res = group(groups[6], () =>
     timeRequest(() => http.post(env.CIC.target + '/userinfo', {}, options), {
       isStatusCode200,
       ...pageContentCheck('credentialJWT')
     })
-  );
-  iterationsCompleted.add(1);
+  )
+  iterationsCompleted.add(1)
 }
 
 export function FaceToFace(): void {
-  const groups = groupMap.FaceToFace;
-  let res: Response;
-  const iteration = execution.scenario.iterationInInstance;
-  const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL'];
-  const path = paths[iteration % paths.length];
-  const expiry = randomDate(new Date(2024, 1, 1), new Date(2024, 12, 31));
-  const expiryDay = expiry.getDate().toString();
-  const expiryMonth = (expiry.getMonth() + 1).toString();
-  const expiryYear = expiry.getFullYear().toString();
-  iterationsStarted.add(1);
+  const groups = groupMap.FaceToFace
+  let res: Response
+  const iteration = execution.scenario.iterationInInstance
+  const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL']
+  const path = paths[iteration % paths.length]
+  const expiry = randomDate(new Date(2024, 1, 1), new Date(2024, 12, 31))
+  const expiryDay = expiry.getDate().toString()
+  const expiryMonth = (expiry.getMonth() + 1).toString()
+  const expiryYear = expiry.getFullYear().toString()
+  iterationsStarted.add(1)
 
   // B02_FaceToFace_01_IPVStubCall
   res = group(groups[0], () =>
@@ -233,9 +233,9 @@ export function FaceToFace(): void {
         ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
       }
     )
-  );
-  const authorizeLocation = getAuthorizeauthorizeLocation(res);
-  const clientId = getClientID(res);
+  )
+  const authorizeLocation = getAuthorizeauthorizeLocation(res)
+  const clientId = getClientID(res)
 
   // B02_FaceToFace_02_Authorize
   res = group(groups[1], () =>
@@ -243,9 +243,9 @@ export function FaceToFace(): void {
       isStatusCode200,
       ...pageContentCheck('How to prove your identity at a Post Office')
     })
-  );
+  )
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B02_FaceToFace_03_Continue
   res = group(groups[2], () =>
@@ -259,9 +259,9 @@ export function FaceToFace(): void {
         ...pageContentCheck('Choose which photo ID you can take to a Post Office')
       }
     )
-  );
+  )
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   switch (path) {
     case 'UKPassport':
@@ -278,9 +278,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('When does your passport expire?')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_05_UKPassport_PassportDetails
       res = group(groups[4], () =>
@@ -299,8 +299,8 @@ export function FaceToFace(): void {
             ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
-      );
-      break;
+      )
+      break
     case 'NationalIDEEA':
       // B02_FaceToFace_04_NationalIDEEA_ChoosePhotoId
       res = group(groups[5], () =>
@@ -315,9 +315,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('Does your national identity card have an expiry date?')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_05_NationalIDEEA_ExpiryOption
       res = group(groups[6], () =>
@@ -332,9 +332,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('When does your national identity card expire?')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_06_NationalIDEEA_Details
       res = group(groups[7], () =>
@@ -353,9 +353,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('Does your national identity card have your current address on it?')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_07_NationalIDEEA_CurrentAddress
       res = group(groups[8], () =>
@@ -372,9 +372,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('Select which country your national identity card is from')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_08_NationalIDEEA_WhichCountry
       res = group(groups[9], () =>
@@ -389,8 +389,8 @@ export function FaceToFace(): void {
             ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
-      );
-      break;
+      )
+      break
     case 'EU-DL':
       // B02_FaceToFace_04_EUDL_ChoosePhotoId
       res = group(groups[10], () =>
@@ -405,9 +405,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('Does your driving licence have an expiry date?')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_05_EUDL_ExpiryOption
       res = group(groups[11], () =>
@@ -422,8 +422,8 @@ export function FaceToFace(): void {
             ...pageContentCheck('When does your driving licence expire?')
           }
         )
-      );
-      sleepBetween(1, 3);
+      )
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_06_EUDL_Details
       res = group(groups[12], () =>
@@ -442,9 +442,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('Does your driving licence have your current address on it?')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_07_EUDL_CurrentAddress
       res = group(groups[13], () =>
@@ -461,9 +461,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('Select which country your driving licence is from')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_08_EUDL_WhichCountry
       res = group(groups[14], () =>
@@ -478,8 +478,8 @@ export function FaceToFace(): void {
             ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
-      );
-      break;
+      )
+      break
     case 'Non-UKPassport':
       // B02_FaceToFace_04_NonUKPassport_ChoosePhotoId
       res = group(groups[15], () =>
@@ -494,9 +494,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('Does your passport have an expiry date?')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_05_NonUKPassport_ExpiryOption
       res = group(groups[16], () =>
@@ -511,9 +511,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('When does your passport expire?')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_06_NonUKPassport_Details
       res = group(groups[17], () =>
@@ -532,9 +532,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('Select which country your passport is from')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_07_NonUKPassport_WhichCountry
       res = group(groups[18], () =>
@@ -549,8 +549,8 @@ export function FaceToFace(): void {
             ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
-      );
-      break;
+      )
+      break
     case 'BRP':
       // B02_FaceToFace_04_BRP_ChoosePhotoId
       res = group(groups[19], () =>
@@ -565,9 +565,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('When does your biometric residence permit (BRP) expire?')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_05_BRP_Details
       res = group(groups[20], () =>
@@ -586,8 +586,8 @@ export function FaceToFace(): void {
             ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
-      );
-      break;
+      )
+      break
     case 'UKDL':
       // B02_FaceToFace_04_UKDL_ChoosePhotoId
       res = group(groups[21], () =>
@@ -602,9 +602,9 @@ export function FaceToFace(): void {
             ...pageContentCheck('When does your driving licence expire?')
           }
         )
-      );
+      )
 
-      sleepBetween(1, 3);
+      sleepBetween(1, 3)
 
       // B02_FaceToFace_05_UKDL_Details
       res = group(groups[22], () =>
@@ -623,7 +623,7 @@ export function FaceToFace(): void {
             ...pageContentCheck('Does your driving licence have your current address on it?')
           }
         )
-      );
+      )
 
       // B02_FaceToFace_06_UKDL_CurrentAddress
       res = group(groups[23], () =>
@@ -638,13 +638,13 @@ export function FaceToFace(): void {
             ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
-      );
-      break;
+      )
+      break
     default:
-      fail('Invalid path');
+      fail('Invalid path')
   }
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B02_FaceToFace_08_FindPostOffice
   res = group(groups[24], () =>
@@ -659,9 +659,9 @@ export function FaceToFace(): void {
         ...pageContentCheck('Choose a Post Office where you can prove your identity')
       }
     )
-  );
+  )
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B02_FaceToFace_09_ChoosePostOffice
   res = group(groups[25], () =>
@@ -673,9 +673,9 @@ export function FaceToFace(): void {
         }),
       { isStatusCode200, ...pageContentCheck('Check your answers') }
     )
-  );
+  )
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B02_FaceToFace_10_CheckDetails
   res = group(groups[26], () =>
@@ -688,10 +688,10 @@ export function FaceToFace(): void {
         'verify url body': (r) => r.url.includes(clientId)
       }
     )
-  );
-  const codeUrl = getCodeFromUrl(res.url);
+  )
+  const codeUrl = getCodeFromUrl(res.url)
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B02_FaceToFace_11_SendAuthorizationCode
   res = group(groups[27], () =>
@@ -704,29 +704,29 @@ export function FaceToFace(): void {
         }),
       { isStatusCode200, ...pageContentCheck('access_token') }
     )
-  );
-  const accessToken = getAccessToken(res);
+  )
+  const accessToken = getAccessToken(res)
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
-  const authHeader = `Bearer ${accessToken}`;
+  const authHeader = `Bearer ${accessToken}`
   const options = {
     headers: {
       Authorization: authHeader
     }
-  };
+  }
   // B02_FaceToFace_12_SendBearerToken
   res = group(groups[28], () =>
     timeRequest(() => http.post(env.F2F.target + '/userinfo', {}, options), {
       'is status 202': (r) => r.status === 202,
       ...pageContentCheck('sub')
     })
-  );
-  iterationsCompleted.add(1);
+  )
+  iterationsCompleted.add(1)
 }
 
 function randomDate(start: Date, end: Date): Date {
-  const diff = Math.abs(+end - +start);
-  const min = Math.min(+end, +start);
-  return new Date(min + diff * Math.random());
+  const diff = Math.abs(+end - +start)
+  const min = Math.min(+end, +start)
+  return new Date(min + diff * Math.random())
 }

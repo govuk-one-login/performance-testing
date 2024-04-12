@@ -1,23 +1,23 @@
-import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
-import { type Options } from 'k6/options';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
+import { type Options } from 'k6/options'
 import {
   selectProfile,
   type ProfileList,
   describeProfile,
   createScenario,
   LoadProfile
-} from '../common/utils/config/load-profiles';
-import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs';
-import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen';
-import { type AssumeRoleOutput } from '../common/utils/aws/types';
-import { uuidv4 } from '../common/utils/jslib/index';
-import { group } from 'k6';
-import { timeRequest } from '../common/utils/request/timing';
-import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions';
-import { SharedArray } from 'k6/data';
-import http from 'k6/http';
-import { getEnv } from '../common/utils/config/environment-variables';
-import { getThresholds } from '../common/utils/config/thresholds';
+} from '../common/utils/config/load-profiles'
+import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
+import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen'
+import { type AssumeRoleOutput } from '../common/utils/aws/types'
+import { uuidv4 } from '../common/utils/jslib/index'
+import { group } from 'k6'
+import { timeRequest } from '../common/utils/request/timing'
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { SharedArray } from 'k6/data'
+import http from 'k6/http'
+import { getEnv } from '../common/utils/config/environment-variables'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -41,30 +41,30 @@ const profiles: ProfileList = {
       exec: 'dataCreationForRetrieve'
     }
   }
-};
+}
 
-const loadProfile = selectProfile(profiles);
+const loadProfile = selectProfile(profiles)
 const groupMap = {
   retrieveIV: ['B02_RetrieveIV_01_GetInterventionData']
-} as const;
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
   thresholds: getThresholds(groupMap),
   tags: { name: '' }
-};
+}
 
 export function setup(): void {
-  describeProfile(loadProfile);
+  describeProfile(loadProfile)
 }
 
 const env = {
   sqs_queue: getEnv('ACCOUNT_BRAVO_AIS_TxMASQS'),
   aisEnvURL: getEnv('ACCOUNT_BRAVO_AIS_URL')
-};
+}
 
 interface RetrieveUserID {
-  userID: string;
+  userID: string
 }
 
 const csvData: RetrieveUserID[] = new SharedArray('Retrieve Intervention User ID', function () {
@@ -74,32 +74,32 @@ const csvData: RetrieveUserID[] = new SharedArray('Retrieve Intervention User ID
     .map((userID) => {
       return {
         userID
-      };
-    });
-});
+      }
+    })
+})
 
-const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials;
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
   region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken
-});
-const sqs = new SQSClient(awsConfig);
+})
+const sqs = new SQSClient(awsConfig)
 
 export function persistIV(): void {
-  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`;
-  const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend);
-  const persistIVMessage = JSON.stringify(persistIVPayload);
-  iterationsStarted.add(1);
-  sqs.sendMessage(env.sqs_queue, persistIVMessage);
-  iterationsCompleted.add(1);
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend)
+  const persistIVMessage = JSON.stringify(persistIVPayload)
+  iterationsStarted.add(1)
+  sqs.sendMessage(env.sqs_queue, persistIVMessage)
+  iterationsCompleted.add(1)
 }
 
 export function retrieveIV(): void {
-  const groups = groupMap.retrieveIV;
-  const retrieveData = csvData[Math.floor(Math.random() * csvData.length)];
-  iterationsStarted.add(1);
+  const groups = groupMap.retrieveIV
+  const retrieveData = csvData[Math.floor(Math.random() * csvData.length)]
+  iterationsStarted.add(1)
 
   // B02_RetrieveIV_01_GetInterventionData
   group(groups[0], () =>
@@ -107,16 +107,16 @@ export function retrieveIV(): void {
       isStatusCode200,
       ...pageContentCheck('Perf Testing')
     })
-  );
-  iterationsCompleted.add(1);
+  )
+  iterationsCompleted.add(1)
 }
 
 export function dataCreationForRetrieve(): void {
-  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`;
-  iterationsStarted.add(1);
-  const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.block);
-  const persistIVMessage = JSON.stringify(persistIVPayload);
-  sqs.sendMessage(env.sqs_queue, persistIVMessage);
-  console.log(userID);
-  iterationsCompleted.add(1);
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  iterationsStarted.add(1)
+  const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.block)
+  const persistIVMessage = JSON.stringify(persistIVPayload)
+  sqs.sendMessage(env.sqs_queue, persistIVMessage)
+  console.log(userID)
+  iterationsCompleted.add(1)
 }

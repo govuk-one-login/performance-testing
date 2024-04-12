@@ -1,26 +1,26 @@
-import http from 'k6/http';
-import { group } from 'k6';
-import { buildFrontendUrl } from '../utils/url';
-import { validatePageRedirect, validateLocationHeader, validateQueryParam } from '../utils/assertions';
-import { parseTestClientResponse, postTestClientStart } from '../utils/test-client';
-import { timeRequest } from '../../common/utils/request/timing';
+import http from 'k6/http'
+import { group } from 'k6'
+import { buildFrontendUrl } from '../utils/url'
+import { validatePageRedirect, validateLocationHeader, validateQueryParam } from '../utils/assertions'
+import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
+import { timeRequest } from '../../common/utils/request/timing'
 import {
   isStatusCode200,
   isStatusCode201,
   isStatusCode302,
   pageContentCheck
-} from '../../common/utils/checks/assertions';
+} from '../../common/utils/checks/assertions'
 
 export function getSessionIdFromCookieJar(): string {
-  const jar = http.cookieJar();
-  return jar.cookiesForURL(buildFrontendUrl('')).sessionId.toString();
+  const jar = http.cookieJar()
+  return jar.cookiesForURL(buildFrontendUrl('')).sessionId.toString()
 }
 
 export function startJourney(): void {
   const testClientRes = group('POST test client /start', () =>
     timeRequest(() => postTestClientStart(), { isStatusCode201 })
-  );
-  const authorizeUrl = parseTestClientResponse(testClientRes, 'WebLocation');
+  )
+  const authorizeUrl = parseTestClientResponse(testClientRes, 'WebLocation')
 
   group('GET /authorize', () =>
     timeRequest(
@@ -34,7 +34,7 @@ export function startJourney(): void {
         ...pageContentCheck('Are you on a computer or a tablet right now?')
       }
     )
-  );
+  )
 }
 
 export function postSelectDevice(): void {
@@ -52,7 +52,7 @@ export function postSelectDevice(): void {
         ...pageContentCheck('Which smartphone are you using?')
       }
     )
-  );
+  )
 }
 
 export function postSelectSmartphone(): void {
@@ -70,7 +70,7 @@ export function postSelectSmartphone(): void {
         ...pageContentCheck('Do you have a valid passport?')
       }
     )
-  );
+  )
 }
 
 export function postValidPassport(): void {
@@ -88,7 +88,7 @@ export function postValidPassport(): void {
         ...pageContentCheck('Does your passport have this symbol on the cover?')
       }
     )
-  );
+  )
 }
 
 export function postBiometricChip(): void {
@@ -106,7 +106,7 @@ export function postBiometricChip(): void {
         ...pageContentCheck('Which iPhone model do you have?')
       }
     )
-  );
+  )
 }
 
 export function postIphoneModel(): void {
@@ -124,7 +124,7 @@ export function postIphoneModel(): void {
         ...pageContentCheck('Use your passport and a GOV.UK app to confirm your identity')
       }
     )
-  );
+  )
 }
 
 export function postIdCheckApp(): void {
@@ -134,7 +134,7 @@ export function postIdCheckApp(): void {
       ...validatePageRedirect('/workingCamera'),
       ...pageContentCheck('Does your smartphone have a working camera?')
     })
-  );
+  )
 }
 
 export function postWorkingCamera(): void {
@@ -152,7 +152,7 @@ export function postWorkingCamera(): void {
         ...pageContentCheck('The app uses flashing colours. Do you want to continue?')
       }
     )
-  );
+  )
 }
 
 export function postFlashingWarning(): void {
@@ -170,14 +170,14 @@ export function postFlashingWarning(): void {
         ...pageContentCheck('Download the GOV.UK ID Check app')
       }
     )
-  );
+  )
 }
 
 export function getRedirect(): void {
   group('GET /redirect', () => {
     const redirectUrl = buildFrontendUrl('/redirect', {
       sessionId: getSessionIdFromCookieJar()
-    });
+    })
 
     timeRequest(
       () =>
@@ -190,15 +190,15 @@ export function getRedirect(): void {
         validateLocationHeader,
         ...validateQueryParam('code')
       }
-    );
-  });
+    )
+  })
 }
 
 export function getAbortCommand(): void {
   group('GET /abortCommand', () => {
     const abortCommandUrl = buildFrontendUrl('/abortCommand', {
       sessionId: getSessionIdFromCookieJar()
-    });
+    })
 
     timeRequest(
       () =>
@@ -211,6 +211,6 @@ export function getAbortCommand(): void {
         validateLocationHeader,
         ...validateQueryParam('error')
       }
-    );
-  });
+    )
+  })
 }

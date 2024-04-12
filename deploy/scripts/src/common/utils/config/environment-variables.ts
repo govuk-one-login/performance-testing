@@ -11,9 +11,9 @@
  * const profile = getEnv('PROFILE', false) ?? 'smoke'  // Optional variable defaults to 'smoke' if variable does not exist
  */
 export function getEnv(name: string, required: boolean = true): string {
-  const variable = __ENV[name];
+  const variable = __ENV[name]
   if (required && variable === undefined) {
-    throw new Error(`Environment variable '${name}' does not exist.`);
+    throw new Error(`Environment variable '${name}' does not exist.`)
   }
-  return variable;
+  return variable
 }

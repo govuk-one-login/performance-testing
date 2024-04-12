@@ -1,8 +1,8 @@
-import { type SpotRequest } from '../../spot/requestGenerator/spotReqFormat';
-import { uuidv4 } from '../../common/utils/jslib/index';
+import { type SpotRequest } from '../../spot/requestGenerator/spotReqFormat'
+import { uuidv4 } from '../../common/utils/jslib/index'
 
 export function generateRequest(currTime: string): SpotRequest {
-  const audClientID = uuidv4();
+  const audClientID = uuidv4()
   const sampleSpotRequest: SpotRequest = {
     in_claims: {
       'https://vocab.account.gov.uk/v1/credentialJWT': [
@@ -26,7 +26,7 @@ export function generateRequest(currTime: string): SpotRequest {
       client_session_id: uuidv4()
     },
     out_sub: 'urn:fdc:gov.uk:2022:JG0RJI1pYbnanbvPs-j4j5-a-PFcmhry9Qu9NCEp5d4'
-  };
+  }
 
-  return sampleSpotRequest;
+  return sampleSpotRequest
 }

@@ -1,14 +1,14 @@
-import { type Stage, type Scenario } from 'k6/options';
+import { type Stage, type Scenario } from 'k6/options'
 
-export type ScenarioList = Record<string, Scenario>;
-export type ProfileList = Record<string, ScenarioList>;
+export type ScenarioList = Record<string, Scenario>
+export type ProfileList = Record<string, ScenarioList>
 export interface Profile {
-  name: string;
-  scenarios: ScenarioList;
+  name: string
+  scenarios: ScenarioList
 }
 export interface ProfileConfig {
-  profile: string;
-  scenario?: string;
+  profile: string
+  scenario?: string
 }
 
 /**
@@ -19,14 +19,14 @@ export interface ProfileConfig {
  * @returns {Profile} Selected load profile
  */
 export function getProfile(profiles: ProfileList, profileName: string): Profile {
-  if (profileName == null) throw new Error('No profile specified');
+  if (profileName == null) throw new Error('No profile specified')
   if (profileName in profiles) {
     return {
       name: profileName,
       scenarios: profiles[profileName]
-    };
+    }
   }
-  throw new Error(`Selection '${profileName}' does not exist. Valid options are '${Object.keys(profiles).toString()}'`);
+  throw new Error(`Selection '${profileName}' does not exist. Valid options are '${Object.keys(profiles).toString()}'`)
 }
 
 /**
@@ -38,13 +38,13 @@ export function getProfile(profiles: ProfileList, profileName: string): Profile 
  * @returns {ScenarioList} Subset of scenarios as defined by the selection string
  */
 export function getScenarios(scenarios: ScenarioList, selections: string | undefined): ScenarioList {
-  let enabled: ScenarioList = {};
+  let enabled: ScenarioList = {}
   selections == null || selections === '' || selections.toLowerCase() === 'all' // Enable all scenarios is selection string is null, empty or set to 'all'
     ? (enabled = scenarios)
     : selections.split(',').forEach((scenario) => {
-        enabled[scenario] = scenarios[scenario];
-      });
-  return enabled;
+        enabled[scenario] = scenarios[scenario]
+      })
+  return enabled
 }
 
 /**
@@ -55,7 +55,7 @@ export function getScenarios(scenarios: ScenarioList, selections: string | undef
 export const defaultConfig: ProfileConfig = {
   profile: __ENV.PROFILE ?? 'smoke',
   scenario: __ENV.SCENARIO ?? 'all'
-};
+}
 
 /**
  * Selects load profile and scenarios based on config selections
@@ -65,11 +65,11 @@ export const defaultConfig: ProfileConfig = {
  * @returns {Profile} Object containing the selected load profile and scenarios
  */
 export function selectProfile(profiles: ProfileList, config: ProfileConfig = defaultConfig): Profile {
-  const profile = getProfile(profiles, config.profile);
+  const profile = getProfile(profiles, config.profile)
   return {
     name: profile.name,
     scenarios: getScenarios(profile.scenarios, config.scenario)
-  };
+  }
 }
 
 /**
@@ -82,8 +82,8 @@ export function selectProfile(profiles: ProfileList, config: ProfileConfig = def
  * }
  */
 export function describeProfile(profile: Profile): void {
-  console.log(`Load Profile: <\x1b[32m${profile.name}\x1b[0m>`);
-  console.log(`Scenarios: <\x1b[34m${Object.keys(profile.scenarios).join('\x1b[0m|\x1b[34m')}\x1b[0m>`);
+  console.log(`Load Profile: <\x1b[32m${profile.name}\x1b[0m>`)
+  console.log(`Scenarios: <\x1b[34m${Object.keys(profile.scenarios).join('\x1b[0m|\x1b[34m')}\x1b[0m>`)
 }
 
 export enum LoadProfile {
@@ -97,25 +97,25 @@ function createStages(type: LoadProfile, target: number): Stage[] {
     case LoadProfile.smoke:
       return [
         { target, duration: '60s' } // 1 minute smoke test
-      ];
+      ]
     case LoadProfile.short:
       return [
         { target, duration: '5m' }, // Ramps up to target throughput in 5 minutes
         { target, duration: '15m' }, // Maintain steady state at target throughput for 15 minutes
         { target: 0, duration: '5m' } // Ramp down over 5 minutes
-      ];
+      ]
     case LoadProfile.full:
       return [
         { target, duration: '15m' }, // Ramps up to target throughput in 15 minutes
         { target, duration: '30m' }, // Maintain steady state at target throughput for 30 minutes
         { target: 0, duration: '5m' } // Ramp down over 5 minutes
-      ];
+      ]
     case LoadProfile.deployment:
       return [
         { target, duration: '5m' }, // Ramp up to target throughput over 5 minutes
         { target, duration: '20m' }, // Maintain steady state at target throughput for 20 minutes
         { target: 0, duration: '5m' } // Ramp down over 5 minutes
-      ];
+      ]
   }
 }
 
@@ -144,10 +144,10 @@ export function createScenario(
   target: number = 1,
   duration: number = 30
 ): ScenarioList {
-  const list: ScenarioList = {};
-  const smoke = type === LoadProfile.smoke;
-  const preAllocatedVUs = smoke ? 1 : (target * duration) / 2;
-  const maxVUs = smoke ? 1 : target * duration;
+  const list: ScenarioList = {}
+  const smoke = type === LoadProfile.smoke
+  const preAllocatedVUs = smoke ? 1 : (target * duration) / 2
+  const maxVUs = smoke ? 1 : target * duration
   list[exec] = {
     executor: 'ramping-arrival-rate',
     startRate: 1,
@@ -156,6 +156,6 @@ export function createScenario(
     maxVUs,
     stages: createStages(type, target),
     exec
-  };
-  return list;
+  }
+  return list
 }

@@ -1,21 +1,21 @@
-import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
-import { group, fail } from 'k6';
-import { type Options } from 'k6/options';
-import http, { type Response } from 'k6/http';
-import { SharedArray } from 'k6/data';
-import exec from 'k6/execution';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
+import { group, fail } from 'k6'
+import { type Options } from 'k6/options'
+import http, { type Response } from 'k6/http'
+import { SharedArray } from 'k6/data'
+import exec from 'k6/execution'
 import {
   selectProfile,
   type ProfileList,
   describeProfile,
   createScenario,
   LoadProfile
-} from '../common/utils/config/load-profiles';
-import { env, encodedCredentials } from './utils/config';
-import { timeRequest } from '../common/utils/request/timing';
-import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions';
-import { sleepBetween } from '../common/utils/sleep/sleepBetween';
-import { getThresholds } from '../common/utils/config/thresholds';
+} from '../common/utils/config/load-profiles'
+import { env, encodedCredentials } from './utils/config'
+import { timeRequest } from '../common/utils/request/timing'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -27,9 +27,9 @@ const profiles: ProfileList = {
   stress: {
     ...createScenario('address', LoadProfile.full, 65)
   }
-};
+}
 
-const loadProfile = selectProfile(profiles);
+const loadProfile = selectProfile(profiles)
 const groupMap = {
   address: [
     'B02_Address_01_AddressCRIEntryFromStub',
@@ -42,20 +42,20 @@ const groupMap = {
     'B02_Address_05_ConfirmDetails::01_AddCRICall',
     'B02_Address_05_ConfirmDetails::02_CoreStubCall'
   ]
-} as const;
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
   thresholds: getThresholds(groupMap),
   tags: { name: '' }
-};
+}
 
 export function setup(): void {
-  describeProfile(loadProfile);
+  describeProfile(loadProfile)
 }
 
 interface Address {
-  postcode: string;
+  postcode: string
 }
 
 const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
@@ -65,15 +65,15 @@ const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
     .map((postcode) => {
       return {
         postcode
-      };
-    });
-});
+      }
+    })
+})
 
 export function address(): void {
-  const groups = groupMap.address;
-  let res: Response;
-  const user1Address = csvData1[exec.scenario.iterationInTest % csvData1.length];
-  iterationsStarted.add(1);
+  const groups = groupMap.address
+  let res: Response
+  const user1Address = csvData1[exec.scenario.iterationInTest % csvData1.length]
+  iterationsStarted.add(1)
 
   // B02_Address_01_AddressCRIEntryFromStub
   group(groups[0], () => {
@@ -88,18 +88,18 @@ export function address(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_AddCRICall
       res = group(groups[2].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Find your address')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B02_Address_02_SearchPostCode
   res = group(groups[3], () =>
@@ -111,9 +111,9 @@ export function address(): void {
         }),
       { isStatusCode200, ...pageContentCheck('Choose your address') }
     )
-  );
+  )
 
-  const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found');
+  const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found')
 
   // B02_Address_03_SelectAddress
   res = group(groups[4], () =>
@@ -125,9 +125,9 @@ export function address(): void {
         }),
       { isStatusCode200, ...pageContentCheck('Check your address') }
     )
-  );
+  )
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B02_Address_04_VerifyAddress
   res = group(groups[5], () =>
@@ -139,9 +139,9 @@ export function address(): void {
         }),
       { isStatusCode200, ...pageContentCheck('Confirm your details') }
     )
-  );
+  )
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B02_Address_05_ConfirmDetails
   group(groups[6], () => {
@@ -151,7 +151,7 @@ export function address(): void {
         timeRequest(() => res.submitForm({ params: { redirects: 1 } }), {
           isStatusCode302
         })
-      );
+      )
       // 02_CoreStubCall
       res = group(groups[8].split('::')[1], () =>
         timeRequest(
@@ -161,8 +161,8 @@ export function address(): void {
             }),
           { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
         )
-      );
-    }, {});
-  });
-  iterationsCompleted.add(1);
+      )
+    }, {})
+  })
+  iterationsCompleted.add(1)
 }

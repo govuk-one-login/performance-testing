@@ -1,4 +1,4 @@
-import { sleep } from 'k6';
+import { sleep } from 'k6'
 
 /**
  * Utility to `sleep` a VU for a random time between a given minimum and
@@ -10,5 +10,5 @@ import { sleep } from 'k6';
  * sleep(0.5, 1.5) // Sleeps for between half a second and 1.5 seconds
  */
 export function sleepBetween(min: number, max: number): void {
-  sleep(min + Math.random() * Math.abs(max - min));
+  sleep(min + Math.random() * Math.abs(max - min))
 }

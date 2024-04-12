@@ -8,7 +8,7 @@ export const addressPayloadDL = JSON.stringify({
       validFrom: '1952-01-01'
     }
   ]
-});
+})
 
 export const fraudPayloadDL = JSON.stringify({
   address: [
@@ -43,7 +43,7 @@ export const fraudPayloadDL = JSON.stringify({
       value: '1970-01-01'
     }
   ]
-});
+})
 
 export const kbvPayloaDL = JSON.stringify({
   address: [
@@ -78,7 +78,7 @@ export const kbvPayloaDL = JSON.stringify({
       value: '1970-01-01'
     }
   ]
-});
+})
 
 export const drivingLicencePayload = JSON.stringify({
   name: [
@@ -112,4 +112,4 @@ export const drivingLicencePayload = JSON.stringify({
       value: '1970-01-01'
     }
   ]
-});
+})

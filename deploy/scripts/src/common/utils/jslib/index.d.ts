@@ -1,4 +1,4 @@
-import { type Stage } from 'k6/options';
+import { type Stage } from 'k6/options'
 
 /**
  * Function that returns a string from between two other strings.
@@ -19,7 +19,7 @@ import { type Stage } from 'k6/options';
  * const allMessages = findBetween(response, '<div class="message">', '</div>', true)
  * console.log(allMessages.length) // 2
  */
-export function findBetween(content: string, left: string, right: string, repeat?: boolean): string | string[];
+export function findBetween(content: string, left: string, right: string, repeat?: boolean): string | string[]
 
 /**
  * Function to create `stages` producing a normal distribution (bell-curve) of VUs for a test.
@@ -36,7 +36,7 @@ export function findBetween(content: string, left: string, right: string, repeat
  *   stages: normalDistributionStages(10, 20, 5)
  * }
  */
-export function normalDistributionStages(maxVus: number, durationSeconds: number, numberOfStages?: number): Stage[];
+export function normalDistributionStages(maxVus: number, durationSeconds: number, numberOfStages?: number): Stage[]
 
 /**
  * Function returns a random number between the specified range.
@@ -50,7 +50,7 @@ export function normalDistributionStages(maxVus: number, durationSeconds: number
  * @example
  * sleep(randomIntBetween(1, 5)); // sleep between 1 and 5 seconds.
  */
-export function randomIntBetween(min: number, max: number): number;
+export function randomIntBetween(min: number, max: number): number
 
 /**
  * Function returns a random item from an array.
@@ -63,7 +63,7 @@ export function randomIntBetween(min: number, max: number): number;
  * const randomName = randomItem(names)
  * console.log(`Hello, my name is ${randomName}`)
  */
-export function randomItem<T>(arrayOfItems: T[]): T;
+export function randomItem<T>(arrayOfItems: T[]): T
 
 /**
  * Function returns a random string of a given length, optionally selected from a custom character set.
@@ -82,7 +82,7 @@ export function randomItem<T>(arrayOfItems: T[]): T;
  * const randomCharacterWeighted = randomString(1, `AAAABBBCCD`)
  * console.log(`Chose a random character ${randomCharacterWeighted}`)
  */
-export function randomString(length: number, charset?: string): string;
+export function randomString(length: number, charset?: string): string
 
 /**
  * Function returns a random uuid v4 in a string form.
@@ -98,4 +98,4 @@ export function randomString(length: number, charset?: string): string;
  * const randomUUID = uuidv4()
  * console.log(randomUUID) // 35acae14-f7cb-468a-9866-1fc45713149a
  */
-export function uuidv4(secure?: boolean): string;
+export function uuidv4(secure?: boolean): string

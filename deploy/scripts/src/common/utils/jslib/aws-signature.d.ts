@@ -32,16 +32,16 @@ export class SignatureV4 {
    * })
    */
   constructor(options: {
-    service: string;
-    region: string;
+    service: string
+    region: string
     credentials: {
-      accessKeyId: string;
-      secretAccessKey: string;
-      sessionToken: string;
-    };
-    uriEscapePath: boolean;
-    applyChecksum: boolean;
-  });
+      accessKeyId: string
+      secretAccessKey: string
+      sessionToken: string
+    }
+    uriEscapePath: boolean
+    applyChecksum: boolean
+  })
 
   /**
    * SignatureV4.sign() signs an HTTP request with the AWS Signature V4 algorithm.
@@ -73,23 +73,23 @@ export class SignatureV4 {
    */
   sign(
     request: {
-      method: string;
-      protocol: 'http' | 'https';
-      hostname: string;
-      path: string;
-      headers: Record<string, string>;
-      body?: string | ArrayBuffer;
-      query?: Record<string, string>;
+      method: string
+      protocol: 'http' | 'https'
+      hostname: string
+      path: string
+      headers: Record<string, string>
+      body?: string | ArrayBuffer
+      query?: Record<string, string>
     },
     overrides?: {
-      signingDate?: Date;
-      signingService?: string;
-      signingRegion?: string;
-      unsignableHeaders?: Set<string>;
-      signableHeaders?: Set<string>;
+      signingDate?: Date
+      signingService?: string
+      signingRegion?: string
+      unsignableHeaders?: Set<string>
+      signableHeaders?: Set<string>
     }
   ): {
-    headers: Record<string, string>;
-    url: string;
-  };
+    headers: Record<string, string>
+    url: string
+  }
 }

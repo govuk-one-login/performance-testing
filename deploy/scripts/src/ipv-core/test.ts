@@ -1,26 +1,26 @@
-import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
-import encoding from 'k6/encoding';
-import { group } from 'k6';
-import { type Options } from 'k6/options';
-import http, { type Response } from 'k6/http';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
+import encoding from 'k6/encoding'
+import { group } from 'k6'
+import { type Options } from 'k6/options'
+import http, { type Response } from 'k6/http'
 import {
   selectProfile,
   type ProfileList,
   describeProfile,
   createScenario,
   LoadProfile
-} from '../common/utils/config/load-profiles';
+} from '../common/utils/config/load-profiles'
 // import { getStaticResources } from '../common/utils/request/static'
-import { timeRequest } from '../common/utils/request/timing';
-import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData';
-import { addressPayloadDL, kbvPayloaDL, fraudPayloadDL, drivingLicencePayload } from './data/drivingLicenceData';
-import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions';
-import { sleepBetween } from '../common/utils/sleep/sleepBetween';
-import { SharedArray } from 'k6/data';
-import { uuidv4 } from '../common/utils/jslib/index';
-import execution from 'k6/execution';
-import { getEnv } from '../common/utils/config/environment-variables';
-import { getThresholds } from '../common/utils/config/thresholds';
+import { timeRequest } from '../common/utils/request/timing'
+import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
+import { addressPayloadDL, kbvPayloaDL, fraudPayloadDL, drivingLicencePayload } from './data/drivingLicenceData'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { SharedArray } from 'k6/data'
+import { uuidv4 } from '../common/utils/jslib/index'
+import execution from 'k6/execution'
+import { getEnv } from '../common/utils/config/environment-variables'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -52,9 +52,9 @@ const profiles: ProfileList = {
       exec: 'passport'
     }
   }
-};
+}
 
-const loadProfile = selectProfile(profiles);
+const loadProfile = selectProfile(profiles)
 const groupMap = {
   passport: [
     'B01_Passport_01_LaunchOrchestratorStub',
@@ -130,21 +130,21 @@ const groupMap = {
     'B03_IDReuse_02_ClickContinue::01_CoreCall',
     'B03_IDReuse_02_ClickContinue::02_OrchStub'
   ]
-} as const;
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
   thresholds: getThresholds(groupMap),
   tags: { name: '' }
-};
+}
 
 export function setup(): void {
-  describeProfile(loadProfile);
+  describeProfile(loadProfile)
 }
 
 interface IDReuseUserID {
-  userID: string;
-  emailID: string;
+  userID: string
+  emailID: string
 }
 
 const csvData: IDReuseUserID[] = new SharedArray('ID Reuse User ID', function () {
@@ -152,36 +152,36 @@ const csvData: IDReuseUserID[] = new SharedArray('ID Reuse User ID', function ()
     .split('\n')
     .slice(1)
     .map((s) => {
-      const data = s.split(',');
-      return { userID: data[0], emailID: data[1] };
-    });
-});
+      const data = s.split(',')
+      return { userID: data[0], emailID: data[1] }
+    })
+})
 
-const environment = getEnv('ENVIRONMENT').toLocaleUpperCase();
-const validEnvironments = ['BUILD', 'DEV'];
+const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
+const validEnvironments = ['BUILD', 'DEV']
 if (!validEnvironments.includes(environment))
-  throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`);
+  throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 
 const env = {
   orchStubEndPoint: __ENV[`IDENTITY_${environment}_ORCH_STUB_URL`],
   ipvCoreURL: __ENV[`IDENTITY_${environment}_CORE_URL`]
   // staticResources: getEnv('K6_NO_STATIC_RESOURCES') !== 'true'
-};
+}
 
 const stubCreds = {
   userName: getEnv('IDENTITY_ORCH_STUB_USERNAME'),
   password: getEnv('IDENTITY_ORCH_STUB_PASSWORD')
-};
+}
 
 export function passport(): void {
-  const groups = groupMap.passport;
-  let res: Response;
-  const credentials = `${stubCreds.userName}:${stubCreds.password}`;
-  const encodedCredentials = encoding.b64encode(credentials);
-  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, ''); // YYMMDDTHHmm
-  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0');
-  const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`;
-  iterationsStarted.add(1);
+  const groups = groupMap.passport
+  let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
+  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0')
+  const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
+  iterationsStarted.add(1)
   // B01_Passport_01_LaunchOrchestratorStub
   res = group(groups[0], () =>
     timeRequest(
@@ -191,12 +191,12 @@ export function passport(): void {
         }),
       { isStatusCode200, ...pageContentCheck('Enter userId manually') }
     )
-  );
+  )
 
-  const userId = getUserId(res);
-  const signInJourneyId = getSignInJourneyId(res);
+  const userId = getUserId(res)
+  const signInJourneyId = getSignInJourneyId(res)
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B01_Passport_02_GoToFullJourneyRoute
   res = group(groups[1], () =>
@@ -208,18 +208,18 @@ export function passport(): void {
           {
             headers: { Authorization: `Basic ${encodedCredentials}` }
           }
-        );
+        )
         // if (env.staticResources) getStaticResources(response)
-        return response;
+        return response
       },
       {
         isStatusCode200,
         ...pageContentCheck('Tell us if you have one of the following types of photo ID')
       }
     )
-  );
+  )
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B01_Passport_03_ClickContinueStartPage
   group(groups[2], () => {
@@ -234,18 +234,18 @@ export function passport(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_DCMAWStub
       res = group(groups[4].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('DOC Checking App (Stub)')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B01_Passport_04_DCMAWContinue
   group(groups[5], () => {
@@ -263,18 +263,18 @@ export function passport(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[7].split('::')[1], () =>
         timeRequest(() => http.get(env.ipvCoreURL + res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Enter your UK passport details and answer security questions online')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B01_Passport_05_ContinueOnPYIStartPage
   group(groups[8], () => {
@@ -289,18 +289,18 @@ export function passport(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_PassStub
       res = group(groups[10].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('UK Passport (Stub)')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B01_Passport_06_PassportDataContinue
   group(groups[11], () => {
@@ -319,24 +319,24 @@ export function passport(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[13].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location, { redirects: 0 }), {
           isStatusCode302
         })
-      );
+      )
       // 03_AddStub
       res = group(groups[14].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Address (Stub)')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B01_Passport_07_AddrDataContinue
   group(groups[15], () => {
@@ -351,24 +351,24 @@ export function passport(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[17].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location, { redirects: 0 }), {
           isStatusCode302
         })
-      );
+      )
       // 03_FraudStub
       res = group(groups[18].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Fraud Check (Stub)')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B01_Passport_08_FraudDataContinue
   group(groups[19], () => {
@@ -386,18 +386,18 @@ export function passport(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[21].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Answer security questions')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B01_Passport_09_PreKBVTransition
   group(groups[22], () => {
@@ -411,18 +411,18 @@ export function passport(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_KBVStub
       res = group(groups[24].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Knowledge Based Verification (Stub)')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B01_Passport_10_KBVDataContinue
   group(groups[25], () => {
@@ -440,18 +440,18 @@ export function passport(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[27].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('You’ve successfully proved your identity')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B01_Passport_11_ContinuePYISuccessPage
   group(groups[28], () => {
@@ -465,7 +465,7 @@ export function passport(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_OrchStub
       res = group(groups[30].split('::')[1], () =>
         timeRequest(
@@ -475,21 +475,21 @@ export function passport(): void {
             }),
           { isStatusCode200, ...pageContentCheck('User information') }
         )
-      );
-    }, {});
-  });
-  iterationsCompleted.add(1);
+      )
+    }, {})
+  })
+  iterationsCompleted.add(1)
 }
 
 export function drivingLicence(): void {
-  const groups = groupMap.drivingLicence;
-  let res: Response;
-  const credentials = `${stubCreds.userName}:${stubCreds.password}`;
-  const encodedCredentials = encoding.b64encode(credentials);
-  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, ''); // YYMMDDTHHmm
-  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0');
-  const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`;
-  iterationsStarted.add(1);
+  const groups = groupMap.drivingLicence
+  let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
+  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0')
+  const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
+  iterationsStarted.add(1)
 
   // B02_DrivingLicence_01_LaunchOrchestratorStub
   res = group(groups[0], () =>
@@ -500,11 +500,11 @@ export function drivingLicence(): void {
         }),
       { isStatusCode200, ...pageContentCheck('Enter userId manually') }
     )
-  );
-  const userId = getUserId(res);
-  const signInJourneyId = getSignInJourneyId(res);
+  )
+  const userId = getUserId(res)
+  const signInJourneyId = getSignInJourneyId(res)
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_02_SelectUserIDContinue
   res = group(groups[1], () =>
@@ -516,18 +516,18 @@ export function drivingLicence(): void {
           {
             headers: { Authorization: `Basic ${encodedCredentials}` }
           }
-        );
+        )
         // if (env.staticResources) getStaticResources(response)
-        return response;
+        return response
       },
       {
         isStatusCode200,
         ...pageContentCheck('Tell us if you have one of the following types of photo ID')
       }
     )
-  );
+  )
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_03_ContinueStartPage
   group(groups[2], () => {
@@ -542,18 +542,18 @@ export function drivingLicence(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_DCMAWStub
       res = group(groups[4].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('DOC Checking App (Stub)')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_04_DCMAWContinue
   group(groups[5], () => {
@@ -571,18 +571,18 @@ export function drivingLicence(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[7].split('::')[1], () =>
         timeRequest(() => http.get(env.ipvCoreURL + res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Enter your UK photocard driving licence details and answer security questions online')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_05_ContinueOnPYIStartPage
   group(groups[8], () => {
@@ -597,18 +597,18 @@ export function drivingLicence(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_DLStub
       res = group(groups[10].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Driving Licence (Stub)')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_06_DrivingLicenceDataContinue
   group(groups[11], () => {
@@ -628,24 +628,24 @@ export function drivingLicence(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[13].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location, { redirects: 0 }), {
           isStatusCode302
         })
-      );
+      )
       // 03_AddStub
       res = group(groups[14].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Address (Stub)')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_07_AddrDataContinue
   group(groups[15], () => {
@@ -660,24 +660,24 @@ export function drivingLicence(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[17].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location, { redirects: 0 }), {
           isStatusCode302
         })
-      );
+      )
       // 03_FraudStub
       res = group(groups[18].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Fraud Check (Stub)')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_08_FraudDataContinue
   group(groups[19], () => {
@@ -696,18 +696,18 @@ export function drivingLicence(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[21].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Answer security questions')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_09_PreKBVTransition
   group(groups[22], () => {
@@ -721,18 +721,18 @@ export function drivingLicence(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_KBVStub
       res = group(groups[24].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Knowledge Based Verification (Stub)')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_10_KBVDataContinue
   group(groups[25], () => {
@@ -750,18 +750,18 @@ export function drivingLicence(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[27].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('Continue to the service you want to use')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_11_ContinueDrivingLicenceSuccessPage
   group(groups[28], () => {
@@ -775,7 +775,7 @@ export function drivingLicence(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_OrchStub
       res = group(groups[30].split('::')[1], () =>
         timeRequest(
@@ -785,20 +785,20 @@ export function drivingLicence(): void {
             }),
           { isStatusCode200, ...pageContentCheck('User information') }
         )
-      );
-    }, {});
-  });
-  iterationsCompleted.add(1);
+      )
+    }, {})
+  })
+  iterationsCompleted.add(1)
 }
 
 export function idReuse(): void {
-  const groups = groupMap.idReuse;
-  let res: Response;
-  const credentials = `${stubCreds.userName}:${stubCreds.password}`;
-  const encodedCredentials = encoding.b64encode(credentials);
-  const idReuseUserID = csvData[Math.floor(Math.random() * csvData.length)];
-  iterationsStarted.add(1);
-  const signInJourneyId = uuidv4();
+  const groups = groupMap.idReuse
+  let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  const idReuseUserID = csvData[Math.floor(Math.random() * csvData.length)]
+  iterationsStarted.add(1)
+  const signInJourneyId = uuidv4()
 
   // B03_IDReuse_01_LoginToCore
   group(groups[0], () => {
@@ -817,18 +817,18 @@ export function idReuse(): void {
             ),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreCall
       res = group(groups[2].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('You have already proved your identity')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(0.5, 1);
+  sleepBetween(0.5, 1)
 
   // B03_IDReuse_02_ClickContinue
   group(groups[3], () => {
@@ -844,7 +844,7 @@ export function idReuse(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_OrchStub
       res = group(groups[5].split('::')[1], () =>
         timeRequest(
@@ -854,16 +854,16 @@ export function idReuse(): void {
             }),
           { isStatusCode200, ...pageContentCheck('User information') }
         )
-      );
-    }, {});
-  });
-  iterationsCompleted.add(1);
+      )
+    }, {})
+  })
+  iterationsCompleted.add(1)
 }
 
 function getUserId(r: Response): string {
-  return r.html().find("input[name='userIdText']").val() ?? 'User ID not found';
+  return r.html().find("input[name='userIdText']").val() ?? 'User ID not found'
 }
 
 function getSignInJourneyId(r: Response): string {
-  return r.html().find("input[name='signInJourneyIdText']").val() ?? 'Sign In Journey ID not found';
+  return r.html().find("input[name='signInJourneyIdText']").val() ?? 'Sign In Journey ID not found'
 }

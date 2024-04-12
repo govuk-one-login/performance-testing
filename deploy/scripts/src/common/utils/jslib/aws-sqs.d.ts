@@ -20,20 +20,20 @@ export class AWSConfig {
    * })
    * const sqs = new SQSClient(awsConfig)
    */
-  constructor(options: { region: string; accessKeyId: string; secretAccessKey: string; sessionToken?: string });
+  constructor(options: { region: string; accessKeyId: string; secretAccessKey: string; sessionToken?: string })
 
-  declare region;
-  declare accessKeyId;
-  declare secretAccessKey;
-  declare sessionToken;
-  declare scheme;
-  declare endpoint;
+  declare region
+  declare accessKeyId
+  declare secretAccessKey
+  declare sessionToken
+  declare scheme
+  declare endpoint
 
   /**
    * Creates an AWSConfig using the `AWS_REGION`, `AWS_ACCESS_KEY_ID`,
    * `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables.
    */
-  static fromEnvironment(): AWSConfig;
+  static fromEnvironment(): AWSConfig
 }
 
 export class SQSClient {
@@ -45,7 +45,7 @@ export class SQSClient {
    *
    * @param {AWSConfig} config AWS Config to use to initialise the SQS client
    */
-  constructor(config: AWSConfig);
+  constructor(config: AWSConfig)
 
   /**
    * Retrieves a list of available Amazon Simple Queue Service (SQS) queues
@@ -74,9 +74,9 @@ export class SQSClient {
    * }
    */
   listQueues(options?: { queueNamePrefix?: string; maxResults?: number; nextToken?: string }): Promise<{
-    urls: string[];
-    nextToken?: string;
-  }>;
+    urls: string[]
+    nextToken?: string
+  }>
 
   /**
    * Sends a message to the specified Amazon Simple Queue Service (SQS) queue.
@@ -99,11 +99,11 @@ export class SQSClient {
     queueUrl: string,
     messageBody: string,
     options?: {
-      messageDeduplicationId?: string;
-      messageGroupId?: string;
+      messageDeduplicationId?: string
+      messageGroupId?: string
     }
   ): {
-    id: string;
-    bodyMD5: string;
-  };
+    id: string
+    bodyMD5: string
+  }
 }

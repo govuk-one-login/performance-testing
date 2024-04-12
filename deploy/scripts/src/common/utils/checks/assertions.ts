@@ -1,5 +1,5 @@
-import { type Response } from 'k6/http';
-import { type Checkers } from 'k6';
+import { type Response } from 'k6/http'
+import { type Checkers } from 'k6'
 
 /**
  * Function to check that a `Response` has status code 200/OK
@@ -12,7 +12,7 @@ import { type Checkers } from 'k6';
  * )
  */
 export function isStatusCode200(response: Response): boolean {
-  return response.status === 200;
+  return response.status === 200
 }
 
 /**
@@ -26,7 +26,7 @@ export function isStatusCode200(response: Response): boolean {
  * )
  */
 export function isStatusCode201(response: Response): boolean {
-  return response.status === 201;
+  return response.status === 201
 }
 
 /**
@@ -40,7 +40,7 @@ export function isStatusCode201(response: Response): boolean {
  * )
  */
 export function isStatusCode302(response: Response): boolean {
-  return response.status === 302;
+  return response.status === 302
 }
 
 /**
@@ -58,5 +58,5 @@ export function isStatusCode302(response: Response): boolean {
 export function pageContentCheck(content: string): Checkers<Response> {
   return {
     validatePageContent: (r) => (r.body as string).includes(content)
-  };
+  }
 }

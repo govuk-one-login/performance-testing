@@ -1,22 +1,22 @@
-import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
-import { group } from 'k6';
-import { type Options } from 'k6/options';
-import http, { type Response } from 'k6/http';
-import encoding from 'k6/encoding';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
+import { group } from 'k6'
+import { type Options } from 'k6/options'
+import http, { type Response } from 'k6/http'
+import encoding from 'k6/encoding'
 import {
   selectProfile,
   type ProfileList,
   describeProfile,
   createScenario,
   LoadProfile
-} from '../common/utils/config/load-profiles';
-import { SharedArray } from 'k6/data';
-import exec from 'k6/execution';
-import { timeRequest } from '../common/utils/request/timing';
-import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions';
-import { sleepBetween } from '../common/utils/sleep/sleepBetween';
-import { getEnv } from '../common/utils/config/environment-variables';
-import { getThresholds } from '../common/utils/config/thresholds';
+} from '../common/utils/config/load-profiles'
+import { SharedArray } from 'k6/data'
+import exec from 'k6/execution'
+import { timeRequest } from '../common/utils/request/timing'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { getEnv } from '../common/utils/config/environment-variables'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -66,9 +66,9 @@ const profiles: ProfileList = {
     ...createScenario('drivingLicence', LoadProfile.full, 55),
     ...createScenario('passport', LoadProfile.full, 55)
   }
-};
+}
 
-const loadProfile = selectProfile(profiles);
+const loadProfile = selectProfile(profiles)
 const groupMap = {
   fraud: [
     'B01_Fraud_01_CoreStubEditUserContinue',
@@ -96,16 +96,16 @@ const groupMap = {
     'B03_Passport_02_EnterPassportDetailsAndContinue::01_CRICall',
     'B03_Passport_02_EnterPassportDetailsAndContinue::02_CoreStubCall'
   ]
-} as const;
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
   thresholds: getThresholds(groupMap),
   tags: { name: '' }
-};
+}
 
 export function setup(): void {
-  describeProfile(loadProfile);
+  describeProfile(loadProfile)
 }
 
 const env = {
@@ -114,32 +114,32 @@ const env = {
   drivingUrl: getEnv('IDENTITY_DRIVING_URL'),
   passportURL: getEnv('IDENTITY_PASSPORT_URL'),
   envName: getEnv('ENVIRONMENT')
-};
+}
 
 const stubCreds = {
   userName: getEnv('IDENTITY_CORE_STUB_USERNAME'),
   password: getEnv('IDENTITY_CORE_STUB_PASSWORD')
-};
+}
 
 interface DrivingLicenseUser {
-  surname: string;
-  firstName: string;
-  middleNames: string;
-  birthday: string;
-  birthmonth: string;
-  birthyear: string;
-  issueDay: string;
-  issueMonth: string;
-  issueYear: string;
-  expiryDay: string;
-  expiryMonth: string;
-  expiryYear: string;
-  licenceNumber: string;
-  postcode: string;
+  surname: string
+  firstName: string
+  middleNames: string
+  birthday: string
+  birthmonth: string
+  birthyear: string
+  issueDay: string
+  issueMonth: string
+  issueYear: string
+  expiryDay: string
+  expiryMonth: string
+  expiryYear: string
+  licenceNumber: string
+  postcode: string
 }
 
 interface DrivingLicenseUserDVLA extends DrivingLicenseUser {
-  issueNumber: string;
+  issueNumber: string
 }
 interface DrivingLicenseUserDVA extends DrivingLicenseUser {}
 
@@ -148,7 +148,7 @@ const csvDVLA: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', 
     .split('\n')
     .slice(1)
     .map((s) => {
-      const data = s.split(',');
+      const data = s.split(',')
       return {
         surname: data[0],
         firstName: data[1],
@@ -165,16 +165,16 @@ const csvDVLA: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', 
         licenceNumber: data[12],
         issueNumber: data[13],
         postcode: data[14]
-      };
-    });
-});
+      }
+    })
+})
 
 const csvDVA: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', () => {
   return open('./data/drivingLicenceDVAData.csv')
     .split('\n')
     .slice(1)
     .map((s) => {
-      const data = s.split(',');
+      const data = s.split(',')
       return {
         surname: data[0],
         firstName: data[1],
@@ -190,21 +190,21 @@ const csvDVA: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', () 
         expiryYear: data[11],
         licenceNumber: data[12],
         postcode: data[13]
-      };
-    });
-});
+      }
+    })
+})
 
 interface PassportUser {
-  passportNumber: string;
-  surname: string;
-  firstName: string;
-  middleName: string;
-  birthday: string;
-  birthmonth: string;
-  birthyear: string;
-  expiryDay: string;
-  expiryMonth: string;
-  expiryYear: string;
+  passportNumber: string
+  surname: string
+  firstName: string
+  middleName: string
+  birthday: string
+  birthmonth: string
+  birthyear: string
+  expiryDay: string
+  expiryMonth: string
+  expiryYear: string
 }
 
 const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => {
@@ -212,7 +212,7 @@ const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => 
     .split('\n')
     .slice(1)
     .map((s) => {
-      const data = s.split(',');
+      const data = s.split(',')
       return {
         passportNumber: data[0],
         surname: data[1],
@@ -224,17 +224,17 @@ const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => 
         expiryDay: data[7],
         expiryMonth: data[8],
         expiryYear: data[9]
-      };
-    });
-});
+      }
+    })
+})
 
 export function fraud(): void {
-  const groups = groupMap.fraud;
-  let res: Response;
-  const userDetails = getUserDetails();
-  const credentials = `${stubCreds.userName}:${stubCreds.password}`;
-  const encodedCredentials = encoding.b64encode(credentials);
-  iterationsStarted.add(1);
+  const groups = groupMap.fraud
+  let res: Response
+  const userDetails = getUserDetails()
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  iterationsStarted.add(1)
 
   // B01_Fraud_01_CoreStubEditUserContinue
   group(groups[0], () => {
@@ -283,18 +283,18 @@ export function fraud(): void {
             ),
           { isStatusCode302 }
         )
-      );
+      )
       // 01_CRICall
       res = group(groups[2].split('::')[1], () =>
         timeRequest(() => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck('We need to check your details')
         })
-      );
-    }, {});
-  });
+      )
+    }, {})
+  })
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B01_Fraud_02_ContinueToCheckFraudDetails
   group(groups[3], () => {
@@ -309,7 +309,7 @@ export function fraud(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreStubCall
       res = group(groups[5].split('::')[1], () =>
         timeRequest(
@@ -319,23 +319,23 @@ export function fraud(): void {
             }),
           { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
         )
-      );
-    }, {});
-  });
-  iterationsCompleted.add(1);
+      )
+    }, {})
+  })
+  iterationsCompleted.add(1)
 }
 
 export function drivingLicence(): void {
-  type drivingLicenceIssuer = 'DVA' | 'DVLA';
-  const licenceIssuer: drivingLicenceIssuer = Math.random() <= 0.5 ? 'DVA' : 'DVLA';
-  const groups = groupMap.drivingLicence.filter((s) => s.includes(licenceIssuer));
+  type drivingLicenceIssuer = 'DVA' | 'DVLA'
+  const licenceIssuer: drivingLicenceIssuer = Math.random() <= 0.5 ? 'DVA' : 'DVLA'
+  const groups = groupMap.drivingLicence.filter((s) => s.includes(licenceIssuer))
 
-  let res: Response;
-  const credentials = `${stubCreds.userName}:${stubCreds.password}`;
-  const encodedCredentials = encoding.b64encode(credentials);
-  const userDVLA = csvDVLA[exec.scenario.iterationInTest % csvDVLA.length];
-  const userDVA = csvDVA[exec.scenario.iterationInTest % csvDVA.length];
-  iterationsStarted.add(1);
+  let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  const userDVLA = csvDVLA[exec.scenario.iterationInTest % csvDVLA.length]
+  const userDVA = csvDVA[exec.scenario.iterationInTest % csvDVA.length]
+  iterationsStarted.add(1)
 
   // B02_Driving_01_DLEntryFromCoreStub_${licenceIssuer}
   res = group(groups[0], () =>
@@ -349,9 +349,9 @@ export function drivingLicence(): void {
         ...pageContentCheck('Who was your UK driving licence issued by?')
       }
     )
-  );
+  )
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   const fields: Record<string, string> =
     licenceIssuer === 'DVLA'
@@ -391,7 +391,7 @@ export function drivingLicence(): void {
           dvaLicenceNumber: userDVA.licenceNumber,
           postcode: userDVA.postcode,
           consentDVACheckbox: 'true'
-        };
+        }
 
   // B02_Driving_02_Select_${licenceIssuer}
   res = group(groups[1], () =>
@@ -406,9 +406,9 @@ export function drivingLicence(): void {
         ...pageContentCheck('Enter your details exactly as they appear on your UK driving licence')
       }
     )
-  );
+  )
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm
   group(groups[2], () => {
@@ -424,7 +424,7 @@ export function drivingLicence(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreStubCall
       res = group(groups[4].split('::')[1], () =>
         timeRequest(
@@ -434,19 +434,19 @@ export function drivingLicence(): void {
             }),
           { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
         )
-      );
-    }, {});
-  });
-  iterationsCompleted.add(1);
+      )
+    }, {})
+  })
+  iterationsCompleted.add(1)
 }
 
 export function passport(): void {
-  const groups = groupMap.passport;
-  let res: Response;
-  const credentials = `${stubCreds.userName}:${stubCreds.password}`;
-  const encodedCredentials = encoding.b64encode(credentials);
-  const userPassport = csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)];
-  iterationsStarted.add(1);
+  const groups = groupMap.passport
+  let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  const userPassport = csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)]
+  iterationsStarted.add(1)
 
   // B03_Passport_01_PassportCRIEntryFromStub
   res = group(groups[0], () =>
@@ -460,9 +460,9 @@ export function passport(): void {
         ...pageContentCheck('Enter your details exactly as they appear on your UK passport')
       }
     )
-  );
+  )
 
-  sleepBetween(1, 3);
+  sleepBetween(1, 3)
 
   // B03_Passport_02_EnterPassportDetailsAndContinue
   group(groups[1], () => {
@@ -489,7 +489,7 @@ export function passport(): void {
             }),
           { isStatusCode302 }
         )
-      );
+      )
       // 02_CoreStubCall
       res = group(groups[3].split('::')[1], () =>
         timeRequest(
@@ -499,23 +499,23 @@ export function passport(): void {
             }),
           { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
         )
-      );
-    }, {});
-  });
-  iterationsCompleted.add(1);
+      )
+    }, {})
+  })
+  iterationsCompleted.add(1)
 }
 
 interface User {
-  firstName: string;
-  lastName: string;
-  day: number;
-  month: number;
-  year: number;
-  buildNum: number;
-  buildName: string;
-  street: string;
-  city: string;
-  postCode: string;
+  firstName: string
+  lastName: string
+  day: number
+  month: number
+  year: number
+  buildNum: number
+  buildName: string
+  street: string
+  city: string
+  postCode: string
 }
 
 function getUserDetails(): User {
@@ -530,5 +530,5 @@ function getUserDetails(): User {
     street: `RandomStreet${Math.floor(Math.random() * 99998) + 1}`,
     city: `RandomCity${Math.floor(Math.random() * 999) + 1}`,
     postCode: `AB${Math.floor(Math.random() * 99) + 1} CD${Math.floor(Math.random() * 99) + 1}`
-  };
+  }
 }

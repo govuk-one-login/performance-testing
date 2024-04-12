@@ -56,7 +56,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
-          role-to-assume: ${{ secrets.PERF_GH_ACTIONS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.PERF_STUB_GH_ACTIONS_ROLE_ARN }}
 
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -66,16 +66,15 @@ jobs:
       - name: Setup nodeJS v20
         uses: actions/setup-node@v4
         with:
-          node-version:  0
+          node-version: 20
       - name: Setup SAM CLI
         uses: aws-actions/setup-sam@v2
-        with:
-          use-installer: true
+
       - name: SAM Validate
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
           sam validate --lint
-      - name: SAM Validate
+      - name: SAM Build
         run: |
           sam build
       - name: Deploy SAM app
@@ -83,7 +82,6 @@ jobs:
         with:
           artifact-bucket-name: ${{ secrets.PERF_STUB_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.PERF_STUB_SIGNING_PROFILE_NAME }}
-          working-directory: ./koa-stub
-          template-file: template.yaml
+          working-directory: ./koa-stub/.aws-sam/build
 
 

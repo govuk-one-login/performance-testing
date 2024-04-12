@@ -144,6 +144,11 @@ Resources:
               - "ssm:GetParametersByPath"
             Resource:
               - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/perfTest/*" #Create the parameters in AWS Systems Manager Parameter store under this path
+          - Effect: "Allow"
+            Action:
+              - "execute-api:*"
+            Resource:
+              - "*"
 
   PerformanceTesterRole:
     Type: AWS::IAM::Role
@@ -214,6 +219,11 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
                     - !FindInMap [TxMA, Staging, AccountID]
                     - "key/*"
+          - Effect: "Allow"
+            Action:
+              - "execute-api:*"
+            Resource:
+              - "*"
           - Effect: "Allow"
             Action:
               - "sqs:SendMessage"

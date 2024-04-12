@@ -10,7 +10,6 @@ import {
   createScenario,
   LoadProfile
 } from '../common/utils/config/load-profiles'
-// import { getStaticResources } from '../common/utils/request/static'
 import { timeRequest } from '../common/utils/request/timing'
 import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
 import { addressPayloadDL, kbvPayloaDL, fraudPayloadDL, drivingLicencePayload } from './data/drivingLicenceData'
@@ -209,7 +208,6 @@ export function passport(): void {
             headers: { Authorization: `Basic ${encodedCredentials}` }
           }
         )
-        // if (env.staticResources) getStaticResources(response)
         return response
       },
       {
@@ -517,7 +515,6 @@ export function drivingLicence(): void {
             headers: { Authorization: `Basic ${encodedCredentials}` }
           }
         )
-        // if (env.staticResources) getStaticResources(response)
         return response
       },
       {

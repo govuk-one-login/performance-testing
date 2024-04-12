@@ -8,21 +8,14 @@ import {
 import { type AssumeRoleOutput } from '../common/utils/aws/types';
 import { AWSConfig } from '../common/utils/jslib/aws-sqs';
 import { SignatureV4 } from '../common/utils/jslib/aws-signature';
-import {
-  generatePutCI,
-  generateGetCIC,
-  generatePostMitigations
-} from './requestGenerator/cimitReqGen';
+import { generatePutCI, generateGetCIC, generatePostMitigations } from './requestGenerator/cimitReqGen';
 import { group } from 'k6';
 import http from 'k6/http';
 import { type Options } from 'k6/options';
 import { timeRequest } from '../common/utils/request/timing';
 import { isStatusCode200 } from '../common/utils/checks/assertions';
 import { SharedArray } from 'k6/data';
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { getEnv } from '../common/utils/config/environment-variables';
 import { getThresholds } from '../common/utils/config/thresholds';
 
@@ -34,22 +27,12 @@ const profiles: ProfileList = {
   },
   lowVolume: {
     ...createScenario('putContraIndicators', LoadProfile.short, 30, 5),
-    ...createScenario(
-      'getContraIndicatorCredentials',
-      LoadProfile.short,
-      30,
-      5
-    ),
+    ...createScenario('getContraIndicatorCredentials', LoadProfile.short, 30, 5),
     ...createScenario('postMitigations', LoadProfile.short, 30, 5)
   },
   load: {
     ...createScenario('putContraIndicators', LoadProfile.full, 400, 5),
-    ...createScenario(
-      'getContraIndicatorCredentials',
-      LoadProfile.full,
-      100,
-      5
-    ),
+    ...createScenario('getContraIndicatorCredentials', LoadProfile.full, 100, 5),
     ...createScenario('postMitigations', LoadProfile.full, 100, 5)
   }
 };
@@ -85,9 +68,7 @@ const env = {
   postMitigationURL: getEnv('IDENTITY_CIMIT_POSTMITIGATION')
 };
 
-const credentials = (
-  JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput
-).Credentials;
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials;
 const awsConfig = new AWSConfig({
   region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
@@ -135,9 +116,7 @@ export function putContraIndicators(): void {
 export function getContraIndicatorCredentials(): void {
   const groups = groupMap.getContraIndicatorCredentials;
   const user = getCIC[Math.floor(Math.random() * getCIC.length)];
-  const getCICPayload = JSON.stringify(
-    generateGetCIC(user.journeyID, user.userID)
-  );
+  const getCICPayload = JSON.stringify(generateGetCIC(user.journeyID, user.userID));
   const request = {
     method: 'POST',
     protocol: 'https' as const,

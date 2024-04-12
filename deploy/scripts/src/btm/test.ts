@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { type Options } from 'k6/options';
 import {
   selectProfile,
@@ -54,9 +51,7 @@ const env = {
   sqs_queue: getEnv('DATA_BTM_SQS')
 };
 
-const credentials = (
-  JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput
-).Credentials;
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials;
 const awsConfig = new AWSConfig({
   region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
@@ -113,13 +108,8 @@ export function sendEventType7(): void {
 }
 
 export function sendSQSMessage(messageBody: Record<string, unknown>): void {
-  const randomTimestamp: number = randomIntBetween(
-    payloadTimestampMin,
-    payloadTimestampMax
-  );
-  const timestampFormatted: string = new Date(
-    randomTimestamp * 1000
-  ).toISOString();
+  const randomTimestamp: number = randomIntBetween(payloadTimestampMin, payloadTimestampMax);
+  const timestampFormatted: string = new Date(randomTimestamp * 1000).toISOString();
   iterationsStarted.add(1);
   messageBody.event_id = uuidv4();
   messageBody.timestamp = randomTimestamp;

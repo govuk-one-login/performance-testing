@@ -20,10 +20,7 @@ export interface TicfAccountIntervention {
   };
 }
 
-export function generatePersistIVRequest(
-  userID: string,
-  interventionCode: string
-): TicfAccountIntervention {
+export function generatePersistIVRequest(userID: string, interventionCode: string): TicfAccountIntervention {
   return {
     timestamp: Math.floor(Date.now() / 1000),
     event_timestamp_ms: Date.now(),

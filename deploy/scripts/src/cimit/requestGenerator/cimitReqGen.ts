@@ -1,8 +1,4 @@
-import {
-  type PutContraIndicators,
-  type GetContraIndicatorCredential,
-  type PostMitigations
-} from './cimitReqFormat';
+import { type PutContraIndicators, type GetContraIndicatorCredential, type PostMitigations } from './cimitReqFormat';
 import { uuidv4 } from '../../common/utils/jslib/index';
 
 export function generatePutCI(): PutContraIndicators {
@@ -14,10 +10,7 @@ export function generatePutCI(): PutContraIndicators {
   };
 }
 
-export function generateGetCIC(
-  journeyID: string,
-  userID: string
-): GetContraIndicatorCredential {
+export function generateGetCIC(journeyID: string, userID: string): GetContraIndicatorCredential {
   return {
     govuk_signin_journey_id: journeyID,
     user_id: userID,

@@ -19,12 +19,7 @@ import { type Stage } from 'k6/options';
  * const allMessages = findBetween(response, '<div class="message">', '</div>', true)
  * console.log(allMessages.length) // 2
  */
-export function findBetween(
-  content: string,
-  left: string,
-  right: string,
-  repeat?: boolean
-): string | string[];
+export function findBetween(content: string, left: string, right: string, repeat?: boolean): string | string[];
 
 /**
  * Function to create `stages` producing a normal distribution (bell-curve) of VUs for a test.
@@ -41,11 +36,7 @@ export function findBetween(
  *   stages: normalDistributionStages(10, 20, 5)
  * }
  */
-export function normalDistributionStages(
-  maxVus: number,
-  durationSeconds: number,
-  numberOfStages?: number
-): Stage[];
+export function normalDistributionStages(maxVus: number, durationSeconds: number, numberOfStages?: number): Stage[];
 
 /**
  * Function returns a random number between the specified range.

@@ -8,10 +8,7 @@ import {
   createScenario,
   LoadProfile
 } from '../common/utils/config/load-profiles';
-import {
-  isStatusCode200,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions';
 import { timeRequest } from '../common/utils/request/timing';
 import { getEnv } from '../common/utils/config/environment-variables';
 
@@ -84,8 +81,7 @@ export function demoSamApp(): void {
   group('GET - {demoSamApp} /test', () =>
     timeRequest(() => http.get(env.BE_URL + '/test'), {
       isStatusCode200,
-      'verify page content': (r) =>
-        JSON.parse(r.body as string).code === 'success'
+      'verify page content': (r) => JSON.parse(r.body as string).code === 'success'
     })
   );
 

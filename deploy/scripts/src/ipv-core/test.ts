@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import encoding from 'k6/encoding';
 import { group } from 'k6';
 import { type Options } from 'k6/options';
@@ -15,23 +12,9 @@ import {
 } from '../common/utils/config/load-profiles';
 // import { getStaticResources } from '../common/utils/request/static'
 import { timeRequest } from '../common/utils/request/timing';
-import {
-  passportPayload,
-  addressPayloadP,
-  kbvPayloadP,
-  fraudPayloadP
-} from './data/passportData';
-import {
-  addressPayloadDL,
-  kbvPayloaDL,
-  fraudPayloadDL,
-  drivingLicencePayload
-} from './data/drivingLicenceData';
-import {
-  isStatusCode200,
-  isStatusCode302,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData';
+import { addressPayloadDL, kbvPayloaDL, fraudPayloadDL, drivingLicencePayload } from './data/drivingLicenceData';
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions';
 import { sleepBetween } from '../common/utils/sleep/sleepBetween';
 import { SharedArray } from 'k6/data';
 import { uuidv4 } from '../common/utils/jslib/index';
@@ -164,25 +147,20 @@ interface IDReuseUserID {
   emailID: string;
 }
 
-const csvData: IDReuseUserID[] = new SharedArray(
-  'ID Reuse User ID',
-  function () {
-    return open('./data/idReuseTestData.csv')
-      .split('\n')
-      .slice(1)
-      .map((s) => {
-        const data = s.split(',');
-        return { userID: data[0], emailID: data[1] };
-      });
-  }
-);
+const csvData: IDReuseUserID[] = new SharedArray('ID Reuse User ID', function () {
+  return open('./data/idReuseTestData.csv')
+    .split('\n')
+    .slice(1)
+    .map((s) => {
+      const data = s.split(',');
+      return { userID: data[0], emailID: data[1] };
+    });
+});
 
 const environment = getEnv('ENVIRONMENT').toLocaleUpperCase();
 const validEnvironments = ['BUILD', 'DEV'];
 if (!validEnvironments.includes(environment))
-  throw new Error(
-    `Environment '${environment}' not in [${validEnvironments.toString()}]`
-  );
+  throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`);
 
 const env = {
   orchStubEndPoint: __ENV[`IDENTITY_${environment}_ORCH_STUB_URL`],
@@ -201,9 +179,7 @@ export function passport(): void {
   const credentials = `${stubCreds.userName}:${stubCreds.password}`;
   const encodedCredentials = encoding.b64encode(credentials);
   const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, ''); // YYMMDDTHHmm
-  const iteration = execution.scenario.iterationInInstance
-    .toString()
-    .padStart(6, '0');
+  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0');
   const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`;
   iterationsStarted.add(1);
   // B01_Passport_01_LaunchOrchestratorStub
@@ -238,9 +214,7 @@ export function passport(): void {
       },
       {
         isStatusCode200,
-        ...pageContentCheck(
-          'Tell us if you have one of the following types of photo ID'
-        )
+        ...pageContentCheck('Tell us if you have one of the following types of photo ID')
       }
     )
   );
@@ -294,9 +268,7 @@ export function passport(): void {
       res = group(groups[7].split('::')[1], () =>
         timeRequest(() => http.get(env.ipvCoreURL + res.headers.Location), {
           isStatusCode200,
-          ...pageContentCheck(
-            'Enter your UK passport details and answer security questions online'
-          )
+          ...pageContentCheck('Enter your UK passport details and answer security questions online')
         })
       );
     }, {});
@@ -515,9 +487,7 @@ export function drivingLicence(): void {
   const credentials = `${stubCreds.userName}:${stubCreds.password}`;
   const encodedCredentials = encoding.b64encode(credentials);
   const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, ''); // YYMMDDTHHmm
-  const iteration = execution.scenario.iterationInInstance
-    .toString()
-    .padStart(6, '0');
+  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0');
   const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`;
   iterationsStarted.add(1);
 
@@ -552,9 +522,7 @@ export function drivingLicence(): void {
       },
       {
         isStatusCode200,
-        ...pageContentCheck(
-          'Tell us if you have one of the following types of photo ID'
-        )
+        ...pageContentCheck('Tell us if you have one of the following types of photo ID')
       }
     )
   );
@@ -608,9 +576,7 @@ export function drivingLicence(): void {
       res = group(groups[7].split('::')[1], () =>
         timeRequest(() => http.get(env.ipvCoreURL + res.headers.Location), {
           isStatusCode200,
-          ...pageContentCheck(
-            'Enter your UK photocard driving licence details and answer security questions online'
-          )
+          ...pageContentCheck('Enter your UK photocard driving licence details and answer security questions online')
         })
       );
     }, {});
@@ -899,8 +865,5 @@ function getUserId(r: Response): string {
 }
 
 function getSignInJourneyId(r: Response): string {
-  return (
-    r.html().find("input[name='signInJourneyIdText']").val() ??
-    'Sign In Journey ID not found'
-  );
+  return r.html().find("input[name='signInJourneyIdText']").val() ?? 'Sign In Journey ID not found';
 }

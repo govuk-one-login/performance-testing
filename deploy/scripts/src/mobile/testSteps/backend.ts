@@ -2,20 +2,12 @@ import http from 'k6/http';
 import { group } from 'k6';
 import { uuidv4 } from '../../common/utils/jslib/index';
 import { buildBackendUrl } from '../utils/url';
-import {
-  parseTestClientResponse,
-  postTestClientStart
-} from '../utils/test-client';
+import { parseTestClientResponse, postTestClientStart } from '../utils/test-client';
 import { timeRequest } from '../../common/utils/request/timing';
-import {
-  isStatusCode200,
-  isStatusCode201
-} from '../../common/utils/checks/assertions';
+import { isStatusCode200, isStatusCode201 } from '../../common/utils/checks/assertions';
 
 export function postVerifyAuthorizeRequest(): string {
-  const testClientRes = group('POST test client /start', () =>
-    timeRequest(postTestClientStart, { isStatusCode201 })
-  );
+  const testClientRes = group('POST test client /start', () => timeRequest(postTestClientStart, { isStatusCode201 }));
   const verifyUrl = parseTestClientResponse(testClientRes, 'ApiLocation');
 
   const verifyRes = group('POST /verifyAuthorizeRequest', () =>
@@ -42,9 +34,7 @@ export function postResourceOwnerDocumentGroups(sessionId: string): void {
         ]
       }
     };
-    const documentGroupsUrl = buildBackendUrl(
-      `/resourceOwner/documentGroups/${sessionId}`
-    );
+    const documentGroupsUrl = buildBackendUrl(`/resourceOwner/documentGroups/${sessionId}`);
 
     timeRequest(
       () =>
@@ -74,13 +64,10 @@ export function getBiometricTokenV2(sessionId: string): void {
 
 export function postFinishBiometricSession(sessionId: string): void {
   group('POST /finishBiometricSession', () => {
-    const finishBiometricSessionUrl = buildBackendUrl(
-      '/finishBiometricSession',
-      {
-        authSessionId: sessionId,
-        biometricSessionId: uuidv4()
-      }
-    );
+    const finishBiometricSessionUrl = buildBackendUrl('/finishBiometricSession', {
+      authSessionId: sessionId,
+      biometricSessionId: uuidv4()
+    });
 
     timeRequest(
       () =>
@@ -114,10 +101,7 @@ export function getRedirect(sessionId: string): {
   });
 }
 
-export function postToken(
-  authorizationCode: string,
-  redirectUri: string
-): string {
+export function postToken(authorizationCode: string, redirectUri: string): string {
   return group('POST /token', () => {
     const tokenUrl = buildBackendUrl('/token');
 

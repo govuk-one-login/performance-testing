@@ -21,10 +21,7 @@ import {
   startJourney,
   getSessionIdFromCookieJar
 } from './testSteps/frontend';
-import {
-  getBiometricTokenV2,
-  postFinishBiometricSession
-} from './testSteps/backend';
+import { getBiometricTokenV2, postFinishBiometricSession } from './testSteps/backend';
 import { sleepBetween } from '../common/utils/sleep/sleepBetween';
 
 const profiles: ProfileList = {

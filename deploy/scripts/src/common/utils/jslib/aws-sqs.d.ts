@@ -20,12 +20,7 @@ export class AWSConfig {
    * })
    * const sqs = new SQSClient(awsConfig)
    */
-  constructor(options: {
-    region: string;
-    accessKeyId: string;
-    secretAccessKey: string;
-    sessionToken?: string;
-  });
+  constructor(options: { region: string; accessKeyId: string; secretAccessKey: string; sessionToken?: string });
 
   declare region;
   declare accessKeyId;
@@ -78,11 +73,7 @@ export class SQSClient {
    *     exec.test.abort()
    * }
    */
-  listQueues(options?: {
-    queueNamePrefix?: string;
-    maxResults?: number;
-    nextToken?: string;
-  }): Promise<{
+  listQueues(options?: { queueNamePrefix?: string; maxResults?: number; nextToken?: string }): Promise<{
     urls: string[];
     nextToken?: string;
   }>;

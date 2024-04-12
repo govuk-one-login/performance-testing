@@ -36,10 +36,7 @@ export type GroupMap = Record<string, readonly string[]>;
  *   thresholds: getThresholds(groupMap)
  * }
  */
-export function getThresholds(
-  groupMap: GroupMap,
-  selections: string | undefined = defaultConfig.scenario
-): Thresholds {
+export function getThresholds(groupMap: GroupMap, selections: string | undefined = defaultConfig.scenario): Thresholds {
   const thresholds: Thresholds = {
     http_req_duration: nfrs.rt,
     http_req_failed: nfrs.errors
@@ -50,11 +47,7 @@ export function getThresholds(
     });
   };
 
-  if (
-    selections == null ||
-    selections === '' ||
-    selections.toLowerCase() === 'all'
-  ) {
+  if (selections == null || selections === '' || selections.toLowerCase() === 'all') {
     // Enable all scenarios is selection string is null, empty or set to 'all'
     Object.values(groupMap).forEach((groupNames) => {
       addThresholds(groupNames);

@@ -15,14 +15,12 @@ export function getCodeFromUrl(url: string): string {
 
 export function getAccessToken(r: Response): string {
   const accessToken = r.json('access_token');
-  if (accessToken !== null && typeof accessToken === 'string')
-    return accessToken;
+  if (accessToken !== null && typeof accessToken === 'string') return accessToken;
   fail('AccessToken not found');
 }
 
 export function getAuthorizeauthorizeLocation(r: Response): string {
   const authorizeLocation = r.json('AuthorizeLocation');
-  if (authorizeLocation !== null && typeof authorizeLocation === 'string')
-    return authorizeLocation;
+  if (authorizeLocation !== null && typeof authorizeLocation === 'string') return authorizeLocation;
   fail('AuthorizeLocation not found');
 }

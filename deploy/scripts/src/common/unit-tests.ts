@@ -20,27 +20,11 @@ import {
 import { URL, URLSearchParams } from './utils/jslib/url';
 import { timeFunction, timeRequest } from './utils/request/timing';
 import { sleepBetween } from './utils/sleep/sleepBetween';
-import {
-  isStatusCode200,
-  isStatusCode201,
-  isStatusCode302,
-  pageContentCheck
-} from './utils/checks/assertions';
-import {
-  type RefinedResponse,
-  type ResponseType,
-  type Response
-} from 'k6/http';
+import { isStatusCode200, isStatusCode201, isStatusCode302, pageContentCheck } from './utils/checks/assertions';
+import { type RefinedResponse, type ResponseType, type Response } from 'k6/http';
 import { type Selection } from 'k6/html';
-import {
-  iterationsCompleted,
-  iterationsStarted
-} from './utils/custom_metric/counter';
-import {
-  type GroupMap,
-  type Thresholds,
-  getThresholds
-} from './utils/config/thresholds';
+import { iterationsCompleted, iterationsStarted } from './utils/custom_metric/counter';
+import { type GroupMap, type Thresholds, getThresholds } from './utils/config/thresholds';
 import { getEnv } from './utils/config/environment-variables';
 import { type RampingArrivalRateScenario } from 'k6/options';
 
@@ -59,8 +43,7 @@ export default (): void => {
   group('authentication/totp', () => {
     // Examples from https://www.rfc-editor.org/rfc/rfc6238
     const sha1seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'; // Ascii string "12345678901234567890" in base32
-    const sha256seed =
-      'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZA===='; // 32 byte seed
+    const sha256seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZA===='; // 32 byte seed
     const sha512seed =
       'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNA='; // 64 byte seed
     const sha1otp = new TOTP(sha1seed, 8, 'sha1');
@@ -68,18 +51,12 @@ export default (): void => {
     const sha512otp = new TOTP(sha512seed, 8, 'sha512');
 
     check(null, {
-      '| SHA1   | T+59          |': () =>
-        sha1otp.generateTOTP(59 * 1000) === '94287082',
-      '| SHA256 | T+1111111109  |': () =>
-        sha256otp.generateTOTP(1111111109 * 1000) === '68084774',
-      '| SHA512 | T+1111111111  |': () =>
-        sha512otp.generateTOTP(1111111111 * 1000) === '99943326',
-      '| SHA1   | T+1234567890  |': () =>
-        sha1otp.generateTOTP(1234567890 * 1000) === '89005924',
-      '| SHA256 | T+2000000000  |': () =>
-        sha256otp.generateTOTP(2000000000 * 1000) === '90698825',
-      '| SHA512 | T+20000000000 |': () =>
-        sha512otp.generateTOTP(20000000000 * 1000) === '47863826'
+      '| SHA1   | T+59          |': () => sha1otp.generateTOTP(59 * 1000) === '94287082',
+      '| SHA256 | T+1111111109  |': () => sha256otp.generateTOTP(1111111109 * 1000) === '68084774',
+      '| SHA512 | T+1111111111  |': () => sha512otp.generateTOTP(1111111111 * 1000) === '99943326',
+      '| SHA1   | T+1234567890  |': () => sha1otp.generateTOTP(1234567890 * 1000) === '89005924',
+      '| SHA256 | T+2000000000  |': () => sha256otp.generateTOTP(2000000000 * 1000) === '90698825',
+      '| SHA512 | T+20000000000 |': () => sha512otp.generateTOTP(20000000000 * 1000) === '47863826'
     });
   });
 
@@ -117,8 +94,7 @@ export default (): void => {
 
       check(null, {
         'Error when not variable not found': () => errorFound,
-        'Undefined when not found and not required': () =>
-          getEnv('NON_EXISTENT', false) === undefined,
+        'Undefined when not found and not required': () => getEnv('NON_EXISTENT', false) === undefined,
         'Value retrieved correctly': () => getEnv(name) === value
       });
     });
@@ -170,15 +146,8 @@ export default (): void => {
         scenario: ''
       });
 
-      function checkProfile(
-        profile: Profile,
-        name: string,
-        scenarioCount: number
-      ): boolean {
-        return (
-          profile.name === name &&
-          Object.keys(profile.scenarios).length === scenarioCount
-        );
+      function checkProfile(profile: Profile, name: string, scenarioCount: number): boolean {
+        return profile.name === name && Object.keys(profile.scenarios).length === scenarioCount;
       }
 
       check(null, {
@@ -200,11 +169,7 @@ export default (): void => {
         ...createScenario('scenario5', LoadProfile.deployment, 2, 40)
       };
 
-      function checkScenario(
-        exec: string,
-        target: number,
-        maxVUs: number
-      ): boolean {
+      function checkScenario(exec: string, target: number, maxVUs: number): boolean {
         const scenario = scenarios[exec] as RampingArrivalRateScenario;
         return (
           scenario.exec === exec && // Exec function is named correctly
@@ -233,10 +198,7 @@ export default (): void => {
     const noGroups: Thresholds = getThresholds({});
     const noFlags: Thresholds = getThresholds(groups);
     const singleScenario: Thresholds = getThresholds(groups, 'scenario1');
-    const multiScenario: Thresholds = getThresholds(
-      groups,
-      'scenario1,scenario2'
-    );
+    const multiScenario: Thresholds = getThresholds(groups, 'scenario1,scenario2');
     const scenarioAll: Thresholds = getThresholds(groups, 'all');
     const scenarioBlank: Thresholds = getThresholds(groups, '');
 
@@ -244,8 +206,7 @@ export default (): void => {
       return (
         thresholds !== undefined &&
         Object.keys(thresholds).length === count + 2 && // Threshold count is equal to no. of groups plus the base two
-        Object.keys(thresholds).filter((s) => s.includes('duration{group:::'))
-          .length === count
+        Object.keys(thresholds).filter((s) => s.includes('duration{group:::')).length === count
       ); // Group duration thresholds equals no. of groups
     }
 
@@ -268,32 +229,21 @@ export default (): void => {
     const client = new SQSClient(config);
 
     check(null, {
-      'AWSConfig.fromEnvironment() exists': () =>
-        typeof AWSConfig.fromEnvironment === 'function',
-      'SQSClient.listQueues() exists': () =>
-        typeof client.listQueues === 'function',
-      'SQSClient.sendMessage() exists': () =>
-        typeof client.sendMessage === 'function'
+      'AWSConfig.fromEnvironment() exists': () => typeof AWSConfig.fromEnvironment === 'function',
+      'SQSClient.listQueues() exists': () => typeof client.listQueues === 'function',
+      'SQSClient.sendMessage() exists': () => typeof client.sendMessage === 'function'
     });
   });
 
   group('jslib/index', () => {
     group('findBetween()', () => {
-      const response =
-        '<div class="message">Message 1</div><div class="message">Message 2</div>';
+      const response = '<div class="message">Message 1</div><div class="message">Message 2</div>';
       const message = findBetween(response, '<div class="message">', '</div>');
-      const allMessages = findBetween(
-        response,
-        '<div class="message">',
-        '</div>',
-        true
-      );
+      const allMessages = findBetween(response, '<div class="message">', '</div>', true);
 
       check(null, {
-        'Single value': () =>
-          typeof message === 'string' && message === 'Message 1',
-        'Multiple values': () =>
-          typeof allMessages === 'object' && allMessages.length === 2
+        'Single value': () => typeof message === 'string' && message === 'Message 1',
+        'Multiple values': () => typeof allMessages === 'object' && allMessages.length === 2
       });
     });
 
@@ -303,11 +253,7 @@ export default (): void => {
         duration: randomIntBetween(60, 600),
         numberOfStages: randomIntBetween(5, 20)
       };
-      const stages = normalDistributionStages(
-        settings.maxVUs,
-        settings.duration,
-        settings.numberOfStages
-      );
+      const stages = normalDistributionStages(settings.maxVUs, settings.duration, settings.numberOfStages);
       const totalDuration = stages.reduce((a, b) => {
         return a + parseInt(b.duration.slice(0, -1));
       }, 0);
@@ -315,10 +261,7 @@ export default (): void => {
         return a > b.target ? a : b.target;
       }, 0);
 
-      const tenStages = normalDistributionStages(
-        settings.maxVUs,
-        settings.duration
-      );
+      const tenStages = normalDistributionStages(settings.maxVUs, settings.duration);
 
       check(null, {
         'Max VUs': () => maxVUs === settings.maxVUs,
@@ -345,11 +288,8 @@ export default (): void => {
       const randomStage = randomItem(normalDistributionStages(100, 120));
 
       check(null, {
-        'Random string': () =>
-          typeof randomName === 'string' && names.includes(randomName),
-        'Random stage': () =>
-          typeof randomStage.duration === 'string' &&
-          typeof randomStage.target === 'number'
+        'Random string': () => typeof randomName === 'string' && names.includes(randomName),
+        'Random stage': () => typeof randomStage.duration === 'string' && typeof randomStage.target === 'number'
       });
     });
 
@@ -361,16 +301,14 @@ export default (): void => {
       check(null, {
         'Random string': () => random.length === 8,
         'Repeated character': () => dashes === '-----',
-        'Random character': () =>
-          ['A', 'B', 'C', 'D'].includes(randomCharacterWeighted)
+        'Random character': () => ['A', 'B', 'C', 'D'].includes(randomCharacterWeighted)
       });
     });
 
     group('uuidv4()', () => {
       const uuid = uuidv4();
       const secureUuid = uuidv4(true);
-      const regex =
-        /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/;
+      const regex = /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/;
 
       check(null, {
         'Valid uuid v4': () => regex.test(uuid),
@@ -380,9 +318,7 @@ export default (): void => {
   });
 
   group('jslib/url', () => {
-    const url = new URL(
-      'https://account.gov.uk/path/to/page?query=val&q=2#anchor'
-    );
+    const url = new URL('https://account.gov.uk/path/to/page?query=val&q=2#anchor');
     const relative = new URL('../new', url);
     const absolute = new URL('/root', url);
 
@@ -393,10 +329,8 @@ export default (): void => {
         'pathname property': () => url.pathname === '/path/to/page',
         'protocol property': () => url.protocol === 'https:',
         'search property': () => url.search === '?query=val&q=2',
-        'Relative redirect': () =>
-          relative.href === 'https://account.gov.uk/path/new',
-        'Absolute redirect': () =>
-          absolute.href === 'https://account.gov.uk/root'
+        'Relative redirect': () => relative.href === 'https://account.gov.uk/path/new',
+        'Absolute redirect': () => absolute.href === 'https://account.gov.uk/root'
       });
     });
 
@@ -409,8 +343,7 @@ export default (): void => {
         'has()': () => paramsString.has('query', 'val'),
         'get()': () => paramsObject.get('search') === 'term',
         'getAll()': () => paramsString.getAll('q').join() === '2',
-        'append() & delete()': () =>
-          paramsObject.toString() === 'search=term&append=New+Value'
+        'append() & delete()': () => paramsObject.toString() === 'search=term&append=New+Value'
       });
     });
   });
@@ -425,8 +358,7 @@ export default (): void => {
 
       check(null, {
         'check result is returned': () => result === 'ABC',
-        'check duration is returned': () =>
-          typeof duration === 'number' && duration >= 1000
+        'check duration is returned': () => typeof duration === 'number' && duration >= 1000
       });
     });
 
@@ -494,9 +426,7 @@ function blankResponse(): Response {
     tls_cipher_suite: 'TLS_RSA_WITH_RC4_128_SHA',
     tls_version: '',
     url: '',
-    clickLink: function <
-      RT extends ResponseType | undefined
-    >(): RefinedResponse<RT> {
+    clickLink: function <RT extends ResponseType | undefined>(): RefinedResponse<RT> {
       throw new Error('Function not implemented.');
     },
     html: function (): Selection {
@@ -505,9 +435,7 @@ function blankResponse(): Response {
     json: function (): JSONValue {
       throw new Error('Function not implemented.');
     },
-    submitForm: function <
-      RT extends ResponseType | undefined
-    >(): RefinedResponse<RT> {
+    submitForm: function <RT extends ResponseType | undefined>(): RefinedResponse<RT> {
       throw new Error('Function not implemented.');
     }
   };

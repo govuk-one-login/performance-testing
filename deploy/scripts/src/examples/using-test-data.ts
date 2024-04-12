@@ -49,22 +49,10 @@ export function setup(): void {
 
 export function csv(): void {
   const user = csvData[exec.scenario.iterationInTest % jsonData.length];
-  console.log(
-    exec.vu.idInTest,
-    ' | csv      |',
-    user.username,
-    '   |',
-    user.pass
-  );
+  console.log(exec.vu.idInTest, ' | csv      |', user.username, '   |', user.pass);
 }
 
 export function json(): void {
   const user = jsonData[exec.scenario.iterationInTest % jsonData.length];
-  console.log(
-    exec.vu.idInTest,
-    ' | json     |',
-    user.username,
-    '   |',
-    user.pass
-  );
+  console.log(exec.vu.idInTest, ' | json     |', user.username, '   |', user.pass);
 }

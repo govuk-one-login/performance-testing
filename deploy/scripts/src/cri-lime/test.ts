@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { group } from 'k6';
 import { type Options } from 'k6/options';
 import http, { type Response } from 'k6/http';
@@ -16,11 +13,7 @@ import {
 import { SharedArray } from 'k6/data';
 import exec from 'k6/execution';
 import { timeRequest } from '../common/utils/request/timing';
-import {
-  isStatusCode200,
-  isStatusCode302,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions';
 import { sleepBetween } from '../common/utils/sleep/sleepBetween';
 import { getEnv } from '../common/utils/config/environment-variables';
 import { getThresholds } from '../common/utils/config/thresholds';
@@ -150,62 +143,56 @@ interface DrivingLicenseUserDVLA extends DrivingLicenseUser {
 }
 interface DrivingLicenseUserDVA extends DrivingLicenseUser {}
 
-const csvDVLA: DrivingLicenseUserDVLA[] = new SharedArray(
-  'csvDataLicenceDVLA',
-  () => {
-    return open('./data/drivingLicenceDVLAData.csv')
-      .split('\n')
-      .slice(1)
-      .map((s) => {
-        const data = s.split(',');
-        return {
-          surname: data[0],
-          firstName: data[1],
-          middleNames: data[2],
-          birthday: data[3],
-          birthmonth: data[4],
-          birthyear: data[5],
-          issueDay: data[6],
-          issueMonth: data[7],
-          issueYear: data[8],
-          expiryDay: data[9],
-          expiryMonth: data[10],
-          expiryYear: data[11],
-          licenceNumber: data[12],
-          issueNumber: data[13],
-          postcode: data[14]
-        };
-      });
-  }
-);
+const csvDVLA: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', () => {
+  return open('./data/drivingLicenceDVLAData.csv')
+    .split('\n')
+    .slice(1)
+    .map((s) => {
+      const data = s.split(',');
+      return {
+        surname: data[0],
+        firstName: data[1],
+        middleNames: data[2],
+        birthday: data[3],
+        birthmonth: data[4],
+        birthyear: data[5],
+        issueDay: data[6],
+        issueMonth: data[7],
+        issueYear: data[8],
+        expiryDay: data[9],
+        expiryMonth: data[10],
+        expiryYear: data[11],
+        licenceNumber: data[12],
+        issueNumber: data[13],
+        postcode: data[14]
+      };
+    });
+});
 
-const csvDVA: DrivingLicenseUserDVA[] = new SharedArray(
-  'csvDataLicenceDVA',
-  () => {
-    return open('./data/drivingLicenceDVAData.csv')
-      .split('\n')
-      .slice(1)
-      .map((s) => {
-        const data = s.split(',');
-        return {
-          surname: data[0],
-          firstName: data[1],
-          middleNames: data[2],
-          birthday: data[3],
-          birthmonth: data[4],
-          birthyear: data[5],
-          issueDay: data[6],
-          issueMonth: data[7],
-          issueYear: data[8],
-          expiryDay: data[9],
-          expiryMonth: data[10],
-          expiryYear: data[11],
-          licenceNumber: data[12],
-          postcode: data[13]
-        };
-      });
-  }
-);
+const csvDVA: DrivingLicenseUserDVA[] = new SharedArray('csvDataLicenceDVA', () => {
+  return open('./data/drivingLicenceDVAData.csv')
+    .split('\n')
+    .slice(1)
+    .map((s) => {
+      const data = s.split(',');
+      return {
+        surname: data[0],
+        firstName: data[1],
+        middleNames: data[2],
+        birthday: data[3],
+        birthmonth: data[4],
+        birthyear: data[5],
+        issueDay: data[6],
+        issueMonth: data[7],
+        issueYear: data[8],
+        expiryDay: data[9],
+        expiryMonth: data[10],
+        expiryYear: data[11],
+        licenceNumber: data[12],
+        postcode: data[13]
+      };
+    });
+});
 
 interface PassportUser {
   passportNumber: string;
@@ -220,29 +207,26 @@ interface PassportUser {
   expiryYear: string;
 }
 
-const csvDataPassport: PassportUser[] = new SharedArray(
-  'csvDataPasport',
-  () => {
-    return open('./data/passportData.csv')
-      .split('\n')
-      .slice(1)
-      .map((s) => {
-        const data = s.split(',');
-        return {
-          passportNumber: data[0],
-          surname: data[1],
-          firstName: data[2],
-          middleName: data[3],
-          birthday: data[4],
-          birthmonth: data[5],
-          birthyear: data[6],
-          expiryDay: data[7],
-          expiryMonth: data[8],
-          expiryYear: data[9]
-        };
-      });
-  }
-);
+const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => {
+  return open('./data/passportData.csv')
+    .split('\n')
+    .slice(1)
+    .map((s) => {
+      const data = s.split(',');
+      return {
+        passportNumber: data[0],
+        surname: data[1],
+        firstName: data[2],
+        middleName: data[3],
+        birthday: data[4],
+        birthmonth: data[5],
+        birthyear: data[6],
+        expiryDay: data[7],
+        expiryMonth: data[8],
+        expiryYear: data[9]
+      };
+    });
+});
 
 export function fraud(): void {
   const groups = groupMap.fraud;
@@ -343,11 +327,8 @@ export function fraud(): void {
 
 export function drivingLicence(): void {
   type drivingLicenceIssuer = 'DVA' | 'DVLA';
-  const licenceIssuer: drivingLicenceIssuer =
-    Math.random() <= 0.5 ? 'DVA' : 'DVLA';
-  const groups = groupMap.drivingLicence.filter((s) =>
-    s.includes(licenceIssuer)
-  );
+  const licenceIssuer: drivingLicenceIssuer = Math.random() <= 0.5 ? 'DVA' : 'DVLA';
+  const groups = groupMap.drivingLicence.filter((s) => s.includes(licenceIssuer));
 
   let res: Response;
   const credentials = `${stubCreds.userName}:${stubCreds.password}`;
@@ -360,12 +341,9 @@ export function drivingLicence(): void {
   res = group(groups[0], () =>
     timeRequest(
       () =>
-        http.get(
-          `${env.ipvCoreStub}/authorize?cri=driving-licence-cri-${env.envName}&rowNumber=197`,
-          {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }
-        ),
+        http.get(`${env.ipvCoreStub}/authorize?cri=driving-licence-cri-${env.envName}&rowNumber=197`, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
       {
         isStatusCode200,
         ...pageContentCheck('Who was your UK driving licence issued by?')
@@ -425,9 +403,7 @@ export function drivingLicence(): void {
         }),
       {
         isStatusCode200,
-        ...pageContentCheck(
-          'Enter your details exactly as they appear on your UK driving licence'
-        )
+        ...pageContentCheck('Enter your details exactly as they appear on your UK driving licence')
       }
     )
   );
@@ -469,28 +445,19 @@ export function passport(): void {
   let res: Response;
   const credentials = `${stubCreds.userName}:${stubCreds.password}`;
   const encodedCredentials = encoding.b64encode(credentials);
-  const userPassport =
-    csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)];
+  const userPassport = csvDataPassport[Math.floor(Math.random() * csvDataPassport.length)];
   iterationsStarted.add(1);
 
   // B03_Passport_01_PassportCRIEntryFromStub
   res = group(groups[0], () =>
     timeRequest(
       () =>
-        http.get(
-          env.ipvCoreStub +
-            '/authorize?cri=passport-v1-cri-' +
-            env.envName +
-            '&rowNumber=197',
-          {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }
-        ),
+        http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' + env.envName + '&rowNumber=197', {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
       {
         isStatusCode200,
-        ...pageContentCheck(
-          'Enter your details exactly as they appear on your UK passport'
-        )
+        ...pageContentCheck('Enter your details exactly as they appear on your UK passport')
       }
     )
   );

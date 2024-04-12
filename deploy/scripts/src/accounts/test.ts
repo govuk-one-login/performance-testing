@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { sleep, group } from 'k6';
 import { type Options } from 'k6/options';
 import http, { type Response } from 'k6/http';
@@ -16,10 +13,7 @@ import {
 } from '../common/utils/config/load-profiles';
 import { SharedArray } from 'k6/data';
 import { timeRequest } from '../common/utils/request/timing';
-import {
-  isStatusCode200,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions';
 import { sleepBetween } from '../common/utils/sleep/sleepBetween';
 import { getEnv } from '../common/utils/config/environment-variables';
 import { getThresholds } from '../common/utils/config/thresholds';
@@ -151,9 +145,7 @@ export function changeEmail(): void {
   const groups = groupMap.changeEmail;
   let res: Response;
   const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, ''); // YYMMDDTHHmm
-  const iteration = exec.scenario.iterationInInstance
-    .toString()
-    .padStart(6, '0');
+  const iteration = exec.scenario.iterationInInstance.toString().padStart(6, '0');
   const newEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`;
   iterationsStarted.add(1);
 
@@ -179,10 +171,10 @@ export function changeEmail(): void {
 
   // B01_ChangeEmail_03_ClickChangeEmailLink
   res = group(groups[2], () =>
-    timeRequest(
-      () => http.get(env.envURL + '/enter-password?type=changeEmail'),
-      { isStatusCode200, ...pageContentCheck('Enter your password') }
-    )
+    timeRequest(() => http.get(env.envURL + '/enter-password?type=changeEmail'), {
+      isStatusCode200,
+      ...pageContentCheck('Enter your password')
+    })
   );
 
   sleepBetween(1, 3);
@@ -291,10 +283,10 @@ export function changePassword(): void {
 
   // B02_ChangePassword_03_ClickChangePasswordLink
   res = group(groups[2], () =>
-    timeRequest(
-      () => http.get(env.envURL + '/enter-password?type=changePassword'),
-      { isStatusCode200, ...pageContentCheck('Enter your current password') }
-    )
+    timeRequest(() => http.get(env.envURL + '/enter-password?type=changePassword'), {
+      isStatusCode200,
+      ...pageContentCheck('Enter your current password')
+    })
   );
 
   sleepBetween(1, 3);
@@ -383,10 +375,10 @@ export function changePhone(): void {
 
   // B03_ChangePhone_03_ClickChangePhoneNumberLink
   res = group(groups[2], () =>
-    timeRequest(
-      () => http.get(env.envURL + '/enter-password?type=changePhoneNumber'),
-      { isStatusCode200, ...pageContentCheck('Enter your password') }
-    )
+    timeRequest(() => http.get(env.envURL + '/enter-password?type=changePhoneNumber'), {
+      isStatusCode200,
+      ...pageContentCheck('Enter your password')
+    })
   );
 
   sleepBetween(1, 3);
@@ -500,10 +492,10 @@ export function deleteAccount(): void {
 
   // B04_DeleteAccount_03_ClickDeleteAccountLink
   res = group(groups[2], () =>
-    timeRequest(
-      () => http.get(env.envURL + '/enter-password?type=deleteAccount'),
-      { isStatusCode200, ...pageContentCheck('Enter your password') }
-    )
+    timeRequest(() => http.get(env.envURL + '/enter-password?type=deleteAccount'), {
+      isStatusCode200,
+      ...pageContentCheck('Enter your password')
+    })
   );
 
   sleepBetween(1, 3);
@@ -521,9 +513,7 @@ export function deleteAccount(): void {
         }),
       {
         isStatusCode200,
-        ...pageContentCheck(
-          'Are you sure you want to delete your GOV.UK One Login'
-        )
+        ...pageContentCheck('Are you sure you want to delete your GOV.UK One Login')
       }
     )
   );
@@ -546,8 +536,7 @@ export function deleteAccount(): void {
 export function validateUser(): void {
   const groups = groupMap.validateUser;
   let res: Response;
-  const userData =
-    validateData[exec.scenario.iterationInInstance % validateData.length];
+  const userData = validateData[exec.scenario.iterationInInstance % validateData.length];
   iterationsStarted.add(1);
 
   // B05_ValidateUser_01_LaunchAccountsHome
@@ -571,9 +560,7 @@ export function validateUser(): void {
         }),
       {
         isStatusCode200,
-        ...pageContentCheck(
-          'Enter your email address to sign in to your GOV.UK One Login'
-        )
+        ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
       }
     )
   );
@@ -605,9 +592,7 @@ export function validateUser(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Enter the 6 digit security code shown in your authenticator app'
-            )
+            ...pageContentCheck('Enter the 6 digit security code shown in your authenticator app')
           }
         )
       );
@@ -622,18 +607,13 @@ export function validateUser(): void {
             const response = res.submitForm({
               fields: { code: totp.generateTOTP() }
             });
-            acceptNewTerms = (response.body as string).includes(
-              'terms of use update'
-            );
+            acceptNewTerms = (response.body as string).includes('terms of use update');
             return response;
           },
           {
             isStatusCode200,
             'verify page content': (r) =>
-              acceptNewTerms ||
-              (r.body as string).includes(
-                'Services you can use with GOV.UK One Login'
-              )
+              acceptNewTerms || (r.body as string).includes('Services you can use with GOV.UK One Login')
           }
         )
       );
@@ -660,18 +640,13 @@ export function validateUser(): void {
             const response = res.submitForm({
               fields: { code: credentials.fixedPhoneOTP }
             });
-            acceptNewTerms = (response.body as string).includes(
-              'terms of use update'
-            );
+            acceptNewTerms = (response.body as string).includes('terms of use update');
             return response;
           },
           {
             isStatusCode200,
             'verify page content': (r) =>
-              acceptNewTerms ||
-              (r.body as string).includes(
-                'Services you can use with GOV.UK One Login'
-              )
+              acceptNewTerms || (r.body as string).includes('Services you can use with GOV.UK One Login')
           }
         )
       );

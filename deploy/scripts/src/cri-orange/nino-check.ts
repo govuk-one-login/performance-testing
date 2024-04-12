@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { group } from 'k6';
 import { SharedArray } from 'k6/data';
 import { type Options } from 'k6/options';
@@ -15,11 +12,7 @@ import {
   LoadProfile
 } from '../common/utils/config/load-profiles';
 import { timeRequest } from '../common/utils/request/timing';
-import {
-  isStatusCode200,
-  isStatusCode302,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions';
 import { sleepBetween } from '../common/utils/sleep/sleepBetween';
 import { getEnv } from '../common/utils/config/environment-variables';
 import { getThresholds } from '../common/utils/config/thresholds';

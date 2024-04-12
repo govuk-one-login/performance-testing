@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { type Options } from 'k6/options';
 import {
   selectProfile,
@@ -48,9 +45,7 @@ const env = {
   sqs_queue: getEnv('IDENTITY_SPOT_SQS')
 };
 
-const credentials = (
-  JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput
-).Credentials;
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials;
 const awsConfig = new AWSConfig({
   region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,

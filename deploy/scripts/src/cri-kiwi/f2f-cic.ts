@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { group, fail } from 'k6';
 import { type Options } from 'k6/options';
 import http, { type Response } from 'k6/http';
@@ -15,17 +12,9 @@ import {
 import execution from 'k6/execution';
 import { b64encode } from 'k6/encoding';
 import { timeRequest } from '../common/utils/request/timing';
-import {
-  isStatusCode200,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions';
 import { sleepBetween } from '../common/utils/sleep/sleepBetween';
-import {
-  getAuthorizeauthorizeLocation,
-  getClientID,
-  getCodeFromUrl,
-  getAccessToken
-} from './utils/authorization';
+import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl, getAccessToken } from './utils/authorization';
 import { getEnv } from '../common/utils/config/environment-variables';
 import { getThresholds } from '../common/utils/config/thresholds';
 
@@ -133,9 +122,7 @@ export function CIC(): void {
   res = group(groups[1], () =>
     timeRequest(() => http.get(authorizeLocation), {
       isStatusCode200,
-      ...pageContentCheck(
-        'Enter your name exactly as it appears on your photo ID'
-      )
+      ...pageContentCheck('Enter your name exactly as it appears on your photo ID')
     })
   );
 
@@ -223,14 +210,7 @@ export function FaceToFace(): void {
   const groups = groupMap.FaceToFace;
   let res: Response;
   const iteration = execution.scenario.iterationInInstance;
-  const paths = [
-    'UKPassport',
-    'NationalIDEEA',
-    'EU-DL',
-    'Non-UKPassport',
-    'BRP',
-    'UKDL'
-  ];
+  const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL'];
   const path = paths[iteration % paths.length];
   const expiry = randomDate(new Date(2024, 1, 1), new Date(2024, 12, 31));
   const expiryDay = expiry.getDate().toString();
@@ -276,9 +256,7 @@ export function FaceToFace(): void {
         }),
       {
         isStatusCode200,
-        ...pageContentCheck(
-          'Choose which photo ID you can take to a Post Office'
-        )
+        ...pageContentCheck('Choose which photo ID you can take to a Post Office')
       }
     )
   );
@@ -318,9 +296,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Find a Post Office where you can prove your identity'
-            )
+            ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
       );
@@ -336,9 +312,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Does your national identity card have an expiry date?'
-            )
+            ...pageContentCheck('Does your national identity card have an expiry date?')
           }
         )
       );
@@ -376,9 +350,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Does your national identity card have your current address on it?'
-            )
+            ...pageContentCheck('Does your national identity card have your current address on it?')
           }
         )
       );
@@ -397,9 +369,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Select which country your national identity card is from'
-            )
+            ...pageContentCheck('Select which country your national identity card is from')
           }
         )
       );
@@ -416,9 +386,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Find a Post Office where you can prove your identity'
-            )
+            ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
       );
@@ -434,9 +402,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Does your driving licence have an expiry date?'
-            )
+            ...pageContentCheck('Does your driving licence have an expiry date?')
           }
         )
       );
@@ -473,9 +439,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Does your driving licence have your current address on it?'
-            )
+            ...pageContentCheck('Does your driving licence have your current address on it?')
           }
         )
       );
@@ -488,16 +452,13 @@ export function FaceToFace(): void {
           () =>
             res.submitForm({
               fields: {
-                euDrivingLicenceAddressCheck:
-                  'Yes, it has my current address on it'
+                euDrivingLicenceAddressCheck: 'Yes, it has my current address on it'
               },
               submitSelector: '#continue'
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Select which country your driving licence is from'
-            )
+            ...pageContentCheck('Select which country your driving licence is from')
           }
         )
       );
@@ -514,9 +475,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Find a Post Office where you can prove your identity'
-            )
+            ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
       );
@@ -587,9 +546,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Find a Post Office where you can prove your identity'
-            )
+            ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
       );
@@ -605,9 +562,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'When does your biometric residence permit (BRP) expire?'
-            )
+            ...pageContentCheck('When does your biometric residence permit (BRP) expire?')
           }
         )
       );
@@ -628,9 +583,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Find a Post Office where you can prove your identity'
-            )
+            ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
       );
@@ -667,9 +620,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Does your driving licence have your current address on it?'
-            )
+            ...pageContentCheck('Does your driving licence have your current address on it?')
           }
         )
       );
@@ -684,9 +635,7 @@ export function FaceToFace(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Find a Post Office where you can prove your identity'
-            )
+            ...pageContentCheck('Find a Post Office where you can prove your identity')
           }
         )
       );
@@ -707,9 +656,7 @@ export function FaceToFace(): void {
         }),
       {
         isStatusCode200,
-        ...pageContentCheck(
-          'Choose a Post Office where you can prove your identity'
-        )
+        ...pageContentCheck('Choose a Post Office where you can prove your identity')
       }
     )
   );

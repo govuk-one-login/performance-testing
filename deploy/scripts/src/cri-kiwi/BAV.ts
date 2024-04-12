@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { group } from 'k6';
 import { type Options } from 'k6/options';
 import http, { type Response } from 'k6/http';
@@ -14,18 +11,10 @@ import {
 } from '../common/utils/config/load-profiles';
 import { b64encode } from 'k6/encoding';
 import { timeRequest } from '../common/utils/request/timing';
-import {
-  isStatusCode200,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions';
 import { sleepBetween } from '../common/utils/sleep/sleepBetween';
 import { bankingPayload } from './data/BAVdata';
-import {
-  getAuthorizeauthorizeLocation,
-  getClientID,
-  getCodeFromUrl,
-  getAccessToken
-} from './utils/authorization';
+import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl, getAccessToken } from './utils/authorization';
 import { getEnv } from '../common/utils/config/environment-variables';
 import { getThresholds } from '../common/utils/config/thresholds';
 
@@ -77,17 +66,10 @@ export function BAV(): void {
 
   // B01_BAV_01_IPVStubCall
   res = group(groups[0], () =>
-    timeRequest(
-      () =>
-        http.post(
-          env.BAV.ipvStub + '/start',
-          JSON.stringify({ bankingPayload })
-        ),
-      {
-        'is status 201': (r) => r.status === 201,
-        ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
-      }
-    )
+    timeRequest(() => http.post(env.BAV.ipvStub + '/start', JSON.stringify({ bankingPayload })), {
+      'is status 201': (r) => r.status === 201,
+      ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
+    })
   );
   const authorizeLocation = getAuthorizeauthorizeLocation(res);
   const clientId = getClientID(res);
@@ -96,9 +78,7 @@ export function BAV(): void {
   res = group(groups[1], () =>
     timeRequest(() => http.get(authorizeLocation), {
       isStatusCode200,
-      ...pageContentCheck(
-        'Continue to your bank or building society account details'
-      )
+      ...pageContentCheck('Continue to your bank or building society account details')
     })
   );
 
@@ -128,9 +108,7 @@ export function BAV(): void {
         }),
       {
         isStatusCode200,
-        ...pageContentCheck(
-          'Check your details match with your bank or building society account'
-        )
+        ...pageContentCheck('Check your details match with your bank or building society account')
       }
     )
   );

@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { group } from 'k6';
 import { type Options } from 'k6/options';
 import http, { type Response } from 'k6/http';
@@ -14,11 +11,7 @@ import {
 } from '../common/utils/config/load-profiles';
 import { env, encodedCredentials } from './utils/config';
 import { timeRequest } from '../common/utils/request/timing';
-import {
-  isStatusCode200,
-  isStatusCode302,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions';
 import { sleepBetween } from '../common/utils/sleep/sleepBetween';
 import { getEnv } from '../common/utils/config/environment-variables';
 import { getThresholds } from '../common/utils/config/thresholds';
@@ -76,15 +69,9 @@ export function kbv(): void {
   res = group(groups[0], () =>
     timeRequest(
       () =>
-        http.get(
-          env.ipvCoreStub +
-            '/authorize?cri=kbv-cri-' +
-            env.envName +
-            '&rowNumber=197',
-          {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }
-        ),
+        http.get(env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197', {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
       {
         isStatusCode200,
         ...pageContentCheck('You can find this amount on your loan agreement')
@@ -118,9 +105,7 @@ export function kbv(): void {
         }),
       {
         isStatusCode200,
-        ...pageContentCheck(
-          'Think about the amount you agreed to pay back every month'
-        )
+        ...pageContentCheck('Think about the amount you agreed to pay back every month')
       }
     )
   );

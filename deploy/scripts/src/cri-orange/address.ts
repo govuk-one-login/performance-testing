@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { group, fail } from 'k6';
 import { type Options } from 'k6/options';
 import http, { type Response } from 'k6/http';
@@ -16,11 +13,7 @@ import {
 } from '../common/utils/config/load-profiles';
 import { env, encodedCredentials } from './utils/config';
 import { timeRequest } from '../common/utils/request/timing';
-import {
-  isStatusCode200,
-  isStatusCode302,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions';
 import { sleepBetween } from '../common/utils/sleep/sleepBetween';
 import { getThresholds } from '../common/utils/config/thresholds';
 
@@ -79,8 +72,7 @@ const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
 export function address(): void {
   const groups = groupMap.address;
   let res: Response;
-  const user1Address =
-    csvData1[exec.scenario.iterationInTest % csvData1.length];
+  const user1Address = csvData1[exec.scenario.iterationInTest % csvData1.length];
   iterationsStarted.add(1);
 
   // B02_Address_01_AddressCRIEntryFromStub
@@ -90,15 +82,10 @@ export function address(): void {
       res = group(groups[1].split('::')[1], () =>
         timeRequest(
           () =>
-            http.get(
-              env.ipvCoreStub +
-                '/credential-issuer?cri=address-cri-' +
-                env.envName,
-              {
-                redirects: 0,
-                headers: { Authorization: `Basic ${encodedCredentials}` }
-              }
-            ),
+            http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
+              redirects: 0,
+              headers: { Authorization: `Basic ${encodedCredentials}` }
+            }),
           { isStatusCode302 }
         )
       );
@@ -126,9 +113,7 @@ export function address(): void {
     )
   );
 
-  const fullAddress =
-    res.html().find('select[name=addressResults]>option').last().val() ??
-    fail('Address not found');
+  const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found');
 
   // B02_Address_03_SelectAddress
   res = group(groups[4], () =>

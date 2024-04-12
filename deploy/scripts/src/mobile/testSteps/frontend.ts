@@ -1,15 +1,8 @@
 import http from 'k6/http';
 import { group } from 'k6';
 import { buildFrontendUrl } from '../utils/url';
-import {
-  validatePageRedirect,
-  validateLocationHeader,
-  validateQueryParam
-} from '../utils/assertions';
-import {
-  parseTestClientResponse,
-  postTestClientStart
-} from '../utils/test-client';
+import { validatePageRedirect, validateLocationHeader, validateQueryParam } from '../utils/assertions';
+import { parseTestClientResponse, postTestClientStart } from '../utils/test-client';
 import { timeRequest } from '../../common/utils/request/timing';
 import {
   isStatusCode200,
@@ -128,9 +121,7 @@ export function postIphoneModel(): void {
       {
         isStatusCode200,
         ...validatePageRedirect('/idCheckApp'),
-        ...pageContentCheck(
-          'Use your passport and a GOV.UK app to confirm your identity'
-        )
+        ...pageContentCheck('Use your passport and a GOV.UK app to confirm your identity')
       }
     )
   );
@@ -138,19 +129,11 @@ export function postIphoneModel(): void {
 
 export function postIdCheckApp(): void {
   group('POST /idCheckApp', () =>
-    timeRequest(
-      () =>
-        http.post(
-          buildFrontendUrl('/idCheckApp'),
-          {},
-          { tags: { name: 'POST /idCheckApp' } }
-        ),
-      {
-        isStatusCode200,
-        ...validatePageRedirect('/workingCamera'),
-        ...pageContentCheck('Does your smartphone have a working camera?')
-      }
-    )
+    timeRequest(() => http.post(buildFrontendUrl('/idCheckApp'), {}, { tags: { name: 'POST /idCheckApp' } }), {
+      isStatusCode200,
+      ...validatePageRedirect('/workingCamera'),
+      ...pageContentCheck('Does your smartphone have a working camera?')
+    })
   );
 }
 
@@ -166,9 +149,7 @@ export function postWorkingCamera(): void {
       {
         isStatusCode200,
         ...validatePageRedirect('/flashingWarning'),
-        ...pageContentCheck(
-          'The app uses flashing colours. Do you want to continue?'
-        )
+        ...pageContentCheck('The app uses flashing colours. Do you want to continue?')
       }
     )
   );

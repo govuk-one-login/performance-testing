@@ -55,9 +55,7 @@ export default class TOTP {
 
     const hash = crypto.hmac(this.algorithm, this.key, time, 'hex');
     const offset = hexToDec(hash.slice(-1)) * 2;
-    const totp = (
-      hexToDec(hash.slice(offset, offset + 8)) & 0x7fffffff
-    ).toString();
+    const totp = (hexToDec(hash.slice(offset, offset + 8)) & 0x7fffffff).toString();
     return totp.slice(-this.digits);
   }
 }

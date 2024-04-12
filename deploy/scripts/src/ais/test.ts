@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { type Options } from 'k6/options';
 import {
   selectProfile,
@@ -11,18 +8,12 @@ import {
   LoadProfile
 } from '../common/utils/config/load-profiles';
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs';
-import {
-  generatePersistIVRequest,
-  interventionCodes
-} from './requestGenerator/aisReqGen';
+import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen';
 import { type AssumeRoleOutput } from '../common/utils/aws/types';
 import { uuidv4 } from '../common/utils/jslib/index';
 import { group } from 'k6';
 import { timeRequest } from '../common/utils/request/timing';
-import {
-  isStatusCode200,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions';
 import { SharedArray } from 'k6/data';
 import http from 'k6/http';
 import { getEnv } from '../common/utils/config/environment-variables';
@@ -76,23 +67,18 @@ interface RetrieveUserID {
   userID: string;
 }
 
-const csvData: RetrieveUserID[] = new SharedArray(
-  'Retrieve Intervention User ID',
-  function () {
-    return open('./data/retrieveInterventionUser.csv')
-      .split('\n')
-      .slice(1)
-      .map((userID) => {
-        return {
-          userID
-        };
-      });
-  }
-);
+const csvData: RetrieveUserID[] = new SharedArray('Retrieve Intervention User ID', function () {
+  return open('./data/retrieveInterventionUser.csv')
+    .split('\n')
+    .slice(1)
+    .map((userID) => {
+      return {
+        userID
+      };
+    });
+});
 
-const credentials = (
-  JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput
-).Credentials;
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials;
 const awsConfig = new AWSConfig({
   region: getEnv('AWS_REGION'),
   accessKeyId: credentials.AccessKeyId,
@@ -103,10 +89,7 @@ const sqs = new SQSClient(awsConfig);
 
 export function persistIV(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`;
-  const persistIVPayload = generatePersistIVRequest(
-    userID,
-    interventionCodes.suspend
-  );
+  const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend);
   const persistIVMessage = JSON.stringify(persistIVPayload);
   iterationsStarted.add(1);
   sqs.sendMessage(env.sqs_queue, persistIVMessage);
@@ -120,11 +103,10 @@ export function retrieveIV(): void {
 
   // B02_RetrieveIV_01_GetInterventionData
   group(groups[0], () =>
-    timeRequest(
-      () =>
-        http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`),
-      { isStatusCode200, ...pageContentCheck('Perf Testing') }
-    )
+    timeRequest(() => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`), {
+      isStatusCode200,
+      ...pageContentCheck('Perf Testing')
+    })
   );
   iterationsCompleted.add(1);
 }
@@ -132,10 +114,7 @@ export function retrieveIV(): void {
 export function dataCreationForRetrieve(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`;
   iterationsStarted.add(1);
-  const persistIVPayload = generatePersistIVRequest(
-    userID,
-    interventionCodes.block
-  );
+  const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.block);
   const persistIVMessage = JSON.stringify(persistIVPayload);
   sqs.sendMessage(env.sqs_queue, persistIVMessage);
   console.log(userID);

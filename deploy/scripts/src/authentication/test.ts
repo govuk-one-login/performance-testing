@@ -4,11 +4,7 @@ import execution from 'k6/execution';
 import http, { type Response } from 'k6/http';
 import { type Options } from 'k6/options';
 import TOTP from '../common/utils/authentication/totp';
-import {
-  isStatusCode200,
-  isStatusCode302,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions';
 import {
   selectProfile,
   type ProfileList,
@@ -17,10 +13,7 @@ import {
   LoadProfile
 } from '../common/utils/config/load-profiles';
 import { getThresholds } from '../common/utils/config/thresholds';
-import {
-  iterationsCompleted,
-  iterationsStarted
-} from '../common/utils/custom_metric/counter';
+import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter';
 import { timeRequest } from '../common/utils/request/timing';
 import { getEnv } from '../common/utils/config/environment-variables';
 
@@ -142,9 +135,7 @@ export function signUp(): void {
   let res: Response;
   const groups = groupMap.signUp;
   const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, ''); // YYMMDDTHHmm
-  const iteration = execution.scenario.iterationInInstance
-    .toString()
-    .padStart(6, '0');
+  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0');
   const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`;
   const phoneNumber = '07700900000';
   let secretKey: string;
@@ -258,8 +249,7 @@ export function signUp(): void {
         )
       );
 
-      secretKey =
-        res.html().find("span[class*='secret-key-fragment']").text() ?? '';
+      secretKey = res.html().find("span[class*='secret-key-fragment']").text() ?? '';
       totp = new TOTP(secretKey);
       sleep(1);
 
@@ -361,10 +351,7 @@ export function signUp(): void {
       timeRequest(() => {
         // 01_RPStub
         res = group(groups[18].split('::')[1], () =>
-          timeRequest(
-            () => http.get(env.rpStub + '/logout', { redirects: 0 }),
-            { isStatusCode302 }
-          )
+          timeRequest(() => http.get(env.rpStub + '/logout', { redirects: 0 }), { isStatusCode302 })
         );
         // 02_OIDCCall
         res = group(groups[19].split('::')[1], () =>
@@ -389,8 +376,7 @@ export function signUp(): void {
 export function signIn(): void {
   let res: Response;
   const groups = groupMap.signIn;
-  const userData =
-    dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length];
+  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length];
   iterationsStarted.add(1);
 
   // B02_SignIn_01_InitializeJourney
@@ -424,9 +410,7 @@ export function signIn(): void {
   res = group(groups[4], () =>
     timeRequest(() => res.submitForm(), {
       isStatusCode200,
-      ...pageContentCheck(
-        'Enter your email address to sign in to your GOV.UK One Login'
-      )
+      ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
     })
   );
 
@@ -457,9 +441,7 @@ export function signIn(): void {
             }),
           {
             isStatusCode200,
-            ...pageContentCheck(
-              'Enter the 6 digit security code shown in your authenticator app'
-            )
+            ...pageContentCheck('Enter the 6 digit security code shown in your authenticator app')
           }
         )
       );
@@ -483,15 +465,10 @@ export function signIn(): void {
           );
           // 02_OIDCCall
           res = group(groups[9].split('::')[1], () =>
-            timeRequest(
-              () => http.get(res.headers.Location, { redirects: 0 }),
-              { isStatusCode302 }
-            )
+            timeRequest(() => http.get(res.headers.Location, { redirects: 0 }), { isStatusCode302 })
           );
 
-          acceptNewTerms = res.headers.Location.includes(
-            'updated-terms-and-conditions'
-          );
+          acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions');
           if (acceptNewTerms) {
             // 03_AuthAcceptTerms
             res = group(groups[10].split('::')[1], () =>
@@ -543,15 +520,10 @@ export function signIn(): void {
           );
           // 02_OIDCCall
           res = group(groups[15].split('::')[1], () =>
-            timeRequest(
-              () => http.get(res.headers.Location, { redirects: 0 }),
-              { isStatusCode302 }
-            )
+            timeRequest(() => http.get(res.headers.Location, { redirects: 0 }), { isStatusCode302 })
           );
 
-          acceptNewTerms = res.headers.Location.includes(
-            'updated-terms-and-conditions'
-          );
+          acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions');
 
           if (acceptNewTerms) {
             // 03_AuthAcceptTerms
@@ -598,10 +570,7 @@ export function signIn(): void {
       timeRequest(() => {
         // 01_RPStub
         res = group(groups[20].split('::')[1], () =>
-          timeRequest(
-            () => http.get(env.rpStub + '/logout', { redirects: 0 }),
-            { isStatusCode302 }
-          )
+          timeRequest(() => http.get(env.rpStub + '/logout', { redirects: 0 }), { isStatusCode302 })
         );
         // 02_OIDCCall
         res = group(groups[21].split('::')[1], () =>

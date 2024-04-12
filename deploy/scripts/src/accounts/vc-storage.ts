@@ -1,7 +1,4 @@
-import {
-  iterationsStarted,
-  iterationsCompleted
-} from '../common/utils/custom_metric/counter';
+import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter';
 import { group, fail } from 'k6';
 import { type Options } from 'k6/options';
 import http, { type Response } from 'k6/http';
@@ -16,10 +13,7 @@ import { SharedArray } from 'k6/data';
 import { uuidv4 } from '../common/utils/jslib';
 import { timeRequest } from '../common/utils/request/timing';
 import { sleepBetween } from '../common/utils/sleep/sleepBetween';
-import {
-  isStatusCode200,
-  pageContentCheck
-} from '../common/utils/checks/assertions';
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions';
 import { getEnv } from '../common/utils/config/environment-variables';
 import { getThresholds } from '../common/utils/config/thresholds';
 
@@ -50,10 +44,7 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles);
 const groupMap = {
   persistVC: ['R01_PersistVC_01_GenerateToken', 'R01_PersistVC_02_CreateVC'],
-  summariseVC: [
-    'R02_SummariseVC_01_GenerateTokenSummary',
-    'R02_SummariseVC_02_Summarise'
-  ]
+  summariseVC: ['R02_SummariseVC_01_GenerateTokenSummary', 'R02_SummariseVC_02_Summarise']
 } as const;
 
 export const options: Options = {
@@ -70,19 +61,16 @@ interface SummariseSubjectID {
   subID: string;
 }
 
-const csvData: SummariseSubjectID[] = new SharedArray(
-  'Summarise Subject ID',
-  function () {
-    return open('./data/summariseSubjectID.csv')
-      .split('\n')
-      .slice(1)
-      .map((subID) => {
-        return {
-          subID
-        };
-      });
-  }
-);
+const csvData: SummariseSubjectID[] = new SharedArray('Summarise Subject ID', function () {
+  return open('./data/summariseSubjectID.csv')
+    .split('\n')
+    .slice(1)
+    .map((subID) => {
+      return {
+        subID
+      };
+    });
+});
 
 const env = {
   envURL: getEnv('ACCOUNT_BRAVO_ID_REUSE_URL'),
@@ -126,13 +114,10 @@ export function persistVC(): void {
   ]);
   // R01_PersistVC_02_CreateVC
   res = group(groups[1], () =>
-    timeRequest(
-      () => http.post(env.envURL + `/vcs/${subjectID}`, body, options),
-      {
-        isStatusCode202: (r) => r.status === 202,
-        ...pageContentCheck('messageId')
-      }
-    )
+    timeRequest(() => http.post(env.envURL + `/vcs/${subjectID}`, body, options), {
+      isStatusCode202: (r) => r.status === 202,
+      ...pageContentCheck('messageId')
+    })
   );
   iterationsCompleted.add(1);
 }
@@ -168,11 +153,10 @@ export function summariseVC(): void {
   };
   // R02_SummariseVC_02_Summarise
   res = group(groups[1], () =>
-    timeRequest(
-      () =>
-        http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options),
-      { isStatusCode200, ...pageContentCheck('vcs') }
-    )
+    timeRequest(() => http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options), {
+      isStatusCode200,
+      ...pageContentCheck('vcs')
+    })
   );
   iterationsCompleted.add(1);
 }

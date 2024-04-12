@@ -8,7 +8,8 @@ ENV WORKDIR=/home/node
 ADD scripts ${WORKDIR}/scripts
 
 WORKDIR ${WORKDIR}/scripts
-RUN npm install && npm start
+RUN npm install --ignore-scripts
+RUN npm start
 
 # -------------------------------
 # Build k6 binary with extensions

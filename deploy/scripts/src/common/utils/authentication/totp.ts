@@ -86,7 +86,7 @@ function base32ToBytes(base32: string): ArrayBuffer {
   const bytes: number[] = []
 
   // Removes padding chars, if any
-  base32 = base32.replace(/=+$/, '')
+  base32 = base32.replace(/={1,7}$/, '')
 
   // Converts base32 string to bits
   for (let i = 0; i < base32.length; i++) {

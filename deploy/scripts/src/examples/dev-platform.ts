@@ -1,6 +1,6 @@
 import http from 'k6/http'
 import { type Options } from 'k6/options'
-import { group, sleep } from 'k6'
+import { sleep } from 'k6'
 import {
   selectProfile,
   type ProfileList,
@@ -9,7 +9,7 @@ import {
   LoadProfile
 } from '../common/utils/config/load-profiles'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
-import { timeRequest } from '../common/utils/request/timing'
+import { timeGroup } from '../common/utils/request/timing'
 import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
@@ -78,22 +78,18 @@ const env = {
 }
 
 export function demoSamApp(): void {
-  group('GET - {demoSamApp} /test', () =>
-    timeRequest(() => http.get(env.BE_URL + '/test'), {
-      isStatusCode200,
-      'verify page content': r => JSON.parse(r.body as string).code === 'success'
-    })
-  )
+  timeGroup('GET - {demoSamApp} /test', () => http.get(env.BE_URL + '/test'), {
+    isStatusCode200,
+    'verify page content': r => JSON.parse(r.body as string).code === 'success'
+  })
 
   sleep(1)
 }
 
 export function demoNodeApp(): void {
-  group('GET - {demoNodeApp} /toy', () =>
-    timeRequest(() => http.get(env.FE_URL + '/toy'), {
-      isStatusCode200,
-      ...pageContentCheck('We need to ask you about your favourite toy')
-    })
-  )
+  timeGroup('GET - {demoNodeApp} /toy', () => http.get(env.FE_URL + '/toy'), {
+    isStatusCode200,
+    ...pageContentCheck('We need to ask you about your favourite toy')
+  })
   sleep(1)
 }

@@ -24,7 +24,7 @@ RUN xk6 build v0.49.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --out
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.97.0 as otel
+FROM otel/opentelemetry-collector-contrib:0.98.0 as otel
 ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---

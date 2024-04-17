@@ -2,7 +2,7 @@ import http, { type Response } from 'k6/http'
 import { buildBackendUrl, buildUrl } from './url'
 import { config } from './config'
 
-export function postTestClientStart (): Response {
+export function postTestClientStart(): Response {
   return http.post(
     buildUrl('start', config.testClientExecuteUrl),
     JSON.stringify({
@@ -16,10 +16,7 @@ export function postTestClientStart (): Response {
   )
 }
 
-export function parseTestClientResponse (
-  response: Response,
-  location: 'WebLocation' | 'ApiLocation'
-): string {
+export function parseTestClientResponse(response: Response, location: 'WebLocation' | 'ApiLocation'): string {
   const url = response.json(location)
   if (typeof url !== 'string') {
     throw new Error('Failed to parse URL from response')
@@ -31,9 +28,9 @@ export function parseTestClientResponse (
   }
 }
 
-function parseApiLocation (apiLocation: string): string {
-  function parseQueryParams (queryParams: string[], parameterName: string): string {
-    return queryParams.filter((value) => value.startsWith(parameterName))[0].split('=')[1]
+function parseApiLocation(apiLocation: string): string {
+  function parseQueryParams(queryParams: string[], parameterName: string): string {
+    return queryParams.filter(value => value.startsWith(parameterName))[0].split('=')[1]
   }
 
   const queryParams = apiLocation.split('?')[1].split('&')

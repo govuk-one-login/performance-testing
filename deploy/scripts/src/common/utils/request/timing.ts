@@ -16,7 +16,7 @@ const durations = new Trend('duration', true)
  *  ..
  * })
  */
-export function timeFunction<T> (fn: () => T): [T, number] {
+export function timeFunction<T>(fn: () => T): [T, number] {
   const start = Date.now()
   const res = fn()
   const end = Date.now()
@@ -35,10 +35,8 @@ export function timeFunction<T> (fn: () => T): [T, number] {
  *   { 'status is 200': (r) => r.status === 200 }
  * )
  */
-export function timeRequest<T> (fn: () => T, checks: Checkers<T>): T {
+export function timeRequest<T>(fn: () => T, checks: Checkers<T>): T {
   const [res, duration] = timeFunction(fn)
-  check(res, checks)
-    ? durations.add(duration)
-    : fail('Response validation failed')
+  check(res, checks) ? durations.add(duration) : fail('Response validation failed')
   return res
 }

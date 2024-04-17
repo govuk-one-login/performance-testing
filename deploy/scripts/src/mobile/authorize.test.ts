@@ -1,5 +1,11 @@
 import { type Options } from 'k6/options'
-import { describeProfile, type ProfileList, selectProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
+import {
+  describeProfile,
+  type ProfileList,
+  selectProfile,
+  createScenario,
+  LoadProfile
+} from '../common/utils/config/load-profiles'
 import { startJourney } from './testSteps/frontend'
 
 const profiles: ProfileList = {
@@ -21,10 +27,10 @@ export const options: Options = {
   }
 }
 
-export function setup (): void {
+export function setup(): void {
   describeProfile(loadProfile)
 }
 
-export function authorize (): void {
+export function authorize(): void {
   startJourney()
 }

@@ -1,4 +1,10 @@
-import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
+import {
+  selectProfile,
+  type ProfileList,
+  describeProfile,
+  createScenario,
+  LoadProfile
+} from '../common/utils/config/load-profiles'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { AWSConfig } from '../common/utils/jslib/aws-sqs'
 import { SignatureV4 } from '../common/utils/jslib/aws-signature'
@@ -31,22 +37,19 @@ const profiles: ProfileList = {
   }
 }
 
-interface GetCICData { journeyID: string, userID: string }
+interface GetCICData {
+  journeyID: string
+  userID: string
+}
 const getCIC: GetCICData[] = new SharedArray('Get CIC Data', () => {
   return JSON.parse(open('./data/getCICData.json')).getCICUSers
 })
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  putContraIndicators: [
-    'B01_CIMIT_01_PutContraIndicator'
-  ],
-  getContraIndicatorCredentials: [
-    'B02_CIMIT_01_GetContraIndicatorCredentials'
-  ],
-  postMitigations: [
-    'B03_CIMIT_01_PostMitigations'
-  ]
+  putContraIndicators: ['B01_CIMIT_01_PutContraIndicator'],
+  getContraIndicatorCredentials: ['B02_CIMIT_01_GetContraIndicatorCredentials'],
+  postMitigations: ['B03_CIMIT_01_PostMitigations']
 } as const
 
 export const options: Options = {
@@ -55,7 +58,7 @@ export const options: Options = {
   tags: { name: '' }
 }
 
-export function setup (): void {
+export function setup(): void {
   describeProfile(loadProfile)
 }
 
@@ -84,7 +87,7 @@ const signer = new SignatureV4({
   applyChecksum: false
 })
 
-export function putContraIndicators (): void {
+export function putContraIndicators(): void {
   const groups = groupMap.putContraIndicators
   const putContraIndicatorPayload = JSON.stringify(generatePutCI())
   const request = {
@@ -97,16 +100,20 @@ export function putContraIndicators (): void {
   }
   const signedRequest = signer.sign(request)
   iterationsStarted.add(1)
-  group(groups[0], () => timeRequest(() => // B01_CIMIT_01_PutContraIndicator
-    http.post(signedRequest.url, putContraIndicatorPayload,
-      {
-        headers: signedRequest.headers
-      }),
-  { isStatusCode200 }))
+  // B01_CIMIT_01_PutContraIndicator
+  group(groups[0], () =>
+    timeRequest(
+      () =>
+        http.post(signedRequest.url, putContraIndicatorPayload, {
+          headers: signedRequest.headers
+        }),
+      { isStatusCode200 }
+    )
+  )
   iterationsCompleted.add(1)
 }
 
-export function getContraIndicatorCredentials (): void {
+export function getContraIndicatorCredentials(): void {
   const groups = groupMap.getContraIndicatorCredentials
   const user = getCIC[Math.floor(Math.random() * getCIC.length)]
   const getCICPayload = JSON.stringify(generateGetCIC(user.journeyID, user.userID))
@@ -120,16 +127,20 @@ export function getContraIndicatorCredentials (): void {
   }
   const signedRequest = signer.sign(request)
   iterationsStarted.add(1)
-  group(groups[0], () => timeRequest(() => // B02_CIMIT_01_GetContraIndicatorCredentials
-    http.post(signedRequest.url, getCICPayload,
-      {
-        headers: signedRequest.headers
-      }),
-  { isStatusCode200 }))
+  // B02_CIMIT_01_GetContraIndicatorCredentials
+  group(groups[0], () =>
+    timeRequest(
+      () =>
+        http.post(signedRequest.url, getCICPayload, {
+          headers: signedRequest.headers
+        }),
+      { isStatusCode200 }
+    )
+  )
   iterationsCompleted.add(1)
 }
 
-export function postMitigations (): void {
+export function postMitigations(): void {
   const groups = groupMap.postMitigations
   const postMitigationsPayload = JSON.stringify(generatePostMitigations())
   const request = {
@@ -142,11 +153,15 @@ export function postMitigations (): void {
   }
   const signedRequest = signer.sign(request)
   iterationsStarted.add(1)
-  group(groups[0], () => timeRequest(() => // B03_CIMIT_01_PostMitigations
-    http.post(signedRequest.url, postMitigationsPayload,
-      {
-        headers: signedRequest.headers
-      }),
-  { isStatusCode200 }))
+  // B03_CIMIT_01_PostMitigations
+  group(groups[0], () =>
+    timeRequest(
+      () =>
+        http.post(signedRequest.url, postMitigationsPayload, {
+          headers: signedRequest.headers
+        }),
+      { isStatusCode200 }
+    )
+  )
   iterationsCompleted.add(1)
 }

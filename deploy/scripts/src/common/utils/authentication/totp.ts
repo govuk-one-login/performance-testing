@@ -18,11 +18,13 @@ export default class TOTP {
    * const seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ' // Ascii string "12345678901234567890" in base32
    * const totp = new TOTP(seed, 8)
    */
-  constructor (base32key: string,
+  constructor(
+    base32key: string,
     private readonly digits = 6,
     private readonly algorithm: Algorithm = 'sha1',
     private readonly period = 30,
-    private readonly startTime = 0) {
+    private readonly startTime = 0
+  ) {
     this.key = base32ToBytes(base32key)
   }
 
@@ -31,7 +33,7 @@ export default class TOTP {
    * @param {number} timestamp Timestamp in milliseconds
    * @returns {ArrayBuffer}  Byte array representing the number of time steps elapsed since the start time
    */
-  calculateTime (timestamp: number): ArrayBuffer {
+  calculateTime(timestamp: number): ArrayBuffer {
     const seconds = Math.round(timestamp / 1000) - this.startTime
     const steps = Math.floor(seconds / this.period)
     const hexSteps = decToHex(steps).padStart(16, '0')
@@ -48,7 +50,7 @@ export default class TOTP {
    * const totp = new TOTP(seed)
    * const password = totp.generateTOTP()
    */
-  public generateTOTP (timestamp: number = Date.now()): string {
+  public generateTOTP(timestamp: number = Date.now()): string {
     const time = this.calculateTime(timestamp)
 
     const hash = crypto.hmac(this.algorithm, this.key, time, 'hex')
@@ -59,24 +61,26 @@ export default class TOTP {
 }
 
 // Converts a hex string to a byte array
-function hexToBytes (hex: string): ArrayBuffer {
+function hexToBytes(hex: string): ArrayBuffer {
   const bytes: number[] = []
-  for (let i = 0; i < hex.length; i += 2) { bytes.push(parseInt(hex.slice(i, i + 2), 16)) }
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes.push(parseInt(hex.slice(i, i + 2), 16))
+  }
   return new Uint8Array(bytes).buffer
 }
 
 // Converts a hex string to a decimal
-function hexToDec (s: string): number {
+function hexToDec(s: string): number {
   return parseInt(s, 16)
 }
 
 // Converts a decimal to a hex string
-function decToHex (d: number): string {
+function decToHex(d: number): string {
   return Math.round(d).toString(16).padStart(2, '0')
 }
 
 // Converts a (RFC 4648) base32 string to a byte array
-function base32ToBytes (base32: string): ArrayBuffer {
+function base32ToBytes(base32: string): ArrayBuffer {
   const base32chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567' // pragma: allowlist secret
   let bits = ''
   const bytes: number[] = []

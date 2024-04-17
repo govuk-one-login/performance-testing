@@ -18,7 +18,7 @@ export interface ProfileConfig {
  * @param {string} profileName Profile name to select
  * @returns {Profile} Selected load profile
  */
-export function getProfile (profiles: ProfileList, profileName: string): Profile {
+export function getProfile(profiles: ProfileList, profileName: string): Profile {
   if (profileName == null) throw new Error('No profile specified')
   if (profileName in profiles) {
     return {
@@ -37,11 +37,13 @@ export function getProfile (profiles: ProfileList, profileName: string): Profile
  * @param {string | undefined} selections Scenario selection string to use, defaults to selecting all scenarios
  * @returns {ScenarioList} Subset of scenarios as defined by the selection string
  */
-export function getScenarios (scenarios: ScenarioList, selections: string | undefined): ScenarioList {
+export function getScenarios(scenarios: ScenarioList, selections: string | undefined): ScenarioList {
   let enabled: ScenarioList = {}
   selections == null || selections === '' || selections.toLowerCase() === 'all' // Enable all scenarios is selection string is null, empty or set to 'all'
-    ? enabled = scenarios
-    : selections.split(',').forEach(scenario => { enabled[scenario] = scenarios[scenario] })
+    ? (enabled = scenarios)
+    : selections.split(',').forEach(scenario => {
+        enabled[scenario] = scenarios[scenario]
+      })
   return enabled
 }
 
@@ -62,7 +64,7 @@ export const defaultConfig: ProfileConfig = {
  * defaults to `defaultConfig` which uses the environment variables
  * @returns {Profile} Object containing the selected load profile and scenarios
  */
-export function selectProfile (profiles: ProfileList, config: ProfileConfig = defaultConfig): Profile {
+export function selectProfile(profiles: ProfileList, config: ProfileConfig = defaultConfig): Profile {
   const profile = getProfile(profiles, config.profile)
   return {
     name: profile.name,
@@ -79,7 +81,7 @@ export function selectProfile (profiles: ProfileList, config: ProfileConfig = de
  *   describeProfile(loadProfile)
  * }
  */
-export function describeProfile (profile: Profile): void {
+export function describeProfile(profile: Profile): void {
   console.log(`Load Profile: <\x1b[32m${profile.name}\x1b[0m>`)
   console.log(`Scenarios: <\x1b[34m${Object.keys(profile.scenarios).join('\x1b[0m|\x1b[34m')}\x1b[0m>`)
 }
@@ -90,7 +92,7 @@ export enum LoadProfile {
   full,
   deployment
 }
-function createStages (type: LoadProfile, target: number): Stage[] {
+function createStages(type: LoadProfile, target: number): Stage[] {
   switch (type) {
     case LoadProfile.smoke:
       return [
@@ -136,10 +138,15 @@ function createStages (type: LoadProfile, target: number): Stage[] {
  *  }
  * }
  */
-export function createScenario (exec: string, type: LoadProfile, target: number = 1, duration: number = 30): ScenarioList {
+export function createScenario(
+  exec: string,
+  type: LoadProfile,
+  target: number = 1,
+  duration: number = 30
+): ScenarioList {
   const list: ScenarioList = {}
   const smoke = type === LoadProfile.smoke
-  const preAllocatedVUs = smoke ? 1 : target * duration / 2
+  const preAllocatedVUs = smoke ? 1 : (target * duration) / 2
   const maxVUs = smoke ? 1 : target * duration
   list[exec] = {
     executor: 'ramping-arrival-rate',

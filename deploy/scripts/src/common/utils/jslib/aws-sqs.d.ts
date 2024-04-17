@@ -20,12 +20,7 @@ export class AWSConfig {
    * })
    * const sqs = new SQSClient(awsConfig)
    */
-  constructor (options: {
-    region: string
-    accessKeyId: string
-    secretAccessKey: string
-    sessionToken?: string
-  })
+  constructor(options: { region: string; accessKeyId: string; secretAccessKey: string; sessionToken?: string })
 
   declare region
   declare accessKeyId
@@ -38,7 +33,7 @@ export class AWSConfig {
    * Creates an AWSConfig using the `AWS_REGION`, `AWS_ACCESS_KEY_ID`,
    * `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables.
    */
-  static fromEnvironment (): AWSConfig
+  static fromEnvironment(): AWSConfig
 }
 
 export class SQSClient {
@@ -50,7 +45,7 @@ export class SQSClient {
    *
    * @param {AWSConfig} config AWS Config to use to initialise the SQS client
    */
-  constructor (config: AWSConfig)
+  constructor(config: AWSConfig)
 
   /**
    * Retrieves a list of available Amazon Simple Queue Service (SQS) queues
@@ -78,11 +73,7 @@ export class SQSClient {
    *     exec.test.abort()
    * }
    */
-  listQueues (options?: {
-    queueNamePrefix?: string
-    maxResults?: number
-    nextToken?: string
-  }): Promise<{
+  listQueues(options?: { queueNamePrefix?: string; maxResults?: number; nextToken?: string }): Promise<{
     urls: string[]
     nextToken?: string
   }>
@@ -104,10 +95,14 @@ export class SQSClient {
    * const testQueue = 'https://sqs.us-east-1.amazonaws.com/000000000/test-queue'
    * const sentMessage = sqs.sendMessage(testQueue, JSON.stringify({value: '123'}))
    */
-  sendMessage (queueUrl: string, messageBody: string, options?: {
-    messageDeduplicationId?: string
-    messageGroupId?: string
-  }): {
+  sendMessage(
+    queueUrl: string,
+    messageBody: string,
+    options?: {
+      messageDeduplicationId?: string
+      messageGroupId?: string
+    }
+  ): {
     id: string
     bodyMD5: string
   }

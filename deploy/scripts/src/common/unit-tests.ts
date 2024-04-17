@@ -1,13 +1,27 @@
 import { type JSONValue, check, group, sleep } from 'k6'
 import TOTP from './utils/authentication/totp'
-import { type Profile, type ProfileList, selectProfile, createScenario, LoadProfile, type ScenarioList } from './utils/config/load-profiles'
+import {
+  type Profile,
+  type ProfileList,
+  selectProfile,
+  createScenario,
+  LoadProfile,
+  type ScenarioList
+} from './utils/config/load-profiles'
 import { AWSConfig, SQSClient } from './utils/jslib/aws-sqs'
-import { findBetween, normalDistributionStages, randomIntBetween, randomItem, randomString, uuidv4 } from './utils/jslib'
+import {
+  findBetween,
+  normalDistributionStages,
+  randomIntBetween,
+  randomItem,
+  randomString,
+  uuidv4
+} from './utils/jslib'
 import { URL, URLSearchParams } from './utils/jslib/url'
 import { timeFunction, timeRequest } from './utils/request/timing'
 import { sleepBetween } from './utils/sleep/sleepBetween'
 import { isStatusCode200, isStatusCode201, isStatusCode302, pageContentCheck } from './utils/checks/assertions'
-import { type RefinedParams, type RefinedResponse, type ResponseType, type Response } from 'k6/http'
+import { type RefinedResponse, type ResponseType, type Response } from 'k6/http'
 import { type Selection } from 'k6/html'
 import { iterationsCompleted, iterationsStarted } from './utils/custom_metric/counter'
 import { type GroupMap, type Thresholds, getThresholds } from './utils/config/thresholds'
@@ -30,7 +44,8 @@ export default (): void => {
     // Examples from https://www.rfc-editor.org/rfc/rfc6238
     const sha1seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ' // Ascii string "12345678901234567890" in base32
     const sha256seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZA====' // 32 byte seed
-    const sha512seed = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNA=' // 64 byte seed
+    const sha512seed =
+      'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNA=' // 64 byte seed
     const sha1otp = new TOTP(sha1seed, 8, 'sha1')
     const sha256otp = new TOTP(sha256seed, 8, 'sha256')
     const sha512otp = new TOTP(sha512seed, 8, 'sha512')
@@ -114,12 +129,24 @@ export default (): void => {
 
       const noFlags = selectProfile(profiles)
       const profileOnly = selectProfile(profiles, { profile: 'stress' })
-      const singleScenario = selectProfile(profiles, { profile: 'smoke', scenario: 'scenario-1b' })
-      const multiScenario = selectProfile(profiles, { profile: 'stress', scenario: 'scenario-2a,scenario-2b' })
-      const scenarioAll = selectProfile(profiles, { profile: 'smoke', scenario: 'all' })
-      const scenarioBlank = selectProfile(profiles, { profile: 'stress', scenario: '' })
+      const singleScenario = selectProfile(profiles, {
+        profile: 'smoke',
+        scenario: 'scenario-1b'
+      })
+      const multiScenario = selectProfile(profiles, {
+        profile: 'stress',
+        scenario: 'scenario-2a,scenario-2b'
+      })
+      const scenarioAll = selectProfile(profiles, {
+        profile: 'smoke',
+        scenario: 'all'
+      })
+      const scenarioBlank = selectProfile(profiles, {
+        profile: 'stress',
+        scenario: ''
+      })
 
-      function checkProfile (profile: Profile, name: string, scenarioCount: number): boolean {
+      function checkProfile(profile: Profile, name: string, scenarioCount: number): boolean {
         return profile.name === name && Object.keys(profile.scenarios).length === scenarioCount
       }
 
@@ -142,11 +169,13 @@ export default (): void => {
         ...createScenario('scenario5', LoadProfile.deployment, 2, 40)
       }
 
-      function checkScenario (exec: string, target: number, maxVUs: number): boolean {
+      function checkScenario(exec: string, target: number, maxVUs: number): boolean {
         const scenario = scenarios[exec] as RampingArrivalRateScenario
-        return scenario.exec === exec && // Exec function is named correctly
+        return (
+          scenario.exec === exec && // Exec function is named correctly
           scenario.maxVUs === maxVUs && // Max VUs = Max throughput * max iteration duration
-          Math.max(...scenario.stages.map(s => s.target)) === target // Max thoughput target is correct
+          Math.max(...scenario.stages.map(s => s.target)) === target
+        ) // Max thoughput target is correct
       }
 
       check(null, {
@@ -161,18 +190,9 @@ export default (): void => {
 
   group('config/thresholds', () => {
     const groups: GroupMap = {
-      scenario1: [
-        'group1a',
-        'group1b',
-        'group1c'
-      ],
-      scenario2: [
-        'group2a',
-        'group2b'
-      ],
-      scenario3: [
-        'group3a'
-      ]
+      scenario1: ['group1a', 'group1b', 'group1c'],
+      scenario2: ['group2a', 'group2b'],
+      scenario3: ['group3a']
     }
 
     const noGroups: Thresholds = getThresholds({})
@@ -182,10 +202,12 @@ export default (): void => {
     const scenarioAll: Thresholds = getThresholds(groups, 'all')
     const scenarioBlank: Thresholds = getThresholds(groups, '')
 
-    function checkThresholds (thresholds: Thresholds, count: number): boolean {
-      return thresholds !== undefined &&
+    function checkThresholds(thresholds: Thresholds, count: number): boolean {
+      return (
+        thresholds !== undefined &&
         Object.keys(thresholds).length === count + 2 && // Threshold count is equal to no. of groups plus the base two
-        Object.keys(thresholds).filter(s => s.includes('duration{group:::')).length === count // Group duration thresholds equals no. of groups
+        Object.keys(thresholds).filter(s => s.includes('duration{group:::')).length === count
+      ) // Group duration thresholds equals no. of groups
     }
 
     check(null, {
@@ -207,7 +229,7 @@ export default (): void => {
     const client = new SQSClient(config)
 
     check(null, {
-      'AWSConfig.fromEnvironment() exists': () => typeof (AWSConfig.fromEnvironment) === 'function',
+      'AWSConfig.fromEnvironment() exists': () => typeof AWSConfig.fromEnvironment === 'function',
       'SQSClient.listQueues() exists': () => typeof client.listQueues === 'function',
       'SQSClient.sendMessage() exists': () => typeof client.sendMessage === 'function'
     })
@@ -232,8 +254,12 @@ export default (): void => {
         numberOfStages: randomIntBetween(5, 20)
       }
       const stages = normalDistributionStages(settings.maxVUs, settings.duration, settings.numberOfStages)
-      const totalDuration = stages.reduce((a, b) => { return a + parseInt(b.duration.slice(0, -1)) }, 0)
-      const maxVUs = stages.reduce((a, b) => { return (a > b.target) ? a : b.target }, 0)
+      const totalDuration = stages.reduce((a, b) => {
+        return a + parseInt(b.duration.slice(0, -1))
+      }, 0)
+      const maxVUs = stages.reduce((a, b) => {
+        return a > b.target ? a : b.target
+      }, 0)
 
       const tenStages = normalDistributionStages(settings.maxVUs, settings.duration)
 
@@ -337,12 +363,15 @@ export default (): void => {
     })
 
     group('timeRequest()', () => {
-      timeRequest(() => {
-        const string = 'BA'
-        return 'C' + string
-      }, {
-        'check result': s => s === 'CBA'
-      })
+      timeRequest(
+        () => {
+          const string = 'BA'
+          return 'C' + string
+        },
+        {
+          'check result': s => s === 'CBA'
+        }
+      )
     })
   })
 
@@ -363,34 +392,50 @@ export default (): void => {
   iterationsCompleted.add(1)
 }
 
-function blankResponse (): Response {
-  return { // Default Response values
+function blankResponse(): Response {
+  return {
+    // Default Response values
     body: null,
     cookies: {},
     error: '',
     error_code: 0,
     headers: {},
-    ocsp: { produced_at: 0, this_update: 0, next_update: 0, revocation_reason: '', revoked_at: 0, status: '' },
+    ocsp: {
+      produced_at: 0,
+      this_update: 0,
+      next_update: 0,
+      revocation_reason: '',
+      revoked_at: 0,
+      status: ''
+    },
     proto: 'HTTP/1.0',
     remote_ip: '',
     remote_port: 0,
     request: { body: '', cookies: {}, headers: {}, method: '', url: '' },
     status: 0,
     status_text: '',
-    timings: { blocked: 0, connecting: 0, tls_handshaking: 0, sending: 0, waiting: 0, receiving: 0, duration: 0 },
+    timings: {
+      blocked: 0,
+      connecting: 0,
+      tls_handshaking: 0,
+      sending: 0,
+      waiting: 0,
+      receiving: 0,
+      duration: 0
+    },
     tls_cipher_suite: 'TLS_RSA_WITH_RC4_128_SHA',
     tls_version: '',
     url: '',
-    clickLink: function <RT extends ResponseType | undefined>(args?: { selector?: string | undefined, params?: RefinedParams<RT> | null | undefined } | undefined): RefinedResponse<RT> {
+    clickLink: function <RT extends ResponseType | undefined>(): RefinedResponse<RT> {
       throw new Error('Function not implemented.')
     },
-    html: function (selector?: string | undefined): Selection {
+    html: function (): Selection {
       throw new Error('Function not implemented.')
     },
-    json: function (selector?: string | undefined): JSONValue {
+    json: function (): JSONValue {
       throw new Error('Function not implemented.')
     },
-    submitForm: function <RT extends ResponseType | undefined>(args?: { formSelector?: string | undefined, fields?: Record<string, string> | undefined, submitSelector?: string | undefined, params?: RefinedParams<RT> | null | undefined } | undefined): RefinedResponse<RT> {
+    submitForm: function <RT extends ResponseType | undefined>(): RefinedResponse<RT> {
       throw new Error('Function not implemented.')
     }
   }

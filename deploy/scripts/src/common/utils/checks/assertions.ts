@@ -11,7 +11,7 @@ import { type Checkers } from 'k6'
  *   { isStatusCode200 }
  * )
  */
-export function isStatusCode200 (response: Response): boolean {
+export function isStatusCode200(response: Response): boolean {
   return response.status === 200
 }
 
@@ -25,7 +25,7 @@ export function isStatusCode200 (response: Response): boolean {
  *   { isStatusCode201 }
  * )
  */
-export function isStatusCode201 (response: Response): boolean {
+export function isStatusCode201(response: Response): boolean {
   return response.status === 201
 }
 
@@ -39,7 +39,7 @@ export function isStatusCode201 (response: Response): boolean {
  *   { isStatusCode302 }
  * )
  */
-export function isStatusCode302 (response: Response): boolean {
+export function isStatusCode302(response: Response): boolean {
   return response.status === 302
 }
 
@@ -55,7 +55,7 @@ export function isStatusCode302 (response: Response): boolean {
  *   { ...pageContentCheck('Enter your email address') }
  * )
  */
-export function pageContentCheck (content: string): Checkers<Response> {
+export function pageContentCheck(content: string): Checkers<Response> {
   return {
     validatePageContent: r => (r.body as string).includes(content)
   }

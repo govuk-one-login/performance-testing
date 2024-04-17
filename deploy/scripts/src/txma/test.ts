@@ -1,6 +1,12 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
-import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
+import {
+  selectProfile,
+  type ProfileList,
+  describeProfile,
+  createScenario,
+  LoadProfile
+} from '../common/utils/config/load-profiles'
 import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
@@ -28,7 +34,7 @@ export const options: Options = {
   }
 }
 
-export function setup (): void {
+export function setup(): void {
   describeProfile(loadProfile)
 }
 
@@ -50,7 +56,7 @@ const eventData = {
 
 const sqs = new SQSClient(awsConfig)
 
-export function sendEvent (): void {
+export function sendEvent(): void {
   const messageBody = eventData.payload.replace(/UUID/g, () => uuidv4())
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, messageBody)

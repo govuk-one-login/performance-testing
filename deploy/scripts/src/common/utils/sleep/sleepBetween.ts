@@ -9,6 +9,6 @@ import { sleep } from 'k6'
  * sleep(3, 5) // Sleeps for between 1 to 3 seconds
  * sleep(0.5, 1.5) // Sleeps for between half a second and 1.5 seconds
  */
-export function sleepBetween (min: number, max: number): void {
+export function sleepBetween(min: number, max: number): void {
   sleep(min + Math.random() * Math.abs(max - min))
 }

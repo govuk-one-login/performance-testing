@@ -56,10 +56,11 @@ export interface F2F_DOCUMENT_UPLOADED {
     user_id: string
   }
   extensions: {
-    post_office_visit_details: [ {
-      post_office_date_of_visit: string
-      post_office_time_of_visit: string
-    }
+    post_office_visit_details: [
+      {
+        post_office_date_of_visit: string
+        post_office_time_of_visit: string
+      }
     ]
   }
   timestamp: number

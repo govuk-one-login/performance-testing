@@ -1,6 +1,12 @@
 import { sleep } from 'k6'
 import { type Options } from 'k6/options'
-import { describeProfile, type ProfileList, selectProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
+import {
+  describeProfile,
+  type ProfileList,
+  selectProfile,
+  createScenario,
+  LoadProfile
+} from '../common/utils/config/load-profiles'
 import {
   postSelectDevice,
   postSelectSmartphone,
@@ -15,10 +21,7 @@ import {
   startJourney,
   getSessionIdFromCookieJar
 } from './testSteps/frontend'
-import {
-  getBiometricTokenV2,
-  postFinishBiometricSession
-} from './testSteps/backend'
+import { getBiometricTokenV2, postFinishBiometricSession } from './testSteps/backend'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
@@ -105,11 +108,11 @@ export const options: Options = {
   }
 }
 
-export function setup (): void {
+export function setup(): void {
   describeProfile(loadProfile)
 }
 
-export function mamIphonePassport (): void {
+export function mamIphonePassport(): void {
   startJourney()
   simulateUserWait()
   postSelectDevice()
@@ -128,18 +131,20 @@ export function mamIphonePassport (): void {
   simulateUserWait()
   postFlashingWarning()
   simulateUserWait()
-  if (Math.random() <= 0.8) { // Approximately 80% of users complete journey successfully
+  if (Math.random() <= 0.8) {
+    // Approximately 80% of users complete journey successfully
     const sessionId = getSessionIdFromCookieJar()
     getBiometricTokenV2(sessionId)
     sleep(1)
     postFinishBiometricSession(sessionId)
     sleep(1)
     getRedirect()
-  } else { // Approximately 20% of users abort journey
+  } else {
+    // Approximately 20% of users abort journey
     getAbortCommand()
   }
 }
 
-function simulateUserWait (): void {
+function simulateUserWait(): void {
   sleepBetween(1, 2) // Simulate random time between 1s and 2s for user to stay on page
 }

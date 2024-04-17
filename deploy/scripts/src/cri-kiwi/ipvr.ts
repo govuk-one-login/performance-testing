@@ -1,8 +1,19 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
-import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
+import {
+  selectProfile,
+  type ProfileList,
+  describeProfile,
+  createScenario,
+  LoadProfile
+} from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
-import { generateAuthRequest, generateF2FRequest, generateIPVRequest, generateDocumentUploadedRequest } from './requestGenerator/ipvrReqGen'
+import {
+  generateAuthRequest,
+  generateF2FRequest,
+  generateIPVRequest,
+  generateDocumentUploadedRequest
+} from './requestGenerator/ipvrReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 import { getEnv } from '../common/utils/config/environment-variables'
@@ -32,7 +43,7 @@ export const options: Options = {
   }
 }
 
-export function setup (): void {
+export function setup(): void {
   describeProfile(loadProfile)
 }
 
@@ -49,7 +60,7 @@ const awsConfig = new AWSConfig({
 })
 const sqs = new SQSClient(awsConfig)
 
-export function authEvent (): void {
+export function authEvent(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const signinJourneyID = uuidv4()
   const authPayload = generateAuthRequest(userID, signinJourneyID)
@@ -59,7 +70,7 @@ export function authEvent (): void {
   iterationsCompleted.add(1)
 }
 
-export function allEvents (): void {
+export function allEvents(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const signinJourneyID = uuidv4()
   const authPayload = generateAuthRequest(userID, signinJourneyID)

@@ -1,6 +1,12 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
-import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
+import {
+  selectProfile,
+  type ProfileList,
+  describeProfile,
+  createScenario,
+  LoadProfile
+} from '../common/utils/config/load-profiles'
 import { uuidv4, randomIntBetween } from '../common/utils/jslib/index'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
@@ -37,7 +43,7 @@ export const options: Options = {
   }
 }
 
-export function setup (): void {
+export function setup(): void {
   describeProfile(loadProfile)
 }
 
@@ -66,42 +72,42 @@ const payloadTimestampArray = eventData.payloadTimestamp.split(',')
 const payloadTimestampMin: number = Number(payloadTimestampArray[0])
 const payloadTimestampMax: number = Number(payloadTimestampArray[1])
 
-export function sendEventType1 (): void {
+export function sendEventType1(): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[0]
   sendSQSMessage(messageBody)
 }
 
-export function sendEventType2 (): void {
+export function sendEventType2(): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[1]
   sendSQSMessage(messageBody)
 }
 
-export function sendEventType3 (): void {
+export function sendEventType3(): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[2]
   sendSQSMessage(messageBody)
 }
 
-export function sendEventType4 (): void {
+export function sendEventType4(): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[3]
   sendSQSMessage(messageBody)
 }
 
-export function sendEventType5 (): void {
+export function sendEventType5(): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[4]
   sendSQSMessage(messageBody)
 }
 
-export function sendEventType6 (): void {
+export function sendEventType6(): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[5]
   sendSQSMessage(messageBody)
 }
 
-export function sendEventType7 (): void {
+export function sendEventType7(): void {
   const messageBody: Record<string, unknown> = payloadEventsArray[6]
   sendSQSMessage(messageBody)
 }
 
-export function sendSQSMessage (messageBody: Record<string, unknown>): void {
+export function sendSQSMessage(messageBody: Record<string, unknown>): void {
   const randomTimestamp: number = randomIntBetween(payloadTimestampMin, payloadTimestampMax)
   const timestampFormatted: string = new Date(randomTimestamp * 1000).toISOString()
   iterationsStarted.add(1)

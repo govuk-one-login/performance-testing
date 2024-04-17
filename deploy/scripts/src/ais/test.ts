@@ -1,6 +1,12 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
-import { selectProfile, type ProfileList, describeProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
+import {
+  selectProfile,
+  type ProfileList,
+  describeProfile,
+  createScenario,
+  LoadProfile
+} from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
@@ -39,9 +45,7 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  retrieveIV: [
-    'B02_RetrieveIV_01_GetInterventionData'
-  ]
+  retrieveIV: ['B02_RetrieveIV_01_GetInterventionData']
 } as const
 
 export const options: Options = {
@@ -50,7 +54,7 @@ export const options: Options = {
   tags: { name: '' }
 }
 
-export function setup (): void {
+export function setup(): void {
   describeProfile(loadProfile)
 }
 
@@ -64,11 +68,14 @@ interface RetrieveUserID {
 }
 
 const csvData: RetrieveUserID[] = new SharedArray('Retrieve Intervention User ID', function () {
-  return open('./data/retrieveInterventionUser.csv').split('\n').slice(1).map((userID) => {
-    return {
-      userID
-    }
-  })
+  return open('./data/retrieveInterventionUser.csv')
+    .split('\n')
+    .slice(1)
+    .map(userID => {
+      return {
+        userID
+      }
+    })
 })
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -80,7 +87,7 @@ const awsConfig = new AWSConfig({
 })
 const sqs = new SQSClient(awsConfig)
 
-export function persistIV (): void {
+export function persistIV(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend)
   const persistIVMessage = JSON.stringify(persistIVPayload)
@@ -89,18 +96,22 @@ export function persistIV (): void {
   iterationsCompleted.add(1)
 }
 
-export function retrieveIV (): void {
+export function retrieveIV(): void {
   const groups = groupMap.retrieveIV
   const retrieveData = csvData[Math.floor(Math.random() * csvData.length)]
   iterationsStarted.add(1)
 
-  group(groups[0], () => timeRequest(() => // B02_RetrieveIV_01_GetInterventionData
-    http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`),
-  { isStatusCode200, ...pageContentCheck('Perf Testing') }))
+  // B02_RetrieveIV_01_GetInterventionData
+  group(groups[0], () =>
+    timeRequest(() => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`), {
+      isStatusCode200,
+      ...pageContentCheck('Perf Testing')
+    })
+  )
   iterationsCompleted.add(1)
 }
 
-export function dataCreationForRetrieve (): void {
+export function dataCreationForRetrieve(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   iterationsStarted.add(1)
   const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.block)

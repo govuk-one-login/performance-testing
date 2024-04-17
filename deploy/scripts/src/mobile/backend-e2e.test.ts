@@ -1,5 +1,11 @@
 import { type Options } from 'k6/options'
-import { describeProfile, type ProfileList, selectProfile, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
+import {
+  describeProfile,
+  type ProfileList,
+  selectProfile,
+  createScenario,
+  LoadProfile
+} from '../common/utils/config/load-profiles'
 import {
   postVerifyAuthorizeRequest,
   postResourceOwnerDocumentGroups,
@@ -55,11 +61,11 @@ export const options: Options = {
   }
 }
 
-export function setup (): void {
+export function setup(): void {
   describeProfile(loadProfile)
 }
 
-export function backendJourney (): void {
+export function backendJourney(): void {
   const sessionId = postVerifyAuthorizeRequest()
   sleep(1)
   postResourceOwnerDocumentGroups(sessionId)

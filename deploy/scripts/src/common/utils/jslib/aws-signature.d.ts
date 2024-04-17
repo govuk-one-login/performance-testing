@@ -31,7 +31,7 @@ export class SignatureV4 {
    * applyChecksum: false,
    * })
    */
-  constructor (options: {
+  constructor(options: {
     service: string
     region: string
     credentials: {
@@ -71,21 +71,24 @@ export class SignatureV4 {
    * signingRegion: 'us-east-1',
    * })
    */
-  sign (request: {
-    method: string
-    protocol: 'http' | 'https'
-    hostname: string
-    path: string
-    headers: Record<string, string>
-    body?: string | ArrayBuffer
-    query?: Record<string, string>
-  }, overrides?: {
+  sign(
+    request: {
+      method: string
+      protocol: 'http' | 'https'
+      hostname: string
+      path: string
+      headers: Record<string, string>
+      body?: string | ArrayBuffer
+      query?: Record<string, string>
+    },
+    overrides?: {
       signingDate?: Date
       signingService?: string
       signingRegion?: string
       unsignableHeaders?: Set<string>
       signableHeaders?: Set<string>
-    }): {
+    }
+  ): {
     headers: Record<string, string>
     url: string
   }

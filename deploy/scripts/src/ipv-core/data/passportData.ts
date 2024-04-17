@@ -25,8 +25,7 @@ export const passportPayload = JSON.stringify({
       value: '1965-07-08'
     }
   ]
-}
-)
+})
 
 export const addressPayloadP = JSON.stringify({
   address: [
@@ -40,8 +39,7 @@ export const addressPayloadP = JSON.stringify({
       validFrom: '2000-01-01'
     }
   ]
-}
-)
+})
 
 export const fraudPayloadP = JSON.stringify({
   address: [
@@ -74,8 +72,7 @@ export const fraudPayloadP = JSON.stringify({
       value: '1965-07-08'
     }
   ]
-}
-)
+})
 
 export const kbvPayloadP = JSON.stringify({
   address: [
@@ -108,5 +105,4 @@ export const kbvPayloadP = JSON.stringify({
       value: '1965-07-08'
     }
   ]
-}
-)
+})

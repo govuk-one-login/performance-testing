@@ -36,7 +36,7 @@ export type GroupMap = Record<string, readonly string[]>
  *   thresholds: getThresholds(groupMap)
  * }
  */
-export function getThresholds (groupMap: GroupMap, selections: string | undefined = defaultConfig.scenario): Thresholds {
+export function getThresholds(groupMap: GroupMap, selections: string | undefined = defaultConfig.scenario): Thresholds {
   const thresholds: Thresholds = {
     http_req_duration: nfrs.rt,
     http_req_failed: nfrs.errors
@@ -47,7 +47,8 @@ export function getThresholds (groupMap: GroupMap, selections: string | undefine
     })
   }
 
-  if (selections == null || selections === '' || selections.toLowerCase() === 'all') { // Enable all scenarios is selection string is null, empty or set to 'all'
+  if (selections == null || selections === '' || selections.toLowerCase() === 'all') {
+    // Enable all scenarios is selection string is null, empty or set to 'all'
     Object.values(groupMap).forEach(groupNames => {
       addThresholds(groupNames)
     })
@@ -55,7 +56,9 @@ export function getThresholds (groupMap: GroupMap, selections: string | undefine
     selections.split(',').forEach(scenario => {
       const groupNames = groupMap[scenario]
       if (groupNames === undefined) {
-        console.warn(`Warning: Scenario '${scenario}' does not exist in group name map. Duration thresholds by group will not be applied`)
+        console.warn(
+          `Warning: Scenario '${scenario}' does not exist in group name map. Duration thresholds by group will not be applied`
+        )
         return
       }
       addThresholds(groupNames)

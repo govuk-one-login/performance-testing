@@ -39,11 +39,14 @@ export function getProfile(profiles: ProfileList, profileName: string): Profile 
  */
 export function getScenarios(scenarios: ScenarioList, selections: string | undefined): ScenarioList {
   let enabled: ScenarioList = {}
-  selections == null || selections === '' || selections.toLowerCase() === 'all' // Enable all scenarios is selection string is null, empty or set to 'all'
-    ? (enabled = scenarios)
-    : selections.split(',').forEach(scenario => {
-        enabled[scenario] = scenarios[scenario]
-      })
+  // Enable all scenarios is selection string is null, empty or set to 'all'
+  if (selections == null || selections === '' || selections.toLowerCase() === 'all') {
+    enabled = scenarios
+  } else {
+    selections.split(',').forEach(scenario => {
+      enabled[scenario] = scenarios[scenario]
+    })
+  }
   return enabled
 }
 

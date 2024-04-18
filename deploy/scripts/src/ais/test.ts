@@ -11,8 +11,7 @@ import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
-import { group } from 'k6'
-import { timeRequest } from '../common/utils/request/timing'
+import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { SharedArray } from 'k6/data'
 import http from 'k6/http'
@@ -102,12 +101,10 @@ export function retrieveIV(): void {
   iterationsStarted.add(1)
 
   // B02_RetrieveIV_01_GetInterventionData
-  group(groups[0], () =>
-    timeRequest(() => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`), {
-      isStatusCode200,
-      ...pageContentCheck('Perf Testing')
-    })
-  )
+  timeGroup(groups[0], () => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`), {
+    isStatusCode200,
+    ...pageContentCheck('Perf Testing')
+  })
   iterationsCompleted.add(1)
 }
 

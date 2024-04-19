@@ -1,7 +1,7 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { fail } from 'k6'
 import { type Options } from 'k6/options'
-import http, { ObjectBatchRequest, type Response } from 'k6/http'
+import http, { type Response } from 'k6/http'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
 import {
@@ -90,7 +90,7 @@ export function address(): void {
         { isStatusCode302 }
       )
       // 02_AddCRICall
-if (env.staticResources) {
+      if (env.staticResources) {
         const paths = [
           '/public/stylesheets/application.css',
           '/public/javascripts/all.js',

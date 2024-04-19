@@ -76,7 +76,7 @@ Resources:
       Handler: serverless.handler
       Runtime: nodejs20.x
       MemorySize: 512
-      ReservedConcurrentExecutions: 200
+      ReservedConcurrentExecutions: 800
       Environment:
         Variables:
           CLIENT_ID: "{{resolve:ssm:StubClientId}}"

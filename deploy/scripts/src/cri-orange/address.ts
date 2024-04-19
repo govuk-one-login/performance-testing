@@ -102,14 +102,13 @@ export function address(): void {
         const batchRequests = paths.map(path => env.addressEndPoint + path)
         http.batch(batchRequests)
       }
-      res = group(groups[2].split('::')[1], () =>
-        timeRequest(() => http.get(res.headers.Location), {
-          isStatusCode200,
-          ...pageContentCheck('Find your address')
-        })
-      )
-    }, {})
-  })
+      res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck('Find your address')
+      })
+    },
+    {}
+  )
 
   sleepBetween(1, 3)
 

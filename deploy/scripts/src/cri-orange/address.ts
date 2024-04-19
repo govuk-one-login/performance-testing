@@ -88,10 +88,28 @@ export function address(): void {
       { isStatusCode302 }
     )
     // 02_AddCRICall
-    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Find your address')
-    })
+    timeGroup(
+      groups[2].split('::')[1],
+      () => {
+        if (env.staticResources) {
+          const paths = [
+            '/public/stylesheets/application.css',
+            '/public/javascripts/all.js',
+            '/public/javascripts/analytics.js',
+            '/public/fonts/bold-b542beb274-v2.woff2',
+            '/public/fonts/light-94a07e06a1-v2.woff2',
+            '/public/images/govuk-crest-2x.png'
+          ]
+          const batchRequests = paths.map(path => env.addressEndPoint + path)
+          http.batch(batchRequests)
+        }
+        return http.get(res.headers.Location)
+      },
+      {
+        isStatusCode200,
+        ...pageContentCheck('Find your address')
+      }
+    )
   })
 
   sleepBetween(1, 3)

@@ -5,7 +5,8 @@ export const env = {
   ipvCoreStub: getEnv('IDENTITY_CORE_STUB_URL'),
   kbvEndPoint: getEnv('IDENTITY_KBV_URL'),
   addressEndPoint: getEnv('IDENTITY_ADDRESS_URL'),
-  envName: getEnv('ENVIRONMENT')
+  envName: getEnv('ENVIRONMENT'),
+  staticResources: getEnv('K6_NO_STATIC_RESOURCES') !== 'true'
 }
 
 export const stubCreds = {

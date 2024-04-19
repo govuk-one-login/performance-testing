@@ -109,34 +109,30 @@ export function kbv(): void {
   sleepBetween(1, 3)
 
   // B01_KBV_04_KBVQuestion3
-  timeGroup(
-    groups[3],
-    () => {
-      // 01_KBVCRICall
-      res = timeGroup(
-        groups[4].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { Q00018: kbvAnsJSON.kbvAns3 },
-            params: { redirects: 2 },
-            submitSelector: '#continue'
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreStubCall
-      res = timeGroup(
-        groups[5].split('::')[1],
-        () =>
-          http.get(res.headers.Location, {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }),
-        {
-          isStatusCode200,
-          ...pageContentCheck('verificationScore&quot;: 2')
-        }
-      )
-    },
-    {}
-  )
+  timeGroup(groups[3], () => {
+    // 01_KBVCRICall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { Q00018: kbvAnsJSON.kbvAns3 },
+          params: { redirects: 2 },
+          submitSelector: '#continue'
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreStubCall
+    res = timeGroup(
+      groups[5].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      {
+        isStatusCode200,
+        ...pageContentCheck('verificationScore&quot;: 2')
+      }
+    )
+  })
   iterationsCompleted.add(1)
 }

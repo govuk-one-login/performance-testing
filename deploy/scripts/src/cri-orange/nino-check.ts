@@ -122,31 +122,27 @@ export function ninoCheck(): void {
   sleepBetween(1, 3)
 
   // B02_Nino_03_SearchNiNo
-  timeGroup(
-    groups[2],
-    () => {
-      // 01_NiNOCRICall
-      res = timeGroup(
-        groups[3].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { nationalInsuranceNumber: userNino.niNumber },
-            params: { redirects: 1 },
-            submitSelector: '#continue'
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreStubCall
-      res = timeGroup(
-        groups[4].split('::')[1],
-        () =>
-          http.get(res.headers.Location, {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }),
-        { isStatusCode200, ...pageContentCheck('Verifiable') }
-      )
-    },
-    {}
-  )
+  timeGroup(groups[2], () => {
+    // 01_NiNOCRICall
+    res = timeGroup(
+      groups[3].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { nationalInsuranceNumber: userNino.niNumber },
+          params: { redirects: 1 },
+          submitSelector: '#continue'
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreStubCall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode200, ...pageContentCheck('Verifiable') }
+    )
+  })
   iterationsCompleted.add(1)
 }

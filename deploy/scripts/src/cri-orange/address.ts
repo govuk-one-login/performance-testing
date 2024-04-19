@@ -76,27 +76,23 @@ export function address(): void {
   iterationsStarted.add(1)
 
   // B02_Address_01_AddressCRIEntryFromStub
-  timeGroup(
-    groups[0],
-    () => {
-      // 01_CoreStubCall
-      res = timeGroup(
-        groups[1].split('::')[1],
-        () =>
-          http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
-            redirects: 0,
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_AddCRICall
-      res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Find your address')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[0], () => {
+    // 01_CoreStubCall
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
+          redirects: 0,
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_AddCRICall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Find your address')
+    })
+  })
 
   sleepBetween(1, 3)
 
@@ -140,24 +136,20 @@ export function address(): void {
   sleepBetween(1, 3)
 
   // B02_Address_05_ConfirmDetails
-  timeGroup(
-    groups[6],
-    () => {
-      // 01_AddCRICall
-      res = timeGroup(groups[7].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
-        isStatusCode302
-      })
-      // 02_CoreStubCall
-      res = timeGroup(
-        groups[8].split('::')[1],
-        () =>
-          http.get(res.headers.Location, {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }),
-        { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
-      )
-    },
-    {}
-  )
+  timeGroup(groups[6], () => {
+    // 01_AddCRICall
+    res = timeGroup(groups[7].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
+      isStatusCode302
+    })
+    // 02_CoreStubCall
+    res = timeGroup(
+      groups[8].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
+    )
+  })
   iterationsCompleted.add(1)
 }

@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'deploy/scripts/src/common/utils/**'
+      - "deploy/scripts/src/common/utils/**"
 
 defaults:
   run:
@@ -30,7 +30,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm i
+        run: npm ci
 
       - name: Create TypeDoc documentation
         run: npx typedoc ./src/common/utils/**/*.ts

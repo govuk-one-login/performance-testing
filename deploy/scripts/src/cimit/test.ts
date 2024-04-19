@@ -9,10 +9,9 @@ import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { AWSConfig } from '../common/utils/jslib/aws-sqs'
 import { SignatureV4 } from '../common/utils/jslib/aws-signature'
 import { generatePutCI, generateGetCIC, generatePostMitigations } from './requestGenerator/cimitReqGen'
-import { group } from 'k6'
 import http from 'k6/http'
 import { type Options } from 'k6/options'
-import { timeRequest } from '../common/utils/request/timing'
+import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200 } from '../common/utils/checks/assertions'
 import { SharedArray } from 'k6/data'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
@@ -101,14 +100,13 @@ export function putContraIndicators(): void {
   const signedRequest = signer.sign(request)
   iterationsStarted.add(1)
   // B01_CIMIT_01_PutContraIndicator
-  group(groups[0], () =>
-    timeRequest(
-      () =>
-        http.post(signedRequest.url, putContraIndicatorPayload, {
-          headers: signedRequest.headers
-        }),
-      { isStatusCode200 }
-    )
+  timeGroup(
+    groups[0],
+    () =>
+      http.post(signedRequest.url, putContraIndicatorPayload, {
+        headers: signedRequest.headers
+      }),
+    { isStatusCode200 }
   )
   iterationsCompleted.add(1)
 }
@@ -128,14 +126,13 @@ export function getContraIndicatorCredentials(): void {
   const signedRequest = signer.sign(request)
   iterationsStarted.add(1)
   // B02_CIMIT_01_GetContraIndicatorCredentials
-  group(groups[0], () =>
-    timeRequest(
-      () =>
-        http.post(signedRequest.url, getCICPayload, {
-          headers: signedRequest.headers
-        }),
-      { isStatusCode200 }
-    )
+  timeGroup(
+    groups[0],
+    () =>
+      http.post(signedRequest.url, getCICPayload, {
+        headers: signedRequest.headers
+      }),
+    { isStatusCode200 }
   )
   iterationsCompleted.add(1)
 }
@@ -154,14 +151,13 @@ export function postMitigations(): void {
   const signedRequest = signer.sign(request)
   iterationsStarted.add(1)
   // B03_CIMIT_01_PostMitigations
-  group(groups[0], () =>
-    timeRequest(
-      () =>
-        http.post(signedRequest.url, postMitigationsPayload, {
-          headers: signedRequest.headers
-        }),
-      { isStatusCode200 }
-    )
+  timeGroup(
+    groups[0],
+    () =>
+      http.post(signedRequest.url, postMitigationsPayload, {
+        headers: signedRequest.headers
+      }),
+    { isStatusCode200 }
   )
   iterationsCompleted.add(1)
 }

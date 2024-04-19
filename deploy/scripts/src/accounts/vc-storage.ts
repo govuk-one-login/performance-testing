@@ -1,5 +1,5 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
-import { group, fail } from 'k6'
+import { fail } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import {
@@ -11,7 +11,7 @@ import {
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib'
-import { timeRequest } from '../common/utils/request/timing'
+import { timeGroup } from '../common/utils/request/timing'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { getEnv } from '../common/utils/config/environment-variables'
@@ -80,22 +80,20 @@ const env = {
 }
 export function persistVC(): void {
   const groups = groupMap.persistVC
-  let res: Response
   const userID = uuidv4()
   const subjectID = `urn:fdc:gov.uk:2022:${userID}`
   iterationsStarted.add(1)
   // R01_PersistVC_01_GenerateToken
-  res = group(groups[0], () =>
-    timeRequest(
-      () =>
-        http.post(
-          env.envMock + '/generate',
-          JSON.stringify({
-            sub: subjectID
-          })
-        ),
-      { isStatusCode200, ...pageContentCheck('token') }
-    )
+  const res: Response = timeGroup(
+    groups[0],
+    () =>
+      http.post(
+        env.envMock + '/generate',
+        JSON.stringify({
+          sub: subjectID
+        })
+      ),
+    { isStatusCode200, ...pageContentCheck('token') }
   )
   const token = getToken(res)
 
@@ -113,35 +111,31 @@ export function persistVC(): void {
     'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1cm46ZmRjOmdvdi51azoyMDIyOlBWUUk3Z0VmR1o2a080X0Z4eDZjaHF0SGNobzVzcjgtazA0MUdxci1YbzQiLCJuYmYiOjE2NTIwMjAxNTMsImlzcyI6Imh0dHBzOi8va2J2LWNyaS5hY2NvdW50Lmdvdi51ayIsInZvdCI6IlAyIiwiZXhwIjoxNjgzNjI4MTUzLCJpYXQiOjE2NTIwOTIxNTMsInZjIjp7ImV2aWRlbmNlIjpbeyJhY3Rpdml0eUhpc3RvcnlTY29yZSI6MCwidmFsaWRpdHlTY29yZSI6MCwidmVyaWZpY2F0aW9uU2NvcmUiOjIsInN0cmVuZ3RoU2NvcmUiOjAsInR4biI6InR4biIsImlkZW50aXR5RnJhdWRTY29yZSI6MCwidHlwZSI6IklkZW50aXR5Q2hlY2sifV0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7Im5hbWUiOlt7Im5hbWVQYXJ0cyI6W3sidHlwZSI6IkdpdmVuTmFtZSIsInZhbHVlIjoiSmFuZSJ9LHsidHlwZSI6IkZhbWlseU5hbWUiLCJ2YWx1ZSI6IldyaWdodCJ9XSwidmFsaWRGcm9tIjoiMjAxOS0wNC0wMSJ9LHsidmFsaWRVbnRpbCI6IjIwMjktMDQtMDEiLCJuYW1lUGFydHMiOlt7InR5cGUiOiJHaXZlbk5hbWUiLCJ2YWx1ZSI6IkphbmUifSx7InR5cGUiOiJGYW1pbHlOYW1lIiwidmFsdWUiOiJXcmlnaHQifV19XSwiYmlydGhEYXRlIjpbeyJ2YWx1ZSI6IjE5ODktMDctMDYifV19LCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiSWRlbnRpdHlDaGVja0NyZWRlbnRpYWwiXSwiQGNvbnRleHQiOlsiaHR0cHM6Ly93d3cudzMub3JnLzIwMTgvY3JlZGVudGlhbHMvdjEiLCJodHRwczovL3ZvY2FiLmxvbmRvbi5jbG91ZGFwcHMuZGlnaXRhbC9jb250ZXh0cy9pZGVudGl0eS12MS5qc29ubGQiXX0sInZ0bSI6Imh0dHBzOi8vb2lkYy5hY2NvdW50Lmdvdi51ay90cnVzdG1hcmsifQ.MEUCIQC8U5VKnsYhlt35vMCaaBLws_3WqfDHMnCnRJIdJ7v_zQIgMdsi_B2UEsD7P_QwLsG7owv4eI_AV5oTpjtmZCeKhs8' // pragma: allowlist secret
   ])
   // R01_PersistVC_02_CreateVC
-  res = group(groups[1], () =>
-    timeRequest(() => http.post(env.envURL + `/vcs/${subjectID}`, body, options), {
-      isStatusCode202: r => r.status === 202,
-      ...pageContentCheck('messageId')
-    })
-  )
+  timeGroup(groups[1], () => http.post(env.envURL + `/vcs/${subjectID}`, body, options), {
+    isStatusCode202: r => r.status === 202,
+    ...pageContentCheck('messageId')
+  })
   iterationsCompleted.add(1)
 }
 
 export function summariseVC(): void {
   const groups = groupMap.summariseVC
-  let res: Response
   const summariseData = csvData[Math.floor(Math.random() * csvData.length)]
   iterationsStarted.add(1)
 
   // R02_SummariseVC_01_GenerateTokenSummary
-  res = group(groups[0], () =>
-    timeRequest(
-      () =>
-        http.post(
-          env.envMock + '/generate',
-          JSON.stringify({
-            sub: summariseData.subID,
-            aud: 'accountManagementAudience',
-            ttl: 120
-          })
-        ),
-      { isStatusCode200, ...pageContentCheck('token') }
-    )
+  const res: Response = timeGroup(
+    groups[0],
+    () =>
+      http.post(
+        env.envMock + '/generate',
+        JSON.stringify({
+          sub: summariseData.subID,
+          aud: 'accountManagementAudience',
+          ttl: 120
+        })
+      ),
+    { isStatusCode200, ...pageContentCheck('token') }
   )
   const token = getToken(res)
 
@@ -152,12 +146,10 @@ export function summariseVC(): void {
     }
   }
   // R02_SummariseVC_02_Summarise
-  res = group(groups[1], () =>
-    timeRequest(() => http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options), {
-      isStatusCode200,
-      ...pageContentCheck('vcs')
-    })
-  )
+  timeGroup(groups[1], () => http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options), {
+    isStatusCode200,
+    ...pageContentCheck('vcs')
+  })
   iterationsCompleted.add(1)
 }
 

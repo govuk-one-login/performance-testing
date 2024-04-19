@@ -1,5 +1,4 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
-import { group } from 'k6'
 import { SharedArray } from 'k6/data'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -11,7 +10,7 @@ import {
   createScenario,
   LoadProfile
 } from '../common/utils/config/load-profiles'
-import { timeRequest } from '../common/utils/request/timing'
+import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
@@ -54,7 +53,7 @@ const stubCreds = {
   password: getEnv('IDENTITY_CORE_STUB_PASSWORD')
 }
 
-interface nino {
+interface Nino {
   firstName: string
   lastName: string
   birthDay: string
@@ -63,7 +62,7 @@ interface nino {
   niNumber: string
 }
 
-const csvData1: nino[] = new SharedArray('csvDataNino', () => {
+const csvData1: Nino[] = new SharedArray('csvDataNino', () => {
   return open('./data/ninoCRIData.csv')
     .split('\n')
     .slice(1)
@@ -89,67 +88,65 @@ export function ninoCheck(): void {
   iterationsStarted.add(1)
 
   // B02_Nino_01_EntryFromStub
-  res = group(groups[0], () =>
-    timeRequest(
-      () =>
-        http.get(env.ipvCoreStub + '/edit-user?cri=check-hmrc-build', {
-          headers: { Authorization: `Basic ${encodedCredentials}` }
-        }),
-      { isStatusCode200, ...pageContentCheck('Edit User') }
-    )
+  res = timeGroup(
+    groups[0],
+    () =>
+      http.get(env.ipvCoreStub + '/edit-user?cri=check-hmrc-build', {
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+      }),
+    { isStatusCode200, ...pageContentCheck('Edit User') }
   )
 
   sleepBetween(1, 3)
 
   // B02_Nino_02_AddUser
-  res = group(groups[1], () =>
-    timeRequest(
-      () =>
-        res.submitForm({
-          fields: {
-            firstName: userNino.firstName,
-            surname: userNino.lastName,
-            'dateOfBirth-day': userNino.birthDay,
-            'dateOfBirth-month': userNino.birthMonth,
-            'dateOfBirth-year': userNino.birthYear
-          },
-          submitSelector: '#govuk-button button',
-          params: {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }
-        }),
-      { isStatusCode200, ...pageContentCheck('national insurance number') }
-    )
+  res = timeGroup(
+    groups[1],
+    () =>
+      res.submitForm({
+        fields: {
+          firstName: userNino.firstName,
+          surname: userNino.lastName,
+          'dateOfBirth-day': userNino.birthDay,
+          'dateOfBirth-month': userNino.birthMonth,
+          'dateOfBirth-year': userNino.birthYear
+        },
+        submitSelector: '#govuk-button button',
+        params: {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }
+      }),
+    { isStatusCode200, ...pageContentCheck('national insurance number') }
   )
 
   sleepBetween(1, 3)
 
   // B02_Nino_03_SearchNiNo
-  group(groups[2], () => {
-    timeRequest(() => {
+  timeGroup(
+    groups[2],
+    () => {
       // 01_NiNOCRICall
-      res = group(groups[3].split('::')[1], () =>
-        timeRequest(
-          () =>
-            res.submitForm({
-              fields: { nationalInsuranceNumber: userNino.niNumber },
-              params: { redirects: 1 },
-              submitSelector: '#continue'
-            }),
-          { isStatusCode302 }
-        )
+      res = timeGroup(
+        groups[3].split('::')[1],
+        () =>
+          res.submitForm({
+            fields: { nationalInsuranceNumber: userNino.niNumber },
+            params: { redirects: 1 },
+            submitSelector: '#continue'
+          }),
+        { isStatusCode302 }
       )
       // 02_CoreStubCall
-      res = group(groups[4].split('::')[1], () =>
-        timeRequest(
-          () =>
-            http.get(res.headers.Location, {
-              headers: { Authorization: `Basic ${encodedCredentials}` }
-            }),
-          { isStatusCode200, ...pageContentCheck('Verifiable') }
-        )
+      res = timeGroup(
+        groups[4].split('::')[1],
+        () =>
+          http.get(res.headers.Location, {
+            headers: { Authorization: `Basic ${encodedCredentials}` }
+          }),
+        { isStatusCode200, ...pageContentCheck('Verifiable') }
       )
-    }, {})
-  })
+    },
+    {}
+  )
   iterationsCompleted.add(1)
 }

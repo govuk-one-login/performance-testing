@@ -1,5 +1,4 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
-import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import encoding from 'k6/encoding'
@@ -12,7 +11,7 @@ import {
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
-import { timeRequest } from '../common/utils/request/timing'
+import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
@@ -237,91 +236,90 @@ export function fraud(): void {
   iterationsStarted.add(1)
 
   // B01_Fraud_01_CoreStubEditUserContinue
-  group(groups[0], () => {
-    timeRequest(() => {
+  timeGroup(
+    groups[0],
+    () => {
       // 01_CoreStubCall
-      res = group(groups[1].split('::')[1], () =>
-        timeRequest(
-          () =>
-            http.post(
-              env.ipvCoreStub + '/edit-user',
-              {
-                cri: `fraud-cri-${env.envName}`,
-                rowNumber: '197',
-                firstName: userDetails.firstName,
-                surname: userDetails.lastName,
-                'dateOfBirth-day': `${userDetails.day}`,
-                'dateOfBirth-month': `${userDetails.month}`,
-                'dateOfBirth-year': `${userDetails.year}`,
-                buildingNumber: `${userDetails.buildNum}`,
-                buildingName: userDetails.buildName,
-                street: userDetails.street,
-                townCity: userDetails.city,
-                postCode: userDetails.postCode,
-                validFromDay: '26',
-                validFromMonth: '02',
-                validFromYear: '2021',
-                validUntilDay: '',
-                validUntilMonth: '',
-                validUntilYear: '',
-                'SecondaryUKAddress.buildingNumber': '',
-                'SecondaryUKAddress.buildingName': '',
-                'SecondaryUKAddress.street': '',
-                'SecondaryUKAddress.townCity': '',
-                'SecondaryUKAddress.postCode': '',
-                'SecondaryUKAddress.validFromDay': '',
-                'SecondaryUKAddress.validFromMonth': '',
-                'SecondaryUKAddress.validFromYear': '',
-                'SecondaryUKAddress.validUntilDay': '',
-                'SecondaryUKAddress.validUntilMonth': '',
-                'SecondaryUKAddress.validUntilYear': ''
-              },
-              {
-                headers: { Authorization: `Basic ${encodedCredentials}` },
-                redirects: 0
-              }
-            ),
-          { isStatusCode302 }
-        )
+      res = timeGroup(
+        groups[1].split('::')[1],
+        () =>
+          http.post(
+            env.ipvCoreStub + '/edit-user',
+            {
+              cri: `fraud-cri-${env.envName}`,
+              rowNumber: '197',
+              firstName: userDetails.firstName,
+              surname: userDetails.lastName,
+              'dateOfBirth-day': `${userDetails.day}`,
+              'dateOfBirth-month': `${userDetails.month}`,
+              'dateOfBirth-year': `${userDetails.year}`,
+              buildingNumber: `${userDetails.buildNum}`,
+              buildingName: userDetails.buildName,
+              street: userDetails.street,
+              townCity: userDetails.city,
+              postCode: userDetails.postCode,
+              validFromDay: '26',
+              validFromMonth: '02',
+              validFromYear: '2021',
+              validUntilDay: '',
+              validUntilMonth: '',
+              validUntilYear: '',
+              'SecondaryUKAddress.buildingNumber': '',
+              'SecondaryUKAddress.buildingName': '',
+              'SecondaryUKAddress.street': '',
+              'SecondaryUKAddress.townCity': '',
+              'SecondaryUKAddress.postCode': '',
+              'SecondaryUKAddress.validFromDay': '',
+              'SecondaryUKAddress.validFromMonth': '',
+              'SecondaryUKAddress.validFromYear': '',
+              'SecondaryUKAddress.validUntilDay': '',
+              'SecondaryUKAddress.validUntilMonth': '',
+              'SecondaryUKAddress.validUntilYear': ''
+            },
+            {
+              headers: { Authorization: `Basic ${encodedCredentials}` },
+              redirects: 0
+            }
+          ),
+        { isStatusCode302 }
       )
       // 01_CRICall
-      res = group(groups[2].split('::')[1], () =>
-        timeRequest(() => http.get(res.headers.Location), {
-          isStatusCode200,
-          ...pageContentCheck('We need to check your details')
-        })
-      )
-    }, {})
-  })
+      res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck('We need to check your details')
+      })
+    },
+    {}
+  )
 
   sleepBetween(1, 3)
 
   // B01_Fraud_02_ContinueToCheckFraudDetails
-  group(groups[3], () => {
-    timeRequest(() => {
+  timeGroup(
+    groups[3],
+    () => {
       // 01_CRICall
-      res = group(groups[4].split('::')[1], () =>
-        timeRequest(
-          () =>
-            res.submitForm({
-              params: { redirects: 1 },
-              submitSelector: '#continue'
-            }),
-          { isStatusCode302 }
-        )
+      res = timeGroup(
+        groups[4].split('::')[1],
+        () =>
+          res.submitForm({
+            params: { redirects: 1 },
+            submitSelector: '#continue'
+          }),
+        { isStatusCode302 }
       )
       // 02_CoreStubCall
-      res = group(groups[5].split('::')[1], () =>
-        timeRequest(
-          () =>
-            http.get(res.headers.Location, {
-              headers: { Authorization: `Basic ${encodedCredentials}` }
-            }),
-          { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
-        )
+      res = timeGroup(
+        groups[5].split('::')[1],
+        () =>
+          http.get(res.headers.Location, {
+            headers: { Authorization: `Basic ${encodedCredentials}` }
+          }),
+        { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
       )
-    }, {})
-  })
+    },
+    {}
+  )
   iterationsCompleted.add(1)
 }
 
@@ -338,17 +336,16 @@ export function drivingLicence(): void {
   iterationsStarted.add(1)
 
   // B02_Driving_01_DLEntryFromCoreStub_${licenceIssuer}
-  res = group(groups[0], () =>
-    timeRequest(
-      () =>
-        http.get(`${env.ipvCoreStub}/authorize?cri=driving-licence-cri-${env.envName}&rowNumber=197`, {
-          headers: { Authorization: `Basic ${encodedCredentials}` }
-        }),
-      {
-        isStatusCode200,
-        ...pageContentCheck('Who was your UK driving licence issued by?')
-      }
-    )
+  res = timeGroup(
+    groups[0],
+    () =>
+      http.get(`${env.ipvCoreStub}/authorize?cri=driving-licence-cri-${env.envName}&rowNumber=197`, {
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+      }),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Who was your UK driving licence issued by?')
+    }
   )
 
   sleepBetween(1, 3)
@@ -394,49 +391,48 @@ export function drivingLicence(): void {
         }
 
   // B02_Driving_02_Select_${licenceIssuer}
-  res = group(groups[1], () =>
-    timeRequest(
-      () =>
-        res.submitForm({
-          fields: { licenceIssuer },
-          submitSelector: '#submitButton'
-        }),
-      {
-        isStatusCode200,
-        ...pageContentCheck('Enter your details exactly as they appear on your UK driving licence')
-      }
-    )
+  res = timeGroup(
+    groups[1],
+    () =>
+      res.submitForm({
+        fields: { licenceIssuer },
+        submitSelector: '#submitButton'
+      }),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your details exactly as they appear on your UK driving licence')
+    }
   )
 
   sleepBetween(1, 3)
 
   // B02_Driving_03_${licenceIssuer}_EnterDetailsConfirm
-  group(groups[2], () => {
-    timeRequest(() => {
+  timeGroup(
+    groups[2],
+    () => {
       // 01_CRICall
-      res = group(groups[3].split('::')[1], () =>
-        timeRequest(
-          () =>
-            res.submitForm({
-              fields,
-              params: { redirects: 2 },
-              submitSelector: '#continue'
-            }),
-          { isStatusCode302 }
-        )
+      res = timeGroup(
+        groups[3].split('::')[1],
+        () =>
+          res.submitForm({
+            fields,
+            params: { redirects: 2 },
+            submitSelector: '#continue'
+          }),
+        { isStatusCode302 }
       )
       // 02_CoreStubCall
-      res = group(groups[4].split('::')[1], () =>
-        timeRequest(
-          () =>
-            http.get(res.headers.Location, {
-              headers: { Authorization: `Basic ${encodedCredentials}` }
-            }),
-          { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
-        )
+      res = timeGroup(
+        groups[4].split('::')[1],
+        () =>
+          http.get(res.headers.Location, {
+            headers: { Authorization: `Basic ${encodedCredentials}` }
+          }),
+        { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
       )
-    }, {})
-  })
+    },
+    {}
+  )
   iterationsCompleted.add(1)
 }
 
@@ -449,59 +445,58 @@ export function passport(): void {
   iterationsStarted.add(1)
 
   // B03_Passport_01_PassportCRIEntryFromStub
-  res = group(groups[0], () =>
-    timeRequest(
-      () =>
-        http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' + env.envName + '&rowNumber=197', {
-          headers: { Authorization: `Basic ${encodedCredentials}` }
-        }),
-      {
-        isStatusCode200,
-        ...pageContentCheck('Enter your details exactly as they appear on your UK passport')
-      }
-    )
+  res = timeGroup(
+    groups[0],
+    () =>
+      http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' + env.envName + '&rowNumber=197', {
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+      }),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your details exactly as they appear on your UK passport')
+    }
   )
 
   sleepBetween(1, 3)
 
   // B03_Passport_02_EnterPassportDetailsAndContinue
-  group(groups[1], () => {
-    timeRequest(() => {
+  timeGroup(
+    groups[1],
+    () => {
       // 01_CRICall
-      res = group(groups[2].split('::')[1], () =>
-        timeRequest(
-          () =>
-            res.submitForm({
-              fields: {
-                passportNumber: userPassport.passportNumber,
-                surname: userPassport.surname,
-                firstName: userPassport.firstName,
-                middleNames: userPassport.middleName,
-                'dateOfBirth-day': userPassport.birthday,
-                'dateOfBirth-month': userPassport.birthmonth,
-                'dateOfBirth-year': userPassport.birthyear,
-                'expiryDate-day': userPassport.expiryDay,
-                'expiryDate-month': userPassport.expiryMonth,
-                'expiryDate-year': userPassport.expiryYear
-              },
-              params: { redirects: 2 },
-              submitSelector: '#continue'
-            }),
-          { isStatusCode302 }
-        )
+      res = timeGroup(
+        groups[2].split('::')[1],
+        () =>
+          res.submitForm({
+            fields: {
+              passportNumber: userPassport.passportNumber,
+              surname: userPassport.surname,
+              firstName: userPassport.firstName,
+              middleNames: userPassport.middleName,
+              'dateOfBirth-day': userPassport.birthday,
+              'dateOfBirth-month': userPassport.birthmonth,
+              'dateOfBirth-year': userPassport.birthyear,
+              'expiryDate-day': userPassport.expiryDay,
+              'expiryDate-month': userPassport.expiryMonth,
+              'expiryDate-year': userPassport.expiryYear
+            },
+            params: { redirects: 2 },
+            submitSelector: '#continue'
+          }),
+        { isStatusCode302 }
       )
       // 02_CoreStubCall
-      res = group(groups[3].split('::')[1], () =>
-        timeRequest(
-          () =>
-            http.get(res.headers.Location, {
-              headers: { Authorization: `Basic ${encodedCredentials}` }
-            }),
-          { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
-        )
+      res = timeGroup(
+        groups[3].split('::')[1],
+        () =>
+          http.get(res.headers.Location, {
+            headers: { Authorization: `Basic ${encodedCredentials}` }
+          }),
+        { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
       )
-    }, {})
-  })
+    },
+    {}
+  )
   iterationsCompleted.add(1)
 }
 

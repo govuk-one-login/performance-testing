@@ -1,5 +1,4 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
-import { group } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import {
@@ -10,7 +9,7 @@ import {
   LoadProfile
 } from '../common/utils/config/load-profiles'
 import { b64encode } from 'k6/encoding'
-import { timeRequest } from '../common/utils/request/timing'
+import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { bankingPayload } from './data/BAVdata'
@@ -65,83 +64,75 @@ export function BAV(): void {
   iterationsStarted.add(1)
 
   // B01_BAV_01_IPVStubCall
-  res = group(groups[0], () =>
-    timeRequest(() => http.post(env.BAV.ipvStub + '/start', JSON.stringify({ bankingPayload })), {
-      'is status 201': r => r.status === 201,
-      ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
-    })
-  )
+  res = timeGroup(groups[0], () => http.post(env.BAV.ipvStub + '/start', JSON.stringify({ bankingPayload })), {
+    'is status 201': r => r.status === 201,
+    ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
+  })
   const authorizeLocation = getAuthorizeauthorizeLocation(res)
   const clientId = getClientID(res)
 
   // B01_BAV_02_Authorize
-  res = group(groups[1], () =>
-    timeRequest(() => http.get(authorizeLocation), {
-      isStatusCode200,
-      ...pageContentCheck('Continue to your bank or building society account details')
-    })
-  )
+  res = timeGroup(groups[1], () => http.get(authorizeLocation), {
+    isStatusCode200,
+    ...pageContentCheck('Continue to your bank or building society account details')
+  })
 
   // B01_BAV_03_Continue
-  res = group(groups[2], () =>
-    timeRequest(
-      () =>
-        res.submitForm({
-          submitSelector: '#landingPageContinue'
-        }),
-      { isStatusCode200, ...pageContentCheck('Enter your account details') }
-    )
+  res = timeGroup(
+    groups[2],
+    () =>
+      res.submitForm({
+        submitSelector: '#landingPageContinue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Enter your account details') }
   )
 
   sleepBetween(1, 3)
 
   // B01_BAV_04_BankDetails
-  res = group(groups[3], () =>
-    timeRequest(
-      () =>
-        res.submitForm({
-          fields: {
-            sortCode: testSortCode,
-            accountNumber: testAccountNumber
-          },
-          submitSelector: '#continue'
-        }),
-      {
-        isStatusCode200,
-        ...pageContentCheck('Check your details match with your bank or building society account')
-      }
-    )
+  res = timeGroup(
+    groups[3],
+    () =>
+      res.submitForm({
+        fields: {
+          sortCode: testSortCode,
+          accountNumber: testAccountNumber
+        },
+        submitSelector: '#continue'
+      }),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Check your details match with your bank or building society account')
+    }
   )
 
   sleepBetween(1, 3)
 
   // B01_BAV_05_CheckDetails
-  res = group(groups[4], () =>
-    timeRequest(
-      () =>
-        res.submitForm({
-          submitSelector: '#submitDetails'
-        }),
-      {
-        'verify url body': r => r.url.includes(clientId)
-      }
-    )
+  res = timeGroup(
+    groups[4],
+    () =>
+      res.submitForm({
+        submitSelector: '#submitDetails'
+      }),
+    {
+      'verify url body': r => r.url.includes(clientId)
+    }
   )
   const codeUrl = getCodeFromUrl(res.url)
 
   sleepBetween(1, 3)
 
   // B01_BAV_06_SendAuthorizationCode
-  res = group(groups[5], () =>
-    timeRequest(
-      () =>
-        http.post(env.BAV.target + '/token', {
-          grant_type: 'authorization_code',
-          code: codeUrl,
-          redirect_uri: env.BAV.ipvStub + '/redirect?id=bav'
-        }),
-      { isStatusCode200, ...pageContentCheck('access_token') }
-    )
+  res = timeGroup(
+    groups[5],
+    () =>
+      http.post(env.BAV.target + '/token', {
+        grant_type: 'authorization_code',
+        code: codeUrl,
+        redirect_uri: env.BAV.ipvStub + '/redirect?id=bav'
+      }),
+    { isStatusCode200, ...pageContentCheck('access_token') }
   )
 
   const accessToken = getAccessToken(res)
@@ -153,11 +144,9 @@ export function BAV(): void {
     headers: { Authorization: authHeader }
   }
   // B01_BAV_07_SendBearerToken
-  res = group(groups[6], () =>
-    timeRequest(() => http.post(env.BAV.target + '/userinfo', {}, options), {
-      isStatusCode200,
-      ...pageContentCheck('credentialJWT')
-    })
-  )
+  res = timeGroup(groups[6], () => http.post(env.BAV.target + '/userinfo', {}, options), {
+    isStatusCode200,
+    ...pageContentCheck('credentialJWT')
+  })
   iterationsCompleted.add(1)
 }

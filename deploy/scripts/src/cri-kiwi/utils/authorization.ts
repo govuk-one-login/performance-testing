@@ -8,7 +8,7 @@ export function getClientID(r: Response): string {
 }
 
 export function getCodeFromUrl(url: string): string {
-  const code = url.match(/code=([^&]*)/)
+  const code = /code=([^&]*)/.exec(url)
   if (code?.[1] != null) return code[1]
   fail('Code not found')
 }

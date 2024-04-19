@@ -18,7 +18,7 @@ import {
   uuidv4
 } from './utils/jslib'
 import { URL, URLSearchParams } from './utils/jslib/url'
-import { timeFunction, timeRequest } from './utils/request/timing'
+import { timeFunction, timeGroup, timeRequest } from './utils/request/timing'
 import { sleepBetween } from './utils/sleep/sleepBetween'
 import { isStatusCode200, isStatusCode201, isStatusCode302, pageContentCheck } from './utils/checks/assertions'
 import { type RefinedResponse, type ResponseType, type Response } from 'k6/http'
@@ -373,6 +373,17 @@ export default (): void => {
         }
       )
     })
+
+    timeGroup(
+      'timeGroup()',
+      () => {
+        const string = 'OK'
+        return 'A' + string
+      },
+      {
+        'check result': s => s === 'AOK'
+      }
+    )
   })
 
   group('sleep/sleepBetween', () => {

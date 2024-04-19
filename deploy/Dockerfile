@@ -1,21 +1,20 @@
 # -----------------------
 # Typescript > Javascript
 # -----------------------
-FROM node:20-alpine3.18 as node-build
+FROM node:20-alpine3.18 AS node-build
 
 ENV WORKDIR=/home/node
 
 ADD scripts ${WORKDIR}/scripts
 
-WORKDIR ${WORKDIR}
-RUN cd scripts && \
-    npm install && \
-    npm start
+WORKDIR ${WORKDIR}/scripts
+RUN npm install --ignore-scripts
+RUN npm start
 
 # -------------------------------
 # Build k6 binary with extensions
 # -------------------------------
-FROM golang:1.22-alpine as k6-build
+FROM golang:1.22-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.10.0
@@ -24,7 +23,7 @@ RUN xk6 build v0.49.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --out
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.98.0 as otel
+FROM otel/opentelemetry-collector-contrib:0.98.0 AS otel
 ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---

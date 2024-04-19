@@ -217,250 +217,214 @@ export function passport(): void {
   sleepBetween(0.5, 1)
 
   // B01_Passport_03_ClickContinueStartPage
-  timeGroup(
-    groups[2],
-    () => {
-      // 01_CoreCall
-      res = timeGroup(
-        groups[3].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { journey: 'next' },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_DCMAWStub
-      res = timeGroup(groups[4].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('DOC Checking App (Stub)')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[2], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[3].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { journey: 'next' },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_DCMAWStub
+    res = timeGroup(groups[4].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('DOC Checking App (Stub)')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B01_Passport_04_DCMAWContinue
-  timeGroup(
-    groups[5],
-    () => {
-      // 01_DCMAWStub
-      res = timeGroup(
-        groups[6].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: {
-              requested_oauth_error_endpoint: 'auth',
-              requested_oauth_error: 'access_denied'
-            },
-            params: { redirects: 1 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[7].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Enter your UK passport details and answer security questions online')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[5], () => {
+    // 01_DCMAWStub
+    res = timeGroup(
+      groups[6].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            requested_oauth_error_endpoint: 'auth',
+            requested_oauth_error: 'access_denied'
+          },
+          params: { redirects: 1 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[7].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Enter your UK passport details and answer security questions online')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B01_Passport_05_ContinueOnPYIStartPage
-  timeGroup(
-    groups[8],
-    () => {
-      // 01_CoreCall
-      res = timeGroup(
-        groups[9].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { journey: 'next/passport' },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_PassStub
-      res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('UK Passport (Stub)')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[8], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[9].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { journey: 'next/passport' },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_PassStub
+    res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('UK Passport (Stub)')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B01_Passport_06_PassportDataContinue
-  timeGroup(
-    groups[11],
-    () => {
-      // 01_PassStub
-      res = timeGroup(
-        groups[12].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: {
-              jsonPayload: passportPayload,
-              strengthScore: '4',
-              validityScore: '2'
-            },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 03_AddStub
-      res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Address (Stub)')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[11], () => {
+    // 01_PassStub
+    res = timeGroup(
+      groups[12].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            jsonPayload: passportPayload,
+            strengthScore: '4',
+            validityScore: '2'
+          },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+      isStatusCode302
+    })
+    // 03_AddStub
+    res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Address (Stub)')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B01_Passport_07_AddrDataContinue
-  timeGroup(
-    groups[15],
-    () => {
-      // 01_AddStub
-      res = timeGroup(
-        groups[16].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { jsonPayload: addressPayloadP },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 03_FraudStub
-      res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Fraud Check (Stub)')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[15], () => {
+    // 01_AddStub
+    res = timeGroup(
+      groups[16].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { jsonPayload: addressPayloadP },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+      isStatusCode302
+    })
+    // 03_FraudStub
+    res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Fraud Check (Stub)')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B01_Passport_08_FraudDataContinue
-  timeGroup(
-    groups[19],
-    () => {
-      // 01_FraudStub
-      res = timeGroup(
-        groups[20].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: {
-              jsonPayload: fraudPayloadP,
-              identityFraudScore: '2'
-            },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Answer security questions')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[19], () => {
+    // 01_FraudStub
+    res = timeGroup(
+      groups[20].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            jsonPayload: fraudPayloadP,
+            identityFraudScore: '2'
+          },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Answer security questions')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B01_Passport_09_PreKBVTransition
-  timeGroup(
-    groups[22],
-    () => {
-      // 01_CoreCall
-      res = timeGroup(
-        groups[23].split('::')[1],
-        () =>
-          res.submitForm({
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_KBVStub
-      res = timeGroup(groups[24].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Knowledge Based Verification (Stub)')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[22], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[23].split('::')[1],
+      () =>
+        res.submitForm({
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_KBVStub
+    res = timeGroup(groups[24].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Knowledge Based Verification (Stub)')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B01_Passport_10_KBVDataContinue
-  timeGroup(
-    groups[25],
-    () => {
-      // 01_KBVStub
-      res = timeGroup(
-        groups[26].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: {
-              jsonPayload: kbvPayloadP,
-              verificationScore: '2'
-            },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[27].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('You’ve successfully proved your identity')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[25], () => {
+    // 01_KBVStub
+    res = timeGroup(
+      groups[26].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            jsonPayload: kbvPayloadP,
+            verificationScore: '2'
+          },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[27].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('You’ve successfully proved your identity')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B01_Passport_11_ContinuePYISuccessPage
-  timeGroup(
-    groups[28],
-    () => {
-      // 01_CoreCall
-      res = timeGroup(
-        groups[29].split('::')[1],
-        () =>
-          res.submitForm({
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_OrchStub
-      res = timeGroup(
-        groups[30].split('::')[1],
-        () =>
-          http.get(res.headers.Location, {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }),
-        { isStatusCode200, ...pageContentCheck('User information') }
-      )
-    },
-    {}
-  )
+  timeGroup(groups[28], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[29].split('::')[1],
+      () =>
+        res.submitForm({
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_OrchStub
+    res = timeGroup(
+      groups[30].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode200, ...pageContentCheck('User information') }
+    )
+  })
   iterationsCompleted.add(1)
 }
 
@@ -510,252 +474,216 @@ export function drivingLicence(): void {
   sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_03_ContinueStartPage
-  timeGroup(
-    groups[2],
-    () => {
-      // 01_CoreCall
-      res = timeGroup(
-        groups[3].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { journey: 'next' },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_DCMAWStub
-      res = timeGroup(groups[4].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('DOC Checking App (Stub)')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[2], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[3].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { journey: 'next' },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_DCMAWStub
+    res = timeGroup(groups[4].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('DOC Checking App (Stub)')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_04_DCMAWContinue
-  timeGroup(
-    groups[5],
-    () => {
-      // 01_DCMAWStub
-      res = timeGroup(
-        groups[6].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: {
-              requested_oauth_error_endpoint: 'auth',
-              requested_oauth_error: 'access_denied'
-            },
-            params: { redirects: 1 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[7].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Enter your UK photocard driving licence details and answer security questions online')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[5], () => {
+    // 01_DCMAWStub
+    res = timeGroup(
+      groups[6].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            requested_oauth_error_endpoint: 'auth',
+            requested_oauth_error: 'access_denied'
+          },
+          params: { redirects: 1 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[7].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Enter your UK photocard driving licence details and answer security questions online')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_05_ContinueOnPYIStartPage
-  timeGroup(
-    groups[8],
-    () => {
-      // 01_CoreCall
-      res = timeGroup(
-        groups[9].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { journey: 'next/driving-licence' },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_DLStub
-      res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Driving Licence (Stub)')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[8], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[9].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { journey: 'next/driving-licence' },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_DLStub
+    res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Driving Licence (Stub)')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_06_DrivingLicenceDataContinue
-  timeGroup(
-    groups[11],
-    () => {
-      // 01_DLStub
-      res = timeGroup(
-        groups[12].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: {
-              jsonPayload: drivingLicencePayload,
-              strengthScore: '3',
-              validityScore: '2',
-              activityHistoryScore: '1'
-            },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 03_AddStub
-      res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Address (Stub)')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[11], () => {
+    // 01_DLStub
+    res = timeGroup(
+      groups[12].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            jsonPayload: drivingLicencePayload,
+            strengthScore: '3',
+            validityScore: '2',
+            activityHistoryScore: '1'
+          },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+      isStatusCode302
+    })
+    // 03_AddStub
+    res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Address (Stub)')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_07_AddrDataContinue
-  timeGroup(
-    groups[15],
-    () => {
-      // 01_AddStub
-      res = timeGroup(
-        groups[16].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { jsonPayload: addressPayloadDL },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 03_FraudStub
-      res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Fraud Check (Stub)')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[15], () => {
+    // 01_AddStub
+    res = timeGroup(
+      groups[16].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { jsonPayload: addressPayloadDL },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+      isStatusCode302
+    })
+    // 03_FraudStub
+    res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Fraud Check (Stub)')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_08_FraudDataContinue
-  timeGroup(
-    groups[19],
-    () => {
-      // 01_FraudStub
-      res = timeGroup(
-        groups[20].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: {
-              jsonPayload: fraudPayloadDL,
-              identityFraudScore: '2',
-              activityHistoryScore: '2'
-            },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Answer security questions')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[19], () => {
+    // 01_FraudStub
+    res = timeGroup(
+      groups[20].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            jsonPayload: fraudPayloadDL,
+            identityFraudScore: '2',
+            activityHistoryScore: '2'
+          },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Answer security questions')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_09_PreKBVTransition
-  timeGroup(
-    groups[22],
-    () => {
-      // 01_CoreCall
-      res = timeGroup(
-        groups[23].split('::')[1],
-        () =>
-          res.submitForm({
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_KBVStub
-      res = timeGroup(groups[24].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Knowledge Based Verification (Stub)')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[22], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[23].split('::')[1],
+      () =>
+        res.submitForm({
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_KBVStub
+    res = timeGroup(groups[24].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Knowledge Based Verification (Stub)')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_10_KBVDataContinue
-  timeGroup(
-    groups[25],
-    () => {
-      // 01_KBVStub
-      res = timeGroup(
-        groups[26].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: {
-              jsonPayload: kbvPayloaDL,
-              verificationScore: '2'
-            },
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[27].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('Continue to the service you want to use')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[25], () => {
+    // 01_KBVStub
+    res = timeGroup(
+      groups[26].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            jsonPayload: kbvPayloaDL,
+            verificationScore: '2'
+          },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[27].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Continue to the service you want to use')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B02_DrivingLicence_11_ContinueDrivingLicenceSuccessPage
-  timeGroup(
-    groups[28],
-    () => {
-      // 01_CoreCall
-      res = timeGroup(
-        groups[29].split('::')[1],
-        () =>
-          res.submitForm({
-            params: { redirects: 0 }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_OrchStub
-      res = timeGroup(
-        groups[30].split('::')[1],
-        () =>
-          http.get(res.headers.Location, {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }),
-        { isStatusCode200, ...pageContentCheck('User information') }
-      )
-    },
-    {}
-  )
+  timeGroup(groups[28], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[29].split('::')[1],
+      () =>
+        res.submitForm({
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_OrchStub
+    res = timeGroup(
+      groups[30].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode200, ...pageContentCheck('User information') }
+    )
+  })
   iterationsCompleted.add(1)
 }
 
@@ -769,61 +697,53 @@ export function idReuse(): void {
   const signInJourneyId = uuidv4()
 
   // B03_IDReuse_01_LoginToCore
-  timeGroup(
-    groups[0],
-    () => {
-      // 01_OrchStub
-      res = timeGroup(
-        groups[1].split('::')[1],
-        () =>
-          http.get(
-            env.orchStubEndPoint +
-              `/authorize?journeyType=full&userIdText=${idReuseUserID.userID}&signInJourneyIdText=${signInJourneyId}&vtrText=P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${idReuseUserID.emailID}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
-            {
-              headers: { Authorization: `Basic ${encodedCredentials}` },
-              redirects: 0
-            }
-          ),
-        { isStatusCode302 }
-      )
-      // 02_CoreCall
-      res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('You have already proved your identity')
-      })
-    },
-    {}
-  )
+  timeGroup(groups[0], () => {
+    // 01_OrchStub
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.get(
+          env.orchStubEndPoint +
+            `/authorize?journeyType=full&userIdText=${idReuseUserID.userID}&signInJourneyIdText=${signInJourneyId}&vtrText=P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${idReuseUserID.emailID}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
+          {
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            redirects: 0
+          }
+        ),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('You have already proved your identity')
+    })
+  })
 
   sleepBetween(0.5, 1)
 
   // B03_IDReuse_02_ClickContinue
-  timeGroup(
-    groups[3],
-    () => {
-      // 01_CoreCall
-      res = timeGroup(
-        groups[4].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { submitButton: '' },
-            params: { redirects: 0 },
-            submitSelector: '#continue'
-          }),
-        { isStatusCode302 }
-      )
-      // 02_OrchStub
-      res = timeGroup(
-        groups[5].split('::')[1],
-        () =>
-          http.get(res.headers.Location, {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }),
-        { isStatusCode200, ...pageContentCheck('User information') }
-      )
-    },
-    {}
-  )
+  timeGroup(groups[3], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { submitButton: '' },
+          params: { redirects: 0 },
+          submitSelector: '#continue'
+        }),
+      { isStatusCode302 }
+    )
+    // 02_OrchStub
+    res = timeGroup(
+      groups[5].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode200, ...pageContentCheck('User information') }
+    )
+  })
   iterationsCompleted.add(1)
 }
 

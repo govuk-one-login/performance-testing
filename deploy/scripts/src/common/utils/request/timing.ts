@@ -28,7 +28,7 @@ export function timeFunction<T>(fn: () => T): [T, number] {
  * If the checks are succesful: the duration is added to the trend.
  * If the checks fail: the iteration is aborted.
  * @param {() => T} fn - Code to be executed and timed
- * @param {Checkers<T>} checks Set of checker functions to use as assertions
+ * @param {Checkers<T>} [checks] Set of checker functions to use as assertions, defaults to none
  * @returns Returns the return value from calling `fn`
  * @example
  * const res = timeRequest(
@@ -36,7 +36,7 @@ export function timeFunction<T>(fn: () => T): [T, number] {
  *   { 'status is 200': (r) => r.status === 200 }
  * )
  */
-export function timeRequest<T>(fn: () => T, checks: Checkers<T>): T {
+export function timeRequest<T>(fn: () => T, checks: Checkers<T> = {}): T {
   const [res, duration] = timeFunction(fn)
   check(res, checks) ? durations.add(duration) : fail('Response validation failed')
   return res
@@ -46,7 +46,7 @@ export function timeRequest<T>(fn: () => T, checks: Checkers<T>): T {
  * Creates a k6 `group` and runs `timeRequest` within it
  * @param {string} name Group name to be used as a `group` tag
  * @param {() => T} fn - Code to be executed and timed
- * @param {Checkers<T>} checks Checkers object to assert against the response of `fn`
+ * @param {Checkers<T>} [checks] Checkers object to assert against the response of `fn`, defaults to empty object
  * @returns Returns the return value from calling `fn`
  * @example
  * const res = timeGroup(
@@ -55,6 +55,6 @@ export function timeRequest<T>(fn: () => T, checks: Checkers<T>): T {
  *   { 'status is 200': (r) => r.status === 200 }
  * )
  */
-export function timeGroup<T>(name: string, fn: () => T, checks: Checkers<T>): T {
+export function timeGroup<T>(name: string, fn: () => T, checks: Checkers<T> = {}): T {
   return group(name, () => timeRequest(fn, checks))
 }

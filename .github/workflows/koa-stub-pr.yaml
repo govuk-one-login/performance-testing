@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'koa-stub/**'
+      - "koa-stub/**"
 
 jobs:
   # Sonar is enabled through SaaS Integration, so workflow checks not needed to be explicit
@@ -42,12 +42,12 @@ jobs:
         working-directory: koa-stub/
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           submodules: true
 
       - name: Setup nodeJS v20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: 20
 

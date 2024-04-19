@@ -90,16 +90,16 @@ export function address(): void {
         )
       )
       // 02_AddCRICall
-      if (env.staticResources) {
-        const requests = [
-          { url: 'https://review-a.build.account.gov.uk/public/stylesheets/application.css' },
-          { url: 'https://review-a.build.account.gov.uk/public/javascripts/all.js' },
-          { url: 'https://review-a.build.account.gov.uk/public/javascripts/analytics.js' },
-          { url: 'https://review-a.build.account.gov.uk/public/fonts/bold-b542beb274-v2.woff2' },
-          { url: 'https://review-a.build.account.gov.uk/public/fonts/light-94a07e06a1-v2.woff2' },
-          { url: 'https://review-a.build.account.gov.uk/public/images/govuk-crest-2x.png' }
+if (env.staticResources) {
+        const paths = [
+          '/public/stylesheets/application.css',
+          '/public/javascripts/all.js',
+          '/public/javascripts/analytics.js',
+          '/public/fonts/bold-b542beb274-v2.woff2',
+          '/public/fonts/light-94a07e06a1-v2.woff2',
+          '/public/images/govuk-crest-2x.png'
         ]
-        const batchRequests: ObjectBatchRequest[] = requests.map(request => ({ url: request.url, method: 'GET' }))
+        const batchRequests = paths.map(path => env.addressEndPoint + path)
         http.batch(batchRequests)
       }
       res = group(groups[2].split('::')[1], () =>

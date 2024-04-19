@@ -20,10 +20,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          fetch-depth: '0'
+          fetch-depth: "0"
+
+      - name: Setup nodeJS v20
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: 20
 
       - name: Install dependencies
-        run: npm i
+        run: npm ci
 
       - name: Run linting checks
         run: npm run lint
@@ -37,7 +42,7 @@ jobs:
           filename: ./deploy/scripts/dist/common/unit-tests.js
 
       - run: git fetch origin main
-      - name:  Run pre-commit action
+      - name: Run pre-commit action
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
         with:
           extra_args: --from-ref FETCH_HEAD --to-ref HEAD

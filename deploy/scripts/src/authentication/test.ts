@@ -61,7 +61,7 @@ const groupMap = {
   ],
   signIn: [
     'B02_SignIn_01_InitializeJourney',
-    'B01_SignUp_01_InitializeJourney::01_RPStub',
+    'B02_SignIn_01_InitializeJourney::01_RPStub',
     'B02_SignIn_01_InitializeJourney::02_OIDCCall',
     'B02_SignIn_01_InitializeJourney::03_AuthCall',
     'B02_SignIn_02_ClickSignIn',

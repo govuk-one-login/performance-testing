@@ -14,13 +14,13 @@ import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('sendEvent', LoadProfile.smoke)
+    ...createScenario('sendSingleEvent', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('sendEvent', LoadProfile.full, 750, 3)
+    ...createScenario('sendSingleEvent', LoadProfile.full, 750, 3)
   },
   stress: {
-    ...createScenario('sendEvent', LoadProfile.full, 7500, 3)
+    ...createScenario('sendSingleEvent', LoadProfile.full, 7500, 3)
   }
 }
 
@@ -56,7 +56,7 @@ const eventData = {
 
 const sqs = new SQSClient(awsConfig)
 
-export function sendEvent(): void {
+export function sendSingleEvent(): void {
   const messageBody = eventData.payload.replace(/UUID/g, () => uuidv4())
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, messageBody)

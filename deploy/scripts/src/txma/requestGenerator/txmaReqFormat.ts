@@ -16,3 +16,23 @@ export interface AuthLogInSuccess {
   }
 }
 
+export interface AuthCreateAccount {
+  event_id: string
+  event_name: string
+  client_id: string
+  component_id: string
+  timestamp: number
+  event_timestamp_ms: number
+  extensions: {
+    internalSubjectId: string
+    rpPairwiseId: string
+  },
+  user: {
+    user_id: string
+    govuk_signin_journey_id: string
+    ip_address: string
+    email: string
+    session_id: string
+    persistent_session_id: string
+  }
+}

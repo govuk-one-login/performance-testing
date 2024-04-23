@@ -11,7 +11,8 @@ import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
-import { generateAuthLogInSuccess } from './requestGenerator/txmaReqGen'
+import { generateAuthLogInSuccess, generateAuthCreateAccount } from './requestGenerator/txmaReqGen'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
@@ -61,3 +62,16 @@ export function sendSingleEvent(): void {
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   iterationsCompleted.add(1)
 }
+
+export function rpPairwiseMapping(): void {
+  const userID = `perfTest${uuidv4()}`
+  const emailID = `perfTest${uuidv4()}@digital.cabinet-office.gov.uk`
+  iterationsStarted.add(1)
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(userID, emailID))
+  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID))
+  sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
+  sleepBetween(1, 2)
+  sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
+  iterationsCompleted.add(1)
+}
+

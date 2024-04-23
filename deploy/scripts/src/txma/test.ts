@@ -16,13 +16,19 @@ import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('sendSingleEvent', LoadProfile.smoke)
+    ...createScenario('sendSingleEvent', LoadProfile.smoke),
+    ...createScenario('rpPairwiseMapping', LoadProfile.smoke),
+    ...createScenario('clientEnrichmentFeature', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('sendSingleEvent', LoadProfile.full, 750, 3)
+    ...createScenario('sendSingleEvent', LoadProfile.full, 750, 3),
+    ...createScenario('rpPairwiseMapping', LoadProfile.full, 750, 3),
+    ...createScenario('clientEnrichmentFeature', LoadProfile.full, 750, 3)
   },
   stress: {
-    ...createScenario('sendSingleEvent', LoadProfile.full, 7500, 3)
+    ...createScenario('sendSingleEvent', LoadProfile.full, 7500, 3),
+    ...createScenario('rpPairwiseMapping', LoadProfile.full, 7500, 3),
+    ...createScenario('clientEnrichmentFeature', LoadProfile.full, 7500, 3)
   }
 }
 

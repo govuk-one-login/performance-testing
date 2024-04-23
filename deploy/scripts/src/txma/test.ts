@@ -21,14 +21,14 @@ const profiles: ProfileList = {
     ...createScenario('clientEnrichmentFeature', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('sendSingleEvent', LoadProfile.full, 750, 3),
-    ...createScenario('rpPairwiseMapping', LoadProfile.full, 750, 3),
-    ...createScenario('clientEnrichmentFeature', LoadProfile.full, 750, 3)
+    ...createScenario('sendSingleEvent', LoadProfile.full, 750),
+    ...createScenario('rpPairwiseMapping', LoadProfile.full, 750),
+    ...createScenario('clientEnrichmentFeature', LoadProfile.full, 750)
   },
   stress: {
-    ...createScenario('sendSingleEvent', LoadProfile.full, 7500, 3),
-    ...createScenario('rpPairwiseMapping', LoadProfile.full, 7500, 3),
-    ...createScenario('clientEnrichmentFeature', LoadProfile.full, 7500, 3)
+    ...createScenario('sendSingleEvent', LoadProfile.full, 7500),
+    ...createScenario('rpPairwiseMapping', LoadProfile.full, 7500),
+    ...createScenario('clientEnrichmentFeature', LoadProfile.full, 7500)
   }
 }
 

@@ -88,7 +88,7 @@ export function address(): void {
       { isStatusCode302 }
     )
     // 02_AddCRICall
-    timeGroup(
+    res = timeGroup(
       groups[2].split('::')[1],
       () => {
         if (env.staticResources) {

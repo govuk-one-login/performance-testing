@@ -11,7 +11,7 @@ import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
-import { generateAuthLogInSuccess, generateAuthCreateAccount } from './requestGenerator/txmaReqGen'
+import { generateAuthLogInSuccess, generateAuthCreateAccount, generateAuthAuthorisationInitiated, geenrateDcmawAbortWeb } from './requestGenerator/txmaReqGen'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
@@ -75,3 +75,14 @@ export function rpPairwiseMapping(): void {
   iterationsCompleted.add(1)
 }
 
+export function clientEnrichmentFeature(): void {
+  const userID = `perfTest${uuidv4()}`
+  const journeyID = uuidv4()
+  iterationsStarted.add(1)
+  const authInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
+  const dcmawAbortPayload = JSON.stringify(geenrateDcmawAbortWeb(userID, journeyID))
+  sqs.sendMessage(env.sqs_queue, authInitiatedPayload)
+  sleepBetween(1, 2)
+  sqs.sendMessage(env.sqs_queue, dcmawAbortPayload)
+  iterationsCompleted.add(1)
+}

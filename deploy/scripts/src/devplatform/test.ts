@@ -55,9 +55,9 @@ export function frontEndScaling(): void {
   iterationsStarted.add(1)
 
   // B01_FEScaling_01_CallDemoAPI
-  timeGroup(groups[0], () => http.get(env.apiURL), {
+  timeGroup(groups[0], () => http.get(env.apiURL + '/toy'), {
     isStatusCode200,
-    ...pageContentCheck('Welcome to the Platform SRE Show and tell')
+    ...pageContentCheck('We need to ask you about your favourite toy')
   })
   iterationsCompleted.add(1)
 }

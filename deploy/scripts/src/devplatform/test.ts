@@ -1,6 +1,6 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { type Options } from 'k6/options'
-import http, { type Response } from 'k6/http'
+import http from 'k6/http'
 import {
   selectProfile,
   type ProfileList,
@@ -51,7 +51,6 @@ const env = {
 
 export function frontEndScaling(): void {
   const groups = groupMap.frontEndScaling
-  let res: Response
   iterationsStarted.add(1)
 
   // B01_FEScaling_01_CallDemoAPI

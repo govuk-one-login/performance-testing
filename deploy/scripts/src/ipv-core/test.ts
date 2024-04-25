@@ -525,7 +525,7 @@ export function drivingLicence(): void {
       groups[9].split('::')[1],
       () =>
         res.submitForm({
-          fields: { journey: 'next/driving-licence' },
+          fields: { journey: 'drivingLicence' },
           params: { redirects: 0 }
         }),
       { isStatusCode302 }

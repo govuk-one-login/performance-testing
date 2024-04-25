@@ -268,7 +268,7 @@ export function passport(): void {
       groups[9].split('::')[1],
       () =>
         res.submitForm({
-          fields: { journey: 'next/passport' },
+          fields: { journey: 'ukPassport' },
           params: { redirects: 0 }
         }),
       { isStatusCode302 }

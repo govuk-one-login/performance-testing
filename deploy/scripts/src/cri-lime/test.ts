@@ -449,10 +449,28 @@ export function passport(): void {
     )
 
     // 02_CRICall
-    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Enter your details exactly as they appear on your UK passport')
-    })
+    res = timeGroup(
+      groups[2].split('::')[1],
+      () => {
+        if (env.staticResources) {
+          const paths = [
+            '/public/fonts/light-94a07e06a1-v2.woff2',
+            '/public/fonts/bold-b542beb274-v2.woff2',
+            '/public/images/govuk-crest-2x.png',
+            '/public/javascripts/analytics.js',
+            '/public/javascripts/all.js',
+            '/public/stylesheets/application.css'
+          ]
+          const batchRequests = paths.map(path => env.passportURL + path)
+          http.batch(batchRequests)
+        }
+        return http.get(res.headers.Location)
+      },
+      {
+        isStatusCode200,
+        ...pageContentCheck('Enter your details exactly as they appear on your UK passport')
+      }
+    )
   })
 
   sleepBetween(1, 3)

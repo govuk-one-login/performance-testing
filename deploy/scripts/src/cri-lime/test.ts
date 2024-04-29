@@ -449,7 +449,7 @@ export function passport(): void {
     )
 
     // 02_CRICall
-    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.location), {
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Enter your details exactly as they appear on your UK passport')
     })

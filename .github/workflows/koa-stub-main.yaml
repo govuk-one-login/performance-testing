@@ -78,7 +78,7 @@ jobs:
         run: |
           sam build
       - name: Deploy SAM app
-        uses: govuk-one-login/devplatform-upload-action@1bf704ccba8eaebea0bd43318321d806b29f9fe4 # v3.5
+        uses: govuk-one-login/devplatform-upload-action@2281463e2a4ea137fa3ff96b4620e5e39b01d7b7 # v3.8.1
         with:
           artifact-bucket-name: ${{ secrets.PERF_STUB_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.PERF_STUB_SIGNING_PROFILE_NAME }}

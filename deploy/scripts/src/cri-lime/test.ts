@@ -91,6 +91,8 @@ const groupMap = {
   ],
   passport: [
     'B03_Passport_01_PassportCRIEntryFromStub',
+    'B03_Passport_01_PassportCRIEntryFromStub::01_CoreStubCall',
+    'B03_Passport_01_PassportCRIEntryFromStub::02_CRICall',
     'B03_Passport_02_EnterPassportDetailsAndContinue',
     'B03_Passport_02_EnterPassportDetailsAndContinue::01_CRICall',
     'B03_Passport_02_EnterPassportDetailsAndContinue::02_CoreStubCall'
@@ -112,7 +114,8 @@ const env = {
   fraudUrl: getEnv('IDENTITY_FRAUD_URL'),
   drivingUrl: getEnv('IDENTITY_DRIVING_URL'),
   passportURL: getEnv('IDENTITY_PASSPORT_URL'),
-  envName: getEnv('ENVIRONMENT')
+  envName: getEnv('ENVIRONMENT'),
+  staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
 }
 
 const stubCreds = {
@@ -433,25 +436,50 @@ export function passport(): void {
   iterationsStarted.add(1)
 
   // B03_Passport_01_PassportCRIEntryFromStub
-  res = timeGroup(
-    groups[0],
-    () =>
-      http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' + env.envName + '&rowNumber=197', {
-        headers: { Authorization: `Basic ${encodedCredentials}` }
-      }),
-    {
-      isStatusCode200,
-      ...pageContentCheck('Enter your details exactly as they appear on your UK passport')
-    }
-  )
+  timeGroup(groups[0], () => {
+    // 01_CoreStubCall
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.get(env.ipvCoreStub + '/authorize?cri=passport-v1-cri-' + env.envName + '&rowNumber=197', {
+          headers: { Authorization: `Basic ${encodedCredentials}` },
+          redirects: 0
+        }),
+      { isStatusCode302 }
+    )
+
+    // 02_CRICall
+    res = timeGroup(
+      groups[2].split('::')[1],
+      () => {
+        if (env.staticResources) {
+          const paths = [
+            '/public/fonts/light-94a07e06a1-v2.woff2',
+            '/public/fonts/bold-b542beb274-v2.woff2',
+            '/public/images/govuk-crest-2x.png',
+            '/public/javascripts/analytics.js',
+            '/public/javascripts/all.js',
+            '/public/stylesheets/application.css'
+          ]
+          const batchRequests = paths.map(path => env.passportURL + path)
+          http.batch(batchRequests)
+        }
+        return http.get(res.headers.Location)
+      },
+      {
+        isStatusCode200,
+        ...pageContentCheck('Enter your details exactly as they appear on your UK passport')
+      }
+    )
+  })
 
   sleepBetween(1, 3)
 
   // B03_Passport_02_EnterPassportDetailsAndContinue
-  timeGroup(groups[1], () => {
+  timeGroup(groups[3], () => {
     // 01_CRICall
     res = timeGroup(
-      groups[2].split('::')[1],
+      groups[4].split('::')[1],
       () =>
         res.submitForm({
           fields: {
@@ -473,7 +501,7 @@ export function passport(): void {
     )
     // 02_CoreStubCall
     res = timeGroup(
-      groups[3].split('::')[1],
+      groups[5].split('::')[1],
       () =>
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }

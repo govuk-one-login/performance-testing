@@ -61,8 +61,8 @@ const awsConfig = new AWSConfig({
 const sqs = new SQSClient(awsConfig)
 
 export function sendSingleEvent(): void {
-  const userID = `perfTest${uuidv4()}`
-  const emailID = `perfTest${uuidv4()}@digital.cabinet-office.gov.uk`
+  const userID = `perfUserSE${uuidv4()}`
+  const emailID = `perfEmailSE${uuidv4()}@digital.cabinet-office.gov.uk`
   iterationsStarted.add(1)
   const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID))
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
@@ -70,25 +70,25 @@ export function sendSingleEvent(): void {
 }
 
 export function rpPairwiseMapping(): void {
-  const userID = `perfTest${uuidv4()}`
-  const emailID = `perfTest${uuidv4()}@digital.cabinet-office.gov.uk`
+  const userID = `perfUserPM${uuidv4()}`
+  const emailID = `perfEmailPM${uuidv4()}@digital.cabinet-office.gov.uk`
   iterationsStarted.add(1)
   const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(userID, emailID))
   const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID))
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   iterationsCompleted.add(1)
 }
 
 export function clientEnrichmentFeature(): void {
-  const userID = `perfTest${uuidv4()}`
-  const journeyID = uuidv4()
+  const userID = `perfUserCEF${uuidv4()}`
+  const journeyID = `perfJourneyCEF${uuidv4()}`
   iterationsStarted.add(1)
   const authInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   const dcmawAbortPayload = JSON.stringify(geenrateDcmawAbortWeb(userID, journeyID))
   sqs.sendMessage(env.sqs_queue, authInitiatedPayload)
-  sleepBetween(1, 2)
+  sleepBetween(0.5, 1)
   sqs.sendMessage(env.sqs_queue, dcmawAbortPayload)
   iterationsCompleted.add(1)
 }

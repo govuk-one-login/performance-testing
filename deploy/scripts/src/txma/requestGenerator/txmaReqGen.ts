@@ -8,7 +8,7 @@ export function generateAuthLogInSuccess(userID: string, emailID: string): AuthL
     event_id: eventID,
     event_name: 'AUTH_LOG_IN_SUCCESS',
     client_id: 'e2eTestClientId',
-    component_id: 'SharedSignalIntegrationTest',
+    component_id: 'SharedSignalPerfTest',
     timestamp: eventTime,
     event_timestamp_ms: eventTime,
     user: {
@@ -29,7 +29,7 @@ export function generateAuthCreateAccount(userID: string, emailID: string): Auth
     event_id: eventID,
     event_name: 'AUTH_CREATE_ACCOUNT',
     client_id: 'e2eTestClientId',
-    component_id: 'UNKNOWN',
+    component_id: 'SharedSignalPerfTest',
     timestamp: Math.floor(Date.now() / 1000),
     event_timestamp_ms: Math.floor(Date.now()),
     extensions: {
@@ -74,6 +74,7 @@ export function generateAuthAuthorisationInitiated(journeyID: string): AuthAutho
 
 export function geenrateDcmawAbortWeb(userID: string, journeyID: string): DcmawAbortWeb {
   const eventID = `perfDcmawAbort${uuidv4()}`
+  const emailID = `perfEmailCEF${uuidv4()}@digital.cabinet-office.gov.uk`
   return {
     event_id: eventID,
     event_name: 'DCMAW_ABORT_WEB',
@@ -85,7 +86,7 @@ export function geenrateDcmawAbortWeb(userID: string, journeyID: string): DcmawA
       user_id: userID,
       govuk_signin_journey_id: journeyID,
       ip_address: '1.2.3.4',
-      email: 'perfTestUser@digital.cabinet-office.gov.uk',
+      email: emailID,
       session_id: uuidv4(),
       persistent_session_id: uuidv4(),
       transaction_id: uuidv4()

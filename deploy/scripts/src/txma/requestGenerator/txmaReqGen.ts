@@ -71,7 +71,6 @@ export function generateAuthAuthorisationInitiated(journeyID: string): AuthAutho
   }
 }
 
-
 export function geenrateDcmawAbortWeb(userID: string, journeyID: string): DcmawAbortWeb {
   const eventID = `perfDcmawAbort${uuidv4()}`
   const emailID = `perfEmailCEF${uuidv4()}@digital.cabinet-office.gov.uk`

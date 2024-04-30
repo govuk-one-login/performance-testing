@@ -11,7 +11,12 @@ import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
-import { generateAuthLogInSuccess, generateAuthCreateAccount, generateAuthAuthorisationInitiated, geenrateDcmawAbortWeb } from './requestGenerator/txmaReqGen'
+import {
+  generateAuthLogInSuccess,
+  generateAuthCreateAccount,
+  generateAuthAuthorisationInitiated,
+  geenrateDcmawAbortWeb
+} from './requestGenerator/txmaReqGen'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {

@@ -64,6 +64,9 @@ const profiles: ProfileList = {
     ...createScenario('fraud', LoadProfile.full, 63),
     ...createScenario('drivingLicence', LoadProfile.full, 55),
     ...createScenario('passport', LoadProfile.full, 55)
+  },
+  extendedRampUp: {
+    ...createScenario('passport', LoadProfile.extendedRampUp, 30)
   }
 }
 

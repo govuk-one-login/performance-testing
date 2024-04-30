@@ -66,7 +66,7 @@ const profiles: ProfileList = {
     ...createScenario('passport', LoadProfile.full, 55)
   },
   extendedRampUp: {
-    ...createScenario('passport', LoadProfile.extendedRampUp, 30)
+    ...createScenario('passport', LoadProfile.rampOnly, 30)
   }
 }
 

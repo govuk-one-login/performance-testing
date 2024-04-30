@@ -94,7 +94,7 @@ export enum LoadProfile {
   short,
   full,
   deployment,
-  extendedRampUp
+  rampOnly
 }
 function createStages(type: LoadProfile, target: number): Stage[] {
   switch (type) {
@@ -120,7 +120,7 @@ function createStages(type: LoadProfile, target: number): Stage[] {
         { target, duration: '20m' }, // Maintain steady state at target throughput for 20 minutes
         { target: 0, duration: '5m' } // Ramp down over 5 minutes
       ]
-    case LoadProfile.extendedRampUp:
+    case LoadProfile.rampOnly:
       return [
         { target, duration: '15m' }, // Ramp up to target throughput over 15 minutes
         { target, duration: '5m' }, // Maintain steady state at target throughput for 5 minutes

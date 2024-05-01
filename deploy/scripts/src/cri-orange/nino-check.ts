@@ -27,7 +27,7 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  ninoScenario1: [
+  ninoCheck: [
     'B02_Nino_01_EntryFromStub',
     'B02_Nino_01_EntryFromStub::01_CoreStubCall',
     'B02_Nino_01_EntryFromStub::02_NiNOCRICall',
@@ -84,7 +84,7 @@ const csvData1: Nino[] = new SharedArray('csvDataNino', () => {
 })
 
 export function ninoCheck(): void {
-  const groups = groupMap.ninoScenario1
+  const groups = groupMap.ninoCheck
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)

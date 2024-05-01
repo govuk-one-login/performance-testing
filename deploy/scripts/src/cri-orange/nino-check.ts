@@ -116,7 +116,7 @@ export function ninoCheck(): void {
           headers: { Authorization: `Basic ${encodedCredentials}` }
         }
       }),
-    { isStatusCode200, ...pageContentCheck('national insurance number') }
+    { isStatusCode200, ...pageContentCheck('Enter your National Insurance number') }
   )
 
   sleepBetween(1, 3)

@@ -87,18 +87,6 @@ export function ninoCheck(): void {
   const userNino = csvData1[Math.floor(Math.random() * csvData1.length)]
   iterationsStarted.add(1)
 
-  // B02_Nino_01_EntryFromStub
-  res = timeGroup(
-    groups[0],
-    () =>
-      http.get(env.ipvCoreStub + '/edit-user?cri=check-hmrc-build', {
-        headers: { Authorization: `Basic ${encodedCredentials}` }
-      }),
-    { isStatusCode200, ...pageContentCheck('Edit User') }
-  )
-
-  sleepBetween(1, 3)
-
   // B02_Nino_02_AddUser
   res = timeGroup(
     groups[1],

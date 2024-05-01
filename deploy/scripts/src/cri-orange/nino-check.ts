@@ -29,10 +29,11 @@ const loadProfile = selectProfile(profiles)
 const groupMap = {
   ninoScenario1: [
     'B02_Nino_01_EntryFromStub',
-    'B02_Nino_02_AddUser',
-    'B02_Nino_03_SearchNiNo',
-    'B02_Nino_03_SearchNiNo::01_NiNOCRICall',
-    'B02_Nino_03_SearchNiNo::02_CoreStubCall'
+    'B02_Nino_01_EntryFromStub::01_CoreStubCall',
+    'B02_Nino_01_EntryFromStub::02_NiNOCRICall',
+    'B02_Nino_02_SearchNiNo',
+    'B02_Nino_02_SearchNiNo::01_NiNOCRICall',
+    'B02_Nino_02_SearchNiNo::02_CoreStubCall'
   ]
 } as const
 
@@ -46,7 +47,10 @@ export function setup(): void {
   describeProfile(loadProfile)
 }
 
-const env = { ipvCoreStub: getEnv('IDENTITY_CORE_STUB_URL') }
+const env = {
+  ipvCoreStub: getEnv('IDENTITY_CORE_STUB_URL'),
+  envName: getEnv('ENVIRONMENT')
+}
 
 const stubCreds = {
   userName: getEnv('IDENTITY_CORE_STUB_USERNAME'),
@@ -87,33 +91,66 @@ export function ninoCheck(): void {
   const userNino = csvData1[Math.floor(Math.random() * csvData1.length)]
   iterationsStarted.add(1)
 
-  // B02_Nino_02_AddUser
-  res = timeGroup(
-    groups[1],
-    () =>
-      res.submitForm({
-        fields: {
-          firstName: userNino.firstName,
-          surname: userNino.lastName,
-          'dateOfBirth-day': userNino.birthDay,
-          'dateOfBirth-month': userNino.birthMonth,
-          'dateOfBirth-year': userNino.birthYear
-        },
-        submitSelector: '#govuk-button button',
-        params: {
-          headers: { Authorization: `Basic ${encodedCredentials}` }
-        }
-      }),
-    { isStatusCode200, ...pageContentCheck('national insurance number') }
-  )
+  // B02_Nino_01_EntryFromStubEditUser
+  timeGroup(groups[0], () => {
+    // 01_CoreStubCall
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.post(
+          env.ipvCoreStub + '/edit-user',
+          {
+            cri: `check-hmrc-${env.envName}`,
+            rowNumber: '0',
+            firstName: userNino.firstName,
+            surname: userNino.lastName,
+            'dateOfBirth-day': userNino.birthDay,
+            'dateOfBirth-month': userNino.birthMonth,
+            'dateOfBirth-year': userNino.birthYear,
+            buildingNumber: '',
+            buildingName: '',
+            street: '',
+            townCity: '',
+            postCode: '',
+            validFromDay: '',
+            validFromMonth: '',
+            validFromYear: '',
+            validUntilDay: '',
+            validUntilMonth: '',
+            validUntilYear: '',
+            'SecondaryUKAddress.buildingNumber': '',
+            'SecondaryUKAddress.buildingName': '',
+            'SecondaryUKAddress.street': '',
+            'SecondaryUKAddress.townCity': '',
+            'SecondaryUKAddress.postCode': '',
+            'SecondaryUKAddress.validFromDay': '',
+            'SecondaryUKAddress.validFromMonth': '',
+            'SecondaryUKAddress.validFromYear': '',
+            'SecondaryUKAddress.validUntilDay': '',
+            'SecondaryUKAddress.validUntilMonth': '',
+            'SecondaryUKAddress.validUntilYear': ''
+          },
+          {
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            redirects: 0
+          }
+        ),
+      { isStatusCode302 }
+    )
+    // 01_CRICall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Enter your National Insurance number')
+    })
+  })
 
   sleepBetween(1, 3)
 
-  // B02_Nino_03_SearchNiNo
-  timeGroup(groups[2], () => {
+  // B02_Nino_02_SearchNiNo
+  timeGroup(groups[3], () => {
     // 01_NiNOCRICall
     res = timeGroup(
-      groups[3].split('::')[1],
+      groups[4].split('::')[1],
       () =>
         res.submitForm({
           fields: { nationalInsuranceNumber: userNino.niNumber },
@@ -124,7 +161,7 @@ export function ninoCheck(): void {
     )
     // 02_CoreStubCall
     res = timeGroup(
-      groups[4].split('::')[1],
+      groups[5].split('::')[1],
       () =>
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }

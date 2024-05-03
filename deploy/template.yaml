@@ -441,6 +441,7 @@ Resources:
               ACCOUNT_PHONE_OTP: "/perfTest/account/fixedPhoneOTP"
               ACCOUNT_RP_STUB: "/perfTest/account/authentication/rpStub"
               ACCOUNT_SIGNIN_URL: "/perfTest/account/accounts/signInUrl"
+              ACCOUNT_STAGING_URL: "/perfTest/account/authentication/baseUrl"
               DATA_BTM_SQS: "/perfTest/data/btm/perfSQS"
               DATA_BTM_SQS_PAYLOAD_EVENTS: "/perfTest/data/txma/SQSPayloadEvents"
               DATA_TXMA_SQS: "/perfTest/data/txma/perfSQS"

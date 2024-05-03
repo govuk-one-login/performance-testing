@@ -56,6 +56,7 @@ fs.createReadStream(fileName)
     processedRows++;
   })
   .on('end', () => {
+    data.sort((a, b) => a.request.localeCompare(b.request));
     data.forEach((requestData) => {
       const durations = requestData.durations.sort((a, b) => a - b);
       const n = durations.length;

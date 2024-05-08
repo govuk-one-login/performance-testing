@@ -1,7 +1,7 @@
 import { uuidv4 } from '../../common/utils/jslib/index'
-import { AuthLogInSuccess, AuthCreateAccount, AuthAuthorisationInitiated, DcmawAbortWeb } from './txmaReqFormat'
+import { AuthLogInSuccess, AuthCreateAccount, AuthAuthorisationReqParsed, DcmawAbortWeb } from './txmaReqFormat'
 
-export function generateAuthLogInSuccess(userID: string, emailID: string): AuthLogInSuccess {
+export function generateAuthLogInSuccess(userID: string, emailID: string, journeyID: string): AuthLogInSuccess {
   const eventID = `perfAuthLogin${uuidv4()}`
   const eventTime = Math.floor(Date.now() / 1000)
   return {
@@ -13,7 +13,7 @@ export function generateAuthLogInSuccess(userID: string, emailID: string): AuthL
     event_timestamp_ms: eventTime,
     user: {
       user_id: userID,
-      govuk_signin_journey_id: uuidv4(),
+      govuk_signin_journey_id: journeyID,
       ip_address: '1.2.3.4',
       session_id: uuidv4(),
       email: emailID,
@@ -23,7 +23,7 @@ export function generateAuthLogInSuccess(userID: string, emailID: string): AuthL
   }
 }
 
-export function generateAuthCreateAccount(userID: string, emailID: string): AuthCreateAccount {
+export function generateAuthCreateAccount(userID: string, emailID: string, journeyID: string): AuthCreateAccount {
   const eventID = `perfAuthCreateAcc${uuidv4()}`
   return {
     event_id: eventID,
@@ -38,7 +38,7 @@ export function generateAuthCreateAccount(userID: string, emailID: string): Auth
     },
     user: {
       user_id: userID,
-      govuk_signin_journey_id: uuidv4(),
+      govuk_signin_journey_id: journeyID,
       ip_address: '1.2.3.4',
       email: emailID,
       session_id: uuidv4(),
@@ -47,18 +47,20 @@ export function generateAuthCreateAccount(userID: string, emailID: string): Auth
   }
 }
 
-export function generateAuthAuthorisationInitiated(journeyID: string): AuthAuthorisationInitiated {
-  const eventID = `perfAuthInitiate${uuidv4()}`
+export function generateAuthReqParsed(journeyID: string): AuthAuthorisationReqParsed {
+  const eventID = `perfAuthReqParsed${uuidv4()}`
   const eventTime = new Date().toISOString()
   return {
-    client_id: 'testclientId',
+    client_id: 'e2eTestClientId',
     component_id: 'https://oidc.account.gov.uk/',
     event_id: eventID,
-    event_name: 'AUTH_AUTHORISATION_INITIATED',
+    event_name: 'AUTH_AUTHORISATION_REQUEST_PARSED',
     event_timestamp_ms: Math.floor(Date.now()),
     event_timestamp_ms_formatted: eventTime,
     extensions: {
-      'client-name': 'testtest'
+      identityRequested: true,
+      reauthRequested: false,
+      rpSid: 'test123'
     },
     timestamp: Math.floor(Date.now() / 1000),
     timestamp_formatted: eventTime,
@@ -71,13 +73,12 @@ export function generateAuthAuthorisationInitiated(journeyID: string): AuthAutho
   }
 }
 
-export function geenrateDcmawAbortWeb(userID: string, journeyID: string): DcmawAbortWeb {
+export function generateDcmawAbortWeb(userID: string, journeyID: string, emailID: string): DcmawAbortWeb {
   const eventID = `perfDcmawAbort${uuidv4()}`
-  const emailID = `perfEmailCEF${uuidv4()}@digital.cabinet-office.gov.uk`
   return {
     event_id: eventID,
     event_name: 'DCMAW_ABORT_WEB',
-    client_id: '',
+    client_id: 'e2eTestClientId',
     component_id: 'UNKNOWN',
     timestamp: Math.floor(Date.now() / 1000),
     event_timestamp_ms: Math.floor(Date.now()),

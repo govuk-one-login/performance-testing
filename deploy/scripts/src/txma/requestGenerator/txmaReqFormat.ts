@@ -37,7 +37,7 @@ export interface AuthCreateAccount {
   }
 }
 
-export interface AuthAuthorisationInitiated {
+export interface AuthAuthorisationReqParsed {
   client_id: string
   component_id: string
   event_id: string
@@ -45,7 +45,9 @@ export interface AuthAuthorisationInitiated {
   event_timestamp_ms: number
   event_timestamp_ms_formatted: string
   extensions: {
-    'client-name': string
+    identityRequested: boolean
+    reauthRequested: boolean
+    rpSid: string
   }
   timestamp: number
   timestamp_formatted: string

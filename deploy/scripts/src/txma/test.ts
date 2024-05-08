@@ -14,26 +14,27 @@ import { getEnv } from '../common/utils/config/environment-variables'
 import {
   generateAuthLogInSuccess,
   generateAuthCreateAccount,
-  generateAuthAuthorisationInitiated,
-  geenrateDcmawAbortWeb
+  generateAuthReqParsed,
+  generateDcmawAbortWeb
 } from './requestGenerator/txmaReqGen'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('sendSingleEvent', LoadProfile.smoke),
-    ...createScenario('rpPairwiseMapping', LoadProfile.smoke),
-    ...createScenario('clientEnrichmentFeature', LoadProfile.smoke)
+    ...createScenario('pairwiseMappingClientEnrichment', LoadProfile.smoke)
+  },
+  lowVolume: {
+    ...createScenario('sendSingleEvent', LoadProfile.short, 30, 2),
+    ...createScenario('pairwiseMappingClientEnrichment', LoadProfile.short, 30, 4)
   },
   load: {
-    ...createScenario('sendSingleEvent', LoadProfile.full, 750, 3),
-    ...createScenario('rpPairwiseMapping', LoadProfile.full, 750, 3),
-    ...createScenario('clientEnrichmentFeature', LoadProfile.full, 750, 3)
+    ...createScenario('sendSingleEvent', LoadProfile.full, 750, 2),
+    ...createScenario('pairwiseMappingClientEnrichment', LoadProfile.full, 100, 4)
   },
   stress: {
-    ...createScenario('sendSingleEvent', LoadProfile.full, 7500, 3),
-    ...createScenario('rpPairwiseMapping', LoadProfile.full, 7500, 3),
-    ...createScenario('clientEnrichmentFeature', LoadProfile.full, 7500, 3)
+    ...createScenario('sendSingleEvent', LoadProfile.full, 7500, 2),
+    ...createScenario('pairwiseMappingClientEnrichment', LoadProfile.full, 7500, 4)
   }
 }
 
@@ -68,30 +69,26 @@ const sqs = new SQSClient(awsConfig)
 export function sendSingleEvent(): void {
   const userID = `perfUserSE${uuidv4()}`
   const emailID = `perfEmailSE${uuidv4()}@digital.cabinet-office.gov.uk`
+  const journeyID = `perfJourney${uuidv4()}`
   iterationsStarted.add(1)
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID))
+  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID, journeyID))
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   iterationsCompleted.add(1)
 }
 
-export function rpPairwiseMapping(): void {
-  const userID = `perfUserPM${uuidv4()}`
-  const emailID = `perfEmailPM${uuidv4()}@digital.cabinet-office.gov.uk`
+export function pairwiseMappingClientEnrichment(): void {
+  const userID = `perfUser${uuidv4()}`
+  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
+  const journeyID = `perfJourney${uuidv4()}`
   iterationsStarted.add(1)
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(userID, emailID))
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID))
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(userID, emailID, journeyID))
+  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID, journeyID))
+  const authInitiatedPayload = JSON.stringify(generateAuthReqParsed(journeyID))
+  const dcmawAbortPayload = JSON.stringify(generateDcmawAbortWeb(userID, journeyID, emailID))
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
   sleepBetween(0.5, 1)
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
-  iterationsCompleted.add(1)
-}
-
-export function clientEnrichmentFeature(): void {
-  const userID = `perfUserCEF${uuidv4()}`
-  const journeyID = `perfJourneyCEF${uuidv4()}`
-  iterationsStarted.add(1)
-  const authInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
-  const dcmawAbortPayload = JSON.stringify(geenrateDcmawAbortWeb(userID, journeyID))
+  sleepBetween(0.5, 1)
   sqs.sendMessage(env.sqs_queue, authInitiatedPayload)
   sleepBetween(0.5, 1)
   sqs.sendMessage(env.sqs_queue, dcmawAbortPayload)

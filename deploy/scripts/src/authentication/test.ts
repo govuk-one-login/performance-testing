@@ -16,6 +16,7 @@ import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { timeGroup } from '../common/utils/request/timing'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { browser, type Page, type Response as PageResponse } from 'k6/experimental/browser'
 
 const profiles: ProfileList = {
   smoke: {
@@ -39,6 +40,19 @@ const profiles: ProfileList = {
   },
   rampOnly: {
     ...createScenario('signUp', LoadProfile.rampOnly, 30)
+  },
+  browser: {
+    ui: {
+      executor: 'per-vu-iterations',
+      exec: 'ui',
+      vus: 1,
+      iterations: 2,
+      options: {
+        browser: {
+          type: 'chromium'
+        }
+      }
+    }
   }
 }
 const loadProfile = selectProfile(profiles)
@@ -132,6 +146,42 @@ const env = {
   rpStub: getEnv('ACCOUNT_RP_STUB'),
   staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true',
   authStagingURL: getEnv('ACCOUNT_STAGING_URL')
+}
+
+async function SubmitPage(p: Page): Promise<[PageResponse | null, void]> {
+  return Promise.all([p.waitForNavigation(), p.locator('button[type="Submit"]').click()])
+}
+
+export async function ui() {
+  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
+  const page: Page = browser.newPage()
+  console.log(env.rpStub + '/start')
+  try {
+    await page.goto(env.rpStub + '/start')
+    await Promise.all([page.waitForNavigation(), page.locator('button#sign-in-button').click()])
+
+    page.locator('input[name="email"]').type(userData.email)
+    await SubmitPage(page)
+
+    page.locator('input#password').type(credentials.password)
+    await SubmitPage(page)
+
+    switch (userData.mfaOption) {
+      case 'AUTH_APP': {
+        const totp = new TOTP(credentials.authAppKey)
+        page.locator('input#code').type(totp.generateTOTP())
+        await SubmitPage(page)
+        break
+      }
+      case 'SMS': {
+        page.locator('input#code').type(credentials.phoneOTP)
+        await SubmitPage(page)
+        break
+      }
+    }
+  } finally {
+    page.close()
+  }
 }
 
 export function signUp(): void {

@@ -494,7 +494,7 @@ Resources:
             build:
               commands:
                 - echo "Run performance test"
-                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out output-statsd --out json=$JSON_RESULTS --system-tags=status,method,group,check,error,scenario
+                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out output-statsd --out json=$JSON_RESULTS
             post_build:
               commands:
                 - echo "Uploading test results to s3"

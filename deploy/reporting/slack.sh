@@ -36,7 +36,8 @@ case $1 in
 esac
 
 if $valid_args; then
-    dynatrace_url="${K6_DYNATRACE_URL}/#dashboard;gtf=${CODEBUILD_START_TIME}%20to%20${dashboard_end};id=${K6_DYNATRACE_DASHBOARD_ID};gf=all;es=CUSTOM_DIMENSION-build_id:${CODEBUILD_BUILD_NUMBER}/"
+    dynatrace_k6="${DYNATRACE_URL}/#dashboard;gtf=${CODEBUILD_START_TIME}%20to%20${dashboard_end};id=${DYNATRACE_K6_ID};gf=all;es=CUSTOM_DIMENSION-build_id:${CODEBUILD_BUILD_NUMBER}/"
+    dynatrace_ecs="${DYNATRACE_URL}/#dashboard;gtf=${CODEBUILD_START_TIME}%20to%20${dashboard_end};id=${DYNATRACE_ECS_ID};gf=all"
     message_id=$(curl https://www.slack.com/api/${api_command} \
             -X POST \
             -H "Authorization: Bearer ${SLACK_OAUTH_TOKEN}" \
@@ -83,7 +84,7 @@ if $valid_args; then
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": "• <'"${dynatrace_url}"'|Dynatrace Dashboard>\n• <'"${CODEBUILD_BUILD_URL}"'|CodeBuild>'"${other_info}"'"
+              "text": "• <'"${dynatrace_k6}"'|Dynatrace k6>\n• <'"${dynatrace_ecs}"'|Dynatrace ECS>\n• <'"${CODEBUILD_BUILD_URL}"'|CodeBuild>'"${other_info}"'"
             }
           },
           {

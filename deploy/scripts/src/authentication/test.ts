@@ -369,11 +369,30 @@ export function signUp(): void {
   iterationsCompleted.add(1)
 }
 
-export function signIn(): void {
+export function logout(): void {
   let res: Response
   const groups = groupMap.signIn
-  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
-  iterationsStarted.add(1)
+  // B02_SignIn_09_Logout
+  timeGroup(groups[19], () => {
+    // 01_RPStub
+    res = timeGroup(groups[20].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
+      isStatusCode302
+    })
+    // 02_OIDCCall
+    res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+      isStatusCode302
+    })
+    // 03_AuthCall
+    res = timeGroup(groups[22].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('You have signed out')
+    })
+  })
+}
+
+export function initializeJourney(): void {
+  let res: Response
+  const groups = groupMap.signIn
 
   // B02_SignIn_01_InitializeJourney
   timeGroup(groups[0], () => {
@@ -391,6 +410,15 @@ export function signIn(): void {
       ...pageContentCheck('Create your GOV.UK One Login or sign in')
     })
   })
+}
+
+export function signIn(): void {
+  let res: Response
+  const groups = groupMap.signIn
+  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
+  iterationsStarted.add(1)
+
+  initializeJourney()
 
   sleep(1)
 
@@ -534,21 +562,7 @@ export function signIn(): void {
     sleep(1)
 
     // B02_SignIn_09_Logout
-    timeGroup(groups[19], () => {
-      // 01_RPStub
-      res = timeGroup(groups[20].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 02_OIDCCall
-      res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 03_AuthCall
-      res = timeGroup(groups[22].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('You have signed out')
-      })
-    })
+    logout()
   }
   iterationsCompleted.add(1)
 }

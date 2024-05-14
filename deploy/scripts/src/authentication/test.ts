@@ -31,7 +31,7 @@ const profiles: ProfileList = {
     ...createScenario('signUp', LoadProfile.short, 10)
   },
   load: {
-    ...createScenario('signIn', LoadProfile.full, 500)
+    ...createScenario('signIn', LoadProfile.full, 1000)
   },
   stress: {
     ...createScenario('signIn', LoadProfile.full, 2000),

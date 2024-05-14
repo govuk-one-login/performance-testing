@@ -372,6 +372,7 @@ export function signUp(): void {
 export function logout(): void {
   let res: Response
   const groups = groupMap.signIn
+
   // B02_SignIn_09_Logout
   timeGroup(groups[19], () => {
     // 01_RPStub
@@ -390,12 +391,12 @@ export function logout(): void {
   })
 }
 
-export function initializeJourney(): void {
+export function initializeJourney(): Response {
   let res: Response
   const groups = groupMap.signIn
 
   // B02_SignIn_01_InitializeJourney
-  timeGroup(groups[0], () => {
+  return timeGroup(groups[0], () => {
     // 01_RPStub
     res = timeGroup(groups[1].split('::')[1], () => http.get(env.rpStub + '/start', { redirects: 0 }), {
       isStatusCode302
@@ -405,11 +406,38 @@ export function initializeJourney(): void {
       isStatusCode302
     })
     // 03_AuthCall
-    res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
+    return (res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Create your GOV.UK One Login or sign in')
-    })
+    }))
   })
+}
+
+export function MFAEnterOTP(): Response {
+  let res: Response
+  const groups = groupMap.signIn
+  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
+  let acceptNewTerms = false
+
+  // 02_OIDCCall
+  res = timeGroup(groups[9].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    isStatusCode302
+  })
+
+  acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
+  if (acceptNewTerms) {
+    // 03_AuthAcceptTerms
+    res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('terms of use update')
+    })
+  } else {
+    // 03_RPStub
+    res = timeGroup(groups[11].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck(userData.email.toLowerCase())
+    })
+  }
 }
 
 export function signIn(): void {
@@ -419,6 +447,7 @@ export function signIn(): void {
   iterationsStarted.add(1)
 
   initializeJourney()
+  res = initializeJourney()
 
   sleep(1)
 
@@ -473,25 +502,9 @@ export function signIn(): void {
             }),
           { isStatusCode302 }
         )
-        // 02_OIDCCall
-        res = timeGroup(groups[9].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-          isStatusCode302
-        })
-
-        acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
-        if (acceptNewTerms) {
-          // 03_AuthAcceptTerms
-          res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
-            isStatusCode200,
-            ...pageContentCheck('terms of use update')
-          })
-        } else {
-          // 03_RPStub
-          res = timeGroup(groups[11].split('::')[1], () => http.get(res.headers.Location), {
-            isStatusCode200,
-            ...pageContentCheck(userData.email.toLowerCase())
-          })
-        }
+        // 02_OIDCCall, 03_AuthAcceptTerms, 03_RPStub
+        MFAEnterOTP()
+        res = MFAEnterOTP()
       })
       break
     }
@@ -520,26 +533,9 @@ export function signIn(): void {
             }),
           { isStatusCode302 }
         )
-        // 02_OIDCCall
-        res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-          isStatusCode302
-        })
-
-        acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
-
-        if (acceptNewTerms) {
-          // 03_AuthAcceptTerms
-          res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location), {
-            isStatusCode200,
-            ...pageContentCheck('terms of use update')
-          })
-        } else {
-          // 03_RPStub
-          res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location), {
-            isStatusCode200,
-            ...pageContentCheck(userData.email.toLowerCase())
-          })
-        }
+        // 02_OIDCCall, 03_AuthAcceptTerms, 03_RPStub
+        MFAEnterOTP()
+        res = MFAEnterOTP()
       })
       break
     }

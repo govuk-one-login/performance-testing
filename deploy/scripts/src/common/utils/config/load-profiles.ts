@@ -111,7 +111,7 @@ function createStages(type: LoadProfile, target: number): Stage[] {
     case LoadProfile.full:
       return [
         { target, duration: '15m' }, // Ramps up to target throughput in 15 minutes
-        { target, duration: '30m' }, // Maintain steady state at target throughput for 30 minutes
+        { target, duration: '15m' }, // Maintain steady state at target throughput for 15 minutes
         { target: 0, duration: '5m' } // Ramp down over 5 minutes
       ]
     case LoadProfile.deployment:

@@ -3,5 +3,8 @@
   "editor.formatOnSave": true,
   "[typescript]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
   }
 }

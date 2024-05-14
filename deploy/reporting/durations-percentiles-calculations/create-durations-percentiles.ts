@@ -1,16 +1,11 @@
 /*
-To select a file and run the code:
-  1. Set the FILE_TYPE environmental variable to either "request" or "group" to select the file.
-     - If FILE_TYPE is set to "request", the code will use "http_req_duration.csv".
-     - If FILE_TYPE is set to "group", the code will use "durations.csv".
-  2. Move the durations CSV file to the durations-percentiles-calculations directory
-  3. Install the required dependencies by running the following command:
-       npm install csv-parser
-  4. Compile the TypeScript file by running the following command:
+To get the p95 and p99 durations from the results (after running the create-summary.sh):
+  1. Move the durations.csv file to the durations-percentiles-calculations directory
+  2. Compile the TypeScript file by running the following command:
        npx tsc create-durations-percentiles.ts
-  5. Run the JavaScript file by running the following command:
+  3. Run the JavaScript file by running the following command:
        node create-durations-percentiles.js
-  6. The script will process the selected CSV file and output the 95th and 99th percentile durations for each request or group.
+  5. The script will process the CSV file and output the 95th and 99th percentile durations for each request or group.
 */
 
 import * as fs from 'fs';

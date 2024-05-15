@@ -48,7 +48,7 @@ ENV WORKDIR=/home/k6
 WORKDIR ${WORKDIR}
 
 USER root
-RUN apk add --no-cache aws-cli curl jq
+RUN apk add --no-cache aws-cli curl jq chromium
 
 USER k6
 RUN mkdir ${WORKDIR}/scripts

@@ -418,7 +418,7 @@ Resources:
 
           env:
             variables:
-              DYNATRACE_ECS_ID: 9c9def17-d1aa-4f67-bf45-17320db60e10
+              DYNATRACE_ECS_ID: 305ec4d2-37de-4ac3-82b6-272371046b92
               DYNATRACE_K6_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
               JSON_RESULTS: results.gz
               OTEL_LOG: otel.log

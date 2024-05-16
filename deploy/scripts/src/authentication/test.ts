@@ -153,40 +153,8 @@ export function signUp(): void {
   iterationsStarted.add(1)
 
   // B01_SignUp_01_InitializeJourney
-  timeGroup(groups[0], () => {
-    // 01_RPStub
-    res = timeGroup(groups[1].split('::')[1], () => http.get(env.rpStub + '/start', { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 02_OIDCCall
-    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 03_AuthCall
-    res = timeGroup(
-      groups[3].split('::')[1],
-      () => {
-        if (env.staticResources) {
-          const paths = [
-            '/public/style.css',
-            '/public/scripts/cookies.js',
-            '/public/scripts/application.js',
-            '/public/scripts/all.js',
-            '/assets/images/govuk-crest-2x.png',
-            '/assets/fonts/light-94a07e06a1-v2.woff2',
-            '/assets/fonts/bold-b542beb274-v2.woff2'
-          ]
-          const batchRequests = paths.map(path => env.authStagingURL + path)
-          http.batch(batchRequests)
-        }
-        return http.get(res.headers.Location)
-      },
-      {
-        isStatusCode200,
-        ...pageContentCheck('Create your GOV.UK One Login or sign in')
-      }
-    )
-  })
+  initializeJourney(groupMap.signUp)
+  res = initializeJourney(groupMap.signUp)
 
   sleep(1)
 
@@ -349,51 +317,43 @@ export function signUp(): void {
     sleep(1)
 
     // B01_SignUp_12_Logout
-    timeGroup(groups[17], () => {
-      // 01_RPStub
-      res = timeGroup(groups[18].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 02_OIDCCall
-      res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 03_AuthCall
-      res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('You have signed out')
-      })
-    })
+    logout(groupMap.signUp, 17, 18, 19, 20)
   }
 
   iterationsCompleted.add(1)
 }
 
-export function logout(): void {
+export function logout(
+  groupMap: readonly string[],
+  groupIndex1: number,
+  groupIndex2: number,
+  groupIndex3: number,
+  groupIndex4: number
+): void {
   let res: Response
-  const groups = groupMap.signIn
+  const groups = groupMap
 
   // B02_SignIn_09_Logout
-  timeGroup(groups[19], () => {
+  timeGroup(groups[groupIndex1], () => {
     // 01_RPStub
-    res = timeGroup(groups[20].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
+    res = timeGroup(groups[groupIndex2].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
       isStatusCode302
     })
     // 02_OIDCCall
-    res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    res = timeGroup(groups[groupIndex3].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
       isStatusCode302
     })
     // 03_AuthCall
-    res = timeGroup(groups[22].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[groupIndex4].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('You have signed out')
     })
   })
 }
 
-export function initializeJourney(): Response {
+export function initializeJourney(groupMap: readonly string[]): Response {
   let res: Response
-  const groups = groupMap.signIn
+  const groups = groupMap
 
   // B02_SignIn_01_InitializeJourney
   return timeGroup(groups[0], () => {
@@ -413,27 +373,35 @@ export function initializeJourney(): Response {
   })
 }
 
-export function MFAEnterOTP(): Response {
-  let res: Response
-  const groups = groupMap.signIn
+export function MFAEnterOTP(
+  headerLocation: string,
+  groupMap: readonly string[],
+  groupIndex1: number,
+  groupIndex3: number,
+  groupIndex4: number
+): Response {
+  const groups = groupMap
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
   let acceptNewTerms = false
 
   // 02_OIDCCall
-  res = timeGroup(groups[9].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-    isStatusCode302
-  })
-
+  const res: Response = timeGroup(
+    groups[groupIndex1].split('::')[1],
+    () => http.get(headerLocation, { redirects: 0 }),
+    {
+      isStatusCode302
+    }
+  )
   acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
   if (acceptNewTerms) {
     // 03_AuthAcceptTerms
-    res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
+    return timeGroup(groups[groupIndex3].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('terms of use update')
     })
   } else {
     // 03_RPStub
-    res = timeGroup(groups[11].split('::')[1], () => http.get(res.headers.Location), {
+    return timeGroup(groups[groupIndex4].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck(userData.email.toLowerCase())
     })
@@ -446,8 +414,8 @@ export function signIn(): void {
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
   iterationsStarted.add(1)
 
-  initializeJourney()
-  res = initializeJourney()
+  initializeJourney(groupMap.signIn)
+  res = initializeJourney(groupMap.signIn)
 
   sleep(1)
 
@@ -471,7 +439,7 @@ export function signIn(): void {
 
   sleep(1)
 
-  let acceptNewTerms = false
+  const acceptNewTerms = false
   switch (userData.mfaOption) {
     case 'AUTH_APP': {
       // B02_SignIn_04_AuthMFA_EnterPassword
@@ -486,7 +454,6 @@ export function signIn(): void {
           ...pageContentCheck('Enter the 6 digit security code shown in your authenticator app')
         }
       )
-
       sleep(1)
 
       const totp = new TOTP(credentials.authAppKey)
@@ -502,9 +469,10 @@ export function signIn(): void {
             }),
           { isStatusCode302 }
         )
+        const headerLocation = res.headers.Location
+
         // 02_OIDCCall, 03_AuthAcceptTerms, 03_RPStub
-        MFAEnterOTP()
-        res = MFAEnterOTP()
+        MFAEnterOTP(headerLocation, groupMap.signIn, 9, 10, 11)
       })
       break
     }
@@ -533,9 +501,9 @@ export function signIn(): void {
             }),
           { isStatusCode302 }
         )
+        const headerLocation: string = res.headers.Location
         // 02_OIDCCall, 03_AuthAcceptTerms, 03_RPStub
-        MFAEnterOTP()
-        res = MFAEnterOTP()
+        MFAEnterOTP(headerLocation, groupMap.signIn, 15, 16, 17)
       })
       break
     }
@@ -558,7 +526,7 @@ export function signIn(): void {
     sleep(1)
 
     // B02_SignIn_09_Logout
-    logout()
+    logout(groupMap.signIn, 19, 20, 21, 22)
   }
   iterationsCompleted.add(1)
 }

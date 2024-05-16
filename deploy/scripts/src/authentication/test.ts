@@ -366,10 +366,29 @@ export function initializeJourney(groupMap: readonly string[]): Response {
       isStatusCode302
     })
     // 03_AuthCall
-    return (res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Create your GOV.UK One Login or sign in')
-    }))
+    return (res = timeGroup(
+      groups[3].split('::')[1],
+      () => {
+        if (env.staticResources) {
+          const paths = [
+            '/public/style.css',
+            '/public/scripts/cookies.js',
+            '/public/scripts/application.js',
+            '/public/scripts/all.js',
+            '/assets/images/govuk-crest-2x.png',
+            '/assets/fonts/light-94a07e06a1-v2.woff2',
+            '/assets/fonts/bold-b542beb274-v2.woff2'
+          ]
+          const batchRequests = paths.map(path => env.authStagingURL + path)
+          http.batch(batchRequests)
+        }
+        return http.get(res.headers.Location)
+      },
+      {
+        isStatusCode200,
+        ...pageContentCheck('Create your GOV.UK One Login or sign in')
+      }
+    ))
   })
 }
 

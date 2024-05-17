@@ -316,45 +316,37 @@ export function signUp(): void {
     sleep(1)
 
     // B01_SignUp_12_Logout
-    logout(groupMap.signUp, 17, 18, 19, 20)
+    logout(groups.slice(17, 21))
   }
 
   iterationsCompleted.add(1)
 }
 
-export function logout(
-  groupMap: readonly string[],
-  groupIndex1: number,
-  groupIndex2: number,
-  groupIndex3: number,
-  groupIndex4: number
-): void {
+export function logout(groups: readonly string[]): void {
   let res: Response
-  const groups = groupMap
 
-  // B02_SignIn_09_Logout
-  timeGroup(groups[groupIndex1], () => {
+  // Logout
+  timeGroup(groups[0], () => {
     // 01_RPStub
-    res = timeGroup(groups[groupIndex2].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
       isStatusCode302
     })
     // 02_OIDCCall
-    res = timeGroup(groups[groupIndex3].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
       isStatusCode302
     })
     // 03_AuthCall
-    res = timeGroup(groups[groupIndex4].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('You have signed out')
     })
   })
 }
 
-export function initializeJourney(groupMap: readonly string[]): Response {
+export function initializeJourney(groups: readonly string[]): Response {
   let res: Response
-  const groups = groupMap
 
-  // B02_SignIn_01_InitializeJourney
+  // InitializeJourney
   return timeGroup(groups[0], () => {
     // 01_RPStub
     res = timeGroup(groups[1].split('::')[1], () => http.get(env.rpStub + '/start', { redirects: 0 }), {
@@ -387,39 +379,28 @@ export function initializeJourney(groupMap: readonly string[]): Response {
         isStatusCode200,
         ...pageContentCheck('Create your GOV.UK One Login or sign in')
       }
-    ))
+    )
   })
 }
 
-export function MFAEnterOTP(
-  headerLocation: string,
-  groupMap: readonly string[],
-  groupIndex1: number,
-  groupIndex3: number,
-  groupIndex4: number
-): Response {
-  const groups = groupMap
+export function MFAEnterOTP(headerLocation: string, groups: readonly string[]): Response {
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
   let acceptNewTerms = false
 
   // 02_OIDCCall
-  const res: Response = timeGroup(
-    groups[groupIndex1].split('::')[1],
-    () => http.get(headerLocation, { redirects: 0 }),
-    {
-      isStatusCode302
-    }
-  )
+  const res: Response = timeGroup(groups[0].split('::')[1], () => http.get(headerLocation, { redirects: 0 }), {
+    isStatusCode302
+  })
   acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
   if (acceptNewTerms) {
     // 03_AuthAcceptTerms
-    return timeGroup(groups[groupIndex3].split('::')[1], () => http.get(res.headers.Location), {
+    return timeGroup(groups[1].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('terms of use update')
     })
   } else {
     // 03_RPStub
-    return timeGroup(groups[groupIndex4].split('::')[1], () => http.get(res.headers.Location), {
+    return timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck(userData.email.toLowerCase())
     })
@@ -489,7 +470,7 @@ export function signIn(): void {
         const headerLocation = res.headers.Location
 
         // 02_OIDCCall, 03_AuthAcceptTerms, 03_RPStub
-        MFAEnterOTP(headerLocation, groupMap.signIn, 9, 10, 11)
+        MFAEnterOTP(headerLocation, groups.slice(9, 12))
       })
       break
     }
@@ -520,7 +501,7 @@ export function signIn(): void {
         )
         const headerLocation: string = res.headers.Location
         // 02_OIDCCall, 03_AuthAcceptTerms, 03_RPStub
-        MFAEnterOTP(headerLocation, groupMap.signIn, 15, 16, 17)
+        MFAEnterOTP(headerLocation, groups.slice(15, 18))
       })
       break
     }
@@ -543,7 +524,7 @@ export function signIn(): void {
     sleep(1)
 
     // B02_SignIn_09_Logout
-    logout(groupMap.signIn, 19, 20, 21, 22)
+    logout(groups.slice(19, 23))
   }
   iterationsCompleted.add(1)
 }

@@ -153,7 +153,6 @@ export function signUp(): void {
   iterationsStarted.add(1)
 
   // B01_SignUp_01_InitializeJourney
-  initializeJourney(groupMap.signUp)
   res = initializeJourney(groupMap.signUp)
 
   sleep(1)
@@ -366,7 +365,7 @@ export function initializeJourney(groupMap: readonly string[]): Response {
       isStatusCode302
     })
     // 03_AuthCall
-    return (res = timeGroup(
+    return timeGroup(
       groups[3].split('::')[1],
       () => {
         if (env.staticResources) {
@@ -433,7 +432,6 @@ export function signIn(): void {
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
   iterationsStarted.add(1)
 
-  initializeJourney(groupMap.signIn)
   res = initializeJourney(groupMap.signIn)
 
   sleep(1)

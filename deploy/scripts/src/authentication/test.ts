@@ -383,30 +383,6 @@ export function initializeJourney(groups: readonly string[]): Response {
   })
 }
 
-export function MFAEnterOTP(headerLocation: string, groups: readonly string[]): Response {
-  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
-  let acceptNewTerms = false
-
-  // 02_OIDCCall
-  const res: Response = timeGroup(groups[0].split('::')[1], () => http.get(headerLocation, { redirects: 0 }), {
-    isStatusCode302
-  })
-  acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
-  if (acceptNewTerms) {
-    // 03_AuthAcceptTerms
-    return timeGroup(groups[1].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('terms of use update')
-    })
-  } else {
-    // 03_RPStub
-    return timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck(userData.email.toLowerCase())
-    })
-  }
-}
-
 export function signIn(): void {
   let res: Response
   const groups = groupMap.signIn

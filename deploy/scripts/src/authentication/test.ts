@@ -437,7 +437,7 @@ export function signIn(): void {
 
   sleep(1)
 
-  const acceptNewTerms = false
+  let acceptNewTerms = false
   switch (userData.mfaOption) {
     case 'AUTH_APP': {
       // B02_SignIn_04_AuthMFA_EnterPassword
@@ -467,10 +467,6 @@ export function signIn(): void {
             }),
           { isStatusCode302 }
         )
-        const headerLocation = res.headers.Location
-
-        // 02_OIDCCall, 03_AuthAcceptTerms, 03_RPStub
-        MFAEnterOTP(headerLocation, groups.slice(9, 12))
       })
       break
     }
@@ -499,12 +495,39 @@ export function signIn(): void {
             }),
           { isStatusCode302 }
         )
-        const headerLocation: string = res.headers.Location
-        // 02_OIDCCall, 03_AuthAcceptTerms, 03_RPStub
-        MFAEnterOTP(headerLocation, groups.slice(15, 18))
       })
       break
     }
+  }
+
+  let groupIndex1: number
+  let groupIndex2: number
+  let groupIndex3: number
+
+  if (userData.mfaOption === 'AUTH_APP') {
+    ;(groupIndex1 = 9), (groupIndex2 = 10), (groupIndex3 = 11)
+  } else {
+    ;(groupIndex1 = 15), (groupIndex2 = 16), (groupIndex3 = 17)
+  }
+
+  // 02_OIDCCall
+  res = timeGroup(groups[groupIndex1].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    isStatusCode302
+  })
+
+  acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
+  if (acceptNewTerms) {
+    // 03_AuthAcceptTerms
+    res = timeGroup(groups[groupIndex2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('terms of use update')
+    })
+  } else {
+    // 03_RPStub
+    res = timeGroup(groups[groupIndex3].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck(userData.email.toLowerCase())
+    })
   }
 
   if (acceptNewTerms) {

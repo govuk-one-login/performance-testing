@@ -19,7 +19,7 @@
   "author": "Andy Loughran & Coral Smith",
   "license": "MIT",
   "devDependencies": {
-    "@eslint/js": "^9.2.0",
+    "@eslint/js": "^9.3.0",
     "aws-sdk-client-mock": "^4.0.0",
     "aws-sdk-client-mock-jest": "^4.0.0",
     "eslint": "^9.2.0",

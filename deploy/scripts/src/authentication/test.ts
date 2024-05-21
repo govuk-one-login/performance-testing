@@ -73,23 +73,17 @@ const groupMap = {
     'B02_SignIn_01_InitializeJourney::03_AuthCall',
     'B02_SignIn_02_ClickSignIn',
     'B02_SignIn_03_EnterEmailAddress',
-    'B02_SignIn_04_AuthMFA_EnterPassword',
-    'B02_SignIn_05_AuthMFA_EnterTOTP',
-    'B02_SignIn_05_AuthMFA_EnterTOTP::01_AuthCall',
-    'B02_SignIn_05_AuthMFA_EnterTOTP::02_OIDCCall',
-    'B02_SignIn_05_AuthMFA_EnterTOTP::03_AuthAcceptTerms',
-    'B02_SignIn_05_AuthMFA_EnterTOTP::03_RPStub',
-    'B02_SignIn_06_SMSMFA_EnterPassword',
-    'B02_SignIn_07_SMSMFA_EnterOTP',
-    'B02_SignIn_07_SMSMFA_EnterOTP::01_AuthCall',
-    'B02_SignIn_07_SMSMFA_EnterOTP::02_OIDCCall',
-    'B02_SignIn_07_SMSMFA_EnterOTP::03_AuthAcceptTerms',
-    'B02_SignIn_07_SMSMFA_EnterOTP::03_RPStub',
-    'B02_SignIn_08_AcceptTermsConditions',
-    'B02_SignIn_09_Logout',
-    'B02_SignIn_09_Logout::01_RPStub',
-    'B02_SignIn_09_Logout::02_OIDCCall',
-    'B02_SignIn_09_Logout::03_AuthCall'
+    'B02_SignIn_04_EnterPassword',
+    'B02_SignIn_05_EnterOTP',
+    'B02_SignIn_05_EnterOTP::01_AuthCall',
+    'B02_SignIn_05_EnterOTP::02_OIDCCall',
+    'B02_SignIn_05_EnterOTP::03_AuthAcceptTerms',
+    'B02_SignIn_05_EnterOTP::03_RPStub',
+    'B02_SignIn_06_AcceptTermsConditions',
+    'B02_SignIn_07_Logout',
+    'B02_SignIn_07_Logout::01_RPStub',
+    'B02_SignIn_07_Logout::02_OIDCCall',
+    'B02_SignIn_07_Logout::03_AuthCall'
   ]
 } as const
 
@@ -413,103 +407,75 @@ export function signIn(): void {
 
   sleep(1)
 
+  function getOTP(): string {
+    switch (userData.mfaOption) {
+      case 'AUTH_APP': {
+        const totp = new TOTP(credentials.authAppKey)
+        return totp.generateTOTP()
+      }
+      case 'SMS':
+        return credentials.phoneOTP
+    }
+  }
+
+  const header =
+    userData.mfaOption === 'AUTH_APP'
+      ? 'Enter the 6 digit security code shown in your authenticator app'
+      : 'Check your phone'
+
   let acceptNewTerms = false
-  switch (userData.mfaOption) {
-    case 'AUTH_APP': {
-      // B02_SignIn_04_AuthMFA_EnterPassword
-      res = timeGroup(
-        groups[6],
-        () =>
-          res.submitForm({
-            fields: { password: credentials.password }
-          }),
-        {
-          isStatusCode200,
-          ...pageContentCheck('Enter the 6 digit security code shown in your authenticator app')
-        }
-      )
-      sleep(1)
 
-      const totp = new TOTP(credentials.authAppKey)
-      // B02_SignIn_05_AuthMFA_EnterTOTP
-      timeGroup(groups[7], () => {
-        // 01_AuthCall
-        res = timeGroup(
-          groups[8].split('::')[1],
-          () =>
-            res.submitForm({
-              fields: { code: totp.generateTOTP() },
-              params: { redirects: 1 }
-            }),
-          { isStatusCode302 }
-        )
-      })
-      break
+  // B02_SignIn_04_EnterPassword
+  res = timeGroup(
+    groups[6],
+    () =>
+      res.submitForm({
+        fields: { password: credentials.password }
+      }),
+    {
+      isStatusCode200,
+      ...pageContentCheck(header)
     }
-    case 'SMS': {
-      // B02_SignIn_06_SMSMFA_EnterPassword
-      res = timeGroup(
-        groups[12],
-        () =>
-          res.submitForm({
-            fields: { password: credentials.password }
-          }),
-        { isStatusCode200, ...pageContentCheck('Check your phone') }
-      )
+  )
+  sleep(1)
 
-      sleep(1)
+  // B02_SignIn_05_EnterOTP
+  timeGroup(groups[7], () => {
+    //01_AuthCall
+    res = timeGroup(
+      groups[8].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { code: getOTP() },
+          params: { redirects: 1 }
+        }),
+      { isStatusCode302 }
+    )
+    //02_OIDCCall
+    res = timeGroup(groups[9].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+      isStatusCode302
+    })
 
-      // B02_SignIn_07_SMSMFA_EnterOTP
-      timeGroup(groups[13], () => {
-        // 01_AuthCall
-        res = timeGroup(
-          groups[14].split('::')[1],
-          () =>
-            res.submitForm({
-              fields: { code: credentials.phoneOTP },
-              params: { redirects: 1 }
-            }),
-          { isStatusCode302 }
-        )
+    acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
+    if (acceptNewTerms) {
+      // 03_AuthAcceptTerms
+      res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck('terms of use update')
       })
-      break
+    } else {
+      // 03_RPStub
+      res = timeGroup(groups[11].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck(userData.email.toLowerCase())
+      })
     }
-  }
-
-  let groupIndex1: number
-  let groupIndex2: number
-  let groupIndex3: number
-
-  if (userData.mfaOption === 'AUTH_APP') {
-    ;(groupIndex1 = 9), (groupIndex2 = 10), (groupIndex3 = 11)
-  } else {
-    ;(groupIndex1 = 15), (groupIndex2 = 16), (groupIndex3 = 17)
-  }
-
-  // 02_OIDCCall
-  res = timeGroup(groups[groupIndex1].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-    isStatusCode302
   })
 
-  acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
   if (acceptNewTerms) {
-    // 03_AuthAcceptTerms
-    res = timeGroup(groups[groupIndex2].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('terms of use update')
-    })
-  } else {
-    // 03_RPStub
-    res = timeGroup(groups[groupIndex3].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck(userData.email.toLowerCase())
-    })
-  }
-
-  if (acceptNewTerms) {
-    // B02_SignIn_08_AcceptTermsConditions
+    // B02_SignIn_06_AcceptTermsConditions
     res = timeGroup(
-      groups[18],
+      groups[12],
       () =>
         res.submitForm({
           fields: { termsAndConditionsResult: 'accept' }
@@ -522,8 +488,8 @@ export function signIn(): void {
   if (Math.random() <= 0.25) {
     sleep(1)
 
-    // B02_SignIn_09_Logout
-    logout(groups.slice(19, 23))
+    // B02_SignIn_07_Logout
+    logout(groups.slice(13, 17))
   }
   iterationsCompleted.add(1)
 }

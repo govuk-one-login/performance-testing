@@ -12,7 +12,6 @@ import {
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib'
 import { timeGroup } from '../common/utils/request/timing'
-import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'

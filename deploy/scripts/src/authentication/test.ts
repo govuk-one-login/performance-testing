@@ -383,7 +383,7 @@ export function signIn(): void {
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
   iterationsStarted.add(1)
 
-  res = initializeJourney(groupMap.signIn)
+  res = initializeJourney(groups)
 
   sleep(1)
 

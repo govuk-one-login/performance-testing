@@ -147,7 +147,7 @@ export function signUp(): void {
   iterationsStarted.add(1)
 
   // B01_SignUp_01_InitializeJourney
-  res = initializeJourney(groupMap.signUp)
+  res = initializeJourney(groups)
 
   sleep(1)
 

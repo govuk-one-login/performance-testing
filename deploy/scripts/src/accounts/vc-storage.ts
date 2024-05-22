@@ -143,7 +143,7 @@ function getToken(r: Response): string {
   fail('token not found')
 }
 
-interface vcPayload {
+interface VCPayload {
   vc: string
   state: string
   metadata: {
@@ -154,7 +154,7 @@ interface vcPayload {
   provenance: string
 }
 
-function generateVCPayload(vcJWT: string): vcPayload {
+function generateVCPayload(vcJWT: string): VCPayload {
   return {
     vc: vcJWT,
     state: 'PENDING',

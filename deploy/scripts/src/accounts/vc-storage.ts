@@ -206,13 +206,14 @@ function getToken(r: Response): string {
   fail('token not found')
 }
 
+type VcState = 'CURRENT' | 'PENDING'
 interface CreateVCPayload {
   vc: string
-  state: string
+  state: VcState
   provenance: string
 }
 
-function generateCreateVCPayload(vcJWT: string, vcState: string): CreateVCPayload {
+function generateCreateVCPayload(vcJWT: string, vcState: VcState): CreateVCPayload {
   return {
     vc: vcJWT,
     state: vcState,
@@ -222,10 +223,10 @@ function generateCreateVCPayload(vcJWT: string, vcState: string): CreateVCPayloa
 
 interface UpdateVCPayload {
   signature: string
-  state: string
+  state: VcState
 }
 
-function generateUpdateVCPayload(vcSign: string, vcState: string): UpdateVCPayload {
+function generateUpdateVCPayload(vcSign: string, vcState: VcState): UpdateVCPayload {
   return {
     signature: vcSign,
     state: vcState

@@ -192,7 +192,7 @@ export function updateVC(): void {
     generateUpdateVCPayload(jwtSignatures.kbv, 'CURRENT')
   ])
 
-  timeGroup(groups[0], () => http.patch(env.envURL + `/vcs/${subjectID}`, body, options), {
+  timeGroup(groups[1], () => http.patch(env.envURL + `/vcs/${subjectID}`, body, options), {
     isStatusCode202: r => r.status === 204,
     ...pageContentCheck('messageId')
   })

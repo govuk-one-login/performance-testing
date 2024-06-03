@@ -15,7 +15,8 @@ import {
   generateAuthLogInSuccess,
   generateAuthCreateAccount,
   generateAuthReqParsed,
-  generateDcmawAbortWeb
+  generateDcmawAbortWeb,
+  generateAuthAuthorisationInitiated
 } from './requestGenerator/txmaReqGen'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
@@ -71,8 +72,10 @@ export function sendSingleEvent(): void {
   const emailID = `perfEmailSE${uuidv4()}@digital.cabinet-office.gov.uk`
   const journeyID = `perfJourney${uuidv4()}`
   iterationsStarted.add(1)
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID, journeyID))
-  sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
+  const authAuthorisationInitiatedPayload = JSON.stringify(
+    generateAuthAuthorisationInitiated(userID, emailID, journeyID)
+  )
+  sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   iterationsCompleted.add(1)
 }
 

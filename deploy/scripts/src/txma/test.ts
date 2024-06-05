@@ -68,13 +68,9 @@ const awsConfig = new AWSConfig({
 const sqs = new SQSClient(awsConfig)
 
 export function sendSingleEvent(): void {
-  const userID = `perfUserSE${uuidv4()}`
-  const emailID = `perfEmailSE${uuidv4()}@digital.cabinet-office.gov.uk`
   const journeyID = `perfJourney${uuidv4()}`
   iterationsStarted.add(1)
-  const authAuthorisationInitiatedPayload = JSON.stringify(
-    generateAuthAuthorisationInitiated(userID, emailID, journeyID)
-  )
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   iterationsCompleted.add(1)
 }

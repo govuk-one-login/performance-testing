@@ -29,28 +29,26 @@ export function generateAuthLogInSuccess(userID: string, emailID: string, journe
   }
 }
 
-export function generateAuthAuthorisationInitiated(
-  userID: string,
-  emailID: string,
-  journeyID: string
-): AuthAuthorisationInitiated {
-  const eventID = `perfAuthInitiated${uuidv4()}`
-  const eventTime = Math.floor(Date.now() / 1000)
+export function generateAuthAuthorisationInitiated(journeyID: string): AuthAuthorisationInitiated {
+  const eventID = `perfAuthInitiate${uuidv4()}`
+  const eventTime = new Date().toISOString()
   return {
+    client_id: 'testclientId',
+    component_id: 'https://oidc.account.gov.uk/',
     event_id: eventID,
     event_name: 'AUTH_AUTHORISATION_INITIATED',
-    client_id: 'e2eTestClientId',
-    component_id: 'SharedSignalPerfTest',
-    timestamp: eventTime,
-    event_timestamp_ms: eventTime,
+    event_timestamp_ms: Math.floor(Date.now()),
+    event_timestamp_ms_formatted: eventTime,
+    extensions: {
+      'client-name': 'testtest'
+    },
+    timestamp: Math.floor(Date.now() / 1000),
+    timestamp_formatted: eventTime,
     user: {
-      user_id: userID,
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
-      session_id: uuidv4(),
-      email: emailID,
+      ip_address: '01.01.01.001',
       persistent_session_id: uuidv4(),
-      phone: '07777777777'
+      session_id: uuidv4()
     }
   }
 }

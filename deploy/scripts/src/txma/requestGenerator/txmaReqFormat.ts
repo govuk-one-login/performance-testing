@@ -16,6 +16,26 @@ export interface AuthLogInSuccess {
   }
 }
 
+export interface AuthAuthorisationInitiated {
+  event_name: string
+  event_id: string
+  client_id: string
+  component_id: string
+  timestamp: number
+  event_timestamp_ms: number
+  event_timestamp_ms_formatted: string
+  timestamp_formatted: string
+  extensions: {
+    'client-name': string
+  }
+  user: {
+    govuk_signin_journey_id: string
+    ip_address: string
+    session_id: string
+    persistent_session_id: string
+  }
+}
+
 export interface AuthCreateAccount {
   event_id: string
   event_name: string

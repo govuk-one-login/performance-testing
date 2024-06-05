@@ -1,5 +1,11 @@
 import { uuidv4 } from '../../common/utils/jslib/index'
-import { AuthLogInSuccess, AuthCreateAccount, AuthAuthorisationReqParsed, DcmawAbortWeb } from './txmaReqFormat'
+import {
+  AuthLogInSuccess,
+  AuthCreateAccount,
+  AuthAuthorisationReqParsed,
+  DcmawAbortWeb,
+  AuthAuthorisationInitiated
+} from './txmaReqFormat'
 
 export function generateAuthLogInSuccess(userID: string, emailID: string, journeyID: string): AuthLogInSuccess {
   const eventID = `perfAuthLogin${uuidv4()}`
@@ -19,6 +25,30 @@ export function generateAuthLogInSuccess(userID: string, emailID: string, journe
       email: emailID,
       persistent_session_id: uuidv4(),
       phone: '07777777777'
+    }
+  }
+}
+
+export function generateAuthAuthorisationInitiated(journeyID: string): AuthAuthorisationInitiated {
+  const eventID = `perfAuthInitiate${uuidv4()}`
+  const eventTime = new Date().toISOString()
+  return {
+    client_id: 'testclientId',
+    component_id: 'https://oidc.account.gov.uk/',
+    event_id: eventID,
+    event_name: 'AUTH_AUTHORISATION_INITIATED',
+    event_timestamp_ms: Math.floor(Date.now()),
+    event_timestamp_ms_formatted: eventTime,
+    extensions: {
+      'client-name': 'testtest'
+    },
+    timestamp: Math.floor(Date.now() / 1000),
+    timestamp_formatted: eventTime,
+    user: {
+      govuk_signin_journey_id: journeyID,
+      ip_address: '01.01.01.001',
+      persistent_session_id: uuidv4(),
+      session_id: uuidv4()
     }
   }
 }

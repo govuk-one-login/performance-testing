@@ -15,8 +15,7 @@ import {
   generateAuthLogInSuccess,
   generateAuthCreateAccount,
   generateAuthReqParsed,
-  generateDcmawAbortWeb,
-  generateAuthAuthorisationInitiated
+  generateDcmawAbortWeb
 } from './requestGenerator/txmaReqGen'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
@@ -70,8 +69,8 @@ const sqs = new SQSClient(awsConfig)
 export function sendSingleEvent(): void {
   const journeyID = `perfJourney${uuidv4()}`
   iterationsStarted.add(1)
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
-  sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
+  const authReqParsedPayload = JSON.stringify(generateAuthReqParsed(journeyID))
+  sqs.sendMessage(env.sqs_queue, authReqParsedPayload)
   iterationsCompleted.add(1)
 }
 

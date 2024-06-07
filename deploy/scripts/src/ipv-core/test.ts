@@ -49,6 +49,21 @@ const profiles: ProfileList = {
       maxDuration: '120m',
       exec: 'passport'
     }
+  },
+  adhocLoadTest: {
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1000,
+      maxVUs: 3000,
+      stages: [
+        { target: 100, duration: '15m' }, // Ramp up to target throughput over 15 minutes
+        { target: 100, duration: '30m' }, // Maintain steady state at target throughput for 30 minutes
+        { target: 0, duration: '5m' } // Ramp down over 5 minutes
+      ],
+      exec: 'passport'
+    }
   }
 }
 

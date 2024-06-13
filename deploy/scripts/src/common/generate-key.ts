@@ -1,5 +1,5 @@
 import { type Options } from 'k6/options'
-import { createKey } from './utils/authentication/jwt'
+import { createKey, signJwt } from './utils/authentication/jwt'
 
 export const options: Options = {
   vus: 1,
@@ -7,5 +7,6 @@ export const options: Options = {
 }
 
 export default async function (): Promise<void> {
-  await createKey('ES256')
+  const key = await createKey('ES256')
+  console.log(signJwt('ES256', key, {}))
 }

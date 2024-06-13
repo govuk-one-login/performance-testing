@@ -1,5 +1,6 @@
 import { type Options } from 'k6/options'
 import { createKey, signJwt } from './utils/authentication/jwt'
+import { crypto } from 'k6/experimental/webcrypto'
 
 export const options: Options = {
   vus: 1,
@@ -7,7 +8,8 @@ export const options: Options = {
 }
 
 export default async function (): Promise<void> {
-  const key = await createKey('ES256')
-  console.log(key)
-  console.log(await signJwt('ES256', key, {}))
+  const key = await createKey('HS256')
+  const x = await crypto.subtle.exportKey('jwk', key)
+  console.log(x)
+  console.log(await signJwt('HS256', key, {}))
 }

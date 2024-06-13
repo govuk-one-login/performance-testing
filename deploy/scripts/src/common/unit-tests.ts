@@ -27,8 +27,9 @@ import { iterationsCompleted, iterationsStarted } from './utils/custom_metric/co
 import { type GroupMap, type Thresholds, getThresholds } from './utils/config/thresholds'
 import { getEnv } from './utils/config/environment-variables'
 import { type RampingArrivalRateScenario } from 'k6/options'
-import { createJwt } from './utils/authentication/jwt'
+import { createJwt, signJwt } from './utils/authentication/jwt'
 import { b64decode } from 'k6/encoding'
+import { crypto, HmacImportParams } from 'k6/experimental/webcrypto'
 
 export const options = {
   vus: 1,
@@ -40,27 +41,35 @@ export const options = {
   }
 }
 
-export default (): void => {
+export default async (): Promise<void> => {
   iterationsStarted.add(1)
-  group('authentication/jwt', () => {
-    // Example from https://www.rfc-editor.org/rfc/rfc7519
-    const payload = { iss: 'joe', exp: 1300819380, 'http://example.com/is_root': true }
-    const secret = b64decode(
-      'AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow', // pragma: allowlist secret
-      'rawurl'
-    )
-    const jwt256 = createJwt(payload, secret)
-    const jwt512 = createJwt(payload, secret, 'HS512')
-    console.log(jwt512)
-    check(null, {
-      HS256: () =>
-        jwt256 ==
-        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.lliDzOlRAdGUCfCHCPx_uisb6ZfZ1LRQa0OJLeYTTpY', // pragma: allowlist secret
-      HS512: () =>
-        jwt512 ==
-        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.6h7gbI9_DlPRjp4xDintN0mleKFoJZuRygnqhHqknUFxfUNzBZKf8YkCNM3HBmYV-h7ZvnEo2a4EwU712D3o8A' // pragma: allowlist secret
-    })
+  //group('authentication/jwt', async () => {
+  // Example from https://www.rfc-editor.org/rfc/rfc7519
+  const payload = { iss: 'joe', exp: 1300819380, 'http://example.com/is_root': true }
+  const secret = b64decode(
+    'AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow', // pragma: allowlist secret
+    'rawurl'
+  )
+  const key256 = await crypto.subtle.importKey('raw', secret, { name: 'HMAC', hash: 'SHA-256' }, true, [
+    'sign',
+    'verify'
+  ])
+  const key512 = await crypto.subtle.importKey('raw', secret, { name: 'HMAC', hash: 'SHA-512' }, true, [
+    'sign',
+    'verify'
+  ])
+  const jwt256 = await signJwt('HS256', key256, payload)
+  const jwt512 = await signJwt('HS512', key512, payload)
+  console.log(jwt512)
+  check(null, {
+    'authentication/jwt HS256': () =>
+      jwt256 ==
+      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.lliDzOlRAdGUCfCHCPx_uisb6ZfZ1LRQa0OJLeYTTpY', // pragma: allowlist secret
+    'authentication/jwt HS512': () =>
+      jwt512 ==
+      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.6h7gbI9_DlPRjp4xDintN0mleKFoJZuRygnqhHqknUFxfUNzBZKf8YkCNM3HBmYV-h7ZvnEo2a4EwU712D3o8A' // pragma: allowlist secret
   })
+  //})
 
   group('authentication/totp', () => {
     // Examples from https://www.rfc-editor.org/rfc/rfc6238

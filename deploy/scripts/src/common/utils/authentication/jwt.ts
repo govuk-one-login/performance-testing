@@ -6,21 +6,12 @@ import {
   type EcKeyGenParams,
   type EcdsaParams,
   type CryptoKey,
-  type CryptoKeyPair,
   type Algorithm as A
 } from 'k6/experimental/webcrypto'
 import { b64decode, b64encode } from 'k6/encoding'
 
 // Supported JWT algorithms
 export type JwtAlgorithm = 'HS256' | 'HS384' | 'HS512' | 'ES256' | 'ES384' | 'ES512'
-const algoMapping: Record<JwtAlgorithm, Algorithm> = {
-  HS256: 'sha256',
-  HS384: 'sha384',
-  HS512: 'sha512',
-  ES256: 'sha256',
-  ES384: 'sha384',
-  ES512: 'sha512'
-}
 const alorithmMapping: Record<JwtAlgorithm, HmacKeyGenParams | EcKeyGenParams> = {
   HS256: {
     name: 'HMAC',
@@ -69,22 +60,6 @@ const alorithmMapping2: Record<JwtAlgorithm, 'HMAC' | A<'HMAC'> | EcdsaParams> =
     name: 'ECDSA',
     hash: 'SHA-512'
   }
-}
-
-/**
- *
- * @param {object} rawPayload
- * @param {string | ArrayBuffer} secret
- * @param {JwtAlgorithm} [algorithm]
- * @returns
- */
-export function createJwt(rawPayload: object, secret: string | ArrayBuffer, algorithm: JwtAlgorithm = 'HS256'): string {
-  const header = b64encode(JSON.stringify({ typ: 'JWT', alg: algorithm }), 'rawurl')
-  const payload = b64encode(JSON.stringify(rawPayload), 'rawurl')
-  const hasher = c.createHMAC(algoMapping[algorithm], secret)
-  hasher.update(`${header}.${payload}`)
-  const signature = hasher.digest('base64rawurl')
-  return `${header}.${payload}.${signature}`
 }
 
 /**

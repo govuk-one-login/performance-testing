@@ -106,6 +106,6 @@ export async function signJwt(type: JwtAlgorithm, key: CryptoKey, data: object):
   const payload = b64encode(JSON.stringify(data), 'rawurl')
   const buf = b64decode(b64encode(`${header}.${payload}`))
   const sigBuf = await crypto.subtle.sign(alorithmMapping2[type], key, buf)
-  const signature = b64decode(b64encode(sigBuf))
+  const signature = b64encode(sigBuf, 'rawurl')
   return `${header}.${payload}.${signature}`
 }

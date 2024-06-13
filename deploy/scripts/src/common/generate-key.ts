@@ -8,5 +8,6 @@ export const options: Options = {
 
 export default async function (): Promise<void> {
   const key = await createKey('ES256')
-  console.log(signJwt('ES256', key, {}))
+  console.log(key)
+  console.log(await signJwt('ES256', key, {}))
 }

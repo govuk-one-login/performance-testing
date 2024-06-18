@@ -6,6 +6,7 @@ import { getEnv } from '../../common/utils/config/environment-variables'
 
 export function generateRequest(): FraudRequest {
   const audClientID = uuidv4()
+  const startTime = Math.floor(Date.now() / 1000)
   const sampleFraudRequest: FraudRequest = {
     iss: 'https://performancetest.onelogin.gov/',
     jti: `performance-test-${audClientID}`,
@@ -17,7 +18,10 @@ export function generateRequest(): FraudRequest {
           format: 'uri',
           uri: 'urn:fdc:gov.uk:2022:56P4CMsGh_02YOlWpd8PAOI-2sVlB2nsNU7mcLZYhYw='
         },
-        reason_admin: { en: 'eligibility-fraud' }
+        reason_admin: { en: 'eligibility-fraud' },
+        event_timeframe: {
+          start_time: startTime
+        }
       }
     }
   }

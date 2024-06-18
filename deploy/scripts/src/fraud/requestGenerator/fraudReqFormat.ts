@@ -10,6 +10,9 @@ export interface FraudRequest {
         uri: string
       }
       reason_admin: { en: string }
+      event_timeframe: {
+        start_time: number
+      }
     }
   }
 }

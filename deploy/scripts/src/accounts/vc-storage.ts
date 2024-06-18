@@ -181,8 +181,7 @@ export function updateVC(): void {
   body = JSON.stringify(Object.values(jwtSignatures).map(signature => generateUpdateVCPayload(signature, 'CURRENT')))
 
   timeGroup(groups[1], () => http.patch(env.envURL + `/vcs/${subjectID}`, body, options), {
-    isStatusCode204: r => r.status === 204,
-    ...pageContentCheck('messageId')
+    isStatusCode204: r => r.status === 204
   })
 
   iterationsCompleted.add(1)

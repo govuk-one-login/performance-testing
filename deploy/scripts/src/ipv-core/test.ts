@@ -49,6 +49,21 @@ const profiles: ProfileList = {
       maxDuration: '120m',
       exec: 'passport'
     }
+  },
+  adhocLoadTest: {
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1000,
+      maxVUs: 3000,
+      stages: [
+        { target: 100, duration: '15m' }, // Ramp up to target throughput over 15 minutes
+        { target: 100, duration: '30m' }, // Maintain steady state at target throughput for 30 minutes
+        { target: 0, duration: '5m' } // Ramp down over 5 minutes
+      ],
+      exec: 'passport'
+    }
   }
 }
 
@@ -223,7 +238,7 @@ export function passport(): void {
       groups[3].split('::')[1],
       () =>
         res.submitForm({
-          fields: { journey: 'next' },
+          fields: { journey: 'appTriage' },
           params: { redirects: 0 }
         }),
       { isStatusCode302 }
@@ -255,7 +270,7 @@ export function passport(): void {
     // 02_CoreCall
     res = timeGroup(groups[7].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Enter your UK passport details and answer security questions online')
+      ...pageContentCheck('Do you want to use your UK photocard driving licence or UK passport to prove your identity')
     })
   })
 
@@ -480,7 +495,7 @@ export function drivingLicence(): void {
       groups[3].split('::')[1],
       () =>
         res.submitForm({
-          fields: { journey: 'next' },
+          fields: { journey: 'appTriage' },
           params: { redirects: 0 }
         }),
       { isStatusCode302 }
@@ -512,7 +527,7 @@ export function drivingLicence(): void {
     // 02_CoreCall
     res = timeGroup(groups[7].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Enter your UK photocard driving licence details and answer security questions online')
+      ...pageContentCheck('Do you want to use your UK photocard driving licence or UK passport to prove your identity')
     })
   })
 

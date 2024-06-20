@@ -27,9 +27,10 @@ import { iterationsCompleted, iterationsStarted } from './utils/custom_metric/co
 import { type GroupMap, type Thresholds, getThresholds } from './utils/config/thresholds'
 import { getEnv } from './utils/config/environment-variables'
 import { type RampingArrivalRateScenario } from 'k6/options'
-import { createJwt, signJwt } from './utils/authentication/jwt'
+import { signJwt, verifyJwt } from './utils/authentication/jwt'
 import { b64decode } from 'k6/encoding'
-import { crypto, HmacImportParams } from 'k6/experimental/webcrypto'
+import { crypto, EcKeyImportParams, HmacImportParams, JWK } from 'k6/experimental/webcrypto'
+import { hs256 } from './generate-key'
 
 export const options = {
   vus: 1,
@@ -41,35 +42,32 @@ export const options = {
   }
 }
 
+const keys = {
+  hs256: JSON.parse(open('./example-data/hs256-key.json')) as JWK,
+  es256private: JSON.parse(open('./example-data/es256-private.json')) as JWK,
+  es256public: JSON.parse(open('./example-data/es256-public.json')) as JWK
+}
+
 export default async (): Promise<void> => {
   iterationsStarted.add(1)
-  //group('authentication/jwt', async () => {
-  // Example from https://www.rfc-editor.org/rfc/rfc7519
   const payload = { iss: 'joe', exp: 1300819380, 'http://example.com/is_root': true }
-  const secret = b64decode(
-    'AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow', // pragma: allowlist secret
-    'rawurl'
-  )
-  const key256 = await crypto.subtle.importKey('raw', secret, { name: 'HMAC', hash: 'SHA-256' }, true, [
-    'sign',
-    'verify'
-  ])
-  const key512 = await crypto.subtle.importKey('raw', secret, { name: 'HMAC', hash: 'SHA-512' }, true, [
-    'sign',
-    'verify'
-  ])
-  const jwt256 = await signJwt('HS256', key256, payload)
-  const jwt512 = await signJwt('HS512', key512, payload)
-  console.log(jwt512)
+  const hmacParam: HmacImportParams = { name: 'HMAC', hash: 'SHA-256' }
+  const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
+  const usages = ['sign' as const, 'verify' as const]
+  const importedKeys = {
+    hs256: await crypto.subtle.importKey('jwk', keys.hs256, hmacParam, true, usages),
+    es256private: await crypto.subtle.importKey('jwk', keys.es256private, escdaParam, true, usages),
+    es256public: await crypto.subtle.importKey('jwk', keys.es256public, escdaParam, true, usages)
+  }
+  const jwts = [
+    await signJwt('HS256', importedKeys.hs256, payload),
+    await signJwt('ES256', importedKeys.es256private, payload)
+  ]
+  const checks = [await verifyJwt(jwts[0], importedKeys.hs256), await verifyJwt(jwts[1], importedKeys.es256public)]
   check(null, {
-    'authentication/jwt HS256': () =>
-      jwt256 ==
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.lliDzOlRAdGUCfCHCPx_uisb6ZfZ1LRQa0OJLeYTTpY', // pragma: allowlist secret
-    'authentication/jwt HS512': () =>
-      jwt512 ==
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.6h7gbI9_DlPRjp4xDintN0mleKFoJZuRygnqhHqknUFxfUNzBZKf8YkCNM3HBmYV-h7ZvnEo2a4EwU712D3o8A' // pragma: allowlist secret
+    'authentication/jwt HS256': () => checks[0],
+    'authentication/jwt ES256': () => checks[1]
   })
-  //})
 
   group('authentication/totp', () => {
     // Examples from https://www.rfc-editor.org/rfc/rfc6238

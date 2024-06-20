@@ -24,7 +24,8 @@ const profiles: ProfileList = {
   smoke: {
     ...createScenario('passport', LoadProfile.smoke),
     ...createScenario('drivingLicence', LoadProfile.smoke),
-    ...createScenario('idReuse', LoadProfile.smoke)
+    ...createScenario('idReuse', LoadProfile.smoke),
+    ...createScenario('orchStubIsolatedTest', LoadProfile.smoke)
   },
   deployment: {
     ...createScenario('passport', LoadProfile.deployment, 2),
@@ -39,7 +40,8 @@ const profiles: ProfileList = {
   load: {
     ...createScenario('passport', LoadProfile.full, 100),
     ...createScenario('drivingLicence', LoadProfile.full, 30),
-    ...createScenario('idReuse', LoadProfile.full, 1900, 5)
+    ...createScenario('idReuse', LoadProfile.full, 1900, 5),
+    ...createScenario('orchStubIsolatedTest', LoadProfile.full, 100)
   },
   dataCreationForIDReuse: {
     passport: {
@@ -142,6 +144,11 @@ const groupMap = {
     'B03_IDReuse_02_ClickContinue',
     'B03_IDReuse_02_ClickContinue::01_CoreCall',
     'B03_IDReuse_02_ClickContinue::02_OrchStub'
+  ],
+  orchStubIsolatedTest: [
+    'B04_OrchStub_01_LaunchOrchestratorStub',
+    'B04_OrchStub_02_GoToFullJourneyRoute',
+    'B04_OrchStub_02_GoToFullJourneyRoute::01_OrchStub'
   ]
 } as const
 
@@ -757,6 +764,49 @@ export function idReuse(): void {
           headers: { Authorization: `Basic ${encodedCredentials}` }
         }),
       { isStatusCode200, ...pageContentCheck('User information') }
+    )
+  })
+  iterationsCompleted.add(1)
+}
+
+export function orchStubIsolatedTest(): void {
+  const groups = groupMap.orchStubIsolatedTest
+  let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
+  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0')
+  const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
+  iterationsStarted.add(1)
+  // B04_OrchStub_01_LaunchOrchestratorStub
+  res = timeGroup(
+    groups[0],
+    () =>
+      http.get(env.orchStubEndPoint, {
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+      }),
+    { isStatusCode200, ...pageContentCheck('Enter userId manually') }
+  )
+
+  const userId = getUserId(res)
+  const signInJourneyId = getSignInJourneyId(res)
+
+  sleepBetween(0.5, 1)
+
+  timeGroup(groups[1], () => {
+    // 01_OrchStub
+    res = timeGroup(
+      groups[2].split('::')[1],
+      () =>
+        http.get(
+          env.orchStubEndPoint +
+            `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
+          {
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            redirects: 0
+          }
+        ),
+      { isStatusCode302 }
     )
   })
   iterationsCompleted.add(1)

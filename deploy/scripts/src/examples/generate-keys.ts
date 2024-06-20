@@ -1,7 +1,7 @@
 import { type Options } from 'k6/options'
-import { createKey, signJwt } from './utils/authentication/jwt'
+import { createKey, signJwt } from '../common/utils/authentication/jwt'
 import { crypto } from 'k6/experimental/webcrypto'
-import { ProfileList, selectProfile } from './utils/config/load-profiles'
+import { ProfileList, selectProfile } from '../common/utils/config/load-profiles'
 
 const profiles: ProfileList = {
   smoke: {

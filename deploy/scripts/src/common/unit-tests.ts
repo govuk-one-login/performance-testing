@@ -28,9 +28,7 @@ import { type GroupMap, type Thresholds, getThresholds } from './utils/config/th
 import { getEnv } from './utils/config/environment-variables'
 import { type RampingArrivalRateScenario } from 'k6/options'
 import { signJwt, verifyJwt } from './utils/authentication/jwt'
-import { b64decode } from 'k6/encoding'
 import { crypto, EcKeyImportParams, HmacImportParams, JWK } from 'k6/experimental/webcrypto'
-import { hs256 } from './generate-key'
 
 export const options = {
   vus: 1,

@@ -37,7 +37,7 @@ const algParamMap: Record<JwtAlgorithm, 'HMAC' | Algorithm<'HMAC'> | EcdsaParams
 /**
  * Create a key which can be used for signing JWTs
  * @param {JwtAlgorithm} type Algorithm to generate a key or key pair for
- * @returns {ryptoKey | CryptoKeyPair} Returns a crypto key or key pair depending on algorithm
+ * @returns {CryptoKey | CryptoKeyPair} Returns a crypto key or key pair depending on algorithm
  */
 export async function createKey(type: HmacAlgorithm): Promise<CryptoKey>
 export async function createKey(type: EcAlgorithm): Promise<CryptoKeyPair>

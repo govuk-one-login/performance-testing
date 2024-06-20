@@ -4,12 +4,19 @@ import {
   type EcKeyGenParams,
   type EcdsaParams,
   type CryptoKey,
-  type Algorithm
+  type Algorithm,
+  type CryptoKeyPair
 } from 'k6/experimental/webcrypto'
 import { b64decode, b64encode } from 'k6/encoding'
 
 // Supported JWT algorithms
-export type JwtAlgorithm = 'HS256' | 'HS384' | 'HS512' | 'ES256' | 'ES384' | 'ES512'
+export type HmacAlgorithm = 'HS256' | 'HS384' | 'HS512'
+export type EcAlgorithm = 'ES256' | 'ES384' | 'ES512'
+export type JwtAlgorithm = HmacAlgorithm | EcAlgorithm
+export type JwtHeader = {
+  typ: 'JWT'
+  alg: JwtAlgorithm
+}
 const algKeyMap: Record<JwtAlgorithm, HmacKeyGenParams | EcKeyGenParams> = {
   HS256: { name: 'HMAC', hash: 'SHA-256' },
   HS384: { name: 'HMAC', hash: 'SHA-384' },
@@ -28,23 +35,61 @@ const algParamMap: Record<JwtAlgorithm, 'HMAC' | Algorithm<'HMAC'> | EcdsaParams
 }
 
 /**
- *
- * @param type
- * @returns
+ * Create a key which can be used for signing JWTs
+ * @param {JwtAlgorithm} type Algorithm to generate a key or key pair for
+ * @returns {ryptoKey | CryptoKeyPair} Returns a crypto key or key pair depending on algorithm
  */
-export async function createKey(type: JwtAlgorithm): Promise<CryptoKey> {
+export async function createKey(type: HmacAlgorithm): Promise<CryptoKey>
+export async function createKey(type: EcAlgorithm): Promise<CryptoKeyPair>
+export async function createKey(type: JwtAlgorithm): Promise<CryptoKey | CryptoKeyPair> {
   const params = algKeyMap[type]
   if ('hash' in params) {
     return crypto.subtle.generateKey(params, true, ['sign', 'verify'])
   }
-  return (await crypto.subtle.generateKey(params, true, ['sign', 'verify'])).privateKey
+  return crypto.subtle.generateKey(params, true, ['sign', 'verify'])
 }
 
+/**
+ * Create a JWT token
+ * @param {JwtAlgorithm} type Algorithm to use to sign the token
+ * @param {CryptoKey} key CryptoKey to use for signing
+ * @param {object} data Data payload to use in JWT
+ * @returns {string} String representation of JWT
+ */
 export async function signJwt(type: JwtAlgorithm, key: CryptoKey, data: object): Promise<string> {
   const header = b64encode(JSON.stringify({ typ: 'JWT', alg: type }), 'rawurl')
   const payload = b64encode(JSON.stringify(data), 'rawurl')
-  const buf = b64decode(b64encode(`${header}.${payload}`))
+  const buf = strToBuf(`${header}.${payload}`)
   const sigBuf = await crypto.subtle.sign(algParamMap[type], key, buf)
   const signature = b64encode(sigBuf, 'rawurl')
   return `${header}.${payload}.${signature}`
+}
+
+/**
+ * Verify a JWT signature
+ * @param {string} jwt JWT in string format
+ * @param {CryptoKey} key CryptoKey used for verification
+ * @returns {boolean} Boolean indicating whether the signature has been verified
+ */
+export async function verifyJwt(jwt: string, key: CryptoKey): Promise<boolean> {
+  const token = jwt.split('.')
+  const header: JwtHeader = JSON.parse(b64decode(token[0], 'rawurl', 's'))
+  const params = algParamMap[header.alg]
+  const data = strToBuf(`${token[0]}.${token[1]}`)
+  const signature = b64decode(token[2], 'rawurl')
+  return await crypto.subtle.verify(params, key, signature, data)
+}
+
+/**
+ * Converts a string to an ArrayBuffer
+ * @param {string} str String to convert
+ * @returns {ArrayBuffer} ArrayBuffer result
+ */
+function strToBuf(str: string): ArrayBuffer {
+  const buf = new ArrayBuffer(str.length * 2)
+  const bufView = new Uint16Array(buf)
+  for (let i = 0, strLen = str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i)
+  }
+  return buf
 }

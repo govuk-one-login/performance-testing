@@ -122,7 +122,7 @@ export function summariseVC(): void {
         env.envMock + '/generate',
         JSON.stringify({
           sub: summariseData.subID,
-          aud: 'accountManagementAudience',
+          scope: null,
           ttl: 120
         })
       ),

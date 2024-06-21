@@ -27,7 +27,7 @@ import { iterationsCompleted, iterationsStarted } from './utils/custom_metric/co
 import { type GroupMap, type Thresholds, getThresholds } from './utils/config/thresholds'
 import { getEnv } from './utils/config/environment-variables'
 import { type RampingArrivalRateScenario } from 'k6/options'
-import { signJwt, verifyJwt } from './utils/authentication/jwt'
+import { createKey, signJwt, verifyJwt } from './utils/authentication/jwt'
 import { crypto, EcKeyImportParams, HmacImportParams, JWK } from 'k6/experimental/webcrypto'
 
 export const options = {
@@ -48,23 +48,32 @@ const keys = {
 
 export default async (): Promise<void> => {
   iterationsStarted.add(1)
+
+  // group: authentication/jwt
   const payload = { iss: 'joe', exp: 1300819380, 'http://example.com/is_root': true }
   const hmacParam: HmacImportParams = { name: 'HMAC', hash: 'SHA-256' }
   const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
   const usages = ['sign' as const, 'verify' as const]
   const importedKeys = {
     hs256: await crypto.subtle.importKey('jwk', keys.hs256, hmacParam, true, usages),
+    hs512: await createKey('HS512'),
     es256private: await crypto.subtle.importKey('jwk', keys.es256private, escdaParam, true, usages),
     es256public: await crypto.subtle.importKey('jwk', keys.es256public, escdaParam, true, usages)
   }
   const jwts = [
     await signJwt('HS256', importedKeys.hs256, payload),
+    await signJwt('HS256', importedKeys.hs512, payload),
     await signJwt('ES256', importedKeys.es256private, payload)
   ]
-  const checks = [await verifyJwt(jwts[0], importedKeys.hs256), await verifyJwt(jwts[1], importedKeys.es256public)]
+  const checks = [
+    await verifyJwt(jwts[0], importedKeys.hs256),
+    await verifyJwt(jwts[1], importedKeys.hs512),
+    await verifyJwt(jwts[2], importedKeys.es256public)
+  ]
   check(null, {
     'authentication/jwt HS256': () => checks[0],
-    'authentication/jwt ES256': () => checks[1]
+    'authentication/jwt HS512': () => checks[1],
+    'authentication/jwt ES256': () => checks[2]
   })
 
   group('authentication/totp', () => {

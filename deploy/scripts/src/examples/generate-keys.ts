@@ -1,5 +1,5 @@
 import { type Options } from 'k6/options'
-import { createKey, signJwt } from '../common/utils/authentication/jwt'
+import { createKey } from '../common/utils/authentication/jwt'
 import { crypto } from 'k6/experimental/webcrypto'
 import { ProfileList, selectProfile } from '../common/utils/config/load-profiles'
 
@@ -29,7 +29,6 @@ export async function hs256(): Promise<void> {
   const key = await createKey('HS256')
   const exportedKey = await crypto.subtle.exportKey('jwk', key)
   console.log('Exported key:', exportedKey)
-  console.log(await signJwt('HS512', key, {}))
 }
 
 export async function es256(): Promise<void> {
@@ -38,5 +37,4 @@ export async function es256(): Promise<void> {
   const privateKey = await crypto.subtle.exportKey('jwk', key.privateKey)
   console.log('Public key:', publicKey)
   console.log('Private key:', privateKey)
-  console.log(await signJwt('ES256', key.privateKey, {}))
 }

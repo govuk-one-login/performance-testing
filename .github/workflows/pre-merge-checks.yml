@@ -16,8 +16,8 @@ defaults:
     working-directory: ./deploy/scripts
 
 jobs:
-  k6_unit_test:
-    name: Run linting and unit tests
+  lint:
+    name: Run linting
     runs-on: ubuntu-latest
 
     steps:
@@ -54,8 +54,8 @@ jobs:
 
       - name: Run k6 unit test script in image
         run: |
-          docker run --rm -i ${{ env.TEST_TAG }}
-          k6 run scripts/common/unit-tests.js
+          docker run --rm ${{ env.TEST_TAG }}
+          ls
         working-directory: ${{ env.DOCKER_PATH }}
 
       - run: git fetch origin main

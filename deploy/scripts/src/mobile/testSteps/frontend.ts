@@ -132,7 +132,7 @@ export function postIdCheckApp(): void {
     timeRequest(() => http.post(buildFrontendUrl('/idCheckApp'), {}, { tags: { name: 'POST /idCheckApp' } }), {
       isStatusCode200,
       ...validatePageRedirect('/downloadApp'),
-      ...pageContentCheck('Download the GOV.UK ID Check app')
+      ...pageContentCheck('Download or open the GOV.UK ID Check app')
     })
   )
 }

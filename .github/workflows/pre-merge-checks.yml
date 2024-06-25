@@ -6,6 +6,9 @@ on:
   merge_group:
   workflow_dispatch:
 
+env:
+  TEST_TAG: user/app:test
+
 defaults:
   run:
     shell: bash
@@ -41,10 +44,17 @@ jobs:
       - name: Transpile TypeScript test scripts
         run: npm start
 
-      - name: Run local k6 unit test script
-        uses: grafana/k6-action@e4714b734f2b0afaabeb7b4a69142745548ab9ec # v0.3.1
+      - name: Build Docker Image
+        uses: docker/build-push-action@31159d49c0d4756269a0940a750801a1ea5d7003 #v6.1.0
         with:
-          filename: ./deploy/scripts/dist/common/unit-tests.js
+          load: true
+          tags: ${{ env.TEST_TAG }}
+
+      - name: Run k6 unit test script in image
+        run: |
+          docker run --rm -it ${{ env.TEST_TAG }}
+          k6 run scripts/common/unit-tests.js
+        working-directory: ./deploy
 
       - run: git fetch origin main
       - name: Run pre-commit action

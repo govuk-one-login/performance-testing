@@ -12,10 +12,8 @@ import {
   postSelectSmartphone,
   postValidPassport,
   postBiometricChip,
-  postFlashingWarning,
   postIphoneModel,
   getRedirect,
-  postWorkingCamera,
   postIdCheckApp,
   getAbortCommand,
   startJourney,
@@ -126,10 +124,6 @@ export function mamIphonePassport(): void {
   postIphoneModel()
   simulateUserWait()
   postIdCheckApp()
-  simulateUserWait()
-  postWorkingCamera()
-  simulateUserWait()
-  postFlashingWarning()
   simulateUserWait()
   if (Math.random() <= 0.8) {
     // Approximately 80% of users complete journey successfully

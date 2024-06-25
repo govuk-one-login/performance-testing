@@ -8,7 +8,7 @@ build({
   entryPoints: sync('src/*/*.ts'),
   outbase,
   outdir,
-  target: 'es6',
+  target: 'es2017',
   format: 'esm',
   bundle: true,
   sourcemap: false,

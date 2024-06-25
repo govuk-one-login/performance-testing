@@ -54,7 +54,7 @@ jobs:
 
       - name: Run k6 unit test script in image
         run: |
-          docker run --rm -it ${{ env.TEST_TAG }}
+          docker run --rm -i ${{ env.TEST_TAG }}
           k6 run scripts/common/unit-tests.js
         working-directory: ${{ env.DOCKER_PATH }}
 

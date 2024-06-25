@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 env:
+  DOCKER_PATH: ./deploy
   TEST_TAG: user/app:test
 
 defaults:
@@ -47,6 +48,7 @@ jobs:
       - name: Build Docker Image
         uses: docker/build-push-action@31159d49c0d4756269a0940a750801a1ea5d7003 #v6.1.0
         with:
+          context: ${{ env.DOCKER_PATH }}
           load: true
           tags: ${{ env.TEST_TAG }}
 
@@ -54,7 +56,7 @@ jobs:
         run: |
           docker run --rm -it ${{ env.TEST_TAG }}
           k6 run scripts/common/unit-tests.js
-        working-directory: ./deploy
+        working-directory: ${{ env.DOCKER_PATH }}
 
       - run: git fetch origin main
       - name: Run pre-commit action

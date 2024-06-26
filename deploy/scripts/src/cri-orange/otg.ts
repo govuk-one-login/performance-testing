@@ -24,7 +24,7 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  otg: ['B01_otg_01_getUrl']
+  otg: ['B01_OTG_01_GetToken']
 }
 
 export const options: Options = {
@@ -50,7 +50,7 @@ export function otg(): void {
   const groups = groupMap.otg
   iterationsStarted.add(1)
 
-  //B01_otg_01_getUrl
+  //B01_OTG_01_GetToken
   timeGroup(groups[0], () => http.get(env.otgURL + '/build/token?tokenType=stub'), {
     isStatusCode200
   })

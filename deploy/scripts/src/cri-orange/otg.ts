@@ -51,7 +51,7 @@ export function otg(): void {
   iterationsStarted.add(1)
 
   //B01_otg_01_getUrl
-  timeGroup(groups[0], () => http.get(env.otgURL), {
+  timeGroup(groups[0], () => http.get(env.otgURL + '/build/token?tokenType=stub'), {
     isStatusCode200
   })
 

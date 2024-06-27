@@ -43,7 +43,7 @@ if (!validEnvironments.includes(environment))
   throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 
 const env = {
-  otgURL: getEnv(`IDENTITY_ORANGE_${environment}_OTG_URL`)
+  otgURL: getEnv(`IDENTITY_${environment}_OTG_URL`)
 }
 
 export function otg(): void {

@@ -18,7 +18,7 @@ const profiles: ProfileList = {
     ...createScenario('otg', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('otg', LoadProfile.full, 44)
+    ...createScenario('otg', LoadProfile.full, 10)
   }
 }
 

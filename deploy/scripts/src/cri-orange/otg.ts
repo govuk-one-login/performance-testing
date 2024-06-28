@@ -9,7 +9,7 @@ import {
   LoadProfile
 } from '../common/utils/config/load-profiles'
 import { timeGroup } from '../common/utils/request/timing'
-import { isStatusCode200 } from '../common/utils/checks/assertions'
+import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
 
@@ -52,7 +52,8 @@ export function otg(): void {
 
   //B01_OTG_01_GetToken
   timeGroup(groups[0], () => http.get(env.otgURL + '/build/token?tokenType=stub'), {
-    isStatusCode200
+    isStatusCode200,
+    ...pageContentCheck('goodToken')
   })
 
   iterationsCompleted.add(1)

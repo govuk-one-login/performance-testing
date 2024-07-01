@@ -18,7 +18,7 @@ FROM golang:1.22-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.10.0
-RUN xk6 build v0.51.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --output /k6
+RUN xk6 build v0.52.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --output /k6
 
 # -----------------------
 # OpenTelemetry Collector

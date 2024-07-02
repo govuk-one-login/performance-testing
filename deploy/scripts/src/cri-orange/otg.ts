@@ -19,6 +19,9 @@ const profiles: ProfileList = {
   },
   load: {
     ...createScenario('otg', LoadProfile.full, 10)
+  },
+  stress: {
+    ...createScenario('otg', LoadProfile.full, 44)
   }
 }
 

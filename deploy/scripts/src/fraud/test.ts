@@ -6,7 +6,6 @@ import {
   createScenario,
   LoadProfile
 } from '../common/utils/config/load-profiles'
-import { signRequest } from './requestGenerator/fraudReqGen'
 import { getAccessToken } from '../cri-kiwi/utils/authorization'
 import { timeGroup } from '../common/utils/request/timing'
 import http from 'k6/http'
@@ -39,7 +38,8 @@ const env = {
   cognitoURL: getEnv('COGNITO_URL'),
   clientId: getEnv('CLIENT_ID'),
   clientSecret: getEnv('CLIENT_SECRET'),
-  ssfInboundUrl: getEnv('SSF_INBOUND_URL')
+  ssfInboundUrl: getEnv('SSF_INBOUND_URL'),
+  fraudPayload: getEnv('FRAUD_PAYLOAD')
 }
 
 const groupMap = {
@@ -49,8 +49,6 @@ const groupMap = {
 export function fraud(): void {
   let res: Response
   const groups = groupMap.fraud
-  // const clientToken = b64encode(JSON.stringify(`${env.clientId}:${env.clientSecret}`), 'rawurl')
-  // console.log(clientToken)
   const options = {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -73,20 +71,18 @@ export function fraud(): void {
       ),
     { isStatusCode200, ...pageContentCheck('token') }
   )
-  console.log(res)
+
   const accessToken = getAccessToken(res)
   const data = {
     headers: {
       Authorization: `Bearer ${accessToken}`
     }
   }
-  const payload = signRequest()
-  console.log('Payload of signed request = ' + payload)
+
   // B01_fraud_02_SendSignedEventToSSF
-  res = timeGroup(groups[1], () => http.post(env.ssfInboundUrl, payload, data), {
+  res = timeGroup(groups[1], () => http.post(env.ssfInboundUrl, env.fraudPayload, data), {
     isStatusCode202: r => r.status === 202,
     ...pageContentCheck('Id')
   })
-  console.log('Response = ' + res)
   iterationsCompleted.add(1)
 }

@@ -17,6 +17,12 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('fraud', LoadProfile.smoke)
+  },
+  load: {
+    ...createScenario('fraud', LoadProfile.full, 500, 3)
+  },
+  stress: {
+    ...createScenario('fraud', LoadProfile.full, 5000, 3)
   }
 }
 

@@ -53,7 +53,6 @@ const groupMap = {
 } as const
 
 export function fraud(): void {
-  let res: Response
   const groups = groupMap.fraud
   const options = {
     headers: {
@@ -62,7 +61,7 @@ export function fraud(): void {
   }
   // B01_fraud_01_GenerateAccessToken
   iterationsStarted.add(1)
-  res = timeGroup(
+  const res: Response = timeGroup(
     groups[0],
     () =>
       http.post(
@@ -86,7 +85,7 @@ export function fraud(): void {
   }
 
   // B01_fraud_02_SendSignedEventToSSF
-  res = timeGroup(groups[1], () => http.post(env.ssfInboundUrl, env.fraudPayload, data), {
+  timeGroup(groups[1], () => http.post(env.ssfInboundUrl, env.fraudPayload, data), {
     isStatusCode202: r => r.status === 202,
     ...pageContentCheck('Id')
   })

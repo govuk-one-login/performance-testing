@@ -453,6 +453,7 @@ Resources:
               IDENTITY_ADDRESS_URL: "/perfTest/identity/orange/addressUrl"
               IDENTITY_BUILD_CORE_URL: "/perfTest/identity/build/coreUrl"
               IDENTITY_BUILD_ORCH_STUB_URL: "/perfTest/identity/build/orchStubUrl"
+              IDENTITY_BUILD_OTG_URL: "/perfTest/identity/orange/OTGUrlBuild"
               IDENTITY_CIMIT_GETCIC: "/perfTest/identity/cimit/getcic"
               IDENTITY_CIMIT_POSTMITIGATION: "/perfTest/identity/cimit/postmitigation"
               IDENTITY_CIMIT_PUTCI: "/perfTest/identity/cimit/putci"

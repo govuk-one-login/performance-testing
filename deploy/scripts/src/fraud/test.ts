@@ -19,10 +19,10 @@ const profiles: ProfileList = {
     ...createScenario('fraud', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('fraud', LoadProfile.full, 500, 3)
+    ...createScenario('fraud', LoadProfile.full, 250, 3)
   },
   stress: {
-    ...createScenario('fraud', LoadProfile.full, 5000, 3)
+    ...createScenario('fraud', LoadProfile.full, 2500, 3)
   }
 }
 

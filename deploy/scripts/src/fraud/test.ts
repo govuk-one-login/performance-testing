@@ -6,7 +6,7 @@ import {
   createScenario,
   LoadProfile
 } from '../common/utils/config/load-profiles'
-import { getAccessToken } from '../common/utils/authorization'
+import { getAccessToken } from '../common/utils/authorization/authorization'
 import { timeGroup } from '../common/utils/request/timing'
 import http from 'k6/http'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'

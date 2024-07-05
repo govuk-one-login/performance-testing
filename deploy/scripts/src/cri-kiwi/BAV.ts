@@ -14,7 +14,7 @@ import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assert
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { bankingPayload } from './data/BAVdata'
 import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl } from './utils/authorization'
-import { getAccessToken } from '../common/utils/authorization'
+import { getAccessToken } from '../common/utils/authorization/authorization'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
 

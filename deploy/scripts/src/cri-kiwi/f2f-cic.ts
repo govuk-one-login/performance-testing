@@ -15,7 +15,7 @@ import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl } from './utils/authorization'
-import { getAccessToken } from '../common/utils/authorization'
+import { getAccessToken } from '../common/utils/authorization/authorization'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
 

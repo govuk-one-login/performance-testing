@@ -44,7 +44,7 @@ const env = {
   cognitoURL: getEnv('FRAUD_COGNITO_URL'),
   clientId: getEnv('FRAUD_CLIENT_ID'),
   clientSecret: getEnv('FRAUD_CLIENT_SECRET'),
-  ssfInboundUrl: getEnv('SSF_INBOUND_URL'),
+  ssfInboundUrl: getEnv('FRAUD_SSF_INBOUND_URL'),
   fraudPayload: getEnv('FRAUD_PAYLOAD')
 }
 

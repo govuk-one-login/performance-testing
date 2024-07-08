@@ -41,10 +41,10 @@ export function setup(): void {
 }
 
 const env = {
-  cognitoURL: getEnv('COGNITO_URL'),
-  clientId: getEnv('CLIENT_ID'),
-  clientSecret: getEnv('CLIENT_SECRET'),
-  ssfInboundUrl: getEnv('SSF_INBOUND_URL'),
+  cognitoURL: getEnv('FRAUD_COGNITO_URL'),
+  clientId: getEnv('FRAUD_CLIENT_ID'),
+  clientSecret: getEnv('FRAUD_CLIENT_SECRET'),
+  ssfInboundUrl: getEnv('FRAUD_SSF_INBOUND_URL'),
   fraudPayload: getEnv('FRAUD_PAYLOAD')
 }
 

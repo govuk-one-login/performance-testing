@@ -49,7 +49,7 @@ exporters:
 service:
   telemetry:
     logs:
-      level: "debug"
+      level: "info"
 
   pipelines:
     metrics:

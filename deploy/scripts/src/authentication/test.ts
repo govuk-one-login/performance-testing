@@ -16,7 +16,7 @@ import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { timeGroup } from '../common/utils/request/timing'
 import { getEnv } from '../common/utils/config/environment-variables'
-import { browser, type Page, type Response as PageResponse } from 'k6/experimental/browser'
+import { browser, type Page, type Response as PageResponse } from 'k6/browser'
 
 const profiles: ProfileList = {
   smoke: {
@@ -154,8 +154,7 @@ async function SubmitPage(p: Page): Promise<[PageResponse | null, void]> {
 
 export async function ui() {
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
-  const page: Page = browser.newPage()
-  console.log(env.rpStub + '/start')
+  const page: Page = await browser.newPage()
   try {
     await page.goto(env.rpStub + '/start')
     await Promise.all([page.waitForNavigation(), page.locator('button#sign-in-button').click()])

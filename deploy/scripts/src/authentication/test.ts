@@ -180,6 +180,11 @@ export async function uiSignIn() {
         break
       }
     }
+
+    if (page.url().endsWith('updated-terms-and-conditions')) {
+      await ClickButton(page)
+    }
+
     const content = await page.content()
     check(null, { validatePageContent: () => content.includes(userData.email.toLowerCase()) })
   } finally {

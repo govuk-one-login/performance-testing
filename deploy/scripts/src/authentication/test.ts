@@ -90,10 +90,14 @@ const groupMap = {
     'B02_SignIn_04_EnterPassword',
     'B02_SignIn_05_EnterOTP',
     'B02_SignIn_05_EnterOTP::01_AuthCall',
-    'B02_SignIn_05_EnterOTP::02_OIDCCall',
-    'B02_SignIn_05_EnterOTP::03_AuthAcceptTerms',
-    'B02_SignIn_05_EnterOTP::03_RPStub',
+    'B02_SignIn_05_EnterOTP::02_AuthAcceptTerms',
+    'B02_SignIn_05_EnterOTP::03_AuthCall',
+    'B02_SignIn_05_EnterOTP::04_OIDCCall',
+    'B02_SignIn_05_EnterOTP::05_RPStub',
     'B02_SignIn_06_AcceptTermsConditions',
+    'B02_SignIn_06_AcceptTermsConditions::01_AuthCall',
+    'B02_SignIn_06_AcceptTermsConditions::02_OIDCCall',
+    'B02_SignIn_06_AcceptTermsConditions::03_RPStub',
     'B02_SignIn_07_Logout',
     'B02_SignIn_07_Logout::01_RPStub',
     'B02_SignIn_07_Logout::02_OIDCCall',
@@ -506,25 +510,40 @@ export function signIn(): void {
       () =>
         res.submitForm({
           fields: { code: getOTP() },
-          params: { redirects: 1 }
+          params: { redirects: 0 }
         }),
       { isStatusCode302 }
     )
-    //02_OIDCCall
-    res = timeGroup(groups[9].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-      isStatusCode302
-    })
 
-    acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
+    acceptNewTerms = res.headers.Location.endsWith('updated-terms-and-conditions')
     if (acceptNewTerms) {
-      // 03_AuthAcceptTerms
-      res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
+      // 02_AuthAcceptTerms
+      res = timeGroup(groups[9].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
         isStatusCode200,
         ...pageContentCheck('terms of use update')
       })
     } else {
-      // 03_RPStub
-      res = timeGroup(groups[11].split('::')[1], () => http.get(res.headers.Location), {
+      // 03_AuthCall
+      res = timeGroup(
+        groups[10].split('::')[1],
+        () => http.get(env.authStagingURL + res.headers.Location, { redirects: 0 }),
+        {
+          isStatusCode302
+        }
+      )
+
+      //04_OIDCCall
+      res = timeGroup(
+        groups[11].split('::')[1],
+        () =>
+          http.get(res.headers.Location, {
+            redirects: 0
+          }),
+        { isStatusCode302 }
+      )
+
+      // 05_RPStub
+      res = timeGroup(groups[12].split('::')[1], () => http.get(res.headers.Location), {
         isStatusCode200,
         ...pageContentCheck(userData.email.toLowerCase())
       })
@@ -533,14 +552,29 @@ export function signIn(): void {
 
   if (acceptNewTerms) {
     // B02_SignIn_06_AcceptTermsConditions
-    res = timeGroup(
-      groups[12],
-      () =>
-        res.submitForm({
-          fields: { termsAndConditionsResult: 'accept' }
-        }),
-      { isStatusCode200, ...pageContentCheck('User information') }
-    )
+    timeGroup(groups[13], () => {
+      // 01_AuthCall
+      res = timeGroup(
+        groups[14].split('::')[1],
+        () =>
+          res.submitForm({
+            fields: { termsAndConditionsResult: 'accept' },
+            params: { redirects: 1 }
+          }),
+        { isStatusCode302 }
+      )
+
+      //02_OIDCCall
+      res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+        isStatusCode302
+      })
+
+      // 03_RPStub
+      res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck(userData.email.toLowerCase())
+      })
+    })
   }
 
   // 25% of users logout
@@ -548,7 +582,7 @@ export function signIn(): void {
     sleep(1)
 
     // B02_SignIn_07_Logout
-    logout(groups.slice(13, 17))
+    logout(groups.slice(17, 21))
   }
   iterationsCompleted.add(1)
 }

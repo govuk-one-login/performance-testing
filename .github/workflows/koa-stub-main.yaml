@@ -26,7 +26,7 @@ jobs:
           submodules: true
 
       - name: Setup nodeJS v20
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: 20
 
@@ -64,11 +64,11 @@ jobs:
           submodules: true
 
       - name: Setup nodeJS v20
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: 20
       - name: Setup SAM CLI
-        uses: aws-actions/setup-sam@342dcc4899c07fedf41f91cbb1e6c68925a85d37 # v2
+        uses: aws-actions/setup-sam@2360ef6d90015369947b45b496193ab9976a9b04 # v2
 
       - name: SAM Validate
         run: |
@@ -78,7 +78,7 @@ jobs:
         run: |
           sam build
       - name: Deploy SAM app
-        uses: govuk-one-login/devplatform-upload-action@2281463e2a4ea137fa3ff96b4620e5e39b01d7b7 # v3.8.1
+        uses: govuk-one-login/devplatform-upload-action@f906dab69fb3b4847aa10cd910317bfe564ebcf9 # v3.9
         with:
           artifact-bucket-name: ${{ secrets.PERF_STUB_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.PERF_STUB_SIGNING_PROFILE_NAME }}

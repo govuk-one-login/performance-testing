@@ -1,4 +1,4 @@
-import { sleep } from 'k6'
+import { check, sleep } from 'k6'
 import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
 import http, { type Response } from 'k6/http'
@@ -16,6 +16,7 @@ import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { timeGroup } from '../common/utils/request/timing'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { browser, type Page, type Response as PageResponse } from 'k6/browser'
 
 const profiles: ProfileList = {
   smoke: {
@@ -26,9 +27,9 @@ const profiles: ProfileList = {
     ...createScenario('signIn', LoadProfile.short, 30),
     ...createScenario('signUp', LoadProfile.short, 30)
   },
-  load10: {
-    ...createScenario('signIn', LoadProfile.short, 190),
-    ...createScenario('signUp', LoadProfile.short, 10)
+  load20: {
+    ...createScenario('signIn', LoadProfile.full, 380),
+    ...createScenario('signUp', LoadProfile.full, 20)
   },
   load: {
     ...createScenario('signIn', LoadProfile.full, 500)
@@ -39,6 +40,19 @@ const profiles: ProfileList = {
   },
   rampOnly: {
     ...createScenario('signUp', LoadProfile.rampOnly, 30)
+  },
+  browser: {
+    uiSignIn: {
+      executor: 'per-vu-iterations',
+      exec: 'uiSignIn',
+      vus: 2,
+      iterations: 10,
+      options: {
+        browser: {
+          type: 'chromium'
+        }
+      }
+    }
   }
 }
 const loadProfile = selectProfile(profiles)
@@ -73,24 +87,23 @@ const groupMap = {
     'B02_SignIn_01_InitializeJourney::03_AuthCall',
     'B02_SignIn_02_ClickSignIn',
     'B02_SignIn_03_EnterEmailAddress',
-    'B02_SignIn_04_AuthMFA_EnterPassword',
-    'B02_SignIn_05_AuthMFA_EnterTOTP',
-    'B02_SignIn_05_AuthMFA_EnterTOTP::01_AuthCall',
-    'B02_SignIn_05_AuthMFA_EnterTOTP::02_OIDCCall',
-    'B02_SignIn_05_AuthMFA_EnterTOTP::03_AuthAcceptTerms',
-    'B02_SignIn_05_AuthMFA_EnterTOTP::03_RPStub',
-    'B02_SignIn_06_SMSMFA_EnterPassword',
-    'B02_SignIn_07_SMSMFA_EnterOTP',
-    'B02_SignIn_07_SMSMFA_EnterOTP::01_AuthCall',
-    'B02_SignIn_07_SMSMFA_EnterOTP::02_OIDCCall',
-    'B02_SignIn_07_SMSMFA_EnterOTP::03_AuthAcceptTerms',
-    'B02_SignIn_07_SMSMFA_EnterOTP::03_RPStub',
-    'B02_SignIn_08_AcceptTermsConditions',
-    'B02_SignIn_09_Logout',
-    'B02_SignIn_09_Logout::01_RPStub',
-    'B02_SignIn_09_Logout::02_OIDCCall',
-    'B02_SignIn_09_Logout::03_AuthCall'
-  ]
+    'B02_SignIn_04_EnterPassword',
+    'B02_SignIn_05_EnterOTP',
+    'B02_SignIn_05_EnterOTP::01_AuthCall',
+    'B02_SignIn_05_EnterOTP::02_AuthAcceptTerms',
+    'B02_SignIn_05_EnterOTP::03_AuthCall',
+    'B02_SignIn_05_EnterOTP::04_OIDCCall',
+    'B02_SignIn_05_EnterOTP::05_RPStub',
+    'B02_SignIn_06_AcceptTermsConditions',
+    'B02_SignIn_06_AcceptTermsConditions::01_AuthCall',
+    'B02_SignIn_06_AcceptTermsConditions::02_OIDCCall',
+    'B02_SignIn_06_AcceptTermsConditions::03_RPStub',
+    'B02_SignIn_07_Logout',
+    'B02_SignIn_07_Logout::01_RPStub',
+    'B02_SignIn_07_Logout::02_OIDCCall',
+    'B02_SignIn_07_Logout::03_AuthCall'
+  ],
+  uiSignIn: []
 } as const
 
 export const options: Options = {
@@ -140,6 +153,50 @@ const env = {
   authStagingURL: getEnv('ACCOUNT_STAGING_URL')
 }
 
+async function ClickButton(p: Page, selector: string = 'button[type="Submit"]'): Promise<[PageResponse | null, void]> {
+  return Promise.all([p.waitForNavigation(), p.locator(selector).click()])
+}
+
+export async function uiSignIn() {
+  iterationsStarted.add(1)
+  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
+  const page: Page = await browser.newPage()
+  try {
+    await page.goto(env.rpStub + '/start')
+    await ClickButton(page, 'button#sign-in-button')
+
+    page.locator('input[name="email"]').type(userData.email)
+    await ClickButton(page)
+
+    page.locator('input#password').type(credentials.password)
+    await ClickButton(page)
+
+    switch (userData.mfaOption) {
+      case 'AUTH_APP': {
+        const totp = new TOTP(credentials.authAppKey)
+        page.locator('input#code').type(totp.generateTOTP())
+        await ClickButton(page)
+        break
+      }
+      case 'SMS': {
+        page.locator('input#code').type(credentials.phoneOTP)
+        await ClickButton(page)
+        break
+      }
+    }
+
+    if (page.url().endsWith('updated-terms-and-conditions')) {
+      await ClickButton(page)
+    }
+
+    const content = await page.content()
+    check(null, { validatePageContent: () => content.includes(userData.email.toLowerCase()) })
+  } finally {
+    page.close()
+  }
+  iterationsCompleted.add(1)
+}
+
 export function signUp(): void {
   let res: Response
   const groups = groupMap.signUp
@@ -153,40 +210,7 @@ export function signUp(): void {
   iterationsStarted.add(1)
 
   // B01_SignUp_01_InitializeJourney
-  timeGroup(groups[0], () => {
-    // 01_RPStub
-    res = timeGroup(groups[1].split('::')[1], () => http.get(env.rpStub + '/start', { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 02_OIDCCall
-    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 03_AuthCall
-    res = timeGroup(
-      groups[3].split('::')[1],
-      () => {
-        if (env.staticResources) {
-          const paths = [
-            '/public/style.css',
-            '/public/scripts/cookies.js',
-            '/public/scripts/application.js',
-            '/public/scripts/all.js',
-            '/assets/images/govuk-crest-2x.png',
-            '/assets/fonts/light-94a07e06a1-v2.woff2',
-            '/assets/fonts/bold-b542beb274-v2.woff2'
-          ]
-          const batchRequests = paths.map(path => env.authStagingURL + path)
-          http.batch(batchRequests)
-        }
-        return http.get(res.headers.Location)
-      },
-      {
-        isStatusCode200,
-        ...pageContentCheck('Create your GOV.UK One Login or sign in')
-      }
-    )
-  })
+  res = initializeJourney(groups)
 
   sleep(1)
 
@@ -349,36 +373,19 @@ export function signUp(): void {
     sleep(1)
 
     // B01_SignUp_12_Logout
-    timeGroup(groups[17], () => {
-      // 01_RPStub
-      res = timeGroup(groups[18].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 02_OIDCCall
-      res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 03_AuthCall
-      res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('You have signed out')
-      })
-    })
+    logout(groups.slice(17, 21))
   }
 
   iterationsCompleted.add(1)
 }
 
-export function signIn(): void {
+export function logout(groups: readonly string[]): void {
   let res: Response
-  const groups = groupMap.signIn
-  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
-  iterationsStarted.add(1)
 
-  // B02_SignIn_01_InitializeJourney
+  // Logout
   timeGroup(groups[0], () => {
     // 01_RPStub
-    res = timeGroup(groups[1].split('::')[1], () => http.get(env.rpStub + '/start', { redirects: 0 }), {
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
       isStatusCode302
     })
     // 02_OIDCCall
@@ -388,9 +395,58 @@ export function signIn(): void {
     // 03_AuthCall
     res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Create your GOV.UK One Login or sign in')
+      ...pageContentCheck('You have signed out')
     })
   })
+}
+
+export function initializeJourney(groups: readonly string[]): Response {
+  let res: Response
+
+  // InitializeJourney
+  return timeGroup(groups[0], () => {
+    // 01_RPStub
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.rpStub + '/start', { redirects: 0 }), {
+      isStatusCode302
+    })
+    // 02_OIDCCall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+      isStatusCode302
+    })
+    // 03_AuthCall
+    return timeGroup(
+      groups[3].split('::')[1],
+      () => {
+        if (env.staticResources) {
+          const paths = [
+            '/public/style.css',
+            '/public/scripts/cookies.js',
+            '/public/scripts/application.js',
+            '/public/scripts/all.js',
+            '/assets/images/govuk-crest-2x.png',
+            '/assets/fonts/light-94a07e06a1-v2.woff2',
+            '/assets/fonts/bold-b542beb274-v2.woff2'
+          ]
+          const batchRequests = paths.map(path => env.authStagingURL + path)
+          http.batch(batchRequests)
+        }
+        return http.get(res.headers.Location)
+      },
+      {
+        isStatusCode200,
+        ...pageContentCheck('Create your GOV.UK One Login or sign in')
+      }
+    )
+  })
+}
+
+export function signIn(): void {
+  let res: Response
+  const groups = groupMap.signIn
+  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
+  iterationsStarted.add(1)
+
+  res = initializeJourney(groups)
 
   sleep(1)
 
@@ -414,141 +470,119 @@ export function signIn(): void {
 
   sleep(1)
 
-  let acceptNewTerms = false
-  switch (userData.mfaOption) {
-    case 'AUTH_APP': {
-      // B02_SignIn_04_AuthMFA_EnterPassword
-      res = timeGroup(
-        groups[6],
-        () =>
-          res.submitForm({
-            fields: { password: credentials.password }
-          }),
-        {
-          isStatusCode200,
-          ...pageContentCheck('Enter the 6 digit security code shown in your authenticator app')
-        }
-      )
-
-      sleep(1)
-
-      const totp = new TOTP(credentials.authAppKey)
-      // B02_SignIn_05_AuthMFA_EnterTOTP
-      timeGroup(groups[7], () => {
-        // 01_AuthCall
-        res = timeGroup(
-          groups[8].split('::')[1],
-          () =>
-            res.submitForm({
-              fields: { code: totp.generateTOTP() },
-              params: { redirects: 1 }
-            }),
-          { isStatusCode302 }
-        )
-        // 02_OIDCCall
-        res = timeGroup(groups[9].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-          isStatusCode302
-        })
-
-        acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
-        if (acceptNewTerms) {
-          // 03_AuthAcceptTerms
-          res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
-            isStatusCode200,
-            ...pageContentCheck('terms of use update')
-          })
-        } else {
-          // 03_RPStub
-          res = timeGroup(groups[11].split('::')[1], () => http.get(res.headers.Location), {
-            isStatusCode200,
-            ...pageContentCheck(userData.email.toLowerCase())
-          })
-        }
-      })
-      break
-    }
-    case 'SMS': {
-      // B02_SignIn_06_SMSMFA_EnterPassword
-      res = timeGroup(
-        groups[12],
-        () =>
-          res.submitForm({
-            fields: { password: credentials.password }
-          }),
-        { isStatusCode200, ...pageContentCheck('Check your phone') }
-      )
-
-      sleep(1)
-
-      // B02_SignIn_07_SMSMFA_EnterOTP
-      timeGroup(groups[13], () => {
-        // 01_AuthCall
-        res = timeGroup(
-          groups[14].split('::')[1],
-          () =>
-            res.submitForm({
-              fields: { code: credentials.phoneOTP },
-              params: { redirects: 1 }
-            }),
-          { isStatusCode302 }
-        )
-        // 02_OIDCCall
-        res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-          isStatusCode302
-        })
-
-        acceptNewTerms = res.headers.Location.includes('updated-terms-and-conditions')
-
-        if (acceptNewTerms) {
-          // 03_AuthAcceptTerms
-          res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location), {
-            isStatusCode200,
-            ...pageContentCheck('terms of use update')
-          })
-        } else {
-          // 03_RPStub
-          res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location), {
-            isStatusCode200,
-            ...pageContentCheck(userData.email.toLowerCase())
-          })
-        }
-      })
-      break
+  function getOTP(): string {
+    switch (userData.mfaOption) {
+      case 'AUTH_APP': {
+        const totp = new TOTP(credentials.authAppKey)
+        return totp.generateTOTP()
+      }
+      case 'SMS':
+        return credentials.phoneOTP
     }
   }
 
-  if (acceptNewTerms) {
-    // B02_SignIn_08_AcceptTermsConditions
+  const header =
+    userData.mfaOption === 'AUTH_APP'
+      ? 'Enter the 6 digit security code shown in your authenticator app'
+      : 'Check your phone'
+
+  let acceptNewTerms = false
+
+  // B02_SignIn_04_EnterPassword
+  res = timeGroup(
+    groups[6],
+    () =>
+      res.submitForm({
+        fields: { password: credentials.password }
+      }),
+    {
+      isStatusCode200,
+      ...pageContentCheck(header)
+    }
+  )
+  sleep(1)
+
+  // B02_SignIn_05_EnterOTP
+  timeGroup(groups[7], () => {
+    //01_AuthCall
     res = timeGroup(
-      groups[18],
+      groups[8].split('::')[1],
       () =>
         res.submitForm({
-          fields: { termsAndConditionsResult: 'accept' }
+          fields: { code: getOTP() },
+          params: { redirects: 0 }
         }),
-      { isStatusCode200, ...pageContentCheck('User information') }
+      { isStatusCode302 }
     )
+
+    acceptNewTerms = res.headers.Location.endsWith('updated-terms-and-conditions')
+    if (acceptNewTerms) {
+      // 02_AuthAcceptTerms
+      res = timeGroup(groups[9].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck('terms of use update')
+      })
+    } else {
+      // 03_AuthCall
+      res = timeGroup(
+        groups[10].split('::')[1],
+        () => http.get(env.authStagingURL + res.headers.Location, { redirects: 0 }),
+        {
+          isStatusCode302
+        }
+      )
+
+      //04_OIDCCall
+      res = timeGroup(
+        groups[11].split('::')[1],
+        () =>
+          http.get(res.headers.Location, {
+            redirects: 0
+          }),
+        { isStatusCode302 }
+      )
+
+      // 05_RPStub
+      res = timeGroup(groups[12].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck(userData.email.toLowerCase())
+      })
+    }
+  })
+
+  if (acceptNewTerms) {
+    // B02_SignIn_06_AcceptTermsConditions
+    timeGroup(groups[13], () => {
+      // 01_AuthCall
+      res = timeGroup(
+        groups[14].split('::')[1],
+        () =>
+          res.submitForm({
+            fields: { termsAndConditionsResult: 'accept' },
+            params: { redirects: 1 }
+          }),
+        { isStatusCode302 }
+      )
+
+      //02_OIDCCall
+      res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+        isStatusCode302
+      })
+
+      // 03_RPStub
+      res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck(userData.email.toLowerCase())
+      })
+    })
   }
 
   // 25% of users logout
   if (Math.random() <= 0.25) {
     sleep(1)
 
-    // B02_SignIn_09_Logout
-    timeGroup(groups[19], () => {
-      // 01_RPStub
-      res = timeGroup(groups[20].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 02_OIDCCall
-      res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-        isStatusCode302
-      })
-      // 03_AuthCall
-      res = timeGroup(groups[22].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('You have signed out')
-      })
-    })
+    // B02_SignIn_07_Logout
+    logout(groups.slice(17, 21))
   }
   iterationsCompleted.add(1)
 }

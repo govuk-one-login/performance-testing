@@ -171,7 +171,7 @@ Resources:
               ArnLike:
                 "aws:PrincipalArn":
                   - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_di-perf-test-prod-admin_*" # Prod Admin Control Tower Role
-                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_di-perf-test-prod-poweruser_*" # Prod Power User Control Tower Role
+                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_AWSPowerUserAccess_*" # Prod Power User Control Tower Role
                   - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_di-perf-test-prod-testers_*" # Prod Tester Control Tower Role
       PermissionsBoundary:
         !If [
@@ -418,12 +418,13 @@ Resources:
 
           env:
             variables:
-              WORK_DIR: /home/k6/scripts
-              REPORTING_DIR: /home/k6/reporting
-              OTEL_LOG: otel.log
+              DYNATRACE_ECS_ID: 305ec4d2-37de-4ac3-82b6-272371046b92
+              DYNATRACE_K6_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
               JSON_RESULTS: results.gz
-              K6_DYNATRACE_DASHBOARD_ID: 1e845440-d013-4472-9d65-2ea21a5cb41a
+              OTEL_LOG: otel.log
+              REPORTING_DIR: /home/k6/reporting
               SLACK_NOTIFY_CHANNEL: C05J07H48UE
+              WORK_DIR: /home/k6/scripts
             parameter-store:
               ACCOUNT_APP_KEY: "/perfTest/account/accounts/appKey"
               ACCOUNT_APP_PASSWORD_NEW: "/perfTest/account/testUserNewPassword"
@@ -447,9 +448,17 @@ Resources:
               DATA_TXMA_SQS: "/perfTest/data/txma/perfSQS"
               DEMO_NODE_ENDPOINT: "/perfTest/demo/nodeEndpoint"
               DEMO_SAM_ENDPOINT: "/perfTest/demo/samEndpoint"
+              DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"
+              DYNATRACE_URL: "/perfTest/dynatraceUrl"
+              FRAUD_CLIENT_ID: "/perfTest/fraud/clientID"
+              FRAUD_CLIENT_SECRET: "/perfTest/fraud/clientSecret"
+              FRAUD_COGNITO_URL: "/perfTest/fraud/cognitoURL"
+              FRAUD_PAYLOAD: "/perfTest/fraud/fraudPayload"
+              FRAUD_SSF_INBOUND_URL: "/perfTest/fraud/SSFInboundURL"
               IDENTITY_ADDRESS_URL: "/perfTest/identity/orange/addressUrl"
               IDENTITY_BUILD_CORE_URL: "/perfTest/identity/build/coreUrl"
               IDENTITY_BUILD_ORCH_STUB_URL: "/perfTest/identity/build/orchStubUrl"
+              IDENTITY_BUILD_OTG_URL: "/perfTest/identity/orange/OTGUrlBuild"
               IDENTITY_CIMIT_GETCIC: "/perfTest/identity/cimit/getcic"
               IDENTITY_CIMIT_POSTMITIGATION: "/perfTest/identity/cimit/postmitigation"
               IDENTITY_CIMIT_PUTCI: "/perfTest/identity/cimit/putci"
@@ -462,19 +471,17 @@ Resources:
               IDENTITY_FRAUD_URL: "/perfTest/identity/lime/fraudUrl"
               IDENTITY_KBV_ANSWERS: "/perfTest/identity/orange/kbvAnswers"
               IDENTITY_KBV_URL: "/perfTest/identity/orange/kbvUrl"
+              IDENTITY_KIWI_BAV_STUB_URL: "/perfTest/identity/kiwi/bav/stubUrl"
+              IDENTITY_KIWI_BAV_TARGET: "/perfTest/identity/kiwi/bav/target"
               IDENTITY_KIWI_CIC_STUB_URL: "/perfTest/identity/kiwi/cic/stubUrl"
               IDENTITY_KIWI_CIC_TARGET: "/perfTest/identity/kiwi/cic/target"
               IDENTITY_KIWI_F2F_STUB_URL: "/perfTest/identity/kiwi/f2f/stubUrl"
               IDENTITY_KIWI_F2F_TARGET: "/perfTest/identity/kiwi/f2f/target"
               IDENTITY_KIWI_STUB_SQS: "/perfTest/identity/kiwi/stubTxMAConsumer"
-              IDENTITY_KIWI_BAV_STUB_URL: "/perfTest/identity/kiwi/bav/stubUrl"
-              IDENTITY_KIWI_BAV_TARGET: "/perfTest/identity/kiwi/bav/target"
               IDENTITY_ORCH_STUB_PASSWORD: "/perfTest/identity/orchStubPassword"
               IDENTITY_ORCH_STUB_USERNAME: "/perfTest/identity/orchStubUsername"
               IDENTITY_PASSPORT_URL: "/perfTest/identity/lime/passportUrl"
               IDENTITY_SPOT_SQS: "/perfTest/identity/spot/SQS"
-              K6_DYNATRACE_APITOKEN: "/perfTest/dynatraceApiToken"
-              K6_DYNATRACE_URL: "/perfTest/dynatraceUrl"
               MOBILE_BUILD_BACKEND_URL: "/perfTest/mobile/build/backendUrl"
               MOBILE_BUILD_FRONTEND_URL: "/perfTest/mobile/build/frontendUrl"
               MOBILE_BUILD_TEST_CLIENT_URL: "/perfTest/mobile/build/testClientUrl"
@@ -486,14 +493,14 @@ Resources:
             pre_build:
               commands:
                 - |
-                  sed -e "s#{URL}#$K6_DYNATRACE_URL#" -e "s#{APITOKEN}#$K6_DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_NUMBER#" $OTEL_TEMPLATE > $OTEL_CONFIG
+                  sed -e "s#{URL}#$DYNATRACE_URL#" -e "s#{APITOKEN}#$DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_NUMBER#" $OTEL_TEMPLATE > $OTEL_CONFIG
                 - /otel/otelcol-contrib  --config=$OTEL_CONFIG > $OTEL_LOG 2>&1 &
                 - export EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name $CODEBUILD_BUILD_NUMBER)
                 - source ${REPORTING_DIR}/slack.sh POST
             build:
               commands:
                 - echo "Run performance test"
-                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out output-statsd --out json=$JSON_RESULTS --system-tags=status,method,group,check,error,scenario
+                - k6 run $WORK_DIR/$TEST_SCRIPT --tag script=$TEST_SCRIPT --tag account_id=$AWS_ACCOUNT_ID --out output-statsd --out json=$JSON_RESULTS
             post_build:
               commands:
                 - echo "Uploading test results to s3"

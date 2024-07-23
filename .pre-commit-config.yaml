@@ -2,55 +2,56 @@
 default_stages: [commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: detect-private-key
       - id: detect-aws-credentials
-        args: ['--allow-missing-credentials']
+        args: ["--allow-missing-credentials"]
       - id: mixed-line-ending
       - id: trailing-whitespace
       - id: check-merge-conflict
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+    rev: v1.5.0
     hooks:
       - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-        exclude: .*/keys/.*|
-              (
-                     ^package-lock.json$|
-                     ^Pipfile|
-                     ^pyproject.toml
-              )
+        args: ["--baseline", ".secrets.baseline"]
+        exclude: .*/keys/.*|.*/example-data/.*|
+          (
+          ^package-lock.json$|
+          ^Pipfile|
+          ^pyproject.toml
+          )
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.4
+    rev: v1.5.5
     hooks:
       - id: remove-tabs
       - id: remove-crlf
   - repo: https://github.com/mattlqx/pre-commit-search-and-replace
-    rev: v1.0.5
+    rev: v1.1.2
     hooks:
       - id: search-and-replace
         stages: [commit-msg, commit]
   - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
-    rev: v9.11.0
+    rev: v9.16.0
     hooks:
       - id: commitlint
         stages: [commit-msg]
-        args: ['--verbose']
+        args: ["--verbose"]
         verbose: true
   - repo: https://github.com/aws-cloudformation/cfn-python-lint
-    rev: v0.85.0
+    rev: v0.87.2
     hooks:
       - id: cfn-python-lint
         files: ^(?!\..*).*/template\.(json|yml|yaml)$
-        args: ['--ignore-checks', 'W3045']
+        args: ["--ignore-checks", "W3045"]
   - repo: https://github.com/bridgecrewio/checkov.git
-    rev: '3.2.3'
+    rev: "3.2.92"
     hooks:
       - id: checkov
-        args: ['--framework', 'cloudformation', '--quiet']
+        args: ["--framework", "cloudformation", "--quiet"]
         files: ^(.*/)?template\.(yml|yaml)$
   - repo: https://github.com/lovesegfault/beautysh
-    rev: 'v6.2.1'
+    rev: "v6.2.1"
     hooks:
       - id: beautysh
+        language_version: "python3.11"

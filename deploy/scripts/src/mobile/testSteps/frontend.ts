@@ -131,45 +131,9 @@ export function postIdCheckApp(): void {
   group('POST /idCheckApp', () =>
     timeRequest(() => http.post(buildFrontendUrl('/idCheckApp'), {}, { tags: { name: 'POST /idCheckApp' } }), {
       isStatusCode200,
-      ...validatePageRedirect('/workingCamera'),
-      ...pageContentCheck('Does your smartphone have a working camera?')
+      ...validatePageRedirect('/downloadApp'),
+      ...pageContentCheck('Download or open the GOV.UK ID Check app')
     })
-  )
-}
-
-export function postWorkingCamera(): void {
-  group('POST /workingCamera', () =>
-    timeRequest(
-      () =>
-        http.post(
-          buildFrontendUrl('/workingCamera'),
-          { 'working-camera-choice': 'yes' },
-          { tags: { name: 'POST /workingCamera' } }
-        ),
-      {
-        isStatusCode200,
-        ...validatePageRedirect('/flashingWarning'),
-        ...pageContentCheck('The app uses flashing colours. Do you want to continue?')
-      }
-    )
-  )
-}
-
-export function postFlashingWarning(): void {
-  group('POST /flashingWarning', () =>
-    timeRequest(
-      () =>
-        http.post(
-          buildFrontendUrl('/flashingWarning'),
-          { 'flashing-colours-choice': 'yes' },
-          { tags: { name: 'POST /flashingWarning' } }
-        ),
-      {
-        isStatusCode200,
-        ...validatePageRedirect('/downloadApp'),
-        ...pageContentCheck('Download the GOV.UK ID Check app')
-      }
-    )
   )
 }
 

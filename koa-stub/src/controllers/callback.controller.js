@@ -3,7 +3,8 @@ const { errorMonitor } = require("koa");
 
 // Check the data we have aligns with this user.
 async function checkUserStateAgainstDB(ctx, nonce, state) {
-  // Read the data from the DB
+  // Read the data from the DB and check that the session matches.
+  // This isn't implemented in a way that works for testing purposes.
   const input = {
     TableName: process.env.SESSION_TABLE,
     Key: {
@@ -16,8 +17,7 @@ async function checkUserStateAgainstDB(ctx, nonce, state) {
   const dbresponse = await ctx.ddbClient.send(command);
   console.log(JSON.stringify(dbresponse));
   // RP Check that the user is who they say they are.
-  if (dbresponse.Item) {
-    console.log(dbresponse.Item.state.S === state);
+  if (dbresponse.Item.state.S === state) {
     console.log("Yay! Correct state.");
   }
 }
@@ -64,7 +64,7 @@ const processCallback = async (ctx) => {
     if (tokenSet.access_token) {
       userinfo = await getUserInfo(ctx, tokenSet.access_token);
     } else {
-      console.log("Token error");
+      throw new Error(`TokenSet issue, access_token not present`);
     }
     console.log(`Getting the ${JSON.stringify(userinfo)} object from the RP`);
 
@@ -93,7 +93,7 @@ async function getUserInfo(ctx, access_token) {
       await new Promise((resolve) => setTimeout(resolve, delay));
       return await ctx.oneLogin.userinfo(access_token);
     }
-    console.log(error);
+    throw new Error(`Userinfo endpoint not authorising`);
   }
 }
 

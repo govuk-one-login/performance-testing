@@ -72,6 +72,12 @@ describe("Tests against the OIDC Servce", () => {
     const response = await client.get(url, { withCredentials: true });
     expect(response.status).toBe(200);
     expect(response.data).toMatchSnapshot();
+    console.log(client);
+    // const logouturl = "http://localhost:8081/logout";
+    // const logoutresponse = await client.get(logouturl, {
+    //   withCredentials: true,
+    // });
+    // expect(logoutresponse.status).toBe(302);
   });
 });
 

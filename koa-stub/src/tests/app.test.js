@@ -9,7 +9,8 @@ const {
   GetItemCommand,
 } = require("@aws-sdk/client-dynamodb");
 
-const expiry = new Date(); expiry.setDate(expiry.getDate()+1);
+const expiry = new Date();
+expiry.setDate(expiry.getDate() + 1);
 const dynamoDB = new DynamoDBClient({});
 const dynamoDBMock = mockClient(dynamoDB);
 
@@ -26,7 +27,8 @@ dynamoDBMock.on(GetItemCommand).resolves({
 const { OAuth2Server } = require("oauth2-mock-server");
 const { setupClient } = require("../utils/onelogin.util");
 
-const oidc_server = new OAuth2Server();
+let oidc_server = new OAuth2Server();
+let service = oidc_server.service;
 
 beforeAll(async () => {
   await oidc_server.start(8080, "localhost");
@@ -35,21 +37,35 @@ beforeAll(async () => {
   process.env.SESSION_TABLE = "SessionTable";
   process.env.RESPONSE_ALG = "RS256";
   process.env.CLIENT_ID = "testclient";
-  process.env.CLIENT_SECRET = "testsecret";  // pragma: allowlist-secret
+  process.env.CLIENT_SECRET = "testsecret"; // pragma: allowlist-secret
   // Generate a new RSA key and add it to the keystore
   oidc_server.issuer.keys.generate(process.env.RESPONSE_ALG);
+
+  service.once("beforeResponse", (tokenEndpointResponse, req) => {
+    tokenEndpointResponse.body = {
+      error: "invalid_grant",
+    };
+    tokenEndpointResponse.statusCode = 400;
+    console.log("FIRE ME");
+  });
+  service.once("beforeUserinfo", (userInfoResponse, req) => {
+    userInfoResponse.body = {
+      error: "invalid_token",
+      error_message: "token is expired",
+    };
+    userInfoResponse.statusCode = 401;
+  });
   // Setup the OIDC client
+  console.log(service);
   app.context.ddbClient = dynamoDBMock;
   app.context.oneLogin = await setupClient();
 });
 
 describe("Tests against the OIDC Servce", () => {
-
-
-  test('The /test endpoint returns TestPage', async () => {
-    const response = await request(app.callback()).get('/test');
+  test("The /test endpoint returns TestPage", async () => {
+    const response = await request(app.callback()).get("/test");
     expect(response.status).toBe(200);
-    expect(response.text).toMatchSnapshot();
+    expect(response.body).toMatchSnapshot();
   });
 
   test("The /start endpoint returns 302", async () => {
@@ -57,9 +73,19 @@ describe("Tests against the OIDC Servce", () => {
     expect(response.status).toBe(302);
     expect(response.text).toContain("authorize?");
     expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
+    expect(response.body).toMatchSnapshot();
   });
 
-  test("The /callback endpoint returns 200", async () => {
+  test("The /callback endpoint returns 204", async () => {
+    const response = await request(app.callback())
+      .get("/callback")
+      .set("Cookie", ["nonce=tests,session=tests"]);
+    expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
+    expect(response.status).toBe(204);
+    expect(response.body).toMatchSnapshot();
+  });
+
+  test("The /callback endpoint returns 204 after a retry", async () => {
     const response = await request(app.callback())
       .get("/callback")
       .set("Cookie", ["nonce=tests,session=tests"]);
@@ -74,6 +100,7 @@ describe("Tests against the OIDC Servce", () => {
       .set("Cookie", ["id_token=sessiontest"]);
     expect(response.status).toBe(302);
     expect(response.text).toContain("id_token_hint");
+    expect(response.text).toMatchSnapshot();
   });
 });
 

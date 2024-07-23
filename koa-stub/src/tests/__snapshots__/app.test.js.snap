@@ -1,5 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Tests against the OIDC Servce The /callback endpoint returns 200 1`] = `{}`;
+exports[`Tests against the OIDC Servce The /callback endpoint returns 204 1`] = `{}`;
 
-exports[`Tests against the OIDC Servce The /test endpoint returns TestPage 1`] = `"TestPage"`;
+exports[`Tests against the OIDC Servce The /callback endpoint returns 204 after a retry 1`] = `{}`;
+
+exports[`Tests against the OIDC Servce The /logout endpoint returns 302 1`] = `"Redirecting to <a href="http://localhost:8080/endsession?client_id=testclient&amp;id_token_hint=sessiontest">http://localhost:8080/endsession?client_id=testclient&amp;id_token_hint=sessiontest</a>."`;
+
+exports[`Tests against the OIDC Servce The /start endpoint returns 302 1`] = `{}`;
+
+exports[`Tests against the OIDC Servce The /test endpoint returns TestPage 1`] = `{}`;

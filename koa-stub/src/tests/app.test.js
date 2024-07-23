@@ -61,6 +61,15 @@ beforeEach(async () => {
 
 describe("Tests against the OIDC Servce", () => {
   test("The OIDC flow works", async () => {
+    const url = "http://localhost:8081/start";
+    const response = await client.get(url, { withCredentials: true });
+    expect(response.status).toBe(200);
+    expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
+    expect(response.data).toMatchSnapshot();
+  });
+});
+describe("Tests against the OIDC Service with errors", () => {
+  test("The OIDC flow works, if the first call to userinfo is a 401", async () => {
     service.once("beforeUserinfo", (userInfoResponse, req) => {
       userInfoResponse.body = {
         error: "invalid_token",
@@ -71,8 +80,9 @@ describe("Tests against the OIDC Servce", () => {
     const url = "http://localhost:8081/start";
     const response = await client.get(url, { withCredentials: true });
     expect(response.status).toBe(200);
+    expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
     expect(response.data).toMatchSnapshot();
-    console.log(client);
+
     // const logouturl = "http://localhost:8081/logout";
     // const logoutresponse = await client.get(logouturl, {
     //   withCredentials: true,

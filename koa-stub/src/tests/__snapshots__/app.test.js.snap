@@ -5,3 +5,9 @@ exports[`Tests against the OIDC Servce The OIDC flow works 1`] = `
   "sub": "johndoe",
 }
 `;
+
+exports[`Tests against the OIDC Service with errors The OIDC flow works, if the first call to userinfo is a 401 1`] = `
+{
+  "sub": "johndoe",
+}
+`;

@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
 
@@ -47,7 +47,6 @@ Globals:
       - !Ref PermissionsBoundary
       - !Ref AWS::NoValue
 
-
 Resources:
   ExpressApi:
     #checkov:skip=CKV_AWS_73:Avoiding x-ray tracing for performance reasons
@@ -56,15 +55,28 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: prod
-      BinaryMediaTypes: ['*/*']
+      BinaryMediaTypes: ["*/*"]
       Auth:
         ResourcePolicy:
           CustomStatements:
-          - Effect: 'Allow'
-            Action: 'execute-api:Invoke'
-            Resource: ['execute-api:/*/*/*']
-            Principal: '*'
+            - Effect: "Allow"
+              Action: "execute-api:Invoke"
+              Resource: ["execute-api:/*/*/*"]
+              Principal: "*"
+      AccessLogSetting:
+        DestinationArn: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${ApiAccessLogGroup}"
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user","requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
+      TracingEnabled: true
 
+  ApiAccessLogGroup:
+    # API Access Log not encrypted
+    # checkov:skip=CKV_AWS_158: No PII in logs
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/AccessLog-api-${AWS::StackName}
+      RetentionInDays: 30
 
   KoaFunction:
     Type: AWS::Serverless::Function
@@ -83,13 +95,12 @@ Resources:
           CLIENT_SECRET: "{{resolve:ssm:StubClientSecret}}"
           OIDC_ENDPOINT: "{{resolve:ssm:StubOIDCEndpoint}}"
           RESPONSE_ALG: "{{resolve:ssm:StubResponseAlgorithm}}"
-          CALLBACK_URL: "{{resolve:ssm:StubCallbackUrl}}"  # This unfortunately needs to be set manually after first deploy.
+          CALLBACK_URL: "{{resolve:ssm:StubCallbackUrl}}" # This unfortunately needs to be set manually after first deploy.
           SESSION_TABLE: !Ref SessionTable
           ENVIRONMENT: !Sub ${Environment}
       Policies:
         - DynamoDBCrudPolicy:
-            TableName:
-              !Ref SessionTable
+            TableName: !Ref SessionTable
       Events:
         KoaFunctionProxy:
           Type: Api

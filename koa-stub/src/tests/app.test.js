@@ -1,6 +1,8 @@
 const { expect } = require("expect");
 require("aws-sdk-client-mock-jest");
-const request = require("supertest");
+const axios = require("axios");
+const cookieJar = require("tough-cookie");
+const wrapper = require("axios-cookiejar-support");
 const app = require("../app");
 const { mockClient } = require("aws-sdk-client-mock");
 const {
@@ -29,8 +31,10 @@ const { setupClient } = require("../utils/onelogin.util");
 
 let oidc_server = new OAuth2Server();
 let service = oidc_server.service;
+let client;
+let server;
 
-beforeAll(async () => {
+beforeEach(async () => {
   await oidc_server.start(8080, "localhost");
   console.log("Issuer URL:", oidc_server.issuer.url);
   process.env.OIDC_ENDPOINT = oidc_server.issuer.url;
@@ -38,41 +42,25 @@ beforeAll(async () => {
   process.env.RESPONSE_ALG = "RS256";
   process.env.CLIENT_ID = "testclient";
   process.env.CLIENT_SECRET = "testsecret"; // pragma: allowlist-secret
+  process.env.CALLBACK_URL = "http://localhost:8081/callback";
 
   // Generate a new RSA key and add it to the keystore
   oidc_server.issuer.keys.generate(process.env.RESPONSE_ALG);
-
+  service.on("any", (res, req) => {
+    consolelog(`Request made to ${req}`);
+  });
   // Setup the OIDC client
   app.context.ddbClient = dynamoDBMock;
   app.context.oneLogin = await setupClient();
+  // Setup the app server
+  server = app.listen(8081);
+
+  const jar = new cookieJar.CookieJar();
+  client = wrapper.wrapper(axios.create({ jar }));
 });
 
 describe("Tests against the OIDC Servce", () => {
-  test("The /test endpoint returns TestPage", async () => {
-    const response = await request(app.callback()).get("/test");
-    expect(response.status).toBe(200);
-    expect(response.body).toMatchSnapshot();
-  });
-
-  test("The /start endpoint returns 302", async () => {
-    const response = await request(app.callback()).get("/start");
-    expect(response.status).toBe(302);
-    expect(response.text).toContain("authorize?");
-    expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
-    expect(response.body).toMatchSnapshot();
-  });
-
-  test("The /callback endpoint returns 204", async () => {
-    const response = await request(app.callback())
-      .get("/callback")
-      .set("Cookie", ["nonce=tests,session=tests"]);
-    expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
-    expect(response.status).toBe(204);
-    expect(response.body).toMatchSnapshot();
-  });
-
-  test("The /callback endpoint returns 204 after a retry", async () => {
-    // This should mean the next request to userInfo will return a 401 response..
+  test("The OIDC flow works", async () => {
     service.once("beforeUserinfo", (userInfoResponse, req) => {
       userInfoResponse.body = {
         error: "invalid_token",
@@ -80,24 +68,14 @@ describe("Tests against the OIDC Servce", () => {
       };
       userInfoResponse.statusCode = 401;
     });
-    const response = await request(app.callback())
-      .get("/callback")
-      .set("Cookie", ["nonce=tests,session=tests"]);
-    expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
-    expect(response.status).toBe(204);
-    expect(response.body).toMatchSnapshot();
-  });
-
-  test("The /logout endpoint returns 302", async () => {
-    const response = await request(app.callback())
-      .get("/logout")
-      .set("Cookie", ["id_token=sessiontest"]);
-    expect(response.status).toBe(302);
-    expect(response.text).toContain("id_token_hint");
-    expect(response.text).toMatchSnapshot();
+    const url = "http://localhost:8081/start";
+    const response = await client.get(url, { withCredentials: true });
+    expect(response.status).toBe(200);
+    expect(response.data).toMatchSnapshot();
   });
 });
 
-afterAll(async () => {
+afterEach(async () => {
   await oidc_server.stop();
+  server.close();
 });

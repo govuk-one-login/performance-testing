@@ -38,25 +38,11 @@ beforeAll(async () => {
   process.env.RESPONSE_ALG = "RS256";
   process.env.CLIENT_ID = "testclient";
   process.env.CLIENT_SECRET = "testsecret"; // pragma: allowlist-secret
+
   // Generate a new RSA key and add it to the keystore
   oidc_server.issuer.keys.generate(process.env.RESPONSE_ALG);
 
-  service.once("beforeResponse", (tokenEndpointResponse, req) => {
-    tokenEndpointResponse.body = {
-      error: "invalid_grant",
-    };
-    tokenEndpointResponse.statusCode = 400;
-    console.log("FIRE ME");
-  });
-  service.once("beforeUserinfo", (userInfoResponse, req) => {
-    userInfoResponse.body = {
-      error: "invalid_token",
-      error_message: "token is expired",
-    };
-    userInfoResponse.statusCode = 401;
-  });
   // Setup the OIDC client
-  console.log(service);
   app.context.ddbClient = dynamoDBMock;
   app.context.oneLogin = await setupClient();
 });
@@ -86,6 +72,14 @@ describe("Tests against the OIDC Servce", () => {
   });
 
   test("The /callback endpoint returns 204 after a retry", async () => {
+    // This should mean the next request to userInfo will return a 401 response..
+    service.once("beforeUserinfo", (userInfoResponse, req) => {
+      userInfoResponse.body = {
+        error: "invalid_token",
+        error_message: "token is expired",
+      };
+      userInfoResponse.statusCode = 401;
+    });
     const response = await request(app.callback())
       .get("/callback")
       .set("Cookie", ["nonce=tests,session=tests"]);

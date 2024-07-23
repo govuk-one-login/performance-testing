@@ -87,6 +87,7 @@ describe("Tests against the OIDC Service with errors", () => {
     // const logoutresponse = await client.get(logouturl, {
     //   withCredentials: true,
     // });
+    // console.log(logoutresponse);
     // expect(logoutresponse.status).toBe(302);
   });
 });

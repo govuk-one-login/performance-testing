@@ -1,4 +1,8 @@
-const { Issuer } = require("openid-client");
+const { Issuer, custom } = require("openid-client");
+
+custom.setHttpOptionsDefaults({
+  timeout: 7000,
+});
 
 async function setupClient() {
   const response = await Issuer.discover(process.env.OIDC_ENDPOINT);

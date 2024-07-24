@@ -30,6 +30,8 @@ jobs:
         uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: 20
+          cache: npm
+          registry-url: "https://npm.pkg.github.com"
 
       - name: Setup python v3.11
         uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1

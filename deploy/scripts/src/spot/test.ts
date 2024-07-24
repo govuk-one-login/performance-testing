@@ -8,9 +8,14 @@ import {
   LoadProfile
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
-import { generateRequest } from './requestGenerator/spotReqGen'
+import { generateSPOTRequest } from './requestGenerator/spotReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { uuidv4 } from '../common/utils/jslib'
+import { generateFraudPayload, generateKBVPayload, generatePassportPayload } from './requestGenerator/payloadGenerator'
+import encoding from 'k6/encoding'
+import { signJwt } from '../common/utils/authentication/jwt'
+import { crypto, EcKeyImportParams } from 'k6/experimental/webcrypto'
 
 const profiles: ProfileList = {
   smoke: {
@@ -45,6 +50,12 @@ const env = {
   sqs_queue: getEnv('IDENTITY_SPOT_SQS')
 }
 
+const pkcs8Keys = {
+  fraud: getEnv('IDENTITY_SPOT_FRAUDKEY'),
+  passport: getEnv('IDENTITY_SPOT_PASSPORTKEY'),
+  kbv: getEnv('IDENTITY_SPOT_KBVKEY')
+}
+
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
   region: getEnv('AWS_REGION'),
@@ -54,14 +65,53 @@ const awsConfig = new AWSConfig({
 })
 const sqs = new SQSClient(awsConfig)
 
-export function spot(): void {
+export async function spot(): Promise<void> {
   const currTime = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
-  const payload = generateRequest(currTime)
+  const userID = uuidv4()
+  const subjectID = `urn:fdc:gov.uk:2022:${userID}`
+  const payloads = {
+    fraudPayload: generateFraudPayload(subjectID),
+    passportPayload: generatePassportPayload(subjectID),
+    kbvPayload: generateKBVPayload(subjectID)
+  }
+  const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
+  const cryptoKeys = {
+    fraudCryptoKey: str2buffer(pkcs8Keys.fraud),
+    passportCryptoKey: str2buffer(pkcs8Keys.passport),
+    kbvCryptoKey: str2buffer(pkcs8Keys.kbv)
+  }
+
+  const importedPrivateKeys = {
+    fraudPrivateKey: await crypto.subtle.importKey('pkcs8', cryptoKeys.fraudCryptoKey, escdaParam, true, ['sign']),
+    passportPrivateKey: await crypto.subtle.importKey('pkcs8', cryptoKeys.passportCryptoKey, escdaParam, true, [
+      'sign'
+    ]),
+    kbvPrivateKey: await crypto.subtle.importKey('pkcs8', cryptoKeys.kbvCryptoKey, escdaParam, true, ['sign'])
+  }
+
+  const jwts = {
+    fraudSignedJWT: await signJwt('ES256', importedPrivateKeys.fraudPrivateKey, payloads.fraudPayload),
+    passportSignedJWT: await signJwt('ES256', importedPrivateKeys.passportPrivateKey, payloads.passportPayload),
+    kbvSignedJWT: await signJwt('ES256', importedPrivateKeys.kbvPrivateKey, payloads.kbvPayload)
+  }
+
+  const spotPayload = generateSPOTRequest(currTime, jwts.fraudSignedJWT, jwts.kbvSignedJWT, jwts.kbvSignedJWT)
 
   const spotMessage = {
-    messageBody: JSON.stringify(payload)
+    messageBody: JSON.stringify(spotPayload)
   }
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, spotMessage.messageBody)
   iterationsCompleted.add(1)
+}
+
+function str2buffer(pkcs8Keys: string): ArrayBuffer {
+  const b64encodedKeys = pkcs8Keys
+  const binaryKey = encoding.b64decode(b64encodedKeys, 'std', 's')
+  const buf = new ArrayBuffer(binaryKey.length * 2)
+  const bufView = new Uint16Array(buf)
+  for (let i = 0, strLen = binaryKey.length; i < strLen; i++) {
+    bufView[i] = binaryKey.charCodeAt(i)
+  }
+  return buf
 }

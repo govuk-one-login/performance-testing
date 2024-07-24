@@ -90,7 +90,7 @@ async function getUserInfo(ctx, access_token) {
     return response;
   } catch (error) {
     if (attempt < maxRetries) {
-      attempt += attempt;
+      attempt += 1;
       const delay = 1000;
       console.warn(`Request to userinfo failed due to ${error}`);
       await new Promise((resolve) => setTimeout(resolve, delay));

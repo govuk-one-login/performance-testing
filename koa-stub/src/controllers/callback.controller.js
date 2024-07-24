@@ -51,7 +51,7 @@ const processCallback = async (ctx) => {
     await checkUserStateAgainstDB(ctx, nonce, state);
 
     const tokenSet = await handleCallbackAndGetTokenSet(ctx, nonce, state);
-    if (tokenSet !== {}) {
+    if (tokenSet.access_token) {
       console.debug(
         `Retrieved successful tokenSet: ${JSON.stringify(tokenSet, null, 2)}`
       );

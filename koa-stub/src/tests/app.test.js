@@ -100,6 +100,27 @@ describe("Tests against the OIDC Service with errors", () => {
     expect(logoutresponse.status).toBe(200);
     expect(logoutresponse.data).toBe("TestPage");
   });
+  test("The OIDC flow fails, if all calls to userinfo is a 401", async () => {
+    const spyConsole = jest.spyOn(console, "warn");
+    service.on("beforeUserinfo", (userInfoResponse, req) => {
+      userInfoResponse.body = {
+        error: "invalid_token",
+        error_message: "token is expired",
+      };
+      userInfoResponse.statusCode = 401;
+    });
+    const url = `${app_url}/start`;
+    await client.get(url, { withCredentials: true }).catch((error) => {
+      expect(error).toMatchSnapshot();
+    });
+
+    expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
+    expect(spyConsole).toHaveBeenCalledTimes(2);
+    expect(spyConsole).toBeCalledWith(
+      "Request to userinfo failed due to OPError: invalid_token"
+    );
+    expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
+  });
 });
 
 afterAll(async () => {

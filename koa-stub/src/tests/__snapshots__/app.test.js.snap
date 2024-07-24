@@ -6,6 +6,8 @@ exports[`Tests against the OIDC Servce The OIDC flow works 1`] = `
 }
 `;
 
+exports[`Tests against the OIDC Service with errors The OIDC flow fails, if all calls to userinfo is a 401 1`] = `[AxiosError: Request failed with status code 500]`;
+
 exports[`Tests against the OIDC Service with errors The OIDC flow works, if the first call to userinfo is a 401 1`] = `
 {
   "sub": "johndoe",

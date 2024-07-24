@@ -51,7 +51,7 @@ const processCallback = async (ctx) => {
     await checkUserStateAgainstDB(ctx, nonce, state);
 
     const tokenSet = await handleCallbackAndGetTokenSet(ctx, nonce, state);
-    if (tokenSet != {}) {
+    if (tokenSet !== {}) {
       console.debug(
         `Retrieved successful tokenSet: ${JSON.stringify(tokenSet, null, 2)}`
       );
@@ -72,7 +72,6 @@ const processCallback = async (ctx) => {
     }
     console.log(`Getting the ${JSON.stringify(userinfo)} object from the RP`);
 
-    // ctx.status = 200;
     ctx.body = userinfo;
   } catch (e) {
     console.log(e);
@@ -91,7 +90,7 @@ async function getUserInfo(ctx, access_token) {
     return response;
   } catch (error) {
     if (attempt < maxRetries) {
-      attempt += 1;
+      attempt += attempt;
       const delay = 1000;
       console.warn(`Request to userinfo failed due to ${error}`);
       await new Promise((resolve) => setTimeout(resolve, delay));

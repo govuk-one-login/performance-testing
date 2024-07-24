@@ -47,13 +47,17 @@ const processCallback = async (ctx) => {
 
     console.log(`Cookies are nonce: ${nonce} and state: ${state}`);
 
+    // This is ignored for testing purposes.
     await checkUserStateAgainstDB(ctx, nonce, state);
-    console.log("User state correct.");
 
     const tokenSet = await handleCallbackAndGetTokenSet(ctx, nonce, state);
-    console.log(
-      `Retrieved successful tokenSet: ${JSON.stringify(tokenSet, null, 2)}`
-    );
+    if (tokenSet != {}) {
+      console.debug(
+        `Retrieved successful tokenSet: ${JSON.stringify(tokenSet, null, 2)}`
+      );
+    } else {
+      throw new Error(`TokenSet is empty object`);
+    }
 
     // Only doing this in perf to enable logout.
     const cookieOptions = { httpOnly: true, secure: false };

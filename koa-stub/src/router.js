@@ -14,5 +14,10 @@ router.get("/test", (ctx) => {
   ctx.status = 200;
   ctx.body = "TestPage";
 });
+router.get("/", (ctx) => {
+  ctx.status = 200;
+  ctx.body =
+    "Welcome to the RP stub, please see the tests for instructions on how to use.";
+});
 
 module.exports = router;

@@ -182,13 +182,14 @@ const csvData: IDReuseUserID[] = new SharedArray('ID Reuse User ID', function ()
 })
 
 const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
-const validEnvironments = ['BUILD', 'DEV']
+const validEnvironments = ['BUILD', 'DEV', 'DEFAULT']
 if (!validEnvironments.includes(environment))
   throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 
 const env = {
   orchStubEndPoint: __ENV[`IDENTITY_${environment}_ORCH_STUB_URL`],
-  ipvCoreURL: __ENV[`IDENTITY_${environment}_CORE_URL`]
+  ipvCoreURL: __ENV[`IDENTITY_${environment}_CORE_URL`],
+  vtrText: __ENV[`IDENTITY_${environment}_VTR_TEXT`]
   // staticResources: getEnv('K6_NO_STATIC_RESOURCES') !== 'true'
 }
 
@@ -229,7 +230,7 @@ export function passport(): void {
       () =>
         http.get(
           env.orchStubEndPoint +
-            `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
+            `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=${env.vtrText}&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
             redirects: 0

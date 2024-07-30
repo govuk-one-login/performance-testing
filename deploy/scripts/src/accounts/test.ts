@@ -13,7 +13,7 @@ import {
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { timeGroup } from '../common/utils/request/timing'
-import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
@@ -41,14 +41,17 @@ const loadProfile = selectProfile(profiles)
 const groupMap = {
   changeEmail: [
     'B01_ChangeEmail_01_LaunchAccountsHome',
-    'B01_ChangeEmail_02_ClickDefaultScenario',
+    'B01_ChangeEmail_01_LaunchAccountsHome::01_OLHCall',
+    'B01_ChangeEmail_01_LaunchAccountsHome::02_OIDCStubCall',
+    'B01_ChangeEmail_02_SelectStubScenario',
+    'B01_ChangeEmail_02_SelectStubScenario::01_OIDCStubCall',
+    'B01_ChangeEmail_02_SelectStubScenario::02_OLHCall',
     'B01_ChangeEmail_03_ClickSecurityTab',
     'B01_ChangeEmail_04_ClickChangeEmailLink',
     'B01_ChangeEmail_05_EnterCurrentPassword',
     'B01_ChangeEmail_06_EnterNewEmailID',
     'B01_ChangeEmail_07_EnterEmailOTP',
-    'B01_ChangeEmail_08_ClickBackToSecurity',
-    'B01_ChangeEmail_09_SignOut'
+    'B01_ChangeEmail_08_Logout'
   ],
   changePassword: [
     'B02_ChangePassword_01_LaunchAccountsHome',
@@ -130,8 +133,7 @@ const validateData: ValidateUserData[] = new SharedArray('data', () =>
 )
 
 const env = {
-  envURL: getEnv('ACCOUNT_HOME_URL'),
-  signinURL: getEnv('ACCOUNT_SIGNIN_URL')
+  envURL: getEnv('ACCOUNT_HOME_URL')
 }
 
 const credentials = {
@@ -155,27 +157,41 @@ export function changeEmail(): void {
   iterationsStarted.add(1)
 
   // B01_ChangeEmail_01_LaunchAccountsHome
-  res = timeGroup(groups[0], () => http.get(env.envURL), {
-    isStatusCode200,
-    ...pageContentCheck('API Simulation Tool')
+
+  timeGroup(groups[0], () => {
+    //01_OLHCall
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
+
+    //02_OIDCStubCall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('API Simulation Tool')
+    })
   })
 
   sleepBetween(1, 3)
 
-  //B01_ChangeEmail_02_ClickDefaultScenario
-  res = timeGroup(
-    groups[1],
-    () =>
-      res.submitForm({
-        submitSelector: '[value="default"]'
-      }),
-    { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }
-  )
+  //B01_ChangeEmail_02_SelectStubScenario
+
+  timeGroup(groups[3], () => {
+    //01_OIDCStubCall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () => res.submitForm({ fields: { scenario: 'default' }, params: { redirects: 0 } }),
+      { isStatusCode302 }
+    )
+
+    //02_OLHCall
+    res = timeGroup(groups[5].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Services you can use with GOV.UK One Login')
+    })
+  })
 
   sleepBetween(1, 3)
 
   // B01_ChangeEmail_03_ClickSecurityTab
-  res = timeGroup(groups[2], () => http.get(env.envURL + '/security'), {
+  res = timeGroup(groups[6], () => http.get(env.envURL + '/security'), {
     isStatusCode200,
     ...pageContentCheck('Delete your GOV.UK One Login')
   })
@@ -183,7 +199,7 @@ export function changeEmail(): void {
   sleepBetween(1, 3)
 
   // B01_ChangeEmail_04_ClickChangeEmailLink
-  res = timeGroup(groups[3], () => http.get(env.envURL + '/enter-password?type=changeEmail'), {
+  res = timeGroup(groups[7], () => http.get(env.envURL + '/enter-password?type=changeEmail'), {
     isStatusCode200,
     ...pageContentCheck('Enter your password')
   })
@@ -192,7 +208,7 @@ export function changeEmail(): void {
 
   // B01_ChangeEmail_05_EnterCurrentPassword
   res = timeGroup(
-    groups[4],
+    groups[8],
     () =>
       res.submitForm({
         formSelector: "form[action='/enter-password']",
@@ -208,7 +224,7 @@ export function changeEmail(): void {
 
   // B01_ChangeEmail_06_EnterNewEmailID
   res = timeGroup(
-    groups[5],
+    groups[9],
     () =>
       res.submitForm({
         formSelector: "form[action='/change-email']",
@@ -223,7 +239,7 @@ export function changeEmail(): void {
 
   // B01_ChangeEmail_07_EnterEmailOTP
   res = timeGroup(
-    groups[6],
+    groups[10],
     () =>
       res.submitForm({
         formSelector: "form[action='/check-your-email']",
@@ -240,17 +256,9 @@ export function changeEmail(): void {
 
   sleepBetween(1, 3)
 
-  // B01_ChangeEmail_08_ClickBackToSecurity
-  res = timeGroup(groups[7], () => http.get(env.envURL + '/manage-your-account'), {
-    isStatusCode200,
-    ...pageContentCheck('Delete your GOV.UK One Login')
-  })
-
-  sleepBetween(1, 3)
-
-  // B01_ChangeEmail_09_SignOut
+  // B01_ChangeEmail_08_SignOut
   res = timeGroup(
-    groups[8],
+    groups[11],
     () =>
       res.submitForm({
         formSelector: "form[action='/sign-out']"

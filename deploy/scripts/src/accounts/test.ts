@@ -55,14 +55,18 @@ const groupMap = {
   ],
   changePassword: [
     'B02_ChangePassword_01_LaunchAccountsHome',
-    'B02_ChangePassword_02_ClickDefaultScenario',
-    'B02_ChangePassword_03_ClickSecurityTab', // pragma: allowlist secret
+    'B02_ChangePassword_01_LaunchAccountsHome::01_OLHCall',
+    'B02_ChangePassword_01_LaunchAccountsHome::02_OIDCStubCall',
+    'B02_ChangePassword_02_SelectStubScenario',
+    'B02_ChangePassword_02_SelectStubScenario::01_OIDCStubCall',
+    'B02_ChangePassword_02_SelectStubScenario::02_OLHCall',
+    'B02_ChangePassword_03_ClickSecurityTab', //pragma: allowlist secret
     'B02_ChangePassword_04_ClickChangePasswordLink',
     'B02_ChangePassword_05_EnterCurrentPassword',
     'B02_ChangePassword_06_EnterNewPassword',
-    'B02_ChangePassword_07_ClickBackToSecurity', // pragma: allowlist secret
-    'B02_ChangePassword_08_NavigateThroughStub',
-    'B02_ChangePassword_09_SignOut'
+    'B02_ChangePassword_07_SignOut',
+    'B02_ChangePassword_07_SignOut::01_OLHCall',
+    'B02_ChangePassword_07_SignOut::01_OIDCStubCall'
   ],
   changePhone: [
     'B03_ChangePhone_01_LaunchAccountsHome',
@@ -275,25 +279,38 @@ export function changePassword(): void {
   iterationsStarted.add(1)
 
   // B02_ChangePassword_01_LaunchAccountsHome
-  res = timeGroup(groups[0], () => http.get(env.envURL), {
-    isStatusCode200,
-    ...pageContentCheck('API Simulation Tool')
+  timeGroup(groups[0], () => {
+    //01_OLHCall
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
+
+    //02_OIDCStubCall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('API Simulation Tool')
+    })
   })
 
   sleepBetween(1, 3)
 
-  //B02_ChangePassword_02_ClickDefaultScenario
-  res = timeGroup(
-    groups[1],
-    () =>
-      res.submitForm({
-        submitSelector: '[value="default"]'
-      }),
-    { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }
-  )
+  timeGroup(groups[3], () => {
+    //01_OIDCStubCall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () => res.submitForm({ fields: { scenario: 'default' }, params: { redirects: 0 } }),
+      { isStatusCode302 }
+    )
+
+    //02_OLHCall
+    res = timeGroup(groups[5].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Services you can use with GOV.UK One Login')
+    })
+  })
+
+  sleepBetween(1, 3)
 
   // B02_ChangePassword_03_ClickSecurityTab
-  res = timeGroup(groups[2], () => http.get(env.envURL + '/security'), {
+  res = timeGroup(groups[6], () => http.get(env.envURL + '/security'), {
     isStatusCode200,
     ...pageContentCheck('Delete your GOV.UK One Login')
   })
@@ -301,7 +318,7 @@ export function changePassword(): void {
   sleepBetween(1, 3)
 
   // B02_ChangePassword_04_ClickChangePasswordLink
-  res = timeGroup(groups[3], () => http.get(env.envURL + '/enter-password?type=changePassword'), {
+  res = timeGroup(groups[7], () => http.get(env.envURL + '/enter-password?type=changePassword'), {
     isStatusCode200,
     ...pageContentCheck('Enter your current password')
   })
@@ -310,7 +327,7 @@ export function changePassword(): void {
 
   // B02_ChangePassword_05_EnterCurrentPassword
   res = timeGroup(
-    groups[4],
+    groups[8],
     () =>
       res.submitForm({
         formSelector: "form[action='/enter-password']",
@@ -326,7 +343,7 @@ export function changePassword(): void {
 
   // B02_ChangePassword_06_EnterNewPassword
   res = timeGroup(
-    groups[5],
+    groups[9],
     () =>
       res.submitForm({
         formSelector: "form[action='/change-password']",
@@ -340,33 +357,23 @@ export function changePassword(): void {
 
   sleepBetween(1, 3)
 
-  // B02_ChangePassword_07_ClickBackToSecurity
-  res = timeGroup(groups[6], () => http.get(env.envURL + '/manage-your-account'), {
-    isStatusCode200,
-    ...pageContentCheck('API Simulation Tool')
+  // B02_ChangePassword_07_SignOut
+
+  timeGroup(groups[10], () => {
+    //01_OLHCall
+    res = timeGroup(
+      groups[11].split('::')[1],
+      () => res.submitForm({ formSelector: "form[action='/sign-out']", params: { redirects: 0 } }),
+      { isStatusCode302 }
+    )
+
+    //02_OIDCStubCall
+    res = timeGroup(groups[12].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('API Simulation Tool')
+    })
   })
 
-  //B02_ChangePassword_08_NavigateThroughStub
-  res = timeGroup(
-    groups[7],
-    () =>
-      res.submitForm({
-        submitSelector: '[value="default"]'
-      }),
-    { isStatusCode200, ...pageContentCheck('Delete your GOV.UK One Login') }
-  )
-
-  sleepBetween(1, 3)
-
-  // B02_ChangePassword_09_SignOut
-  res = timeGroup(
-    groups[8],
-    () =>
-      res.submitForm({
-        formSelector: "form[action='/sign-out']"
-      }),
-    { isStatusCode200, ...pageContentCheck('You have signed out') }
-  )
   iterationsCompleted.add(1)
 }
 

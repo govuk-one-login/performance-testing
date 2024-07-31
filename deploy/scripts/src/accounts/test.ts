@@ -84,7 +84,11 @@ const groupMap = {
   ],
   deleteAccount: [
     'B04_DeleteAccount_01_LaunchAccountsHome',
-    'B04_DeleteAccount_02_ClickDefaultScenario',
+    'B04_DeleteAccount_01_LaunchAccountsHome::01_OLHCall',
+    'B04_DeleteAccount_01_LaunchAccountsHome::02_OIDCStubCall',
+    'B04_DeleteAccount_02_SelectStubScenario',
+    'B04_DeleteAccount_02_SelectStubScenario::01_OIDCStubCall',
+    'B04_DeleteAccount_02_SelectStubScenario::02_OLHCall',
     'B04_DeleteAccount_03_ClickSecurityTab',
     'B04_DeleteAccount_04_ClickDeleteAccountLink',
     'B04_DeleteAccount_05_EnterCurrentPassword',
@@ -509,25 +513,41 @@ export function deleteAccount(): void {
   iterationsStarted.add(1)
 
   // B04_DeleteAccount_01_LaunchAccountsHome
-  res = timeGroup(groups[0], () => http.get(env.envURL), {
-    isStatusCode200,
-    ...pageContentCheck('API Simulation Tool')
+
+  timeGroup(groups[0], () => {
+    //01_OLHCall
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
+
+    //02_OIDCStubCall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('API Simulation Tool')
+    })
   })
 
   sleepBetween(1, 3)
 
-  //B04_DeleteAccount_02_ClickDefaultScenario
-  res = timeGroup(
-    groups[1],
-    () =>
-      res.submitForm({
-        submitSelector: '[value="default"]'
-      }),
-    { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }
-  )
+  //B04_DeleteAccount_02_SelectStubScenario
+
+  timeGroup(groups[3], () => {
+    //01_OIDCStubCall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () => res.submitForm({ fields: { scenario: 'default' }, params: { redirects: 0 } }),
+      { isStatusCode302 }
+    )
+
+    //02_OLHCall
+    res = timeGroup(groups[5].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Services you can use with GOV.UK One Login')
+    })
+  })
+
+  sleepBetween(1, 3)
 
   // B04_DeleteAccount_03_ClickSecurityTab
-  res = timeGroup(groups[2], () => http.get(env.envURL + '/security'), {
+  res = timeGroup(groups[6], () => http.get(env.envURL + '/security'), {
     isStatusCode200,
     ...pageContentCheck('Delete your GOV.UK One Login')
   })
@@ -535,7 +555,7 @@ export function deleteAccount(): void {
   sleepBetween(1, 3)
 
   // B04_DeleteAccount_04_ClickDeleteAccountLink
-  res = timeGroup(groups[3], () => http.get(env.envURL + '/enter-password?type=deleteAccount'), {
+  res = timeGroup(groups[7], () => http.get(env.envURL + '/enter-password?type=deleteAccount'), {
     isStatusCode200,
     ...pageContentCheck('Enter your password')
   })
@@ -544,7 +564,7 @@ export function deleteAccount(): void {
 
   // B04_DeleteAccount_05_EnterCurrentPassword
   res = timeGroup(
-    groups[4],
+    groups[8],
     () =>
       res.submitForm({
         formSelector: "form[action='/enter-password']",
@@ -563,7 +583,7 @@ export function deleteAccount(): void {
 
   // B04_DeleteAccount_06_DeleteAccountConfirm
   res = timeGroup(
-    groups[5],
+    groups[9],
     () =>
       res.submitForm({
         formSelector: "form[action='/delete-account']"

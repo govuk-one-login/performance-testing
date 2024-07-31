@@ -70,14 +70,17 @@ const groupMap = {
   ],
   changePhone: [
     'B03_ChangePhone_01_LaunchAccountsHome',
-    'B03_ChangePhone_02_ClickDefaultScenario',
+    'B03_ChangePhone_01_LaunchAccountsHome::01_OLHCall',
+    'B03_ChangePhone_01_LaunchAccountsHome::01_OIDCStubCall',
+    'B03_ChangePhone_02_SelectStubScenario',
+    'B03_ChangePhone_02_SelectStubScenario::01_OIDCStubCall',
+    'B03_ChangePhone_02_SelectStubScenario::02_OLHCall',
     'B03_ChangePhone_03_ClickSecurityTab',
     'B03_ChangePhone_04_ClickChangePhoneNumberLink',
     'B03_ChangePhone_05_EnterCurrentPassword',
     'B03_ChangePhone_06_EnterNewPhoneID',
     'B03_ChangePhone_07_EnterSMSOTP',
-    'B03_ChangePhone_08_ClickBackToSecurity',
-    'B03_ChangePhone_09_SignOut'
+    'B03_ChangePhone_08_SignOut'
   ],
   deleteAccount: [
     'B04_DeleteAccount_01_LaunchAccountsHome',
@@ -383,25 +386,41 @@ export function changePhone(): void {
   iterationsStarted.add(1)
 
   // B03_ChangePhone_01_LaunchAccountsHome
-  res = timeGroup(groups[0], () => http.get(env.envURL), {
-    isStatusCode200,
-    ...pageContentCheck('API Simulation Tool')
+
+  timeGroup(groups[0], () => {
+    //01_OLHCall
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
+
+    //02_OIDCStubCall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('API Simulation Tool')
+    })
   })
 
   sleepBetween(1, 3)
 
-  //B03_ChangePhone_02_ClickDefaultScenario
-  res = timeGroup(
-    groups[1],
-    () =>
-      res.submitForm({
-        submitSelector: '[value="default"]'
-      }),
-    { isStatusCode200, ...pageContentCheck('Services you can use with GOV.UK One Login') }
-  )
+  //B03_ChangePhone_02_SelectStubScenario
+
+  timeGroup(groups[3], () => {
+    //01_OIDCStubCall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () => res.submitForm({ fields: { scenario: 'default' }, params: { redirects: 0 } }),
+      { isStatusCode302 }
+    )
+
+    //02_OLHCall
+    res = timeGroup(groups[5].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Services you can use with GOV.UK One Login')
+    })
+  })
+
+  sleepBetween(1, 3)
 
   // B03_ChangePhone_03_ClickSecurityTab
-  res = timeGroup(groups[2], () => http.get(env.envURL + '/security'), {
+  res = timeGroup(groups[6], () => http.get(env.envURL + '/security'), {
     isStatusCode200,
     ...pageContentCheck('Delete your GOV.UK One Login')
   })
@@ -409,7 +428,7 @@ export function changePhone(): void {
   sleepBetween(1, 3)
 
   // B03_ChangePhone_04_ClickChangePhoneNumberLink
-  res = timeGroup(groups[3], () => http.get(env.envURL + '/enter-password?type=changePhoneNumber'), {
+  res = timeGroup(groups[7], () => http.get(env.envURL + '/enter-password?type=changePhoneNumber'), {
     isStatusCode200,
     ...pageContentCheck('Enter your password')
   })
@@ -418,7 +437,7 @@ export function changePhone(): void {
 
   // B03_ChangePhone_05_EnterCurrentPassword
   res = timeGroup(
-    groups[4],
+    groups[8],
     () =>
       res.submitForm({
         formSelector: "form[action='/enter-password']",
@@ -437,7 +456,7 @@ export function changePhone(): void {
 
   // B03_ChangePhone_06_EnterNewPhoneID
   res = timeGroup(
-    groups[5],
+    groups[9],
     () =>
       res.submitForm({
         formSelector: "form[action='/change-phone-number']",
@@ -453,7 +472,7 @@ export function changePhone(): void {
 
   // B03_ChangePhone_07_EnterSMSOTP
   res = timeGroup(
-    groups[6],
+    groups[10],
     () =>
       res.submitForm({
         formSelector: "form[action='/check-your-phone']",
@@ -472,17 +491,9 @@ export function changePhone(): void {
 
   sleepBetween(1, 3)
 
-  // B03_ChangePhone_08_ClickBackToSecurity
-  res = timeGroup(groups[7], () => http.get(env.envURL + '/manage-your-account'), {
-    isStatusCode200,
-    ...pageContentCheck('Delete your GOV.UK One Login')
-  })
-
-  sleepBetween(1, 3)
-
-  // B03_ChangePhone_09_SignOut
+  // B03_ChangePhone_08_SignOut
   res = timeGroup(
-    groups[8],
+    groups[11],
     () =>
       res.submitForm({
         formSelector: "form[action='/sign-out']"

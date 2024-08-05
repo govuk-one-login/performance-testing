@@ -146,7 +146,7 @@ interface DrivingLicenseUser {
 interface DrivingLicenseUserDVLA extends DrivingLicenseUser {
   issueNumber: string
 }
-interface DrivingLicenseUserDVA extends DrivingLicenseUser {}
+type DrivingLicenseUserDVA = DrivingLicenseUser
 
 const csvDVLA: DrivingLicenseUserDVLA[] = new SharedArray('csvDataLicenceDVLA', () => {
   return open('./data/drivingLicenceDVLAData.csv')

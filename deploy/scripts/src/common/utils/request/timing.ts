@@ -38,7 +38,11 @@ export function timeFunction<T>(fn: () => T): [T, number] {
  */
 export function timeRequest<T>(fn: () => T, checks: Checkers<T> = {}): T {
   const [res, duration] = timeFunction(fn)
-  check(res, checks) ? durations.add(duration) : fail('Response validation failed')
+  if (check(res, checks)) {
+    durations.add(duration)
+  } else {
+    fail('Response validation failed')
+  }
   return res
 }
 

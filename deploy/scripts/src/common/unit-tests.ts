@@ -120,7 +120,7 @@ export default async (): Promise<void> => {
       let errorFound = false
       try {
         getEnv('NON_EXISTENT')
-      } catch (error) {
+      } catch {
         errorFound = true
       }
 

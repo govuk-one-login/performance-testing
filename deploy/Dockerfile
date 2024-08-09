@@ -5,7 +5,7 @@ FROM node:20-alpine3.18 AS node-build
 
 ENV WORKDIR=/home/node
 
-ADD scripts ${WORKDIR}/scripts
+COPY scripts ${WORKDIR}/scripts
 
 WORKDIR ${WORKDIR}/scripts
 RUN npm install --ignore-scripts
@@ -24,7 +24,7 @@ RUN xk6 build v0.52.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --out
 # OpenTelemetry Collector
 # -----------------------
 FROM otel/opentelemetry-collector-contrib:0.106.1 AS otel
-ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
+COPY otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---
 # Run
@@ -53,6 +53,6 @@ RUN apk add --no-cache aws-cli curl jq chromium
 USER k6
 RUN mkdir ${WORKDIR}/scripts
 COPY --from=node-build /home/node/scripts/dist ${WORKDIR}/scripts
-ADD reporting ${WORKDIR}/reporting
+COPY reporting ${WORKDIR}/reporting
 
 ENTRYPOINT ["sh"]

@@ -28,6 +28,18 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 
+const env = {
+  cognitoURL: getEnv('FRAUD_COGNITO_URL'),
+  clientId: getEnv('FRAUD_CLIENT_ID'),
+  clientSecret: getEnv('FRAUD_CLIENT_SECRET'),
+  ssfInboundUrl: getEnv('FRAUD_SSF_INBOUND_URL'),
+  fraudPayload: getEnv('FRAUD_PAYLOAD')
+}
+
+const groupMap = {
+  fraud: ['B01_fraud_01_GenerateAccessToken', 'B01_fraud_02_SendSignedEventToSSF']
+} as const
+
 export const options: Options = {
   scenarios: loadProfile.scenarios,
   thresholds: {
@@ -69,18 +81,6 @@ export function setup(): RefinedParams<ResponseType> {
     }
   }
 }
-
-const env = {
-  cognitoURL: getEnv('FRAUD_COGNITO_URL'),
-  clientId: getEnv('FRAUD_CLIENT_ID'),
-  clientSecret: getEnv('FRAUD_CLIENT_SECRET'),
-  ssfInboundUrl: getEnv('FRAUD_SSF_INBOUND_URL'),
-  fraudPayload: getEnv('FRAUD_PAYLOAD')
-}
-
-const groupMap = {
-  fraud: ['B01_fraud_01_GenerateAccessToken', 'B01_fraud_02_SendSignedEventToSSF']
-} as const
 
 export function fraud(data: RefinedParams<ResponseType>): void {
   const groups = groupMap.fraud

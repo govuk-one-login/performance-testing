@@ -23,7 +23,7 @@ const profiles: ProfileList = {
     ...createScenario('hmrc_kbv', LoadProfile.short, 5)
   },
   stress: {
-    ...createScenario('hmrc_kbv', LoadProfile.full, 30)
+    ...createScenario('hmrc_kbv', LoadProfile.full, 14)
   }
 }
 

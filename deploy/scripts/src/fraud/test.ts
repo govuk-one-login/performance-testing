@@ -8,7 +8,7 @@ import {
 } from '../common/utils/config/load-profiles'
 import { getAccessToken } from '../common/utils/authorization/authorization'
 import { timeGroup } from '../common/utils/request/timing'
-import http from 'k6/http'
+import http, { RefinedParams, ResponseType } from 'k6/http'
 import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { type Response } from 'k6/http'
@@ -28,18 +28,6 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 
-export const options: Options = {
-  scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
-}
-
-export function setup(): void {
-  describeProfile(loadProfile)
-}
-
 const env = {
   cognitoURL: getEnv('FRAUD_COGNITO_URL'),
   clientId: getEnv('FRAUD_CLIENT_ID'),
@@ -52,7 +40,17 @@ const groupMap = {
   fraud: ['B01_fraud_01_GenerateAccessToken', 'B01_fraud_02_SendSignedEventToSSF']
 } as const
 
-export function fraud(): void {
+export const options: Options = {
+  scenarios: loadProfile.scenarios,
+  thresholds: {
+    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
+    http_req_failed: ['rate<0.05'] // Error rate <5%
+  }
+}
+
+export function setup(): RefinedParams<ResponseType> {
+  describeProfile(loadProfile)
+
   const groups = groupMap.fraud
   const options = {
     headers: {
@@ -60,7 +58,6 @@ export function fraud(): void {
     }
   }
   // B01_fraud_01_GenerateAccessToken
-  iterationsStarted.add(1)
   const res: Response = timeGroup(
     groups[0],
     () =>
@@ -78,11 +75,16 @@ export function fraud(): void {
   )
 
   const accessToken = getAccessToken(res)
-  const data = {
+  return {
     headers: {
       Authorization: `Bearer ${accessToken}`
     }
   }
+}
+
+export function fraud(data: RefinedParams<ResponseType>): void {
+  const groups = groupMap.fraud
+  iterationsStarted.add(1)
 
   // B01_fraud_02_SendSignedEventToSSF
   timeGroup(groups[1], () => http.post(env.ssfInboundUrl, env.fraudPayload, data), {

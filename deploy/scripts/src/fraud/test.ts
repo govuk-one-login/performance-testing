@@ -13,7 +13,7 @@ import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assert
 import { getEnv } from '../common/utils/config/environment-variables'
 import { type Response } from 'k6/http'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
-import { check } from 'k6'
+import { check, fail } from 'k6'
 
 const profiles: ProfileList = {
   smoke: {
@@ -64,7 +64,10 @@ export function setup(): RefinedParams<ResponseType> {
   )
   console.log('Cognito status code:', res.status, res.status_text)
   console.log('Cognito response:', res.body)
-  check(res, { isStatusCode200, ...pageContentCheck('token') })
+  const ok = check(res, { isStatusCode200, ...pageContentCheck('token') })
+  if (!ok) {
+    fail('Failed to get token from Cognito')
+  }
   const accessToken = getAccessToken(res)
   return {
     headers: {

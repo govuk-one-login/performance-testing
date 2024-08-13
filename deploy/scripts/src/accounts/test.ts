@@ -174,13 +174,20 @@ export function changeEmail(): void {
     res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
 
     //02_OIDCStubCall
-    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('API Simulation Tool')
-    })
-    if (!pageContentCheck('API Simulation Tool').validatePageContent(res)) {
-      console.log(res.html('h1').first().text())
-    }
+    res = timeGroup(
+      groups[2].split('::')[1],
+      () => {
+        const r = http.get(res.headers.Location)
+        if (!pageContentCheck('--API Simulation Tool--').validatePageContent(r)) {
+          console.log(r.html('h1').first().text())
+        }
+        return r
+      },
+      {
+        isStatusCode200,
+        ...pageContentCheck('API Simulation Tool')
+      }
+    )
   })
 
   sleepBetween(1, 3)
@@ -196,110 +203,145 @@ export function changeEmail(): void {
     )
 
     //02_OLHCall
-    res = timeGroup(groups[5].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Services you can use with GOV.UK One Login')
-    })
-    if (!pageContentCheck('Services you can use with GOV.UK One Login').validatePageContent(res)) {
-      console.log(res.html('h2').eq(1).text())
-    }
+    res = timeGroup(
+      groups[5].split('::')[1],
+      () => {
+        const r = http.get(res.headers.Location)
+        if (!pageContentCheck('Services you can use with GOV.UK One Login--').validatePageContent(r)) {
+          console.log(r.html('h2').eq(1).text())
+        }
+        return r
+      },
+      {
+        isStatusCode200,
+        ...pageContentCheck('Services you can use with GOV.UK One Login')
+      }
+    )
   })
 
   sleepBetween(1, 3)
 
   // B01_ChangeEmail_03_ClickSecurityTab
-  res = timeGroup(groups[6], () => http.get(env.envURL + '/security'), {
-    isStatusCode200,
-    ...pageContentCheck('Delete your GOV.UK One Login')
-  })
-  if (!pageContentCheck('Delete your GOV.UK One Login').validatePageContent(res)) {
-    console.log(res.html('h2').eq(3).text())
-  }
+  res = timeGroup(
+    groups[6],
+    () => {
+      const r = http.get(env.envURL + '/security')
+      if (!pageContentCheck('Delete your GOV.UK One Login--').validatePageContent(r)) {
+        console.log(r.html('h2').eq(3).text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Delete your GOV.UK One Login')
+    }
+  )
 
   sleepBetween(1, 3)
 
   // B01_ChangeEmail_04_ClickChangeEmailLink
-  res = timeGroup(groups[7], () => http.get(env.envURL + '/enter-password?type=changeEmail'), {
-    isStatusCode200,
-    ...pageContentCheck('Enter your password')
-  })
-  if (!pageContentCheck('Enter your password').validatePageContent(res)) {
-    console.log(res.html('h1').text())
-  }
+  res = timeGroup(
+    groups[7],
+    () => {
+      const r = http.get(env.envURL + '/enter-password?type=changeEmail')
+      if (!pageContentCheck('Enter your password--').validatePageContent(r)) {
+        console.log(r.html('h1').text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your password')
+    }
+  )
 
   sleepBetween(1, 3)
 
   // B01_ChangeEmail_05_EnterCurrentPassword
   res = timeGroup(
     groups[8],
-    () =>
-      res.submitForm({
+    () => {
+      const r = res.submitForm({
         formSelector: "form[action='/enter-password']",
         fields: {
           requestType: 'changeEmail',
           password: credentials.currPassword
         }
-      }),
-    { isStatusCode200, ...pageContentCheck('Enter your new email address') }
+      })
+      if (!pageContentCheck('Enter your new email address--').validatePageContent(r)) {
+        console.log(r.html('h1').text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your new email address')
+    }
   )
-  if (!pageContentCheck('Enter your new email address').validatePageContent(res)) {
-    console.log(res.html('h1').text())
-  }
 
   sleepBetween(1, 3)
 
   // B01_ChangeEmail_06_EnterNewEmailID
   res = timeGroup(
     groups[9],
-    () =>
-      res.submitForm({
+    () => {
+      const r = res.submitForm({
         formSelector: "form[action='/change-email']",
         fields: {
           email: newEmail
         }
-      }),
-    { isStatusCode200, ...pageContentCheck('Check your email') }
+      })
+      if (!pageContentCheck('Check your email--').validatePageContent(r)) {
+        console.log(r.html('h1').text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Check your email')
+    }
   )
-  if (!pageContentCheck('Check your email').validatePageContent(res)) {
-    console.log(res.html('h1').text())
-  }
 
   sleepBetween(1, 3)
 
   // B01_ChangeEmail_07_EnterEmailOTP
   res = timeGroup(
     groups[10],
-    () =>
-      res.submitForm({
+    () => {
+      const r = res.submitForm({
         formSelector: "form[action='/check-your-email']",
         fields: {
           email: newEmail,
           code: credentials.fixedEmailOTP
         }
-      }),
+      })
+      if (!pageContentCheck('You’ve changed your email address--').validatePageContent(r)) {
+        console.log(r.html('h1').text())
+      }
+      return r
+    },
     {
       isStatusCode200,
       ...pageContentCheck('You’ve changed your email address')
     }
   )
-  if (!pageContentCheck('You’ve changed your email address').validatePageContent(res)) {
-    console.log(res.html('h1').text())
-  }
 
   sleepBetween(1, 3)
 
   // B01_ChangeEmail_08_SignOut
   res = timeGroup(
     groups[11],
-    () =>
-      res.submitForm({
+    () => {
+      const r = res.submitForm({
         formSelector: "form[action='/sign-out']"
-      }),
+      })
+      if (!pageContentCheck('You have signed out--').validatePageContent(r)) {
+        console.log(r.html('h1').text())
+      }
+      return r
+    },
     { isStatusCode200, ...pageContentCheck('You have signed out') }
   )
-  if (!pageContentCheck('You have signed out').validatePageContent(res)) {
-    console.log(res.html('h1').text())
-  }
 
   iterationsCompleted.add(1)
 }

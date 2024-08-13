@@ -178,6 +178,9 @@ export function changeEmail(): void {
       isStatusCode200,
       ...pageContentCheck('API Simulation Tool')
     })
+    if (!pageContentCheck('API Simulation Tool').validatePageContent(res)) {
+      console.log(res.html('h1').first().text())
+    }
   })
 
   sleepBetween(1, 3)
@@ -197,6 +200,9 @@ export function changeEmail(): void {
       isStatusCode200,
       ...pageContentCheck('Services you can use with GOV.UK One Login')
     })
+    if (!pageContentCheck('Services you can use with GOV.UK One Login').validatePageContent(res)) {
+      console.log(res.html('h2').eq(1).text())
+    }
   })
 
   sleepBetween(1, 3)
@@ -206,6 +212,9 @@ export function changeEmail(): void {
     isStatusCode200,
     ...pageContentCheck('Delete your GOV.UK One Login')
   })
+  if (!pageContentCheck('Delete your GOV.UK One Login').validatePageContent(res)) {
+    console.log(res.html('h2').eq(3).text())
+  }
 
   sleepBetween(1, 3)
 
@@ -214,6 +223,9 @@ export function changeEmail(): void {
     isStatusCode200,
     ...pageContentCheck('Enter your password')
   })
+  if (!pageContentCheck('Enter your password').validatePageContent(res)) {
+    console.log(res.html('h1').text())
+  }
 
   sleepBetween(1, 3)
 
@@ -230,6 +242,9 @@ export function changeEmail(): void {
       }),
     { isStatusCode200, ...pageContentCheck('Enter your new email address') }
   )
+  if (!pageContentCheck('Enter your new email address').validatePageContent(res)) {
+    console.log(res.html('h1').text())
+  }
 
   sleepBetween(1, 3)
 
@@ -245,6 +260,9 @@ export function changeEmail(): void {
       }),
     { isStatusCode200, ...pageContentCheck('Check your email') }
   )
+  if (!pageContentCheck('Check your email').validatePageContent(res)) {
+    console.log(res.html('h1').text())
+  }
 
   sleepBetween(1, 3)
 
@@ -264,6 +282,9 @@ export function changeEmail(): void {
       ...pageContentCheck('You’ve changed your email address')
     }
   )
+  if (!pageContentCheck('You’ve changed your email address').validatePageContent(res)) {
+    console.log(res.html('h1').text())
+  }
 
   sleepBetween(1, 3)
 
@@ -276,6 +297,9 @@ export function changeEmail(): void {
       }),
     { isStatusCode200, ...pageContentCheck('You have signed out') }
   )
+  if (!pageContentCheck('You have signed out').validatePageContent(res)) {
+    console.log(res.html('h1').text())
+  }
 
   iterationsCompleted.add(1)
 }

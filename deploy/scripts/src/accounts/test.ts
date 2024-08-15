@@ -227,7 +227,7 @@ export function changeEmail(): void {
     () => {
       const r = http.get(env.envURL + '/security')
       if (!pageContentCheck('Delete your GOV.UK One Login').validatePageContent(r)) {
-        console.log(' Expected "Delete your GOV.UL One Login", got: ', r.html('h2').eq(3).text())
+        console.log(' Expected "Delete your GOV.UK One Login", got: ', r.html('h2').eq(3).text())
       }
       return r
     },

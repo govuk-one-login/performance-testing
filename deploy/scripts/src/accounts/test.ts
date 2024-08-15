@@ -178,7 +178,7 @@ export function changeEmail(): void {
       groups[2].split('::')[1],
       () => {
         const r = http.get(res.headers.Location)
-        if (!pageContentCheck('--API Simulation Tool--').validatePageContent(r)) {
+        if (!pageContentCheck('API Simulation Tool').validatePageContent(r)) {
           console.log(r.html('h1').first().text())
         }
         return r

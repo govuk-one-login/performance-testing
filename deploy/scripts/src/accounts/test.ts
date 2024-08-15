@@ -179,7 +179,7 @@ export function changeEmail(): void {
       () => {
         const r = http.get(res.headers.Location)
         if (!pageContentCheck('API Simulation Tool').validatePageContent(r)) {
-          console.log(r.html('h1').first().text())
+          console.log('Expected "API Simulation Tool", got: ', r.html('h1').first().text())
         }
         return r
       },
@@ -207,8 +207,8 @@ export function changeEmail(): void {
       groups[5].split('::')[1],
       () => {
         const r = http.get(res.headers.Location)
-        if (!pageContentCheck('Services you can use with GOV.UK One Login--').validatePageContent(r)) {
-          console.log(r.html('h2').eq(1).text())
+        if (!pageContentCheck('Services you can use with GOV.UK One Login').validatePageContent(r)) {
+          console.log(' Expected "Services you can use with GOV.UK One Login", got: ', r.html('h2').eq(1).text())
         }
         return r
       },
@@ -226,8 +226,8 @@ export function changeEmail(): void {
     groups[6],
     () => {
       const r = http.get(env.envURL + '/security')
-      if (!pageContentCheck('Delete your GOV.UK One Login--').validatePageContent(r)) {
-        console.log(r.html('h2').eq(3).text())
+      if (!pageContentCheck('Delete your GOV.UK One Login').validatePageContent(r)) {
+        console.log(' Expected "Delete your GOV.UL One Login", got: ', r.html('h2').eq(3).text())
       }
       return r
     },
@@ -244,8 +244,8 @@ export function changeEmail(): void {
     groups[7],
     () => {
       const r = http.get(env.envURL + '/enter-password?type=changeEmail')
-      if (!pageContentCheck('Enter your password--').validatePageContent(r)) {
-        console.log(r.html('h1').text())
+      if (!pageContentCheck('Enter your password').validatePageContent(r)) {
+        console.log(' Expected "Enter your password", got: ', r.html('h1').text())
       }
       return r
     },
@@ -268,8 +268,8 @@ export function changeEmail(): void {
           password: credentials.currPassword
         }
       })
-      if (!pageContentCheck('Enter your new email address--').validatePageContent(r)) {
-        console.log(r.html('h1').text())
+      if (!pageContentCheck('Enter your new email address').validatePageContent(r)) {
+        console.log(' Expected "Enter your new email address", got: ', r.html('h1').text())
       }
       return r
     },
@@ -291,8 +291,8 @@ export function changeEmail(): void {
           email: newEmail
         }
       })
-      if (!pageContentCheck('Check your email--').validatePageContent(r)) {
-        console.log(r.html('h1').text())
+      if (!pageContentCheck('Check your email').validatePageContent(r)) {
+        console.log(' Expected "Check your email", got: ', r.html('h1').text())
       }
       return r
     },
@@ -315,8 +315,8 @@ export function changeEmail(): void {
           code: credentials.fixedEmailOTP
         }
       })
-      if (!pageContentCheck('You’ve changed your email address--').validatePageContent(r)) {
-        console.log(r.html('h1').text())
+      if (!pageContentCheck('You’ve changed your email address').validatePageContent(r)) {
+        console.log('Expected "You’ve changed your email address", got: ', r.html('h1').text())
       }
       return r
     },
@@ -335,8 +335,8 @@ export function changeEmail(): void {
       const r = res.submitForm({
         formSelector: "form[action='/sign-out']"
       })
-      if (!pageContentCheck('You have signed out--').validatePageContent(r)) {
-        console.log(r.html('h1').text())
+      if (!pageContentCheck('You have signed out').validatePageContent(r)) {
+        console.log('Expected "You have signed out", got: ', r.html('h1').text())
       }
       return r
     },

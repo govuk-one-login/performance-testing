@@ -122,6 +122,7 @@ interface SignInData {
   mfaOption: mfaType
 }
 const dataSignIn: SignInData[] = new SharedArray('data', () =>
+  // We have 10k users for each auth type setup in auth.
   Array.from({ length: 10000 }, (_, i) => {
     const id: string = Math.floor(i / 2 + 1)
       .toString()

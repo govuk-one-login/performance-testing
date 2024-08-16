@@ -28,14 +28,14 @@ const profiles: ProfileList = {
     ...createScenario('signUp', LoadProfile.short, 30)
   },
   load20: {
-    ...createScenario('signIn', LoadProfile.full, 380),
+    ...createScenario('signIn', LoadProfile.full, 380, 26),
     ...createScenario('signUp', LoadProfile.full, 20)
   },
   load: {
-    ...createScenario('signIn', LoadProfile.full, 500)
+    ...createScenario('signIn', LoadProfile.full, 500, 20)
   },
   stress: {
-    ...createScenario('signIn', LoadProfile.full, 2000),
+    ...createScenario('signIn', LoadProfile.full, 2000, 5),
     ...createScenario('signUp', LoadProfile.full, 100)
   },
   rampOnly: {

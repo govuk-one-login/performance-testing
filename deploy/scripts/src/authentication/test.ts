@@ -17,6 +17,7 @@ import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_m
 import { timeGroup } from '../common/utils/request/timing'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { browser, type Page, type Response as PageResponse } from 'k6/browser'
+import { vu } from 'k6/execution';
 
 const profiles: ProfileList = {
   smoke: {
@@ -159,7 +160,9 @@ async function ClickButton(p: Page, selector: string = 'button[type="Submit"]'):
 
 export async function uiSignIn() {
   iterationsStarted.add(1)
-  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
+  // https://community.grafana.com/t/unique-login-for-each-virtual-user/99596
+  const userData = dataSignIn[vu.idInTest - 1]
+
   const page: Page = await browser.newPage()
   try {
     await page.goto(env.rpStub + '/start')

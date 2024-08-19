@@ -14,7 +14,7 @@ RUN npm start
 # -------------------------------
 # Build k6 binary with extensions
 # -------------------------------
-FROM golang:1.22-alpine AS k6-build
+FROM golang:1.23-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.10.0

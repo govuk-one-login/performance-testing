@@ -60,8 +60,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 1000,
       maxVUs: 3000,
       stages: [
-        { target: 100, duration: '15m' }, // Ramp up to target throughput over 15 minutes
-        { target: 100, duration: '5m' }, // Maintain steady state at target throughput for 5 minutes
+        { target: 35, duration: '15m' }, // Ramp up to target throughput over 15 minutes
+        { target: 35, duration: '5m' }, // Maintain steady state at target throughput for 5 minutes
         { target: 0, duration: '5m' } // Ramp down over 5 minutes
       ],
       exec: 'passport'

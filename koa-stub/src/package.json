@@ -7,7 +7,7 @@
     "@aws-sdk/client-dynamodb": "^3.632.0",
     "@codegenie/serverless-express": "^4.15.0",
     "@koa/cors": "^5.0.0",
-    "axios": "^1.7.4",
+    "axios": "^1.7.5",
     "axios-cookiejar-support": "^5.0.2",
     "koa": "^2.15.3",
     "koa-cookie": "^1.0.0",

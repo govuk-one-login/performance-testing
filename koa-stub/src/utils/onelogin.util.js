@@ -1,7 +1,7 @@
 const { Issuer, custom } = require("openid-client");
 
 custom.setHttpOptionsDefaults({
-  timeout: 7000,
+  timeout: 30000, // Longer than API Gateway
 });
 
 async function setupClient() {

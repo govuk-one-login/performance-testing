@@ -4,10 +4,10 @@
   "description": "An example config for a RP stub",
   "main": "app.js",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.624.0",
-    "@codegenie/serverless-express": "^4.14.1",
+    "@aws-sdk/client-dynamodb": "^3.632.0",
+    "@codegenie/serverless-express": "^4.15.0",
     "@koa/cors": "^5.0.0",
-    "axios": "^1.7.3",
+    "axios": "^1.7.4",
     "axios-cookiejar-support": "^5.0.2",
     "koa": "^2.15.3",
     "koa-cookie": "^1.0.0",

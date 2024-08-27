@@ -28,14 +28,14 @@ const profiles: ProfileList = {
     ...createScenario('signUp', LoadProfile.short, 30)
   },
   load20: {
-    ...createScenario('signIn', LoadProfile.full, 380),
+    ...createScenario('signIn', LoadProfile.full, 380, 26),
     ...createScenario('signUp', LoadProfile.full, 20)
   },
   load: {
-    ...createScenario('signIn', LoadProfile.full, 500)
+    ...createScenario('signIn', LoadProfile.full, 500, 20)
   },
   stress: {
-    ...createScenario('signIn', LoadProfile.full, 2000),
+    ...createScenario('signIn', LoadProfile.full, 2000, 5),
     ...createScenario('signUp', LoadProfile.full, 100)
   },
   rampOnly: {
@@ -122,6 +122,7 @@ interface SignInData {
   mfaOption: mfaType
 }
 const dataSignIn: SignInData[] = new SharedArray('data', () =>
+  // We have 10k users for each auth type setup in auth.
   Array.from({ length: 10000 }, (_, i) => {
     const id: string = Math.floor(i / 2 + 1)
       .toString()
@@ -159,7 +160,9 @@ async function ClickButton(p: Page, selector: string = 'button[type="Submit"]'):
 
 export async function uiSignIn() {
   iterationsStarted.add(1)
-  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
+  // https://community.grafana.com/t/unique-login-for-each-virtual-user/99596
+  const userData = dataSignIn[execution.vu.idInTest - 1]
+
   const page: Page = await browser.newPage()
   try {
     await page.goto(env.rpStub + '/start')

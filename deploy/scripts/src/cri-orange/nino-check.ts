@@ -15,6 +15,9 @@ import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/ut
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
+import { Imposter } from '../common/imposter'
+
+const imposter = new Imposter()
 
 const profiles: ProfileList = {
   smoke: {
@@ -83,7 +86,14 @@ const csvData1: Nino[] = new SharedArray('csvDataNino', () => {
     })
 })
 
-export function ninoCheck(): void {
+let imposterstarted = false
+
+export function ninoCheck(): void{
+  if (!imposterstarted) { const response = imposter.handler(); 
+    console.log('Response status: ', response.status);
+    console.log('Response body: ', response.body);
+    imposterstarted = true
+  }
   const groups = groupMap.ninoCheck
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`

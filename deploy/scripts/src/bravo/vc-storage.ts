@@ -65,7 +65,7 @@ interface SummariseSubjectID {
 }
 
 const csvData: SummariseSubjectID[] = new SharedArray('Summarise Subject ID', function () {
-  return open('./data/summariseSubjectID.csv')
+  return open('./bravo/data/summariseSubjectID.csv')
     .split('\n')
     .slice(1)
     .map(subID => {
@@ -100,6 +100,7 @@ export function persistVC(): void {
   }
 
   const body = JSON.stringify(Object.values(jwtTokens).map(token => generateCreateVCPayload(token, 'CURRENT')))
+
   // R01_PersistVC_01_CreateVC
   timeGroup(groups[0], () => http.post(env.envURL + `/vcs/${subjectID}`, body, options), {
     isStatusCode202: r => r.status === 202,

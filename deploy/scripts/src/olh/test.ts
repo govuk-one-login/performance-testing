@@ -50,7 +50,8 @@ const groupMap = {
     'B01_ChangeEmail_04_ClickChangeEmailLink',
     'B01_ChangeEmail_05_EnterCurrentPassword',
     'B01_ChangeEmail_06_EnterNewEmailID',
-    'B01_ChangeEmail_07_EnterEmailOTP'
+    'B01_ChangeEmail_07_EnterEmailOTP',
+    'B01_ChangeEmail_08_Logout'
   ],
   changePassword: [
     'B02_ChangePassword_01_LaunchAccountsHome',
@@ -326,6 +327,21 @@ export function changeEmail(): void {
   )
 
   sleepBetween(1, 3)
+
+  // B01_ChangeEmail_08_SignOut
+  res = timeGroup(
+    groups[11],
+    () => {
+      const r = res.submitForm({
+        formSelector: "form[action='/sign-out']"
+      })
+      if (!pageContentCheck('You have signed out').validatePageContent(r)) {
+        console.log('Expected "You have signed out", got: ', r.html('h1').text())
+      }
+      return r
+    },
+    { isStatusCode200, ...pageContentCheck('You have signed out') }
+  )
 
   iterationsCompleted.add(1)
 }

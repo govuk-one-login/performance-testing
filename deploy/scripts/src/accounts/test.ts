@@ -50,7 +50,8 @@ const groupMap = {
     'B01_ChangeEmail_04_ClickChangeEmailLink',
     'B01_ChangeEmail_05_EnterCurrentPassword',
     'B01_ChangeEmail_06_EnterNewEmailID',
-    'B01_ChangeEmail_07_EnterEmailOTP'
+    'B01_ChangeEmail_07_EnterEmailOTP',
+    'B01_ChangeEmail_08_Logout'
   ],
   changePassword: [
     'B02_ChangePassword_01_LaunchAccountsHome',
@@ -62,7 +63,10 @@ const groupMap = {
     'B02_ChangePassword_03_ClickSecurityTab', //pragma: allowlist secret
     'B02_ChangePassword_04_ClickChangePasswordLink',
     'B02_ChangePassword_05_EnterCurrentPassword',
-    'B02_ChangePassword_06_EnterNewPassword'
+    'B02_ChangePassword_06_EnterNewPassword',
+    'B02_ChangePassword_07_SignOut',
+    'B02_ChangePassword_07_SignOut::01_OLHCall',
+    'B02_ChangePassword_07_SignOut::01_OIDCStubCall'
   ],
   changePhone: [
     'B03_ChangePhone_01_LaunchAccountsHome',
@@ -75,7 +79,8 @@ const groupMap = {
     'B03_ChangePhone_04_ClickChangePhoneNumberLink',
     'B03_ChangePhone_05_EnterCurrentPassword',
     'B03_ChangePhone_06_EnterNewPhoneID',
-    'B03_ChangePhone_07_EnterSMSOTP'
+    'B03_ChangePhone_07_EnterSMSOTP',
+    'B03_ChangePhone_08_SignOut'
   ],
   deleteAccount: [
     'B04_DeleteAccount_01_LaunchAccountsHome',
@@ -323,6 +328,21 @@ export function changeEmail(): void {
 
   sleepBetween(1, 3)
 
+  // B01_ChangeEmail_08_SignOut
+  res = timeGroup(
+    groups[11],
+    () => {
+      const r = res.submitForm({
+        formSelector: "form[action='/sign-out']"
+      })
+      if (!pageContentCheck('You have signed out').validatePageContent(r)) {
+        console.log('Expected "You have signed out", got: ', r.html('h1').text())
+      }
+      return r
+    },
+    { isStatusCode200, ...pageContentCheck('You have signed out') }
+  )
+
   iterationsCompleted.add(1)
 }
 
@@ -409,6 +429,23 @@ export function changePassword(): void {
   )
 
   sleepBetween(1, 3)
+
+  // B02_ChangePassword_07_SignOut
+
+  timeGroup(groups[10], () => {
+    //01_OLHCall
+    res = timeGroup(
+      groups[11].split('::')[1],
+      () => res.submitForm({ formSelector: "form[action='/sign-out']", params: { redirects: 0 } }),
+      { isStatusCode302 }
+    )
+
+    //02_OIDCStubCall
+    res = timeGroup(groups[12].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('API Simulation Tool')
+    })
+  })
 
   iterationsCompleted.add(1)
 }
@@ -523,6 +560,17 @@ export function changePhone(): void {
   )
 
   sleepBetween(1, 3)
+
+  // B03_ChangePhone_08_SignOut
+  res = timeGroup(
+    groups[11],
+    () =>
+      res.submitForm({
+        formSelector: "form[action='/sign-out']"
+      }),
+    { isStatusCode200, ...pageContentCheck('You have signed out') }
+  )
+
   iterationsCompleted.add(1)
 }
 

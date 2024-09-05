@@ -28,7 +28,7 @@ const profiles: ProfileList = {
     ...createScenario('contactsPage', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('changeEmail', LoadProfile.full, 15),
+    ...createScenario('changeEmail', LoadProfile.full, 30),
     ...createScenario('changePassword', LoadProfile.full, 15),
     ...createScenario('changePhone', LoadProfile.full, 15),
     ...createScenario('deleteAccount', LoadProfile.full, 15),

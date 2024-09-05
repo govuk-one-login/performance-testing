@@ -2,13 +2,10 @@ import http from 'k6/http';
 
 export class Imposter {
   public handler() {
-    const url = 'https://26okyhxy99.execute-api.eu-west-2.amazonaws.com/build/individuals/authentication/authenticator/api/match';
-    
+    const url = 'https://privatevpceid';
+
     const body = JSON.stringify({
-      firstName: 'Jim',
-      lastName: 'Ferguson',
-      dateOfBirth: '1970-01-01',
-      nino: 'AA000003D',
+      'jsonbody'
     });
 
     const params = {

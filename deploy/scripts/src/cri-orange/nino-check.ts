@@ -88,11 +88,12 @@ const csvData1: Nino[] = new SharedArray('csvDataNino', () => {
 
 let imposterstarted = false
 
-export function ninoCheck(): void {
-  if (!imposterstarted) {
-    const response = imposter.handler()
-    console.log('Response status: ', response.status)
-    console.log('Response body: ', response.body)
+let imposterstarted = false
+
+export function ninoCheck(): void{
+  if (!imposterstarted) { const response = imposter.handler();
+    console.log('Response status: ', response.status);
+    console.log('Response body: ', response.body);
     imposterstarted = true
   }
   const groups = groupMap.ninoCheck

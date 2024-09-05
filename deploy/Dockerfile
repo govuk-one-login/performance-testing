@@ -8,8 +8,8 @@ ENV WORKDIR=/home/node
 COPY scripts ${WORKDIR}/scripts
 
 WORKDIR ${WORKDIR}/scripts
-RUN npm install --ignore-scripts
-RUN npm start
+RUN npm install --ignore-scripts \
+  && npm start
 
 # -------------------------------
 # Build k6 binary with extensions
@@ -17,8 +17,8 @@ RUN npm start
 FROM golang:1.23-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
-RUN go install go.k6.io/xk6/cmd/xk6@v0.10.0
-RUN xk6 build v0.52.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --output /k6
+RUN go install go.k6.io/xk6/cmd/xk6@v0.10.0 \
+  && xk6 build v0.52.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --output /k6
 
 # -----------------------
 # OpenTelemetry Collector

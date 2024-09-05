@@ -101,6 +101,7 @@ describe("Tests against the OIDC Service with errors", () => {
     expect(logoutresponse.data).toBe("TestPage");
   });
   test("The OIDC flow fails, if all calls to userinfo is a 401", async () => {
+    console.warn.mockRestore();
     const spyConsole = jest.spyOn(console, "warn");
     service.on("beforeUserinfo", (userInfoResponse, req) => {
       userInfoResponse.body = {
@@ -115,7 +116,7 @@ describe("Tests against the OIDC Service with errors", () => {
     });
 
     expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
-    expect(spyConsole).toHaveBeenCalledTimes(2);
+    expect(spyConsole).toHaveBeenCalledTimes(3);
     expect(spyConsole).toBeCalledWith(
       "Request to userinfo failed due to OPError: invalid_token"
     );

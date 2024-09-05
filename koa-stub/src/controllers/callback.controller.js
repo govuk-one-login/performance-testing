@@ -86,12 +86,10 @@ async function getUserInfo(ctx, access_token) {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const response = await ctx.oneLogin.userinfo(access_token);
-      console.log(`Attempt ${attempt}: Response ${response}`);
+      console.log(response);
       return response;
     } catch (error) {
-      console.warn(
-        `Attempt ${attempt}: Request to userinfo failed due to ${error}`
-      );
+      console.warn(`Request to userinfo failed due to ${error}`);
       const delay = 1000;
       await new Promise((resolve) => setTimeout(resolve, delay));
     }

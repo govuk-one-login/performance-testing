@@ -81,23 +81,20 @@ const processCallback = async (ctx) => {
 };
 
 async function getUserInfo(ctx, access_token) {
-  let attempt = 0;
   let maxRetries = 3;
   console.log("Getting the userinfo request");
-  try {
-    let response = await ctx.oneLogin.userinfo(access_token);
-    console.log(response);
-    return response;
-  } catch (error) {
-    if (attempt < maxRetries) {
-      attempt += 1;
-      const delay = 1000;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await ctx.oneLogin.userinfo(access_token);
+      console.log(response);
+      return response;
+    } catch (error) {
       console.warn(`Request to userinfo failed due to ${error}`);
+      const delay = 1000;
       await new Promise((resolve) => setTimeout(resolve, delay));
-      return await ctx.oneLogin.userinfo(access_token);
     }
-    throw new Error(`Userinfo endpoint not authorising`);
   }
+  throw new Error(`Userinfo endpoint not authorising`);
 }
 
 module.exports = {

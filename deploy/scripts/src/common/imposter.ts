@@ -1,22 +1,28 @@
-import http from 'k6/http';
+import http from 'k6/http'
+import { getEnv } from './utils/config/environment-variables'
+
+const env = {
+  imposterStubURL: getEnv('IDENTITY_NINO_IMPOSTER_STUB_URL')
+}
+const payload = {
+  reqBody: getEnv('IDENTITY_NINO_IMPOSTER_PAYLOAD')
+}
 
 export class Imposter {
   public handler() {
-    const url = 'https://privatevpceid';
+    const url = `'https://${env.imposterStubURL}`
 
-    const body = JSON.stringify({
-      'jsonbody'
-    });
+    const body = JSON.stringify(payload.reqBody)
 
     const params = {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer goodToken',
-      },
-    };
+        Authorization: 'Bearer goodToken'
+      }
+    }
 
-    const response = http.post(url, body, params);
+    const response = http.post(url, body, params)
 
-    return response;
+    return response
   }
 }

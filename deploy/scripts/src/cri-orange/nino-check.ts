@@ -46,10 +46,6 @@ export const options: Options = {
   tags: { name: '' }
 }
 
-export function setup(): void {
-  describeProfile(loadProfile)
-}
-
 const env = {
   ipvCoreStub: getEnv('IDENTITY_CORE_STUB_URL'),
   envName: getEnv('ENVIRONMENT')
@@ -86,15 +82,18 @@ const csvData1: Nino[] = new SharedArray('csvDataNino', () => {
     })
 })
 
-let imposterstarted = false
-
-export function ninoCheck(): void {
+export function setup(): void {
+  describeProfile(loadProfile)
+  let imposterstarted = false
   if (!imposterstarted) {
     const response = imposter.handler()
     console.log('Response status: ', response.status)
     console.log('Response body: ', response.body)
     imposterstarted = true
   }
+}
+
+export function ninoCheck(): void {
   const groups = groupMap.ninoCheck
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`

@@ -10,7 +10,7 @@ const payload = {
 
 export class Imposter {
   public handler() {
-    const url = `'https://${env.imposterStubURL}`
+    const url = `https://${env.imposterStubURL}/build/individuals/authentication/authenticator/api/match`
 
     const body = JSON.stringify(payload.reqBody)
 

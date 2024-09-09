@@ -9,6 +9,21 @@ updates:
     directory: "/deploy/scripts"
     schedule:
       interval: "weekly"
+    groups:
+      eslint:
+        patterns:
+          - "@eslint/*"
+          - "@typescript-eslint/*"
+          - "eslint-*"
+          - "eslint"
+      esbuild:
+        patterns:
+          - "esbuild-*"
+          - "esbuild"
+      k6:
+        patterns:
+          - "@types/k6"
+          - "k6"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -24,3 +39,21 @@ updates:
     directory: "/koa-stub/src"
     schedule:
       interval: "weekly"
+    groups:
+      aws-sdk:
+        patterns:
+          - "@aws-sdk/*"
+          - "aws-sdk-*"
+      axios:
+        patterns:
+          - "axios-*"
+          - "axios"
+      koa:
+        patterns:
+          - "@koa/*"
+          - "koa-*"
+          - "koa"
+      supertest:
+        patterns:
+          - "supertest-*"
+          - "supertest"

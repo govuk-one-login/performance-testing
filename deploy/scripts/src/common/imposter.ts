@@ -7,6 +7,7 @@ const env = {
 const payload = {
   reqBody: getEnv('IDENTITY_NINO_IMPOSTER_PAYLOAD')
 }
+const bearerToken = getEnv('IDENTITY_NINO_BEARER_TOKEN')
 
 export class Imposter {
   public handler() {
@@ -17,7 +18,7 @@ export class Imposter {
     const params = {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer goodToken'
+        Authorization: bearerToken
       }
     }
 

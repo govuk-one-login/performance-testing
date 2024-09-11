@@ -15,7 +15,7 @@ import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/ut
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
-import { Imposter } from '../common/imposter'
+import { Imposter } from '../common/lambda-warmer'
 
 const imposter = new Imposter()
 

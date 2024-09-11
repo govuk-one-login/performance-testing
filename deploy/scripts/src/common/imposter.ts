@@ -2,16 +2,17 @@ import http from 'k6/http'
 import { getEnv } from './utils/config/environment-variables'
 
 const env = {
-  imposterStubURL: getEnv('IDENTITY_NINO_IMPOSTER_STUB_URL')
+  imposterStubURL: getEnv('IDENTITY_IMPOSTER_STUB_URL'),
+  environment: getEnv('ENVIRONMENT')
 }
 const payload = {
-  reqBody: getEnv('IDENTITY_NINO_IMPOSTER_PAYLOAD')
+  reqBody: getEnv('IDENTITY_IMPOSTER_PAYLOAD')
 }
-const bearerToken = getEnv('IDENTITY_NINO_BEARER_TOKEN')
+const bearerToken = getEnv('IDENTITY_IMPOSTER_BEARER_TOKEN')
 
 export class Imposter {
   public handler() {
-    const url = `https://${env.imposterStubURL}/build/individuals/authentication/authenticator/api/match`
+    const url = `https://${env.imposterStubURL}/${env.environment}/individuals/authentication/authenticator/api/match`
 
     const body = JSON.stringify(payload.reqBody)
 

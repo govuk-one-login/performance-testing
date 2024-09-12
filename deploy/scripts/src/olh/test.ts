@@ -198,7 +198,7 @@ export function changeEmail(): void {
     //01_OIDCStubCall
     res = timeGroup(
       groups[4].split('::')[1],
-      () => res.submitForm({ fields: { scenario: 'default' }, params: { redirects: 0 } }),
+      () => res.submitForm({ fields: { scenario: 'userPerformanceTest' }, params: { redirects: 0 } }),
       { isStatusCode302 }
     )
 
@@ -369,7 +369,7 @@ export function changePassword(): void {
     //01_OIDCStubCall
     res = timeGroup(
       groups[4].split('::')[1],
-      () => res.submitForm({ fields: { scenario: 'default' }, params: { redirects: 0 } }),
+      () => res.submitForm({ fields: { scenario: 'userPerformanceTest' }, params: { redirects: 0 } }),
       { isStatusCode302 }
     )
 
@@ -476,7 +476,7 @@ export function changePhone(): void {
     //01_OIDCStubCall
     res = timeGroup(
       groups[4].split('::')[1],
-      () => res.submitForm({ fields: { scenario: 'default' }, params: { redirects: 0 } }),
+      () => res.submitForm({ fields: { scenario: 'userPerformanceTest' }, params: { redirects: 0 } }),
       { isStatusCode302 }
     )
 
@@ -600,7 +600,7 @@ export function deleteAccount(): void {
     //01_OIDCStubCall
     res = timeGroup(
       groups[4].split('::')[1],
-      () => res.submitForm({ fields: { scenario: 'default' }, params: { redirects: 0 } }),
+      () => res.submitForm({ fields: { scenario: 'userPerformanceTest' }, params: { redirects: 0 } }),
       { isStatusCode302 }
     )
 

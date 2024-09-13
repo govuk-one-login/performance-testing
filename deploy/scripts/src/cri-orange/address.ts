@@ -22,7 +22,7 @@ const profiles: ProfileList = {
     ...createScenario('address', LoadProfile.smoke)
   },
   lowVolume: {
-    ...createScenario('address', LoadProfile.short, 30)
+    ...createScenario('address', LoadProfile.short, 15)
   },
   stress: {
     ...createScenario('address', LoadProfile.full, 65)

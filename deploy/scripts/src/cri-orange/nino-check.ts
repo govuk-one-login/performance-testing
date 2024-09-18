@@ -84,6 +84,9 @@ const csvData1: Nino[] = new SharedArray('csvDataNino', () => {
 
 export function setup(): void {
   describeProfile(loadProfile)
+}
+
+export function ninoCheck(): void {
   let imposterstarted = false
   if (!imposterstarted) {
     const response = imposter.handler()
@@ -91,9 +94,6 @@ export function setup(): void {
     console.log('Response body: ', response.body)
     imposterstarted = true
   }
-}
-
-export function ninoCheck(): void {
   const groups = groupMap.ninoCheck
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`

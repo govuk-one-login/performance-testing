@@ -189,7 +189,7 @@ if (!validEnvironments.includes(environment))
 const env = {
   orchStubEndPoint: __ENV[`IDENTITY_${environment}_ORCH_STUB_URL`],
   ipvCoreURL: __ENV[`IDENTITY_${environment}_CORE_URL`],
-  vtrText: __ENV[`IDENTITY_${environment}_VTR_TEXT`]
+  vtrText: __ENV[`IDENTITY_${environment}_CORE_VTR_TEXT`]
   // staticResources: getEnv('K6_NO_STATIC_RESOURCES') !== 'true'
 }
 
@@ -286,7 +286,7 @@ export function passport(): void {
     // 02_CoreCall
     res = timeGroup(groups[9].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Do you want to use your UK photocard driving licence or UK passport to prove your identity')
+      ...pageContentCheck('Enter your UK passport details')
     })
   })
 

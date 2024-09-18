@@ -457,6 +457,7 @@ Resources:
               FRAUD_SSF_INBOUND_URL: "/perfTest/fraud/SSFInboundURL"
               IDENTITY_ADDRESS_URL: "/perfTest/identity/orange/addressUrl"
               IDENTITY_BUILD_CORE_URL: "/perfTest/identity/build/coreUrl"
+              IDENTITY_BUILD_CORE_VTR_TEXT: "/perfTest/identity/build/coreVtrText"
               IDENTITY_BUILD_ORCH_STUB_URL: "/perfTest/identity/build/orchStubUrl"
               IDENTITY_BUILD_OTG_URL: "/perfTest/identity/orange/OTGUrlBuild"
               IDENTITY_CIMIT_GETCIC: "/perfTest/identity/cimit/getcic"

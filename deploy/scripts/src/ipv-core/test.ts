@@ -105,17 +105,17 @@ const groupMap = {
     'B01_Identity_11_ContinueSuccessPage::02_OrchStub'
   ],
   idReuse: [
-    'B03_IDReuse_01_LoginToCore',
-    'B03_IDReuse_01_LoginToCore::01_OrchStub',
-    'B03_IDReuse_01_LoginToCore::02_CoreCall',
-    'B03_IDReuse_02_ClickContinue',
-    'B03_IDReuse_02_ClickContinue::01_CoreCall',
-    'B03_IDReuse_02_ClickContinue::02_OrchStub'
+    'B02_IDReuse_01_LoginToCore',
+    'B02_IDReuse_01_LoginToCore::01_OrchStub',
+    'B02_IDReuse_01_LoginToCore::02_CoreCall',
+    'B02_IDReuse_02_ClickContinue',
+    'B02_IDReuse_02_ClickContinue::01_CoreCall',
+    'B02_IDReuse_02_ClickContinue::02_OrchStub'
   ],
   orchStubIsolatedTest: [
-    'B04_OrchStub_01_LaunchOrchestratorStub',
-    'B04_OrchStub_02_GoToFullJourneyRoute',
-    'B04_OrchStub_02_GoToFullJourneyRoute::01_OrchStub'
+    'B01_Identity_01_LaunchOrchestratorStub',
+    'B01_Identity_02_GoToFullJourneyRoute',
+    'B01_Identity_02_GoToFullJourneyRoute::01_OrchStubCall'
   ]
 } as const
 
@@ -161,7 +161,7 @@ const stubCreds = {
   password: getEnv('IDENTITY_ORCH_STUB_PASSWORD')
 }
 
-export function identity(): void {
+export function identity(stubOnly: boolean = false): void {
   const groups = groupMap.identity
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
@@ -203,12 +203,17 @@ export function identity(): void {
         ),
       { isStatusCode302 }
     )
+    if (stubOnly) return
     // 02_CoreCall
     res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Tell us if you have one of the following types of photo ID')
     })
   })
+  if (stubOnly) {
+    iterationsCompleted.add(1)
+    return
+  }
 
   sleepBetween(0.5, 1)
 
@@ -502,46 +507,7 @@ export function idReuse(): void {
 }
 
 export function orchStubIsolatedTest(): void {
-  const groups = groupMap.orchStubIsolatedTest
-  let res: Response
-  const credentials = `${stubCreds.userName}:${stubCreds.password}`
-  const encodedCredentials = encoding.b64encode(credentials)
-  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
-  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0')
-  const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
-  iterationsStarted.add(1)
-  // B04_OrchStub_01_LaunchOrchestratorStub
-  res = timeGroup(
-    groups[0],
-    () =>
-      http.get(env.orchStubEndPoint, {
-        headers: { Authorization: `Basic ${encodedCredentials}` }
-      }),
-    { isStatusCode200, ...pageContentCheck('Enter userId manually') }
-  )
-
-  const userId = getUserId(res)
-  const signInJourneyId = getSignInJourneyId(res)
-
-  sleepBetween(0.5, 1)
-
-  timeGroup(groups[1], () => {
-    // 01_OrchStub
-    res = timeGroup(
-      groups[2].split('::')[1],
-      () =>
-        http.get(
-          env.orchStubEndPoint +
-            `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=Cl.Cm.P2&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
-          {
-            headers: { Authorization: `Basic ${encodedCredentials}` },
-            redirects: 0
-          }
-        ),
-      { isStatusCode302 }
-    )
-  })
-  iterationsCompleted.add(1)
+  identity(true)
 }
 
 function getUserId(r: Response): string {

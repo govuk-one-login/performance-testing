@@ -22,24 +22,20 @@ import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('passport', LoadProfile.smoke),
-    ...createScenario('drivingLicence', LoadProfile.smoke),
+    ...createScenario('identity', LoadProfile.smoke),
     ...createScenario('idReuse', LoadProfile.smoke),
     ...createScenario('orchStubIsolatedTest', LoadProfile.smoke)
   },
   deployment: {
-    ...createScenario('passport', LoadProfile.deployment, 2),
-    ...createScenario('drivingLicence', LoadProfile.deployment, 2),
+    ...createScenario('identity', LoadProfile.deployment, 2),
     ...createScenario('idReuse', LoadProfile.deployment, 10)
   },
   lowVolume: {
-    ...createScenario('passport', LoadProfile.short, 20),
-    ...createScenario('drivingLicence', LoadProfile.short, 20),
+    ...createScenario('identity', LoadProfile.short, 20),
     ...createScenario('idReuse', LoadProfile.short, 20)
   },
   load: {
-    ...createScenario('passport', LoadProfile.full, 100),
-    ...createScenario('drivingLicence', LoadProfile.full, 30),
+    ...createScenario('identity', LoadProfile.full, 100),
     ...createScenario('idReuse', LoadProfile.full, 1900, 5),
     ...createScenario('orchStubIsolatedTest', LoadProfile.full, 100)
   },
@@ -71,75 +67,42 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  passport: [
-    'B01_Passport_01_LaunchOrchestratorStub',
-    'B01_Passport_02_GoToFullJourneyRoute',
-    'B01_Passport_02_GoToFullJourneyRoute::01_OrchStubCall',
-    'B01_Passport_02_GoToFullJourneyRoute::02_CoreCall',
-    'B01_Passport_03_ClickContinueStartPage',
-    'B01_Passport_03_ClickContinueStartPage::01_CoreCall',
-    'B01_Passport_03_ClickContinueStartPage::02_DCMAWStub',
-    'B01_Passport_04_DCMAWContinue',
-    'B01_Passport_04_DCMAWContinue::01_DCMAWStub',
-    'B01_Passport_04_DCMAWContinue::02_CoreCall',
-    'B01_Passport_05_ContinueOnPYIStartPage',
-    'B01_Passport_05_ContinueOnPYIStartPage::01_CoreCall',
-    'B01_Passport_05_ContinueOnPYIStartPage::02_PassStub',
-    'B01_Passport_06_PassportDataContinue',
-    'B01_Passport_06_PassportDataContinue::01_PassStub',
-    'B01_Passport_06_PassportDataContinue::02_CoreCall',
-    'B01_Passport_06_PassportDataContinue::03_AddStub',
-    'B01_Passport_07_AddrDataContinue',
-    'B01_Passport_07_AddrDataContinue::01_AddStub',
-    'B01_Passport_07_AddrDataContinue::02_CoreCall',
-    'B01_Passport_07_AddrDataContinue::03_FraudStub',
-    'B01_Passport_08_FraudDataContinue',
-    'B01_Passport_08_FraudDataContinue::01_FraudStub',
-    'B01_Passport_08_FraudDataContinue::02_CoreCall',
-    'B01_Passport_09_PreKBVTransition',
-    'B01_Passport_09_PreKBVTransition::01_CoreCall',
-    'B01_Passport_09_PreKBVTransition::02_KBVStub',
-    'B01_Passport_10_KBVDataContinue',
-    'B01_Passport_10_KBVDataContinue::01_KBVStub',
-    'B01_Passport_10_KBVDataContinue::02_CoreCall',
-    'B01_Passport_11_ContinuePYISuccessPage',
-    'B01_Passport_11_ContinuePYISuccessPage::01_CoreCall',
-    'B01_Passport_11_ContinuePYISuccessPage::02_OrchStub'
-  ],
-  drivingLicence: [
-    'B02_DrivingLicence_01_LaunchOrchestratorStub',
-    'B02_DrivingLicence_02_GoToFullJourneyRoute',
-    'B02_DrivingLicence_02_GoToFullJourneyRoute::01_OrchStubCall',
-    'B02_DrivingLicence_02_GoToFullJourneyRoute::02_CoreCall',
-    'B02_DrivingLicence_03_ContinueStartPage',
-    'B02_DrivingLicence_03_ContinueStartPage::01_CoreCall',
-    'B02_DrivingLicence_03_ContinueStartPage::02_DCMAWStub',
-    'B02_DrivingLicence_04_DCMAWContinue',
-    'B02_DrivingLicence_04_DCMAWContinue::01_DCMAWStub',
-    'B02_DrivingLicence_04_DCMAWContinue::02_CoreCall',
-    'B02_DrivingLicence_05_ContinueOnPYIStartPage',
-    'B02_DrivingLicence_05_ContinueOnPYIStartPage::01_CoreCall',
-    'B02_DrivingLicence_05_ContinueOnPYIStartPage::02_DLStub',
-    'B02_DrivingLicence_06_DrivingLicenceDataContinue',
-    'B02_DrivingLicence_06_DrivingLicenceDataContinue::01_DLStub',
-    'B02_DrivingLicence_06_DrivingLicenceDataContinue::02_CoreCall',
-    'B02_DrivingLicence_06_DrivingLicenceDataContinue::03_AddStub',
-    'B02_DrivingLicence_07_AddrDataContinue',
-    'B02_DrivingLicence_07_AddrDataContinue::01_AddStub',
-    'B02_DrivingLicence_07_AddrDataContinue::02_CoreCall',
-    'B02_DrivingLicence_07_AddrDataContinue::03_FraudStub',
-    'B02_DrivingLicence_08_FraudDataContinue',
-    'B02_DrivingLicence_08_FraudDataContinue::01_FraudStub',
-    'B02_DrivingLicence_08_FraudDataContinue::02_CoreCall',
-    'B02_DrivingLicence_09_PreKBVTransition',
-    'B02_DrivingLicence_09_PreKBVTransition::01_CoreCall',
-    'B02_DrivingLicence_09_PreKBVTransition::02_KBVStub',
-    'B02_DrivingLicence_10_KBVDataContinue',
-    'B02_DrivingLicence_10_KBVDataContinue::01_KBVStub',
-    'B02_DrivingLicence_10_KBVDataContinue::02_CoreCall',
-    'B02_DrivingLicence_11_ContinueDrivingLicenceSuccessPage',
-    'B02_DrivingLicence_11_ContinueDrivingLicenceSuccessPage::01_CoreCall',
-    'B02_DrivingLicence_11_ContinueDrivingLicenceSuccessPage::02_OrchStub'
+  identity: [
+    'B01_Identity_01_LaunchOrchestratorStub',
+    'B01_Identity_02_GoToFullJourneyRoute',
+    'B01_Identity_02_GoToFullJourneyRoute::01_OrchStubCall',
+    'B01_Identity_02_GoToFullJourneyRoute::02_CoreCall',
+    'B01_Identity_03_ClickContinueStartPage',
+    'B01_Identity_03_ClickContinueStartPage::01_CoreCall',
+    'B01_Identity_03_ClickContinueStartPage::02_DCMAWStub',
+    'B01_Identity_04_DCMAWContinue',
+    'B01_Identity_04_DCMAWContinue::01_DCMAWStub',
+    'B01_Identity_04_DCMAWContinue::02_CoreCall',
+    'B01_Identity_05_ContinueOnPYIStartPage',
+    'B01_Identity_05_ContinueOnPYIStartPage::01_CoreCall',
+    'B01_Identity_05_ContinueOnPYIStartPage::02_PassStub',
+    'B01_Identity_05_ContinueOnPYIStartPage::02_DLStub',
+    'B01_Identity_06_DocumentDataContinue',
+    'B01_Identity_06_DocumentDataContinue::01_PassStub',
+    'B01_Identity_06_DocumentDataContinue::01_DLStub',
+    'B01_Identity_06_DocumentDataContinue::02_CoreCall',
+    'B01_Identity_06_DocumentDataContinue::03_AddStub',
+    'B01_Identity_07_AddrDataContinue',
+    'B01_Identity_07_AddrDataContinue::01_AddStub',
+    'B01_Identity_07_AddrDataContinue::02_CoreCall',
+    'B01_Identity_07_AddrDataContinue::03_FraudStub',
+    'B01_Identity_08_FraudDataContinue',
+    'B01_Identity_08_FraudDataContinue::01_FraudStub',
+    'B01_Identity_08_FraudDataContinue::02_CoreCall',
+    'B01_Identity_09_PreKBVTransition',
+    'B01_Identity_09_PreKBVTransition::01_CoreCall',
+    'B01_Identity_09_PreKBVTransition::02_KBVStub',
+    'B01_Identity_10_KBVDataContinue',
+    'B01_Identity_10_KBVDataContinue::01_KBVStub',
+    'B01_Identity_10_KBVDataContinue::02_CoreCall',
+    'B01_Identity_11_ContinueSuccessPage',
+    'B01_Identity_11_ContinueSuccessPage::01_CoreCall',
+    'B01_Identity_11_ContinueSuccessPage::02_OrchStub'
   ],
   idReuse: [
     'B03_IDReuse_01_LoginToCore',
@@ -198,16 +161,18 @@ const stubCreds = {
   password: getEnv('IDENTITY_ORCH_STUB_PASSWORD')
 }
 
-export function passport(): void {
-  const groups = groupMap.passport
+export function identity(): void {
+  const groups = groupMap.identity
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
   const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0')
   const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
+  const passport = Math.random() < 0.8
   iterationsStarted.add(1)
-  // B01_Passport_01_LaunchOrchestratorStub
+
+  // B01_Identity_01_LaunchOrchestratorStub
   res = timeGroup(
     groups[0],
     () =>
@@ -222,7 +187,7 @@ export function passport(): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Passport_02_GoToFullJourneyRoute
+  // B01_Identity_02_GoToFullJourneyRoute
   timeGroup(groups[1], () => {
     // 01_OrchStub
     res = timeGroup(
@@ -247,7 +212,7 @@ export function passport(): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Passport_03_ClickContinueStartPage
+  // B01_Identity_03_ClickContinueStartPage
   timeGroup(groups[4], () => {
     // 01_CoreCall
     res = timeGroup(
@@ -268,7 +233,7 @@ export function passport(): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Passport_04_DCMAWContinue
+  // B01_Identity_04_DCMAWContinue
   timeGroup(groups[7], () => {
     // 01_DCMAWStub
     res = timeGroup(
@@ -292,49 +257,60 @@ export function passport(): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Passport_05_ContinueOnPYIStartPage
+  // B01_Identity_05_ContinueOnPYIStartPage
   timeGroup(groups[10], () => {
     // 01_CoreCall
     res = timeGroup(
       groups[11].split('::')[1],
       () =>
         res.submitForm({
-          fields: { journey: 'ukPassport' },
+          fields: { journey: passport ? 'ukPassport' : 'drivingLicence' },
           params: { redirects: 0 }
         }),
       { isStatusCode302 }
     )
-    // 02_PassStub
-    res = timeGroup(groups[12].split('::')[1], () => http.get(res.headers.Location), {
+    // 02_XXXStub
+    const name = (passport ? groups[12] : groups[13]).split('::')[1]
+    const content = passport ? 'UK Passport (Stub)' : 'Driving Licence (Stub)'
+    res = timeGroup(name, () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('UK Passport (Stub)')
+      ...pageContentCheck(content)
     })
   })
 
   sleepBetween(0.5, 1)
 
-  // B01_Passport_06_PassportDataContinue
-  timeGroup(groups[13], () => {
-    // 01_PassStub
+  // B01_Identity_06_DocumentDataContinue
+  timeGroup(groups[14], () => {
+    // 01_XXXStub
+    const name = (passport ? groups[15] : groups[16]).split('::')[1]
     res = timeGroup(
-      groups[14].split('::')[1],
+      name,
       () =>
         res.submitForm({
-          fields: {
-            jsonPayload: passportPayload,
-            strengthScore: '4',
-            validityScore: '2'
-          },
+          fields: passport
+            ? {
+                jsonPayload: passportPayload,
+                strengthScore: '4',
+                validityScore: '2'
+              }
+            : {
+                jsonPayload: drivingLicencePayload,
+                strengthScore: '3',
+                validityScore: '2',
+                activityHistoryScore: '1'
+              },
           params: { redirects: 0 }
         }),
       { isStatusCode302 }
     )
+
     // 02_CoreCall
-    res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
       isStatusCode302
     })
     // 03_AddStub
-    res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Address (Stub)')
     })
@@ -342,24 +318,24 @@ export function passport(): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Passport_07_AddrDataContinue
-  timeGroup(groups[17], () => {
+  // B01_Identity_07_AddrDataContinue
+  timeGroup(groups[19], () => {
     // 01_AddStub
     res = timeGroup(
-      groups[18].split('::')[1],
+      groups[20].split('::')[1],
       () =>
         res.submitForm({
-          fields: { jsonPayload: addressPayloadP },
+          fields: { jsonPayload: passport ? addressPayloadP : addressPayloadDL },
           params: { redirects: 0 }
         }),
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
       isStatusCode302
     })
     // 03_FraudStub
-    res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[22].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Fraud Check (Stub)')
     })
@@ -367,23 +343,29 @@ export function passport(): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Passport_08_FraudDataContinue
-  timeGroup(groups[21], () => {
+  // B01_Identity_08_FraudDataContinue
+  timeGroup(groups[23], () => {
     // 01_FraudStub
     res = timeGroup(
-      groups[22].split('::')[1],
+      groups[24].split('::')[1],
       () =>
         res.submitForm({
-          fields: {
-            jsonPayload: fraudPayloadP,
-            identityFraudScore: '2'
-          },
+          fields: passport
+            ? {
+                jsonPayload: fraudPayloadP,
+                identityFraudScore: '2'
+              }
+            : {
+                jsonPayload: fraudPayloadDL,
+                identityFraudScore: '2',
+                activityHistoryScore: '2'
+              },
           params: { redirects: 0 }
         }),
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[23].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[25].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Answer security questions')
     })
@@ -391,11 +373,11 @@ export function passport(): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Passport_09_PreKBVTransition
-  timeGroup(groups[24], () => {
+  // B01_Identity_09_PreKBVTransition
+  timeGroup(groups[26], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[25].split('::')[1],
+      groups[27].split('::')[1],
       () =>
         res.submitForm({
           params: { redirects: 0 }
@@ -403,7 +385,7 @@ export function passport(): void {
       { isStatusCode302 }
     )
     // 02_KBVStub
-    res = timeGroup(groups[26].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[28].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Knowledge Based Verification (Stub)')
     })
@@ -411,15 +393,15 @@ export function passport(): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Passport_10_KBVDataContinue
-  timeGroup(groups[27], () => {
+  // B01_Identity_10_KBVDataContinue
+  timeGroup(groups[29], () => {
     // 01_KBVStub
     res = timeGroup(
-      groups[28].split('::')[1],
+      groups[30].split('::')[1],
       () =>
         res.submitForm({
           fields: {
-            jsonPayload: kbvPayloadP,
+            jsonPayload: passport ? kbvPayloadP : kbvPayloaDL,
             verificationScore: '2'
           },
           params: { redirects: 0 }
@@ -427,7 +409,7 @@ export function passport(): void {
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[29].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[31].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('You’ve successfully proved your identity')
     })
@@ -435,11 +417,11 @@ export function passport(): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Passport_11_ContinuePYISuccessPage
-  timeGroup(groups[30], () => {
+  // B01_Identity_11_ContinueSuccessPage
+  timeGroup(groups[32], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[31].split('::')[1],
+      groups[33].split('::')[1],
       () =>
         res.submitForm({
           params: { redirects: 0 }
@@ -448,270 +430,7 @@ export function passport(): void {
     )
     // 02_OrchStub
     res = timeGroup(
-      groups[32].split('::')[1],
-      () =>
-        http.get(res.headers.Location, {
-          headers: { Authorization: `Basic ${encodedCredentials}` }
-        }),
-      { isStatusCode200, ...pageContentCheck('User information') }
-    )
-  })
-  iterationsCompleted.add(1)
-}
-
-export function drivingLicence(): void {
-  const groups = groupMap.drivingLicence
-  let res: Response
-  const credentials = `${stubCreds.userName}:${stubCreds.password}`
-  const encodedCredentials = encoding.b64encode(credentials)
-  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
-  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0')
-  const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
-  iterationsStarted.add(1)
-
-  // B02_DrivingLicence_01_LaunchOrchestratorStub
-  res = timeGroup(
-    groups[0],
-    () =>
-      http.get(env.orchStubEndPoint, {
-        headers: { Authorization: `Basic ${encodedCredentials}` }
-      }),
-    { isStatusCode200, ...pageContentCheck('Enter userId manually') }
-  )
-  const userId = getUserId(res)
-  const signInJourneyId = getSignInJourneyId(res)
-
-  sleepBetween(0.5, 1)
-
-  // B02_DrivingLicence_02_SelectUserIDContinue
-  timeGroup(groups[1], () => {
-    // 01_OrchStub
-    res = timeGroup(
-      groups[2].split('::')[1],
-      () =>
-        http.get(
-          env.orchStubEndPoint +
-            `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=${env.vtrText}&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
-          {
-            headers: { Authorization: `Basic ${encodedCredentials}` },
-            redirects: 0
-          }
-        ),
-      { isStatusCode302 }
-    )
-    // 02_CoreCall
-    res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Tell us if you have one of the following types of photo ID')
-    })
-  })
-
-  sleepBetween(0.5, 1)
-
-  // B02_DrivingLicence_03_ContinueStartPage
-  timeGroup(groups[4], () => {
-    // 01_CoreCall
-    res = timeGroup(
-      groups[5].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: { journey: 'appTriage' },
-          params: { redirects: 0 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_DCMAWStub
-    res = timeGroup(groups[6].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('DOC Checking App (Stub)')
-    })
-  })
-
-  sleepBetween(0.5, 1)
-
-  // B02_DrivingLicence_04_DCMAWContinue
-  timeGroup(groups[7], () => {
-    // 01_DCMAWStub
-    res = timeGroup(
-      groups[8].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: {
-            requested_oauth_error_endpoint: 'auth',
-            requested_oauth_error: 'access_denied'
-          },
-          params: { redirects: 1 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_CoreCall
-    res = timeGroup(groups[9].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Enter your UK passport details')
-    })
-  })
-
-  sleepBetween(0.5, 1)
-
-  // B02_DrivingLicence_05_ContinueOnPYIStartPage
-  timeGroup(groups[10], () => {
-    // 01_CoreCall
-    res = timeGroup(
-      groups[11].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: { journey: 'drivingLicence' },
-          params: { redirects: 0 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_DLStub
-    res = timeGroup(groups[12].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Driving Licence (Stub)')
-    })
-  })
-
-  sleepBetween(0.5, 1)
-
-  // B02_DrivingLicence_06_DrivingLicenceDataContinue
-  timeGroup(groups[13], () => {
-    // 01_DLStub
-    res = timeGroup(
-      groups[14].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: {
-            jsonPayload: drivingLicencePayload,
-            strengthScore: '3',
-            validityScore: '2',
-            activityHistoryScore: '1'
-          },
-          params: { redirects: 0 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_CoreCall
-    res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 03_AddStub
-    res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Address (Stub)')
-    })
-  })
-
-  sleepBetween(0.5, 1)
-
-  // B02_DrivingLicence_07_AddrDataContinue
-  timeGroup(groups[17], () => {
-    // 01_AddStub
-    res = timeGroup(
-      groups[18].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: { jsonPayload: addressPayloadDL },
-          params: { redirects: 0 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_CoreCall
-    res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 03_FraudStub
-    res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Fraud Check (Stub)')
-    })
-  })
-
-  sleepBetween(0.5, 1)
-
-  // B02_DrivingLicence_08_FraudDataContinue
-  timeGroup(groups[21], () => {
-    // 01_FraudStub
-    res = timeGroup(
-      groups[22].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: {
-            jsonPayload: fraudPayloadDL,
-            identityFraudScore: '2',
-            activityHistoryScore: '2'
-          },
-          params: { redirects: 0 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_CoreCall
-    res = timeGroup(groups[23].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Answer security questions')
-    })
-  })
-
-  sleepBetween(0.5, 1)
-
-  // B02_DrivingLicence_09_PreKBVTransition
-  timeGroup(groups[24], () => {
-    // 01_CoreCall
-    res = timeGroup(
-      groups[25].split('::')[1],
-      () =>
-        res.submitForm({
-          params: { redirects: 0 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_KBVStub
-    res = timeGroup(groups[26].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Knowledge Based Verification (Stub)')
-    })
-  })
-
-  sleepBetween(0.5, 1)
-
-  // B02_DrivingLicence_10_KBVDataContinue
-  timeGroup(groups[27], () => {
-    // 01_KBVStub
-    res = timeGroup(
-      groups[28].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: {
-            jsonPayload: kbvPayloaDL,
-            verificationScore: '2'
-          },
-          params: { redirects: 0 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_CoreCall
-    res = timeGroup(groups[29].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Continue to the service you want to use')
-    })
-  })
-
-  sleepBetween(0.5, 1)
-
-  // B02_DrivingLicence_11_ContinueDrivingLicenceSuccessPage
-  timeGroup(groups[30], () => {
-    // 01_CoreCall
-    res = timeGroup(
-      groups[31].split('::')[1],
-      () =>
-        res.submitForm({
-          params: { redirects: 0 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_OrchStub
-    res = timeGroup(
-      groups[32].split('::')[1],
+      groups[34].split('::')[1],
       () =>
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }

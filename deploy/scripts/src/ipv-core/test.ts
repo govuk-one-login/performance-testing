@@ -187,9 +187,9 @@ if (!validEnvironments.includes(environment))
   throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 
 const env = {
-  orchStubEndPoint: __ENV[`IDENTITY_${environment}_ORCH_STUB_URL`],
-  ipvCoreURL: __ENV[`IDENTITY_${environment}_CORE_URL`],
-  vtrText: __ENV[`IDENTITY_${environment}_CORE_VTR_TEXT`]
+  orchStubEndPoint: getEnv(`IDENTITY_${environment}_ORCH_STUB_URL`),
+  ipvCoreURL: getEnv(`IDENTITY_${environment}_CORE_URL`),
+  vtrText: getEnv(`IDENTITY_${environment}_CORE_VTR_TEXT`)
   // staticResources: getEnv('K6_NO_STATIC_RESOURCES') !== 'true'
 }
 

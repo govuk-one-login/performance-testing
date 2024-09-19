@@ -547,7 +547,7 @@ export function drivingLicence(): void {
     // 02_CoreCall
     res = timeGroup(groups[9].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Do you want to use your UK photocard driving licence or UK passport to prove your identity')
+      ...pageContentCheck('Enter your UK passport details')
     })
   })
 

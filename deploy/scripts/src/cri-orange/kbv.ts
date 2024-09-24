@@ -31,6 +31,8 @@ const loadProfile = selectProfile(profiles)
 const groupMap = {
   kbv: [
     'B01_KBV_01_CoreStubEditUserContinue',
+    'B01_KBV_01_CoreStubEditUserContinue::01_CoreStubCall',
+    'B01_KBV_01_CoreStubEditUserContinue::02_KBVCRICall',
     'B01_KBV_02_KBVQuestion1',
     'B01_KBV_03_KBVQuestion2',
     'B01_KBV_04_KBVQuestion3',
@@ -65,17 +67,28 @@ export function kbv(): void {
   iterationsStarted.add(1)
 
   // B01_KBV_01_CoreStubEditUserContinue
+  timeGroup(groups[0], ()=> {
+    //01_CoreStubCall
   res = timeGroup(
-    groups[0],
+    groups[1].split('::')[1],
     () =>
       http.get(env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197', {
-        headers: { Authorization: `Basic ${encodedCredentials}` }
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+        redirects: 0
       }),
+      {isStatusCode302})
+    //02_KBVCRICall
+    res = timeGroup(
+      groups[2].split('::')[1],
+      () =>
+        http.get(res.headers.Location),
     {
       isStatusCode200,
       ...pageContentCheck('You can find this amount on your loan agreement')
     }
   )
+}
+)
 
   sleepBetween(1, 3)
 

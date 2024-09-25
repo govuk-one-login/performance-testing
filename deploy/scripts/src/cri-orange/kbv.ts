@@ -67,28 +67,23 @@ export function kbv(): void {
   iterationsStarted.add(1)
 
   // B01_KBV_01_CoreStubEditUserContinue
-  timeGroup(groups[0], ()=> {
+  timeGroup(groups[0], () => {
     //01_CoreStubCall
-  res = timeGroup(
-    groups[1].split('::')[1],
-    () =>
-      http.get(env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197', {
-        headers: { Authorization: `Basic ${encodedCredentials}` },
-        redirects: 0
-      }),
-      {isStatusCode302})
-    //02_KBVCRICall
     res = timeGroup(
-      groups[2].split('::')[1],
+      groups[1].split('::')[1],
       () =>
-        http.get(res.headers.Location),
-    {
+        http.get(env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197', {
+          headers: { Authorization: `Basic ${encodedCredentials}` },
+          redirects: 0
+        }),
+      { isStatusCode302 }
+    )
+    //02_KBVCRICall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('You can find this amount on your loan agreement')
-    }
-  )
-}
-)
+    })
+  })
 
   sleepBetween(1, 3)
 

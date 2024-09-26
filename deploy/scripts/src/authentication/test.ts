@@ -75,27 +75,19 @@ const groupMap = {
     'B01_SignUp_11_ContinueAccountCreated::02_OrchStub'
   ],
   signIn: [
-    'B02_SignIn_01_InitializeJourney',
-    'B02_SignIn_01_InitializeJourney::01_RPStub',
-    'B02_SignIn_01_InitializeJourney::02_OIDCCall',
-    'B02_SignIn_01_InitializeJourney::03_AuthCall',
+    'B02_SignIn_01_OrchStubSubmit',
+    'B02_SignIn_01_OrchStubSubmit::01_OrchStub',
+    'B02_SignIn_01_OrchStubSubmit::02_AuthCall',
     'B02_SignIn_02_ClickSignIn',
     'B02_SignIn_03_EnterEmailAddress',
     'B02_SignIn_04_EnterPassword',
     'B02_SignIn_05_EnterOTP',
     'B02_SignIn_05_EnterOTP::01_AuthCall',
     'B02_SignIn_05_EnterOTP::02_AuthAcceptTerms',
-    'B02_SignIn_05_EnterOTP::03_AuthCall',
-    'B02_SignIn_05_EnterOTP::04_OIDCCall',
-    'B02_SignIn_05_EnterOTP::05_RPStub',
+    'B02_SignIn_05_EnterOTP::02_OrchStub',
     'B02_SignIn_06_AcceptTermsConditions',
     'B02_SignIn_06_AcceptTermsConditions::01_AuthCall',
-    'B02_SignIn_06_AcceptTermsConditions::02_OIDCCall',
-    'B02_SignIn_06_AcceptTermsConditions::03_RPStub',
-    'B02_SignIn_07_Logout',
-    'B02_SignIn_07_Logout::01_RPStub',
-    'B02_SignIn_07_Logout::02_OIDCCall',
-    'B02_SignIn_07_Logout::03_AuthCall'
+    'B02_SignIn_06_AcceptTermsConditions::02_OrchStub'
   ],
   uiSignIn: []
 } as const
@@ -481,12 +473,13 @@ export function signIn(): void {
   const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
   iterationsStarted.add(1)
 
-  res = initializeJourney(groups)
+  // B02_SignIn_01_OrchStubSubmit
+  res = orchStubSubmit(groups)
 
   sleep(1)
 
   // B02_SignIn_02_ClickSignIn
-  res = timeGroup(groups[4], () => res.submitForm(), {
+  res = timeGroup(groups[3], () => res.submitForm(), {
     isStatusCode200,
     ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
   })
@@ -495,7 +488,7 @@ export function signIn(): void {
 
   // B02_SignIn_03_EnterEmailAddress
   res = timeGroup(
-    groups[5],
+    groups[4],
     () =>
       res.submitForm({
         fields: { email: userData.email }
@@ -525,7 +518,7 @@ export function signIn(): void {
 
   // B02_SignIn_04_EnterPassword
   res = timeGroup(
-    groups[6],
+    groups[5],
     () =>
       res.submitForm({
         fields: { password: credentials.password }
@@ -538,14 +531,14 @@ export function signIn(): void {
   sleep(1)
 
   // B02_SignIn_05_EnterOTP
-  timeGroup(groups[7], () => {
+  timeGroup(groups[6], () => {
     //01_AuthCall
     res = timeGroup(
-      groups[8].split('::')[1],
+      groups[7].split('::')[1],
       () =>
         res.submitForm({
           fields: { code: getOTP() },
-          params: { redirects: 0 }
+          params: { redirects: 1 }
         }),
       { isStatusCode302 }
     )
@@ -553,32 +546,13 @@ export function signIn(): void {
     acceptNewTerms = res.headers.Location.endsWith('updated-terms-and-conditions')
     if (acceptNewTerms) {
       // 02_AuthAcceptTerms
-      res = timeGroup(groups[9].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
+      res = timeGroup(groups[8].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
         isStatusCode200,
         ...pageContentCheck('terms of use update')
       })
     } else {
-      // 03_AuthCall
-      res = timeGroup(
-        groups[10].split('::')[1],
-        () => http.get(env.authStagingURL + res.headers.Location, { redirects: 0 }),
-        {
-          isStatusCode302
-        }
-      )
-
-      //04_OIDCCall
-      res = timeGroup(
-        groups[11].split('::')[1],
-        () =>
-          http.get(res.headers.Location, {
-            redirects: 0
-          }),
-        { isStatusCode302 }
-      )
-
-      // 05_RPStub
-      res = timeGroup(groups[12].split('::')[1], () => http.get(res.headers.Location), {
+      // 02_OrchStub
+      res = timeGroup(groups[9].split('::')[1], () => http.get(res.headers.Location), {
         isStatusCode200,
         ...pageContentCheck(userData.email.toLowerCase())
       })
@@ -587,10 +561,10 @@ export function signIn(): void {
 
   if (acceptNewTerms) {
     // B02_SignIn_06_AcceptTermsConditions
-    timeGroup(groups[13], () => {
+    timeGroup(groups[10], () => {
       // 01_AuthCall
       res = timeGroup(
-        groups[14].split('::')[1],
+        groups[11].split('::')[1],
         () =>
           res.submitForm({
             fields: { termsAndConditionsResult: 'accept' },
@@ -599,25 +573,13 @@ export function signIn(): void {
         { isStatusCode302 }
       )
 
-      //02_OIDCCall
-      res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-        isStatusCode302
-      })
-
-      // 03_RPStub
-      res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location), {
+      // 02_OrchStub
+      res = timeGroup(groups[12].split('::')[1], () => http.get(res.headers.Location), {
         isStatusCode200,
         ...pageContentCheck(userData.email.toLowerCase())
       })
     })
   }
 
-  // 25% of users logout
-  if (Math.random() <= 0.25) {
-    sleep(1)
-
-    // B02_SignIn_07_Logout
-    logout(groups.slice(17, 21))
-  }
   iterationsCompleted.add(1)
 }

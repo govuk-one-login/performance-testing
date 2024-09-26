@@ -470,7 +470,7 @@ export function orchStubSubmit(groups: readonly string[]): Response {
 export function signIn(): void {
   let res: Response
   const groups = groupMap.signIn
-  const userData = dataSignIn[execution.scenario.iterationInInstance % dataSignIn.length]
+  const userData = dataSignIn[execution.vu.idInTest - 1]
   iterationsStarted.add(1)
 
   // B02_SignIn_01_OrchStubSubmit

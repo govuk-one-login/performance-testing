@@ -58,10 +58,9 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 const groupMap = {
   signUp: [
-    'B01_SignUp_01_InitializeJourney',
-    'B01_SignUp_01_InitializeJourney::01_RPStub',
-    'B01_SignUp_01_InitializeJourney::02_OIDCCall',
-    'B01_SignUp_01_InitializeJourney::03_AuthCall',
+    'B01_SignUp_01_OrchStubSubmit',
+    'B01_SignUp_01_OrchStubSubmit::01_OrchStub',
+    'B01_SignUp_01_OrchStubSubmit::02_AuthCall',
     'B01_SignUp_02_CreateOneLogin',
     'B01_SignUp_03_EnterEmailAddress',
     'B01_SignUp_04_EnterOTP',
@@ -73,12 +72,7 @@ const groupMap = {
     'B01_SignUp_10_MFA_EnterSMSOTP',
     'B01_SignUp_11_ContinueAccountCreated',
     'B01_SignUp_11_ContinueAccountCreated::01_AuthCall',
-    'B01_SignUp_11_ContinueAccountCreated::02_OIDCCall',
-    'B01_SignUp_11_ContinueAccountCreated::03_RPStub',
-    'B01_SignUp_12_Logout',
-    'B01_SignUp_12_Logout::01_RPStub',
-    'B01_SignUp_12_Logout::02_OIDCCall',
-    'B01_SignUp_12_Logout::03_AuthCall'
+    'B01_SignUp_11_ContinueAccountCreated::02_OrchStub'
   ],
   signIn: [
     'B02_SignIn_01_InitializeJourney',
@@ -149,7 +143,7 @@ const credentials = {
 }
 
 const env = {
-  rpStub: getEnv('ACCOUNT_RP_STUB'),
+  orchStub: getEnv('ACCOUNT_ORCH_STUB'),
   staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true',
   authStagingURL: getEnv('ACCOUNT_STAGING_URL')
 }
@@ -165,7 +159,7 @@ export async function uiSignIn() {
 
   const page: Page = await browser.newPage()
   try {
-    await page.goto(env.rpStub + '/start')
+    await page.goto(env.orchStub + '/start')
     await ClickButton(page, 'button#sign-in-button')
 
     page.locator('input[name="email"]').type(userData.email)
@@ -212,14 +206,14 @@ export function signUp(): void {
   const mfaOption: mfaType = Math.random() <= 0.5 ? 'SMS' : 'AUTH_APP'
   iterationsStarted.add(1)
 
-  // B01_SignUp_01_InitializeJourney
-  res = initializeJourney(groups)
+  // B01_SignUp_01_OrchStubSubmit
+  res = orchStubSubmit(groups)
 
   sleep(1)
 
   // B01_SignUp_02_CreateOneLogin
   res = timeGroup(
-    groups[4],
+    groups[3],
     () =>
       res.submitForm({
         fields: {
@@ -233,7 +227,7 @@ export function signUp(): void {
   sleep(1)
 
   // B01_SignUp_03_EnterEmailAddress
-  res = timeGroup(groups[5], () => res.submitForm({ fields: { email: testEmail } }), {
+  res = timeGroup(groups[4], () => res.submitForm({ fields: { email: testEmail } }), {
     isStatusCode200,
     ...pageContentCheck('Check your email')
   })
@@ -242,7 +236,7 @@ export function signUp(): void {
 
   // B01_SignUp_04_EnterOTP
   res = timeGroup(
-    groups[6],
+    groups[5],
     () =>
       res.submitForm({
         fields: {
@@ -257,7 +251,7 @@ export function signUp(): void {
 
   // B01_SignUp_05_CreatePassword
   res = timeGroup(
-    groups[7],
+    groups[6],
     () =>
       res.submitForm({
         fields: {
@@ -279,7 +273,7 @@ export function signUp(): void {
     case 'AUTH_APP': {
       // B01_SignUp_06_MFA_AuthApp
       res = timeGroup(
-        groups[8],
+        groups[7],
         () =>
           res.submitForm({
             fields: { mfaOptions: mfaOption }
@@ -296,7 +290,7 @@ export function signUp(): void {
 
       // B01_SignUp_07_MFA_EnterTOTP
       res = timeGroup(
-        groups[9],
+        groups[8],
         () =>
           res.submitForm({
             fields: { code: totp.generateTOTP() }
@@ -311,7 +305,7 @@ export function signUp(): void {
     case 'SMS': {
       // B01_SignUp_08_MFA_SMS
       res = timeGroup(
-        groups[10],
+        groups[9],
         () =>
           res.submitForm({
             fields: { mfaOptions: mfaOption }
@@ -326,7 +320,7 @@ export function signUp(): void {
 
       // B01_SignUp_09_MFA_EnterPhoneNum
       res = timeGroup(
-        groups[11],
+        groups[10],
         () =>
           res.submitForm({
             fields: { phoneNumber }
@@ -338,7 +332,7 @@ export function signUp(): void {
 
       // B01_SignUp_10_MFA_EnterSMSOTP
       res = timeGroup(
-        groups[12],
+        groups[11],
         () =>
           res.submitForm({
             fields: { code: credentials.phoneOTP }
@@ -355,29 +349,17 @@ export function signUp(): void {
   sleep(1)
 
   // B01_SignUp_11_ContinueAccountCreated
-  timeGroup(groups[13], () => {
+  timeGroup(groups[12], () => {
     // 01_AuthCall
-    res = timeGroup(groups[14].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
+    res = timeGroup(groups[13].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
       isStatusCode302
     })
-    // 02_OIDCCall
-    res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 03_RPStub
-    res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location), {
+    // 02_OrchStub
+    res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck(testEmail.toLowerCase())
     })
   })
-
-  // 25% of users logout
-  if (Math.random() <= 0.25) {
-    sleep(1)
-
-    // B01_SignUp_12_Logout
-    logout(groups.slice(17, 21))
-  }
 
   iterationsCompleted.add(1)
 }
@@ -388,7 +370,7 @@ export function logout(groups: readonly string[]): void {
   // Logout
   timeGroup(groups[0], () => {
     // 01_RPStub
-    res = timeGroup(groups[1].split('::')[1], () => http.get(env.rpStub + '/logout', { redirects: 0 }), {
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.orchStub + '/logout', { redirects: 0 }), {
       isStatusCode302
     })
     // 02_OIDCCall
@@ -409,7 +391,7 @@ export function initializeJourney(groups: readonly string[]): Response {
   // InitializeJourney
   return timeGroup(groups[0], () => {
     // 01_RPStub
-    res = timeGroup(groups[1].split('::')[1], () => http.get(env.rpStub + '/start', { redirects: 0 }), {
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.orchStub + '/start', { redirects: 0 }), {
       isStatusCode302
     })
     // 02_OIDCCall
@@ -419,6 +401,56 @@ export function initializeJourney(groups: readonly string[]): Response {
     // 03_AuthCall
     return timeGroup(
       groups[3].split('::')[1],
+      () => {
+        if (env.staticResources) {
+          const paths = [
+            '/public/style.css',
+            '/public/scripts/cookies.js',
+            '/public/scripts/application.js',
+            '/public/scripts/all.js',
+            '/assets/images/govuk-crest-2x.png',
+            '/assets/fonts/light-94a07e06a1-v2.woff2',
+            '/assets/fonts/bold-b542beb274-v2.woff2'
+          ]
+          const batchRequests = paths.map(path => env.authStagingURL + path)
+          http.batch(batchRequests)
+        }
+        return http.get(res.headers.Location)
+      },
+      {
+        isStatusCode200,
+        ...pageContentCheck('Create your GOV.UK One Login or sign in')
+      }
+    )
+  })
+}
+
+export function orchStubSubmit(groups: readonly string[]): Response {
+  let res: Response
+
+  // InitializeJourney
+  return timeGroup(groups[0], () => {
+    // 01_RPStub
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.post(
+          env.orchStub,
+          {
+            reauthenticate: '',
+            level: 'Cl.Cm',
+            authenticated: 'no',
+            authenticatedLevel: 'Cl.Cm'
+          },
+          { redirects: 0 }
+        ),
+      {
+        isStatusCode302
+      }
+    )
+    // 02_AuthCall
+    return timeGroup(
+      groups[2].split('::')[1],
       () => {
         if (env.staticResources) {
           const paths = [

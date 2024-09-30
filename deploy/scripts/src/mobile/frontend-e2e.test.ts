@@ -21,6 +21,7 @@ import {
 } from './testSteps/frontend'
 import { getBiometricTokenV2, postFinishBiometricSession } from './testSteps/backend'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -44,13 +45,26 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  mamIphonePassport: [
+    'POST test client /start',
+    'GET /authorize',
+    'POST /selectDevice',
+    'POST /selectSmartphone',
+    'POST /validPassport',
+    'POST /biometricChip',
+    'POST /iphoneModel',
+    'POST /idCheckApp',
+    'GET /biometricToken/v2',
+    'POST /finishBiometricSession',
+    'GET /redirect'
+  ]
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
+  thresholds: getThresholds(groupMap),
+  tags: { name: '' }
 }
 
 export function setup(): void {

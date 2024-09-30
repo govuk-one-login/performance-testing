@@ -21,33 +21,14 @@ const profiles: ProfileList = {
   smoke: {
     ...createScenario('backendJourney', LoadProfile.smoke)
   },
-  load: {
-    ...createScenario('backendJourney', LoadProfile.full, 40, 37)
+  lowVolume: {
+    ...createScenario('backendJourney', LoadProfile.full, 10)
   },
-  loadSelfAssessment: {
-    backendJourney: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 60,
-      maxVUs: 450,
-      stages: [
-        { target: 10, duration: '15m' },
-        { target: 10, duration: '10m' }
-      ],
-      exec: 'backendJourney'
-    }
+  load: {
+    ...createScenario('backendJourney', LoadProfile.full, 40)
   },
   deploy: {
-    backendJourney: {
-      executor: 'constant-arrival-rate',
-      rate: 1,
-      timeUnit: '1s',
-      duration: '25m',
-      preAllocatedVUs: 10, // Calculation: 1 journeys / second * 10 seconds average journey time
-      maxVUs: 65, // Calculation: 1 journeys / second * 14 seconds maximum journey time + 50 buffer
-      exec: 'backendJourney'
-    }
+    ...createScenario('backendJourney', LoadProfile.deployment, 1)
   }
 }
 

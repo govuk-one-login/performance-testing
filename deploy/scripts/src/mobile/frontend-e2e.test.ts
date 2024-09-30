@@ -26,33 +26,14 @@ const profiles: ProfileList = {
   smoke: {
     ...createScenario('mamIphonePassport', LoadProfile.smoke)
   },
-  load: {
-    ...createScenario('mamIphonePassport', LoadProfile.full, 40, 37)
+  lowVolume: {
+    ...createScenario('mamIphonePassport', LoadProfile.full, 10, 40)
   },
-  loadSelfAssessment: {
-    mamIphonePassport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 100,
-      maxVUs: 450,
-      stages: [
-        { target: 10, duration: '15m' },
-        { target: 10, duration: '10m' }
-      ],
-      exec: 'mamIphonePassport'
-    }
+  load: {
+    ...createScenario('mamIphonePassport', LoadProfile.full, 40, 40)
   },
   deploy: {
-    mamIphonePassport: {
-      executor: 'constant-arrival-rate',
-      rate: 1,
-      timeUnit: '1s',
-      duration: '25m',
-      preAllocatedVUs: 15, // Calculation: 1 journeys / second * 15 seconds average journey time
-      maxVUs: 75, // Calculation: 1 journeys / second * 24 seconds maximum journey time + 50 buffer
-      exec: 'mamIphonePassport'
-    }
+    ...createScenario('mamIphonePassport', LoadProfile.deployment, 1, 40)
   },
   incrementalLoad: {
     mamIphonePassport: {

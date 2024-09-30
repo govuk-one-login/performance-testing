@@ -16,6 +16,7 @@ import {
   postUserInfoV2
 } from './testSteps/backend'
 import { sleep } from 'k6'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -33,13 +34,23 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  backendJourney: [
+    'POST test client /start',
+    'POST /verifyAuthorizeRequest',
+    'POST /resourceOwner/documentGroups',
+    'GET /biometricToken/v2',
+    'POST /finishBiometricSession',
+    'GET /redirect',
+    'POST /token',
+    'POST /userinfo/v2'
+  ]
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
+  thresholds: getThresholds(groupMap),
+  tags: { name: '' }
 }
 
 export function setup(): void {

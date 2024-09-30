@@ -94,7 +94,8 @@ export enum LoadProfile {
   short,
   full,
   deployment,
-  rampOnly
+  rampOnly,
+  incremental
 }
 function createStages(type: LoadProfile, target: number): Stage[] {
   switch (type) {
@@ -126,6 +127,19 @@ function createStages(type: LoadProfile, target: number): Stage[] {
         { target, duration: '5m' }, // Maintain steady state at target throughput for 5 minutes
         { target, duration: '5m' } // Ramp down over 5 minutes
       ]
+    case LoadProfile.incremental: {
+      const step = target / 4
+      return [
+        { target: step, duration: '4m' }, // Ramp up to 25% target throughput over 4 minutes
+        { target: step, duration: '10m' }, // Maintain steady state at 25% target throughput for 10 minutes
+        { target: step * 2, duration: '4m' }, // Ramp up to 50% target throughput over 4 minutes
+        { target: step * 2, duration: '10m' }, // Maintain steady state at 50% target throughput for 10 minutes
+        { target: step * 3, duration: '4m' }, // Ramp up to 75% target throughput over 4 minutes
+        { target: step * 3, duration: '10m' }, // Maintain steady state at 75% target throughput for 10 minutes
+        { target, duration: '4m' }, // Ramp up to target throughput over 4 minutes
+        { target, duration: '10m' } // Maintain steady state at target throughput for 10 minutes
+      ]
+    }
   }
 }
 

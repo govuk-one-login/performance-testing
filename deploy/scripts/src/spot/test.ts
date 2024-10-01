@@ -106,12 +106,5 @@ export async function spot(): Promise<void> {
 }
 
 function str2buffer(pkcs8Keys: string): ArrayBuffer {
-  const b64encodedKeys = pkcs8Keys
-  const binaryKey = encoding.b64decode(b64encodedKeys, 'std', 's')
-  const buf = new ArrayBuffer(binaryKey.length * 2)
-  const bufView = new Uint16Array(buf)
-  for (let i = 0, strLen = binaryKey.length; i < strLen; i++) {
-    bufView[i] = binaryKey.charCodeAt(i)
-  }
-  return buf
+  return encoding.b64decode(pkcs8Keys, 'std')
 }

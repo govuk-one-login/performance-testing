@@ -16,49 +16,42 @@ import {
   postUserInfoV2
 } from './testSteps/backend'
 import { sleep } from 'k6'
+import { getThresholds } from '../common/utils/config/thresholds'
+import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('backendJourney', LoadProfile.smoke)
   },
-  load: {
-    ...createScenario('backendJourney', LoadProfile.full, 40, 37)
+  lowVolume: {
+    ...createScenario('backendJourney', LoadProfile.full, 10)
   },
-  loadSelfAssessment: {
-    backendJourney: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 60,
-      maxVUs: 450,
-      stages: [
-        { target: 10, duration: '15m' },
-        { target: 10, duration: '10m' }
-      ],
-      exec: 'backendJourney'
-    }
+  load: {
+    ...createScenario('backendJourney', LoadProfile.full, 40)
   },
   deploy: {
-    backendJourney: {
-      executor: 'constant-arrival-rate',
-      rate: 1,
-      timeUnit: '1s',
-      duration: '25m',
-      preAllocatedVUs: 10, // Calculation: 1 journeys / second * 10 seconds average journey time
-      maxVUs: 65, // Calculation: 1 journeys / second * 14 seconds maximum journey time + 50 buffer
-      exec: 'backendJourney'
-    }
+    ...createScenario('backendJourney', LoadProfile.deployment, 1)
   }
 }
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  backendJourney: [
+    'POST test client /start',
+    'POST /verifyAuthorizeRequest',
+    'POST /resourceOwner/documentGroups',
+    'GET /biometricToken/v2',
+    'POST /finishBiometricSession',
+    'GET /redirect',
+    'POST /token',
+    'POST /userinfo/v2'
+  ]
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
+  thresholds: getThresholds(groupMap),
+  tags: { name: '' }
 }
 
 export function setup(): void {
@@ -66,6 +59,7 @@ export function setup(): void {
 }
 
 export function backendJourney(): void {
+  iterationsStarted.add(1)
   const sessionId = postVerifyAuthorizeRequest()
   sleep(1)
   postResourceOwnerDocumentGroups(sessionId)
@@ -79,4 +73,5 @@ export function backendJourney(): void {
   const accessToken = postToken(authorizationCode, redirectUri)
   sleep(1)
   postUserInfoV2(accessToken)
+  iterationsCompleted.add(1)
 }

@@ -17,6 +17,7 @@ import {
 } from './testSteps/backend'
 import { sleep } from 'k6'
 import { getThresholds } from '../common/utils/config/thresholds'
+import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 
 const profiles: ProfileList = {
   smoke: {
@@ -58,6 +59,7 @@ export function setup(): void {
 }
 
 export function backendJourney(): void {
+  iterationsStarted.add(1)
   const sessionId = postVerifyAuthorizeRequest()
   sleep(1)
   postResourceOwnerDocumentGroups(sessionId)
@@ -71,4 +73,5 @@ export function backendJourney(): void {
   const accessToken = postToken(authorizationCode, redirectUri)
   sleep(1)
   postUserInfoV2(accessToken)
+  iterationsCompleted.add(1)
 }

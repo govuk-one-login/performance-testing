@@ -22,6 +22,7 @@ import {
 import { getBiometricTokenV2, postFinishBiometricSession } from './testSteps/backend'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getThresholds } from '../common/utils/config/thresholds'
+import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 
 const profiles: ProfileList = {
   smoke: {
@@ -72,6 +73,7 @@ export function setup(): void {
 }
 
 export function mamIphonePassport(): void {
+  iterationsStarted.add(1)
   startJourney()
   simulateUserWait()
   postSelectDevice()
@@ -98,6 +100,7 @@ export function mamIphonePassport(): void {
     // Approximately 20% of users abort journey
     getAbortCommand()
   }
+  iterationsCompleted.add(1)
 }
 
 function simulateUserWait(): void {

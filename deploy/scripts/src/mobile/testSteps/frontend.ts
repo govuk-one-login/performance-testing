@@ -4,12 +4,7 @@ import { buildFrontendUrl } from '../utils/url'
 import { validatePageRedirect, validateLocationHeader, validateQueryParam } from '../utils/assertions'
 import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
 import { timeRequest } from '../../common/utils/request/timing'
-import {
-  isStatusCode200,
-  isStatusCode201,
-  isStatusCode302,
-  pageContentCheck
-} from '../../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../../common/utils/checks/assertions'
 
 export function getSessionIdFromCookieJar(): string {
   const jar = http.cookieJar()
@@ -17,9 +12,7 @@ export function getSessionIdFromCookieJar(): string {
 }
 
 export function startJourney(): void {
-  const testClientRes = group('POST test client /start', () =>
-    timeRequest(() => postTestClientStart(), { isStatusCode201 })
-  )
+  const testClientRes = postTestClientStart()
   const authorizeUrl = parseTestClientResponse(testClientRes, 'WebLocation')
 
   group('GET /authorize', () =>

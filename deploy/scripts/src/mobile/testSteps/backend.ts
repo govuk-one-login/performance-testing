@@ -4,10 +4,10 @@ import { uuidv4 } from '../../common/utils/jslib/index'
 import { buildBackendUrl } from '../utils/url'
 import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
 import { timeRequest } from '../../common/utils/request/timing'
-import { isStatusCode200, isStatusCode201 } from '../../common/utils/checks/assertions'
+import { isStatusCode200 } from '../../common/utils/checks/assertions'
 
 export function postVerifyAuthorizeRequest(): string {
-  const testClientRes = group('POST test client /start', () => timeRequest(postTestClientStart, { isStatusCode201 }))
+  const testClientRes = postTestClientStart()
   const verifyUrl = parseTestClientResponse(testClientRes, 'ApiLocation')
 
   const verifyRes = group('POST /verifyAuthorizeRequest', () =>

@@ -85,12 +85,11 @@ const csvData1: Nino[] = new SharedArray('csvDataNino', () => {
 
 export function setup(): void {
   describeProfile(loadProfile)
-  let imposterstarted = false
+  const imposterstarted = false
   if (!imposterstarted) {
     const response = imposter.handler()
     console.log('Response status: ', response[0].status)
     console.log('Response body: ', response[0].body)
-    imposterstarted = true
   }
 }
 

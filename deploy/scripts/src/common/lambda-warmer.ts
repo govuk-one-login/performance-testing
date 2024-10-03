@@ -12,18 +12,20 @@ const bearerToken = getEnv('IDENTITY_IMPOSTER_BEARER_TOKEN')
 
 export class Imposter {
   public handler() {
-    const url = `https://${env.imposterStubURL}/${env.environment}/individuals/authentication/authenticator/api/match`
-
-    const body = JSON.stringify(payload.reqBody)
-
-    const params = {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: bearerToken
+    const req = {
+      method: 'POST',
+      url: `https://${env.imposterStubURL}/${env.environment}/individuals/authentication/authenticator/api/match`,
+      body: JSON.stringify(payload.reqBody),
+      params: {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: bearerToken
+        }
       }
     }
 
-    const response = http.post(url, body, params)
+    const reqArray = Array(10).fill(req)
+    const response = http.batch(reqArray)
 
     return response
   }

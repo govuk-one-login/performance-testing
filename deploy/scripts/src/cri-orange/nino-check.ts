@@ -43,7 +43,8 @@ const groupMap = {
 export const options: Options = {
   scenarios: loadProfile.scenarios,
   thresholds: getThresholds(groupMap),
-  tags: { name: '' }
+  tags: { name: '' },
+  batchPerHost: 10
 }
 
 const env = {
@@ -84,16 +85,16 @@ const csvData1: Nino[] = new SharedArray('csvDataNino', () => {
 
 export function setup(): void {
   describeProfile(loadProfile)
-}
-
-export function ninoCheck(): void {
   let imposterstarted = false
   if (!imposterstarted) {
     const response = imposter.handler()
-    console.log('Response status: ', response.status)
-    console.log('Response body: ', response.body)
+    console.log('Response status: ', response[0].status)
+    console.log('Response body: ', response[0].body)
     imposterstarted = true
   }
+}
+
+export function ninoCheck(): void {
   const groups = groupMap.ninoCheck
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`

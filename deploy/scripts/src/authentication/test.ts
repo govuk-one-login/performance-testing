@@ -377,52 +377,12 @@ export function logout(groups: readonly string[]): void {
   })
 }
 
-export function initializeJourney(groups: readonly string[]): Response {
-  let res: Response
-
-  // InitializeJourney
-  return timeGroup(groups[0], () => {
-    // 01_RPStub
-    res = timeGroup(groups[1].split('::')[1], () => http.get(env.orchStub + '/start', { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 02_OIDCCall
-    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 03_AuthCall
-    return timeGroup(
-      groups[3].split('::')[1],
-      () => {
-        if (env.staticResources) {
-          const paths = [
-            '/public/style.css',
-            '/public/scripts/cookies.js',
-            '/public/scripts/application.js',
-            '/public/scripts/all.js',
-            '/assets/images/govuk-crest-2x.png',
-            '/assets/fonts/light-94a07e06a1-v2.woff2',
-            '/assets/fonts/bold-b542beb274-v2.woff2'
-          ]
-          const batchRequests = paths.map(path => env.authStagingURL + path)
-          http.batch(batchRequests)
-        }
-        return http.get(res.headers.Location)
-      },
-      {
-        isStatusCode200,
-        ...pageContentCheck('Create your GOV.UK One Login or sign in')
-      }
-    )
-  })
-}
-
 export function orchStubSubmit(groups: readonly string[]): Response {
   let res: Response
 
-  // InitializeJourney
+  // OrchStubSubmit
   return timeGroup(groups[0], () => {
-    // 01_RPStub
+    // 01_OrchStubCall
     res = timeGroup(
       groups[1].split('::')[1],
       () =>
@@ -432,7 +392,8 @@ export function orchStubSubmit(groups: readonly string[]): Response {
             reauthenticate: '',
             level: 'Cl.Cm',
             authenticated: 'no',
-            authenticatedLevel: 'Cl.Cm'
+            authenticatedLevel: 'Cl.Cm',
+            channel: 'none'
           },
           { redirects: 0 }
         ),

@@ -356,27 +356,6 @@ export function signUp(): void {
   iterationsCompleted.add(1)
 }
 
-export function logout(groups: readonly string[]): void {
-  let res: Response
-
-  // Logout
-  timeGroup(groups[0], () => {
-    // 01_RPStub
-    res = timeGroup(groups[1].split('::')[1], () => http.get(env.orchStub + '/logout', { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 02_OIDCCall
-    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-      isStatusCode302
-    })
-    // 03_AuthCall
-    res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('You have signed out')
-    })
-  })
-}
-
 export function orchStubSubmit(groups: readonly string[]): Response {
   let res: Response
 

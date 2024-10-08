@@ -64,7 +64,7 @@ export function kbv(): void {
     kbvAns3: string
   }
   const kbvAnsJSON: KbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
-  iterationsStarted.add(1)
+  iterationsStarted.add(3)
 
   // B01_KBV_01_CoreStubEditUserContinue
   timeGroup(groups[0], () => {
@@ -85,11 +85,11 @@ export function kbv(): void {
     })
   })
 
-  sleepBetween(1, 3)
+  sleepBetween(3, 5)
 
   // B01_KBV_02_KBVQuestion1
   res = timeGroup(
-    groups[1],
+    groups[3],
     () =>
       res.submitForm({
         fields: { Q00042: kbvAnsJSON.kbvAns1 },
@@ -98,11 +98,11 @@ export function kbv(): void {
     { isStatusCode200, ...pageContentCheck('This includes any interest') }
   )
 
-  sleepBetween(1, 3)
+  sleepBetween(3, 5)
 
   // B01_KBV_03_KBVQuestion2
   res = timeGroup(
-    groups[2],
+    groups[4],
     () =>
       res.submitForm({
         fields: { Q00015: kbvAnsJSON.kbvAns2 },
@@ -114,13 +114,13 @@ export function kbv(): void {
     }
   )
 
-  sleepBetween(1, 3)
+  sleepBetween(3, 5)
 
   // B01_KBV_04_KBVQuestion3
   timeGroup(groups[3], () => {
     // 01_KBVCRICall
     res = timeGroup(
-      groups[4].split('::')[1],
+      groups[6].split('::')[3],
       () =>
         res.submitForm({
           fields: { Q00018: kbvAnsJSON.kbvAns3 },
@@ -131,7 +131,7 @@ export function kbv(): void {
     )
     // 02_CoreStubCall
     res = timeGroup(
-      groups[5].split('::')[1],
+      groups[7].split('::')[3],
       () =>
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }
@@ -142,5 +142,5 @@ export function kbv(): void {
       }
     )
   })
-  iterationsCompleted.add(1)
+  iterationsCompleted.add(3)
 }

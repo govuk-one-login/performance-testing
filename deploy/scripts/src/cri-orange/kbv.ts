@@ -85,7 +85,7 @@ export function kbv(): void {
     })
   })
 
-  sleepBetween(3, 5)
+  sleepBetween(1, 3)
 
   // B01_KBV_02_KBVQuestion1
   res = timeGroup(

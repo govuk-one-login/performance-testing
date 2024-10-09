@@ -120,7 +120,7 @@ export function kbv(): void {
   timeGroup(groups[3], () => {
     // 01_KBVCRICall
     res = timeGroup(
-      groups[6].split('::')[3],
+      groups[6].split('::')[1],
       () =>
         res.submitForm({
           fields: { Q00018: kbvAnsJSON.kbvAns3 },

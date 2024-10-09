@@ -103,6 +103,8 @@ Parameter store locations must start with the prefix `/perfTest/` in order for t
     |`SCENARIO`|`all`<sup>[_default_]</sup></br>`sign_in`</br>`create_account,sign_in`|Comma seperated list of scenarios to enable. Blank strings or `'all'` will default to enabling all scenarios in the selected load profile. Implementation in [`getScenarios`](src/common/utils/config/load-profiles.ts#L27-L36) function|
     |`ENVIRONMENT`|`build`<sup>[_default_]</sup></br>`staging`|Name of the environment where the test is being conducted. Accepted Values are build/staging depending on the test scenario|
 
+Note: To overcome latency issues caused by lambda cold starts, a [lambda warmer script](src/common/lambda-warmer.ts) is ran before performance tests. This sends concurrent requests to the respective imposter stub.
+
 5. Click 'Start Build'
 
 6. Build progress and the stdout results summary are printed in the 'Build logs'

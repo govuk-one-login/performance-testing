@@ -10,6 +10,7 @@ export function generateAuthRequest(userID: string, signinJourneyID: string): Au
   const timestamp = new Date().toISOString()
   return {
     event_id: uuidv4(),
+    component_id: 'UNKNOWN',
     client_id: uuidv4(),
     clientLandingPageUrl: 'https://www.gov.uk/request-copy-criminal-record',
     event_name: 'AUTH_IPV_AUTHORISATION_REQUESTED',
@@ -19,7 +20,10 @@ export function generateAuthRequest(userID: string, signinJourneyID: string): Au
     user: {
       user_id: userID,
       email: 'test.user@digital.cabinet-office.gov.uk',
-      govuk_signin_journey_id: signinJourneyID
+      govuk_signin_journey_id: signinJourneyID,
+      ip_address: '1.2.3.4',
+      persistent_session_id: uuidv4(),
+      session_id: uuidv4()
     }
   }
 }
@@ -28,6 +32,7 @@ export function generateF2FRequest(userID: string, signinJourneyID: string): F2f
   const timestamp = new Date().toISOString()
   return {
     event_id: uuidv4(),
+    component_id: 'UNKNOWN',
     client_id: uuidv4(),
     clientLandingPageUrl: 'https://www.gov.uk/request-copy-criminal-record',
     event_name: 'F2F_YOTI_START',
@@ -36,7 +41,9 @@ export function generateF2FRequest(userID: string, signinJourneyID: string): F2f
     timestamp_formatted: timestamp,
     user: {
       user_id: userID,
-      govuk_signin_journey_id: signinJourneyID
+      govuk_signin_journey_id: signinJourneyID,
+      ip_address: '1.2.3.4',
+      session_id: uuidv4()
     },
     extensions: {
       post_office_details: [
@@ -66,10 +73,13 @@ export function generateF2FRequest(userID: string, signinJourneyID: string): F2f
 export function generateDocumentUploadedRequest(userID: string): F2fDocumentUploaded {
   return {
     event_name: 'F2F_DOCUMENT_UPLOADED',
+    component_id: 'UNKNOWN',
     event_id: uuidv4(),
     timestamp: Date.now(),
     user: {
-      user_id: userID
+      user_id: userID,
+      ip_address: '1.2.3.4',
+      session_id: uuidv4()
     },
     extensions: {
       post_office_visit_details: [
@@ -86,6 +96,7 @@ export function generateIPVRequest(userID: string, signinJourneyID: string): Ipv
   const timestamp = new Date().toISOString()
   return {
     event_id: uuidv4(),
+    component_id: 'UNKNOWN',
     client_id: uuidv4(),
     clientLandingPageUrl: 'https://www.gov.uk/request-copy-criminal-record',
     event_name: 'IPV_F2F_CRI_VC_CONSUMED',

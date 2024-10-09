@@ -64,7 +64,7 @@ export function kbv(): void {
     kbvAns3: string
   }
   const kbvAnsJSON: KbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
-  iterationsStarted.add(3)
+  iterationsStarted.add(1)
 
   // B01_KBV_01_CoreStubEditUserContinue
   timeGroup(groups[0], () => {

@@ -88,7 +88,8 @@ const groupMap = {
     'B02_SignIn_05_EnterOTP',
     'B02_SignIn_05_EnterOTP::01_AuthCall',
     'B02_SignIn_05_EnterOTP::02_AuthAcceptTerms',
-    'B02_SignIn_05_EnterOTP::02_OrchStub',
+    'B02_SignIn_05_EnterOTP::03_AuthCall',
+    'B02_SignIn_05_EnterOTP::04_OrchStub',
     'B02_SignIn_06_AcceptTermsConditions',
     'B02_SignIn_06_AcceptTermsConditions::01_AuthCall',
     'B02_SignIn_06_AcceptTermsConditions::02_OrchStub'
@@ -482,7 +483,7 @@ export function signIn(): void {
       () =>
         res.submitForm({
           fields: { code: getOTP() },
-          params: { redirects: 1 }
+          params: { redirects: 0 }
         }),
       { isStatusCode302 }
     )
@@ -495,8 +496,16 @@ export function signIn(): void {
         ...pageContentCheck('terms of use update')
       })
     } else {
-      // 02_OrchStub
-      res = timeGroup(groups[9].split('::')[1], () => http.get(res.headers.Location), {
+      // 03_AuthCall
+      res = timeGroup(
+        groups[9].split('::')[1],
+        () => http.get(env.authStagingURL + res.headers.Location, { redirects: 0 }),
+        {
+          isStatusCode302
+        }
+      )
+      // 04_OrchStub
+      res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
         isStatusCode200,
         ...pageContentCheck(userData.email.toLowerCase())
       })
@@ -505,10 +514,10 @@ export function signIn(): void {
 
   if (acceptNewTerms) {
     // B02_SignIn_06_AcceptTermsConditions
-    timeGroup(groups[10], () => {
+    timeGroup(groups[11], () => {
       // 01_AuthCall
       res = timeGroup(
-        groups[11].split('::')[1],
+        groups[12].split('::')[1],
         () =>
           res.submitForm({
             fields: { termsAndConditionsResult: 'accept' },
@@ -518,7 +527,7 @@ export function signIn(): void {
       )
 
       // 02_OrchStub
-      res = timeGroup(groups[12].split('::')[1], () => http.get(res.headers.Location), {
+      res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location), {
         isStatusCode200,
         ...pageContentCheck(userData.email.toLowerCase())
       })

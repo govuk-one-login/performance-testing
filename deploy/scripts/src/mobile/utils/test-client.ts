@@ -1,18 +1,26 @@
 import http, { type Response } from 'k6/http'
 import { buildBackendUrl, buildUrl } from './url'
 import { config } from './config'
+import { isStatusCode201 } from '../../common/utils/checks/assertions'
+import { timeRequest } from '../../common/utils/request/timing'
+import { group } from 'k6'
 
 export function postTestClientStart(): Response {
-  return http.post(
-    buildUrl('start', config.testClientExecuteUrl),
-    JSON.stringify({
-      target: config.backendUrl,
-      frontendUri: config.frontendUrl
-    }),
-    {
-      tags: { name: 'POST /start' },
-      headers: { 'Content-Type': 'application/json' }
-    }
+  return group('POST test client /start', () =>
+    timeRequest(
+      () =>
+        http.post(
+          buildUrl('start', config.testClientExecuteUrl),
+          JSON.stringify({
+            target: config.backendUrl,
+            frontendUri: config.frontendUrl
+          }),
+          {
+            headers: { 'Content-Type': 'application/json' }
+          }
+        ),
+      { isStatusCode201 }
+    )
   )
 }
 

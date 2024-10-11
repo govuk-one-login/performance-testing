@@ -5,31 +5,31 @@ FROM node:20-alpine3.18 AS node-build
 
 ENV WORKDIR=/home/node
 
-ADD scripts ${WORKDIR}/scripts
+COPY scripts ${WORKDIR}/scripts
 
 WORKDIR ${WORKDIR}/scripts
-RUN npm install --ignore-scripts
-RUN npm start
+RUN npm install --ignore-scripts \
+  && npm start
 
 # -------------------------------
 # Build k6 binary with extensions
 # -------------------------------
-FROM golang:1.22-alpine AS k6-build
+FROM golang:1.23-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
-RUN go install go.k6.io/xk6/cmd/xk6@v0.10.0
-RUN xk6 build v0.52.0 --with github.com/LeonAdato/xk6-output-statsd@v0.1.1 --output /k6
+RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
+  && xk6 build v0.54.0 --with github.com/LeonAdato/xk6-output-statsd@v0.2.0 --output /k6
 
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.104.0 AS otel
-ADD otel-config-template.yaml /etc/otelcol/config-template.yaml
+FROM otel/opentelemetry-collector-contrib:0.111.0 AS otel
+COPY otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---
 # Run
 # ---
-FROM grafana/k6:0.52.0
+FROM grafana/k6:0.54.0
 COPY --from=k6-build /k6 /usr/bin/k6
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true
@@ -48,11 +48,11 @@ ENV WORKDIR=/home/k6
 WORKDIR ${WORKDIR}
 
 USER root
-RUN apk add --no-cache aws-cli curl jq chromium
+RUN apk add --no-cache aws-cli chromium curl jq
 
 USER k6
 RUN mkdir ${WORKDIR}/scripts
 COPY --from=node-build /home/node/scripts/dist ${WORKDIR}/scripts
-ADD reporting ${WORKDIR}/reporting
+COPY reporting ${WORKDIR}/reporting
 
 ENTRYPOINT ["sh"]

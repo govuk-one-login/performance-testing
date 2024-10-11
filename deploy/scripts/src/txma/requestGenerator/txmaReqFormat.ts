@@ -14,6 +14,10 @@ export interface AuthLogInSuccess {
     persistent_session_id: string
     phone: string
   }
+  extensions: {
+    phone_number_country_code: number
+    rpPairwiseId: string
+  }
 }
 
 export interface AuthCreateAccount {
@@ -23,17 +27,18 @@ export interface AuthCreateAccount {
   component_id: string
   timestamp: number
   event_timestamp_ms: number
-  extensions: {
-    internalSubjectId: string
-    rpPairwiseId: string
-  }
   user: {
     user_id: string
     govuk_signin_journey_id: string
     ip_address: string
-    email: string
     session_id: string
+    email: string
     persistent_session_id: string
+    phone: number
+  }
+  extensions: {
+    phone_number_country_code: number
+    rpPairwiseId: string
   }
 }
 

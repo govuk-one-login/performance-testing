@@ -4,12 +4,7 @@ import { buildFrontendUrl } from '../utils/url'
 import { validatePageRedirect, validateLocationHeader, validateQueryParam } from '../utils/assertions'
 import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
 import { timeRequest } from '../../common/utils/request/timing'
-import {
-  isStatusCode200,
-  isStatusCode201,
-  isStatusCode302,
-  pageContentCheck
-} from '../../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../../common/utils/checks/assertions'
 
 export function getSessionIdFromCookieJar(): string {
   const jar = http.cookieJar()
@@ -17,113 +12,65 @@ export function getSessionIdFromCookieJar(): string {
 }
 
 export function startJourney(): void {
-  const testClientRes = group('POST test client /start', () =>
-    timeRequest(() => postTestClientStart(), { isStatusCode201 })
-  )
+  const testClientRes = postTestClientStart()
   const authorizeUrl = parseTestClientResponse(testClientRes, 'WebLocation')
 
   group('GET /authorize', () =>
-    timeRequest(
-      () =>
-        http.get(authorizeUrl, {
-          tags: { name: 'GET /authorize' }
-        }),
-      {
-        isStatusCode200,
-        ...validatePageRedirect('/selectDevice'),
-        ...pageContentCheck('Are you on a computer or a tablet right now?')
-      }
-    )
+    timeRequest(() => http.get(authorizeUrl), {
+      isStatusCode200,
+      ...validatePageRedirect('/selectDevice'),
+      ...pageContentCheck('Are you on a computer or a tablet right now?')
+    })
   )
 }
 
 export function postSelectDevice(): void {
   group('POST /selectDevice', () =>
-    timeRequest(
-      () =>
-        http.post(
-          buildFrontendUrl('/selectDevice'),
-          { 'select-device-choice': 'smartphone' },
-          { tags: { name: 'POST /selectDevice' } }
-        ),
-      {
-        isStatusCode200,
-        ...validatePageRedirect('/selectSmartphone'),
-        ...pageContentCheck('Which smartphone are you using?')
-      }
-    )
+    timeRequest(() => http.post(buildFrontendUrl('/selectDevice'), { 'select-device-choice': 'smartphone' }), {
+      isStatusCode200,
+      ...validatePageRedirect('/selectSmartphone'),
+      ...pageContentCheck('Which smartphone are you using?')
+    })
   )
 }
 
 export function postSelectSmartphone(): void {
   group('POST /selectSmartphone', () =>
-    timeRequest(
-      () =>
-        http.post(
-          buildFrontendUrl('/selectSmartphone'),
-          { 'smartphone-choice': 'iphone' },
-          { tags: { name: 'POST /selectSmartphone' } }
-        ),
-      {
-        isStatusCode200,
-        ...validatePageRedirect('/validPassport'),
-        ...pageContentCheck('Do you have a valid passport?')
-      }
-    )
+    timeRequest(() => http.post(buildFrontendUrl('/selectSmartphone'), { 'smartphone-choice': 'iphone' }), {
+      isStatusCode200,
+      ...validatePageRedirect('/validPassport'),
+      ...pageContentCheck('Do you have a valid passport?')
+    })
   )
 }
 
 export function postValidPassport(): void {
   group('POST /validPassport', () =>
-    timeRequest(
-      () =>
-        http.post(
-          buildFrontendUrl('/validPassport'),
-          { 'select-option': 'yes' },
-          { tags: { name: 'POST /validPassport' } }
-        ),
-      {
-        isStatusCode200,
-        ...validatePageRedirect('/biometricChip'),
-        ...pageContentCheck('Does your passport have this symbol on the cover?')
-      }
-    )
+    timeRequest(() => http.post(buildFrontendUrl('/validPassport'), { 'select-option': 'yes' }), {
+      isStatusCode200,
+      ...validatePageRedirect('/biometricChip'),
+      ...pageContentCheck('Does your passport have this symbol on the cover?')
+    })
   )
 }
 
 export function postBiometricChip(): void {
   group('POST /biometricChip', () =>
-    timeRequest(
-      () =>
-        http.post(
-          buildFrontendUrl('/biometricChip'),
-          { 'select-option': 'yes' },
-          { tags: { name: 'POST /biometricChip' } }
-        ),
-      {
-        isStatusCode200,
-        ...validatePageRedirect('/iphoneModel'),
-        ...pageContentCheck('Which iPhone model do you have?')
-      }
-    )
+    timeRequest(() => http.post(buildFrontendUrl('/biometricChip'), { 'select-option': 'yes' }), {
+      isStatusCode200,
+      ...validatePageRedirect('/iphoneModel'),
+      ...pageContentCheck('Which iPhone model do you have?')
+    })
   )
 }
 
 export function postIphoneModel(): void {
   group('POST /iphoneModel', () =>
-    timeRequest(
-      () =>
-        http.post(
-          buildFrontendUrl('/iphoneModel'),
-          { 'select-option': 'iphone7OrNewer' },
-          { tags: { name: 'POST /iphoneModel' } }
-        ),
-      {
-        isStatusCode200,
-        ...validatePageRedirect('/idCheckApp'),
-        ...pageContentCheck('Use your passport and a GOV.UK app to confirm your identity')
-      }
-    )
+    timeRequest(() => http.post(buildFrontendUrl('/iphoneModel'), { 'select-option': 'iphone7OrNewer' }), {
+      isStatusCode200,
+      ...validatePageRedirect('/idCheckApp'),
+      ...pageContentCheck('Use your passport and a GOV.UK app to confirm your identity')
+    })
   )
 }
 
@@ -146,8 +93,7 @@ export function getRedirect(): void {
     timeRequest(
       () =>
         http.get(redirectUrl, {
-          redirects: 0,
-          tags: { name: 'GET /redirect' }
+          redirects: 0
         }),
       {
         isStatusCode302,
@@ -167,8 +113,7 @@ export function getAbortCommand(): void {
     timeRequest(
       () =>
         http.get(abortCommandUrl, {
-          redirects: 0,
-          tags: { name: 'GET /abortCommand' }
+          redirects: 0
         }),
       {
         isStatusCode302,

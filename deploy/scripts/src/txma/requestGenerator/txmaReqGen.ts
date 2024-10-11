@@ -1,48 +1,50 @@
 import { uuidv4 } from '../../common/utils/jslib/index'
 import { AuthLogInSuccess, AuthCreateAccount, AuthAuthorisationReqParsed, DcmawAbortWeb } from './txmaReqFormat'
 
-export function generateAuthLogInSuccess(userID: string, emailID: string, journeyID: string): AuthLogInSuccess {
-  const eventID = `perfAuthLogin${uuidv4()}`
-  const eventTime = Math.floor(Date.now() / 1000)
+export function generateAuthLogInSuccess(testID: string, userID: string, emailID: string): AuthLogInSuccess {
   return {
-    event_id: eventID,
+    event_id: `${testID}_${uuidv4()}`,
     event_name: 'AUTH_LOG_IN_SUCCESS',
-    client_id: 'e2eTestClientId',
+    client_id: 'performanceTestClientId',
     component_id: 'SharedSignalPerfTest',
-    timestamp: eventTime,
-    event_timestamp_ms: eventTime,
+    timestamp: Math.floor(Date.now() / 1000),
+    event_timestamp_ms: Math.floor(Date.now()),
     user: {
-      user_id: userID,
-      govuk_signin_journey_id: journeyID,
+      user_id: `${testID}_performanceTestClientId_${userID}_performanceTestCommonSubjectId`,
+      govuk_signin_journey_id: uuidv4(),
       ip_address: '1.2.3.4',
       session_id: uuidv4(),
       email: emailID,
       persistent_session_id: uuidv4(),
       phone: '07777777777'
+    },
+    extensions: {
+      phone_number_country_code: 44,
+      rpPairwiseId: `${testID}_performanceTestClientId_${userID}_performanceTestRpPairwiseId`
     }
   }
 }
 
-export function generateAuthCreateAccount(userID: string, emailID: string, journeyID: string): AuthCreateAccount {
-  const eventID = `perfAuthCreateAcc${uuidv4()}`
+export function generateAuthCreateAccount(testID: string, userID: string, emailID: string): AuthCreateAccount {
+  const evendID = `${testID}_${uuidv4()}`
   return {
-    event_id: eventID,
+    event_id: evendID,
     event_name: 'AUTH_CREATE_ACCOUNT',
-    client_id: 'e2eTestClientId',
+    client_id: 'performanceTestClientId',
     component_id: 'SharedSignalPerfTest',
     timestamp: Math.floor(Date.now() / 1000),
     event_timestamp_ms: Math.floor(Date.now()),
-    extensions: {
-      internalSubjectId: uuidv4(),
-      rpPairwiseId: 'e2eTestPairwiseId'
-    },
     user: {
-      user_id: userID,
-      govuk_signin_journey_id: journeyID,
+      user_id: `${testID}_performanceTestClientId_${userID}_performanceTestCommonSubjectId`,
+      govuk_signin_journey_id: uuidv4(),
       ip_address: '1.2.3.4',
       email: emailID,
       session_id: uuidv4(),
       persistent_session_id: uuidv4()
+    },
+    extensions: {
+      phone_number_country_code: 44,
+      rpPairwiseId: `${testID}_performanceTestClientId_${userID}_performanceTestRpPairwiseId`
     }
   }
 }

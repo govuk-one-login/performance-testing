@@ -29,7 +29,7 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  kbvScenario1: [
+  kbv: [
     'B01_KBV_01_CoreStubEditUserContinue',
     'B01_KBV_02_KBVQuestion1',
     'B01_KBV_03_KBVQuestion2',
@@ -54,7 +54,7 @@ const kbvAnswersOBJ = {
 }
 
 export function kbv(): void {
-  const groups = groupMap.kbvScenario1
+  const groups = groupMap.kbv
   let res: Response
   interface KbvAnswers {
     kbvAns1: string

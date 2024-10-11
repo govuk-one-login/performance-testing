@@ -1,21 +1,18 @@
-
-const Koa = require('koa');
+const Koa = require("koa");
 const app = new Koa();
 const cors = require("@koa/cors");
-const router = require('./router');
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-
+const router = require("./router");
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 
 let config = {};
 if (process.env.AWS_SAM_LOCAL) {
-    config = {
-        endpoint: "http://host.docker.internal:8000"
-    }
+  config = {
+    endpoint: "http://host.docker.internal:8000",
+  };
 }
 
-app.context.ddbClient = new DynamoDBClient(config)
+app.context.ddbClient = new DynamoDBClient(config);
 
-app.use(cors())
-    .use(router.routes())
+app.use(cors()).use(router.routes());
 
-module.exports = app
+module.exports = app;

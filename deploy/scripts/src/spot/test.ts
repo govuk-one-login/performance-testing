@@ -75,6 +75,7 @@ export async function spot(): Promise<void> {
   }
   const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
   const importKey = async (key: JWK): Promise<CryptoKey> => {
+    const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     return crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
   }
   const importedKeys = {

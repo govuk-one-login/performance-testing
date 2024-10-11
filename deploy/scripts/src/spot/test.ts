@@ -75,9 +75,10 @@ export async function spot(): Promise<void> {
     passport: generatePassportPayload(subjectID),
     kbv: generateKBVPayload(subjectID)
   }
-  const importKey = async (key: JWK): Promise<CryptoKey> => {
+  const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
-    return webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+    const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+    return signJwt('ES256', importedKey, payload)
   }
   const importedKeys = {
     fraud: await importKey(keys.fraud),
@@ -86,9 +87,9 @@ export async function spot(): Promise<void> {
   }
   const algorithm = 'ES256'
   const jwts = [
-    await signJwt(algorithm, importedKeys.fraud, payloads.fraud),
-    await signJwt(algorithm, importedKeys.passport, payloads.passport),
-    await signJwt(algorithm, importedKeys.kbv, payloads.kbv)
+    await createJwt(keys.fraud, payloads.fraud),
+    await createJwt(keys.passport, payloads.passport),
+    await createJwt(keys.kbv, payloads.kbv)
   ]
   const payload = generateSPOTRequest(subjectID, jwts)
 

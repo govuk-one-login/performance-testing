@@ -73,7 +73,6 @@ export async function spot(): Promise<void> {
     passport: generatePassportPayload(subjectID),
     kbv: generateKBVPayload(subjectID)
   }
-  const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
   const importKey = async (key: JWK): Promise<CryptoKey> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     return crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
@@ -89,12 +88,9 @@ export async function spot(): Promise<void> {
     await signJwt(algorithm, importedKeys.passport, payloads.passport),
     await signJwt(algorithm, importedKeys.kbv, payloads.kbv)
   ]
-  const spotPayload = generateSPOTRequest(currTime, jwts)
+  const payload = generateSPOTRequest(currTime, jwts)
 
-  const spotMessage = {
-    messageBody: JSON.stringify(spotPayload)
-  }
   iterationsStarted.add(1)
-  sqs.sendMessage(env.sqs_queue, spotMessage.messageBody)
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(payload))
   iterationsCompleted.add(1)
 }

@@ -11,12 +11,12 @@ import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generateSPOTRequest } from './requestGenerator/spotReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
-import { uuidv4 } from '../common/utils/jslib'
 import { generateFraudPayload, generateKBVPayload, generatePassportPayload } from './requestGenerator/payloadGenerator'
 import { signJwt } from '../common/utils/authentication/jwt'
-import { crypto as webcrypto, CryptoKey, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
+import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
 import crypto from 'k6/crypto'
 import { b64decode } from 'k6/encoding'
+import { SpotRequestInfo } from './requestGenerator/spotReqFormat'
 
 const profiles: ProfileList = {
   smoke: {
@@ -67,21 +67,25 @@ const awsConfig = new AWSConfig({
 const sqs = new SQSClient(awsConfig)
 
 export async function spot(): Promise<void> {
-  const getSub = (sectorId: string): string => {
+  const config: SpotRequestInfo = {
+    host: 'a-simple-local-account-id',
+    sector: 'a.simple.sector.id',
+    salt: 'YS1zaW1wbGUtc2FsdA=='
+  }
+
+  const pairwiseSub = (sectorId: string): string => {
     const hasher = crypto.createHash('sha256')
-    const host = 'a-simple-local-account-id'
-    const salt = b64decode('YS1zaW1wbGUtc2FsdA==')
     hasher.update(sectorId)
-    hasher.update(host)
-    hasher.update(salt)
+    hasher.update(config.host)
+    hasher.update(b64decode(config.salt))
     const id = hasher.digest('base64rawurl')
     return 'urn:fdc:gov.uk:2022:' + id
   }
 
   const payloads = {
-    fraud: generateFraudPayload(getSub('fraudSector')),
-    passport: generatePassportPayload(getSub('passportSector')),
-    kbv: generateKBVPayload(getSub('verificationSector'))
+    fraud: generateFraudPayload(pairwiseSub('fraudSector')),
+    passport: generatePassportPayload(pairwiseSub('passportSector')),
+    kbv: generateKBVPayload(pairwiseSub('verificationSector'))
   }
   const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
@@ -93,7 +97,7 @@ export async function spot(): Promise<void> {
     await createJwt(keys.passport, payloads.passport),
     await createJwt(keys.kbv, payloads.kbv)
   ]
-  const payload = generateSPOTRequest(getSub('a.simple.sector.id'), jwts)
+  const payload = generateSPOTRequest(pairwiseSub(config.sector), config, jwts)
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(payload))
   iterationsCompleted.add(1)

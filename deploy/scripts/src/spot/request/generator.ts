@@ -1,75 +1,83 @@
-import { IdentityCheckCredentialJWTClass } from '@govuk-one-login/data-vocab/credentials'
+import {
+  IdentityCheckCredentialJWTClass,
+  IdentityCheckClass,
+  IdentityCheckSubjectClass,
+  BirthDateClass,
+  NameClass,
+  PostalAddressClass
+} from '@govuk-one-login/data-vocab/credentials'
 import { uuidv4 } from '../../common/utils/jslib'
+import { SpotRequest, SpotRequestInfo } from './types'
 
-export function generateFraudPayload(subID: string): IdentityCheckCredentialJWTClass {
-  return {
-    sub: subID,
-    nbf: Math.floor(Date.now() / 1000),
-    iss: 'https://fraudcri.dev.gov.uk',
-    vc: {
-      evidence: [
+export enum Issuer {
+  Fraud,
+  Passport,
+  KBV
+}
+
+export function generatePayload(sub: string, issuer: Issuer): IdentityCheckCredentialJWTClass {
+  let iss: string
+  let evidence: IdentityCheckClass[]
+  let credentialSubject: IdentityCheckSubjectClass
+
+  const address: PostalAddressClass[] = [
+    {
+      addressCountry: 'GB',
+      buildingName: '',
+      streetName: 'HADLEY ROAD',
+      postalCode: 'BA2 5AA',
+      buildingNumber: '8',
+      addressLocality: 'BATH',
+      validFrom: '2000-01-01'
+    }
+  ]
+  const name: NameClass[] = [
+    {
+      nameParts: [
+        {
+          type: 'GivenName',
+          value: 'Kenneth'
+        },
+        {
+          type: 'FamilyName',
+          value: 'Decerqueira'
+        }
+      ]
+    }
+  ]
+  const birthDate: BirthDateClass[] = [
+    {
+      value: '1965-07-08'
+    }
+  ]
+
+  switch (issuer) {
+    case Issuer.Fraud:
+      iss = 'https://fraudcri.dev.gov.uk'
+      evidence = [
         {
           identityFraudScore: 2,
           txn: uuidv4(),
           type: 'IdentityCheck'
         }
-      ],
-      credentialSubject: {
-        address: [
-          {
-            addressCountry: 'GB',
-            buildingName: '',
-            streetName: 'HADLEY ROAD',
-            postalCode: 'BA2 5AA',
-            buildingNumber: '8',
-            addressLocality: 'BATH',
-            validFrom: '2000-01-01'
-          }
-        ],
-        name: [
-          {
-            nameParts: [
-              {
-                type: 'GivenName',
-                value: 'Kenneth'
-              },
-              {
-                type: 'FamilyName',
-                value: 'Decerqueira'
-              }
-            ]
-          }
-        ],
-        birthDate: [
-          {
-            value: '1965-07-08'
-          }
-        ]
-      },
-      type: ['VerifiableCredential', 'IdentityCheckCredential'],
-      '@context': [
-        'https://www.w3.org/2018/credentials/v1',
-        'https://vocab.london.cloudapps.digital/contexts/identity-v1.jsonld'
       ]
-    }
-  }
-}
-
-export function generatePassportPayload(subID: string): IdentityCheckCredentialJWTClass {
-  return {
-    sub: subID,
-    nbf: Math.floor(Date.now() / 1000),
-    iss: 'https://passportcri.dev.gov.uk',
-    vc: {
-      evidence: [
+      credentialSubject = {
+        address,
+        name,
+        birthDate
+      }
+      break
+    case Issuer.Passport:
+      iss = 'https://passportcri.dev.gov.uk'
+      evidence = [
         {
           validityScore: 2,
           strengthScore: 4,
           txn: uuidv4(),
           type: 'IdentityCheck'
         }
-      ],
-      credentialSubject: {
+      ]
+      credentialSubject = {
         passport: [
           {
             expiryDate: '2030-01-01',
@@ -77,80 +85,36 @@ export function generatePassportPayload(subID: string): IdentityCheckCredentialJ
             documentNumber: '321654987'
           }
         ],
-        name: [
-          {
-            nameParts: [
-              {
-                type: 'GivenName',
-                value: 'Kenneth'
-              },
-              {
-                type: 'FamilyName',
-                value: 'Decerqueira'
-              }
-            ]
-          }
-        ],
-        birthDate: [
-          {
-            value: '1965-07-08'
-          }
-        ]
-      },
-      type: ['VerifiableCredential', 'IdentityCheckCredential'],
-      '@context': [
-        'https://www.w3.org/2018/credentials/v1',
-        'https://vocab.london.cloudapps.digital/contexts/identity-v1.jsonld'
-      ]
-    }
-  }
-}
-
-export function generateKBVPayload(subID: string): IdentityCheckCredentialJWTClass {
-  return {
-    sub: subID,
-    nbf: Math.floor(Date.now() / 1000),
-    iss: 'https://verificationcri.dev.gov.uk',
-    vc: {
-      evidence: [
+        name,
+        birthDate
+      }
+      break
+    case Issuer.KBV:
+      iss = 'https://verificationcri.dev.gov.uk'
+      evidence = [
         {
           verificationScore: 2,
           txn: uuidv4(),
           type: 'IdentityCheck'
         }
-      ],
-      credentialSubject: {
-        address: [
-          {
-            addressCountry: 'GB',
-            buildingName: '',
-            streetName: 'HADLEY ROAD',
-            postalCode: 'BA2 5AA',
-            buildingNumber: '8',
-            addressLocality: 'BATH',
-            validFrom: '2000-01-01'
-          }
-        ],
-        name: [
-          {
-            nameParts: [
-              {
-                type: 'GivenName',
-                value: 'Kenneth'
-              },
-              {
-                type: 'FamilyName',
-                value: 'Decerqueira'
-              }
-            ]
-          }
-        ],
-        birthDate: [
-          {
-            value: '1965-07-08'
-          }
-        ]
-      },
+      ]
+      credentialSubject = {
+        address,
+        name,
+        birthDate
+      }
+      break
+    default:
+      throw new Error('Issuer not implemented')
+  }
+
+  return {
+    sub: sub,
+    nbf: Math.floor(Date.now() / 1000),
+    iss,
+    vc: {
+      evidence,
+      credentialSubject,
       type: ['VerifiableCredential', 'IdentityCheckCredential'],
       '@context': [
         'https://www.w3.org/2018/credentials/v1',

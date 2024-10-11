@@ -14,7 +14,8 @@ import { getEnv } from '../common/utils/config/environment-variables'
 import { uuidv4 } from '../common/utils/jslib'
 import { generateFraudPayload, generateKBVPayload, generatePassportPayload } from './requestGenerator/payloadGenerator'
 import { signJwt } from '../common/utils/authentication/jwt'
-import { crypto, CryptoKey, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
+import { crypto as webcrypto, CryptoKey, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
+import crypto from 'k6/crypto'
 
 const profiles: ProfileList = {
   smoke: {
@@ -65,8 +66,9 @@ const awsConfig = new AWSConfig({
 const sqs = new SQSClient(awsConfig)
 
 export async function spot(): Promise<void> {
-  const currTime = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
-  const userID = uuidv4()
+  const hasher = crypto.createHash('sha256')
+  hasher.update(uuidv4())
+  const userID = hasher.digest('base64rawurl')
   const subjectID = `urn:fdc:gov.uk:2022:${userID}`
   const payloads = {
     fraud: generateFraudPayload(subjectID),
@@ -75,7 +77,7 @@ export async function spot(): Promise<void> {
   }
   const importKey = async (key: JWK): Promise<CryptoKey> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
-    return crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+    return webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
   }
   const importedKeys = {
     fraud: await importKey(keys.fraud),
@@ -88,7 +90,7 @@ export async function spot(): Promise<void> {
     await signJwt(algorithm, importedKeys.passport, payloads.passport),
     await signJwt(algorithm, importedKeys.kbv, payloads.kbv)
   ]
-  const payload = generateSPOTRequest(currTime, jwts)
+  const payload = generateSPOTRequest(subjectID, jwts)
 
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(payload))

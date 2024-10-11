@@ -1,7 +1,7 @@
 import { type SpotRequest } from '../../spot/requestGenerator/spotReqFormat'
 import { uuidv4 } from '../../common/utils/jslib/index'
 
-export function generateSPOTRequest(currTime: string, jwts: string[]): SpotRequest {
+export function generateSPOTRequest(currTime: string, subID: string, jwts: string[]): SpotRequest {
   const audClientID = uuidv4()
   return {
     in_claims: {

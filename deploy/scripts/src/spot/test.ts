@@ -16,6 +16,7 @@ import { generateFraudPayload, generateKBVPayload, generatePassportPayload } fro
 import { signJwt } from '../common/utils/authentication/jwt'
 import { crypto as webcrypto, CryptoKey, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
 import crypto from 'k6/crypto'
+import { b64decode } from 'k6/encoding'
 
 const profiles: ProfileList = {
   smoke: {
@@ -66,33 +67,33 @@ const awsConfig = new AWSConfig({
 const sqs = new SQSClient(awsConfig)
 
 export async function spot(): Promise<void> {
-  const hasher = crypto.createHash('sha256')
-  hasher.update(uuidv4())
-  const userID = hasher.digest('base64rawurl')
-  const subjectID = `urn:fdc:gov.uk:2022:${userID}`
+  const getSub = (sectorId: string): string => {
+    const hasher = crypto.createHash('sha256')
+    const host = 'a-simple-local-account-id'
+    const salt = b64decode('YS1zaW1wbGUtc2FsdA==')
+    hasher.update(sectorId)
+    hasher.update(host)
+    hasher.update(salt)
+    const id = hasher.digest('base64rawurl')
+    return 'urn:fdc:gov.uk:2022:' + id
+  }
+
   const payloads = {
-    fraud: generateFraudPayload(subjectID),
-    passport: generatePassportPayload(subjectID),
-    kbv: generateKBVPayload(subjectID)
+    fraud: generateFraudPayload(getSub('fraudSector')),
+    passport: generatePassportPayload(getSub('passportSector')),
+    kbv: generateKBVPayload(getSub('verificationSector'))
   }
   const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     return signJwt('ES256', importedKey, payload)
   }
-  const importedKeys = {
-    fraud: await importKey(keys.fraud),
-    passport: await importKey(keys.passport),
-    kbv: await importKey(keys.kbv)
-  }
-  const algorithm = 'ES256'
   const jwts = [
     await createJwt(keys.fraud, payloads.fraud),
     await createJwt(keys.passport, payloads.passport),
     await createJwt(keys.kbv, payloads.kbv)
   ]
-  const payload = generateSPOTRequest(subjectID, jwts)
-
+  const payload = generateSPOTRequest(getSub('a.simple.sector.id'), jwts)
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(payload))
   iterationsCompleted.add(1)

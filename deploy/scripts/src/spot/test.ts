@@ -13,9 +13,8 @@ import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { uuidv4 } from '../common/utils/jslib'
 import { generateFraudPayload, generateKBVPayload, generatePassportPayload } from './requestGenerator/payloadGenerator'
-import encoding from 'k6/encoding'
 import { signJwt } from '../common/utils/authentication/jwt'
-import { crypto, EcKeyImportParams } from 'k6/experimental/webcrypto'
+import { crypto, CryptoKey, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
 
 const profiles: ProfileList = {
   smoke: {
@@ -50,10 +49,10 @@ const env = {
   sqs_queue: getEnv('IDENTITY_SPOT_SQS')
 }
 
-const pkcs8Keys = {
-  fraud: getEnv('IDENTITY_SPOT_FRAUDKEY'),
-  passport: getEnv('IDENTITY_SPOT_PASSPORTKEY'),
-  kbv: getEnv('IDENTITY_SPOT_KBVKEY')
+const keys = {
+  fraud: JSON.parse(getEnv('IDENTITY_SPOT_FRAUDKEY')) as JWK,
+  passport: JSON.parse(getEnv('IDENTITY_SPOT_PASSPORTKEY')) as JWK,
+  kbv: JSON.parse(getEnv('IDENTITY_SPOT_KBVKEY')) as JWK
 }
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -70,32 +69,26 @@ export async function spot(): Promise<void> {
   const userID = uuidv4()
   const subjectID = `urn:fdc:gov.uk:2022:${userID}`
   const payloads = {
-    fraudPayload: generateFraudPayload(subjectID),
-    passportPayload: generatePassportPayload(subjectID),
-    kbvPayload: generateKBVPayload(subjectID)
+    fraud: generateFraudPayload(subjectID),
+    passport: generatePassportPayload(subjectID),
+    kbv: generateKBVPayload(subjectID)
   }
   const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
-  const cryptoKeys = {
-    fraudCryptoKey: str2buffer(pkcs8Keys.fraud),
-    passportCryptoKey: str2buffer(pkcs8Keys.passport),
-    kbvCryptoKey: str2buffer(pkcs8Keys.kbv)
+  const importKey = async (key: JWK): Promise<CryptoKey> => {
+    return crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
   }
-
-  const importedPrivateKeys = {
-    fraudPrivateKey: await crypto.subtle.importKey('pkcs8', cryptoKeys.fraudCryptoKey, escdaParam, true, ['sign']),
-    passportPrivateKey: await crypto.subtle.importKey('pkcs8', cryptoKeys.passportCryptoKey, escdaParam, true, [
-      'sign'
-    ]),
-    kbvPrivateKey: await crypto.subtle.importKey('pkcs8', cryptoKeys.kbvCryptoKey, escdaParam, true, ['sign'])
+  const importedKeys = {
+    fraud: await importKey(keys.fraud),
+    passport: await importKey(keys.passport),
+    kbv: await importKey(keys.kbv)
   }
-
-  const jwts = {
-    fraudSignedJWT: await signJwt('ES256', importedPrivateKeys.fraudPrivateKey, payloads.fraudPayload),
-    passportSignedJWT: await signJwt('ES256', importedPrivateKeys.passportPrivateKey, payloads.passportPayload),
-    kbvSignedJWT: await signJwt('ES256', importedPrivateKeys.kbvPrivateKey, payloads.kbvPayload)
-  }
-
-  const spotPayload = generateSPOTRequest(currTime, jwts.fraudSignedJWT, jwts.kbvSignedJWT, jwts.kbvSignedJWT)
+  const algorithm = 'ES256'
+  const jwts = [
+    await signJwt(algorithm, importedKeys.fraud, payloads.fraud),
+    await signJwt(algorithm, importedKeys.passport, payloads.passport),
+    await signJwt(algorithm, importedKeys.kbv, payloads.kbv)
+  ]
+  const spotPayload = generateSPOTRequest(currTime, jwts)
 
   const spotMessage = {
     messageBody: JSON.stringify(spotPayload)
@@ -103,8 +96,4 @@ export async function spot(): Promise<void> {
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, spotMessage.messageBody)
   iterationsCompleted.add(1)
-}
-
-function str2buffer(pkcs8Keys: string): ArrayBuffer {
-  return encoding.b64decode(pkcs8Keys, 'std')
 }

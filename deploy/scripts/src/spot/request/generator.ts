@@ -159,3 +159,27 @@ export function generateKBVPayload(subID: string): IdentityCheckCredentialJWTCla
     }
   }
 }
+
+export function generateSPOTRequest(sub: string, config: SpotRequestInfo, jwts: string[]): SpotRequest {
+  const currTime = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
+  const audClientID = uuidv4()
+  return {
+    in_claims: {
+      'https://vocab.account.gov.uk/v1/credentialJWT': jwts,
+      vot: 'P2',
+      vtm: 'https://local.vtm'
+    },
+    in_local_account_id: config.host,
+    in_rp_sector_id: config.sector,
+    in_salt: config.salt,
+    out_audience: audClientID,
+    log_ids: {
+      client_id: audClientID,
+      persistent_session_id: uuidv4(),
+      request_id: uuidv4() + '_' + currTime,
+      session_id: uuidv4(),
+      client_session_id: uuidv4()
+    },
+    out_sub: sub
+  }
+}

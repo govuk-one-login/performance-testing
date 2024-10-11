@@ -8,15 +8,19 @@ import {
   LoadProfile
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
-import { generateSPOTRequest } from './requestGenerator/spotReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
-import { generateFraudPayload, generateKBVPayload, generatePassportPayload } from './requestGenerator/payloadGenerator'
+import {
+  generateFraudPayload,
+  generateKBVPayload,
+  generatePassportPayload,
+  generateSPOTRequest
+} from './requests/payloadGenerator'
 import { signJwt } from '../common/utils/authentication/jwt'
 import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
 import crypto from 'k6/crypto'
 import { b64decode } from 'k6/encoding'
-import { SpotRequestInfo } from './requestGenerator/spotReqFormat'
+import { SpotRequestInfo } from './requests/spotReqFormat'
 
 const profiles: ProfileList = {
   smoke: {

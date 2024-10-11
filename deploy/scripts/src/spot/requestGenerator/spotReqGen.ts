@@ -1,16 +1,11 @@
 import { type SpotRequest } from '../../spot/requestGenerator/spotReqFormat'
 import { uuidv4 } from '../../common/utils/jslib/index'
 
-export function generateSPOTRequest(
-  currTime: string,
-  fraudSignedJWT: string,
-  passportSignedJWT: string,
-  kbvSignedJWT: string
-): SpotRequest {
+export function generateSPOTRequest(currTime: string, jwts: string[]): SpotRequest {
   const audClientID = uuidv4()
-  const sampleSpotRequest: SpotRequest = {
+  return {
     in_claims: {
-      'https://vocab.account.gov.uk/v1/credentialJWT': [fraudSignedJWT, passportSignedJWT, kbvSignedJWT],
+      'https://vocab.account.gov.uk/v1/credentialJWT': jwts,
       vot: 'P2',
       vtm: 'https://local.vtm'
     },
@@ -27,6 +22,4 @@ export function generateSPOTRequest(
     },
     out_sub: 'urn:fdc:gov.uk:2022:JG0RJI1pYbnanbvPs-j4j5-a-PFcmhry9Qu9NCEp5d4'
   }
-
-  return sampleSpotRequest
 }

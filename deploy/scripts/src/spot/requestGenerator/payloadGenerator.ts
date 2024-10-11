@@ -2,7 +2,7 @@ import { IdentityCheckCredentialJWTClass } from '@govuk-one-login/data-vocab/cre
 import { uuidv4 } from '../../common/utils/jslib'
 
 export function generateFraudPayload(subID: string): IdentityCheckCredentialJWTClass {
-  const fraudPayload: IdentityCheckCredentialJWTClass = {
+  return {
     sub: subID,
     nbf: Math.floor(Date.now() / 1000),
     iss: 'https://fraudcri.dev.gov.uk',
@@ -53,12 +53,10 @@ export function generateFraudPayload(subID: string): IdentityCheckCredentialJWTC
       ]
     }
   }
-
-  return fraudPayload
 }
 
 export function generatePassportPayload(subID: string): IdentityCheckCredentialJWTClass {
-  const passportPayload: IdentityCheckCredentialJWTClass = {
+  return {
     sub: subID,
     nbf: Math.floor(Date.now() / 1000),
     iss: 'https://passportcri.dev.gov.uk',
@@ -106,12 +104,10 @@ export function generatePassportPayload(subID: string): IdentityCheckCredentialJ
       ]
     }
   }
-
-  return passportPayload
 }
 
 export function generateKBVPayload(subID: string): IdentityCheckCredentialJWTClass {
-  const kbvPayload: IdentityCheckCredentialJWTClass = {
+  return {
     sub: subID,
     nbf: Math.floor(Date.now() / 1000),
     iss: 'https://verificationcri.dev.gov.uk',
@@ -162,6 +158,4 @@ export function generateKBVPayload(subID: string): IdentityCheckCredentialJWTCla
       ]
     }
   }
-
-  return kbvPayload
 }

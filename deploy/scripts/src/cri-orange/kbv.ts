@@ -98,7 +98,7 @@ export function kbv(): void {
     { isStatusCode200, ...pageContentCheck('This includes any interest') }
   )
 
-  sleepBetween(3, 5)
+  sleepBetween(1, 3)
 
   // B01_KBV_03_KBVQuestion2
   res = timeGroup(
@@ -114,7 +114,7 @@ export function kbv(): void {
     }
   )
 
-  sleepBetween(3, 5)
+  sleepBetween(1, 3)
 
   // B01_KBV_04_KBVQuestion3
   timeGroup(groups[3], () => {
@@ -131,7 +131,7 @@ export function kbv(): void {
     )
     // 02_CoreStubCall
     res = timeGroup(
-      groups[7].split('::')[3],
+      groups[7].split('::')[1],
       () =>
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }
@@ -142,5 +142,5 @@ export function kbv(): void {
       }
     )
   })
-  iterationsCompleted.add(3)
+  iterationsCompleted.add(1)
 }

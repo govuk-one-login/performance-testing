@@ -101,6 +101,7 @@ export const drivingLicencePayload = JSON.stringify({
   ],
   drivingPermit: [
     {
+      issuedBy: 'DVLA',
       expiryDate: '2032-02-02',
       issuedBy: 'DVLA',
       personalNumber: 'PARKE710112PBFGA',

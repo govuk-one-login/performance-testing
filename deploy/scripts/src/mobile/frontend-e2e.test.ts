@@ -21,89 +21,51 @@ import {
 } from './testSteps/frontend'
 import { getBiometricTokenV2, postFinishBiometricSession } from './testSteps/backend'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { getThresholds } from '../common/utils/config/thresholds'
+import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('mamIphonePassport', LoadProfile.smoke)
   },
-  load: {
-    ...createScenario('mamIphonePassport', LoadProfile.full, 40, 37)
+  lowVolume: {
+    ...createScenario('mamIphonePassport', LoadProfile.full, 10, 40)
   },
-  loadSelfAssessment: {
-    mamIphonePassport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 100,
-      maxVUs: 450,
-      stages: [
-        { target: 10, duration: '15m' },
-        { target: 10, duration: '10m' }
-      ],
-      exec: 'mamIphonePassport'
-    }
+  load: {
+    ...createScenario('mamIphonePassport', LoadProfile.full, 40, 40)
   },
   deploy: {
-    mamIphonePassport: {
-      executor: 'constant-arrival-rate',
-      rate: 1,
-      timeUnit: '1s',
-      duration: '25m',
-      preAllocatedVUs: 15, // Calculation: 1 journeys / second * 15 seconds average journey time
-      maxVUs: 75, // Calculation: 1 journeys / second * 24 seconds maximum journey time + 50 buffer
-      exec: 'mamIphonePassport'
-    }
-  },
-  incrementalLoad: {
-    mamIphonePassport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 1700, // Calculation: 100 journeys / second * 17 seconds average journey time
-      maxVUs: 3000, // Calculation: 100 journeys / second * 2.5 seconds maximum expected from NFR (2.5 per request, 10 user-facing requests + safety)
-      stages: [
-        { target: 25, duration: '4m' }, // linear increase from 0 iteration per second to 25 iterations per second for 4 mins -> 0.1 t/s/s
-        { target: 25, duration: '10m' }, // maintain 25 iterations per second for 10 min
-        { target: 50, duration: '4m' }, // linear increase from 25 iteration per second to 50 iterations per second for 4 mins -> 0.1 t/s/s
-        { target: 50, duration: '10m' }, // maintain 50 iterations per second for 10 min
-        { target: 75, duration: '4m' }, // linear increase from 50 iteration per second to 75 iterations per second for 4 mins -> 0.1 t/s/s
-        { target: 75, duration: '10m' }, // maintain 75 iterations per second for 10 min
-        { target: 100, duration: '4m' }, // linear increase from 75 iteration per second to 100 iterations per second for 4 mins -> 0.1 t/s/s
-        { target: 100, duration: '10m' } // maintain 100 iterations per second for 10 min
-      ],
-      exec: 'mamIphonePassport'
-    }
+    ...createScenario('mamIphonePassport', LoadProfile.deployment, 1, 40)
   },
   incrementalSmallVolumes: {
-    mamIphonePassport: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '1s',
-      preAllocatedVUs: 700, // Calculation: 40 journeys / second * 17 seconds average journey time
-      maxVUs: 1500, // Calculation: 40 journeys / second * 2.5 seconds maximum expected from NFR (2.5 per request, 10 user-facing requests + safety)
-      stages: [
-        { target: 5, duration: '4m' }, // linear increase from 0 iteration per second to 5 iterations per second for 4 mins
-        { target: 5, duration: '10m' }, // maintain 5 iterations per second for 10 min
-        { target: 15, duration: '4m' }, // linear increase from 15 iteration per second to 50 iterations per second for 4 mins
-        { target: 15, duration: '10m' }, // maintain 15 iterations per second for 10 min
-        { target: 30, duration: '4m' }, // linear increase from 15 iteration per second to 30 iterations per second for 4 mins
-        { target: 30, duration: '10m' }, // maintain 30 iterations per second for 10 min
-        { target: 40, duration: '4m' }, // linear increase from 30 iteration per second to 40 iterations per second for 4 mins
-        { target: 40, duration: '10m' } // maintain 40 iterations per second for 10 min
-      ],
-      exec: 'mamIphonePassport'
-    }
+    ...createScenario('mamIphonePassport', LoadProfile.incremental, 40)
+  },
+  incrementalLoad: {
+    ...createScenario('mamIphonePassport', LoadProfile.incremental, 100)
   }
 }
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  mamIphonePassport: [
+    'POST test client /start',
+    'GET /authorize',
+    'POST /selectDevice',
+    'POST /selectSmartphone',
+    'POST /validPassport',
+    'POST /biometricChip',
+    'POST /iphoneModel',
+    'POST /idCheckApp',
+    'GET /biometricToken/v2',
+    'POST /finishBiometricSession',
+    'GET /redirect'
+  ]
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
+  thresholds: getThresholds(groupMap),
+  tags: { name: '' }
 }
 
 export function setup(): void {
@@ -111,6 +73,7 @@ export function setup(): void {
 }
 
 export function mamIphonePassport(): void {
+  iterationsStarted.add(1)
   startJourney()
   simulateUserWait()
   postSelectDevice()
@@ -137,6 +100,7 @@ export function mamIphonePassport(): void {
     // Approximately 20% of users abort journey
     getAbortCommand()
   }
+  iterationsCompleted.add(1)
 }
 
 function simulateUserWait(): void {

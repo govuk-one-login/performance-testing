@@ -440,7 +440,7 @@ Resources:
               ACCOUNT_HOME_URL: "/perfTest/account/accounts/homeUrl"
               ACCOUNT_NEW_PHONE: "/perfTest/account/accounts/newPhone"
               ACCOUNT_PHONE_OTP: "/perfTest/account/fixedPhoneOTP"
-              ACCOUNT_RP_STUB: "/perfTest/account/authentication/rpStub"
+              ACCOUNT_ORCH_STUB: "/perfTest/account/authentication/orchStub"
               ACCOUNT_SIGNIN_URL: "/perfTest/account/accounts/signInUrl"
               ACCOUNT_STAGING_URL: "/perfTest/account/authentication/baseUrl"
               DATA_BTM_SQS: "/perfTest/data/btm/perfSQS"

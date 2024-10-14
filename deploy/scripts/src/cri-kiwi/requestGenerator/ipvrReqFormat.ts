@@ -1,5 +1,6 @@
 export interface AuthIpvAuthorisationRequested {
   event_id: string
+  component_id: string
   client_id: string
   clientLandingPageUrl: string
   event_name: string
@@ -10,11 +11,15 @@ export interface AuthIpvAuthorisationRequested {
     user_id: string
     email: string
     govuk_signin_journey_id: string
+    ip_address: string
+    persistent_session_id: string
+    session_id: string
   }
 }
 
 export interface F2fYotiStart {
   event_id: string
+  component_id: string
   client_id: string
   clientLandingPageUrl: string
   event_name: string
@@ -24,6 +29,8 @@ export interface F2fYotiStart {
   user: {
     user_id: string
     govuk_signin_journey_id: string
+    ip_address: string
+    session_id: string
   }
   extensions: {
     post_office_details: [
@@ -51,9 +58,12 @@ export interface F2fYotiStart {
 
 export interface F2fDocumentUploaded {
   event_name: string
+  component_id: string
   event_id: string
   user: {
     user_id: string
+    ip_address: string
+    session_id: string
   }
   extensions: {
     post_office_visit_details: [
@@ -68,6 +78,7 @@ export interface F2fDocumentUploaded {
 
 export interface IpvF2fVcConsumed {
   event_id: string
+  component_id: string
   client_id: string
   clientLandingPageUrl: string
   event_name: string

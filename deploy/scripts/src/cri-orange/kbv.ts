@@ -117,7 +117,7 @@ export function kbv(): void {
   sleepBetween(1, 3)
 
   // B01_KBV_04_KBVQuestion3
-  timeGroup(groups[3], () => {
+  timeGroup(groups[5], () => {
     // 01_KBVCRICall
     res = timeGroup(
       groups[6].split('::')[1],

@@ -31,6 +31,8 @@ const loadProfile = selectProfile(profiles)
 const groupMap = {
   kbv: [
     'B01_KBV_01_CoreStubEditUserContinue',
+    'B01_KBV_01_CoreStubEditUserContinue::01_CoreStubCall',
+    'B01_KBV_01_CoreStubEditUserContinue::02_KBVCRICall',
     'B01_KBV_02_KBVQuestion1',
     'B01_KBV_03_KBVQuestion2',
     'B01_KBV_04_KBVQuestion3',
@@ -65,23 +67,29 @@ export function kbv(): void {
   iterationsStarted.add(1)
 
   // B01_KBV_01_CoreStubEditUserContinue
-  res = timeGroup(
-    groups[0],
-    () =>
-      http.get(env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197', {
-        headers: { Authorization: `Basic ${encodedCredentials}` }
-      }),
-    {
+  timeGroup(groups[0], () => {
+    //01_CoreStubCall
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.get(env.ipvCoreStub + '/authorize?cri=kbv-cri-' + env.envName + '&rowNumber=197', {
+          headers: { Authorization: `Basic ${encodedCredentials}` },
+          redirects: 0
+        }),
+      { isStatusCode302 }
+    )
+    //02_KBVCRICall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('You can find this amount on your loan agreement')
-    }
-  )
+    })
+  })
 
   sleepBetween(1, 3)
 
   // B01_KBV_02_KBVQuestion1
   res = timeGroup(
-    groups[1],
+    groups[3],
     () =>
       res.submitForm({
         fields: { Q00042: kbvAnsJSON.kbvAns1 },
@@ -94,7 +102,7 @@ export function kbv(): void {
 
   // B01_KBV_03_KBVQuestion2
   res = timeGroup(
-    groups[2],
+    groups[4],
     () =>
       res.submitForm({
         fields: { Q00015: kbvAnsJSON.kbvAns2 },
@@ -109,10 +117,10 @@ export function kbv(): void {
   sleepBetween(1, 3)
 
   // B01_KBV_04_KBVQuestion3
-  timeGroup(groups[3], () => {
+  timeGroup(groups[5], () => {
     // 01_KBVCRICall
     res = timeGroup(
-      groups[4].split('::')[1],
+      groups[6].split('::')[1],
       () =>
         res.submitForm({
           fields: { Q00018: kbvAnsJSON.kbvAns3 },
@@ -123,7 +131,7 @@ export function kbv(): void {
     )
     // 02_CoreStubCall
     res = timeGroup(
-      groups[5].split('::')[1],
+      groups[7].split('::')[1],
       () =>
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }

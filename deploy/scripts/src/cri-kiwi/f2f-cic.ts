@@ -204,7 +204,7 @@ export function FaceToFace(): void {
   const iteration = execution.scenario.iterationInInstance
   const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL']
   const path = paths[iteration % paths.length]
-  const expiry = randomDate(new Date(2024, 1, 1), new Date(2024, 12, 31))
+  const expiry = randomDate(new Date(2025, 1, 1), new Date(2025, 12, 31))
   const expiryDay = expiry.getDate().toString()
   const expiryMonth = (expiry.getMonth() + 1).toString()
   const expiryYear = expiry.getFullYear().toString()
@@ -309,7 +309,7 @@ export function FaceToFace(): void {
         groups[6],
         () =>
           res.submitForm({
-            fields: { idHasExpiryDate: 'Yes' },
+            fields: { idHasExpiryDate: 'yes' },
             submitSelector: '#continue'
           }),
         {
@@ -345,9 +345,7 @@ export function FaceToFace(): void {
         groups[8],
         () =>
           res.submitForm({
-            fields: {
-              eeaIdCardAddressCheck: 'Yes, it has my current address on it'
-            },
+            fields: { eeaIdentityCardAddressCheck: 'current' },
             submitSelector: '#continue'
           }),
         {
@@ -363,7 +361,7 @@ export function FaceToFace(): void {
         groups[9],
         () =>
           res.submitForm({
-            fields: { eeaIdentityCardCountrySelector: 'Romania' },
+            fields: { eeaIdentityCardCountrySelector: 'ROU' },
             submitSelector: '#continue'
           }),
         {
@@ -394,7 +392,7 @@ export function FaceToFace(): void {
         groups[11],
         () =>
           res.submitForm({
-            fields: { idHasExpiryDate: 'Yes' },
+            fields: { idHasExpiryDate: 'yes' },
             submitSelector: '#continue'
           }),
         {
@@ -430,7 +428,7 @@ export function FaceToFace(): void {
         () =>
           res.submitForm({
             fields: {
-              euDrivingLicenceAddressCheck: 'Yes, it has my current address on it'
+              euPhotocardDlAddressCheck: 'current'
             },
             submitSelector: '#continue'
           }),
@@ -447,7 +445,7 @@ export function FaceToFace(): void {
         groups[14],
         () =>
           res.submitForm({
-            fields: { euDrivingLicenceCountrySelector: 'Romania' },
+            fields: { euDrivingLicenceCountrySelector: 'ROU' },
             submitSelector: '#continue'
           }),
         {
@@ -478,7 +476,7 @@ export function FaceToFace(): void {
         groups[16],
         () =>
           res.submitForm({
-            fields: { idHasExpiryDate: 'Yes' },
+            fields: { idHasExpiryDate: 'yes' },
             submitSelector: '#continue'
           }),
         {
@@ -514,7 +512,7 @@ export function FaceToFace(): void {
         groups[18],
         () =>
           res.submitForm({
-            fields: { nonUkPassportCountrySelector: 'Romania' },
+            fields: { nonUkPassportCountrySelector: 'ROU' },
             submitSelector: '#continue'
           }),
         {
@@ -598,7 +596,7 @@ export function FaceToFace(): void {
         groups[23],
         () =>
           res.submitForm({
-            fields: { ukDlAddressCheck: 'Yes' },
+            fields: { ukPhotocardDlAddressCheck: 'current' },
             submitSelector: '#continue'
           }),
         {

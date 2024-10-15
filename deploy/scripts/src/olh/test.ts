@@ -30,7 +30,7 @@ const profiles: ProfileList = {
   load: {
     ...createScenario('changeEmail', LoadProfile.full, 30),
     ...createScenario('changePassword', LoadProfile.full, 30),
-    ...createScenario('changePhone', LoadProfile.full, 15),
+    ...createScenario('changePhone', LoadProfile.full, 30),
     ...createScenario('deleteAccount', LoadProfile.full, 30),
     ...createScenario('validateUser', LoadProfile.full, 10),
     ...createScenario('contactsPage', LoadProfile.full, 10)

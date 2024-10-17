@@ -26,7 +26,7 @@ const profiles: ProfileList = {
   },
   load: {
     ...createScenario('FaceToFace', LoadProfile.short, 3),
-    ...createScenario('CIC', LoadProfile.short, 3, 3)
+    ...createScenario('CIC', LoadProfile.short, 3)
   }
 }
 

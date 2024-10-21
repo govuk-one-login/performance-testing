@@ -15,6 +15,9 @@ import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/ut
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
+import { Imposter } from '../common/lambda-warmer'
+
+const imposter = new Imposter()
 
 const profiles: ProfileList = {
   smoke: {
@@ -40,11 +43,8 @@ const groupMap = {
 export const options: Options = {
   scenarios: loadProfile.scenarios,
   thresholds: getThresholds(groupMap),
-  tags: { name: '' }
-}
-
-export function setup(): void {
-  describeProfile(loadProfile)
+  tags: { name: '' },
+  batchPerHost: 10
 }
 
 const env = {
@@ -82,6 +82,13 @@ const csvData1: Nino[] = new SharedArray('csvDataNino', () => {
       }
     })
 })
+
+export function setup(): void {
+  describeProfile(loadProfile)
+  const response = imposter.handler()
+  console.log('Response status: ', response[0].status)
+  console.log('Response body: ', response[0].body)
+}
 
 export function ninoCheck(): void {
   const groups = groupMap.ninoCheck

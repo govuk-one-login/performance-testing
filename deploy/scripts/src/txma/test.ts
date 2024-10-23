@@ -98,12 +98,16 @@ export function sendSingleEvent(): void {
 }
 
 export function pairwiseMappingClientEnrichment(): void {
-  const userID = `perfUser${uuidv4()}`
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
+  const testID = `perfTestID${timestamp}`
+  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
+  const eventID = `${testID}_${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
   iterationsStarted.add(1)
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(userID, emailID, journeyID))
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID, journeyID))
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID))
+  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID))
   const authInitiatedPayload = JSON.stringify(generateAuthReqParsed(journeyID))
   const dcmawAbortPayload = JSON.stringify(generateDcmawAbortWeb(userID, journeyID, emailID))
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)

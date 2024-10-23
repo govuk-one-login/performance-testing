@@ -63,27 +63,27 @@ const awsConfig = new AWSConfig({
 
 const sqs = new SQSClient(awsConfig)
 
-const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
-const testData = {
-  testID: `perfTestID${timestamp}`,
-  userID: `perfUserID${uuidv4()}`,
-  emailID: `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-}
-
-export function setup(): void {
+export function setup(): string {
   describeProfile(loadProfile)
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
+  const testID = `perfTestID${timestamp}`
+  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
+  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID))
   console.log('Sending primer event')
-  const authCreateAccPayload = JSON.stringify(
-    generateAuthCreateAccount(testData.testID, testData.userID, testData.emailID)
-  )
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
   console.log('Primer event sent')
+  return authCreateAccPayload
 }
 
-export function sendRegularEvent(): void {
+export function sendRegularEvent(authCreateAccPayload: string): void {
   iterationsStarted.add(1)
+  const authCreatePayload = JSON.parse(authCreateAccPayload)
+  const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
+  const eventID = `${testID}_${uuidv4()}`
   const authLogInSuccessPayload = JSON.stringify(
-    generateAuthLogInSuccess(testData.testID, testData.userID, testData.emailID)
+    generateAuthLogInSuccess(eventID, `${authCreatePayload.user.user_id}`, `${authCreatePayload.user.email}`)
   )
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   iterationsCompleted.add(1)

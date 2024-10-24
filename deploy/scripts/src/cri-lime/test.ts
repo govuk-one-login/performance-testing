@@ -57,7 +57,7 @@ const profiles: ProfileList = {
   },
   lowVolume: {
     ...createScenario('fraud', LoadProfile.short, 30),
-    ...createScenario('drivingLicence', LoadProfile.short, 5),
+    ...createScenario('drivingLicence', LoadProfile.short, 15),
     ...createScenario('passport', LoadProfile.short, 30)
   },
   stress: {

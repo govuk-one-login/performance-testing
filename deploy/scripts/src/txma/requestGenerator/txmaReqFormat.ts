@@ -1,4 +1,4 @@
-export interface AuthLogInSuccess {
+export interface AuthCreateAccount {
   event_id: string
   event_name: string
   client_id: string
@@ -18,9 +18,20 @@ export interface AuthLogInSuccess {
     phone_number_country_code: number
     rpPairwiseId: string
   }
+  restricted: {
+    device_information: {
+      request_timestamp_ms: number
+      ip_address: string
+      connection_port: number
+      country_code: string
+      user_agent: string
+      accepted_language: number
+      ja3_fingerprint: string
+    }
+  }
 }
 
-export interface AuthCreateAccount {
+export interface AuthLogInSuccess {
   event_id: string
   event_name: string
   client_id: string
@@ -34,11 +45,21 @@ export interface AuthCreateAccount {
     session_id: string
     email: string
     persistent_session_id: string
-    phone: number
+    phone: string
   }
   extensions: {
     phone_number_country_code: number
-    rpPairwiseId: string
+  }
+  restricted: {
+    device_information: {
+      request_timestamp_ms: number
+      ip_address: string
+      connection_port: number
+      country_code: string
+      user_agent: string
+      accepted_language: number
+      ja3_fingerprint: string
+    }
   }
 }
 

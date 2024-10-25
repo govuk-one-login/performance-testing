@@ -27,6 +27,7 @@ const profiles: ProfileList = {
   },
   lowVolume: {
     ...createScenario('sendSingleEvent', LoadProfile.short, 30, 2),
+    ...createScenario('sendRegularEvent', LoadProfile.short, 30, 2),
     ...createScenario('pairwiseMappingClientEnrichment', LoadProfile.short, 30, 4)
   },
   load: {

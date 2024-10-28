@@ -21,7 +21,7 @@ const profiles: ProfileList = {
     ...createScenario('ninoCheck', LoadProfile.smoke)
   },
   lowVolume: {
-    ...createScenario('ninoCheck', LoadProfile.short, 15)
+    ...createScenario('ninoCheck', LoadProfile.short, 5)
   }
 }
 

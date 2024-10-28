@@ -5,7 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.679.0",
-    "@codegenie/serverless-express": "^4.15.0",
+    "@codegenie/serverless-express": "^4.16.0",
     "@koa/cors": "^5.0.0",
     "axios": "^1.7.7",
     "axios-cookiejar-support": "^5.0.3",

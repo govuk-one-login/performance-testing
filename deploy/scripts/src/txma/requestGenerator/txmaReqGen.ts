@@ -1,5 +1,18 @@
 import { uuidv4 } from '../../common/utils/jslib/index'
-import { AuthLogInSuccess, AuthCreateAccount, AuthAuthorisationReqParsed, DcmawAbortWeb } from './txmaReqFormat'
+import {
+  AuthLogInSuccess,
+  AuthCreateAccount,
+  AuthAuthorisationReqParsed,
+  DcmawAbortWeb,
+  AuthAuthorizationInitiated,
+  AuthCodeVerified,
+  AuthUpdateProfilePhoneNumber,
+  IPVJourneyStart,
+  IPVSubJourneyStart,
+  IPVDLCRIVCIssued,
+  IPVAddressCRIVCIssued,
+  CICCRIVCIssued
+} from './txmaReqFormat'
 
 export function generateAuthCreateAccount(
   testID: string,
@@ -119,6 +132,234 @@ export function generateDcmawAbortWeb(userID: string, journeyID: string, emailID
       session_id: uuidv4(),
       persistent_session_id: uuidv4(),
       transaction_id: uuidv4()
+    }
+  }
+}
+
+export function generateAuthAuthorizationInitiated(journeyID: string): AuthAuthorizationInitiated {
+  return {
+    client_id: 'performanceTestClientId',
+    component_id: 'perfTest', //unknown
+    event_name: 'AUTH_AUTHORIZATION_INITIATED',
+    event_timestamp_ms: Math.floor(Date.now()),
+    timestamp: Math.floor(Date.now() / 1000),
+    user: {
+      govuk_signin_journey_id: journeyID,
+      ip_address: '1.2.3.4',
+      persistent_session_id: uuidv4(),
+      session_id: uuidv4()
+    }
+  }
+}
+
+export function generateAuthCodeVerified(emailID: string, journeyID: string, userID: string): AuthCodeVerified {
+  return {
+    client_id: 'performanceTestClientId',
+    component_id: 'perfTest', //unknown
+    event_name: 'AUTH_CODE_VERIFIED',
+    event_timestamp_ms: Math.floor(Date.now()),
+    extension: {
+      MFACodeEntered: 'unknown', //unknown
+      loginFailureCount: 0 //unknown
+    },
+    timestamp: Math.floor(Date.now() / 1000),
+    user: {
+      email: emailID,
+      govuk_sigin_journey_id: journeyID,
+      ip_address: '1.2.3.4',
+      persistent_session_id: uuidv4(),
+      session_id: uuidv4(),
+      user_id: userID
+    }
+  }
+}
+
+export function generateAuthUpdatePhone(
+  emailID: string,
+  journeyID: string,
+  userID: string
+): AuthUpdateProfilePhoneNumber {
+  return {
+    client_id: 'performanceTestClientId',
+    component_id: 'perfTest', //unknown
+    event_name: 'AUTH_UPDATE_PROFILE_PHONE_NUMBER',
+    event_timestamp_ms: Math.floor(Date.now()),
+    extensions: {
+      phone_number_country_code: 44 //unknown
+    },
+    timestamp: Math.floor(Date.now() / 1000),
+    user: {
+      email: emailID,
+      govuk_signin_journey_id: journeyID,
+      ip_address: '1.2.3.4',
+      persistent_session_id: uuidv4(),
+      phone: '07123456789', //unknown
+      session_id: uuidv4(),
+      user_id: userID
+    }
+  }
+}
+
+export function generateIPVJourneyStart(journeyID: string, userID: string): IPVJourneyStart {
+  return {
+    client_id: 'performanceTestClientId',
+    component_id: 'perfTest', //unknown
+    event_name: 'IPV_JOURNEY_START',
+    event_timestamp_ms: Math.floor(Date.now()),
+    extensions: {
+      reprove_identity: true //unknown
+    },
+    restricted: {
+      device_infomation: {
+        encoded: 'string' //unknown
+      }
+    },
+    timestamp: Math.floor(Date.now() / 1000),
+    user: {
+      govuk_signin_journey_id: journeyID,
+      ip_address: '1.2.3.4',
+      session_id: uuidv4(),
+      user_id: userID
+    }
+  }
+}
+
+export function generateIPVSubJourneyStart(journeyID: string, userID: string): IPVSubJourneyStart {
+  return {
+    client_id: 'performanceTestClientId',
+    component_id: 'perfTest', //unknown
+    event_name: 'IPV_SUBJOURNEY_START',
+    event_timestamp_ms: Math.floor(Date.now()),
+    extensions: {
+      journey_type: 'unknown' //unknown
+    },
+    restricted: {
+      device_information: {
+        encoded: 'string,' //unknown
+      }
+    },
+    timestamp: Math.floor(Date.now() / 1000),
+    user: {
+      govuk_signin_journey_id: journeyID,
+      ip_address: '1.2.3.4',
+      session_id: uuidv4(),
+      user_id: userID
+    }
+  }
+}
+
+export function generateIPVDLCRIVCIssued(userID: string, journeyID: string): IPVDLCRIVCIssued {
+  return {
+    client_id: 'performanceTestClientId',
+    component_id: 'perfTest', //unknown
+    event_name: 'IPV_DL_CRI_VC_ISSUED',
+    event_timestamp_ms: Math.floor(Date.now()),
+    extensions: {
+      evidence: {
+        activityHistoryScore: 0, //unknown
+        checkDetails: {
+          activityForm: 'string', //unknown
+          checkMethod: 'string', //unknown
+          identityCheckPolicy: 'string' //unknown
+        },
+        ci: 'string', //unknown
+        failedCheckDetails: {
+          checkMethod: 'string', //unknown
+          identityCheckPolicy: 'string' //unknown
+        },
+        strengthScore: 0, //unknown
+        txn: 'string', //unknown
+        type: 'string', //unknown
+        validityScore: 0 //unknown
+      },
+      iss: 'string' //unknown
+    },
+    restricted: {
+      address: {
+        postalCode: 'AB12 3CD' //unknown
+      },
+      birthDate: {
+        value: '19901011' //unknown
+      },
+      drivingPermit: {
+        expiryDate: '20300101', //unknown
+        issueDate: '20200101', //unknown
+        issueNumber: '1234', //unknown
+        issuesBy: '1234', //unknown
+        personalNumber: '12345' //unknown
+      },
+      name: {
+        description: 'string', //unknown
+        nameParts: {
+          type: 'string', //unknown
+          validFrom: 'string', //unknown
+          validUntil: 'string', //unknown
+          value: 'string' //unknown
+        },
+        validFrom: 'string', //unknown
+        validUntil: 'string' //unknown
+      },
+      timestamp: Math.floor(Date.now() / 1000),
+      user: {
+        govuk_signin_journey_id: journeyID,
+        ip_address: '1.2.3.4',
+        persistent_session_id: uuidv4(),
+        session_id: uuidv4(),
+        user_id: userID
+      }
+    }
+  }
+}
+
+export function generateIPVAddressCRIVCIssued(journeyID: string, userID: string): IPVAddressCRIVCIssued {
+  return {
+    client_id: 'performanceTestClientId',
+    component_id: 'perfTest', //unknown
+    event_name: 'IPV_ADDRESS_CRI_VC_ISSUED',
+    event_tiemstamp_ms: Math.floor(Date.now()),
+    extensions: {
+      addressEntered: 2, //unknown
+      iss: 'string' //unknown
+    },
+    timestamp: Math.floor(Date.now() / 1000),
+    user: {
+      govuk_signin_journey_id: journeyID,
+      ip_address: '1.2.3.4',
+      persistent_session_id: uuidv4(),
+      session_id: uuidv4(),
+      user_id: userID
+    }
+  }
+}
+
+export function generateCICCRIVCIssued(journeyID: string, userID: string): CICCRIVCIssued {
+  return {
+    client_id: 'performanceTestClientId',
+    component_id: 'perfTest', //unknown
+    event_name: 'CIC_CRI_VC_ISSUED',
+    event_timestamp_ms: Math.floor(Date.now()),
+    restricted: {
+      birthdate: {
+        value: '19901011' //unknown
+      },
+      name: {
+        description: 'string', //unknown
+        nameParts: {
+          type: 'string', //unknown
+          validFrom: 'string', //unknown
+          validUnti: 'string', //unknown
+          Value: 'string' //unknown
+        },
+        validFrom: 'string', //unknown
+        validUntil: 'string' //unknown
+      },
+      timestamp: Math.floor(Date.now() / 1000),
+      user: {
+        govuk_signin_journey_id: journeyID,
+        ip_address: '1.2.3.4',
+        session_id: uuidv4(),
+        user_id: userID
+      }
     }
   }
 }

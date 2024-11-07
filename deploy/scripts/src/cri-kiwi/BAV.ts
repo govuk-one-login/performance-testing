@@ -23,7 +23,7 @@ const profiles: ProfileList = {
     ...createScenario('BAV', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('BAV', LoadProfile.full, 10)
+    ...createScenario('BAV', LoadProfile.full, 5)
   }
 }
 

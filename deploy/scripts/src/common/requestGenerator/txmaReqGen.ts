@@ -1,4 +1,4 @@
-import { uuidv4 } from '../../common/utils/jslib/index'
+import { uuidv4 } from '../utils/jslib/index'
 import {
   AuthLogInSuccess,
   AuthCreateAccount,
@@ -139,9 +139,13 @@ export function generateDcmawAbortWeb(userID: string, journeyID: string, emailID
 export function generateAuthAuthorizationInitiated(journeyID: string): AuthAuthorizationInitiated {
   return {
     client_id: 'performanceTestClientId',
-    component_id: 'perfTest', //unknown
+    component_id: 'perfTest',
     event_name: 'AUTH_AUTHORIZATION_INITIATED',
     event_timestamp_ms: Math.floor(Date.now()),
+    extensions: {
+      'client-name': 'PerfTest',
+      new_authentication_required: false
+    },
     timestamp: Math.floor(Date.now() / 1000),
     user: {
       govuk_signin_journey_id: journeyID,
@@ -155,12 +159,16 @@ export function generateAuthAuthorizationInitiated(journeyID: string): AuthAutho
 export function generateAuthCodeVerified(emailID: string, journeyID: string, userID: string): AuthCodeVerified {
   return {
     client_id: 'performanceTestClientId',
-    component_id: 'perfTest', //unknown
+    component_id: 'perfTest',
     event_name: 'AUTH_CODE_VERIFIED',
     event_timestamp_ms: Math.floor(Date.now()),
     extension: {
-      MFACodeEntered: 'unknown', //unknown
-      loginFailureCount: 0 //unknown
+      MFACodeEntered: '123',
+      'account-recovery': false,
+      'journey-type': 'SIGN_IN',
+      loginFailureCount: 0,
+      'mfa-type': 'SMS',
+      'notification-type': 'SMS'
     },
     timestamp: Math.floor(Date.now() / 1000),
     user: {
@@ -181,11 +189,13 @@ export function generateAuthUpdatePhone(
 ): AuthUpdateProfilePhoneNumber {
   return {
     client_id: 'performanceTestClientId',
-    component_id: 'perfTest', //unknown
+    component_id: 'perfTest',
     event_name: 'AUTH_UPDATE_PROFILE_PHONE_NUMBER',
     event_timestamp_ms: Math.floor(Date.now()),
     extensions: {
-      phone_number_country_code: 44 //unknown
+      'account-recovery': false,
+      'mfa-type': 'SMS',
+      phone_number_country_code: 44
     },
     timestamp: Math.floor(Date.now() / 1000),
     user: {
@@ -193,7 +203,7 @@ export function generateAuthUpdatePhone(
       govuk_signin_journey_id: journeyID,
       ip_address: '1.2.3.4',
       persistent_session_id: uuidv4(),
-      phone: '07123456789', //unknown
+      phone: '07123456789',
       session_id: uuidv4(),
       user_id: userID
     }
@@ -203,15 +213,16 @@ export function generateAuthUpdatePhone(
 export function generateIPVJourneyStart(journeyID: string, userID: string): IPVJourneyStart {
   return {
     client_id: 'performanceTestClientId',
-    component_id: 'perfTest', //unknown
+    component_id: 'perfTest',
     event_name: 'IPV_JOURNEY_START',
     event_timestamp_ms: Math.floor(Date.now()),
     extensions: {
-      reprove_identity: true //unknown
+      reprove_identity: false
+      //have left of vtr: array[string], as don't understand
     },
     restricted: {
       device_infomation: {
-        encoded: 'string' //unknown
+        encoded: 'RW5jb2RlZCBkYXRhIHdpbGwgYmUgaGVyZQ==' //Device information retrieved from cloudfront headers encoded in Base6 (have currently made up base64).
       }
     },
     timestamp: Math.floor(Date.now() / 1000),
@@ -227,15 +238,15 @@ export function generateIPVJourneyStart(journeyID: string, userID: string): IPVJ
 export function generateIPVSubJourneyStart(journeyID: string, userID: string): IPVSubJourneyStart {
   return {
     client_id: 'performanceTestClientId',
-    component_id: 'perfTest', //unknown
+    component_id: 'perfTest',
     event_name: 'IPV_SUBJOURNEY_START',
     event_timestamp_ms: Math.floor(Date.now()),
     extensions: {
-      journey_type: 'unknown' //unknown
+      journey_type: 'REUSE_EXISTING_IDENTITY'
     },
     restricted: {
       device_information: {
-        encoded: 'string,' //unknown
+        encoded: 'RW5jb2RlZCBkYXRhIHdpbGwgYmUgaGVyZQ==,'
       }
     },
     timestamp: Math.floor(Date.now() / 1000),
@@ -251,53 +262,53 @@ export function generateIPVSubJourneyStart(journeyID: string, userID: string): I
 export function generateIPVDLCRIVCIssued(userID: string, journeyID: string): IPVDLCRIVCIssued {
   return {
     client_id: 'performanceTestClientId',
-    component_id: 'perfTest', //unknown
+    component_id: 'perfTest',
     event_name: 'IPV_DL_CRI_VC_ISSUED',
     event_timestamp_ms: Math.floor(Date.now()),
     extensions: {
       evidence: {
-        activityHistoryScore: 0, //unknown
+        activityHistoryScore: 4,
         checkDetails: {
-          activityForm: 'string', //unknown
-          checkMethod: 'string', //unknown
-          identityCheckPolicy: 'string' //unknown
+          activityForm: '20200101',
+          checkMethod: 'vpip',
+          identityCheckPolicy: 'policy'
         },
-        ci: 'string', //unknown
+        ci: 'string', //this should be an array[string], i don't know how to do that
         failedCheckDetails: {
-          checkMethod: 'string', //unknown
-          identityCheckPolicy: 'string' //unknown
+          checkMethod: 'vpip',
+          identityCheckPolicy: 'policy'
         },
-        strengthScore: 0, //unknown
-        txn: 'string', //unknown
-        type: 'string', //unknown
-        validityScore: 0 //unknown
+        strengthScore: 4,
+        txn: 'UNKOWN',
+        type: 'UNKNOWN',
+        validityScore: 4
       },
-      iss: 'string' //unknown
+      iss: 'perfTest'
     },
     restricted: {
       address: {
-        postalCode: 'AB12 3CD' //unknown
+        postalCode: 'AB12 3CD'
       },
       birthDate: {
-        value: '19901011' //unknown
+        value: '19900101'
       },
       drivingPermit: {
-        expiryDate: '20300101', //unknown
-        issueDate: '20200101', //unknown
-        issueNumber: '1234', //unknown
-        issuesBy: '1234', //unknown
-        personalNumber: '12345' //unknown
+        expiryDate: '20300101',
+        issueDate: '20200101',
+        issueNumber: '1234',
+        issuedBy: 'DVLA',
+        personalNumber: '12345'
       },
       name: {
-        description: 'string', //unknown
+        description: 'name',
         nameParts: {
-          type: 'string', //unknown
-          validFrom: 'string', //unknown
-          validUntil: 'string', //unknown
-          value: 'string' //unknown
+          type: 'FamilyName',
+          validFrom: '19900101',
+          validUntil: '20500101',
+          value: 'Smith'
         },
-        validFrom: 'string', //unknown
-        validUntil: 'string' //unknown
+        validFrom: '19900101',
+        validUntil: '20500101'
       },
       timestamp: Math.floor(Date.now() / 1000),
       user: {
@@ -314,12 +325,25 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string): IPV
 export function generateIPVAddressCRIVCIssued(journeyID: string, userID: string): IPVAddressCRIVCIssued {
   return {
     client_id: 'performanceTestClientId',
-    component_id: 'perfTest', //unknown
+    component_id: 'perfTest',
     event_name: 'IPV_ADDRESS_CRI_VC_ISSUED',
     event_tiemstamp_ms: Math.floor(Date.now()),
     extensions: {
-      addressEntered: 2, //unknown
-      iss: 'string' //unknown
+      addressEntered: 1,
+      iss: 'perfTest'
+    },
+    restricted: {
+      address: {
+        addressCountry: 'GB',
+        addressLocality: 'London',
+        buildingName: 'Highfield House',
+        buildingNumber: '44',
+        postalCode: 'AB12 3CD',
+        streetName: 'HIGH STREET',
+        uprn: 123456789012,
+        validFrom: '19900101',
+        validUntil: '20300101'
+      }
     },
     timestamp: Math.floor(Date.now() / 1000),
     user: {
@@ -335,23 +359,23 @@ export function generateIPVAddressCRIVCIssued(journeyID: string, userID: string)
 export function generateCICCRIVCIssued(journeyID: string, userID: string): CICCRIVCIssued {
   return {
     client_id: 'performanceTestClientId',
-    component_id: 'perfTest', //unknown
+    component_id: 'perfTest',
     event_name: 'CIC_CRI_VC_ISSUED',
     event_timestamp_ms: Math.floor(Date.now()),
     restricted: {
       birthdate: {
-        value: '19901011' //unknown
+        value: '19900101'
       },
       name: {
-        description: 'string', //unknown
+        description: 'name',
         nameParts: {
-          type: 'string', //unknown
-          validFrom: 'string', //unknown
-          validUnti: 'string', //unknown
-          Value: 'string' //unknown
+          type: 'familyName',
+          validFrom: '19900101',
+          validUnti: '20500101',
+          Value: 'Smith'
         },
-        validFrom: 'string', //unknown
-        validUntil: 'string' //unknown
+        validFrom: '19900101',
+        validUntil: '20500101'
       },
       timestamp: Math.floor(Date.now() / 1000),
       user: {

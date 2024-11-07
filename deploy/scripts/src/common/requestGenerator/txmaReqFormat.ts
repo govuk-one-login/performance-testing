@@ -104,11 +104,14 @@ export interface DcmawAbortWeb {
 }
 
 export interface AuthAuthorizationInitiated {
-  //unsure if the extensions section is required here.
   client_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number
+  extensions: {
+    'client-name': string
+    new_authentication_required: boolean
+  }
   timestamp: number
   user: {
     govuk_signin_journey_id: string
@@ -119,14 +122,17 @@ export interface AuthAuthorizationInitiated {
 }
 
 export interface AuthCodeVerified {
-  //Some values from extensions missing.
   client_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number
   extension: {
     MFACodeEntered: string
+    'account-recovery': boolean
+    'journey-type': string
     loginFailureCount: number
+    'mfa-type': string
+    'notification-type': string
   }
   timestamp: number
   user: {
@@ -145,6 +151,8 @@ export interface AuthUpdateProfilePhoneNumber {
   event_name: string
   event_timestamp_ms: number
   extensions: {
+    'account-recovery': boolean
+    'mfa-type': string
     phone_number_country_code: number
   }
   timestamp: number
@@ -160,6 +168,7 @@ export interface AuthUpdateProfilePhoneNumber {
 }
 
 export interface IPVJourneyStart {
+  //not included vtr in extensions
   client_id: string
   component_id: string
   event_name: string
@@ -239,7 +248,7 @@ export interface IPVDLCRIVCIssued {
       expiryDate: string
       issueDate: string
       issueNumber: string
-      issuesBy: string
+      issuedBy: string
       personalNumber: string
     }
     name: {
@@ -272,6 +281,19 @@ export interface IPVAddressCRIVCIssued {
   extensions: {
     addressEntered: number
     iss: string
+  }
+  restricted: {
+    address: {
+      addressCountry: string
+      addressLocality: string
+      buildingName: string
+      buildingNumber: string
+      postalCode: string
+      streetName: string
+      uprn: number
+      validFrom: string
+      validUntil: string
+    }
   }
   timestamp: number
   user: {

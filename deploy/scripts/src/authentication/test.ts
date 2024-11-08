@@ -82,6 +82,9 @@ const groupMap = {
     'B01_SignUp_01_OrchStubSubmit',
     'B01_SignUp_01_OrchStubSubmit::01_OrchStub',
     'B01_SignUp_01_OrchStubSubmit::02_AuthCall',
+    'B01_SignUp_01_RPStubSubmit',
+    'B01_SignUp_01_RPStubSubmit::01_RPStub',
+    'B01_SignUp_01_RPStubSubmit::02_AuthCall',
     'B01_SignUp_02_CreateOneLogin',
     'B01_SignUp_03_EnterEmailAddress',
     'B01_SignUp_04_EnterOTP',
@@ -156,8 +159,12 @@ const credentials = {
   phoneOTP: getEnv('ACCOUNT_PHONE_OTP')
 }
 
+const route = getEnv('ENVIRONMENT').toLocaleUpperCase()
+const validRoute = ['RP', 'ORCH']
+if (!validRoute.includes(route)) throw new Error(`Route '${route}' not in [${validRoute.toString()}]`)
+
 const env = {
-  orchStub: getEnv('ACCOUNT_ORCH_STUB'),
+  stubEndpoint: getEnv('ACCOUNT_${route}_STUB'),
   staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true',
   authStagingURL: getEnv('ACCOUNT_STAGING_URL')
 }
@@ -220,8 +227,14 @@ export function signUp(): void {
   const mfaOption: mfaType = Math.random() <= 0.5 ? 'SMS' : 'AUTH_APP'
   iterationsStarted.add(1)
 
-  // B01_SignUp_01_OrchStubSubmit
-  res = orchStubSubmit(groups)
+  // B01_SignUp_01_StubSubmit based on the route i.e. RP or ORCH
+  if (route === 'ORCH') {
+    res = orchStubSubmit(groups)
+  } else if (route === 'RP') {
+    res = rpStubSubmit(groups)
+  } else {
+    throw new Error(`Invalid route: ${route}`) // Handle invalid route values
+  }
 
   sleep(1)
 
@@ -388,7 +401,7 @@ export function orchStubSubmit(groups: readonly string[]): Response {
       groups[1].split('::')[1],
       () =>
         http.post(
-          env.orchStub,
+          env.stubEndpoint,
           {
             reauthenticate: '',
             level: 'Cl.Cm',
@@ -421,6 +434,29 @@ export function orchStubSubmit(groups: readonly string[]): Response {
         }
         return http.get(res.headers.Location)
       },
+      {
+        isStatusCode200,
+        ...pageContentCheck('Create your GOV.UK One Login or sign in')
+      }
+    )
+  })
+}
+
+export function rpStubSubmit(groups: readonly string[]): Response {
+  let res: Response
+
+  return timeGroup(groups[3], () => {
+    // 01_RPStubCall (Initial Request)
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () => http.get(env.stubEndpoint + '/prod/start', { redirects: 0 }), //changed orchStub to stubEndPoint
+      { isStatusCode302 }
+    )
+
+    // 02_OIDCStubCall (Redirect Handling)
+    return timeGroup(
+      groups[5].split('::')[1],
+      () => http.get(res.headers.Location), // Follow the redirect
       {
         isStatusCode200,
         ...pageContentCheck('Create your GOV.UK One Login or sign in')

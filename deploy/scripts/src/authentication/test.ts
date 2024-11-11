@@ -1,4 +1,3 @@
-// just to verfy the ssh
 import { check, sleep } from 'k6'
 import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
@@ -102,6 +101,9 @@ const groupMap = {
     'B02_SignIn_01_OrchStubSubmit',
     'B02_SignIn_01_OrchStubSubmit::01_OrchStub',
     'B02_SignIn_01_OrchStubSubmit::02_AuthCall',
+    'B02_SignIn_01_RPStubSubmit',
+    'B02_SignIn_01_RPStubSubmit::01_RPStub',
+    'B02_SignIn_01_RPStubSubmit::02_AuthCall',
     'B02_SignIn_02_ClickSignIn',
     'B02_SignIn_03_EnterEmailAddress',
     'B02_SignIn_04_EnterPassword',
@@ -110,9 +112,11 @@ const groupMap = {
     'B02_SignIn_05_EnterOTP::02_AuthAcceptTerms',
     'B02_SignIn_05_EnterOTP::03_AuthCall',
     'B02_SignIn_05_EnterOTP::04_OrchStub',
+    'B02_SignIn_05_EnterOTP::04_RPStub',
     'B02_SignIn_06_AcceptTermsConditions',
     'B02_SignIn_06_AcceptTermsConditions::01_AuthCall',
-    'B02_SignIn_06_AcceptTermsConditions::02_OrchStub'
+    'B02_SignIn_06_AcceptTermsConditions::02_OrchStub',
+    'B02_SignIn_06_AcceptTermsConditions::02_RPStub'
   ],
   uiSignIn: []
 } as const
@@ -180,7 +184,7 @@ export async function uiSignIn() {
 
   const page: Page = await browser.newPage()
   try {
-    await page.goto(env.orchStub + '/start')
+    await page.goto(env.stubEndpoint + '/start')
     await ClickButton(page, 'button#sign-in-button')
 
     page.locator('input[name="email"]').type(userData.email)
@@ -227,14 +231,8 @@ export function signUp(): void {
   const mfaOption: mfaType = Math.random() <= 0.5 ? 'SMS' : 'AUTH_APP'
   iterationsStarted.add(1)
 
-  // B01_SignUp_01_StubSubmit based on the route i.e. RP or ORCH
-  if (route === 'ORCH') {
-    res = orchStubSubmit(groups)
-  } else if (route === 'RP') {
-    res = rpStubSubmit(groups)
-  } else {
-    throw new Error(`Invalid route: ${route}`) // Handle invalid route values
-  }
+  // B01_SignUp_01_StubSubmit
+  res = route == 'ORCH' ? (res = orchStubSubmit(groups)) : (res = rpStubSubmit(groups))
 
   sleep(1)
 
@@ -472,12 +470,18 @@ export function signIn(): void {
   iterationsStarted.add(1)
 
   // B02_SignIn_01_OrchStubSubmit
-  res = orchStubSubmit(groups)
+  if (route === 'ORCH') {
+    res = orchStubSubmit(groups)
+  } else if (route === 'RP') {
+    res = rpStubSubmit(groups)
+  } else {
+    throw new Error(`Invalid route: ${route}`) // Handle invalid route values
+  }
 
   sleep(1)
 
   // B02_SignIn_02_ClickSignIn
-  res = timeGroup(groups[3], () => res.submitForm(), {
+  res = timeGroup(groups[6], () => res.submitForm(), {
     isStatusCode200,
     ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
   })
@@ -486,7 +490,7 @@ export function signIn(): void {
 
   // B02_SignIn_03_EnterEmailAddress
   res = timeGroup(
-    groups[4],
+    groups[7],
     () =>
       res.submitForm({
         fields: { email: userData.email }
@@ -516,7 +520,7 @@ export function signIn(): void {
 
   // B02_SignIn_04_EnterPassword
   res = timeGroup(
-    groups[5],
+    groups[8],
     () =>
       res.submitForm({
         fields: { password: credentials.password }
@@ -529,10 +533,10 @@ export function signIn(): void {
   sleep(1)
 
   // B02_SignIn_05_EnterOTP
-  timeGroup(groups[6], () => {
+  timeGroup(groups[9], () => {
     //01_AuthCall
     res = timeGroup(
-      groups[7].split('::')[1],
+      groups[10].split('::')[1],
       () =>
         res.submitForm({
           fields: { code: getOTP() },
@@ -544,48 +548,63 @@ export function signIn(): void {
     acceptNewTerms = res.headers.Location.endsWith('updated-terms-and-conditions')
     if (acceptNewTerms) {
       // 02_AuthAcceptTerms
-      res = timeGroup(groups[8].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
+      res = timeGroup(groups[11].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
         isStatusCode200,
         ...pageContentCheck('terms of use update')
       })
     } else {
       // 03_AuthCall
       res = timeGroup(
-        groups[9].split('::')[1],
+        groups[12].split('::')[1],
         () => http.get(env.authStagingURL + res.headers.Location, { redirects: 0 }),
         {
           isStatusCode302
         }
       )
       // 04_OrchStub
-      res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck(userData.email.toLowerCase())
+      if (route === 'ORCH') {
+        res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location), {
+          isStatusCode200,
+          ...pageContentCheck(userData.email.toLowerCase())
+        })
+        // 04_RPStub
+      } else if (route === 'RP') {
+        res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
+          isStatusCode200,
+          ...pageContentCheck(userData.email.toLowerCase())
+        })
+      }
+    }
+
+    if (acceptNewTerms) {
+      // B02_SignIn_06_AcceptTermsConditions
+      timeGroup(groups[15], () => {
+        // 01_AuthCall
+        res = timeGroup(
+          groups[16].split('::')[1],
+          () =>
+            res.submitForm({
+              fields: { termsAndConditionsResult: 'accept' },
+              params: { redirects: 1 }
+            }),
+          { isStatusCode302 }
+        )
+
+        // 02_OrchStub
+        if (route === 'ORCH') {
+          res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location), {
+            isStatusCode200,
+            ...pageContentCheck(userData.email.toLowerCase())
+          })
+          // 02_RPStub
+        } else if (route === 'RP') {
+          res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
+            isStatusCode200,
+            ...pageContentCheck(userData.email.toLowerCase())
+          })
+        }
       })
+      iterationsCompleted.add(1)
     }
   })
-
-  if (acceptNewTerms) {
-    // B02_SignIn_06_AcceptTermsConditions
-    timeGroup(groups[11], () => {
-      // 01_AuthCall
-      res = timeGroup(
-        groups[12].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { termsAndConditionsResult: 'accept' },
-            params: { redirects: 1 }
-          }),
-        { isStatusCode302 }
-      )
-
-      // 02_OrchStub
-      res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck(userData.email.toLowerCase())
-      })
-    })
-  }
-
-  iterationsCompleted.add(1)
 }

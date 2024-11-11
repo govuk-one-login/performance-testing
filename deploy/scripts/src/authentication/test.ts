@@ -143,7 +143,7 @@ const credentials = {
   phoneOTP: getEnv('ACCOUNT_PHONE_OTP')
 }
 
-const route = getEnv('ENVIRONMENT').toLocaleUpperCase()
+const route = getEnv('ROUTE').toLocaleUpperCase()
 const validRoute = ['RP', 'ORCH']
 if (!validRoute.includes(route)) throw new Error(`Route '${route}' not in [${validRoute.toString()}]`)
 

@@ -454,13 +454,7 @@ export function signIn(): void {
   iterationsStarted.add(1)
 
   // B02_SignIn_01_OrchStubSubmit
-  if (route === 'ORCH') {
-    res = orchStubSubmit(groups)
-  } else if (route === 'RP') {
-    res = rpStubSubmit(groups)
-  } else {
-    throw new Error(`Invalid route: ${route}`) // Handle invalid route values
-  }
+  res = route == 'ORCH' ? (res = orchStubSubmit(groups)) : (res = rpStubSubmit(groups))
 
   sleep(1)
 

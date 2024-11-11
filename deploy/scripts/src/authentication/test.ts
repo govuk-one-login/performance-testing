@@ -148,7 +148,7 @@ const validRoute = ['RP', 'ORCH']
 if (!validRoute.includes(route)) throw new Error(`Route '${route}' not in [${validRoute.toString()}]`)
 
 const env = {
-  stubEndpoint: getEnv('ACCOUNT_${route}_STUB'),
+  stubEndpoint: getEnv(`ACCOUNT_${route}_STUB`),
   staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true',
   authStagingURL: getEnv('ACCOUNT_STAGING_URL')
 }
@@ -224,7 +224,7 @@ export function signUp(): void {
 
   // B01_SignUp_02_CreateOneLogin
   res = timeGroup(
-    groups[3],
+    groups[6],
     () =>
       res.submitForm({
         fields: {
@@ -238,7 +238,7 @@ export function signUp(): void {
   sleep(1)
 
   // B01_SignUp_03_EnterEmailAddress
-  res = timeGroup(groups[4], () => res.submitForm({ fields: { email: testEmail } }), {
+  res = timeGroup(groups[7], () => res.submitForm({ fields: { email: testEmail } }), {
     isStatusCode200,
     ...pageContentCheck('Check your email')
   })
@@ -247,7 +247,7 @@ export function signUp(): void {
 
   // B01_SignUp_04_EnterOTP
   res = timeGroup(
-    groups[5],
+    groups[8],
     () =>
       res.submitForm({
         fields: {
@@ -262,7 +262,7 @@ export function signUp(): void {
 
   // B01_SignUp_05_CreatePassword
   res = timeGroup(
-    groups[6],
+    groups[9],
     () =>
       res.submitForm({
         fields: {
@@ -284,7 +284,7 @@ export function signUp(): void {
     case 'AUTH_APP': {
       // B01_SignUp_06_MFA_AuthApp
       res = timeGroup(
-        groups[7],
+        groups[10],
         () =>
           res.submitForm({
             fields: { mfaOptions: mfaOption }
@@ -301,7 +301,7 @@ export function signUp(): void {
 
       // B01_SignUp_07_MFA_EnterTOTP
       res = timeGroup(
-        groups[8],
+        groups[11],
         () =>
           res.submitForm({
             fields: { code: totp.generateTOTP() }
@@ -316,7 +316,7 @@ export function signUp(): void {
     case 'SMS': {
       // B01_SignUp_08_MFA_SMS
       res = timeGroup(
-        groups[9],
+        groups[12],
         () =>
           res.submitForm({
             fields: { mfaOptions: mfaOption }
@@ -331,7 +331,7 @@ export function signUp(): void {
 
       // B01_SignUp_09_MFA_EnterPhoneNum
       res = timeGroup(
-        groups[10],
+        groups[13],
         () =>
           res.submitForm({
             fields: { phoneNumber }
@@ -343,7 +343,7 @@ export function signUp(): void {
 
       // B01_SignUp_10_MFA_EnterSMSOTP
       res = timeGroup(
-        groups[11],
+        groups[14],
         () =>
           res.submitForm({
             fields: { code: credentials.phoneOTP }
@@ -360,13 +360,13 @@ export function signUp(): void {
   sleep(1)
 
   // B01_SignUp_11_ContinueAccountCreated
-  timeGroup(groups[12], () => {
+  timeGroup(groups[15], () => {
     // 01_AuthCall
-    res = timeGroup(groups[13].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
+    res = timeGroup(groups[16].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
       isStatusCode302
     })
     // 02_OrchStub
-    res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck(testEmail.toLowerCase())
     })

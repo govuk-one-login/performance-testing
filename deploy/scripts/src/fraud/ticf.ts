@@ -35,7 +35,7 @@ export const options: Options = {
 }
 
 const env = {
-  sqs_queue: getEnv('TiCF_SQS_QUEUE') // Need to chnage this and implement the actual SQS Queue.
+  sqs_queue: getEnv('TiCF_SQS_QUEUE') // Need to change this and implement the actual SQS Queue.
 }
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -113,6 +113,5 @@ export function ticfDataMigration(): void {
   iterationsCompleted.add(1)
 }
 
-//Other Questions:
-//We need to chaneg permisisons on TiCF SQS queue and Perf Testing CF Template
-//There are still a few values of the payloads i am unsure on whether to include/the value of them e.g. ci in generateIPVDLCRIVCIssued
+//We need to change the permisisons of the TiCF SQS queue and Perf Testing CF Template.
+//There are still a few values of the payloads i am unsure on whether to include/the value of them e.g. ci in generateIPVDLCRIVCIssued.

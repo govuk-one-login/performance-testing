@@ -168,13 +168,13 @@ export interface AuthUpdateProfilePhoneNumber {
 }
 
 export interface IPVJourneyStart {
-  //not included vtr in extensions
   client_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number
   extensions: {
     reprove_identity: boolean
+    vtr: string[array]
   }
   restricted: {
     device_infomation: {
@@ -225,7 +225,7 @@ export interface IPVDLCRIVCIssued {
         checkMethod: string
         identityCheckPolicy: string
       }
-      ci: string
+      ci: string[array]
       failedCheckDetails: {
         checkMethod: string
         identityCheckPolicy: string

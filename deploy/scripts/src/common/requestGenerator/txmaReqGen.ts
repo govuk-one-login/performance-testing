@@ -217,8 +217,8 @@ export function generateIPVJourneyStart(journeyID: string, userID: string): IPVJ
     event_name: 'IPV_JOURNEY_START',
     event_timestamp_ms: Math.floor(Date.now()),
     extensions: {
-      reprove_identity: false
-      //have left of vtr: array[string], as don't understand
+      reprove_identity: false,
+      vtr: 'CI'
     },
     restricted: {
       device_infomation: {
@@ -273,7 +273,7 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string): IPV
           checkMethod: 'vpip',
           identityCheckPolicy: 'policy'
         },
-        ci: 'string', //this should be an array[string], i don't know how to do that
+        ci: 'string', //This should be an array[string], i don't know how to implement that/if it needs changing.
         failedCheckDetails: {
           checkMethod: 'vpip',
           identityCheckPolicy: 'policy'

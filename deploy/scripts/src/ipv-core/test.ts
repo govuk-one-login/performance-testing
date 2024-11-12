@@ -416,7 +416,7 @@ export function identity(stubOnly: boolean = false): void {
     // 02_CoreCall
     res = timeGroup(groups[31].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('You’ve successfully proved your identity')
+      ...pageContentCheck('Continue to the service you need to use')
     })
   })
 

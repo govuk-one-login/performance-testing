@@ -49,8 +49,8 @@ const profiles: ProfileList = {
     uiSignIn: {
       executor: 'per-vu-iterations',
       exec: 'uiSignIn',
-      vus: 2,
-      iterations: 10,
+      vus: 1,
+      iterations: 1,
       options: {
         browser: {
           type: 'chromium'
@@ -183,8 +183,15 @@ export async function uiSignIn() {
   const userData = dataSignIn[execution.vu.idInTest - 1]
 
   const page: Page = await browser.newPage()
+
+  let targetUrl = env.stubEndpoint
+  if (route === 'RP') {
+    targetUrl += '/prod/start'
+  } else if (route === 'ORCH') {
+    targetUrl += '?reauthenticate=&level=Cl.Cm&authenticated=no&authenticatedLevel=Cl.Cm&channel=none'
+  }
   try {
-    await page.goto(env.stubEndpoint + '/start')
+    await page.goto(targetUrl)
     await ClickButton(page, 'button#sign-in-button')
 
     page.locator('input[name="email"]').type(userData.email)

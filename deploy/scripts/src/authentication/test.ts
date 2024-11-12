@@ -469,7 +469,7 @@ export function signIn(): void {
   const userData = dataSignIn[execution.vu.idInTest - 1]
   iterationsStarted.add(1)
 
-  // B02_SignIn_01_OrchStubSubmit
+  // B02_SignIn_01_StubSubmit
   res = route == 'ORCH' ? (res = orchStubSubmit(groups)) : (res = rpStubSubmit(groups))
 
   sleep(1)

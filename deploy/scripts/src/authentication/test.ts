@@ -95,7 +95,9 @@ const groupMap = {
     'B01_SignUp_10_MFA_EnterSMSOTP',
     'B01_SignUp_11_ContinueAccountCreated',
     'B01_SignUp_11_ContinueAccountCreated::01_AuthCall',
-    'B01_SignUp_11_ContinueAccountCreated::02_OrchStub'
+    'B01_SignUp_11_ContinueAccountCreated::02_OrchStubCall',
+    'B01_SignUp_11_ContinueAccountCreated::02_OIDCCall',
+    'B01_SignUp_11_ContinueAccountCreated::03_RPStubCall'
   ],
   signIn: [
     'B02_SignIn_01_OrchStubSubmit',
@@ -239,8 +241,7 @@ export function signUp(): void {
   iterationsStarted.add(1)
 
   // B01_SignUp_01_StubSubmit
-  res = route == 'ORCH' ? (res = orchStubSubmit(groups)) : (res = rpStubSubmit(groups))
-
+  route == 'ORCH' ? (res = orchStubSubmit(groups)) : (res = rpStubSubmit(groups))
   sleep(1)
 
   // B01_SignUp_02_CreateOneLogin
@@ -382,17 +383,28 @@ export function signUp(): void {
 
   // B01_SignUp_11_ContinueAccountCreated
   timeGroup(groups[15], () => {
-    // 01_AuthCall
+    // 01_AuthCall (common for ORCH and RP route)
     res = timeGroup(groups[16].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
       isStatusCode302
     })
-    // 02_OrchStub
-    res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck(testEmail.toLowerCase())
-    })
+    if (route === 'ORCH') {
+      // 02_OrchStub
+      res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck(testEmail.toLowerCase())
+      })
+    } else if (route === 'RP') {
+      // 02_OIDCCall
+      res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+        isStatusCode302
+      })
+      //03_RPStub
+      res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck(testEmail.toLowerCase())
+      })
+    }
   })
-
   iterationsCompleted.add(1)
 }
 

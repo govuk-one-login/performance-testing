@@ -57,6 +57,22 @@ const profiles: ProfileList = {
         }
       }
     }
+  },
+  loadMar2025: {
+    ...createScenario('signUp', LoadProfile.short, 45),
+    ...createScenario('signIn', LoadProfile.short, 50)
+  },
+  soakMar2025: {
+    ...createScenario('signUp', LoadProfile.soak, 45),
+    ...createScenario('signIn', LoadProfile.soak, 50)
+  },
+  spikeNFR: {
+    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 45),
+    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 50)
+  },
+  spikeSudden: {
+    ...createScenario('signUp', LoadProfile.spikeSudden, 45),
+    ...createScenario('signIn', LoadProfile.spikeSudden, 50)
   }
 }
 const loadProfile = selectProfile(profiles)

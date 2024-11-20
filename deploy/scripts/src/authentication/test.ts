@@ -475,7 +475,7 @@ export function signIn(): void {
   iterationsStarted.add(1)
 
   // B02_SignIn_01_StubSubmit
-  res = route == 'ORCH' ? (res = orchStubSubmit(groups)) : (res = rpStubSubmit(groups))
+  route == 'ORCH' ? (res = orchStubSubmit(groups)) : (res = rpStubSubmit(groups))
 
   sleep(1)
 

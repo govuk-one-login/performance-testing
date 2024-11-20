@@ -147,7 +147,7 @@ function createStages(type: LoadProfile, target: number): Stage[] {
     case LoadProfile.soak:
       return [
         { target, duration: '10m' }, // Ramp up to target throughput over 10 minutes
-        { target, duration: '60m' }, // Maintain steady state at target throughput for 5 minutes
+        { target, duration: '60m' }, // Maintain steady state at target throughput for 60 minutes
         { target, duration: '5m' } // Ramp down over 5 minutes
       ]
     case LoadProfile.spikeNFRSignUp: {
@@ -175,7 +175,7 @@ function createStages(type: LoadProfile, target: number): Stage[] {
       return [
         { target: step, duration: '5m' }, // Ramp up to 33% target throughput over 5 minutes
         { target: step, duration: '10m' }, // Maintain steady state at 50% target throughput for 10 minutes
-        { target: step * 3, duration: '1s' }, // Ramp up to 100% target throughput over 1 seconds
+        { target: step * 3, duration: '1s' }, // Ramp up to 100% target throughput over 1 second
         { target: step * 3, duration: '10m' }, // Maintain steady state at 100% target throughput for 10 minutes
         { target: 0, duration: '5m' } // Ramp down over 5 minutes
       ]

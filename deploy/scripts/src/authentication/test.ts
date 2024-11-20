@@ -227,7 +227,12 @@ export function signUp(): void {
   iterationsStarted.add(1)
 
   // B01_SignUp_01_StubSubmit
-  route == 'ORCH' ? (res = orchStubSubmit(groups)) : (res = rpStubSubmit(groups))
+  if (route === 'RP') {
+    res = rpStubSubmit(groups)
+  } else if (route === 'ORCH') {
+    res = orchStubSubmit(groups)
+  }
+
   sleep(1)
 
   // B01_SignUp_02_CreateOneLogin
@@ -475,7 +480,11 @@ export function signIn(): void {
   iterationsStarted.add(1)
 
   // B02_SignIn_01_StubSubmit
-  route == 'ORCH' ? (res = orchStubSubmit(groups)) : (res = rpStubSubmit(groups))
+  if (route === 'RP') {
+    res = rpStubSubmit(groups)
+  } else if (route === 'ORCH') {
+    res = orchStubSubmit(groups)
+  }
 
   sleep(1)
 

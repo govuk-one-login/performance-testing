@@ -114,11 +114,13 @@ const groupMap = {
     'B02_SignIn_05_EnterOTP::02_AuthAcceptTerms',
     'B02_SignIn_05_EnterOTP::03_AuthCall',
     'B02_SignIn_05_EnterOTP::04_OrchStub',
-    'B02_SignIn_05_EnterOTP::04_RPStub',
+    'B02_SignIn_05_EnterOTP::04_OIDCCall',
+    'B02_SignIn_05_EnterOTP::05_RPStub',
     'B02_SignIn_06_AcceptTermsConditions',
     'B02_SignIn_06_AcceptTermsConditions::01_AuthCall',
     'B02_SignIn_06_AcceptTermsConditions::02_OrchStub',
-    'B02_SignIn_06_AcceptTermsConditions::02_RPStub'
+    'B02_SignIn_06_AcceptTermsConditions::02_OIDCCall',
+    'B02_SignIn_06_AcceptTermsConditions::03_RPStub'
   ],
   uiSignIn: []
 } as const
@@ -574,15 +576,20 @@ export function signIn(): void {
           isStatusCode302
         }
       )
-      // 04_OrchStub
+
       if (route === 'ORCH') {
+        // 04_OrchStub
         res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck(userData.email.toLowerCase())
         })
-        // 04_RPStub
       } else if (route === 'RP') {
-        res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
+        // 04_OIDCCall
+        res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+          isStatusCode302
+        })
+        //05_RPStub
+        res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location), {
           isStatusCode200,
           ...pageContentCheck(userData.email.toLowerCase())
         })
@@ -591,10 +598,10 @@ export function signIn(): void {
 
     if (acceptNewTerms) {
       // B02_SignIn_06_AcceptTermsConditions
-      timeGroup(groups[15], () => {
+      timeGroup(groups[16], () => {
         // 01_AuthCall
         res = timeGroup(
-          groups[16].split('::')[1],
+          groups[17].split('::')[1],
           () =>
             res.submitForm({
               fields: { termsAndConditionsResult: 'accept' },
@@ -603,15 +610,19 @@ export function signIn(): void {
           { isStatusCode302 }
         )
 
-        // 02_OrchStub
         if (route === 'ORCH') {
-          res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location), {
+          // 02_OrchStub
+          res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
             isStatusCode200,
             ...pageContentCheck(userData.email.toLowerCase())
           })
-          // 02_RPStub
         } else if (route === 'RP') {
-          res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
+          // 02_OIDCCall
+          res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+            isStatusCode302
+          })
+          //03_RPStub
+          res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location), {
             isStatusCode200,
             ...pageContentCheck(userData.email.toLowerCase())
           })

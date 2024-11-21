@@ -60,19 +60,19 @@ const profiles: ProfileList = {
   },
   loadMar2025: {
     ...createScenario('signUp', LoadProfile.short, 45),
-    ...createScenario('signIn', LoadProfile.short, 50)
+    ...createScenario('signIn', LoadProfile.short, 60)
   },
   soakMar2025: {
     ...createScenario('signUp', LoadProfile.soak, 45),
-    ...createScenario('signIn', LoadProfile.soak, 50)
+    ...createScenario('signIn', LoadProfile.soak, 60)
   },
   spikeNFR: {
     ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 45),
-    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 50)
+    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 60)
   },
   spikeSudden: {
     ...createScenario('signUp', LoadProfile.spikeSudden, 45),
-    ...createScenario('signIn', LoadProfile.spikeSudden, 50)
+    ...createScenario('signIn', LoadProfile.spikeSudden, 60)
   }
 }
 const loadProfile = selectProfile(profiles)
@@ -604,6 +604,7 @@ export function signIn(): void {
         })
       }
     }
+    iterationsCompleted.add(1)
 
     if (acceptNewTerms) {
       // B02_SignIn_06_AcceptTermsConditions

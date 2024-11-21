@@ -107,7 +107,6 @@ export function persistVC(): void {
     ...pageContentCheck('messageId')
   })
   iterationsCompleted.add(1)
-  console.log(subjectID)
 }
 
 export function summariseVC(): void {

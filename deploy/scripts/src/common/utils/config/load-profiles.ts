@@ -132,7 +132,7 @@ function createStages(type: LoadProfile, target: number): Stage[] {
         { target, duration: '5m' } // Ramp down over 5 minutes
       ]
     case LoadProfile.incremental: {
-      const step = target / 4
+      const step = Math.round(target / 4)
       return [
         { target: step, duration: '4m' }, // Ramp up to 25% target throughput over 4 minutes
         { target: step, duration: '10m' }, // Maintain steady state at 25% target throughput for 10 minutes
@@ -151,7 +151,7 @@ function createStages(type: LoadProfile, target: number): Stage[] {
         { target, duration: '5m' } // Ramp down over 5 minutes
       ]
     case LoadProfile.spikeNFRSignUp: {
-      const step = target / 2
+      const step = Math.round(target / 2)
       return [
         { target: step, duration: '4m' }, // Ramp up to 50% target throughput over 4 minutes
         { target: step, duration: '10m' }, // Maintain steady state at 50% target throughput for 10 minutes
@@ -161,7 +161,7 @@ function createStages(type: LoadProfile, target: number): Stage[] {
       ]
     }
     case LoadProfile.spikeNFRSignIn: {
-      const step = target / 2
+      const step = Math.round(target / 2)
       return [
         { target: step, duration: '15s' }, // Ramp up to 50% target throughput over 15 seconds
         { target: step, duration: '10m' }, // Maintain steady state at 50% target throughput for 10 minutes
@@ -171,7 +171,7 @@ function createStages(type: LoadProfile, target: number): Stage[] {
       ]
     }
     case LoadProfile.spikeSudden: {
-      const step = target / 3
+      const step = Math.round(target / 3)
       return [
         { target: step, duration: '5m' }, // Ramp up to 33% target throughput over 5 minutes
         { target: step, duration: '10m' }, // Maintain steady state at 50% target throughput for 10 minutes

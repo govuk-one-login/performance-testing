@@ -26,6 +26,18 @@ const profiles: ProfileList = {
   },
   stress: {
     ...createScenario('address', LoadProfile.full, 65)
+  },
+  loadMar2025: {
+    ...createScenario('address', LoadProfile.short, 13),
+  },
+  soakMar2025: {
+    ...createScenario('address', LoadProfile.soak, 13),
+  },
+  spikeNFR: {
+    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 13),
+  },
+  spikeSudden: {
+    ...createScenario('address', LoadProfile.spikeSudden, 13),
   }
 }
 

@@ -39,6 +39,22 @@ const profiles: ProfileList = {
     ...createScenario('idReuse', LoadProfile.full, 1900, 5),
     ...createScenario('orchStubIsolatedTest', LoadProfile.full, 100)
   },
+  loadMar2025: {
+    ...createScenario('identity', LoadProfile.short, 20),
+    ...createScenario('idReuse', LoadProfile.short, 40)
+  },
+  soakMar2025: {
+    ...createScenario('identity', LoadProfile.soak, 20),
+    ...createScenario('idReuse', LoadProfile.soak, 40)
+  },
+  spikeNFR: {
+    ...createScenario('identity', LoadProfile.spikeNFRSignUp, 20),
+    ...createScenario('idReuse', LoadProfile.spikeNFRSignIn, 40)
+  },
+  spikeSudden: {
+    ...createScenario('identity', LoadProfile.spikeSudden, 20),
+    ...createScenario('idReuse', LoadProfile.spikeSudden, 40)
+  },
   dataCreationForIDReuse: {
     passport: {
       executor: 'per-vu-iterations',

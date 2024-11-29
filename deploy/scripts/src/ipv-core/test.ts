@@ -54,8 +54,7 @@ const profiles: ProfileList = {
   spikeSudden: {
     ...createScenario('identity', LoadProfile.spikeSudden, 20),
     ...createScenario('idReuse', LoadProfile.spikeSudden, 40)
-    },
-
+  },
   dataCreationForIDReuse: {
     passport: {
       executor: 'per-vu-iterations',

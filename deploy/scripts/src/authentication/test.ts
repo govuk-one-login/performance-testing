@@ -58,21 +58,37 @@ const profiles: ProfileList = {
       }
     }
   },
-  loadMar2025: {
+  loadMar2025_L1: {
     ...createScenario('signUp', LoadProfile.short, 45),
     ...createScenario('signIn', LoadProfile.short, 60)
   },
-  soakMar2025: {
+  soakMar2025_L1: {
     ...createScenario('signUp', LoadProfile.soak, 45),
     ...createScenario('signIn', LoadProfile.soak, 60)
   },
-  spikeNFR: {
+  spikeNFR_L1: {
     ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 45),
     ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 60)
   },
-  spikeSudden: {
+  spikeSudden_L1: {
     ...createScenario('signUp', LoadProfile.spikeSudden, 45),
     ...createScenario('signIn', LoadProfile.spikeSudden, 60)
+  },
+  loadMar2025_L2: {
+    ...createScenario('signUp', LoadProfile.short, 90),
+    ...createScenario('signIn', LoadProfile.short, 120)
+  },
+  soakMar2025_L2: {
+    ...createScenario('signUp', LoadProfile.soak, 90),
+    ...createScenario('signIn', LoadProfile.soak, 120)
+  },
+  spikeNFR_L2: {
+    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 90),
+    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 120)
+  },
+  spikeSudden_L2: {
+    ...createScenario('signUp', LoadProfile.spikeSudden, 90),
+    ...createScenario('signIn', LoadProfile.spikeSudden, 120)
   }
 }
 const loadProfile = selectProfile(profiles)

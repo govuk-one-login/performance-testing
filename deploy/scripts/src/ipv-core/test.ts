@@ -56,12 +56,12 @@ const profiles: ProfileList = {
     ...createScenario('idReuse', LoadProfile.spikeSudden, 40)
   },
   dataCreationForIDReuse: {
-    passport: {
+    identity: {
       executor: 'per-vu-iterations',
       vus: 250,
       iterations: 200,
       maxDuration: '120m',
-      exec: 'passport'
+      exec: 'identity'
     }
   },
   adhocLoadTest: {

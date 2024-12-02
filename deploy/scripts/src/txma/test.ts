@@ -16,7 +16,7 @@ import {
   generateAuthCreateAccount,
   generateAuthReqParsed,
   generateDcmawAbortWeb
-} from './requestGenerator/txmaReqGen'
+} from '../common/requestGenerator/txmaReqGen'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {

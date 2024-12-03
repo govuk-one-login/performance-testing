@@ -483,7 +483,7 @@ export function idReuse(): void {
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
-  const idReuseUserID = csvData[Math.floor(Math.random() * csvData.length)]
+  const idReuseUserID = csvData[execution.vu.idInTest - 1]
   iterationsStarted.add(1)
   const signInJourneyId = uuidv4()
 

@@ -34,7 +34,7 @@ const profiles: ProfileList = {
     ...createScenario('address', LoadProfile.soak, 13)
   },
   spikeNFR: {
-    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 13)
+    ...createScenario('address', LoadProfile.spikeNFRSignUp, 13)
   },
   spikeSudden: {
     ...createScenario('address', LoadProfile.spikeSudden, 13)

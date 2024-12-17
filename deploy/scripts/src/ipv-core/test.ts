@@ -41,19 +41,19 @@ const profiles: ProfileList = {
   },
   loadMar2025: {
     ...createScenario('identity', LoadProfile.short, 20, 44),
-    ...createScenario('idReuse', LoadProfile.short, 40, 28)
+    ...createScenario('idReuse', LoadProfile.short, 40, 8)
   },
   soakMar2025: {
     ...createScenario('identity', LoadProfile.soak, 20, 44),
-    ...createScenario('idReuse', LoadProfile.soak, 40, 28)
+    ...createScenario('idReuse', LoadProfile.soak, 40, 8)
   },
   spikeNFR: {
     ...createScenario('identity', LoadProfile.spikeNFRSignUp, 20, 44),
-    ...createScenario('idReuse', LoadProfile.spikeNFRSignIn, 40, 28)
+    ...createScenario('idReuse', LoadProfile.spikeNFRSignIn, 40, 8)
   },
   spikeSudden: {
     ...createScenario('identity', LoadProfile.spikeSudden, 20, 44),
-    ...createScenario('idReuse', LoadProfile.spikeSudden, 40, 28)
+    ...createScenario('idReuse', LoadProfile.spikeSudden, 40, 8)
   },
   dataCreationForIDReuse: {
     identity: {

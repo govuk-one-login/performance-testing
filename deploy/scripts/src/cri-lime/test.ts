@@ -278,6 +278,7 @@ export function fraud(): void {
             street: userDetails.street,
             townCity: userDetails.city,
             postCode: userDetails.postCode,
+            addressCountry: 'GB',
             validFromDay: '26',
             validFromMonth: '02',
             validFromYear: '2021',

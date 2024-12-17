@@ -69,20 +69,20 @@ const profiles: ProfileList = {
     ...createScenario('passport', LoadProfile.rampOnly, 30)
   },
   loadMar2025: {
-    ...createScenario('fraud', LoadProfile.short, 13),
-    ...createScenario('passport', LoadProfile.short, 11)
+    ...createScenario('fraud', LoadProfile.short, 13, 8),
+    ...createScenario('passport', LoadProfile.short, 11, 8)
   },
   soakMar2025: {
-    ...createScenario('fraud', LoadProfile.soak, 13),
-    ...createScenario('passport', LoadProfile.soak, 11)
+    ...createScenario('fraud', LoadProfile.soak, 13, 8),
+    ...createScenario('passport', LoadProfile.soak, 11, 8)
   },
   spikeNFR: {
-    ...createScenario('fraud', LoadProfile.spikeNFRSignUp, 13),
-    ...createScenario('passport', LoadProfile.spikeNFRSignUp, 11)
+    ...createScenario('fraud', LoadProfile.spikeNFRSignUp, 13, 8),
+    ...createScenario('passport', LoadProfile.spikeNFRSignUp, 11, 8)
   },
   spikeSudden: {
-    ...createScenario('fraud', LoadProfile.spikeSudden, 13),
-    ...createScenario('passport', LoadProfile.spikeSudden, 11)
+    ...createScenario('fraud', LoadProfile.spikeSudden, 13, 8),
+    ...createScenario('passport', LoadProfile.spikeSudden, 11, 8)
   }
 }
 

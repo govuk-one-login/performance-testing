@@ -40,20 +40,20 @@ const profiles: ProfileList = {
     ...createScenario('orchStubIsolatedTest', LoadProfile.full, 100)
   },
   loadMar2025: {
-    ...createScenario('identity', LoadProfile.short, 20),
-    ...createScenario('idReuse', LoadProfile.short, 40)
+    ...createScenario('identity', LoadProfile.short, 20, 44),
+    ...createScenario('idReuse', LoadProfile.short, 40, 28)
   },
   soakMar2025: {
-    ...createScenario('identity', LoadProfile.soak, 20),
-    ...createScenario('idReuse', LoadProfile.soak, 40)
+    ...createScenario('identity', LoadProfile.soak, 20, 44),
+    ...createScenario('idReuse', LoadProfile.soak, 40, 28)
   },
   spikeNFR: {
-    ...createScenario('identity', LoadProfile.spikeNFRSignUp, 20),
-    ...createScenario('idReuse', LoadProfile.spikeNFRSignIn, 40)
+    ...createScenario('identity', LoadProfile.spikeNFRSignUp, 20, 44),
+    ...createScenario('idReuse', LoadProfile.spikeNFRSignIn, 40, 28)
   },
   spikeSudden: {
-    ...createScenario('identity', LoadProfile.spikeSudden, 20),
-    ...createScenario('idReuse', LoadProfile.spikeSudden, 40)
+    ...createScenario('identity', LoadProfile.spikeSudden, 20, 44),
+    ...createScenario('idReuse', LoadProfile.spikeSudden, 40, 28)
   },
   dataCreationForIDReuse: {
     identity: {

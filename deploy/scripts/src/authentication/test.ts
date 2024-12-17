@@ -59,36 +59,36 @@ const profiles: ProfileList = {
     }
   },
   loadMar2025_L1: {
-    ...createScenario('signUp', LoadProfile.short, 45),
-    ...createScenario('signIn', LoadProfile.short, 60)
+    ...createScenario('signUp', LoadProfile.short, 45, 48),
+    ...createScenario('signIn', LoadProfile.short, 60, 8)
   },
   soakMar2025_L1: {
-    ...createScenario('signUp', LoadProfile.soak, 45),
-    ...createScenario('signIn', LoadProfile.soak, 60)
+    ...createScenario('signUp', LoadProfile.soak, 45, 48),
+    ...createScenario('signIn', LoadProfile.soak, 60, 8)
   },
   spikeNFR_L1: {
-    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 45),
-    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 60)
+    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 45, 48),
+    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 60, 8)
   },
   spikeSudden_L1: {
-    ...createScenario('signUp', LoadProfile.spikeSudden, 45),
-    ...createScenario('signIn', LoadProfile.spikeSudden, 60)
+    ...createScenario('signUp', LoadProfile.spikeSudden, 45, 48),
+    ...createScenario('signIn', LoadProfile.spikeSudden, 60, 8)
   },
   loadMar2025_L2: {
-    ...createScenario('signUp', LoadProfile.short, 90),
-    ...createScenario('signIn', LoadProfile.short, 120)
+    ...createScenario('signUp', LoadProfile.short, 90, 48),
+    ...createScenario('signIn', LoadProfile.short, 120, 8)
   },
   soakMar2025_L2: {
-    ...createScenario('signUp', LoadProfile.soak, 90),
-    ...createScenario('signIn', LoadProfile.soak, 120)
+    ...createScenario('signUp', LoadProfile.soak, 90, 48),
+    ...createScenario('signIn', LoadProfile.soak, 120, 8)
   },
   spikeNFR_L2: {
-    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 90),
-    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 120)
+    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 90, 48),
+    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 120, 8)
   },
   spikeSudden_L2: {
-    ...createScenario('signUp', LoadProfile.spikeSudden, 90),
-    ...createScenario('signIn', LoadProfile.spikeSudden, 120)
+    ...createScenario('signUp', LoadProfile.spikeSudden, 90, 48),
+    ...createScenario('signIn', LoadProfile.spikeSudden, 120, 8)
   }
 }
 const loadProfile = selectProfile(profiles)

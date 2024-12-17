@@ -28,16 +28,16 @@ const profiles: ProfileList = {
     ...createScenario('address', LoadProfile.full, 65)
   },
   loadMar2025: {
-    ...createScenario('address', LoadProfile.short, 13)
+    ...createScenario('address', LoadProfile.short, 13, 20)
   },
   soakMar2025: {
-    ...createScenario('address', LoadProfile.soak, 13)
+    ...createScenario('address', LoadProfile.soak, 13, 20)
   },
   spikeNFR: {
-    ...createScenario('address', LoadProfile.spikeNFRSignUp, 13)
+    ...createScenario('address', LoadProfile.spikeNFRSignUp, 13, 20)
   },
   spikeSudden: {
-    ...createScenario('address', LoadProfile.spikeSudden, 13)
+    ...createScenario('address', LoadProfile.spikeSudden, 13, 20)
   }
 }
 

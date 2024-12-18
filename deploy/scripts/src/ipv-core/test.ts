@@ -55,6 +55,22 @@ const profiles: ProfileList = {
     ...createScenario('identity', LoadProfile.spikeSudden, 20, 44),
     ...createScenario('idReuse', LoadProfile.spikeSudden, 40, 8)
   },
+  loadMar2025L2: {
+    ...createScenario('identity', LoadProfile.short, 40, 44),
+    ...createScenario('idReuse', LoadProfile.short, 80, 8)
+  },
+  soakMar2025L2: {
+    ...createScenario('identity', LoadProfile.soak, 40, 44),
+    ...createScenario('idReuse', LoadProfile.soak, 80, 8)
+  },
+  spikeNFRL2: {
+    ...createScenario('identity', LoadProfile.spikeNFRSignUpL2, 40, 44),
+    ...createScenario('idReuse', LoadProfile.spikeNFRSignInL2, 80, 8)
+  },
+  spikeSuddenL2: {
+    ...createScenario('identity', LoadProfile.spikeSudden, 40, 44),
+    ...createScenario('idReuse', LoadProfile.spikeSudden, 80, 8)
+  },
   dataCreationForIDReuse: {
     identity: {
       executor: 'per-vu-iterations',

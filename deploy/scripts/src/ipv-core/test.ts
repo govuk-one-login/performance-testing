@@ -39,6 +39,38 @@ const profiles: ProfileList = {
     ...createScenario('idReuse', LoadProfile.full, 1900, 5),
     ...createScenario('orchStubIsolatedTest', LoadProfile.full, 100)
   },
+  loadMar2025: {
+    ...createScenario('identity', LoadProfile.short, 20, 44),
+    ...createScenario('idReuse', LoadProfile.short, 40, 8)
+  },
+  soakMar2025: {
+    ...createScenario('identity', LoadProfile.soak, 20, 44),
+    ...createScenario('idReuse', LoadProfile.soak, 40, 8)
+  },
+  spikeNFR: {
+    ...createScenario('identity', LoadProfile.spikeNFRSignUp, 20, 44),
+    ...createScenario('idReuse', LoadProfile.spikeNFRSignIn, 40, 8)
+  },
+  spikeSudden: {
+    ...createScenario('identity', LoadProfile.spikeSudden, 20, 44),
+    ...createScenario('idReuse', LoadProfile.spikeSudden, 40, 8)
+  },
+  loadMar2025L2: {
+    ...createScenario('signUp', LoadProfile.short, 40,44),
+    ...createScenario('signIn', LoadProfile.short, 80,8)
+  },
+  soakMar2025L2: {
+    ...createScenario('signUp', LoadProfile.soak, 40,44),
+    ...createScenario('signIn', LoadProfile.soak, 80,8)
+  },
+  spikeNFRL2: {
+    ...createScenario('signUp', LoadProfile.spikeNFRSignUpL2, 40,44),
+    ...createScenario('signIn', LoadProfile.spikeNFRSignInL2, 80,8)
+  },
+  spikeSuddenL2: {
+    ...createScenario('signUp', LoadProfile.spikeSudden, 40,44),
+    ...createScenario('signIn', LoadProfile.spikeSudden, 80,8)
+  }
   dataCreationForIDReuse: {
     passport: {
       executor: 'per-vu-iterations',

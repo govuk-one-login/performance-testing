@@ -99,7 +99,9 @@ export enum LoadProfile {
   soak,
   spikeNFRSignUp,
   spikeNFRSignIn,
-  spikeSudden
+  spikeSudden,
+  spikeNFRSignUpL2,
+  spikeNFRSignInL2
 }
 function createStages(type: LoadProfile, target: number): Stage[] {
   switch (type) {

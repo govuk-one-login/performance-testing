@@ -99,7 +99,9 @@ export enum LoadProfile {
   soak,
   spikeNFRSignUp,
   spikeNFRSignIn,
-  spikeSudden
+  spikeSudden,
+  spikeNFRSignUpL2,
+  spikeNFRSignInL2
 }
 function createStages(type: LoadProfile, target: number): Stage[] {
   switch (type) {
@@ -177,6 +179,26 @@ function createStages(type: LoadProfile, target: number): Stage[] {
         { target: step, duration: '10m' }, // Maintain steady state at 50% target throughput for 10 minutes
         { target: step * 3, duration: '1s' }, // Ramp up to 100% target throughput over 1 second
         { target: step * 3, duration: '10m' }, // Maintain steady state at 100% target throughput for 10 minutes
+        { target: 0, duration: '5m' } // Ramp down over 5 minutes
+      ]
+    }
+    case LoadProfile.spikeNFRSignUpL2: {
+      const step = Math.round(target / 2)
+      return [
+        { target: step, duration: '8m' }, // Ramp up to 50% target throughput over 8 minutes
+        { target: step, duration: '10m' }, // Maintain steady state at 50% target throughput for 10 minutes
+        { target: step * 2, duration: '8m' }, // Ramp up to 100% target throughput over 8 minutes
+        { target: step * 2, duration: '10m' }, // Maintain steady state at 100% target throughput for 10 minutes
+        { target: 0, duration: '5m' } // Ramp down over 5 minutes
+      ]
+    }
+    case LoadProfile.spikeNFRSignInL2: {
+      const step = Math.round(target / 2)
+      return [
+        { target: step, duration: '30s' }, // Ramp up to 50% target throughput over 30 seconds
+        { target: step, duration: '10m' }, // Maintain steady state at 50% target throughput for 10 minutes
+        { target: step * 2, duration: '30s' }, // Ramp up to 100% target throughput over 30 seconds
+        { target: step * 2, duration: '10m' }, // Maintain steady state at 100% target throughput for 10 minutes
         { target: 0, duration: '5m' } // Ramp down over 5 minutes
       ]
     }

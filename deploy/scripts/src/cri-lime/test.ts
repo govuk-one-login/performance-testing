@@ -68,21 +68,37 @@ const profiles: ProfileList = {
   rampOnly: {
     ...createScenario('passport', LoadProfile.rampOnly, 30)
   },
-  loadMar2025: {
+  loadMar2025_L1: {
     ...createScenario('fraud', LoadProfile.short, 13, 8),
     ...createScenario('passport', LoadProfile.short, 11, 8)
   },
-  soakMar2025: {
+  soakMar2025_L1: {
     ...createScenario('fraud', LoadProfile.soak, 13, 8),
     ...createScenario('passport', LoadProfile.soak, 11, 8)
   },
-  spikeNFR: {
+  spikeNFR_L1: {
     ...createScenario('fraud', LoadProfile.spikeNFRSignUp, 13, 8),
     ...createScenario('passport', LoadProfile.spikeNFRSignUp, 11, 8)
   },
-  spikeSudden: {
+  spikeSudden_L1: {
     ...createScenario('fraud', LoadProfile.spikeSudden, 13, 8),
     ...createScenario('passport', LoadProfile.spikeSudden, 11, 8)
+  },
+  loadMar2025_L2: {
+    ...createScenario('fraud', LoadProfile.short, 26, 8),
+    ...createScenario('passport', LoadProfile.short, 22, 8)
+  },
+  soakMar2025_L2: {
+    ...createScenario('fraud', LoadProfile.soak, 26, 8),
+    ...createScenario('passport', LoadProfile.soak, 22, 8)
+  },
+  spikeNFR_L2: {
+    ...createScenario('fraud', LoadProfile.spikeNFRSignUp, 26, 8),
+    ...createScenario('passport', LoadProfile.spikeNFRSignUp, 22, 8)
+  },
+  spikeSudden_L2: {
+    ...createScenario('fraud', LoadProfile.spikeSudden, 26, 8),
+    ...createScenario('passport', LoadProfile.spikeSudden, 22, 8)
   }
 }
 

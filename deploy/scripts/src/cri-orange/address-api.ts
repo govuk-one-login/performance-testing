@@ -63,7 +63,6 @@ const groupMap = {
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: getThresholds(groupMap),
   tags: { name: '' }
 }
 
@@ -87,104 +86,58 @@ const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
 })
 
 export function address(): void {
-  const groups = groupMap.address
   let res: Response
   const user1Address = csvData1[exec.scenario.iterationInTest % csvData1.length]
   iterationsStarted.add(1)
 
   // B02_Address_01_AddressCRIEntryFromStub
-  timeGroup(groups[0], () => {
-    // 01_CoreStubCall
-    res = timeGroup(
-      groups[1].split('::')[1],
-      () =>
-        http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
-          redirects: 0,
-          headers: { Authorization: `Basic ${encodedCredentials}` }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_AddCRICall
-    res = timeGroup(
-      groups[2].split('::')[1],
-      () => {
-        if (env.staticResources) {
-          const paths = [
-            '/public/stylesheets/application.css',
-            '/public/javascripts/all.js',
-            '/public/javascripts/analytics.js',
-            '/public/fonts/bold-b542beb274-v2.woff2',
-            '/public/fonts/light-94a07e06a1-v2.woff2',
-            '/public/images/govuk-crest-2x.png'
-          ]
-          const batchRequests = paths.map(path => env.addressEndPoint + path)
-          http.batch(batchRequests)
-        }
-        return http.get(res.headers.Location)
-      },
-      {
-        isStatusCode200,
-        ...pageContentCheck('Find your address')
-      }
-    )
-  })
-
-  sleepBetween(0.1, 0.3)
-
+res = http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
+        redirects: 0,
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+    }),
+    { isStatusCode302 }
+// 02_AddCRICall
+res = http.get(res.headers.Location),
+    {
+    isStatusCode200,
+    ...pageContentCheck('Find your address')
+    }
   // B02_Address_02_SearchPostCode
-  res = timeGroup(
-    groups[3],
-    () =>
-      res.submitForm({
-        fields: { addressSearch: user1Address.postcode },
-        submitSelector: '#continue'
-      }),
+res = res.submitForm({
+    fields: { addressSearch: user1Address.postcode },
+    submitSelector: '#continue'
+    }),
     { isStatusCode200, ...pageContentCheck('Choose your address') }
-  )
 
-  const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found')
+const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found')
+console.log(fullAddress);
+//?? fail('Address not found')
 
-  // B02_Address_03_SelectAddress
-  res = timeGroup(
-    groups[4],
-    () =>
-      res.submitForm({
-        fields: { addressResults: fullAddress },
-        submitSelector: '#continue'
-      }),
+res = res.submitForm({
+    fields: { addressResults: fullAddress },
+      submitSelector: '#continue'
+    }),
     { isStatusCode200, ...pageContentCheck('Check your address') }
-  )
 
-  sleepBetween(0.1, 0.3)
-
-  // B02_Address_04_VerifyAddress
-  res = timeGroup(
-    groups[5],
-    () =>
-      res.submitForm({
-        fields: { addressYearFrom: '2021' },
-        submitSelector: '#continue'
-      }),
+res = res.submitForm({
+    fields: { addressYearFrom: '2021' },
+    submitSelector: '#continue'
+    }),
     { isStatusCode200, ...pageContentCheck('Confirm your details') }
-  )
 
-  sleepBetween(0.1, 0.3)
 
   // B02_Address_05_ConfirmDetails
-  timeGroup(groups[6], () => {
     // 01_AddCRICall
-    res = timeGroup(groups[7].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
+res = res.submitForm({ params: { redirects: 1 } }), {
       isStatusCode302
-    })
+    }
     // 02_CoreStubCall
-    res = timeGroup(
-      groups[8].split('::')[1],
-      () =>
-        http.get(res.headers.Location, {
+    res =  http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }
         }),
       { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
-    )
-  })
+
   iterationsCompleted.add(1)
 }
+
+export default address;

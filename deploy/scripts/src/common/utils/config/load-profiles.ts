@@ -101,7 +101,8 @@ export enum LoadProfile {
   spikeNFRSignIn,
   spikeSudden,
   spikeNFRSignUpL2,
-  spikeNFRSignInL2
+  spikeNFRSignInL2,
+  constantVus
 }
 function createStages(type: LoadProfile, target: number): Stage[] {
   switch (type) {
@@ -241,6 +242,21 @@ export function createScenario(
     preAllocatedVUs,
     maxVUs,
     stages: createStages(type, target),
+    exec
+  }
+  return list
+}
+
+export function createMeasureScenario(
+  exec: string,
+  target: number = 1,
+): ScenarioList {
+  const list: ScenarioList = {}
+  const maxVUs = target
+  list[exec] = {
+    executor: 'constant-vus',
+    duration: '30s',
+    vus: 1,
     exec
   }
   return list

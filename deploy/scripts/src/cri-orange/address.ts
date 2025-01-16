@@ -40,6 +40,17 @@ const profiles: ProfileList = {
   },
   spikeSudden: {
     ...createScenario('address', LoadProfile.spikeSudden, 13, 20)
+  },
+  coreStubIsolatedTest: {
+    coreStubCall: {
+      executor: 'ramping-vus',
+      startVUs: 1,
+      stages: [
+        { duration: '5m', target: 400 },
+        { duration: '5m', target: 400 }
+      ],
+      exec: 'coreStubCall'
+    }
   }
 }
 
@@ -56,6 +67,7 @@ const groupMap = {
     'B02_Address_05_ConfirmDetails::01_AddCRICall',
     'B02_Address_05_ConfirmDetails::02_CoreStubCall'
   ],
+  coreStubCall: ['01_CoreStubCall'],
   internationalAddress: [
     'B03_InternationalAddress_01_CRIEntryFromStub',
     'B03_InternationalAddress_01_CRIEntryFromStub::01_CoreStubCall',
@@ -194,6 +206,26 @@ export function address(): void {
     )
   })
   iterationsCompleted.add(1)
+}
+
+export function coreStubCall(): void {
+  const groups = groupMap.coreStubCall
+  iterationsStarted.add(1)
+
+  // B01_CoreStubCall
+  timeGroup(
+    groups[0],
+    () =>
+      http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
+        redirects: 0,
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+      }),
+    {
+      isStatusCode302,
+      validateRedirectLocation: r =>
+        (r.headers.Location as string).includes(`${env.addressEndPoint}/oauth2/authorize?request=`)
+    }
+  )
 }
 
 export function internationalAddress(): void {

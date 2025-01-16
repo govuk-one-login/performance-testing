@@ -23,8 +23,8 @@ const profiles: ProfileList = {
     ...createScenario('internationalAddress', LoadProfile.smoke)
   },
   lowVolume: {
-    ...createScenario('address', LoadProfile.short, 10),
-    ...createScenario('internationalAddress', LoadProfile.short, 3)
+    ...createScenario('address', LoadProfile.short, 10, 20),
+    ...createScenario('internationalAddress', LoadProfile.short, 3, 16)
   },
   stress: {
     ...createScenario('address', LoadProfile.full, 65)

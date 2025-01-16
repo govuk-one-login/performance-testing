@@ -57,14 +57,14 @@ const groupMap = {
     'B02_Address_05_ConfirmDetails::02_CoreStubCall'
   ],
   internationalAddress: [
-    'B03_internationalAddress_01_CRIEntryFromStub',
-    'B03_internationalAddress_01_CRIEntryFromStub::01_CoreStubCall',
-    'B03_internationalAddress_01_CRIEntryFromStub::02_CRICall',
-    'B03_internationalAddress_02_SelectCountry',
-    'B03_internationalAddress_03_EnterAddress',
-    'B03_internationalAddress_04_VerifyAddressDetails',
-    'B03_internationalAddress_04_VerifyAddressDetails::01_CRICall',
-    'B03_internationalAddress_04_VerifyAddressDetails::02_CoreStubCall'
+    'B03_InternationalAddress_01_CRIEntryFromStub',
+    'B03_InternationalAddress_01_CRIEntryFromStub::01_CoreStubCall',
+    'B03_InternationalAddress_01_CRIEntryFromStub::02_CRICall',
+    'B03_InternationalAddress_02_SelectCountry',
+    'B03_InternationalAddress_03_EnterAddress',
+    'B03_InternationalAddress_04_VerifyAddressDetails',
+    'B03_InternationalAddress_04_VerifyAddressDetails::01_CRICall',
+    'B03_InternationalAddress_04_VerifyAddressDetails::02_CoreStubCall'
   ]
 } as const
 
@@ -201,7 +201,7 @@ export function internationalAddress(): void {
   let res: Response
   iterationsStarted.add(1)
 
-  //B03_internationalAddress_01_CRIEntryFromStub
+  //B03_InternationalAddress_01_CRIEntryFromStub
   timeGroup(groups[0], () => {
     // 01_CoreStubCall
     res = timeGroup(
@@ -222,7 +222,7 @@ export function internationalAddress(): void {
 
   sleepBetween(1, 3)
 
-  // B03_internationalAddress_02_SelectCountry
+  // B03_InternationalAddress_02_SelectCountry
   res = timeGroup(
     groups[3],
     () =>
@@ -235,7 +235,7 @@ export function internationalAddress(): void {
 
   sleepBetween(1, 3)
 
-  // B03_internationalAddress_03_EnterAddress
+  // B03_InternationalAddress_03_EnterAddress
   res = timeGroup(
     groups[4],
     () =>
@@ -254,7 +254,7 @@ export function internationalAddress(): void {
 
   sleepBetween(1, 3)
 
-  // B03_internationalAddress_04_VerifyAddressDetails
+  // B03_InternationalAddress_04_VerifyAddressDetails
 
   timeGroup(groups[5], () => {
     // 01_CRICall

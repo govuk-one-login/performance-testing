@@ -226,82 +226,82 @@ export function coreStubCall(): void {
         (r.headers.Location as string).includes(`${env.addressEndPoint}/oauth2/authorize?request=`)
     }
   )
+}
 
-  export function internationalAddress(): void {
-    const groups = groupMap.internationalAddress
-    let res: Response
-    iterationsStarted.add(1)
+export function internationalAddress(): void {
+  const groups = groupMap.internationalAddress
+  let res: Response
+  iterationsStarted.add(1)
 
-    //B03_InternationalAddress_01_CRIEntryFromStub
-    timeGroup(groups[0], () => {
-      // 01_CoreStubCall
-      res = timeGroup(
-        groups[1].split('::')[1],
-        () =>
-          http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-build&context=international_user', {
-            redirects: 0,
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }),
-        { isStatusCode302 }
-      )
-      // 02_CRICall
-      res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck('What country do you live in?')
-      })
-    })
-
-    sleepBetween(1, 3)
-
-    // B03_InternationalAddress_02_SelectCountry
+  //B03_InternationalAddress_01_CRIEntryFromStub
+  timeGroup(groups[0], () => {
+    // 01_CoreStubCall
     res = timeGroup(
-      groups[3],
+      groups[1].split('::')[1],
       () =>
-        res.submitForm({
-          fields: { country: 'AU' },
-          submitSelector: '#continue'
+        http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-build&context=international_user', {
+          redirects: 0,
+          headers: { Authorization: `Basic ${encodedCredentials}` }
         }),
-      { isStatusCode200, ...pageContentCheck('Enter your address') }
+      { isStatusCode302 }
     )
-
-    sleepBetween(1, 3)
-
-    // B03_InternationalAddress_03_EnterAddress
-    res = timeGroup(
-      groups[4],
-      () =>
-        res.submitForm({
-          fields: {
-            nonUKAddressApartmentNumber: '100',
-            nonUKAddressStreetName: 'Main Street',
-            nonUKAddressLocality: 'Melbourne',
-            nonUKAddressPostalCode: '3000',
-            nonUKAddressYearFrom: '2020'
-          },
-          submitSelector: '#continue'
-        }),
-      { isStatusCode200, ...pageContentCheck('Confirm your details') }
-    )
-
-    sleepBetween(1, 3)
-
-    // B03_InternationalAddress_04_VerifyAddressDetails
-
-    timeGroup(groups[5], () => {
-      // 01_CRICall
-      res = timeGroup(groups[6].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
-        isStatusCode302
-      })
-      //02_CoreStubCall
-      res = timeGroup(
-        groups[7].split('::')[1],
-        () =>
-          http.get(res.headers.Location, {
-            headers: { Authorization: `Basic ${encodedCredentials}` }
-          }),
-        { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
-      )
+    // 02_CRICall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('What country do you live in?')
     })
-    iterationsCompleted.add(1)
-  }
+  })
+
+  sleepBetween(1, 3)
+
+  // B03_InternationalAddress_02_SelectCountry
+  res = timeGroup(
+    groups[3],
+    () =>
+      res.submitForm({
+        fields: { country: 'AU' },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Enter your address') }
+  )
+
+  sleepBetween(1, 3)
+
+  // B03_InternationalAddress_03_EnterAddress
+  res = timeGroup(
+    groups[4],
+    () =>
+      res.submitForm({
+        fields: {
+          nonUKAddressApartmentNumber: '100',
+          nonUKAddressStreetName: 'Main Street',
+          nonUKAddressLocality: 'Melbourne',
+          nonUKAddressPostalCode: '3000',
+          nonUKAddressYearFrom: '2020'
+        },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Confirm your details') }
+  )
+
+  sleepBetween(1, 3)
+
+  // B03_InternationalAddress_04_VerifyAddressDetails
+
+  timeGroup(groups[5], () => {
+    // 01_CRICall
+    res = timeGroup(groups[6].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
+      isStatusCode302
+    })
+    //02_CoreStubCall
+    res = timeGroup(
+      groups[7].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
+    )
+  })
+  iterationsCompleted.add(1)
 }

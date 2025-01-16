@@ -159,7 +159,7 @@ export function address(): void {
         fields: { addressResults: fullAddress },
         submitSelector: '#continue'
       }),
-    { isStatusCode200, ...pageContentCheck('Check your address') }
+    { isStatusCode200, ...pageContentCheck('Enter your address') }
   )
 
   sleepBetween(1, 3)

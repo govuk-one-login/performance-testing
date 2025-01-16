@@ -23,13 +23,13 @@ RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.116.1 AS otel
+FROM otel/opentelemetry-collector-contrib:0.117.0 AS otel
 COPY otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---
 # Run
 # ---
-FROM grafana/k6:0.55.2
+FROM grafana/k6:0.56.0
 COPY --from=k6-build /k6 /usr/bin/k6
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true

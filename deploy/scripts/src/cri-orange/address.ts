@@ -24,7 +24,7 @@ const profiles: ProfileList = {
   },
   lowVolume: {
     ...createScenario('address', LoadProfile.short, 10),
-    ...createScenario('internationalAddress', LoadProfile.short, 5)
+    ...createScenario('internationalAddress', LoadProfile.short, 3)
   },
   stress: {
     ...createScenario('address', LoadProfile.full, 65)

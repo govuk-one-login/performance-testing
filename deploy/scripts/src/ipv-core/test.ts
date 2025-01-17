@@ -252,7 +252,7 @@ export function identity(stubOnly: boolean = false): void {
 
   // B01_Identity_03_LiveInTheUK
   res = timeGroup(
-    groups[4].split('::')[1],
+    groups[4],
     () =>
       res.submitForm({
         fields: { journey: 'uk' }

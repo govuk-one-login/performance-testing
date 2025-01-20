@@ -20,7 +20,8 @@ import { getThresholds } from '../common/utils/config/thresholds'
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('address', LoadProfile.smoke),
-    ...createScenario('internationalAddress', LoadProfile.smoke)
+    ...createScenario('internationalAddress', LoadProfile.smoke),
+    ...createScenario('addressAdhocScenario', LoadProfile.smoke)
   },
   lowVolume: {
     ...createScenario('address', LoadProfile.short, 10, 20),
@@ -51,6 +52,18 @@ const profiles: ProfileList = {
       ],
       exec: 'coreStubCall'
     }
+  },
+  addressVUTest: {
+    addressAdhocScenario: {
+      executor: 'ramping-vus',
+      startVUs: 1,
+      stages: [
+        { duration: '5m', target: 10 },
+        { duration: '15m', target: 10 },
+        { duration: '1m', target: 0 }
+      ],
+      exec: 'addressAdhocScenario'
+    }
   }
 }
 
@@ -77,6 +90,16 @@ const groupMap = {
     'B03_InternationalAddress_04_VerifyAddressDetails',
     'B03_InternationalAddress_04_VerifyAddressDetails::01_CRICall',
     'B03_InternationalAddress_04_VerifyAddressDetails::02_CoreStubCall'
+  ],
+  addressAdhocScenario: [
+    'B02_Address_01_AddressCRIEntryFromStub',
+    'B02_Address_01_AddressCRIEntryFromStub::01_CoreStubCall',
+    'B02_Address_01_AddressCRIEntryFromStub::02_AddCRICall',
+    'B02_Address_02_SearchPostCode',
+    'B02_Address_03_SelectAddress',
+    'B02_Address_04_VerifyAddress',
+    'B02_Address_05_ConfirmDetails',
+    'B02_Address_05_ConfirmDetails::01_AddCRICall'
   ]
 } as const
 
@@ -302,6 +325,86 @@ export function internationalAddress(): void {
         }),
       { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
     )
+  })
+  iterationsCompleted.add(1)
+}
+
+export function addressAdhocScenario(): void {
+  const groups = groupMap.address
+  let res: Response
+  const user1Address = csvData1[exec.scenario.iterationInTest % csvData1.length]
+  iterationsStarted.add(1)
+
+  // B02_Address_01_AddressCRIEntryFromStub
+  timeGroup(groups[0], () => {
+    // 01_CoreStubCall
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
+          redirects: 0,
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_AddCRICall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Find your address')
+    })
+  })
+
+  // B02_Address_02_SearchPostCode
+  res = timeGroup(
+    groups[3],
+    () =>
+      res.submitForm({
+        fields: { addressSearch: user1Address.postcode },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Choose your address') }
+  )
+
+  const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found')
+
+  // B02_Address_03_SelectAddress
+  res = timeGroup(
+    groups[4],
+    () =>
+      res.submitForm({
+        fields: { addressResults: fullAddress },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Enter your address') }
+  )
+
+  // B02_Address_04_VerifyAddress
+  res = timeGroup(
+    groups[5],
+    () =>
+      res.submitForm({
+        fields: { addressYearFrom: '2021' },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Confirm your details') }
+  )
+
+  // B02_Address_05_ConfirmDetails
+  timeGroup(groups[6], () => {
+    // 01_AddCRICall
+    res = timeGroup(groups[7].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
+      isStatusCode302
+    })
+    /* // Commenting the final stub call.
+    // 02_CoreStubCall
+    res = timeGroup(
+      groups[8].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
+    )*/
   })
   iterationsCompleted.add(1)
 }

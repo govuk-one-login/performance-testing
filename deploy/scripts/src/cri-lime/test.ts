@@ -93,8 +93,8 @@ const profiles: ProfileList = {
     ...createScenario('passport', LoadProfile.soak, 22, 8)
   },
   spikeNFR_L2: {
-    ...createScenario('fraud', LoadProfile.spikeNFRSignUp, 26, 8),
-    ...createScenario('passport', LoadProfile.spikeNFRSignUp, 22, 8)
+    ...createScenario('fraud', LoadProfile.spikeNFRSignUpL2, 26, 8),
+    ...createScenario('passport', LoadProfile.spikeNFRSignUpL2, 22, 8)
   },
   spikeSudden_L2: {
     ...createScenario('fraud', LoadProfile.spikeSudden, 27, 8),

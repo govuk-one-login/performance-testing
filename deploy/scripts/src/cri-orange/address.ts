@@ -58,9 +58,10 @@ const profiles: ProfileList = {
       executor: 'ramping-vus',
       startVUs: 1,
       stages: [
-        { duration: '5m', target: 10 },
-        { duration: '15m', target: 10 },
-        { duration: '1m', target: 0 }
+        { duration: '1000s', target: 100 }, // Ramp up from 0 to 100 concurrent users in 1000 seconds.
+        { duration: '15m', target: 100 }, // Maintain a steady state at 100 concurrent users for 15 minutes
+        { duration: '1000s', target: 200 }, // Ramp up from 100 to 200 concurrent users in 1000 seconds.
+        { duration: '15m', target: 200 } // Maintain a steady state at 200 concurrent users for 15 minutes
       ],
       exec: 'addressAdhocScenario'
     }
@@ -354,6 +355,8 @@ export function addressAdhocScenario(): void {
     })
   })
 
+  sleepBetween(1, 3)
+
   // B02_Address_02_SearchPostCode
   res = timeGroup(
     groups[3],
@@ -365,6 +368,7 @@ export function addressAdhocScenario(): void {
     { isStatusCode200, ...pageContentCheck('Choose your address') }
   )
 
+  sleepBetween(1, 3)
   const fullAddress = res.html().find('select[name=addressResults]>option').last().val() ?? fail('Address not found')
 
   // B02_Address_03_SelectAddress
@@ -377,6 +381,7 @@ export function addressAdhocScenario(): void {
       }),
     { isStatusCode200, ...pageContentCheck('Enter your address') }
   )
+  sleepBetween(1, 3)
 
   // B02_Address_04_VerifyAddress
   res = timeGroup(
@@ -388,6 +393,7 @@ export function addressAdhocScenario(): void {
       }),
     { isStatusCode200, ...pageContentCheck('Confirm your details') }
   )
+  sleepBetween(1, 3)
 
   // B02_Address_05_ConfirmDetails
   timeGroup(groups[6], () => {

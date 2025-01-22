@@ -75,7 +75,7 @@ const profiles: ProfileList = {
       stages: [
         { target: 130, duration: '129s' },
         { target: 130, duration: '900s' },
-        { target: 0, duration: '300s' }
+        { target: 0, duration: '120s' }
       ],
       exec: 'address'
     }

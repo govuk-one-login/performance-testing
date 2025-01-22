@@ -64,6 +64,21 @@ const profiles: ProfileList = {
       ],
       exec: 'addressAdhocScenario'
     }
+  },
+  addressUpdatedConfig: {
+    address: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 130, duration: '129s' },
+        { target: 130, duration: '900s' },
+        { target: 0, duration: '300s' }
+      ],
+      exec: 'address'
+    }
   }
 }
 

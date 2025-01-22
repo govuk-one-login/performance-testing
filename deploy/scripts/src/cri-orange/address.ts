@@ -73,7 +73,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 130, duration: '129s' },
+        { target: 130, duration: '120s' },
         { target: 130, duration: '900s' },
         { target: 0, duration: '120s' }
       ],

@@ -41,7 +41,7 @@ export function timeRequest<T>(fn: () => T, checks: Checkers<T> = {}): T {
   if (check(res, checks)) {
     durations.add(duration)
   } else {
-    fail('Response validation failed')
+    fail(res.status + res.body)
   }
   return res
 }

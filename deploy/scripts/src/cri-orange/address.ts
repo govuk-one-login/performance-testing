@@ -1,5 +1,5 @@
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
-import { fail } from 'k6'
+import { fail, sleep } from 'k6'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { SharedArray } from 'k6/data'
@@ -63,6 +63,20 @@ const profiles: ProfileList = {
         { duration: '1m', target: 0 }
       ],
       exec: 'addressAdhocScenario'
+    }
+  },
+  addressUpdatedConfig: {
+    address: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 20, duration: '200s' },
+        { target: 20, duration: '180s' }
+      ],
+      exec: 'address'
     }
   }
 }
@@ -171,7 +185,7 @@ export function address(): void {
     )
   })
 
-  sleepBetween(1, 3)
+  sleep(1)
 
   // B02_Address_02_SearchPostCode
   res = timeGroup(
@@ -197,7 +211,7 @@ export function address(): void {
     { isStatusCode200, ...pageContentCheck('Enter your address') }
   )
 
-  sleepBetween(1, 3)
+  sleep(1)
 
   // B02_Address_04_VerifyAddress
   res = timeGroup(
@@ -210,7 +224,7 @@ export function address(): void {
     { isStatusCode200, ...pageContentCheck('Confirm your details') }
   )
 
-  sleepBetween(1, 3)
+  sleep(1)
 
   // B02_Address_05_ConfirmDetails
   timeGroup(groups[6], () => {

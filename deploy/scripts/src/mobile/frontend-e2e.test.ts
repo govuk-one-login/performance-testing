@@ -34,6 +34,9 @@ const profiles: ProfileList = {
   load: {
     ...createScenario('mamIphonePassport', LoadProfile.full, 40, 40)
   },
+  nfrload: {
+    ...createScenario('mamIphonePassport', LoadProfile.full, 95, 40)
+  },
   deploy: {
     ...createScenario('mamIphonePassport', LoadProfile.deployment, 1, 40)
   },

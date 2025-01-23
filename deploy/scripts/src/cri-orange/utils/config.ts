@@ -6,7 +6,7 @@ export const env = {
   kbvEndPoint: getEnv('IDENTITY_KBV_URL'),
   addressEndPoint: getEnv('IDENTITY_ADDRESS_URL'),
   envName: getEnv('ENVIRONMENT'),
-  staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
+  staticResources: __ENV.K6_NO_STATIC_RESOURCES == 'true'
 }
 
 export const stubCreds = {

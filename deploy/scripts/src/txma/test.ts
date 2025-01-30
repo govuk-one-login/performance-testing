@@ -31,7 +31,7 @@ const profiles: ProfileList = {
     ...createScenario('pairwiseMappingClientEnrichment', LoadProfile.short, 30, 4)
   },
   load: {
-    ...createScenario('sendRegularEvent', LoadProfile.full, 500, 2),
+    ...createScenario('sendRegularEvent', LoadProfile.full, 2000, 2),
     ...createScenario('sendSingleEvent', LoadProfile.full, 750, 2),
     ...createScenario('pairwiseMappingClientEnrichment', LoadProfile.full, 100, 4)
   },

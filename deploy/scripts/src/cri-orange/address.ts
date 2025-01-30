@@ -68,13 +68,13 @@ const profiles: ProfileList = {
   addressUpdatedConfig: {
     address: {
       executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '10s',
+      startRate: 6,
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 20, duration: '200s' },
-        { target: 20, duration: '180s' }
+        { target: 120, duration: '200s' },
+        { target: 120, duration: '180s' }
       ],
       exec: 'address'
     }

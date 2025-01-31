@@ -14,7 +14,7 @@ Test scripts are written in TypeScript, and transpiled into JavaScript via esbui
 Clone the repository and navigate to this folder `deploy/scripts`. Then to install the dependencies in [`package.json`](package.json) run
 
 ```console
-% npm install
+npm install
 ```
 
 ### Linting
@@ -22,13 +22,15 @@ Clone the repository and navigate to this folder `deploy/scripts`. Then to insta
 If using VSCode as an IDE it is recommended to install [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and set this to your default formatter for TypeScript files in this project.
 
 You can also manually run linting checks in the `scripts` directory with
+
 ```console
-% npm run lint
+npm run lint
 ```
 
 Further, you can add the `--fix` flag to fix any auto-fixable problems in your TypeScript files
+
 ```console
-% npm run lint -- --fix
+npm run lint -- --fix
 ```
 
 ## Local Testing
@@ -38,12 +40,13 @@ Test scripts are contained in the `src` folder, with a folder for each product t
 To run a TypeScript test locally, navigate to the `deploy/scripts` folder and run the following
 
 ```console
-% npm start
+npm start
 ```
+
 This command will generate the JavaScript files in the `dist` folder. These can then be run with k6 in the normal way using a command such as
 
 ```console
-% k6 run dist/common/test.js
+k6 run dist/common/test.js
 ```
 
 ## Unit Testing and Common Utilities
@@ -51,7 +54,7 @@ This command will generate the JavaScript files in the `dist` folder. These can 
 Unit tests to validate the TypeScript utility files are contained in the [`src/common/unit-tests.js`](src/common/unit-tests.ts) file. They can be run to validate the utilities are working as intended by running
 
 ```console
-% npm test
+npm test
 ```
 
 This unit test also runs when raising pull requests as a [github action](../../.github/workflows/pre-merge-checks.yml). If adding an additional utility in the `src/common/utils` folder, add another `group` to the test script with `checks` to validate the behaviour.
@@ -63,12 +66,15 @@ This unit test also runs when raising pull requests as a [github action](../../.
 When running locally you can pass secrets and environment configuration variables via local environment variables or by passing them into k6 explicity (see [k6 docs](https://k6.io/docs/using-k6/environment-variables/)).
 
 For example
+
 ```console
-% export VARIABLE=value
+export VARIABLE=value
 ```
+
 or
+
 ```console
-% k6 run dist/test.js -e VARIABLE=value
+k6 run dist/test.js -e VARIABLE=value
 ```
 
 ### Pipeline
@@ -96,16 +102,16 @@ Parameter store locations must start with the prefix `/perfTest/` in order for t
 
     !['Environment variables override' section](../../docs/environment-variables-override.png)
 
-    |Environment Variable|Example Values|Description|
-    |-|-|-|
-    |`TEST_SCRIPT`|`accounts/test.js`</br>`authentication/test.js`</br>`common/test.js`<sup>[_default_]</sup></br>`common/unit-tests.js`|Relative path of test script to use, including `.js` extension|
-    |`PROFILE`|`smoke`<sup>[_default_]</sup></br>`stress`</br>`load`|Used to select a named load profile described in the test script. Values should match the keys of a [`ProfileList`](src/common/utils/config/load-profiles.ts#L4) object|
-    |`SCENARIO`|`all`<sup>[_default_]</sup></br>`sign_in`</br>`create_account,sign_in`|Comma seperated list of scenarios to enable. Blank strings or `'all'` will default to enabling all scenarios in the selected load profile. Implementation in [`getScenarios`](src/common/utils/config/load-profiles.ts#L27-L36) function|
-    |`ENVIRONMENT`|`build`<sup>[_default_]</sup></br>`staging`|Name of the environment where the test is being conducted. Accepted Values are build/staging depending on the test scenario|
+    | Environment Variable | Example Values                                                                                                        | Description                                                                                                                                                                                                                              |
+    | -------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `TEST_SCRIPT`        | `accounts/test.js`</br>`authentication/test.js`</br>`common/test.js`<sup>[_default_]</sup></br>`common/unit-tests.js` | Relative path of test script to use, including `.js` extension                                                                                                                                                                           |
+    | `PROFILE`            | `smoke`<sup>[_default_]</sup></br>`stress`</br>`load`                                                                 | Used to select a named load profile described in the test script. Values should match the keys of a [`ProfileList`](src/common/utils/config/load-profiles.ts#L4) object                                                                  |
+    | `SCENARIO`           | `all`<sup>[_default_]</sup></br>`sign_in`</br>`create_account,sign_in`                                                | Comma seperated list of scenarios to enable. Blank strings or `'all'` will default to enabling all scenarios in the selected load profile. Implementation in [`getScenarios`](src/common/utils/config/load-profiles.ts#L27-L36) function |
+    | `ENVIRONMENT`        | `build`<sup>[_default_]</sup></br>`staging`                                                                           | Name of the environment where the test is being conducted. Accepted Values are build/staging depending on the test scenario                                                                                                              |
 
-5. Click 'Start Build'
+5.  Click 'Start Build'
 
-6. Build progress and the stdout results summary are printed in the 'Build logs'
+6.  Build progress and the stdout results summary are printed in the 'Build logs'
 
 ## Querying the Test Result File
 
@@ -127,12 +133,12 @@ After each pipeline run, the test results file is zipped and uploaded to S3.
     > **Note**
     > The [k6 documentation](https://k6.io/docs/results-output/real-time/json/) has further information on this file format and querying
 
-
 ### Useful `jq` queries
 
 **Error Count by Group Name and Status Code**
 
 The following command filters the results on errors and then totals the count by group and status
+
 ```console
 % cat path/to/results.json |
 jq 'select(
@@ -154,6 +160,7 @@ jq -s 'group_by(.group,.status)
 ```
 
 The output of the above command can be further pretty printed into a table using `jq` and `column`
+
 ```console
 % cat error-counts.json |
 jq -r '(

@@ -53,7 +53,7 @@ export function generatePayload(sub: string, issuer: Issuer): IdentityCheckCrede
 
   switch (issuer) {
     case Issuer.Fraud:
-      iss = 'https://fraudcri.dev.gov.uk'
+      iss = 'https://review-f.dev.account.gov.uk'
       evidence = [
         {
           identityFraudScore: 2,
@@ -68,7 +68,7 @@ export function generatePayload(sub: string, issuer: Issuer): IdentityCheckCrede
       }
       break
     case Issuer.Passport:
-      iss = 'https://passportcri.dev.gov.uk'
+      iss = 'https://review-p.dev.account.gov.uk'
       evidence = [
         {
           validityScore: 2,
@@ -90,7 +90,7 @@ export function generatePayload(sub: string, issuer: Issuer): IdentityCheckCrede
       }
       break
     case Issuer.KBV:
-      iss = 'https://verificationcri.dev.gov.uk'
+      iss = 'https://review-k.dev.account.gov.uk'
       evidence = [
         {
           verificationScore: 2,

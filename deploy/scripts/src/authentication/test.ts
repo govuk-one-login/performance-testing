@@ -49,14 +49,46 @@ const profiles: ProfileList = {
     uiSignIn: {
       executor: 'per-vu-iterations',
       exec: 'uiSignIn',
-      vus: 2,
-      iterations: 10,
+      vus: 1,
+      iterations: 1,
       options: {
         browser: {
           type: 'chromium'
         }
       }
     }
+  },
+  loadMar2025_L1: {
+    ...createScenario('signUp', LoadProfile.short, 45, 48),
+    ...createScenario('signIn', LoadProfile.short, 60, 24)
+  },
+  soakMar2025_L1: {
+    ...createScenario('signUp', LoadProfile.soak, 45, 48),
+    ...createScenario('signIn', LoadProfile.soak, 60, 24)
+  },
+  spikeNFR_L1: {
+    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 45, 48),
+    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 60, 24)
+  },
+  spikeSudden_L1: {
+    ...createScenario('signUp', LoadProfile.spikeSudden, 45, 48),
+    ...createScenario('signIn', LoadProfile.spikeSudden, 60, 24)
+  },
+  loadMar2025_L2: {
+    ...createScenario('signUp', LoadProfile.short, 90, 48),
+    ...createScenario('signIn', LoadProfile.short, 120, 24)
+  },
+  soakMar2025_L2: {
+    ...createScenario('signUp', LoadProfile.soak, 90, 48),
+    ...createScenario('signIn', LoadProfile.soak, 120, 24)
+  },
+  spikeNFR_L2: {
+    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 90, 48),
+    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 120, 24)
+  },
+  spikeSudden_L2: {
+    ...createScenario('signUp', LoadProfile.spikeSudden, 90, 48),
+    ...createScenario('signIn', LoadProfile.spikeSudden, 120, 24)
   }
 }
 const loadProfile = selectProfile(profiles)
@@ -65,6 +97,10 @@ const groupMap = {
     'B01_SignUp_01_OrchStubSubmit',
     'B01_SignUp_01_OrchStubSubmit::01_OrchStub',
     'B01_SignUp_01_OrchStubSubmit::02_AuthCall',
+    'B01_SignUp_01_RPStubSubmit',
+    'B01_SignUp_01_RPStubSubmit::01_RPStub',
+    'B01_SignUp_01_RPStubSubmit::02_OIDCCall',
+    'B01_SignUp_01_RPStubSubmit::03_AuthCall',
     'B01_SignUp_02_CreateOneLogin',
     'B01_SignUp_03_EnterEmailAddress',
     'B01_SignUp_04_EnterOTP',
@@ -76,12 +112,18 @@ const groupMap = {
     'B01_SignUp_10_MFA_EnterSMSOTP',
     'B01_SignUp_11_ContinueAccountCreated',
     'B01_SignUp_11_ContinueAccountCreated::01_AuthCall',
-    'B01_SignUp_11_ContinueAccountCreated::02_OrchStub'
+    'B01_SignUp_11_ContinueAccountCreated::02_OrchStubCall',
+    'B01_SignUp_11_ContinueAccountCreated::02_OIDCCall',
+    'B01_SignUp_11_ContinueAccountCreated::03_RPStubCall'
   ],
   signIn: [
     'B02_SignIn_01_OrchStubSubmit',
     'B02_SignIn_01_OrchStubSubmit::01_OrchStub',
     'B02_SignIn_01_OrchStubSubmit::02_AuthCall',
+    'B02_SignIn_01_RPStubSubmit',
+    'B02_SignIn_01_RPStubSubmit::01_RPStub',
+    'B02_SignIn_01_RPStubSubmit::02_OIDCCall',
+    'B02_SignIn_01_RPStubSubmit::03_AuthCall',
     'B02_SignIn_02_ClickSignIn',
     'B02_SignIn_03_EnterEmailAddress',
     'B02_SignIn_04_EnterPassword',
@@ -90,9 +132,13 @@ const groupMap = {
     'B02_SignIn_05_EnterOTP::02_AuthAcceptTerms',
     'B02_SignIn_05_EnterOTP::03_AuthCall',
     'B02_SignIn_05_EnterOTP::04_OrchStub',
+    'B02_SignIn_05_EnterOTP::04_OIDCCall',
+    'B02_SignIn_05_EnterOTP::05_RPStub',
     'B02_SignIn_06_AcceptTermsConditions',
     'B02_SignIn_06_AcceptTermsConditions::01_AuthCall',
-    'B02_SignIn_06_AcceptTermsConditions::02_OrchStub'
+    'B02_SignIn_06_AcceptTermsConditions::02_OrchStub',
+    'B02_SignIn_06_AcceptTermsConditions::02_OIDCCall',
+    'B02_SignIn_06_AcceptTermsConditions::03_RPStub'
   ],
   uiSignIn: []
 } as const
@@ -139,8 +185,12 @@ const credentials = {
   phoneOTP: getEnv('ACCOUNT_PHONE_OTP')
 }
 
+const route = getEnv('ROUTE').toLocaleUpperCase()
+const validRoute = ['RP', 'ORCH']
+if (!validRoute.includes(route)) throw new Error(`Route '${route}' not in [${validRoute.toString()}]`)
+
 const env = {
-  orchStub: getEnv('ACCOUNT_ORCH_STUB'),
+  stubEndpoint: getEnv(`ACCOUNT_${route}_STUB`),
   staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true',
   authStagingURL: getEnv('ACCOUNT_STAGING_URL')
 }
@@ -155,8 +205,15 @@ export async function uiSignIn() {
   const userData = dataSignIn[execution.vu.idInTest - 1]
 
   const page: Page = await browser.newPage()
+
+  let targetUrl = env.stubEndpoint
+  if (route === 'RP') {
+    targetUrl += '/prod/start'
+  } else if (route === 'ORCH') {
+    targetUrl += '?reauthenticate=&level=Cl.Cm&authenticated=no&authenticatedLevel=Cl.Cm&channel=none'
+  }
   try {
-    await page.goto(env.orchStub + '/start')
+    await page.goto(targetUrl)
     await ClickButton(page, 'button#sign-in-button')
 
     page.locator('input[name="email"]').type(userData.email)
@@ -203,14 +260,18 @@ export function signUp(): void {
   const mfaOption: mfaType = Math.random() <= 0.5 ? 'SMS' : 'AUTH_APP'
   iterationsStarted.add(1)
 
-  // B01_SignUp_01_OrchStubSubmit
-  res = orchStubSubmit(groups)
+  // B01_SignUp_01_StubSubmit
+  if (route === 'RP') {
+    res = rpStubSubmit(groups)
+  } else if (route === 'ORCH') {
+    res = orchStubSubmit(groups)
+  }
 
   sleep(1)
 
   // B01_SignUp_02_CreateOneLogin
   res = timeGroup(
-    groups[3],
+    groups[7],
     () =>
       res.submitForm({
         fields: {
@@ -224,7 +285,7 @@ export function signUp(): void {
   sleep(1)
 
   // B01_SignUp_03_EnterEmailAddress
-  res = timeGroup(groups[4], () => res.submitForm({ fields: { email: testEmail } }), {
+  res = timeGroup(groups[8], () => res.submitForm({ fields: { email: testEmail } }), {
     isStatusCode200,
     ...pageContentCheck('Check your email')
   })
@@ -233,7 +294,7 @@ export function signUp(): void {
 
   // B01_SignUp_04_EnterOTP
   res = timeGroup(
-    groups[5],
+    groups[9],
     () =>
       res.submitForm({
         fields: {
@@ -248,7 +309,7 @@ export function signUp(): void {
 
   // B01_SignUp_05_CreatePassword
   res = timeGroup(
-    groups[6],
+    groups[10],
     () =>
       res.submitForm({
         fields: {
@@ -270,7 +331,7 @@ export function signUp(): void {
     case 'AUTH_APP': {
       // B01_SignUp_06_MFA_AuthApp
       res = timeGroup(
-        groups[7],
+        groups[11],
         () =>
           res.submitForm({
             fields: { mfaOptions: mfaOption }
@@ -287,7 +348,7 @@ export function signUp(): void {
 
       // B01_SignUp_07_MFA_EnterTOTP
       res = timeGroup(
-        groups[8],
+        groups[12],
         () =>
           res.submitForm({
             fields: { code: totp.generateTOTP() }
@@ -302,7 +363,7 @@ export function signUp(): void {
     case 'SMS': {
       // B01_SignUp_08_MFA_SMS
       res = timeGroup(
-        groups[9],
+        groups[13],
         () =>
           res.submitForm({
             fields: { mfaOptions: mfaOption }
@@ -317,7 +378,7 @@ export function signUp(): void {
 
       // B01_SignUp_09_MFA_EnterPhoneNum
       res = timeGroup(
-        groups[10],
+        groups[14],
         () =>
           res.submitForm({
             fields: { phoneNumber }
@@ -329,7 +390,7 @@ export function signUp(): void {
 
       // B01_SignUp_10_MFA_EnterSMSOTP
       res = timeGroup(
-        groups[11],
+        groups[15],
         () =>
           res.submitForm({
             fields: { code: credentials.phoneOTP }
@@ -346,18 +407,29 @@ export function signUp(): void {
   sleep(1)
 
   // B01_SignUp_11_ContinueAccountCreated
-  timeGroup(groups[12], () => {
-    // 01_AuthCall
-    res = timeGroup(groups[13].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
+  timeGroup(groups[16], () => {
+    // 01_AuthCall (common for ORCH and RP route)
+    res = timeGroup(groups[17].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
       isStatusCode302
     })
-    // 02_OrchStub
-    res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck(testEmail.toLowerCase())
-    })
+    if (route === 'ORCH') {
+      // 02_OrchStub
+      res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck(testEmail.toLowerCase())
+      })
+    } else if (route === 'RP') {
+      // 02_OIDCCall
+      res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+        isStatusCode302
+      })
+      //03_RPStub
+      res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location), {
+        isStatusCode200,
+        ...pageContentCheck(testEmail.toLowerCase())
+      })
+    }
   })
-
   iterationsCompleted.add(1)
 }
 
@@ -371,7 +443,7 @@ export function orchStubSubmit(groups: readonly string[]): Response {
       groups[1].split('::')[1],
       () =>
         http.post(
-          env.orchStub,
+          env.stubEndpoint,
           {
             reauthenticate: '',
             level: 'Cl.Cm',
@@ -412,19 +484,49 @@ export function orchStubSubmit(groups: readonly string[]): Response {
   })
 }
 
+export function rpStubSubmit(groups: readonly string[]): Response {
+  let res: Response
+
+  return timeGroup(groups[3], () => {
+    // 01_RPStubCall (Initial Request)
+    res = timeGroup(groups[4].split('::')[1], () => http.get(env.stubEndpoint + '/prod/start', { redirects: 0 }), {
+      //changed orchStub to stubEndPoint
+      isStatusCode302
+    })
+
+    // 02_OIDCStubCall (Redirect Handling)
+    res = timeGroup(
+      groups[5].split('::')[1],
+      () => http.get(res.headers.Location, { redirects: 0 }), // Follow the redirect
+      {
+        isStatusCode302
+      }
+    )
+    // 03_AuthCall
+    return timeGroup(groups[6].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Create your GOV.UK One Login or sign in')
+    })
+  })
+}
+
 export function signIn(): void {
   let res: Response
   const groups = groupMap.signIn
   const userData = dataSignIn[execution.vu.idInTest - 1]
   iterationsStarted.add(1)
 
-  // B02_SignIn_01_OrchStubSubmit
-  res = orchStubSubmit(groups)
+  // B02_SignIn_01_StubSubmit
+  if (route === 'RP') {
+    res = rpStubSubmit(groups)
+  } else if (route === 'ORCH') {
+    res = orchStubSubmit(groups)
+  }
 
   sleep(1)
 
   // B02_SignIn_02_ClickSignIn
-  res = timeGroup(groups[3], () => res.submitForm(), {
+  res = timeGroup(groups[7], () => res.submitForm(), {
     isStatusCode200,
     ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
   })
@@ -433,7 +535,7 @@ export function signIn(): void {
 
   // B02_SignIn_03_EnterEmailAddress
   res = timeGroup(
-    groups[4],
+    groups[8],
     () =>
       res.submitForm({
         fields: { email: userData.email }
@@ -463,7 +565,7 @@ export function signIn(): void {
 
   // B02_SignIn_04_EnterPassword
   res = timeGroup(
-    groups[5],
+    groups[9],
     () =>
       res.submitForm({
         fields: { password: credentials.password }
@@ -476,10 +578,10 @@ export function signIn(): void {
   sleep(1)
 
   // B02_SignIn_05_EnterOTP
-  timeGroup(groups[6], () => {
+  timeGroup(groups[10], () => {
     //01_AuthCall
     res = timeGroup(
-      groups[7].split('::')[1],
+      groups[11].split('::')[1],
       () =>
         res.submitForm({
           fields: { code: getOTP() },
@@ -491,48 +593,73 @@ export function signIn(): void {
     acceptNewTerms = res.headers.Location.endsWith('updated-terms-and-conditions')
     if (acceptNewTerms) {
       // 02_AuthAcceptTerms
-      res = timeGroup(groups[8].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
+      res = timeGroup(groups[12].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
         isStatusCode200,
         ...pageContentCheck('terms of use update')
       })
     } else {
       // 03_AuthCall
       res = timeGroup(
-        groups[9].split('::')[1],
+        groups[13].split('::')[1],
         () => http.get(env.authStagingURL + res.headers.Location, { redirects: 0 }),
         {
           isStatusCode302
         }
       )
-      // 04_OrchStub
-      res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck(userData.email.toLowerCase())
+
+      if (route === 'ORCH') {
+        // 04_OrchStub
+        res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
+          isStatusCode200,
+          ...pageContentCheck(userData.email.toLowerCase())
+        })
+      } else if (route === 'RP') {
+        // 04_OIDCCall
+        res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+          isStatusCode302
+        })
+        //05_RPStub
+        res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location), {
+          isStatusCode200,
+          ...pageContentCheck(userData.email.toLowerCase())
+        })
+      }
+    }
+    iterationsCompleted.add(1)
+
+    if (acceptNewTerms) {
+      // B02_SignIn_06_AcceptTermsConditions
+      timeGroup(groups[17], () => {
+        // 01_AuthCall
+        res = timeGroup(
+          groups[18].split('::')[1],
+          () =>
+            res.submitForm({
+              fields: { termsAndConditionsResult: 'accept' },
+              params: { redirects: 1 }
+            }),
+          { isStatusCode302 }
+        )
+
+        if (route === 'ORCH') {
+          // 02_OrchStub
+          res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location), {
+            isStatusCode200,
+            ...pageContentCheck(userData.email.toLowerCase())
+          })
+        } else if (route === 'RP') {
+          // 02_OIDCCall
+          res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+            isStatusCode302
+          })
+          //03_RPStub
+          res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location), {
+            isStatusCode200,
+            ...pageContentCheck(userData.email.toLowerCase())
+          })
+        }
       })
+      iterationsCompleted.add(1)
     }
   })
-
-  if (acceptNewTerms) {
-    // B02_SignIn_06_AcceptTermsConditions
-    timeGroup(groups[11], () => {
-      // 01_AuthCall
-      res = timeGroup(
-        groups[12].split('::')[1],
-        () =>
-          res.submitForm({
-            fields: { termsAndConditionsResult: 'accept' },
-            params: { redirects: 1 }
-          }),
-        { isStatusCode302 }
-      )
-
-      // 02_OrchStub
-      res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck(userData.email.toLowerCase())
-      })
-    })
-  }
-
-  iterationsCompleted.add(1)
 }

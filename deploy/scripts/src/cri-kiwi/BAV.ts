@@ -23,7 +23,7 @@ const profiles: ProfileList = {
     ...createScenario('BAV', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('BAV', LoadProfile.full, 10)
+    ...createScenario('BAV', LoadProfile.full, 5)
   }
 }
 
@@ -75,7 +75,7 @@ export function BAV(): void {
   // B01_BAV_02_Authorize
   res = timeGroup(groups[1], () => http.get(authorizeLocation), {
     isStatusCode200,
-    ...pageContentCheck('Continue to your bank or building society account details')
+    ...pageContentCheck('Continue to enter your bank or building society account details')
   })
 
   // B01_BAV_03_Continue

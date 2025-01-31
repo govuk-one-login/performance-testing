@@ -27,9 +27,11 @@ const profiles: ProfileList = {
   },
   lowVolume: {
     ...createScenario('sendSingleEvent', LoadProfile.short, 30, 2),
+    ...createScenario('sendRegularEvent', LoadProfile.short, 30, 2),
     ...createScenario('pairwiseMappingClientEnrichment', LoadProfile.short, 30, 4)
   },
   load: {
+    ...createScenario('sendRegularEvent', LoadProfile.full, 2000, 2),
     ...createScenario('sendSingleEvent', LoadProfile.full, 750, 2),
     ...createScenario('pairwiseMappingClientEnrichment', LoadProfile.full, 100, 4)
   },
@@ -63,27 +65,27 @@ const awsConfig = new AWSConfig({
 
 const sqs = new SQSClient(awsConfig)
 
-const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
-const testData = {
-  testID: `perfTestID${timestamp}`,
-  userID: `perfUserID${uuidv4()}`,
-  emailID: `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-}
-
-export function setup(): void {
+export function setup(): string {
   describeProfile(loadProfile)
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
+  const testID = `perfTestID${timestamp}`
+  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
+  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID))
   console.log('Sending primer event')
-  const authCreateAccPayload = JSON.stringify(
-    generateAuthCreateAccount(testData.testID, testData.userID, testData.emailID)
-  )
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
   console.log('Primer event sent')
+  return authCreateAccPayload
 }
 
-export function sendRegularEvent(): void {
+export function sendRegularEvent(authCreateAccPayload: string): void {
   iterationsStarted.add(1)
+  const authCreatePayload = JSON.parse(authCreateAccPayload)
+  const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
+  const eventID = `${testID}_${uuidv4()}`
   const authLogInSuccessPayload = JSON.stringify(
-    generateAuthLogInSuccess(testData.testID, testData.userID, testData.emailID)
+    generateAuthLogInSuccess(eventID, `${authCreatePayload.user.user_id}`, `${authCreatePayload.user.email}`)
   )
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   iterationsCompleted.add(1)
@@ -98,12 +100,16 @@ export function sendSingleEvent(): void {
 }
 
 export function pairwiseMappingClientEnrichment(): void {
-  const userID = `perfUser${uuidv4()}`
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
+  const testID = `perfTestID${timestamp}`
+  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
+  const eventID = `${testID}_${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
   iterationsStarted.add(1)
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(userID, emailID, journeyID))
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID, journeyID))
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID))
+  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID))
   const authInitiatedPayload = JSON.stringify(generateAuthReqParsed(journeyID))
   const dcmawAbortPayload = JSON.stringify(generateDcmawAbortWeb(userID, journeyID, emailID))
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)

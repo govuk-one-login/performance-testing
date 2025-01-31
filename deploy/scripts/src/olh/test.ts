@@ -28,12 +28,12 @@ const profiles: ProfileList = {
     ...createScenario('contactsPage', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('changeEmail', LoadProfile.full, 30),
-    ...createScenario('changePassword', LoadProfile.full, 15),
-    ...createScenario('changePhone', LoadProfile.full, 15),
-    ...createScenario('deleteAccount', LoadProfile.full, 15),
-    ...createScenario('validateUser', LoadProfile.full, 10),
-    ...createScenario('contactsPage', LoadProfile.full, 10)
+    ...createScenario('changeEmail', LoadProfile.full, 30, 32),
+    ...createScenario('changePassword', LoadProfile.full, 30, 28),
+    ...createScenario('changePhone', LoadProfile.full, 30, 32),
+    ...createScenario('deleteAccount', LoadProfile.full, 30, 24),
+    ...createScenario('validateUser', LoadProfile.full, 10, 40),
+    ...createScenario('contactsPage', LoadProfile.full, 10, 4)
   }
 }
 

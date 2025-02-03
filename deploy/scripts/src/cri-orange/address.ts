@@ -65,16 +65,16 @@ const profiles: ProfileList = {
       exec: 'addressAdhocScenario'
     }
   },
-  addressUpdatedConfig: {
+  lowVolumePERF007Test: {
     address: {
       executor: 'ramping-arrival-rate',
-      startRate: 6,
-      timeUnit: '1m',
+      startRate: 1,
+      timeUnit: '10s',
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 120, duration: '200s' },
-        { target: 120, duration: '180s' }
+        { target: 20, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 20, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
       ],
       exec: 'address'
     }

@@ -22,6 +22,20 @@ const profiles: ProfileList = {
   },
   lowVolume: {
     ...createScenario('ninoCheck', LoadProfile.short, 5)
+  },
+  lowVolumePERF007Test: {
+    ninoCheck: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 20, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 20, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+      ],
+      exec: 'ninoCheck'
+    }
   }
 }
 

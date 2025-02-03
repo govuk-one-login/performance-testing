@@ -94,6 +94,32 @@ const profiles: ProfileList = {
       ],
       exec: 'passport'
     }
+  },
+  lowVolPerf007Test: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 20, duration: '200s' },
+        { target: 20, duration: '180s' }
+      ],
+      exec: 'identity'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 10, duration: '200s' },
+        { target: 10, duration: '180s' }
+      ],
+      exec: 'idReuse'
+    }
   }
 }
 

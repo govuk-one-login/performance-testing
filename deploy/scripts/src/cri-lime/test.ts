@@ -99,6 +99,44 @@ const profiles: ProfileList = {
   spikeSudden_L2: {
     ...createScenario('fraud', LoadProfile.spikeSudden, 27, 8),
     ...createScenario('passport', LoadProfile.spikeSudden, 22, 8)
+  },
+  lowVolPerf007Test: {
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 20, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 20, duration: '180s' } // // Target to be updated based on the percentage split confirmed by the app team
+      ],
+      exec: 'fraud'
+    },
+    drivingLicence: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 20, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 20, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+      ],
+      exec: 'drivingLicence'
+    },
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 20, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 20, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+      ],
+      exec: 'passport'
+    }
   }
 }
 

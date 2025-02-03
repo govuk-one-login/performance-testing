@@ -130,38 +130,37 @@ const groupMap = {
     'B01_Identity_02_GoToFullJourneyRoute',
     'B01_Identity_02_GoToFullJourneyRoute::01_OrchStubCall',
     'B01_Identity_02_GoToFullJourneyRoute::02_CoreCall',
-    'B01_Identity_03_LiveInTheUK',
-    'B01_Identity_04_ClickContinueStartPage',
-    'B01_Identity_04_ClickContinueStartPage::01_CoreCall',
-    'B01_Identity_04_ClickContinueStartPage::02_DCMAWStub',
-    'B01_Identity_05_DCMAWContinue',
-    'B01_Identity_05_DCMAWContinue::01_DCMAWStub',
-    'B01_Identity_05_DCMAWContinue::02_CoreCall',
-    'B01_Identity_06_ContinueOnPYIStartPage',
-    'B01_Identity_06_ContinueOnPYIStartPage::01_CoreCall',
-    'B01_Identity_06_ContinueOnPYIStartPage::02_PassStub',
-    'B01_Identity_06_ContinueOnPYIStartPage::02_DLStub',
-    'B01_Identity_07_DocumentDataContinue',
-    'B01_Identity_07_DocumentDataContinue::01_PassStub',
-    'B01_Identity_07_DocumentDataContinue::01_DLStub',
-    'B01_Identity_07_DocumentDataContinue::02_CoreCall',
-    'B01_Identity_07_DocumentDataContinue::03_AddStub',
-    'B01_Identity_08_AddrDataContinue',
-    'B01_Identity_08_AddrDataContinue::01_AddStub',
-    'B01_Identity_08_AddrDataContinue::02_CoreCall',
-    'B01_Identity_08_AddrDataContinue::03_FraudStub',
-    'B01_Identity_09_FraudDataContinue',
-    'B01_Identity_09_FraudDataContinue::01_FraudStub',
-    'B01_Identity_09_FraudDataContinue::02_CoreCall',
-    'B01_Identity_10_PreKBVTransition',
-    'B01_Identity_10_PreKBVTransition::01_CoreCall',
-    'B01_Identity_10_PreKBVTransition::02_KBVStub',
-    'B01_Identity_11_KBVDataContinue',
-    'B01_Identity_11_KBVDataContinue::01_KBVStub',
-    'B01_Identity_11_KBVDataContinue::02_CoreCall',
-    'B01_Identity_12_ContinueSuccessPage',
-    'B01_Identity_12_ContinueSuccessPage::01_CoreCall',
-    'B01_Identity_12_ContinueSuccessPage::02_OrchStub'
+    'B01_Identity_03_ClickContinueStartPage',
+    'B01_Identity_03_ClickContinueStartPage::01_CoreCall',
+    'B01_Identity_03_ClickContinueStartPage::02_DCMAWStub',
+    'B01_Identity_04_DCMAWContinue',
+    'B01_Identity_04_DCMAWContinue::01_DCMAWStub',
+    'B01_Identity_04_DCMAWContinue::02_CoreCall',
+    'B01_Identity_05_ContinueOnPYIStartPage',
+    'B01_Identity_05_ContinueOnPYIStartPage::01_CoreCall',
+    'B01_Identity_05_ContinueOnPYIStartPage::02_PassStub',
+    'B01_Identity_05_ContinueOnPYIStartPage::02_DLStub',
+    'B01_Identity_06_DocumentDataContinue',
+    'B01_Identity_06_DocumentDataContinue::01_PassStub',
+    'B01_Identity_06_DocumentDataContinue::01_DLStub',
+    'B01_Identity_06_DocumentDataContinue::02_CoreCall',
+    'B01_Identity_06_DocumentDataContinue::03_AddStub',
+    'B01_Identity_07_AddrDataContinue',
+    'B01_Identity_07_AddrDataContinue::01_AddStub',
+    'B01_Identity_07_AddrDataContinue::02_CoreCall',
+    'B01_Identity_07_AddrDataContinue::03_FraudStub',
+    'B01_Identity_08_FraudDataContinue',
+    'B01_Identity_08_FraudDataContinue::01_FraudStub',
+    'B01_Identity_08_FraudDataContinue::02_CoreCall',
+    'B01_Identity_09_PreKBVTransition',
+    'B01_Identity_09_PreKBVTransition::01_CoreCall',
+    'B01_Identity_09_PreKBVTransition::02_KBVStub',
+    'B01_Identity_10_KBVDataContinue',
+    'B01_Identity_10_KBVDataContinue::01_KBVStub',
+    'B01_Identity_10_KBVDataContinue::02_CoreCall',
+    'B01_Identity_11_ContinueSuccessPage',
+    'B01_Identity_11_ContinueSuccessPage::01_CoreCall',
+    'B01_Identity_11_ContinueSuccessPage::02_OrchStub'
   ],
   idReuse: [
     'B02_IDReuse_01_LoginToCore',
@@ -266,7 +265,7 @@ export function identity(stubOnly: boolean = false): void {
     // 02_CoreCall
     res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Do you live in the UK, the Channel Islands or the Isle of Man')
+      ...pageContentCheck('Tell us if you have one of the following types of photo ID') // Do you live in the UK, the Channel Islands or the Isle of Man
     })
   })
   if (stubOnly) {
@@ -276,6 +275,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
+  /*
   // B01_Identity_03_LiveInTheUK
   res = timeGroup(
     groups[4],
@@ -285,12 +285,13 @@ export function identity(stubOnly: boolean = false): void {
       }),
     { isStatusCode200, ...pageContentCheck('Tell us if you have one of the following types of photo ID') }
   )
+    */
 
   // B01_Identity_03_ClickContinueStartPage
-  timeGroup(groups[5], () => {
+  timeGroup(groups[4], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[6].split('::')[1],
+      groups[5].split('::')[1],
       () =>
         res.submitForm({
           fields: { journey: 'appTriage' },
@@ -299,7 +300,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_DCMAWStub
-    res = timeGroup(groups[7].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[6].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('DOC Checking App (Stub)')
     })
@@ -308,10 +309,10 @@ export function identity(stubOnly: boolean = false): void {
   sleepBetween(0.5, 1)
 
   // B01_Identity_04_DCMAWContinue
-  timeGroup(groups[8], () => {
+  timeGroup(groups[7], () => {
     // 01_DCMAWStub
     res = timeGroup(
-      groups[9].split('::')[1],
+      groups[8].split('::')[1],
       () =>
         res.submitForm({
           fields: {
@@ -323,7 +324,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[10].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
+    res = timeGroup(groups[9].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Enter your UK passport details')
     })
@@ -332,10 +333,10 @@ export function identity(stubOnly: boolean = false): void {
   sleepBetween(0.5, 1)
 
   // B01_Identity_05_ContinueOnPYIStartPage
-  timeGroup(groups[11], () => {
+  timeGroup(groups[10], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[12].split('::')[1],
+      groups[11].split('::')[1],
       () =>
         res.submitForm({
           fields: { journey: passport ? 'ukPassport' : 'drivingLicence' },
@@ -344,7 +345,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_XXXStub
-    const name = (passport ? groups[13] : groups[14]).split('::')[1]
+    const name = (passport ? groups[12] : groups[13]).split('::')[1]
     const content = passport ? 'UK Passport (Stub)' : 'Driving Licence (Stub)'
     res = timeGroup(name, () => http.get(res.headers.Location), {
       isStatusCode200,
@@ -355,9 +356,9 @@ export function identity(stubOnly: boolean = false): void {
   sleepBetween(0.5, 1)
 
   // B01_Identity_06_DocumentDataContinue
-  timeGroup(groups[15], () => {
+  timeGroup(groups[14], () => {
     // 01_XXXStub
-    const name = (passport ? groups[16] : groups[17]).split('::')[1]
+    const name = (passport ? groups[15] : groups[16]).split('::')[1]
     res = timeGroup(
       name,
       () =>
@@ -380,11 +381,11 @@ export function identity(stubOnly: boolean = false): void {
     )
 
     // 02_CoreCall
-    res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
       isStatusCode302
     })
     // 03_AddStub
-    res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Address (Stub)')
     })
@@ -393,10 +394,10 @@ export function identity(stubOnly: boolean = false): void {
   sleepBetween(0.5, 1)
 
   // B01_Identity_07_AddrDataContinue
-  timeGroup(groups[20], () => {
+  timeGroup(groups[19], () => {
     // 01_AddStub
     res = timeGroup(
-      groups[21].split('::')[1],
+      groups[20].split('::')[1],
       () =>
         res.submitForm({
           fields: { jsonPayload: passport ? addressPayloadP : addressPayloadDL },
@@ -405,11 +406,11 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[22].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
       isStatusCode302
     })
     // 03_FraudStub
-    res = timeGroup(groups[23].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[22].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Fraud Check (Stub)')
     })
@@ -418,10 +419,10 @@ export function identity(stubOnly: boolean = false): void {
   sleepBetween(0.5, 1)
 
   // B01_Identity_08_FraudDataContinue
-  timeGroup(groups[24], () => {
+  timeGroup(groups[23], () => {
     // 01_FraudStub
     res = timeGroup(
-      groups[25].split('::')[1],
+      groups[24].split('::')[1],
       () =>
         res.submitForm({
           fields: passport
@@ -439,7 +440,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[26].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[25].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Answer security questions')
     })
@@ -448,10 +449,10 @@ export function identity(stubOnly: boolean = false): void {
   sleepBetween(0.5, 1)
 
   // B01_Identity_09_PreKBVTransition
-  timeGroup(groups[27], () => {
+  timeGroup(groups[26], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[28].split('::')[1],
+      groups[27].split('::')[1],
       () =>
         res.submitForm({
           params: { redirects: 0 }
@@ -459,7 +460,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_KBVStub
-    res = timeGroup(groups[29].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[28].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Knowledge Based Verification (Stub)')
     })
@@ -468,10 +469,10 @@ export function identity(stubOnly: boolean = false): void {
   sleepBetween(0.5, 1)
 
   // B01_Identity_10_KBVDataContinue
-  timeGroup(groups[30], () => {
+  timeGroup(groups[29], () => {
     // 01_KBVStub
     res = timeGroup(
-      groups[31].split('::')[1],
+      groups[30].split('::')[1],
       () =>
         res.submitForm({
           fields: {
@@ -483,7 +484,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[32].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[31].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Continue to the service you need to use')
     })
@@ -492,10 +493,10 @@ export function identity(stubOnly: boolean = false): void {
   sleepBetween(0.5, 1)
 
   // B01_Identity_11_ContinueSuccessPage
-  timeGroup(groups[33], () => {
+  timeGroup(groups[32], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[34].split('::')[1],
+      groups[33].split('::')[1],
       () =>
         res.submitForm({
           params: { redirects: 0 }
@@ -504,7 +505,7 @@ export function identity(stubOnly: boolean = false): void {
     )
     // 02_OrchStub
     res = timeGroup(
-      groups[35].split('::')[1],
+      groups[34].split('::')[1],
       () =>
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }

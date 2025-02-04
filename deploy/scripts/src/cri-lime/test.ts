@@ -108,32 +108,32 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 20, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 20, duration: '180s' } // // Target to be updated based on the percentage split confirmed by the app team
+        { target: 20, duration: '200s' },
+        { target: 20, duration: '180s' }
       ],
       exec: 'fraud'
     },
     drivingLicence: {
       executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '10s',
+      startRate: 2,
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 20, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 20, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 40, duration: '400s' },
+        { target: 40, duration: '180s' }
       ],
       exec: 'drivingLicence'
     },
     passport: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '10s',
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 20, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 20, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 12, duration: '120s' },
+        { target: 12, duration: '180s' }
       ],
       exec: 'passport'
     }

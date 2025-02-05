@@ -413,7 +413,7 @@ export function drivingLicence(): void {
       }),
     {
       isStatusCode200,
-      ...pageContentCheck('Who was your UK driving licence issued by?')
+      ...pageContentCheck('Was your UK photocard driving licence issued by DVLA or DVA?')
     }
   )
 

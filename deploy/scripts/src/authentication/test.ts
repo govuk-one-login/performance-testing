@@ -89,6 +89,32 @@ const profiles: ProfileList = {
   spikeSudden_L2: {
     ...createScenario('signUp', LoadProfile.spikeSudden, 90, 48),
     ...createScenario('signIn', LoadProfile.spikeSudden, 120, 24)
+  },
+  lowVolPerf007Test: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 20, duration: '200s' },
+        { target: 20, duration: '180s' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 10, duration: '200s' },
+        { target: 10, duration: '180s' }
+      ],
+      exec: 'signIn'
+    }
   }
 }
 const loadProfile = selectProfile(profiles)

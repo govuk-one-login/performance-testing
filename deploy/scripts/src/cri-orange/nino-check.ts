@@ -27,12 +27,12 @@ const profiles: ProfileList = {
     ninoCheck: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '10s',
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 20, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 20, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '60s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
       ],
       exec: 'ninoCheck'
     }

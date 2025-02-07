@@ -31,8 +31,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 1, duration: '60s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 1, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '60s' },
+        { target: 1, duration: '180s' }
       ],
       exec: 'ninoCheck'
     }

@@ -34,6 +34,56 @@ const profiles: ProfileList = {
     ...createScenario('deleteAccount', LoadProfile.full, 30, 24),
     ...createScenario('validateUser', LoadProfile.full, 10, 40),
     ...createScenario('contactsPage', LoadProfile.full, 10, 4)
+  },
+  lowVolumePERF007Test: {
+    changeEmail: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+      ],
+      exec: 'changeEmail'
+    },
+    changePassword: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+      ],
+      exec: 'changePassword'
+    },
+    changePhone: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+      ],
+      exec: 'changePhone'
+    },
+    deleteAccount: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+      ],
+      exec: 'deleteAccount'
+    }
   }
 }
 

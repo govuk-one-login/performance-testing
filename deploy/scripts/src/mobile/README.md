@@ -1,6 +1,6 @@
 # Mobile Performance Testing
 
-This repository contains the performance test framework for testing DCMAW journeys.
+This repository contains the performance test framework for testing DCMAW mobile journeys.
 
 
 ## Required Installations

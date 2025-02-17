@@ -104,7 +104,7 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: dprofile.startRate,
       timeUnit: dprofile.timeUnit,
-      preAllocatedVUs: dprofile.preAllocatedVUs,
+      preAllocatedVUs: 100,
       maxVUs: dprofile.maxVUs,
       stages: [
         { target: dprofile.rutarget, duration: dprofile.ruduration },

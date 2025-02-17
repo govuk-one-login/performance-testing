@@ -18,6 +18,19 @@ import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
 
+const dprofile = {
+  // scenarioName: getEnv('K6_SCENARIO_NAME'),
+  // executor: getEnv('K6_EXECUTOR'),
+  startRate: parseInt(getEnv('K6_START_RATE') || '1', 10),
+  timeUnit: getEnv('K6_TIME_UNIT'),
+  preAllocatedVUs: parseInt(getEnv('K6_PRE_ALLOCATED_VUS') || '100', 10),
+  maxVUs: parseInt(getEnv('K6_MAXVUS') || '400', 10),
+  rutarget: parseInt(getEnv('K6_RU_TARGET') || '20', 10),
+  ruduration: getEnv('K6_RU_DURATION'),
+  sstarget: parseInt(getEnv('K6_SS_TARGET') || '20', 10),
+  ssduration: getEnv('K6_SS_DURATION')
+}
+
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('changeEmail', LoadProfile.smoke),
@@ -83,6 +96,22 @@ const profiles: ProfileList = {
         { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
       ],
       exec: 'deleteAccount'
+    }
+  },
+  dynamicProfile: {
+    changeEmail: {
+      //executor: dprofile.executor,
+      executor: 'ramping-arrival-rate',
+      startRate: dprofile.startRate,
+      timeUnit: dprofile.timeUnit,
+      preAllocatedVUs: dprofile.preAllocatedVUs,
+      maxVUs: dprofile.maxVUs,
+      stages: [
+        { target: dprofile.rutarget, duration: dprofile.ruduration },
+        { target: dprofile.sstarget, duration: dprofile.ssduration }
+      ],
+      //exec: dprofile.scenarioName
+      exec: 'changeEmail'
     }
   }
 }

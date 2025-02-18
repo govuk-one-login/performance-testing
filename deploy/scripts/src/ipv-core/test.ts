@@ -129,8 +129,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 1476,
       stages: [
-        { target: 410, duration: '410s' }, // Target to be updated based on the historical peak calculation.
-        { target: 410, duration: '15m' } // Target to be updated based on the historical peak calculation.
+        { target: 410, duration: '410s' },
+        { target: 410, duration: '15m' }
       ],
       exec: 'identity'
     },
@@ -141,8 +141,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 54,
       stages: [
-        { target: 9, duration: '5s' }, // Target to be updated based on the historical peak calculation.
-        { target: 9, duration: '15m' } // Target to be updated based on the historical peak calculation.
+        { target: 9, duration: '5s' },
+        { target: 9, duration: '15m' }
       ],
       exec: 'idReuse'
     }

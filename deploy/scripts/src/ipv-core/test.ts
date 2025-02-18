@@ -127,22 +127,22 @@ const profiles: ProfileList = {
       startRate: 1,
       timeUnit: '10s',
       preAllocatedVUs: 100,
-      maxVUs: 400,
+      maxVUs: 1476,
       stages: [
-        { target: 20, duration: '200s' }, // Target to be updated based on the historical peak calculation.
-        { target: 20, duration: '15m' } // Target to be updated based on the historical peak calculation.
+        { target: 410, duration: '410s' }, // Target to be updated based on the historical peak calculation.
+        { target: 410, duration: '15m' } // Target to be updated based on the historical peak calculation.
       ],
       exec: 'identity'
     },
     idReuse: {
       executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '10s',
+      startRate: 2,
+      timeUnit: '1s',
       preAllocatedVUs: 100,
-      maxVUs: 400,
+      maxVUs: 54,
       stages: [
-        { target: 20, duration: '200s' }, // Target to be updated based on the historical peak calculation.
-        { target: 20, duration: '15m' } // Target to be updated based on the historical peak calculation.
+        { target: 9, duration: '5s' }, // Target to be updated based on the historical peak calculation.
+        { target: 9, duration: '15m' } // Target to be updated based on the historical peak calculation.
       ],
       exec: 'idReuse'
     }

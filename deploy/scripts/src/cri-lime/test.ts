@@ -147,7 +147,7 @@ const profiles: ProfileList = {
       maxVUs: 400,
       stages: [
         { target: 150, duration: '151s' },
-        { target: 150, duration: '120s' }
+        { target: 150, duration: '15m' }
       ],
       exec: 'fraud'
     },
@@ -159,7 +159,7 @@ const profiles: ProfileList = {
       maxVUs: 400,
       stages: [
         { target: 25, duration: '26s' },
-        { target: 25, duration: '120s' }
+        { target: 25, duration: '15m' }
       ],
       exec: 'drivingLicence'
     },
@@ -171,7 +171,7 @@ const profiles: ProfileList = {
       maxVUs: 400,
       stages: [
         { target: 20, duration: '21s' },
-        { target: 20, duration: '120s' }
+        { target: 20, duration: '15m' }
       ],
       exec: 'passport'
     }

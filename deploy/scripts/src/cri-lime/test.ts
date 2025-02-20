@@ -146,7 +146,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 150, duration: '150s' },
+        { target: 150, duration: '151s' },
         { target: 150, duration: '120s' }
       ],
       exec: 'fraud'
@@ -170,7 +170,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 20, duration: '20s' },
+        { target: 20, duration: '21s' },
         { target: 20, duration: '120s' }
       ],
       exec: 'passport'

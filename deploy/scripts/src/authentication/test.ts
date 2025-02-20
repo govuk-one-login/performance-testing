@@ -115,6 +115,32 @@ const profiles: ProfileList = {
       ],
       exec: 'signIn'
     }
+  },
+  perf006Iteration1: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 297,
+      stages: [
+        { target: 90, duration: '90s' },
+        { target: 90, duration: '15m' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 306,
+      stages: [
+        { target: 17, duration: '9s' },
+        { target: 17, duration: '15m' }
+      ],
+      exec: 'signIn'
+    }
   }
 }
 const loadProfile = selectProfile(profiles)

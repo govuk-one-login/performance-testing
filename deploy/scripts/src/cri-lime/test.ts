@@ -125,6 +125,18 @@ const profiles: ProfileList = {
       ],
       exec: 'drivingLicence'
     },
+    drivingLicenceAtStation: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 40, duration: '400s' },
+        { target: 40, duration: '180s' }
+      ],
+      exec: 'drivingLicenceAtStation'
+    },
     passport: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -161,6 +173,20 @@ const groupMap = {
     'B02_Driving_03_EnterDetailsConfirm_DVLA',
     'B02_Driving_03_EnterDetailsConfirm_DVLA::01_CRICall',
     'B02_Driving_03_EnterDetailsConfirm_DVLA::02_CoreStubCall'
+  ],
+  drivingLicenceAtStation: [
+    'B04_DLatStation_01_CredentialIssuerPageFromCoreStub',
+    'B04_DLatStation_02_NavigateDrivingLicenseCRIBuild',
+    'B04_DLatStation_03_EnterDetails_ToCheckyourDetails',
+    'B04_DLatStation_03_EnterDetails_ToCheckyourDetails_01',
+    'B04_DLatStation_03_EnterDetails_ToCheckyourDetails_02',
+    'B04_DLatStation_03_EnterDetails_ToCheckyourDetails_03',
+    'B04_DLatStation_03_EnterDetails_ToCheckyourDetails_04',
+    'B04_DLatStation_01_',
+    'B04_DLatStation_02_',
+    'B04_DLatStation_03_',
+    'B04_DLatStation_03_',
+    'B04_DLatStation_03_'
   ],
   passport: [
     'B03_Passport_01_PassportCRIEntryFromStub',
@@ -499,6 +525,27 @@ export function drivingLicence(): void {
     )
   })
   iterationsCompleted.add(1)
+}
+
+export function drivingLicenceAtStation(): void {
+  const groups = groupMap.drivingLicenceAtStation
+  let res: Response
+  //const userDetails = getUserDetails()
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  iterationsStarted.add(1)
+  //B04_DLatStation_01_CredentialIssuerPageFromCoreStub
+  res = timeGroup(
+    groups[0],
+    () =>
+      http.get(`${env.ipvCoreStub}/credential-issuers`, {
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+      }),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Visit Credential Issuers')
+    }
+  )
 }
 
 export function passport(): void {

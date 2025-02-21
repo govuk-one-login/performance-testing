@@ -6,6 +6,9 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions:
+  packages: read
+
 env:
   DOCKER_PATH: ./deploy
   TEST_TAG: user/app:test
@@ -30,6 +33,9 @@ jobs:
         uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: "deploy/scripts/package-lock.json"
+          registry-url: "https://npm.pkg.github.com"
 
       - name: Setup python v3.11
         uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
@@ -38,6 +44,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
 
       - name: Run linting checks
         run: npm run lint

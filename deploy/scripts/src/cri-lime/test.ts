@@ -21,6 +21,7 @@ const profiles: ProfileList = {
   smoke: {
     ...createScenario('fraud', LoadProfile.smoke),
     ...createScenario('drivingLicence', LoadProfile.smoke),
+    ...createScenario('drivingLicenceAtStation', LoadProfile.smoke),
     ...createScenario('passport', LoadProfile.smoke)
   },
   bau1x: {
@@ -179,8 +180,6 @@ const groupMap = {
     'B04_DLatStation_01_CoreStubtoUserSearch::01_CoreStubCall',
     'B04_DLatStation_01_CoreStubtoUserSearch::02_CRICall',
     'B04_DLatStation_02_ContinueToCheckDLdetails',
-    //'B04_DLatStation_02_ContinueToCheckDLdetails::01_CRICall',
-    //'B04_DLatStation_02_ContinueToCheckDLdetails::02_CRICall',
     'B04_DLatStation_03_ConfirmConsentform',
     'B04_DLatStation_03_ConfirmConsentform::01_CRICall',
     'B04_DLatStation_03_ConfirmConsentform::01_CoreStubCall'
@@ -209,6 +208,7 @@ const env = {
   ipvCoreStub: getEnv('IDENTITY_CORE_STUB_URL'),
   fraudUrl: getEnv('IDENTITY_FRAUD_URL'),
   drivingUrl: getEnv('IDENTITY_DRIVING_URL'),
+  DLatStation: getEnv('IDENTITY_DRIVING_URL'),
   passportURL: getEnv('IDENTITY_PASSPORT_URL'),
   envName: getEnv('ENVIRONMENT'),
   staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'

@@ -39,51 +39,63 @@ const profiles: ProfileList = {
   lowVolumePERF007Test: {
     changeEmail: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
+      startRate: 12,
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '5s' },
+        { target: 1, duration: '180s' }
       ],
       exec: 'changeEmail'
     },
     changePassword: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
+      startRate: 12,
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '5s' },
+        { target: 1, duration: '180s' }
       ],
       exec: 'changePassword'
     },
     changePhone: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
+      startRate: 12,
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '5s' },
+        { target: 1, duration: '180s' }
       ],
       exec: 'changePhone'
     },
     deleteAccount: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
+      startRate: 12,
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '5s' },
+        { target: 1, duration: '180s' }
       ],
       exec: 'deleteAccount'
+    },
+    landingPage: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 56, duration: '280s' }, // Target to be updated based on the percentage split confirmed by the app team
+        { target: 56, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+      ],
+      exec: 'landingPage'
     }
   }
 }

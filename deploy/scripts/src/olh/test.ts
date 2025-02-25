@@ -92,8 +92,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 56, duration: '280s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 56, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 56, duration: '280s' },
+        { target: 56, duration: '180s' }
       ],
       exec: 'landingPage'
     }
@@ -172,7 +172,7 @@ const groupMap = {
   contactsPage: ['B06_01_ContactsPage'],
   landingPage: [
     'B07_01_LandingPage',
-    'B07_01_LandingPage::01_OLHStubCall',
+    'B07_01_LandingPage::01_OLHCall',
     'B07_01_LandingPage::02_OIDCStubCall',
     'B07_02_selectStubScenario',
     'B07_02_selectStubScenario::01_OIDCStubCall',

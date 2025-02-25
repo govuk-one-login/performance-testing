@@ -88,7 +88,7 @@ const profiles: ProfileList = {
       maxVUs: 400,
       stages: [
         { target: 100, duration: '100s' },
-        { target: 100, duration: '600s' }
+        { target: 100, duration: '15m' }
       ],
       exec: 'address'
     }

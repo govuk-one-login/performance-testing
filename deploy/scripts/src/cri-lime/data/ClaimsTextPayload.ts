@@ -1,10 +1,10 @@
 /*
 export const claimsTextPayload = JSON.stringify({
-  "@context": [
+  @context: [
     "https://www.w3.org/2018/credentials/v1",
     "https://vocab.london.cloudapps.digital/contexts/identity-v1.jsonld"
   ],
-  "name": {
+  name: {
     "nameParts": [
       {
         "type": "GivenName",

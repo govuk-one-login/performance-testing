@@ -179,8 +179,8 @@ const groupMap = {
     'B04_DLatStation_01_CoreStubtoUserSearch::01_CoreStubCall',
     'B04_DLatStation_01_CoreStubtoUserSearch::02_CRICall',
     'B04_DLatStation_02_ContinueToCheckDLdetails',
-    'B04_DLatStation_02_ContinueToCheckDLdetails::01_CRICall',
-    'B04_DLatStation_02_ContinueToCheckDLdetails::02_CRICall',
+    //'B04_DLatStation_02_ContinueToCheckDLdetails::01_CRICall',
+    //'B04_DLatStation_02_ContinueToCheckDLdetails::02_CRICall',
     'B04_DLatStation_03_ConfirmConsentform',
     'B04_DLatStation_03_ConfirmConsentform::01_CRICall',
     'B04_DLatStation_03_ConfirmConsentform::01_CoreStubCall'
@@ -593,31 +593,19 @@ export function drivingLicenceAtStation(): void {
   })
 
   //B04_DLatStation_02_ContinueToCheckDLdetails
-  timeGroup(groups[3], () => {
-    /*
-    res.submitForm({
-      fields: { confirmDetails: 'detailsConfirmed' },
-      submitSelector: 'button.govuk-button button'
-    }),
+  res = timeGroup(
+    groups[3],
+    () =>
+      res.submitForm({
+        fields: { confirmDetails: 'detailsConfirmed' }
+      }),
     { isStatusCode200, ...pageContentCheck('We need to check your driving licence details') }
-     */
-    //01_CRICall
-    res = timeGroup(
-      groups[4].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: { confirmDetails: 'detailsConfirmed' }
-          //submitSelector: 'button.govuk-button button'
-        }),
-      { isStatusCode200, ...pageContentCheck('We need to check your driving licence details') }
-    )
-    //02_CRICall
-  })
+  )
   //B04_DLatStation_03_ConfirmConsentform
-  timeGroup(groups[5], () => {
+  timeGroup(groups[4], () => {
     //01_CRI Call
     res = timeGroup(
-      groups[6].split('::')[1],
+      groups[5].split('::')[1],
       () =>
         res.submitForm({
           fields: {
@@ -626,13 +614,12 @@ export function drivingLicenceAtStation(): void {
           },
           params: { redirects: 2 },
           submitSelector: '#continue'
-          //submitSelector: 'button.govuk-button button'
         }),
       { isStatusCode302 }
     )
   })
   //02_StubCall
-  res = timeGroup(groups[7].split('::')[1], () => http.get(res.headers.Location), {
+  res = timeGroup(groups[6].split('::')[1], () => http.get(res.headers.Location), {
     isStatusCode200,
     ...pageContentCheck('Verifiable Credentials')
   })

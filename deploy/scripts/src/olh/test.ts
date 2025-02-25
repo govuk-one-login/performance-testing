@@ -25,7 +25,8 @@ const profiles: ProfileList = {
     ...createScenario('changePhone', LoadProfile.smoke),
     ...createScenario('deleteAccount', LoadProfile.smoke),
     ...createScenario('validateUser', LoadProfile.smoke),
-    ...createScenario('contactsPage', LoadProfile.smoke)
+    ...createScenario('contactsPage', LoadProfile.smoke),
+    ...createScenario('landingPage', LoadProfile.smoke)
   },
   load: {
     ...createScenario('changeEmail', LoadProfile.full, 30, 32),
@@ -38,51 +39,63 @@ const profiles: ProfileList = {
   lowVolumePERF007Test: {
     changeEmail: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
+      startRate: 12,
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '5s' },
+        { target: 1, duration: '180s' }
       ],
       exec: 'changeEmail'
     },
     changePassword: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
+      startRate: 12,
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '5s' },
+        { target: 1, duration: '180s' }
       ],
       exec: 'changePassword'
     },
     changePhone: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
+      startRate: 12,
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '5s' },
+        { target: 1, duration: '180s' }
       ],
       exec: 'changePhone'
     },
     deleteAccount: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
+      startRate: 12,
+      timeUnit: '1m',
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 10, duration: '200s' }, // Target to be updated based on the percentage split confirmed by the app team
-        { target: 10, duration: '180s' } // Target to be updated based on the percentage split confirmed by the app team
+        { target: 1, duration: '5s' },
+        { target: 1, duration: '180s' }
       ],
       exec: 'deleteAccount'
+    },
+    landingPage: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 56, duration: '280s' },
+        { target: 56, duration: '180s' }
+      ],
+      exec: 'landingPage'
     }
   }
 }
@@ -156,7 +169,15 @@ const groupMap = {
     'B05_ValidateUser_09_ClickSecurityTab',
     'B05_ValidateUser_10_Logout'
   ],
-  contactsPage: ['B06_01_ContactsPage']
+  contactsPage: ['B06_01_ContactsPage'],
+  landingPage: [
+    'B07_01_LandingPage',
+    'B07_01_LandingPage::01_OLHCall',
+    'B07_01_LandingPage::02_OIDCStubCall',
+    'B07_02_selectStubScenario',
+    'B07_02_selectStubScenario::01_OIDCStubCall',
+    'B07_02_selectStubScenario::02_OLHCall'
+  ]
 } as const
 
 export const options: Options = {
@@ -873,4 +894,42 @@ export function contactsPage(): void {
     ...pageContentCheck('Contact GOV.UK One Login')
   })
   iterationsCompleted.add(1)
+}
+
+export function landingPage(): void {
+  const groups = groupMap.landingPage
+  let res: Response
+  iterationsStarted.add(1)
+
+  //B07_01_LaunchLandingPage
+  timeGroup(groups[0], () => {
+    //01_OLHCall
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL + '/your-services', { redirects: 0 }), {
+      isStatusCode302
+    })
+
+    //02_OIDCStubCall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('API Simulation Tool')
+    })
+  })
+
+  sleepBetween(1, 3)
+
+  //B07_02_selectStubScenario
+  timeGroup(groups[3], () => {
+    //01_OIDCStubCall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () => res.submitForm({ fields: { scenario: 'userPerformanceTest' }, params: { redirects: 0 } }),
+      { isStatusCode302 }
+    )
+
+    //02_OLHCall
+    res = timeGroup(groups[5].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Your services')
+    })
+  })
 }

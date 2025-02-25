@@ -932,4 +932,5 @@ export function landingPage(): void {
       ...pageContentCheck('Your services')
     })
   })
+  iterationsCompleted.add(1)
 }

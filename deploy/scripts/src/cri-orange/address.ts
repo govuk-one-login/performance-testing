@@ -78,6 +78,20 @@ const profiles: ProfileList = {
       ],
       exec: 'address'
     }
+  },
+  perf006Iteration1: {
+    address: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 100, duration: '100s' },
+        { target: 100, duration: '600s' }
+      ],
+      exec: 'address'
+    }
   }
 }
 

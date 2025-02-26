@@ -36,20 +36,6 @@ const profiles: ProfileList = {
       ],
       exec: 'ninoCheck'
     }
-  },
-  perf006Iteration1: {
-    ninoCheck: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '10s',
-      preAllocatedVUs: 100,
-      maxVUs: 400,
-      stages: [
-        { target: 5, duration: '51s' },
-        { target: 5, duration: '15m' }
-      ],
-      exec: 'ninoCheck'
-    }
   }
 }
 

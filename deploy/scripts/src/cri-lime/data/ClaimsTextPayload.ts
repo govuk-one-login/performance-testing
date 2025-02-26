@@ -4,7 +4,7 @@ export const claimsTextPayload = JSON.stringify({
     "https://www.w3.org/2018/credentials/v1",
     "https://vocab.london.cloudapps.digital/contexts/identity-v1.jsonld"
   ],
-  name: {
+  'name': {
     "nameParts": [
       {
         "type": "GivenName",
@@ -27,5 +27,5 @@ export const claimsTextPayload = JSON.stringify({
     "issuedBy": "DVLA",
     "fullAddress": "8 HADLEY ROAD BATH BA2 5AA"
   }
-});
+})
 */

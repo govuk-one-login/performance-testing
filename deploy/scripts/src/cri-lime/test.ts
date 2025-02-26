@@ -326,6 +326,20 @@ const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => 
     })
 })
 
+interface DLatStationUser {
+  claimsText: string
+}
+const csvClaimsTextData: DLatStationUser[] = new SharedArray('csvDataClaimsText', () => {
+  return open('./data/ClaimsTextPayload.csv')
+    .split('\n')
+    .slice(1)
+    .map(claimsText => {
+      return {
+        claimsText
+      }
+    })
+})
+
 export function fraud(): void {
   const groups = groupMap.fraud
   let res: Response
@@ -530,6 +544,7 @@ export function drivingLicenceAtStation(): void {
   //const userDetails = getUserDetails()
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
+  const DLatStationUser = csvClaimsTextData[exec.scenario.iterationInTest % csvClaimsTextData.length]
   iterationsStarted.add(1)
   //B04_DLatStation_01_CoreStubtoUserSearch
   timeGroup(groups[0], () => {
@@ -542,6 +557,8 @@ export function drivingLicenceAtStation(): void {
           {
             cri: `cri=driving-licence-cri-${env.envName}`,
             context: 'check_details',
+            claimsText: DLatStationUser.claimsText
+            /*
             claimsText: `{
               "@context": [
                 "https://www.w3.org/2018/credentials/v1",
@@ -576,7 +593,7 @@ export function drivingLicenceAtStation(): void {
                   "fullAddress": "8 HADLEY ROAD BATH BA2 5AA"
                 }
               ]
-            }`
+            }`*/
           },
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },

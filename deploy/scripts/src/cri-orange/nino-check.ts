@@ -45,8 +45,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 5, duration: '51s' },
-        { target: 5, duration: '15m' }
+        { target: 50, duration: '51s' },
+        { target: 50, duration: '15m' }
       ],
       exec: 'ninoCheck'
     }

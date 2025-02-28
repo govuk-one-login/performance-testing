@@ -1,31 +1,21 @@
-/*
 export const claimsTextPayload = JSON.stringify({
-  @context: [
-    "https://www.w3.org/2018/credentials/v1",
-    "https://vocab.london.cloudapps.digital/contexts/identity-v1.jsonld"
+  '@context': [
+    `"https://www.w3.org/2018/credentials/v1"`,
+    `"https://vocab.london.cloudapps.digital/contexts/identity-v1.jsonld"`
   ],
-  'name': {
-    "nameParts": [
-      {
-        "type": "GivenName",
-        "value": "KENNETH"
-      },
-      {
-        "type": "FamilyName",
-        "value": "DECERQUEIRA"
-      }
+  name: {
+    nameParts: [
+      { type: 'GivenName', value: 'KENNETH' },
+      { type: 'FamilyName', value: 'DECERQUEIRA' }
     ]
   },
-  "birthDate": {
-    "value": "1965-07-08"
-  },
-  "drivingPermit": {
-    "personalNumber": "DECER607085K99AE",
-    "expiryDate": "2025-04-27",
-    "issueDate": "2023-08-22",
-    "issueNumber": "16",
-    "issuedBy": "DVLA",
-    "fullAddress": "8 HADLEY ROAD BATH BA2 5AA"
+  birthDate: { value: '1965-07-08' },
+  drivingPermit: {
+    personalNumber: 'DECER607085K99AE',
+    expiryDate: '2025-04-27',
+    issueDate: '2023-08-22',
+    issueNumber: '16',
+    issuedBy: 'DVLA',
+    fullAddress: '8 HADLEY ROAD BATH BA2 5AA'
   }
 })
-*/

@@ -175,18 +175,15 @@ const groupMap = {
     'B02_Driving_03_EnterDetailsConfirm_DVLA::02_CoreStubCall'
   ],
   drivingLicenceAtStation: [
-    'B04_DLatStation_01_CredentialIssuerPageFromCoreStub',
-    'B04_DLatStation_02_NavigateDrivingLicenseCRIBuild',
-    'B04_DLatStation_03_EnterDetails_ToCheckyourDetails',
-    'B04_DLatStation_03_EnterDetails_ToCheckyourDetails_01',
-    'B04_DLatStation_03_EnterDetails_ToCheckyourDetails_02',
-    'B04_DLatStation_03_EnterDetails_ToCheckyourDetails_03',
-    'B04_DLatStation_03_EnterDetails_ToCheckyourDetails_04',
-    'B04_DLatStation_01_',
-    'B04_DLatStation_02_',
-    'B04_DLatStation_03_',
-    'B04_DLatStation_03_',
-    'B04_DLatStation_03_'
+    'B04_DLatStation_01_CoreStubtoUserSearch',
+    'B04_DLatStation_01_CoreStubtoUserSearch::01_CoreStubCall',
+    'B04_DLatStation_01_CoreStubtoUserSearch::02_CRICall',
+    'B04_DLatStation_02_ContinueToCheckDLdetails',
+    'B04_DLatStation_02_ContinueToCheckDLdetails::01_CRICall',
+    'B04_DLatStation_02_ContinueToCheckDLdetails::02_CRICall',
+    'B04_DLatStation_03_ConfirmConsentform',
+    'B04_DLatStation_03_ConfirmConsentform::01_CRICall',
+    'B04_DLatStation_03_ConfirmConsentform::01_CoreStubCall'
   ],
   passport: [
     'B03_Passport_01_PassportCRIEntryFromStub',
@@ -534,18 +531,111 @@ export function drivingLicenceAtStation(): void {
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   iterationsStarted.add(1)
-  //B04_DLatStation_01_CredentialIssuerPageFromCoreStub
-  res = timeGroup(
-    groups[0],
-    () =>
-      http.get(`${env.ipvCoreStub}/credential-issuers`, {
-        headers: { Authorization: `Basic ${encodedCredentials}` }
-      }),
-    {
+  //B04_DLatStation_01_CoreStubtoUserSearch
+  timeGroup(groups[0], () => {
+    // 01_CoreStubCall
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.post(
+          env.ipvCoreStub + '/user-search',
+          {
+            cri: `cri=driving-licence-cri-${env.envName}`,
+            context: 'check_details',
+            claimsText: `{
+              "@context": [
+                "https://www.w3.org/2018/credentials/v1",
+                "https://vocab.london.cloudapps.digital/contexts/identity-v1.jsonld"
+              ],
+              "name": [
+                {
+                  "nameParts": [
+                    {
+                      "type": "GivenName",
+                      "value": "KENNETH"
+                    },
+                    {
+                      "type": "FamilyName",
+                      "value": "DECERQUEIRA"
+                    }
+                  ]
+                }
+              ],
+              "birthDate": [
+                {
+                  "value": "1965-07-08"
+                }
+              ],
+              "drivingPermit": [
+                {
+                  "personalNumber": "DECER607085K99AE",
+                  "expiryDate": "2025-04-27",
+                  "issueDate": "2023-08-22",
+                  "issueNumber": "16",
+                  "issuedBy": "DVLA",
+                  "fullAddress": "8 HADLEY ROAD BATH BA2 5AA"
+                }
+              ]
+            }`
+          },
+          {
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            redirects: 0
+          }
+        ),
+      { isStatusCode302 }
+    )
+    // 01_CRICall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Visit Credential Issuers')
-    }
-  )
+      ...pageContentCheck('Check your UK photocard driving licence details')
+    })
+  })
+
+  //B04_DLatStation_02_ContinueToCheckDLdetails
+  timeGroup(groups[3], () => {
+    /*
+    res.submitForm({
+      fields: { confirmDetails: 'detailsConfirmed' },
+      submitSelector: 'button.govuk-button button'
+    }),
+    { isStatusCode200, ...pageContentCheck('We need to check your driving licence details') }
+     */
+    //01_CRICall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { confirmDetails: 'detailsConfirmed' }
+          //submitSelector: 'button.govuk-button button'
+        }),
+      { isStatusCode200, ...pageContentCheck('We need to check your driving licence details') }
+    )
+    //02_CRICall
+  })
+  //B04_DLatStation_03_ConfirmConsentform
+  timeGroup(groups[5], () => {
+    //01_CRI Call
+    res = timeGroup(
+      groups[6].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            issuerDependent: 'DVLA',
+            consentCheckbox: 'true'
+          },
+          params: { redirects: 2 },
+          submitSelector: '#continue'
+          //submitSelector: 'button.govuk-button button'
+        }),
+      { isStatusCode302 }
+    )
+  })
+  //02_StubCall
+  res = timeGroup(groups[7].split('::')[1], () => http.get(res.headers.Location), {
+    isStatusCode200,
+    ...pageContentCheck('Verifiable Credentials')
+  })
 }
 
 export function passport(): void {

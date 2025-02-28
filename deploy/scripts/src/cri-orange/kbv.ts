@@ -38,6 +38,20 @@ const profiles: ProfileList = {
       ],
       exec: 'kbv'
     }
+  },
+  perf006Iteration1: {
+    kbv: {
+      executor: 'ramping-arrival-rate',
+      startRate: 6,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 156, duration: '27s' },
+        { target: 156, duration: '15m' }
+      ],
+      exec: 'kbv'
+    }
   }
 }
 

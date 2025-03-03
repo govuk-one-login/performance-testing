@@ -106,8 +106,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 13, duration: '7s' },
-        { target: 13, duration: '15m' }
+        { target: 1, duration: '6s' },
+        { target: 1, duration: '15m' }
       ],
       exec: 'changeEmail'
     },
@@ -118,8 +118,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 9, duration: '5s' },
-        { target: 9, duration: '15m' }
+        { target: 1, duration: '6s' },
+        { target: 1, duration: '15m' }
       ],
       exec: 'changePassword'
     },
@@ -130,8 +130,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 5, duration: '3s' },
-        { target: 5, duration: '15m' }
+        { target: 1, duration: '6s' },
+        { target: 1, duration: '15m' }
       ],
       exec: 'changePhone'
     },
@@ -142,8 +142,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 4, duration: '3s' },
-        { target: 4, duration: '15m' }
+        { target: 1, duration: '6s' },
+        { target: 1, duration: '15m' }
       ],
       exec: 'deleteAccount'
     },
@@ -154,8 +154,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [
-        { target: 228, duration: '105s' },
-        { target: 228, duration: '15m' }
+        { target: 90, duration: '451s' },
+        { target: 90, duration: '15m' }
       ],
       exec: 'landingPage'
     }

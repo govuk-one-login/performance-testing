@@ -44,13 +44,14 @@ export function getBiometricTokenV2(sessionId: string): void {
   })
 }
 
-export function postWriteTxma(sessionId: string): void {
-  group('GET /writeTxma', () => {
-    const writeTxma = buildBackendUrl('/writeTxma', {
-      authSessionId: sessionId
+export function postTxmaEvent(sessionId: string): void {
+  group('POST /txmaEvent', () => {
+    const txmaEvent = buildBackendUrl('/txmaEvent', {
+      SessionId: sessionId,
+      eventName: 'DCMAW_APP_HANDOFF_START'
     })
 
-    timeRequest(() => http.get(writeTxma), { isStatusCode200 })
+    timeRequest(() => http.post(txmaEvent), { isStatusCode200 })
   })
 }
 

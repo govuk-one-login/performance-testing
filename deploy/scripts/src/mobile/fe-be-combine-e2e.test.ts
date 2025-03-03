@@ -21,7 +21,7 @@ import {
 import {
   getBiometricTokenV2,
   postFinishBiometricSession,
-  postWriteTxma,
+  postTxmaEvent,
   postToken,
   postUserInfoV2,
   getRedirect,
@@ -82,7 +82,7 @@ const groupMap = {
     'POST /idCheckApp',
     'GET /appInfo', //BE
     'GET /biometricToken/v2',
-    'POST /writeTxma', //BE
+    'POST /txmaEvent', //BE
     'POST /finishBiometricSession', //BE
     'GET /redirect', //BE
     'POST /token', //BE
@@ -121,7 +121,7 @@ export function mamIphonePassport(): void {
   const sessionId = getSessionIdFromCookieJar()
   getBiometricTokenV2(sessionId)
   sleep(1)
-  postWriteTxma(sessionId) // BE
+  postTxmaEvent(sessionId) // BE
   sleep(1)
   postFinishBiometricSession(sessionId)
   sleep(1)

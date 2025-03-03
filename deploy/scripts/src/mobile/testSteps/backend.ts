@@ -46,11 +46,11 @@ export function getBiometricTokenV2(sessionId: string): void {
 
 export function postWriteTxma(sessionId: string): void {
   group('GET /writeTxma', () => {
-    const biometricTokenUrl = buildBackendUrl('/writeTxma', {
+    const writeTxma = buildBackendUrl('/writeTxma', {
       authSessionId: sessionId
     })
 
-    timeRequest(() => http.get(biometricTokenUrl), { isStatusCode200 })
+    timeRequest(() => http.get(writeTxma), { isStatusCode200 })
   })
 }
 

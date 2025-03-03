@@ -44,6 +44,16 @@ export function getBiometricTokenV2(sessionId: string): void {
   })
 }
 
+export function postWriteTxma(sessionId: string): void {
+  group('GET /writeTxma', () => {
+    const biometricTokenUrl = buildBackendUrl('/writeTxma', {
+      authSessionId: sessionId
+    })
+
+    timeRequest(() => http.get(biometricTokenUrl), { isStatusCode200 })
+  })
+}
+
 export function postFinishBiometricSession(sessionId: string): void {
   group('POST /finishBiometricSession', () => {
     const finishBiometricSessionUrl = buildBackendUrl('/finishBiometricSession', {
@@ -102,5 +112,13 @@ export function postUserInfoV2(accessToken: string): void {
         }),
       { isStatusCode200 }
     )
+  })
+}
+
+export function getAppInfo(): void {
+  group('GET /appInfo', () => {
+    const getAppInfoUrl = buildBackendUrl('appInfo', {})
+
+    timeRequest(() => http.get(getAppInfoUrl), { isStatusCode200 })
   })
 }

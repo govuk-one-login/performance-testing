@@ -7,57 +7,54 @@ import {
   createScenario,
   LoadProfile
 } from '../common/utils/config/load-profiles'
-
 import {
   postSelectDevice,
   postSelectSmartphone,
   postValidPassport,
   postBiometricChip,
   postIphoneModel,
-  getRedirect,
+  //getRedirect,
   postIdCheckApp,
-  getAbortCommand,
   startJourney,
   getSessionIdFromCookieJar
 } from './testSteps/frontend'
-
 import {
-  postVerifyAuthorizeRequest,
-  postResourceOwnerDocumentGroups,
-  //getRedirect,
+  getBiometricTokenV2,
+  postFinishBiometricSession,
+  postWriteTxma,
   postToken,
-  postUserInfoV2
+  postUserInfoV2,
+  getRedirect,
+  getAppInfo
 } from './testSteps/backend'
-
-import { getBiometricTokenV2, postFinishBiometricSession } from './testSteps/backend'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('febecombine', LoadProfile.smoke)
+    ...createScenario('mamIphonePassport', LoadProfile.smoke)
   },
   lowVolume: {
-    ...createScenario('febecombine', LoadProfile.full, 10, 40)
+    ...createScenario('mamIphonePassport', LoadProfile.full, 10, 40)
   },
   load: {
-    ...createScenario('febecombine', LoadProfile.full, 40, 40)
+    ...createScenario('mamIphonePassport', LoadProfile.full, 40, 40)
   },
   nfrload: {
-    ...createScenario('febecombine', LoadProfile.full, 95, 40)
+    ...createScenario('mamIphonePassport', LoadProfile.full, 95, 40)
   },
   deploy: {
-    ...createScenario('febecombine', LoadProfile.deployment, 1, 40)
+    ...createScenario('mamIphonePassport', LoadProfile.deployment, 1, 40)
   },
   incrementalSmallVolumes: {
-    ...createScenario('febecombine', LoadProfile.incremental, 40)
+    ...createScenario('mamIphonePassport', LoadProfile.incremental, 40)
   },
   incrementalLoad: {
-    ...createScenario('febecombine', LoadProfile.incremental, 100)
+    ...createScenario('mamIphonePassport', LoadProfile.incremental, 100)
   },
   lowVolumePERF007Test: {
-    febecombine: {
+    mamIphonePassport: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',
@@ -67,27 +64,27 @@ const profiles: ProfileList = {
         { target: 20, duration: '200s' },
         { target: 20, duration: '180s' }
       ],
-      exec: 'febecombine'
+      exec: 'mamIphonePassport'
     }
   }
 }
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  febecombine: [
-    'POST test client /start', //FE
-    'GET /authorize', //FE
-    'POST /selectDevice', //FE
-    'POST /selectSmartphone', //FE
-    'POST /validPassport', //FE
-    'POST /biometricChip', //FE
-    'POST /iphoneModel', //FE
-    'POST /idCheckApp', //FE
-    //'GET /appInfo' //BE
-    'GET /biometricToken/v2', //BE
-    //'POST /writeTxma', //BE
+  mamIphonePassport: [
+    'POST test client /start',
+    'GET /authorize',
+    'POST /selectDevice',
+    'POST /selectSmartphone',
+    'POST /validPassport',
+    'POST /biometricChip',
+    'POST /iphoneModel',
+    'POST /idCheckApp',
+    'GET /appInfo', //BE
+    'GET /biometricToken/v2',
+    'POST /writeTxma', //BE
     'POST /finishBiometricSession', //BE
-    'GET /redirect', //FE
+    'GET /redirect', //BE
     'POST /token', //BE
     'POST /userinfo/v2' //BE
   ]
@@ -103,7 +100,7 @@ export function setup(): void {
   describeProfile(loadProfile)
 }
 
-export function febecombine(): void {
+export function mamIphonePassport(): void {
   iterationsStarted.add(1)
   startJourney()
   simulateUserWait()
@@ -118,40 +115,13 @@ export function febecombine(): void {
   postIphoneModel()
   simulateUserWait()
   postIdCheckApp()
-  // BE Get /appInfo
   simulateUserWait()
-  if (Math.random() <= 0.8) {
-    // Approximately 80% of users complete journey successfully
-    const sessionId = getSessionIdFromCookieJar()
-    getBiometricTokenV2(sessionId)
-    sleep(1)
-    postwriteTxma() //define this in the fe-be-combine.ts
-    postFinishBiometricSession(sessionId)
-    sleep(1)
-    getRedirect()
-    sleep(1)
-    postToken() //BE 'POST /token'
-  } else {
-    // Approximately 20% of users abort journey
-    getAbortCommand()
-  }
+  getAppInfo()
   simulateUserWait()
-  iterationsCompleted.add(1)
-}
-
-function simulateUserWait(): void {
-  sleepBetween(1, 2) // Simulate random time between 1s and 2s for user to stay on page
-}
-
-/****************************************Backend Tests Profile**********************************/
-
-export function backendJourney(): void {
-  iterationsStarted.add(1)
-  const sessionId = postVerifyAuthorizeRequest()
-  sleep(1)
-  postResourceOwnerDocumentGroups(sessionId)
-  sleep(1)
+  const sessionId = getSessionIdFromCookieJar()
   getBiometricTokenV2(sessionId)
+  sleep(1)
+  postWriteTxma(sessionId) // BE
   sleep(1)
   postFinishBiometricSession(sessionId)
   sleep(1)
@@ -161,4 +131,8 @@ export function backendJourney(): void {
   sleep(1)
   postUserInfoV2(accessToken)
   iterationsCompleted.add(1)
+}
+
+function simulateUserWait(): void {
+  sleepBetween(1, 2) // Simulate random time between 1s and 2s for user to stay on page
 }

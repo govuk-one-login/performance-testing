@@ -46,12 +46,23 @@ export function getBiometricTokenV2(sessionId: string): void {
 
 export function postTxmaEvent(sessionId: string): void {
   group('POST /txmaEvent', () => {
-    const txmaEvent = buildBackendUrl('/txmaEvent', {
-      SessionId: sessionId,
-      eventName: 'DCMAW_APP_HANDOFF_START'
-    })
+    const txmaEventURL = buildBackendUrl('/txmaEvent') //{
+    // SessionId: sessionId
+    //})
+    const payload = { sessionId: sessionId, eventName: 'DCMAW_APP_HANDOFF_START' }
 
-    timeRequest(() => http.post(txmaEvent), { isStatusCode200 })
+    // Logging the outgoing request
+    console.log(`Sending POST request to: ${txmaEventURL}`)
+    console.log(`Request body: ${JSON.stringify(payload)}`)
+
+    const res = http.post(txmaEventURL, payload) // Making the request here
+
+    // Now logging the response details
+    console.log(`Response status: ${res.status}`)
+    console.log(`Response body: ${res.body}`)
+
+    // Then, performing  checks
+    timeRequest(() => res, { isStatusCode200 })
   })
 }
 

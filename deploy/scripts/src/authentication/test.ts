@@ -141,6 +141,10 @@ const profiles: ProfileList = {
       ],
       exec: 'signIn'
     }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('signUp', LoadProfile.spikeI2HighTraffic, 35, 48),
+    ...createScenario('signIn', LoadProfile.spikeI2HighTraffic, 32, 24)
   }
 }
 const loadProfile = selectProfile(profiles)

@@ -141,8 +141,13 @@ const profiles: ProfileList = {
       ],
       exec: 'signIn'
     }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('signUp', LoadProfile.spikeI2HighTraffic, 5, 48),
+    ...createScenario('signIn', LoadProfile.spikeI2HighTraffic, 5, 24)
   }
 }
+
 const loadProfile = selectProfile(profiles)
 const groupMap = {
   signUp: [

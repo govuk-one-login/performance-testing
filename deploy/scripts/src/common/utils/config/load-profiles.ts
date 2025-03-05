@@ -101,7 +101,9 @@ export enum LoadProfile {
   spikeNFRSignIn,
   spikeSudden,
   spikeNFRSignUpL2,
-  spikeNFRSignInL2
+  spikeNFRSignInL2,
+  spikeI2LowTraffic,
+  spikeI2HighTraffic
 }
 function createStages(type: LoadProfile, target: number): Stage[] {
   switch (type) {
@@ -200,6 +202,31 @@ function createStages(type: LoadProfile, target: number): Stage[] {
         { target: step * 2, duration: '30s' }, // Ramp up to 100% target throughput over 30 seconds
         { target: step * 2, duration: '10m' }, // Maintain steady state at 100% target throughput for 10 minutes
         { target: 0, duration: '5m' } // Ramp down over 5 minutes
+      ]
+    }
+    case LoadProfile.spikeI2LowTraffic: {
+      return [
+        { target, duration: '1s' }, // Ramp up to 100% target throughput over 1 second
+        { target, duration: '1m' }, // Maintain steady state at 100% target throughput for 1 minute
+        { target: 0, duration: '1s' }, // Ramp down to 0 over 1 second
+        { target: 0, duration: '5m' }, // Maintain steady state at 0% target throughput for 5 minutes
+        { target, duration: '1s' }, // Ramp up to 100% target throughput over 1 second
+        { target, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
+        { target: 0, duration: '1s' } // Ramp down over 1 second
+      ]
+    }
+    case LoadProfile.spikeI2HighTraffic: {
+      const step = Math.round(target / 3)
+      return [
+        { target: step, duration: '5m' }, // Ramp up to 33% target throughput over 5 minutes
+        { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+        { target: step * 3, duration: '1s' }, // Ramp up to 100% target throughput over 1 second
+        { target: step * 3, duration: '1m' }, // Maintain steady state at 100% target throughput for 1 minute
+        { target: step, duration: '1s' }, // Ramp down to 33% over 1 second
+        { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+        { target: step * 3, duration: '1s' }, // Ramp up to 100% target throughput over 1 second
+        { target: step * 3, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
+        { target: 0, duration: '1s' } // Ramp down over 1 second
       ]
     }
   }

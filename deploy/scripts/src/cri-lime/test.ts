@@ -16,11 +16,13 @@ import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/ut
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
+import { claimsTextPayload } from './data/ClaimsTextPayload'
 
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('fraud', LoadProfile.smoke),
     ...createScenario('drivingLicence', LoadProfile.smoke),
+    ...createScenario('drivingLicenceAttestation', LoadProfile.smoke),
     ...createScenario('passport', LoadProfile.smoke)
   },
   bau1x: {
@@ -125,6 +127,18 @@ const profiles: ProfileList = {
       ],
       exec: 'drivingLicence'
     },
+    drivingLicenceAttestation: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 40, duration: '400s' },
+        { target: 40, duration: '180s' }
+      ],
+      exec: 'drivingLicenceAttestation'
+    },
     passport: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -199,6 +213,15 @@ const groupMap = {
     'B02_Driving_03_EnterDetailsConfirm_DVLA',
     'B02_Driving_03_EnterDetailsConfirm_DVLA::01_CRICall',
     'B02_Driving_03_EnterDetailsConfirm_DVLA::02_CoreStubCall'
+  ],
+  drivingLicenceAttestation: [
+    'B04_DLattestation_01_CoreStubtoUserSearch',
+    'B04_DLattestation_01_CoreStubtoUserSearch::01_CoreStubCall',
+    'B04_DLattestation_01_CoreStubtoUserSearch::02_CRICall',
+    'B04_DLattestation_02_ContinueToCheckDLdetails',
+    'B04_DLattestation_03_ConfirmConsentform',
+    'B04_DLattestation_03_ConfirmConsentform::01_CRICall',
+    'B04_DLattestation_03_ConfirmConsentform::02_CoreStubCall'
   ],
   passport: [
     'B03_Passport_01_PassportCRIEntryFromStub',
@@ -536,6 +559,77 @@ export function drivingLicence(): void {
       { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
     )
   })
+  iterationsCompleted.add(1)
+}
+
+export function drivingLicenceAttestation(): void {
+  const groups = groupMap.drivingLicenceAttestation
+  let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  iterationsStarted.add(1)
+  //B04_DLattestation_01_CoreStubtoUserSearch
+  timeGroup(groups[0], () => {
+    // 01_CoreStubCall
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.post(
+          env.ipvCoreStub + '/user-search',
+          {
+            cri: `driving-licence-cri-${env.envName}`,
+            context: 'check_details',
+            claimsText: claimsTextPayload
+          },
+          {
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            redirects: 0
+          }
+        ),
+      { isStatusCode302 }
+    )
+    // 02_CRICall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Check your UK photocard driving licence details')
+    })
+  })
+
+  //B04_DLattestation_02_ContinueToCheckDLdetails
+  res = timeGroup(
+    groups[3],
+    () =>
+      res.submitForm({
+        fields: { confirmDetails: 'detailsConfirmed' }
+      }),
+    { isStatusCode200, ...pageContentCheck('We need to check your driving licence details') }
+  )
+  //B04_DLattestation_03_ConfirmConsentform
+  timeGroup(groups[4], () => {
+    //01_CRI Call
+    res = timeGroup(
+      groups[5].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            issuerDependent: 'DVLA',
+            consentCheckbox: 'true'
+          },
+          params: { redirects: 2 },
+          submitSelector: '#continue'
+        }),
+      { isStatusCode302 }
+    )
+  })
+  //02_StubCall
+  res = timeGroup(
+    groups[6].split('::')[1],
+    () =>
+      http.get(res.headers.Location, {
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+      }),
+    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
+  )
   iterationsCompleted.add(1)
 }
 

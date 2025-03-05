@@ -16,12 +16,13 @@ import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/ut
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
+import { claimsTextPayload } from './data/ClaimsTextPayload'
 
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('fraud', LoadProfile.smoke),
     ...createScenario('drivingLicence', LoadProfile.smoke),
-    ...createScenario('drivingLicenceAtStation', LoadProfile.smoke),
+    ...createScenario('drivingLicenceAttestation', LoadProfile.smoke),
     ...createScenario('passport', LoadProfile.smoke)
   },
   bau1x: {
@@ -175,14 +176,14 @@ const groupMap = {
     'B02_Driving_03_EnterDetailsConfirm_DVLA::01_CRICall',
     'B02_Driving_03_EnterDetailsConfirm_DVLA::02_CoreStubCall'
   ],
-  drivingLicenceAtStation: [
-    'B04_DLatStation_01_CoreStubtoUserSearch',
-    'B04_DLatStation_01_CoreStubtoUserSearch::01_CoreStubCall',
-    'B04_DLatStation_01_CoreStubtoUserSearch::02_CRICall',
-    'B04_DLatStation_02_ContinueToCheckDLdetails',
-    'B04_DLatStation_03_ConfirmConsentform',
-    'B04_DLatStation_03_ConfirmConsentform::01_CRICall',
-    'B04_DLatStation_03_ConfirmConsentform::01_CoreStubCall'
+  drivingLicenceAttestation: [
+    'B04_DLattestation_01_CoreStubtoUserSearch',
+    'B04_DLattestation_01_CoreStubtoUserSearch::01_CoreStubCall',
+    'B04_DLattestation_01_CoreStubtoUserSearch::02_CRICall',
+    'B04_DLattestation_02_ContinueToCheckDLdetails',
+    'B04_DLattestation_03_ConfirmConsentform',
+    'B04_DLattestation_03_ConfirmConsentform::01_CRICall',
+    'B04_DLattestation_03_ConfirmConsentform::01_CoreStubCall'
   ],
   passport: [
     'B03_Passport_01_PassportCRIEntryFromStub',
@@ -208,7 +209,7 @@ const env = {
   ipvCoreStub: getEnv('IDENTITY_CORE_STUB_URL'),
   fraudUrl: getEnv('IDENTITY_FRAUD_URL'),
   drivingUrl: getEnv('IDENTITY_DRIVING_URL'),
-  DLatStation: getEnv('IDENTITY_DRIVING_URL'),
+  DLattestation: getEnv('IDENTITY_DRIVING_URL'),
   passportURL: getEnv('IDENTITY_PASSPORT_URL'),
   envName: getEnv('ENVIRONMENT'),
   staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
@@ -322,20 +323,6 @@ const csvDataPassport: PassportUser[] = new SharedArray('csvDataPasport', () => 
         expiryDay: data[7],
         expiryMonth: data[8],
         expiryYear: data[9]
-      }
-    })
-})
-
-interface DLatStationUser {
-  claimsText: string
-}
-const csvClaimsTextData: DLatStationUser[] = new SharedArray('csvDataClaimsText', () => {
-  return open('./data/ClaimsTextPayload.csv')
-    .split('\n')
-    .slice(1)
-    .map(claimsText => {
-      return {
-        claimsText
       }
     })
 })
@@ -538,15 +525,13 @@ export function drivingLicence(): void {
   iterationsCompleted.add(1)
 }
 
-export function drivingLicenceAtStation(): void {
-  const groups = groupMap.drivingLicenceAtStation
+export function drivingLicenceAttestation(): void {
+  const groups = groupMap.drivingLicenceAttestation
   let res: Response
-  //const userDetails = getUserDetails()
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
-  const DLatStationUser = csvClaimsTextData[exec.scenario.iterationInTest % csvClaimsTextData.length]
   iterationsStarted.add(1)
-  //B04_DLatStation_01_CoreStubtoUserSearch
+  //B04_DLattestation_01_CoreStubtoUserSearch
   timeGroup(groups[0], () => {
     // 01_CoreStubCall
     res = timeGroup(
@@ -555,45 +540,9 @@ export function drivingLicenceAtStation(): void {
         http.post(
           env.ipvCoreStub + '/user-search',
           {
-            cri: `cri=driving-licence-cri-${env.envName}`,
+            cri: `driving-licence-cri-${env.envName}`,
             context: 'check_details',
-            claimsText: DLatStationUser.claimsText
-            /*
-            claimsText: `{
-              "@context": [
-                "https://www.w3.org/2018/credentials/v1",
-                "https://vocab.london.cloudapps.digital/contexts/identity-v1.jsonld"
-              ],
-              "name": [
-                {
-                  "nameParts": [
-                    {
-                      "type": "GivenName",
-                      "value": "KENNETH"
-                    },
-                    {
-                      "type": "FamilyName",
-                      "value": "DECERQUEIRA"
-                    }
-                  ]
-                }
-              ],
-              "birthDate": [
-                {
-                  "value": "1965-07-08"
-                }
-              ],
-              "drivingPermit": [
-                {
-                  "personalNumber": "DECER607085K99AE",
-                  "expiryDate": "2025-04-27",
-                  "issueDate": "2023-08-22",
-                  "issueNumber": "16",
-                  "issuedBy": "DVLA",
-                  "fullAddress": "8 HADLEY ROAD BATH BA2 5AA"
-                }
-              ]
-            }`*/
+            claimsText: claimsTextPayload
           },
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
@@ -609,7 +558,7 @@ export function drivingLicenceAtStation(): void {
     })
   })
 
-  //B04_DLatStation_02_ContinueToCheckDLdetails
+  //B04_DLattestation_02_ContinueToCheckDLdetails
   res = timeGroup(
     groups[3],
     () =>
@@ -618,7 +567,7 @@ export function drivingLicenceAtStation(): void {
       }),
     { isStatusCode200, ...pageContentCheck('We need to check your driving licence details') }
   )
-  //B04_DLatStation_03_ConfirmConsentform
+  //B04_DLattestation_03_ConfirmConsentform
   timeGroup(groups[4], () => {
     //01_CRI Call
     res = timeGroup(
@@ -636,10 +585,14 @@ export function drivingLicenceAtStation(): void {
     )
   })
   //02_StubCall
-  res = timeGroup(groups[6].split('::')[1], () => http.get(res.headers.Location), {
-    isStatusCode200,
-    ...pageContentCheck('Verifiable Credentials')
-  })
+  res = timeGroup(
+    groups[6].split('::')[1],
+    () =>
+      http.get(res.headers.Location, {
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+      }),
+    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
+  )
 }
 
 export function passport(): void {

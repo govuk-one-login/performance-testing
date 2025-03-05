@@ -127,7 +127,7 @@ const profiles: ProfileList = {
       ],
       exec: 'drivingLicence'
     },
-    drivingLicenceAtStation: {
+    drivingLicenceAttestation: {
       executor: 'ramping-arrival-rate',
       startRate: 2,
       timeUnit: '1m',
@@ -137,7 +137,7 @@ const profiles: ProfileList = {
         { target: 40, duration: '400s' },
         { target: 40, duration: '180s' }
       ],
-      exec: 'drivingLicenceAtStation'
+      exec: 'drivingLicenceAttestation'
     },
     passport: {
       executor: 'ramping-arrival-rate',
@@ -209,7 +209,6 @@ const env = {
   ipvCoreStub: getEnv('IDENTITY_CORE_STUB_URL'),
   fraudUrl: getEnv('IDENTITY_FRAUD_URL'),
   drivingUrl: getEnv('IDENTITY_DRIVING_URL'),
-  DLattestation: getEnv('IDENTITY_DRIVING_URL'),
   passportURL: getEnv('IDENTITY_PASSPORT_URL'),
   envName: getEnv('ENVIRONMENT'),
   staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
@@ -593,6 +592,7 @@ export function drivingLicenceAttestation(): void {
       }),
     { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
   )
+  iterationsCompleted.add(1)
 }
 
 export function passport(): void {

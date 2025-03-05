@@ -183,7 +183,7 @@ const groupMap = {
     'B04_DLattestation_02_ContinueToCheckDLdetails',
     'B04_DLattestation_03_ConfirmConsentform',
     'B04_DLattestation_03_ConfirmConsentform::01_CRICall',
-    'B04_DLattestation_03_ConfirmConsentform::01_CoreStubCall'
+    'B04_DLattestation_03_ConfirmConsentform::02_CoreStubCall'
   ],
   passport: [
     'B03_Passport_01_PassportCRIEntryFromStub',
@@ -550,7 +550,7 @@ export function drivingLicenceAttestation(): void {
         ),
       { isStatusCode302 }
     )
-    // 01_CRICall
+    // 02_CRICall
     res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Check your UK photocard driving licence details')

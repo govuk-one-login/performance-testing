@@ -94,6 +94,58 @@ const profiles: ProfileList = {
       ],
       exec: 'passport'
     }
+  },
+  lowVolPerf007Test: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 20, duration: '200s' },
+        { target: 20, duration: '180s' }
+      ],
+      exec: 'identity'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 10, duration: '200s' },
+        { target: 10, duration: '180s' }
+      ],
+      exec: 'idReuse'
+    }
+  },
+  perf006Iteration1: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 504,
+      stages: [
+        { target: 140, duration: '141s' },
+        { target: 140, duration: '15m' }
+      ],
+      exec: 'identity'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 15,
+      maxVUs: 18,
+      stages: [
+        { target: 3, duration: '3s' },
+        { target: 3, duration: '15m' }
+      ],
+      exec: 'idReuse'
+    }
   }
 }
 
@@ -240,7 +292,7 @@ export function identity(stubOnly: boolean = false): void {
     // 02_CoreCall
     res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Do you live in the UK, the Channel Islands or the Isle of Man')
+      ...pageContentCheck('Do you live in the UK, the Channel Islands or the Isle of Man') // Do you live in the UK, the Channel Islands or the Isle of Man
     })
   })
   if (stubOnly) {
@@ -260,7 +312,7 @@ export function identity(stubOnly: boolean = false): void {
     { isStatusCode200, ...pageContentCheck('Tell us if you have one of the following types of photo ID') }
   )
 
-  // B01_Identity_03_ClickContinueStartPage
+  // B01_Identity_04_ClickContinueStartPage
   timeGroup(groups[5], () => {
     // 01_CoreCall
     res = timeGroup(
@@ -281,7 +333,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_04_DCMAWContinue
+  // B01_Identity_05_DCMAWContinue
   timeGroup(groups[8], () => {
     // 01_DCMAWStub
     res = timeGroup(
@@ -305,7 +357,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_05_ContinueOnPYIStartPage
+  // B01_Identity_06_ContinueOnPYIStartPage
   timeGroup(groups[11], () => {
     // 01_CoreCall
     res = timeGroup(
@@ -328,7 +380,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_06_DocumentDataContinue
+  // B01_Identity_07_DocumentDataContinue
   timeGroup(groups[15], () => {
     // 01_XXXStub
     const name = (passport ? groups[16] : groups[17]).split('::')[1]
@@ -366,7 +418,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_07_AddrDataContinue
+  // B01_Identity_08_AddrDataContinue
   timeGroup(groups[20], () => {
     // 01_AddStub
     res = timeGroup(
@@ -391,7 +443,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_08_FraudDataContinue
+  // B01_Identity_09_FraudDataContinue
   timeGroup(groups[24], () => {
     // 01_FraudStub
     res = timeGroup(
@@ -421,7 +473,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_09_PreKBVTransition
+  // B01_Identity_10_PreKBVTransition
   timeGroup(groups[27], () => {
     // 01_CoreCall
     res = timeGroup(
@@ -441,7 +493,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_10_KBVDataContinue
+  // B01_Identity_11_KBVDataContinue
   timeGroup(groups[30], () => {
     // 01_KBVStub
     res = timeGroup(
@@ -465,7 +517,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_11_ContinueSuccessPage
+  // B01_Identity_12_ContinueSuccessPage
   timeGroup(groups[33], () => {
     // 01_CoreCall
     res = timeGroup(

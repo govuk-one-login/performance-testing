@@ -22,6 +22,34 @@ const profiles: ProfileList = {
   },
   lowVolume: {
     ...createScenario('ninoCheck', LoadProfile.short, 5)
+  },
+  lowVolumePERF007Test: {
+    ninoCheck: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 1, duration: '60s' },
+        { target: 1, duration: '180s' }
+      ],
+      exec: 'ninoCheck'
+    }
+  },
+  perf006Iteration1: {
+    ninoCheck: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 50, duration: '51s' },
+        { target: 50, duration: '15m' }
+      ],
+      exec: 'ninoCheck'
+    }
   }
 }
 

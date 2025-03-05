@@ -99,6 +99,82 @@ const profiles: ProfileList = {
   spikeSudden_L2: {
     ...createScenario('fraud', LoadProfile.spikeSudden, 27, 8),
     ...createScenario('passport', LoadProfile.spikeSudden, 22, 8)
+  },
+  lowVolPerf007Test: {
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 20, duration: '200s' },
+        { target: 20, duration: '180s' }
+      ],
+      exec: 'fraud'
+    },
+    drivingLicence: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 40, duration: '400s' },
+        { target: 40, duration: '180s' }
+      ],
+      exec: 'drivingLicence'
+    },
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 12, duration: '120s' },
+        { target: 12, duration: '180s' }
+      ],
+      exec: 'passport'
+    }
+  },
+  perf006Iteration1: {
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 150, duration: '151s' },
+        { target: 150, duration: '15m' }
+      ],
+      exec: 'fraud'
+    },
+    drivingLicence: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 25, duration: '26s' },
+        { target: 25, duration: '15m' }
+      ],
+      exec: 'drivingLicence'
+    },
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 20, duration: '21s' },
+        { target: 20, duration: '15m' }
+      ],
+      exec: 'passport'
+    }
   }
 }
 
@@ -375,7 +451,7 @@ export function drivingLicence(): void {
       }),
     {
       isStatusCode200,
-      ...pageContentCheck('Who was your UK driving licence issued by?')
+      ...pageContentCheck('Was your UK photocard driving licence issued by DVLA or DVA?')
     }
   )
 

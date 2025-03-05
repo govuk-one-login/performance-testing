@@ -14,7 +14,7 @@ RUN npm install --ignore-scripts \
 # -------------------------------
 # Build k6 binary with extensions
 # -------------------------------
-FROM golang:1.23-alpine AS k6-build
+FROM golang:1.24-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
@@ -23,13 +23,13 @@ RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.118.0 AS otel
+FROM otel/opentelemetry-collector-contrib:0.120.0 AS otel
 COPY otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---
 # Run
 # ---
-FROM grafana/k6:0.56.0
+FROM grafana/k6:0.57.0
 COPY --from=k6-build /k6 /usr/bin/k6
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true

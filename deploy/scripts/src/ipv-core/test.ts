@@ -146,6 +146,10 @@ const profiles: ProfileList = {
       ],
       exec: 'idReuse'
     }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('identity', LoadProfile.spikeI2HighTraffic, 35, 44),
+    ...createScenario('idReuse', LoadProfile.spikeI2HighTraffic, 32, 8)
   }
 }
 

@@ -145,6 +145,32 @@ const profiles: ProfileList = {
   spikeI2HighTraffic: {
     ...createScenario('signUp', LoadProfile.spikeI2HighTraffic, 35, 48),
     ...createScenario('signIn', LoadProfile.spikeI2HighTraffic, 32, 24)
+  },
+  perf006Iteration2PeakTest: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 576,
+      stages: [
+        { target: 120, duration: '121s' },
+        { target: 120, duration: '30m' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 264,
+      stages: [
+        { target: 11, duration: '6s' },
+        { target: 11, duration: '30m' }
+      ],
+      exec: 'signIn'
+    }
   }
 }
 const loadProfile = selectProfile(profiles)

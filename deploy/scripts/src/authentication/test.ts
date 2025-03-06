@@ -27,14 +27,6 @@ const profiles: ProfileList = {
     ...createScenario('signIn', LoadProfile.short, 30),
     ...createScenario('signUp', LoadProfile.short, 30)
   },
-  load10: {
-    ...createScenario('signIn', LoadProfile.full, 190, 25),
-    ...createScenario('signUp', LoadProfile.full, 10, 30)
-  },
-  load20: {
-    ...createScenario('signIn', LoadProfile.full, 380, 25),
-    ...createScenario('signUp', LoadProfile.full, 20, 30)
-  },
   load: {
     ...createScenario('signIn', LoadProfile.full, 500, 20)
   },
@@ -57,38 +49,6 @@ const profiles: ProfileList = {
         }
       }
     }
-  },
-  loadMar2025_L1: {
-    ...createScenario('signUp', LoadProfile.short, 45, 48),
-    ...createScenario('signIn', LoadProfile.short, 60, 24)
-  },
-  soakMar2025_L1: {
-    ...createScenario('signUp', LoadProfile.soak, 45, 48),
-    ...createScenario('signIn', LoadProfile.soak, 60, 24)
-  },
-  spikeNFR_L1: {
-    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 45, 48),
-    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 60, 24)
-  },
-  spikeSudden_L1: {
-    ...createScenario('signUp', LoadProfile.spikeSudden, 45, 48),
-    ...createScenario('signIn', LoadProfile.spikeSudden, 60, 24)
-  },
-  loadMar2025_L2: {
-    ...createScenario('signUp', LoadProfile.short, 90, 48),
-    ...createScenario('signIn', LoadProfile.short, 120, 24)
-  },
-  soakMar2025_L2: {
-    ...createScenario('signUp', LoadProfile.soak, 90, 48),
-    ...createScenario('signIn', LoadProfile.soak, 120, 24)
-  },
-  spikeNFR_L2: {
-    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 90, 48),
-    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 120, 24)
-  },
-  spikeSudden_L2: {
-    ...createScenario('signUp', LoadProfile.spikeSudden, 90, 48),
-    ...createScenario('signIn', LoadProfile.spikeSudden, 120, 24)
   },
   lowVolPerf007Test: {
     signUp: {

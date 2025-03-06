@@ -27,14 +27,6 @@ const profiles: ProfileList = {
     ...createScenario('signIn', LoadProfile.short, 30),
     ...createScenario('signUp', LoadProfile.short, 30)
   },
-  load10: {
-    ...createScenario('signIn', LoadProfile.full, 190, 25),
-    ...createScenario('signUp', LoadProfile.full, 10, 30)
-  },
-  load20: {
-    ...createScenario('signIn', LoadProfile.full, 380, 25),
-    ...createScenario('signUp', LoadProfile.full, 20, 30)
-  },
   load: {
     ...createScenario('signIn', LoadProfile.full, 500, 20)
   },
@@ -57,38 +49,6 @@ const profiles: ProfileList = {
         }
       }
     }
-  },
-  loadMar2025_L1: {
-    ...createScenario('signUp', LoadProfile.short, 45, 48),
-    ...createScenario('signIn', LoadProfile.short, 60, 24)
-  },
-  soakMar2025_L1: {
-    ...createScenario('signUp', LoadProfile.soak, 45, 48),
-    ...createScenario('signIn', LoadProfile.soak, 60, 24)
-  },
-  spikeNFR_L1: {
-    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 45, 48),
-    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 60, 24)
-  },
-  spikeSudden_L1: {
-    ...createScenario('signUp', LoadProfile.spikeSudden, 45, 48),
-    ...createScenario('signIn', LoadProfile.spikeSudden, 60, 24)
-  },
-  loadMar2025_L2: {
-    ...createScenario('signUp', LoadProfile.short, 90, 48),
-    ...createScenario('signIn', LoadProfile.short, 120, 24)
-  },
-  soakMar2025_L2: {
-    ...createScenario('signUp', LoadProfile.soak, 90, 48),
-    ...createScenario('signIn', LoadProfile.soak, 120, 24)
-  },
-  spikeNFR_L2: {
-    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 90, 48),
-    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 120, 24)
-  },
-  spikeSudden_L2: {
-    ...createScenario('signUp', LoadProfile.spikeSudden, 90, 48),
-    ...createScenario('signIn', LoadProfile.spikeSudden, 120, 24)
   },
   lowVolPerf007Test: {
     signUp: {
@@ -145,6 +105,32 @@ const profiles: ProfileList = {
   spikeI2HighTraffic: {
     ...createScenario('signUp', LoadProfile.spikeI2HighTraffic, 35, 48),
     ...createScenario('signIn', LoadProfile.spikeI2HighTraffic, 32, 24)
+  },
+  perf006Iteration2PeakTest: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 576,
+      stages: [
+        { target: 120, duration: '121s' },
+        { target: 120, duration: '30m' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 264,
+      stages: [
+        { target: 11, duration: '6s' },
+        { target: 11, duration: '30m' }
+      ],
+      exec: 'signIn'
+    }
   }
 }
 const loadProfile = selectProfile(profiles)

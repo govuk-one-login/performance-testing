@@ -92,6 +92,23 @@ const profiles: ProfileList = {
       ],
       exec: 'address'
     }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('address', LoadProfile.spikeI2HighTraffic, 35, 20)
+  },
+  perf006Iteration2PeakTest: {
+    address: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 120, duration: '121s' },
+        { target: 120, duration: '30m' }
+      ],
+      exec: 'address'
+    }
   }
 }
 

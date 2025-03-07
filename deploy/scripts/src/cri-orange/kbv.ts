@@ -52,6 +52,24 @@ const profiles: ProfileList = {
       ],
       exec: 'kbv'
     }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('kbv', LoadProfile.spikeI2HighTraffic, 4)
+  },
+
+  perf006Iteration2PeakTest: {
+    kbv: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 12, duration: '13s' },
+        { target: 12, duration: '30m' }
+      ],
+      exec: 'kbv'
+    }
   }
 }
 

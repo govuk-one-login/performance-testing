@@ -24,6 +24,9 @@ const profiles: ProfileList = {
   },
   stress: {
     ...createScenario('fraud', LoadProfile.full, 2500, 3)
+  },
+  steadyStateOnly: {
+    ...createScenario('fraud', LoadProfile.steadyStateOnly, 250, 3)
   }
 }
 

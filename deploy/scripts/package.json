@@ -30,5 +30,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@typescript-eslint/parser": "^8.26.0",
+    "@typescript-eslint/scope-manager": "^8.26.0"
+  }
 }

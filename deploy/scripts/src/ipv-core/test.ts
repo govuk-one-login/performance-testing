@@ -156,7 +156,7 @@ const profiles: ProfileList = {
       maxVUs: 432,
       stages: [
         { target: 120, duration: '121s' },
-        { target: 120, duration: '15m' }
+        { target: 120, duration: '30m' }
       ],
       exec: 'identity'
     },
@@ -168,7 +168,7 @@ const profiles: ProfileList = {
       maxVUs: 66,
       stages: [
         { target: 11, duration: '6s' },
-        { target: 11, duration: '15m' }
+        { target: 11, duration: '30m' }
       ],
       exec: 'idReuse'
     }

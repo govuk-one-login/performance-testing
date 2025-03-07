@@ -103,7 +103,8 @@ export enum LoadProfile {
   spikeNFRSignUpL2,
   spikeNFRSignInL2,
   spikeI2LowTraffic,
-  spikeI2HighTraffic
+  spikeI2HighTraffic,
+  steadyStateOnly
 }
 function createStages(type: LoadProfile, target: number): Stage[] {
   switch (type) {
@@ -227,6 +228,12 @@ function createStages(type: LoadProfile, target: number): Stage[] {
         { target, duration: '1s' }, // Ramp up to 100% target throughput over 1 second
         { target, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
         { target: 0, duration: '1s' } // Ramp down over 1 second
+      ]
+    }
+    case LoadProfile.steadyStateOnly: {
+      return [
+        { target, duration: '1s' }, // Ramp-up to 100% volume in 1 second
+        { target, duration: '6m' } // Maintain 100% volume for 6 minutes
       ]
     }
   }

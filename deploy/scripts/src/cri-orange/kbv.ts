@@ -53,8 +53,8 @@ const profiles: ProfileList = {
       exec: 'kbv'
     }
   },
-  spikeI2HighTraffic: {
-    ...createScenario('kbv', LoadProfile.spikeI2HighTraffic, 4)
+  spikeI2LowTraffic: {
+    ...createScenario('kbv', LoadProfile.spikeI2LowTraffic, 4) //rounded to 4 from 3.5
   },
 
   perf006Iteration2PeakTest: {

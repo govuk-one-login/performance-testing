@@ -165,7 +165,7 @@ const profiles: ProfileList = {
     ...createScenario('changePassword', LoadProfile.spikeI2LowTraffic, 1, 28),
     ...createScenario('changePhone', LoadProfile.spikeI2LowTraffic, 1, 32),
     ...createScenario('deleteAccount', LoadProfile.spikeI2LowTraffic, 1, 24),
-    ...createScenario('contactsPage', LoadProfile.spikeI2LowTraffic, 3, 4)
+    ...createScenario('landingPage', LoadProfile.spikeI2LowTraffic, 3, 4)
   },
   perf006Iteration2PeakTest: {
     changeEmail: {
@@ -216,7 +216,7 @@ const profiles: ProfileList = {
       ],
       exec: 'deleteAccount'
     },
-    contactsPage: {
+    landingPage: {
       executor: 'ramping-arrival-rate',
       startRate: 12,
       timeUnit: '1m',
@@ -226,7 +226,7 @@ const profiles: ProfileList = {
         { target: 66, duration: '7s' },
         { target: 66, duration: '30m' }
       ],
-      exec: 'contactsPage'
+      exec: 'landingPage'
     }
   }
 }

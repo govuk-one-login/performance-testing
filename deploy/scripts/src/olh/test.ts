@@ -159,6 +159,75 @@ const profiles: ProfileList = {
       ],
       exec: 'landingPage'
     }
+  },
+  spikeI2LowTraffic: {
+    ...createScenario('changeEmail', LoadProfile.spikeI2LowTraffic, 1, 32),
+    ...createScenario('changePassword', LoadProfile.spikeI2LowTraffic, 1, 28),
+    ...createScenario('changePhone', LoadProfile.spikeI2LowTraffic, 1, 32),
+    ...createScenario('deleteAccount', LoadProfile.spikeI2LowTraffic, 1, 24),
+    ...createScenario('contactsPage', LoadProfile.spikeI2LowTraffic, 3, 4)
+  },
+  perf006Iteration2PeakTest: {
+    changeEmail: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
+      ],
+      exec: 'changeEmail'
+    },
+    changePassword: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
+      ],
+      exec: 'changePassword'
+    },
+    changePhone: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
+      ],
+      exec: 'changePhone'
+    },
+    deleteAccount: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
+      ],
+      exec: 'deleteAccount'
+    },
+    contactsPage: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 66, duration: '7s' },
+        { target: 66, duration: '30m' }
+      ],
+      exec: 'contactsPage'
+    }
   }
 }
 

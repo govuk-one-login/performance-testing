@@ -192,7 +192,7 @@ const profiles: ProfileList = {
   },
   spikeI2HighTraffic: {
     ...createScenario('drivingLicense', LoadProfile.spikeI2HighTraffic, 4, 9),
-    ...createScenario('drivingLicenceAttestation', LoadProfile.spikeI2HighTraffic, 4, 9)
+    ...createScenario('drivingLicenceAttestation', LoadProfile.spikeI2HighTraffic, 7, 9)
   }
 }
 

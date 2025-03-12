@@ -189,6 +189,10 @@ const profiles: ProfileList = {
       ],
       exec: 'passport'
     }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('drivingLicense', LoadProfile.spikeI2HighTraffic, 4, 9),
+    ...createScenario('drivingLicenceAttestation', LoadProfile.spikeI2HighTraffic, 4, 9)
   }
 }
 

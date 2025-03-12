@@ -223,7 +223,7 @@ const profiles: ProfileList = {
     fraud: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '1s',
+      timeUnit: '10s',
       preAllocatedVUs: 72,
       maxVUs: 72,
       stages: [

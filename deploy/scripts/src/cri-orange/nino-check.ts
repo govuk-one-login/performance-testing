@@ -52,7 +52,7 @@ const profiles: ProfileList = {
     }
   },
   spikeI2LowTraffic: {
-    ...createScenario('ninoCheck', LoadProfile.spikeI2LowTraffic, 1) //rounded to 1 from 0.4
+    ...createScenario('ninoCheck', LoadProfile.spikeI2LowTraffic, 1) //rounded to 1 from 0.4 as designed in the iteration 2 plan
   },
 
   perf006Iteration2PeakTest: {

@@ -56,7 +56,7 @@ const profiles: ProfileList = {
   },
 
   perf006Iteration2PeakTest: {
-    kbv: {
+    ninoCheck: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',

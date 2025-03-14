@@ -34,7 +34,6 @@ export interface AuthCreateAccount {
 export interface AuthLogInSuccess {
   event_id: string
   event_name: string
-  client_id: string
   component_id: string
   timestamp: number
   event_timestamp_ms: number
@@ -70,11 +69,6 @@ export interface AuthAuthorisationReqParsed {
   event_name: string
   event_timestamp_ms: number
   event_timestamp_ms_formatted: string
-  extensions: {
-    identityRequested: boolean
-    reauthRequested: boolean
-    rpSid: string
-  }
   timestamp: number
   timestamp_formatted: string
   user: {
@@ -82,6 +76,9 @@ export interface AuthAuthorisationReqParsed {
     ip_address: string
     persistent_session_id: string
     session_id: string
+  }
+  txma: {
+    obfuscated: boolean
   }
 }
 

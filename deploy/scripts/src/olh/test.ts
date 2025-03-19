@@ -162,7 +162,7 @@ const profiles: ProfileList = {
   },
   spikeI2LowTraffic: {
     ...createScenario('changeEmail', LoadProfile.spikeI2LowTraffic, 1, 24),
-    ...createScenario('changePassword', LoadProfile.spikeI2LowTraffic, 1, 21),
+    ...createScenario('changePassword', LoadProfile.spikeI2LowTraffic, 1, 22),
     ...createScenario('changePhone', LoadProfile.spikeI2LowTraffic, 1, 24),
     ...createScenario('deleteAccount', LoadProfile.spikeI2LowTraffic, 1, 18),
     ...createScenario('landingPage', LoadProfile.spikeI2LowTraffic, 3, 6)

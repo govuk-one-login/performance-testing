@@ -12,26 +12,19 @@ import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
 import {
-  generateAuthLogInSuccess,
   generateAuthCreateAccount,
-  generateAuthReqParsed
+  generateAuthReqParsedEnrichment,
+  generateAuthLogInSuccessEnrichment
 } from './requestGenerator/txmaReqGen'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('sendSingleEvent', LoadProfile.smoke),
-    ...createScenario('sendRegularEvent', LoadProfile.smoke)
-  },
-  lowVolume: {
-    ...createScenario('sendSingleEvent', LoadProfile.short, 30, 2),
-    ...createScenario('sendRegularEvent', LoadProfile.short, 30, 2)
+    ...createScenario('sendRegularEventWithEnrichment', LoadProfile.smoke)
   },
   load: {
     ...createScenario('sendRegularEvent', LoadProfile.full, 2000, 2),
-    ...createScenario('sendSingleEvent', LoadProfile.full, 750, 2)
-  },
-  stress: {
-    ...createScenario('sendSingleEvent', LoadProfile.full, 7500, 2)
+    ...createScenario('sendSingleEvent', LoadProfile.full, 750, 2),
+    ...createScenario('sendRegularEventWithEnrichment', LoadProfile.full, 100, 3)
   }
 }
 
@@ -66,31 +59,34 @@ export function setup(): string {
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-  const journeyID = uuidv4()
+  const journeyID = 'journeyID'
   const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
+  const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID, testID))
 
   console.log('Sending primer event 1')
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
-  console.log('Primer event sent')
+  console.log('Primer event 1 sent')
+
+  console.log('Sending primer event 2')
+  sqs.sendMessage(env.sqs_queue, authReqParsedPayloadEnrichment)
+  console.log('Primer event 2 sent')
   return authCreateAccPayload
 }
 
-export function sendRegularEvent(authCreateAccPayload: string): void {
+export function sendRegularEventWithEnrichment(authCreateAccPayload: string): void {
   iterationsStarted.add(1)
   const authCreatePayload = JSON.parse(authCreateAccPayload)
   const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
   const eventID = `${testID}_${uuidv4()}`
-  const authLogInSuccessPayload = JSON.stringify(
-    generateAuthLogInSuccess(eventID, `${authCreatePayload.user.user_id}`, `${authCreatePayload.user.email}`)
+  const journeyID = 'journeyID'
+  const authLogInSuccessPayloadEnrichment = JSON.stringify(
+    generateAuthLogInSuccessEnrichment(
+      eventID,
+      `${authCreatePayload.user.user_id}`,
+      `${authCreatePayload.user.email}`,
+      journeyID
+    )
   )
-  sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
-  iterationsCompleted.add(1)
-}
-
-export function sendSingleEvent(): void {
-  const journeyID = `perfJourney${uuidv4()}`
-  iterationsStarted.add(1)
-  const authReqParsedPayload = JSON.stringify(generateAuthReqParsed(journeyID))
-  sqs.sendMessage(env.sqs_queue, authReqParsedPayload)
+  sqs.sendMessage(env.sqs_queue, authLogInSuccessPayloadEnrichment)
   iterationsCompleted.add(1)
 }

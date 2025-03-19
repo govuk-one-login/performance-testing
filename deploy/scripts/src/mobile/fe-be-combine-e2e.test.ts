@@ -30,6 +30,18 @@ import {
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
+//import { AWSConfig, Endpoint, SignatureV4 } from 'https://jslib.k6.io/aws/0.12.3/signature.js'
+//import { AWSConfig } from '../common/utils/jslib/aws-sqs'
+//import { type AssumeRoleOutput } from '../common/utils/aws/types'
+//import { getEnv } from '../common/utils/config/environment-variables'
+
+//const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
+//const awsConfig = new AWSConfig({
+//  region: getEnv('AWS_REGION'),
+//  accessKeyId: credentials.AccessKeyId,
+//  secretAccessKey: credentials.SecretAccessKey,
+//  sessionToken: credentials.SessionToken
+//})
 
 const profiles: ProfileList = {
   smoke: {

@@ -52,12 +52,6 @@ export function postTxmaEvent(sessionId: string): void {
     const res = http.post(txmaEventURL, JSON.stringify(payload), {
       headers: { 'Content-Type': 'application/json' }
     })
-
-    // Now logging the response details
-    console.log(`Response status: ${res.status}`)
-    console.log(`Response body: ${res.body}`)
-
-    // Then, performing  checks
     timeRequest(() => res, { isStatusCode200 })
   })
 }
@@ -102,9 +96,6 @@ export function postToken(authorizationCode: string, redirectUri: string): strin
         }),
       { isStatusCode200 }
     )
-    // Log the response details
-    console.log(`>>>POST/Token - Response status: ${tokenResponse.status}`)
-    console.log(`>>>POST/Token - Response body: ${tokenResponse.body}`)
     return tokenResponse.json('access_token') as string
   })
 }

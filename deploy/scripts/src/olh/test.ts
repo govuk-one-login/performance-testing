@@ -160,12 +160,12 @@ const profiles: ProfileList = {
       exec: 'landingPage'
     }
   },
-  spikeI2HighTraffic: {
-    ...createScenario('changeEmail', LoadProfile.spikeI2HighTraffic, 1, 32),
-    ...createScenario('changePassword', LoadProfile.spikeI2HighTraffic, 1, 28),
-    ...createScenario('changePhone', LoadProfile.spikeI2HighTraffic, 1, 32),
-    ...createScenario('deleteAccount', LoadProfile.spikeI2HighTraffic, 1, 24),
-    ...createScenario('landingPage', LoadProfile.spikeI2HighTraffic, 3, 4)
+  spikeI2LowTraffic: {
+    ...createScenario('changeEmail', LoadProfile.spikeI2LowTraffic, 1, 24),
+    ...createScenario('changePassword', LoadProfile.spikeI2LowTraffic, 1, 21),
+    ...createScenario('changePhone', LoadProfile.spikeI2LowTraffic, 1, 24),
+    ...createScenario('deleteAccount', LoadProfile.spikeI2LowTraffic, 1, 18),
+    ...createScenario('landingPage', LoadProfile.spikeI2LowTraffic, 3, 6)
   },
   perf006Iteration2PeakTest: {
     changeEmail: {

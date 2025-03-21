@@ -193,7 +193,8 @@ const profiles: ProfileList = {
   spikeI2HighTraffic: {
     ...createScenario('drivingLicence', LoadProfile.spikeI2HighTraffic, 4, 9),
     ...createScenario('drivingLicenceAttestation', LoadProfile.spikeI2HighTraffic, 7, 10),
-    ...createScenario('fraud', LoadProfile.spikeI2HighTraffic, 35, 6)
+    ...createScenario('fraud', LoadProfile.spikeI2HighTraffic, 35, 6),
+    ...createScenario('passport', LoadProfile.spikeI2HighTraffic, 4, 6)
   },
   perf006Iteration2PeakTest: {
     drivingLicence: {
@@ -231,6 +232,18 @@ const profiles: ProfileList = {
         { target: 120, duration: '30m' }
       ],
       exec: 'fraud'
+    },
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 20,
+      maxVUs: 72,
+      stages: [
+        { target: 12, duration: '13s' },
+        { target: 12, duration: '30m' }
+      ],
+      exec: 'passport'
     }
   }
 }

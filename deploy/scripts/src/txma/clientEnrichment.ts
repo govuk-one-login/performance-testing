@@ -22,9 +22,24 @@ const profiles: ProfileList = {
     ...createScenario('sendRegularEventWithEnrichment', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('sendRegularEvent', LoadProfile.full, 2000, 2),
-    ...createScenario('sendSingleEvent', LoadProfile.full, 750, 2),
     ...createScenario('sendRegularEventWithEnrichment', LoadProfile.full, 100, 3)
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('sendRegularEventWithEnrichment', LoadProfile.spikeI2HighTraffic, 1804, 3)
+  },
+  perf006Iteration2PeakTest: {
+    sendRegularEventWithEnrichment: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1857,
+      stages: [
+        { target: 619, duration: '283s' },
+        { target: 619, duration: '30m' }
+      ],
+      exec: 'sendRegularEventWithEnrichment'
+    }
   }
 }
 

@@ -8,13 +8,12 @@ import { isStatusCode200, isStatusCode201 } from '../../common/utils/checks/asse
 import { getEnv } from '../../common/utils/config/environment-variables'
 import { SignatureV4 } from '../../common/utils/jslib/aws-signature'
 
-// Load AWS credentials and region from environment variables
+// Load AWS credentials and region from environment variables - following can be deleted once we have the access available to hit the api
 
 const accessKeyId = getEnv('AWS_ACCESS_KEY_ID')
 const secretAccessKey = getEnv('AWS_SECRET_ACCESS_KEY')
 const region = getEnv('AWS_REGION')
 
-// ENV object for parameter values
 const ENV = {
   dcaMockReadIdUrl: getEnv('MOBILE_BUILD_DCAMOCK_READID_URL'),
   bodySignV4: getEnv('MOBILE_BUILD_BODY_SIGNV4')
@@ -63,19 +62,22 @@ export function postTxmaEvent(sessionId: string): void {
     const txmaEventURL = buildBackendUrl('/txmaEvent')
     const payload = { sessionId: sessionId, eventName: 'DCMAW_APP_HANDOFF_START' }
 
-    const res = http.post(txmaEventURL, JSON.stringify(payload), {
-      headers: { 'Content-Type': 'application/json' }
-    })
-    timeRequest(() => res, { isStatusCode200 })
+    timeRequest(
+      () => {
+        const res = http.post(txmaEventURL, JSON.stringify(payload), {
+          headers: { 'Content-Type': 'application/json' }
+        })
+        return res
+      },
+      { isStatusCode200 }
+    )
   })
 }
 
 export function postFinishBiometricSession(sessionId: string): string {
   const biometricSessionId = uuidv4()
-  group('POST /finishBiometricSession', () => {
-    // Log the generated biometricSessionId
-    console.log(`Generated Biometric Session ID: ${biometricSessionId}`)
 
+  group('POST /finishBiometricSession', () => {
     const finishBiometricSessionUrl = buildBackendUrl('/finishBiometricSession', {
       authSessionId: sessionId,
       biometricSessionId: biometricSessionId
@@ -115,28 +117,17 @@ export function postToken(authorizationCode: string, redirectUri: string): strin
         }),
       { isStatusCode200 }
     )
-    // Add console.log statements here
-    console.log(`>>>>Token POST /token response status: ${tokenResponse.status}`)
-    console.log(`>>>>Token POST /token response body: ${tokenResponse.body}`)
-    //return tokenResponse.json('access_token') as string
-    const accessToken = tokenResponse.json('access_token') as string // Capture access_token
-    console.log(`Access Token: ${accessToken}`) // Log the access token
-
-    return accessToken // Return the access token
+    const accessToken = tokenResponse.json('access_token') as string
+    return accessToken
   })
 }
 
-export function postUserInfoV2(biometricSessionId: string) {
-  // Log the retrieved biometricSessionId inside the postUserInfoV2 function
-
-  console.log(`>>>>>>>Biometric session id in PostUserInfoV2: ${biometricSessionId}`) //
-
+export function setupVendorResponse(biometricSessionId: string) {
   //Get the request body from the environment variable
   const requestBodyFromEnv = JSON.parse(ENV.bodySignV4)
 
-  group('POST /userinfo/v2', () => {
+  group('POST /v2/setupVendorResponse/', () => {
     const url = `${ENV.dcaMockReadIdUrl}/v2/setupVendorResponse`
-    console.log(`Request URL: ${url}`) //
 
     // Create a SignatureV4 signer for API Gateway
     const apiGatewaySigner = new SignatureV4({
@@ -145,19 +136,18 @@ export function postUserInfoV2(biometricSessionId: string) {
       credentials: {
         accessKeyId: accessKeyId,
         secretAccessKey: secretAccessKey,
-        sessionToken: '' // If using temporary credentials
+        sessionToken: '' // Provide If using temporary credentials
       },
       uriEscapePath: false,
       applyChecksum: false
     })
 
-    // Create a new request body object with the updated opaqueId
+    // Create a new request body with the updated opaqueId
     const updatedRequestBody = { ...requestBodyFromEnv, opaqueId: biometricSessionId }
 
-    // Update creation date
+    // Create a new request body with the Updated creation date
     updatedRequestBody.creationDate = new Date().toISOString()
     updatedRequestBody.consolidatedIdentityData.creationDate = updatedRequestBody.creationDate
-    console.log(`Updated Request Body for /userinfo/v2: ${JSON.stringify(updatedRequestBody, null, 2)}`)
 
     // Sign the request
     const signedRequest = apiGatewaySigner.sign({
@@ -168,24 +158,12 @@ export function postUserInfoV2(biometricSessionId: string) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(updatedRequestBody) // Use the updated request body for signing
+      body: JSON.stringify(updatedRequestBody)
     })
-
-    // Log the signed request details
-    console.log(`Signed Request URL: ${signedRequest.url}`)
-    console.log(`Signed Request Headers: ${JSON.stringify(signedRequest.headers, null, 2)}`)
-    // Note: It's generally not recommended to log the signed request body directly
-    // as it might contain sensitive information. If you need to inspect it,
-    // consider logging specific parts or using a debugging tool.
 
     timeRequest(
       () => {
         const res = http.post(signedRequest.url, JSON.stringify(updatedRequestBody), { headers: signedRequest.headers })
-        //const res = http.post(signedRequest.url, signedRequest.body, { headers: signedRequest.headers })
-        console.log(`Response status: ${res.status}`)
-        console.log(`Response body: ${res.body}`)
-        console.log(`url: ${res.url}`)
-        
         return res
       },
       { isStatusCode201 }

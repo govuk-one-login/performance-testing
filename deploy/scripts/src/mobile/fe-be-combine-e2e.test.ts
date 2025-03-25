@@ -30,18 +30,6 @@ import {
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
-//import { AWSConfig, Endpoint, SignatureV4 } from 'https://jslib.k6.io/aws/0.12.3/signature.js'
-//import { AWSConfig } from '../common/utils/jslib/aws-sqs'
-//import { type AssumeRoleOutput } from '../common/utils/aws/types'
-//import { getEnv } from '../common/utils/config/environment-variables'
-
-//const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
-//const awsConfig = new AWSConfig({
-//  region: getEnv('AWS_REGION'),
-//  accessKeyId: credentials.AccessKeyId,
-//  secretAccessKey: credentials.SecretAccessKey,
-//  sessionToken: credentials.SessionToken
-//})
 
 const profiles: ProfileList = {
   smoke: {
@@ -99,6 +87,7 @@ const groupMap = {
     'GET /redirect', //BE
     'POST /token', //BE
     'POST /userinfo/v2' //BE
+    //'POST /userinfo/v2' //BE
   ]
 } as const
 
@@ -134,14 +123,17 @@ export function mamIphonePassport(): void {
   getBiometricTokenV2(sessionId)
   sleep(1)
   postTxmaEvent(sessionId) // BE
-  sleep(1)
-  postFinishBiometricSession(sessionId)
+  sleep(3)
+  //postFinishBiometricSession(sessionId)
+  const biometricSessionId = postFinishBiometricSession(sessionId)
   sleep(1)
   const { authorizationCode, redirectUri } = getRedirect(sessionId)
   sleep(1)
-  const accessToken = postToken(authorizationCode, redirectUri)
+  //const accessToken = postToken(authorizationCode, redirectUri)
+  postToken(authorizationCode, redirectUri)
   sleep(1)
-  postUserInfoV2(accessToken)
+  //postUserInfoV2(accessToken)
+  postUserInfoV2(biometricSessionId)
   iterationsCompleted.add(1)
 }
 

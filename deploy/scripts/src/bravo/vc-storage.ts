@@ -51,8 +51,8 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',
-      preAllocatedVUs: 100,
-      maxVUs: 576,
+      preAllocatedVUs: 30,
+      maxVUs: 36,
       stages: [
         { target: 120, duration: '121s' },
         { target: 120, duration: '30m' }
@@ -63,8 +63,8 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',
-      preAllocatedVUs: 100,
-      maxVUs: 264,
+      preAllocatedVUs: 30,
+      maxVUs: 36,
       stages: [
         { target: 120, duration: '121s' },
         { target: 120, duration: '30m' }
@@ -75,8 +75,8 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 2,
       timeUnit: '1s',
-      preAllocatedVUs: 100,
-      maxVUs: 264,
+      preAllocatedVUs: 50,
+      maxVUs: 66,
       stages: [
         { target: 11, duration: '6s' },
         { target: 11, duration: '30m' }

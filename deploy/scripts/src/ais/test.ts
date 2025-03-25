@@ -39,6 +39,32 @@ const profiles: ProfileList = {
       maxDuration: '60m',
       exec: 'dataCreationForRetrieve'
     }
+  },
+  perf006Iteration2PeakTest: {
+    persistIV: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 20,
+      maxVUs: 90,
+      stages: [
+        { target: 30, duration: '15s' },
+        { target: 30, duration: '30m' }
+      ],
+      exec: 'persistIV'
+    },
+    retrieveIV: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 20,
+      maxVUs: 99,
+      stages: [
+        { target: 33, duration: '16s' },
+        { target: 33, duration: '30m' }
+      ],
+      exec: 'retrieveIV'
+    }
   }
 }
 

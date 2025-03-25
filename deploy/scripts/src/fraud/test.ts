@@ -27,6 +27,20 @@ const profiles: ProfileList = {
   },
   steadyStateOnly: {
     ...createScenario('fraud', LoadProfile.steadyStateOnly, 250, 3)
+  },
+  PeakTest: {
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 50,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 750,
+      stages: [
+        { target: 250, duration: '4s' },
+        { target: 250, duration: '6m' }
+      ],
+      exec: 'fraud'
+    }
   }
 }
 

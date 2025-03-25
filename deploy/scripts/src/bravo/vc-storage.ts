@@ -43,8 +43,8 @@ const profiles: ProfileList = {
   },
   spikeI2HighTraffic: {
     ...createScenario('persistVC', LoadProfile.spikeI2HighTraffic, 35, 15),
-    ...createScenario('summariseVC', LoadProfile.spikeI2HighTraffic, 35, 15),
-    ...createScenario('updateVC', LoadProfile.spikeI2HighTraffic, 32, 15)
+    ...createScenario('updateVC', LoadProfile.spikeI2HighTraffic, 35, 15),
+    ...createScenario('summariseVC', LoadProfile.spikeI2HighTraffic, 32, 15)
   },
   perf006Iteration2PeakTest: {
     persistVC: {
@@ -59,9 +59,9 @@ const profiles: ProfileList = {
       ],
       exec: 'persistVC'
     },
-    summariseVC: {
+    updateVC: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
+      startRate: 1,
       timeUnit: '10s',
       preAllocatedVUs: 100,
       maxVUs: 264,
@@ -69,11 +69,11 @@ const profiles: ProfileList = {
         { target: 120, duration: '121s' },
         { target: 120, duration: '30m' }
       ],
-      exec: 'summariseVC'
+      exec: 'updateVC'
     },
-    updateVC: {
+    summariseVC: {
       executor: 'ramping-arrival-rate',
-      startRate: 1,
+      startRate: 2,
       timeUnit: '1s',
       preAllocatedVUs: 100,
       maxVUs: 264,
@@ -81,7 +81,7 @@ const profiles: ProfileList = {
         { target: 11, duration: '6s' },
         { target: 11, duration: '30m' }
       ],
-      exec: 'updateVC'
+      exec: 'summariseVC'
     }
   }
 }

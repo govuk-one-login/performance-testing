@@ -4,7 +4,7 @@ import { uuidv4 } from '../../common/utils/jslib/index'
 import { buildBackendUrl } from '../utils/url'
 import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
 import { timeRequest } from '../../common/utils/request/timing'
-import { isStatusCode200 } from '../../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode201 } from '../../common/utils/checks/assertions'
 import { getEnv } from '../../common/utils/config/environment-variables'
 import { SignatureV4 } from '../../common/utils/jslib/aws-signature'
 
@@ -164,11 +164,11 @@ export function postUserInfoV2(biometricSessionId: string) {
       method: 'POST',
       protocol: 'https',
       hostname: new URL(url).hostname,
-      path: '/v2/setupVendorResponse',
+      path: `/v2/setupVendorResponse/${biometricSessionId}`,
       headers: {
         'Content-Type': 'application/json'
-      }
-      //body: JSON.stringify(updatedRequestBody) // Use the updated request body for signing
+      },
+      body: JSON.stringify(updatedRequestBody) // Use the updated request body for signing
     })
 
     // Log the signed request details
@@ -184,9 +184,11 @@ export function postUserInfoV2(biometricSessionId: string) {
         //const res = http.post(signedRequest.url, signedRequest.body, { headers: signedRequest.headers })
         console.log(`Response status: ${res.status}`)
         console.log(`Response body: ${res.body}`)
+        console.log(`url: ${res.url}`)
+        
         return res
       },
-      { isStatusCode200 }
+      { isStatusCode201 }
     )
   })
 }

@@ -74,6 +74,39 @@ const profiles: ProfileList = {
       stages: [{ target: 380, duration: '6m' }],
       exec: 'fraud'
     }
+  },
+  short50: {
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 50,
+      timeUnit: '1s',
+      preAllocatedVUs: 150,
+      maxVUs: 150,
+      stages: [{ target: 50, duration: '8s' }],
+      exec: 'fraud'
+    }
+  },
+  load150: {
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 150,
+      timeUnit: '1s',
+      preAllocatedVUs: 450,
+      maxVUs: 450,
+      stages: [{ target: 150, duration: '3m' }],
+      exec: 'fraud'
+    }
+  },
+  load200: {
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 200,
+      timeUnit: '1s',
+      preAllocatedVUs: 600,
+      maxVUs: 600,
+      stages: [{ target: 200, duration: '3m' }],
+      exec: 'fraud'
+    }
   }
 }
 

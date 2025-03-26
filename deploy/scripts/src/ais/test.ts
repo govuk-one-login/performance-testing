@@ -129,7 +129,7 @@ export function retrieveIV(): void {
   // B02_RetrieveIV_01_GetInterventionData
   timeGroup(groups[0], () => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`), {
     isStatusCode200,
-    ...pageContentCheck('Perf Testing')
+    ...pageContentCheck('intervention')
   })
   iterationsCompleted.add(1)
 }

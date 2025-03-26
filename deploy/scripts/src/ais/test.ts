@@ -57,11 +57,11 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 2,
       timeUnit: '1s',
-      preAllocatedVUs: 20,
-      maxVUs: 99,
+      preAllocatedVUs: 200,
+      maxVUs: 909,
       stages: [
-        { target: 33, duration: '16s' },
-        { target: 33, duration: '30m' }
+        { target: 303, duration: '139s' },
+        { target: 303, duration: '30m' }
       ],
       exec: 'retrieveIV'
     }

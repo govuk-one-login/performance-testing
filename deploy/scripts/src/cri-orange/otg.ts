@@ -26,6 +26,9 @@ const profiles: ProfileList = {
   spikeI2HighTraffic: {
     ...createScenario('otg', LoadProfile.spikeI2HighTraffic, 4, 4)
   },
+  spikeI2LowTraffic: {
+    ...createScenario('otg', LoadProfile.spikeI2LowTraffic, 1) //rounded to 1 from 0.4 based on the iteration 2 plan
+  },
   perf006Iteration2PeakTest: {
     ninoCheck: {
       executor: 'ramping-arrival-rate',
@@ -34,8 +37,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 400,
       stages: [
-        { target: 13, duration: '14s' },
-        { target: 13, duration: '30m' }
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
       ],
       exec: 'otg'
     }

@@ -24,7 +24,7 @@ const profiles: ProfileList = {
     ...createScenario('otg', LoadProfile.full, 44)
   },
   spikeI2HighTraffic: {
-    ...createScenario('otg', LoadProfile.spikeI2HighTraffic, 2, 4)
+    ...createScenario('otg', LoadProfile.spikeI2HighTraffic, 4, 4)
   },
   perf006Iteration2PeakTest: {
     ninoCheck: {

@@ -30,7 +30,7 @@ const profiles: ProfileList = {
     ...createScenario('otg', LoadProfile.spikeI2LowTraffic, 1) //rounded to 1 from 0.4 based on the iteration 2 plan
   },
   perf006Iteration2PeakTest: {
-    ninoCheck: {
+    otg: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',

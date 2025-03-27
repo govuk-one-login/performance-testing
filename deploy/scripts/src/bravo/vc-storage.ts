@@ -42,8 +42,8 @@ const profiles: ProfileList = {
     }
   },
   spikeI2HighTraffic: {
-    ...createScenario('persistVC', LoadProfile.spikeI2HighTraffic, 35, 15),
-    ...createScenario('updateVC', LoadProfile.spikeI2HighTraffic, 35, 15),
+    ...createScenario('persistVC', LoadProfile.spikeI2HighTraffic, 35, 16),
+    ...createScenario('updateVC', LoadProfile.spikeI2HighTraffic, 35, 16),
     ...createScenario('summariseVC', LoadProfile.spikeI2HighTraffic, 32, 15)
   },
   perf006Iteration2PeakTest: {

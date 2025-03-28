@@ -49,7 +49,18 @@ const profiles: ProfileList = {
       timeUnit: '1s',
       preAllocatedVUs: 150,
       maxVUs: 150,
-      stages: [{ target: 50, duration: '6m' }],
+      stages: [{ target: 50, duration: '3m' }],
+      exec: 'fraud'
+    }
+  },
+  load75: {
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 75,
+      timeUnit: '1s',
+      preAllocatedVUs: 225,
+      maxVUs: 225,
+      stages: [{ target: 75, duration: '3m' }],
       exec: 'fraud'
     }
   },

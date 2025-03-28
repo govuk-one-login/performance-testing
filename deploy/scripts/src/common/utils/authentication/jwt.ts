@@ -70,7 +70,7 @@ export async function createKey(type: JwtAlgorithm): Promise<CryptoKey | CryptoK
  * const jwt = await signJwt('EC256', keys.privateKey, payload)
  */
 export async function signJwt(type: JwtAlgorithm, key: CryptoKey, data: object): Promise<string> {
-  const header = b64encode(JSON.stringify({ typ: 'JWT', alg: type }), 'rawurl')
+  const header = b64encode(JSON.stringify({ alg: type, typ: 'JWT' }), 'rawurl')
   const payload = b64encode(JSON.stringify(data), 'rawurl')
   const buf = strToBuf(`${header}.${payload}`)
   const sigBuf = await crypto.subtle.sign(algParamMap[type], key, buf)
@@ -106,8 +106,8 @@ export async function verifyJwt(jwt: string, key: CryptoKey): Promise<boolean> {
  * @returns {ArrayBuffer} ArrayBuffer result
  */
 function strToBuf(str: string): ArrayBuffer {
-  const buf = new ArrayBuffer(str.length * 2)
-  const bufView = new Uint16Array(buf)
+  const buf = new ArrayBuffer(str.length)
+  const bufView = new Uint8Array(buf)
   for (let i = 0, strLen = str.length; i < strLen; i++) {
     bufView[i] = str.charCodeAt(i)
   }

@@ -30,5 +30,8 @@
   },
   "keywords": [],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@govuk-one-login/data-vocab": "^1.7.3"
+  }
 }

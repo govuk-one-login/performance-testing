@@ -8,9 +8,14 @@ import {
   LoadProfile
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
-import { generateRequest } from './requestGenerator/spotReqGen'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { generatePayload, generateSPOTRequest, Issuer } from './request/generator'
+import { signJwt } from '../common/utils/authentication/jwt'
+import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
+import crypto from 'k6/crypto'
+import { b64decode } from 'k6/encoding'
+import { SpotRequestInfo } from './request/types'
 
 const profiles: ProfileList = {
   smoke: {
@@ -45,6 +50,12 @@ const env = {
   sqs_queue: getEnv('IDENTITY_SPOT_SQS')
 }
 
+const keys = {
+  fraud: JSON.parse(getEnv('IDENTITY_SPOT_FRAUDKEY')) as JWK,
+  passport: JSON.parse(getEnv('IDENTITY_SPOT_PASSPORTKEY')) as JWK,
+  kbv: JSON.parse(getEnv('IDENTITY_SPOT_KBVKEY')) as JWK
+}
+
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
   region: getEnv('AWS_REGION'),
@@ -54,14 +65,39 @@ const awsConfig = new AWSConfig({
 })
 const sqs = new SQSClient(awsConfig)
 
-export function spot(): void {
-  const currTime = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
-  const payload = generateRequest(currTime)
-
-  const spotMessage = {
-    messageBody: JSON.stringify(payload)
+export async function spot(): Promise<void> {
+  const config: SpotRequestInfo = {
+    host: 'a-simple-local-account-id',
+    sector: 'a.simple.sector.id',
+    salt: 'YS1zaW1wbGUtc2FsdA=='
   }
+
+  const pairwiseSub = (sectorId: string): string => {
+    const hasher = crypto.createHash('sha256')
+    hasher.update(sectorId)
+    hasher.update(config.host)
+    hasher.update(b64decode(config.salt))
+    const id = hasher.digest('base64rawurl')
+    return 'urn:fdc:gov.uk:2022:' + id
+  }
+
+  const payloads = {
+    fraud: generatePayload(pairwiseSub('fraudSector'), Issuer.Fraud),
+    passport: generatePayload(pairwiseSub('passportSector'), Issuer.Passport),
+    kbv: generatePayload(pairwiseSub('verificationSector'), Issuer.KBV)
+  }
+  const createJwt = async (key: JWK, payload: object): Promise<string> => {
+    const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
+    const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+    return signJwt('ES256', importedKey, payload)
+  }
+  const jwts = [
+    await createJwt(keys.fraud, payloads.fraud),
+    await createJwt(keys.passport, payloads.passport),
+    await createJwt(keys.kbv, payloads.kbv)
+  ]
+  const payload = generateSPOTRequest(pairwiseSub(config.sector), config, jwts)
   iterationsStarted.add(1)
-  sqs.sendMessage(env.sqs_queue, spotMessage.messageBody)
+  sqs.sendMessage(env.sqs_queue, JSON.stringify(payload))
   iterationsCompleted.add(1)
 }

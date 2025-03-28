@@ -60,7 +60,7 @@ const profiles: ProfileList = {
       timeUnit: '1s',
       preAllocatedVUs: 300,
       maxVUs: 300,
-      stages: [{ target: 100, duration: '6m' }],
+      stages: [{ target: 100, duration: '3m' }],
       exec: 'fraud'
     }
   },

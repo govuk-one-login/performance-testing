@@ -24,6 +24,23 @@ const profiles: ProfileList = {
   },
   load: {
     ...createScenario('BAV', LoadProfile.full, 5)
+  },
+  spikeI2LowTraffic: {
+    ...createScenario('BAV', LoadProfile.spikeI2LowTraffic, 1) //rounded to 1 from 0.4 based on the iteration 2 plan
+  },
+  perf006Iteration2PeakTest: {
+    BAV: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 10,
+      maxVUs: 100,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
+      ],
+      exec: 'BAV'
+    }
   }
 }
 

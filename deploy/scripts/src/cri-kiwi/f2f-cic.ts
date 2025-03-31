@@ -27,6 +27,36 @@ const profiles: ProfileList = {
   load: {
     ...createScenario('FaceToFace', LoadProfile.short, 3),
     ...createScenario('CIC', LoadProfile.short, 3)
+  },
+  spikeI2LowTraffic: {
+    ...createScenario('FaceToFace', LoadProfile.spikeI2LowTraffic, 1), //rounded to 1 from 0.4 based on the iteration 2 plan
+    ...createScenario('CIC', LoadProfile.spikeI2LowTraffic, 1)
+  },
+  perf006Iteration2PeakTest: {
+    FaceToFace: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 10,
+      maxVUs: 100,
+      stages: [
+        { target: 3, duration: '4s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'FaceToFace'
+    },
+    CIC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 10,
+      maxVUs: 100,
+      stages: [
+        { target: 3, duration: '4s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'CIC'
+    }
   }
 }
 

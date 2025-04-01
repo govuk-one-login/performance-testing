@@ -146,6 +146,36 @@ const profiles: ProfileList = {
       ],
       exec: 'idReuse'
     }
+  },
+  perf006Iteration2PeakTest: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 432,
+      stages: [
+        { target: 120, duration: '121s' },
+        { target: 120, duration: '30m' }
+      ],
+      exec: 'identity'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 15,
+      maxVUs: 66,
+      stages: [
+        { target: 11, duration: '6s' },
+        { target: 11, duration: '30m' }
+      ],
+      exec: 'idReuse'
+    }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('identity', LoadProfile.spikeI2HighTraffic, 35, 44),
+    ...createScenario('idReuse', LoadProfile.spikeI2HighTraffic, 32, 8)
   }
 }
 

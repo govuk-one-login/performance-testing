@@ -22,6 +22,40 @@ const profiles: ProfileList = {
   },
   stress: {
     ...createScenario('otg', LoadProfile.full, 44)
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('otg', LoadProfile.spikeI2HighTraffic, 4, 4)
+  },
+  spikeI2LowTraffic: {
+    ...createScenario('otg', LoadProfile.spikeI2LowTraffic, 1) //rounded to 1 from 0.4 based on the iteration 2 plan
+  },
+  perf006Iteration2PeakTest: {
+    otg: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
+      ],
+      exec: 'otg'
+    }
+  },
+  perf006Iteration3PeakTest: {
+    otg: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 2, duration: '2s' },
+        { target: 2, duration: '30m' }
+      ],
+      exec: 'otg'
+    }
   }
 }
 

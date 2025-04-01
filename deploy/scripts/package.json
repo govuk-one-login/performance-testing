@@ -32,7 +32,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@typescript-eslint/parser": "^8.26.0",
-    "@typescript-eslint/scope-manager": "^8.26.0"
+    "@govuk-one-login/data-vocab": "1.9.3"
   }
 }

@@ -109,6 +109,20 @@ const profiles: ProfileList = {
       ],
       exec: 'address'
     }
+  },
+  perf006Iteration3PeakTest: {
+    address: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '30m' }
+      ],
+      exec: 'address'
+    }
   }
 }
 

@@ -70,6 +70,20 @@ const profiles: ProfileList = {
       ],
       exec: 'kbv'
     }
+  },
+  perf006Iteration3PeakTest: {
+    kbv: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 16, duration: '17s' },
+        { target: 16, duration: '30m' }
+      ],
+      exec: 'kbv'
+    }
   }
 }
 

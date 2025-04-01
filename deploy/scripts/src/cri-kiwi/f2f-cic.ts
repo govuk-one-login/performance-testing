@@ -65,8 +65,8 @@ const groupMap = {
   CIC: [
     'B01_CIC_01_IPVStubCall',
     'B01_CIC_02_Authorize',
-    'B01_CIC_03_Continue',
-    'B01_CIC_04_BankDetails',
+    'B01_CIC_03_UserDetails',
+    'B01_CIC_04_UserBirthdate',
     'B01_CIC_05_CheckDetails',
     'B01_CIC_06_SendAuthorizationCode',
     'B01_CIC_07_SendBearerToken'

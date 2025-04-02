@@ -40,6 +40,20 @@ const profiles: ProfileList = {
       ],
       exec: 'sendRegularEventWithEnrichment'
     }
+  },
+  perf006I3PeakTest: {
+    sendRegularEventWithEnrichment: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 3408,
+      stages: [
+        { target: 1136, duration: '518s' },
+        { target: 1136, duration: '30m' }
+      ],
+      exec: 'sendRegularEventWithEnrichment'
+    }
   }
 }
 

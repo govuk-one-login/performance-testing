@@ -42,6 +42,20 @@ const profiles: ProfileList = {
       ],
       exec: 'otg'
     }
+  },
+  perf006Iteration3PeakTest: {
+    otg: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 2, duration: '2s' },
+        { target: 2, duration: '30m' }
+      ],
+      exec: 'otg'
+    }
   }
 }
 

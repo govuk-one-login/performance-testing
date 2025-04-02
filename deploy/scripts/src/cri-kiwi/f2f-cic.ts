@@ -63,13 +63,13 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 const groupMap = {
   CIC: [
-    'B01_BAV_01_IPVStubCall',
-    'B01_BAV_02_Authorize',
-    'B01_BAV_03_Continue',
-    'B01_BAV_04_BankDetails',
-    'B01_BAV_05_CheckDetails',
-    'B01_BAV_06_SendAuthorizationCode',
-    'B01_BAV_07_SendBearerToken'
+    'B01_CIC_01_IPVStubCall',
+    'B01_CIC_02_Authorize',
+    'B01_CIC_03_UserDetails',
+    'B01_CIC_04_UserBirthdate',
+    'B01_CIC_05_CheckDetails',
+    'B01_CIC_06_SendAuthorizationCode',
+    'B01_CIC_07_SendBearerToken'
   ],
   FaceToFace: [
     'B02_FaceToFace_01_IPVStubCall',

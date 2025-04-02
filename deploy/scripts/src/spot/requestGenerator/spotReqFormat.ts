@@ -19,9 +19,3 @@ export interface SpotRequest {
   in_rp_sector_id: string
   log_ids: LogIds
 }
-
-export interface SpotRequestInfo {
-  host: string
-  sector: string
-  salt: string
-}

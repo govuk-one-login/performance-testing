@@ -91,16 +91,15 @@ const groupMap = {
     'B02_FaceToFace_05_NonUKPassport_ExpiryOption',
     'B02_FaceToFace_06_NonUKPassport_Details',
     'B02_FaceToFace_07_NonUKPassport_WhichCountry', // pragma: allowlist secret
-    'B02_FaceToFace_04_BRP_ChoosePhotoId',
-    'B02_FaceToFace_05_BRP_Details',
     'B02_FaceToFace_04_UKDL_ChoosePhotoId',
     'B02_FaceToFace_05_UKDL_Details',
     'B02_FaceToFace_06_UKDL_CurrentAddress',
     'B02_FaceToFace_08_FindPostOffice',
     'B02_FaceToFace_09_ChoosePostOffice',
-    'B02_FaceToFace_10_CheckDetails',
-    'B02_FaceToFace_11_SendAuthorizationCode',
-    'B02_FaceToFace_12_SendBearerToken'
+    'B02_FaceToFace_10_SelectMailingOption',
+    'B02_FaceToFace_11_CheckDetails',
+    'B02_FaceToFace_12_SendAuthorizationCode',
+    'B02_FaceToFace_13_SendBearerToken'
   ]
 } as const
 
@@ -234,7 +233,7 @@ export function FaceToFace(): void {
   const iteration = execution.scenario.iterationInInstance
   const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL']
   const path = paths[iteration % paths.length]
-  const expiry = randomDate(new Date(2025, 1, 1), new Date(2025, 12, 31))
+  const expiry = randomDate(new Date(2030, 1, 1), new Date(2030, 12, 31)) // Expiry 5 years from now
   const expiryDay = expiry.getDate().toString()
   const expiryMonth = (expiry.getMonth() + 1).toString()
   const expiryYear = expiry.getFullYear().toString()
@@ -257,6 +256,8 @@ export function FaceToFace(): void {
   )
   const authorizeLocation = getAuthorizeauthorizeLocation(res)
   const clientId = getClientID(res)
+
+  console.log(authorizeLocation)
 
   // B02_FaceToFace_02_Authorize
   res = timeGroup(groups[1], () => http.get(authorizeLocation), {
@@ -551,45 +552,10 @@ export function FaceToFace(): void {
         }
       )
       break
-    case 'BRP':
-      // B02_FaceToFace_04_BRP_ChoosePhotoId
-      res = timeGroup(
-        groups[19],
-        () =>
-          res.submitForm({
-            fields: { photoIdChoice: 'brp' },
-            submitSelector: '#continue'
-          }),
-        {
-          isStatusCode200,
-          ...pageContentCheck('When does your biometric residence permit (BRP) expire?')
-        }
-      )
-
-      sleepBetween(1, 3)
-
-      // B02_FaceToFace_05_BRP_Details
-      res = timeGroup(
-        groups[20],
-        () =>
-          res.submitForm({
-            fields: {
-              'brpExpiryDate-day': expiryDay,
-              'brpExpiryDate-month': expiryMonth,
-              'brpExpiryDate-year': expiryYear
-            },
-            submitSelector: '#continue'
-          }),
-        {
-          isStatusCode200,
-          ...pageContentCheck('Find a Post Office where you can prove your identity')
-        }
-      )
-      break
     case 'UKDL':
       // B02_FaceToFace_04_UKDL_ChoosePhotoId
       res = timeGroup(
-        groups[21],
+        groups[19],
         () =>
           res.submitForm({
             fields: { photoIdChoice: 'ukPhotocardDl' },
@@ -605,7 +571,7 @@ export function FaceToFace(): void {
 
       // B02_FaceToFace_05_UKDL_Details
       res = timeGroup(
-        groups[22],
+        groups[20],
         () =>
           res.submitForm({
             fields: {
@@ -623,7 +589,7 @@ export function FaceToFace(): void {
 
       // B02_FaceToFace_06_UKDL_CurrentAddress
       res = timeGroup(
-        groups[23],
+        groups[21],
         () =>
           res.submitForm({
             fields: { ukPhotocardDlAddressCheck: 'current' },
@@ -643,7 +609,7 @@ export function FaceToFace(): void {
 
   // B02_FaceToFace_08_FindPostOffice
   res = timeGroup(
-    groups[24],
+    groups[22],
     () =>
       res.submitForm({
         fields: { postcode: 'SW1A 2AA' },
@@ -659,10 +625,20 @@ export function FaceToFace(): void {
 
   // B02_FaceToFace_09_ChoosePostOffice
   res = timeGroup(
-    groups[25],
+    groups[23],
     () =>
       res.submitForm({
         fields: { branches: '1' },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Your Post Office customer letter') }
+  )
+  // B02_FaceToFace_10_SelectMailingOption
+  res = timeGroup(
+    groups[24],
+    () =>
+      res.submitForm({
+        fields: { postOfficeCustomerLetterChoice: 'email' },
         submitSelector: '#continue'
       }),
     { isStatusCode200, ...pageContentCheck('Check your answers') }
@@ -670,9 +646,9 @@ export function FaceToFace(): void {
 
   sleepBetween(1, 3)
 
-  // B02_FaceToFace_10_CheckDetails
+  // B02_FaceToFace_11_CheckDetails
   res = timeGroup(
-    groups[26],
+    groups[25],
     () =>
       res.submitForm({
         submitSelector: '#continue'
@@ -685,9 +661,9 @@ export function FaceToFace(): void {
 
   sleepBetween(1, 3)
 
-  // B02_FaceToFace_11_SendAuthorizationCode
+  // B02_FaceToFace_12_SendAuthorizationCode
   res = timeGroup(
-    groups[27],
+    groups[26],
     () =>
       http.post(env.F2F.target + '/token', {
         grant_type: 'authorization_code',
@@ -706,8 +682,8 @@ export function FaceToFace(): void {
       Authorization: authHeader
     }
   }
-  // B02_FaceToFace_12_SendBearerToken
-  res = timeGroup(groups[28], () => http.post(env.F2F.target + '/userinfo', {}, options), {
+  // B02_FaceToFace_13_SendBearerToken
+  res = timeGroup(groups[27], () => http.post(env.F2F.target + '/userinfo', {}, options), {
     'is status 202': r => r.status === 202,
     ...pageContentCheck('sub')
   })

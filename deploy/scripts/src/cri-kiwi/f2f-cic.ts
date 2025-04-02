@@ -94,12 +94,12 @@ const groupMap = {
     'B02_FaceToFace_04_UKDL_ChoosePhotoId',
     'B02_FaceToFace_05_UKDL_Details',
     'B02_FaceToFace_06_UKDL_CurrentAddress',
-    'B02_FaceToFace_08_FindPostOffice',
-    'B02_FaceToFace_09_ChoosePostOffice',
-    'B02_FaceToFace_10_SelectMailingOption',
-    'B02_FaceToFace_11_CheckDetails',
-    'B02_FaceToFace_12_SendAuthorizationCode',
-    'B02_FaceToFace_13_SendBearerToken'
+    'B02_FaceToFace_09_FindPostOffice',
+    'B02_FaceToFace_10_ChoosePostOffice',
+    'B02_FaceToFace_11_SelectMailingOption',
+    'B02_FaceToFace_12_CheckDetails',
+    'B02_FaceToFace_13_SendAuthorizationCode',
+    'B02_FaceToFace_14_SendBearerToken'
   ]
 } as const
 
@@ -256,8 +256,6 @@ export function FaceToFace(): void {
   )
   const authorizeLocation = getAuthorizeauthorizeLocation(res)
   const clientId = getClientID(res)
-
-  console.log(authorizeLocation)
 
   // B02_FaceToFace_02_Authorize
   res = timeGroup(groups[1], () => http.get(authorizeLocation), {
@@ -607,7 +605,7 @@ export function FaceToFace(): void {
 
   sleepBetween(1, 3)
 
-  // B02_FaceToFace_08_FindPostOffice
+  // B02_FaceToFace_09_FindPostOffice
   res = timeGroup(
     groups[22],
     () =>
@@ -623,7 +621,7 @@ export function FaceToFace(): void {
 
   sleepBetween(1, 3)
 
-  // B02_FaceToFace_09_ChoosePostOffice
+  // B02_FaceToFace_10_ChoosePostOffice
   res = timeGroup(
     groups[23],
     () =>
@@ -633,7 +631,7 @@ export function FaceToFace(): void {
       }),
     { isStatusCode200, ...pageContentCheck('Your Post Office customer letter') }
   )
-  // B02_FaceToFace_10_SelectMailingOption
+  // B02_FaceToFace_11_SelectMailingOption
   res = timeGroup(
     groups[24],
     () =>
@@ -646,7 +644,7 @@ export function FaceToFace(): void {
 
   sleepBetween(1, 3)
 
-  // B02_FaceToFace_11_CheckDetails
+  // B02_FaceToFace_12_CheckDetails
   res = timeGroup(
     groups[25],
     () =>
@@ -661,7 +659,7 @@ export function FaceToFace(): void {
 
   sleepBetween(1, 3)
 
-  // B02_FaceToFace_12_SendAuthorizationCode
+  // B02_FaceToFace_13_SendAuthorizationCode
   res = timeGroup(
     groups[26],
     () =>
@@ -682,7 +680,7 @@ export function FaceToFace(): void {
       Authorization: authHeader
     }
   }
-  // B02_FaceToFace_13_SendBearerToken
+  // B02_FaceToFace_14_SendBearerToken
   res = timeGroup(groups[27], () => http.post(env.F2F.target + '/userinfo', {}, options), {
     'is status 202': r => r.status === 202,
     ...pageContentCheck('sub')

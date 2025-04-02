@@ -140,7 +140,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 528,
       stages: [
-        { target: 160, duration: '160s' },
+        { target: 160, duration: '161s' },
         { target: 160, duration: '30m' }
       ],
       exec: 'signUp'
@@ -152,7 +152,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 100,
       maxVUs: 432,
       stages: [
-        { target: 24, duration: '11s' },
+        { target: 24, duration: '12s' },
         { target: 24, duration: '30m' }
       ],
       exec: 'signIn'

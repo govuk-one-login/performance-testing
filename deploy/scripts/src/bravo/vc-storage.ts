@@ -83,6 +83,44 @@ const profiles: ProfileList = {
       ],
       exec: 'summariseVC'
     }
+  },
+  perf006Iteration3PeakTest: {
+    persistVC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 30,
+      maxVUs: 48,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '30m' }
+      ],
+      exec: 'persistVC'
+    },
+    updateVC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 30,
+      maxVUs: 96,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '30m' }
+      ],
+      exec: 'updateVC'
+    },
+    summariseVC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 50,
+      maxVUs: 144,
+      stages: [
+        { target: 24, duration: '12s' },
+        { target: 24, duration: '30m' }
+      ],
+      exec: 'summariseVC'
+    }
   }
 }
 

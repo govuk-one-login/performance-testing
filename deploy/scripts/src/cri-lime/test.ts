@@ -245,6 +245,56 @@ const profiles: ProfileList = {
       ],
       exec: 'passport'
     }
+  },
+  perf006Iteration3PeakTest: {
+    drivingLicence: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 9,
+      maxVUs: 18,
+      stages: [
+        { target: 20, duration: '21s' },
+        { target: 20, duration: '30m' }
+      ],
+      exec: 'drivingLicence'
+    },
+    drivingLicenceAttestation: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 15,
+      maxVUs: 31,
+      stages: [
+        { target: 34, duration: '35s' },
+        { target: 34, duration: '30m' }
+      ],
+      exec: 'drivingLicenceAttestation'
+    },
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 16,
+      maxVUs: 32,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '30m' }
+      ],
+      exec: 'fraud'
+    },
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 4,
+      maxVUs: 8,
+      stages: [
+        { target: 16, duration: '17s' },
+        { target: 16, duration: '30m' }
+      ],
+      exec: 'passport'
+    }
   }
 }
 

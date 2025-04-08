@@ -12,7 +12,7 @@ import {
 import execution from 'k6/execution'
 import { b64encode } from 'k6/encoding'
 import { timeGroup } from '../common/utils/request/timing'
-import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl } from './utils/authorization'
 import { getAccessToken } from '../common/utils/authorization/authorization'
@@ -68,6 +68,8 @@ const groupMap = {
     'B01_CIC_03_UserDetails',
     'B01_CIC_04_UserBirthdate',
     'B01_CIC_05_CheckDetails',
+    'B01_CIC_05_CheckDetails::01_CICCall',
+    'B01_CIC_05_CheckDetails::01_IPVStubCall',
     'B01_CIC_06_SendAuthorizationCode',
     'B01_CIC_07_SendBearerToken'
   ],
@@ -98,6 +100,8 @@ const groupMap = {
     'B02_FaceToFace_10_ChoosePostOffice',
     'B02_FaceToFace_11_SelectMailingOption',
     'B02_FaceToFace_12_CheckDetails',
+    'B02_FaceToFace_12_CheckDetails::01_F2FCall',
+    'B02_FaceToFace_12_CheckDetails::02_IPVStubCall',
     'B02_FaceToFace_13_SendAuthorizationCode',
     'B02_FaceToFace_14_SendBearerToken'
   ]
@@ -185,23 +189,30 @@ export function CIC(): void {
   )
 
   // B01_CIC_05_CheckDetails
-  res = timeGroup(
-    groups[4],
-    () =>
-      res.submitForm({
-        submitSelector: '#continue'
-      }),
-    {
+  timeGroup(groups[4], () => {
+    //01_CICCall
+    res = timeGroup(
+      groups[5].split('::')[1],
+      () =>
+        res.submitForm({
+          submitSelector: '#submitDetails',
+          params: { redirects: 2 }
+        }),
+      { isStatusCode302 }
+    )
+
+    //02_IPVStubCall
+    res = timeGroup(groups[6].split('::')[1], () => http.get(res.headers.Location), {
       'verify url body': r => r.url.includes(clientId)
-    }
-  )
+    })
+  })
   const codeUrl = getCodeFromUrl(res.url)
 
   sleepBetween(1, 3)
 
   // B01_CIC_06_SendAuthorizationCode
   res = timeGroup(
-    groups[5],
+    groups[7],
     () =>
       http.post(env.CIC.target + '/token', {
         grant_type: 'authorization_code',
@@ -220,7 +231,7 @@ export function CIC(): void {
     headers: { Authorization: authHeader }
   }
   // B01_CIC_07_SendBearerToken
-  res = timeGroup(groups[6], () => http.post(env.CIC.target + '/userinfo', {}, options), {
+  res = timeGroup(groups[8], () => http.post(env.CIC.target + '/userinfo', {}, options), {
     isStatusCode200,
     ...pageContentCheck('credentialJWT')
   })
@@ -645,23 +656,32 @@ export function FaceToFace(): void {
   sleepBetween(1, 3)
 
   // B02_FaceToFace_12_CheckDetails
-  res = timeGroup(
-    groups[25],
-    () =>
-      res.submitForm({
-        submitSelector: '#continue'
-      }),
-    {
+  timeGroup(groups[25], () => {
+    //01_F2FCall
+    res = timeGroup(
+      groups[26].split('::')[1],
+      () =>
+        res.submitForm({
+          submitSelector: '#submitDetails',
+          params: { redirects: 2 }
+        }),
+      { isStatusCode302 }
+    )
+
+    //02_IPVStubCall
+    res = timeGroup(groups[27].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
       'verify url body': r => r.url.includes(clientId)
-    }
-  )
+    })
+  })
+
   const codeUrl = getCodeFromUrl(res.url)
 
   sleepBetween(1, 3)
 
   // B02_FaceToFace_13_SendAuthorizationCode
   res = timeGroup(
-    groups[26],
+    groups[28],
     () =>
       http.post(env.F2F.target + '/token', {
         grant_type: 'authorization_code',
@@ -681,7 +701,7 @@ export function FaceToFace(): void {
     }
   }
   // B02_FaceToFace_14_SendBearerToken
-  res = timeGroup(groups[27], () => http.post(env.F2F.target + '/userinfo', {}, options), {
+  res = timeGroup(groups[29], () => http.post(env.F2F.target + '/userinfo', {}, options), {
     'is status 202': r => r.status === 202,
     ...pageContentCheck('sub')
   })

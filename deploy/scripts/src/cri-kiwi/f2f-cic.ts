@@ -100,6 +100,8 @@ const groupMap = {
     'B02_FaceToFace_10_ChoosePostOffice',
     'B02_FaceToFace_11_SelectMailingOption',
     'B02_FaceToFace_12_CheckDetails',
+    'B02_FaceToFace_12_CheckDetails::01_F2FCall',
+    'B02_FaceToFace_12_CheckDetails::02_IPVStubCall',
     'B02_FaceToFace_13_SendAuthorizationCode',
     'B02_FaceToFace_14_SendBearerToken'
   ]
@@ -654,23 +656,32 @@ export function FaceToFace(): void {
   sleepBetween(1, 3)
 
   // B02_FaceToFace_12_CheckDetails
-  res = timeGroup(
-    groups[25],
-    () =>
-      res.submitForm({
-        submitSelector: '#continue'
-      }),
-    {
+  timeGroup(groups[25], () => {
+    //01_F2FCall
+    res = timeGroup(
+      groups[26].split('::')[1],
+      () =>
+        res.submitForm({
+          submitSelector: '#submitDetails',
+          params: { redirects: 2 }
+        }),
+      { isStatusCode302 }
+    )
+
+    //02_IPVStubCall
+    res = timeGroup(groups[27].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
       'verify url body': r => r.url.includes(clientId)
-    }
-  )
+    })
+  })
+
   const codeUrl = getCodeFromUrl(res.url)
 
   sleepBetween(1, 3)
 
   // B02_FaceToFace_13_SendAuthorizationCode
   res = timeGroup(
-    groups[26],
+    groups[28],
     () =>
       http.post(env.F2F.target + '/token', {
         grant_type: 'authorization_code',
@@ -690,7 +701,7 @@ export function FaceToFace(): void {
     }
   }
   // B02_FaceToFace_14_SendBearerToken
-  res = timeGroup(groups[27], () => http.post(env.F2F.target + '/userinfo', {}, options), {
+  res = timeGroup(groups[29], () => http.post(env.F2F.target + '/userinfo', {}, options), {
     'is status 202': r => r.status === 202,
     ...pageContentCheck('sub')
   })

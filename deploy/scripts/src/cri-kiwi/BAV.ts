@@ -10,7 +10,7 @@ import {
 } from '../common/utils/config/load-profiles'
 import { b64encode } from 'k6/encoding'
 import { timeGroup } from '../common/utils/request/timing'
-import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { bankingPayload } from './data/BAVdata'
 import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl } from './utils/authorization'
@@ -52,6 +52,8 @@ const groupMap = {
     'B01_BAV_03_Continue',
     'B01_BAV_04_BankDetails',
     'B01_BAV_05_CheckDetails',
+    'B01_BAV_05_CheckDetails::01_BAVCall',
+    'B01_BAV_05_CheckDetails::02_IPVStubCall',
     'B01_BAV_06_SendAuthorizationCode',
     'B01_BAV_07_SendBearerToken'
   ]
@@ -127,23 +129,30 @@ export function BAV(): void {
   sleepBetween(1, 3)
 
   // B01_BAV_05_CheckDetails
-  res = timeGroup(
-    groups[4],
-    () =>
-      res.submitForm({
-        submitSelector: '#submitDetails'
-      }),
-    {
+  timeGroup(groups[4], () => {
+    //01_BAVCall
+    res = timeGroup(
+      groups[5].split('::')[1],
+      () =>
+        res.submitForm({
+          submitSelector: '#submitDetails',
+          params: { redirects: 2 }
+        }),
+      { isStatusCode302 }
+    )
+
+    //02_IPVStubCall
+    res = timeGroup(groups[6].split('::')[1], () => http.get(res.headers.Location), {
       'verify url body': r => r.url.includes(clientId)
-    }
-  )
+    })
+  })
   const codeUrl = getCodeFromUrl(res.url)
 
   sleepBetween(1, 3)
 
   // B01_BAV_06_SendAuthorizationCode
   res = timeGroup(
-    groups[5],
+    groups[7],
     () =>
       http.post(env.BAV.target + '/token', {
         grant_type: 'authorization_code',
@@ -162,7 +171,7 @@ export function BAV(): void {
     headers: { Authorization: authHeader }
   }
   // B01_BAV_07_SendBearerToken
-  res = timeGroup(groups[6], () => http.post(env.BAV.target + '/userinfo', {}, options), {
+  res = timeGroup(groups[8], () => http.post(env.BAV.target + '/userinfo', {}, options), {
     isStatusCode200,
     ...pageContentCheck('credentialJWT')
   })

@@ -13,7 +13,6 @@ import {
   postFinishBiometricSession,
   getRedirect,
   postToken
-  //postUserInfoV2
 } from './testSteps/backend'
 import { sleep } from 'k6'
 import { getThresholds } from '../common/utils/config/thresholds'
@@ -70,8 +69,6 @@ export function backendJourney(): void {
   sleep(1)
   const { authorizationCode, redirectUri } = getRedirect(sessionId)
   sleep(1)
-  const accessToken = postToken(authorizationCode, redirectUri)
-  sleep(1)
-  //postUserInfoV2(accessToken)
+  postToken(authorizationCode, redirectUri)
   iterationsCompleted.add(1)
 }

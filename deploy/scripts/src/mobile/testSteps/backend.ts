@@ -7,17 +7,8 @@ import { timeRequest } from '../../common/utils/request/timing'
 import { isStatusCode200, isStatusCode201 } from '../../common/utils/checks/assertions'
 import { getEnv } from '../../common/utils/config/environment-variables'
 import { SignatureV4 } from '../../common/utils/jslib/aws-signature'
-
-// Load AWS credentials and region from environment variables - following can be deleted once we have the access available to hit the api
-
-const accessKeyId = getEnv('AWS_ACCESS_KEY_ID')
-const secretAccessKey = getEnv('AWS_SECRET_ACCESS_KEY')
-const region = getEnv('AWS_REGION')
-
-const ENV = {
-  dcaMockReadIdUrl: getEnv('MOBILE_BUILD_DCAMOCK_READID_URL'),
-  bodySignV4: getEnv('MOBILE_BUILD_BODY_SIGNV4')
-}
+import { type AssumeRoleOutput } from '../../common/utils/aws/types'
+import { config } from '../utils/config'
 
 export function postVerifyAuthorizeRequest(): string {
   const testClientRes = postTestClientStart()
@@ -123,20 +114,19 @@ export function postToken(authorizationCode: string, redirectUri: string): strin
 }
 
 export function setupVendorResponse(biometricSessionId: string) {
-  //Get the request body from the environment variable
-  const requestBodyFromEnv = JSON.parse(ENV.bodySignV4)
+  const requestBodyFromEnv = JSON.parse(config.requestBody)
 
   group('POST /v2/setupVendorResponse/', () => {
-    const url = `${ENV.dcaMockReadIdUrl}/v2/setupVendorResponse`
-
+    const url = `${config.dcaMockReadIdUrl}/v2/setupVendorResponse`
+    const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
     // Create a SignatureV4 signer for API Gateway
     const apiGatewaySigner = new SignatureV4({
       service: 'execute-api',
-      region: region,
+      region: getEnv('AWS_REGION'),
       credentials: {
-        accessKeyId: accessKeyId,
-        secretAccessKey: secretAccessKey,
-        sessionToken: '' // Provide If using temporary credentials
+        accessKeyId: credentials.AccessKeyId,
+        secretAccessKey: credentials.SecretAccessKey,
+        sessionToken: credentials.SessionToken
       },
       uriEscapePath: false,
       applyChecksum: false

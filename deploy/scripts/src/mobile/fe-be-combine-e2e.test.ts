@@ -13,7 +13,6 @@ import {
   postValidPassport,
   postBiometricChip,
   postIphoneModel,
-  //getRedirect,
   postIdCheckApp,
   startJourney,
   getSessionIdFromCookieJar
@@ -117,22 +116,19 @@ export function mamIphonePassport(): void {
   simulateUserWait()
   postIdCheckApp()
   simulateUserWait()
-  getAppInfo()
+  getAppInfo() // BE
   simulateUserWait()
   const sessionId = getSessionIdFromCookieJar()
   getBiometricTokenV2(sessionId)
   sleep(1)
   postTxmaEvent(sessionId) // BE
   sleep(3)
-  //postFinishBiometricSession(sessionId)
-  const biometricSessionId = postFinishBiometricSession(sessionId)
+  const biometricSessionId = postFinishBiometricSession(sessionId) // BE
   sleep(1)
-  const { authorizationCode, redirectUri } = getRedirect(sessionId)
+  const { authorizationCode, redirectUri } = getRedirect(sessionId) //BE
   sleep(1)
-  //const accessToken = postToken(authorizationCode, redirectUri)
-  postToken(authorizationCode, redirectUri)
+  postToken(authorizationCode, redirectUri) // BE
   sleep(1)
-  //postUserInfoV2(accessToken)
   setupVendorResponse(biometricSessionId)
   iterationsCompleted.add(1)
 }

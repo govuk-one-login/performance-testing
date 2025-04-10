@@ -57,6 +57,32 @@ const profiles: ProfileList = {
       ],
       exec: 'CIC'
     }
+  },
+  perf006Iteration3PeakTest: {
+    FaceToFace: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 10,
+      maxVUs: 100,
+      stages: [
+        { target: 4, duration: '5s' },
+        { target: 4, duration: '30m' }
+      ],
+      exec: 'FaceToFace'
+    },
+    CIC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 10,
+      maxVUs: 100,
+      stages: [
+        { target: 4, duration: '5s' },
+        { target: 4, duration: '30m' }
+      ],
+      exec: 'CIC'
+    }
   }
 }
 

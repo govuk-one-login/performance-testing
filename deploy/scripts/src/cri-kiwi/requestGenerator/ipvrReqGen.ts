@@ -63,7 +63,8 @@ export function generateF2FRequest(userID: string, signinJourneyID: string): F2f
     restricted: {
       document_details: [
         {
-          documentType: 'PASSPORT'
+          documentType: 'PASSPORT',
+          issuingCountry: 'GBR'
         }
       ]
     }

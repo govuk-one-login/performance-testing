@@ -17,6 +17,7 @@ import {
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { sleep } from 'k6'
 
 const profiles: ProfileList = {
   smoke: {
@@ -109,8 +110,11 @@ export function allEvents(): void {
   const ipvPayload = generateIPVRequest(userID, signinJourneyID)
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(authPayload))
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(f2fPayload))
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(docUploadPayload))
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
   iterationsCompleted.add(1)
 }

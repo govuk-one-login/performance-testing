@@ -41,6 +41,20 @@ const profiles: ProfileList = {
       ],
       exec: 'BAV'
     }
+  },
+  perf006Iteration3PeakTest: {
+    BAV: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 10,
+      maxVUs: 100,
+      stages: [
+        { target: 2, duration: '3s' }, //Rounded to 0.2 for the 0.16 target
+        { target: 2, duration: '30m' }
+      ],
+      exec: 'BAV'
+    }
   }
 }
 

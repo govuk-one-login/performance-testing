@@ -30,6 +30,36 @@ const profiles: ProfileList = {
   stress: {
     ...createScenario('authEvent', LoadProfile.full, 2000, 2),
     ...createScenario('allEvents', LoadProfile.full, 12, 2)
+  },
+  perf006Iteration2PeakTest: {
+    authEvent: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 11, duration: '6s' },
+        { target: 11, duration: '30m' }
+      ],
+      exec: 'authEvent'
+    },
+    allEvents: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 3, duration: '4s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'allEvents'
+    }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('authEvent', LoadProfile.spikeI2HighTraffic, 32),
+    ...createScenario('allEvents', LoadProfile.spikeI2HighTraffic, 1)
   }
 }
 

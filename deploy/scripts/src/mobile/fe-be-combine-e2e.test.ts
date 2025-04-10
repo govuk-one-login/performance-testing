@@ -24,7 +24,8 @@ import {
   postToken,
   setupVendorResponse,
   getRedirect,
-  getAppInfo
+  getAppInfo,
+  postUserInfoV2
 } from './testSteps/backend'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getThresholds } from '../common/utils/config/thresholds'
@@ -127,9 +128,11 @@ export function mamIphonePassport(): void {
   sleep(1)
   const { authorizationCode, redirectUri } = getRedirect(sessionId) //BE
   sleep(1)
-  postToken(authorizationCode, redirectUri) // BE
+  const accessToken = postToken(authorizationCode, redirectUri) // BE
   sleep(1)
   setupVendorResponse(biometricSessionId)
+  sleep(1)
+  postUserInfoV2(accessToken)
   iterationsCompleted.add(1)
 }
 

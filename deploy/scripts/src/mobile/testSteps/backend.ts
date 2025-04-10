@@ -168,3 +168,20 @@ export function getAppInfo(): void {
     timeRequest(() => http.get(getAppInfoUrl), { isStatusCode200 })
   })
 }
+
+export function postUserInfoV2(accessToken: string): void {
+  group('POST /userinfo/v2', () => {
+    const userInfoV2Url = buildBackendUrl('/userinfo/v2')
+
+    timeRequest(
+      () =>
+        http.post(userInfoV2Url, null, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + accessToken
+          }
+        }),
+      { isStatusCode200 }
+    )
+  })
+}

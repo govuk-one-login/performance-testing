@@ -210,6 +210,20 @@ const profiles: ProfileList = {
       ],
       exec: 'idReuse'
     }
+  },
+  identityM1CPeakTest: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 576,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '30m' }
+      ],
+      exec: 'identityM1C'
+    }
   }
 }
 

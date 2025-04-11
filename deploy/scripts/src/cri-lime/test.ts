@@ -363,6 +363,10 @@ const stubCreds = {
   password: getEnv('IDENTITY_CORE_STUB_PASSWORD')
 }
 
+const profile = {
+  m1c: getEnv('IDENTITY_FRAUD_M1C') == 'true'
+}
+
 interface DrivingLicenseUser {
   surname: string
   firstName: string
@@ -477,6 +481,7 @@ export function fraud(): void {
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   iterationsStarted.add(1)
+  const userSurname = profile.m1c ? 'M1C_500' : userDetails.lastName
 
   // B01_Fraud_01_CoreStubEditUserContinue
   timeGroup(groups[0], () => {
@@ -490,7 +495,7 @@ export function fraud(): void {
             cri: `fraud-cri-${env.envName}`,
             rowNumber: '197',
             firstName: userDetails.firstName,
-            surname: userDetails.lastName,
+            surname: userSurname,
             'dateOfBirth-day': `${userDetails.day}`,
             'dateOfBirth-month': `${userDetails.month}`,
             'dateOfBirth-year': `${userDetails.year}`,
@@ -536,6 +541,7 @@ export function fraud(): void {
 
   // B01_Fraud_02_ContinueToCheckFraudDetails
   timeGroup(groups[3], () => {
+    const pageContent = profile.m1c ? 'failedCheckDetails' : 'identityFraudScore'
     // 01_CRICall
     res = timeGroup(
       groups[4].split('::')[1],
@@ -553,7 +559,7 @@ export function fraud(): void {
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }
         }),
-      { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
+      { isStatusCode200, ...pageContentCheck(pageContent) }
     )
   })
   iterationsCompleted.add(1)

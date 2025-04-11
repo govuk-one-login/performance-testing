@@ -12,6 +12,13 @@ import {
 import { timeGroup } from '../common/utils/request/timing'
 import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
 import { addressPayloadDL, kbvPayloaDL, fraudPayloadDL, drivingLicencePayload } from './data/drivingLicenceData'
+import {
+  passportPayloadM1C,
+  chippedPassportPayloadM1C,
+  addressPayloadM1C,
+  fraudPayloadM1C,
+  failedFraudCheckPayloadM1C
+} from './data/m1CData'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { SharedArray } from 'k6/data'
@@ -24,7 +31,8 @@ const profiles: ProfileList = {
   smoke: {
     ...createScenario('identity', LoadProfile.smoke),
     ...createScenario('idReuse', LoadProfile.smoke),
-    ...createScenario('orchStubIsolatedTest', LoadProfile.smoke)
+    ...createScenario('orchStubIsolatedTest', LoadProfile.smoke),
+    ...createScenario('identityM1C', LoadProfile.smoke)
   },
   deployment: {
     ...createScenario('identity', LoadProfile.deployment, 2),
@@ -257,6 +265,32 @@ const groupMap = {
     'B01_Identity_01_LaunchOrchestratorStub',
     'B01_Identity_02_GoToFullJourneyRoute',
     'B01_Identity_02_GoToFullJourneyRoute::01_OrchStubCall'
+  ],
+  identityM1C: [
+    'B01_IdentityM1C_01_LaunchOrchestratorStub',
+    'B01_IdentityM1C_02_GoToFullJourneyRoute',
+    'B01_IdentityM1C_02_GoToFullJourneyRoute::01_OrchStubCall',
+    'B01_IdentityM1C_02_GoToFullJourneyRoute::02_CoreCall',
+    'B01_IdentityM1C_03_LiveInTheUK',
+    'B01_IdentityM1C_04_ClickContinueStartPage',
+    'B01_IdentityM1C_04_ClickContinueStartPage::01_CoreCall',
+    'B01_IdentityM1C_04_ClickContinueStartPage::02_DCMAWStub',
+    'B01_IdentityM1C_05_DCMAWContinue',
+    'B01_IdentityM1C_05_DCMAWContinue::01_DCMAWStub',
+    'B01_IdentityM1C_05_DCMAWContinue::02_CoreCall',
+    'B01_IdentityM1C_06_DCMAWSuccessPage',
+    'B01_IdentityM1C_06_DCMAWSuccessPage::01_CoreCall',
+    'B01_IdentityM1C_06_DCMAWSuccessPage::02_AddStub',
+    'B01_IdentityM1C_07_AddrDataContinue',
+    'B01_IdentityM1C_07_AddrDataContinue::01_AddStub',
+    'B01_IdentityM1C_07_AddrDataContinue::02_CoreCall',
+    'B01_IdentityM1C_07_AddrDataContinue::03_FraudStub',
+    'B01_IdentityM1C_08_FraudDataContinue',
+    'B01_IdentityM1C_08_FraudDataContinue::01_FraudStub',
+    'B01_IdentityM1C_08_FraudDataContinue::02_CoreCall',
+    'B01_IdentityM1C_09_ContinueSuccessPage',
+    'B01_IdentityM1C_09_ContinueSuccessPage::01_CoreCall',
+    'B01_IdentityM1C_09_ContinueSuccessPage::02_OrchStub'
   ]
 } as const
 
@@ -652,6 +686,209 @@ export function idReuse(): void {
           headers: { Authorization: `Basic ${encodedCredentials}` }
         }),
       { isStatusCode200, ...pageContentCheck('User information') }
+    )
+  })
+  iterationsCompleted.add(1)
+}
+
+export function identityM1C(): void {
+  const groups = groupMap.identityM1C
+  let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  const timestamp = new Date().toISOString().slice(2, 16).replace(/[-:]/g, '') // YYMMDDTHHmm
+  const iteration = execution.scenario.iterationInInstance.toString().padStart(6, '0')
+  const testEmail = `perftest${timestamp}${iteration}@digital.cabinet-office.gov.uk`
+  iterationsStarted.add(1)
+
+  // B01_IdentityM1C_01_LaunchOrchestratorStub
+  res = timeGroup(
+    groups[0],
+    () =>
+      http.get(env.orchStubEndPoint, {
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+      }),
+    { isStatusCode200, ...pageContentCheck('Enter userId manually') }
+  )
+
+  const userId = getUserId(res)
+  const signInJourneyId = getSignInJourneyId(res)
+
+  sleepBetween(0.5, 1)
+
+  // B01_IdentityM1C_02_GoToFullJourneyRoute
+  timeGroup(groups[1], () => {
+    // 01_OrchStub
+    res = timeGroup(
+      groups[2].split('::')[1],
+      () =>
+        http.get(
+          env.orchStubEndPoint +
+            `/authorize?journeyType=full&userIdText=${userId}&signInJourneyIdText=${signInJourneyId}&vtrText=${env.vtrText}&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${testEmail}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
+          {
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            redirects: 0
+          }
+        ),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Do you live in the UK, the Channel Islands or the Isle of Man') // Do you live in the UK, the Channel Islands or the Isle of Man
+    })
+  })
+
+  sleepBetween(0.5, 1)
+
+  // B01_IdentityM1C_03_LiveInTheUK
+  res = timeGroup(
+    groups[4],
+    () =>
+      res.submitForm({
+        fields: { journey: 'uk' }
+      }),
+    { isStatusCode200, ...pageContentCheck('Tell us if you have one of the following types of photo ID') }
+  )
+
+  // B01_IdentityM1C_04_ClickContinueStartPage
+  timeGroup(groups[5], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[6].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { journey: 'appTriage' },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_DCMAWStub
+    res = timeGroup(groups[7].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('DOC Checking App (Stub)')
+    })
+  })
+
+  sleepBetween(0.5, 1)
+
+  // B01_IdentityM1C_05_DCMAWContinue
+  timeGroup(groups[8], () => {
+    // 01_DCMAWStub
+    res = timeGroup(
+      groups[9].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            jsonPayload: passportPayloadM1C,
+            expand_evidence: 'on',
+            evidenceJsonPayload: chippedPassportPayloadM1C
+          },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    //02_CoreCall
+    res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('successfully matched you to the photo on your ID')
+    })
+  })
+
+  sleepBetween(0.5, 1)
+
+  // B01_IdentityM1C_06_DCMAWSuccessPage
+  timeGroup(groups[11], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[12].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            journey: 'next'
+          },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_AddressStub
+    res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Address (Stub)')
+    })
+  })
+
+  sleepBetween(0.5, 1)
+
+  // B01_IdentityM1C_07_AddrDataContinue
+  timeGroup(groups[14], () => {
+    // 01_AddStub
+    res = timeGroup(
+      groups[15].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: { jsonPayload: addressPayloadM1C },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+      isStatusCode302
+    })
+    // 03_FraudStub
+    res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Fraud Check (Stub)')
+    })
+  })
+
+  sleepBetween(0.5, 1)
+
+  // B01_IdentityM1C_08_FraudDataContinue
+  timeGroup(groups[18], () => {
+    // 01_FraudStub
+    res = timeGroup(
+      groups[19].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            jsonPayload: fraudPayloadM1C,
+            expand_evidence: 'on',
+            evidenceJsonPayload: failedFraudCheckPayloadM1C
+          },
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_CoreCall
+    res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Continue to the service you need to use')
+    })
+  })
+
+  sleepBetween(0.5, 1)
+
+  // B01_IdentityM1C_09_ContinueSuccessPage
+  timeGroup(groups[21], () => {
+    // 01_CoreCall
+    res = timeGroup(
+      groups[22].split('::')[1],
+      () =>
+        res.submitForm({
+          params: { redirects: 0 }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_OrchStub
+    res = timeGroup(
+      groups[23].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode200, ...pageContentCheck('available_authoritative_source') }
     )
   })
   iterationsCompleted.add(1)

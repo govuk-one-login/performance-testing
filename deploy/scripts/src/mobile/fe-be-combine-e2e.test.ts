@@ -120,7 +120,7 @@ export function mamIphonePassport(): void {
   getAppInfo() // BE
   simulateUserWait()
   const sessionId = getSessionIdFromCookieJar()
-  getBiometricTokenV2(sessionId)
+  const opaqueId = getBiometricTokenV2(sessionId)
   sleep(1)
   postTxmaEvent(sessionId) // BE
   sleep(3)
@@ -130,7 +130,7 @@ export function mamIphonePassport(): void {
   sleep(1)
   const accessToken = postToken(authorizationCode, redirectUri) // BE
   sleep(1)
-  setupVendorResponse(biometricSessionId)
+  setupVendorResponse(biometricSessionId, opaqueId)
   sleep(1)
   postUserInfoV2(accessToken)
   iterationsCompleted.add(1)

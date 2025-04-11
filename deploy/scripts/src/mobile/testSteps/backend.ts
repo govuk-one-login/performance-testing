@@ -38,13 +38,14 @@ export function postResourceOwnerDocumentGroups(sessionId: string): void {
   })
 }
 
-export function getBiometricTokenV2(sessionId: string): void {
-  group('GET /biometricToken/v2', () => {
+export function getBiometricTokenV2(sessionId: string): string {
+  return group('GET /biometricToken/v2', () => {
     const biometricTokenUrl = buildBackendUrl('/biometricToken/v2', {
       authSessionId: sessionId
     })
 
-    timeRequest(() => http.get(biometricTokenUrl), { isStatusCode200 })
+    const response = timeRequest(() => http.get(biometricTokenUrl), { isStatusCode200 })
+    return response.json('opaqueId') as string
   })
 }
 
@@ -113,7 +114,7 @@ export function postToken(authorizationCode: string, redirectUri: string): strin
   })
 }
 
-export function setupVendorResponse(biometricSessionId: string) {
+export function setupVendorResponse(biometricSessionId: string, opaqueId: string) {
   const requestBodyFromEnv = JSON.parse(config.requestBody)
 
   group('POST /v2/setupVendorResponse/', () => {
@@ -133,7 +134,7 @@ export function setupVendorResponse(biometricSessionId: string) {
     })
 
     // Create a new request body with the updated opaqueId
-    const updatedRequestBody = { ...requestBodyFromEnv, opaqueId: biometricSessionId }
+    const updatedRequestBody = { ...requestBodyFromEnv, opaqueId }
 
     // Create a new request body with the Updated creation date
     updatedRequestBody.creationDate = new Date().toISOString()

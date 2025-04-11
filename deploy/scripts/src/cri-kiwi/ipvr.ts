@@ -48,7 +48,7 @@ const profiles: ProfileList = {
     allEvents: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
-      timeUnit: '10',
+      timeUnit: '10s',
       preAllocatedVUs: 100,
       maxVUs: 1000,
       stages: [

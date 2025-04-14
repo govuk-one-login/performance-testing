@@ -8,6 +8,11 @@ ENV WORKDIR=/home/node
 COPY scripts ${WORKDIR}/scripts
 
 WORKDIR ${WORKDIR}/scripts
+
+# Create a new .npmrc file in the image
+RUN echo "@govuk-one-login:registry=https://npm.pkg.github.com" > .npmrc \
+  && echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+
 RUN npm install --ignore-scripts \
   && npm start
 

@@ -212,7 +212,7 @@ const profiles: ProfileList = {
     }
   },
   identityM1CPeakTest: {
-    identity: {
+    identityM1C: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',

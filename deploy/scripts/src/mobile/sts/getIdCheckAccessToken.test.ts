@@ -49,9 +49,11 @@ export function getIdCheckAccessToken(): void {
   iterationsCompleted.add(1)
 }
 
-const stsBaseUrl = 'https://token.dev.account.gov.uk'
+// const stsBaseUrl = 'https://token.dev.account.gov.uk'
+const stsBaseUrl = 'https://backend-api-jl.token.dev.account.gov.uk'
 const redirectUrl = 'https://mobile.dev.account.gov.uk/redirect'
-const orchestrationBaseUrl = 'https://auth-stub.mobile.dev.account.gov.uk'
+// const orchestrationBaseUrl = 'https://auth-stub.mobile.dev.account.gov.uk'
+const orchestrationBaseUrl = 'https://auth-stub-jl.mobile.dev.account.gov.uk'
 const codeVerifier = '98116f16-5a63-43ae-bc6d-563fbbd8b6d8'
 const codeChallenge = generateCodeChallenge(codeVerifier)
 
@@ -81,7 +83,7 @@ export function getAuthorize(): string {
       validateOrchestrationRedirect
     }
   )
-  return new URL(res.headers.Location).toString()
+  return res.headers.Location
 }
 
 function simulateOrchestrationCallToStsJwks(): void {

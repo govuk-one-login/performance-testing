@@ -223,6 +223,18 @@ const profiles: ProfileList = {
         { target: 160, duration: '30m' }
       ],
       exec: 'identityM1C'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 144,
+      stages: [
+        { target: 24, duration: '12s' },
+        { target: 24, duration: '30m' }
+      ],
+      exec: 'idReuse'
     }
   }
 }

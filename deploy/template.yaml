@@ -270,6 +270,11 @@ Resources:
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [TxMA, Staging, AccountID]
+                    - "self-staging-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [TiCF, Build, AccountID]
                     - "di-ticf-*"
               - Fn::Join:

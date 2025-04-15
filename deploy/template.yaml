@@ -48,9 +48,6 @@ Mappings:
   IPVR:
     AWS:
       AccountID: "073717171046"
-  TiCF:
-    AWS:
-      AccountID: "769837561067"
 
 Resources:
   CodeBuildServiceRole:
@@ -222,11 +219,6 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
                     - !FindInMap [TxMA, Staging, AccountID]
                     - "key/*"
-              - Fn::Join:
-                  - ":"
-                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
-                    - !FindInMap [TiCF, AWS, AccountID]
-                    - "key/*"
           - Effect: "Allow"
             Action:
               - "execute-api:*"
@@ -265,11 +257,6 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [TxMA, Staging, AccountID]
                     - "self-staging-*"
-              - Fn::Join:
-                  - ":"
-                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
-                    - !FindInMap [TiCF, AWS, AccountID]
-                    - "di-ticf-*"
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"
@@ -288,11 +275,6 @@ Resources:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
                     - !FindInMap [TxMA, Staging, AccountID]
-                    - "function:*"
-              - Fn::Join:
-                  - ":"
-                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
-                    - !FindInMap [TiCF, AWS, AccountID]
                     - "function:*"
 
   VPCTestPolicy:

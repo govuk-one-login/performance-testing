@@ -289,7 +289,7 @@ export function createI3SpikeSignUpScenario(
   const list: ScenarioList = {}
   const preAllocatedVUs = Math.round(((target / 10) * iterationDuration) / 2)
   const maxVUs = Math.round((target / 10) * iterationDuration)
-  const step = Math.round(target / 10 / 3)
+  const step = Math.round(target / 3)
   const spikeRamp = Math.round(rampUpNFR / 5)
   list[exec] = {
     executor: 'ramping-arrival-rate',

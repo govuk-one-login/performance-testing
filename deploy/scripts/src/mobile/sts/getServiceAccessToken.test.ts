@@ -8,16 +8,18 @@ import {
 import { Options } from 'k6/options'
 import { getThresholds } from '../../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../../common/utils/custom_metric/counter'
-import { timeGroup } from '../../common/utils/request/timing'
-import { isStatusCode200, isStatusCode302 } from '../../common/utils/checks/assertions'
-import http, { type Response } from 'k6/http'
-import { URL } from '../../common/utils/jslib/url'
-import { b64encode } from 'k6/encoding'
-import { algParamMap, JwtAlgorithm } from '../../common/utils/authentication/jwt'
-import { getEnv } from '../../common/utils/config/environment-variables'
-import { SignatureV4 } from '../../common/utils/jslib/aws-signature'
-import { AssumeRoleOutput } from '../../common/utils/aws/types'
-import { config } from './utils/config'
+import { postGenerateClientAttestation } from './utils/mockClient'
+import {
+  exchangeAccessToken,
+  exchangeAuthorizationCode,
+  getAuthorize,
+  getCodeFromOrchestration,
+  getRedirect,
+  simulateAppCallToStsJwks,
+  simulateIdCheckCallToStsJwks,
+  simulateOrchestrationCallToStsJwks
+} from './testSteps/backend'
+import { generateCodeChallenge, generateKey } from './utils/crypto'
 
 const profiles: ProfileList = {
   smoke: {
@@ -26,7 +28,7 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
-const groupMap = {
+export const groupMap = {
   getServiceAccessToken: [
     'GET /authorize (STS)',
     'GET /.well-known/jwks.json',
@@ -65,293 +67,7 @@ export async function getServiceAccessToken(): Promise<void> {
   const clientAttestation = postGenerateClientAttestation(publicKeyJwk)
   const accessToken = await exchangeAuthorizationCode(stsAuthorizationCode, codeVerifier, clientAttestation, keyPair)
   simulateAppCallToStsJwks()
-  await exchangeAccessToken(accessToken, 'sts-test.hello-world.read')
+  exchangeAccessToken(accessToken, 'sts-test.hello-world.read')
   simulateIdCheckCallToStsJwks()
   iterationsCompleted.add(1)
-}
-
-async function generateCodeChallenge(codeVerifier: string): Promise<string> {
-  const data = strToBuf(codeVerifier)
-  const buf = await crypto.subtle.digest('SHA-256', data)
-  return b64encode(buf, 'rawurl')
-}
-
-async function generateKey() {
-  return await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign'])
-}
-
-function strToBuf(str: string): ArrayBuffer {
-  const buf = new ArrayBuffer(str.length)
-  const bufView = new Uint8Array(buf)
-  for (let i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i)
-  }
-  return buf
-}
-
-async function signJwt(
-  type: JwtAlgorithm,
-  key: CryptoKey,
-  payload: object,
-  additionalHeaderParameters: object
-): Promise<string> {
-  const encodedHeader = b64encode(JSON.stringify({ alg: type, typ: 'JWT', ...additionalHeaderParameters }), 'rawurl')
-  const encodedPayload = b64encode(JSON.stringify(payload), 'rawurl')
-  const buf = strToBuf(`${encodedHeader}.${encodedPayload}`)
-  const sigBuf = await crypto.subtle.sign(algParamMap[type], key, buf)
-  const signature = b64encode(sigBuf, 'rawurl')
-  return `${encodedHeader}.${encodedPayload}.${signature}`
-}
-
-async function createJwt(key: CryptoKey, payload: object, additionalHeaderParameters: object): Promise<string> {
-  return signJwt('ES256', key, payload, additionalHeaderParameters)
-}
-
-// steps
-export function getAuthorize(codeChallenge: string): string {
-  const url = new URL('authorize', config.stsBaseUrl)
-  url.searchParams.set('client_id', config.clientId)
-  url.searchParams.set('redirect_uri', config.redirectUri)
-  url.searchParams.set('state', 'STATE')
-  url.searchParams.set('nonce', 'NONCE')
-  url.searchParams.set('response_type', 'code')
-  url.searchParams.set('scope', 'openid')
-  url.searchParams.set('code_challenge', codeChallenge)
-  url.searchParams.set('code_challenge_method', 'S256')
-  const authorizeRequestUrl = url.toString()
-  const res = timeGroup(
-    groupMap.getServiceAccessToken[0],
-    () => {
-      return http.get(authorizeRequestUrl, { redirects: 0 })
-    },
-    {
-      isStatusCode302,
-      validateOrchestrationRedirect
-    }
-  )
-  return res.headers.Location
-}
-
-function simulateOrchestrationCallToStsJwks(): void {
-  timeGroup(
-    groupMap.getServiceAccessToken[1],
-    () => {
-      return http.get(`${config.stsBaseUrl}/.well-known/jwks.json`)
-    },
-    {
-      isStatusCode200
-    }
-  )
-}
-
-function getCodeFromOrchestration(orchestrationAuthorizeUrl: string): {
-  state: string
-  orchestrationAuthorizationCode: string
-} {
-  const res = timeGroup(groupMap.getServiceAccessToken[2], () =>
-    http.get(orchestrationAuthorizeUrl, {
-      headers: { 'x-headless-mode-enabled': 'true' }
-    })
-  )
-  // Question - how to handle responses from mocks where it might be inefficient to add checks
-  return {
-    state: res.json('state') as string,
-    orchestrationAuthorizationCode: res.json('code') as string
-  }
-}
-
-export function getRedirect(state: string, orchestrationAuthorizationCode: string): string {
-  const url = new URL('redirect', config.stsBaseUrl)
-  url.searchParams.set('code', orchestrationAuthorizationCode)
-  url.searchParams.set('state', state)
-  const redirectRequestUrl = url.toString()
-  const res = timeGroup(
-    groupMap.getServiceAccessToken[3],
-    () => {
-      return http.get(redirectRequestUrl, { redirects: 0 })
-    },
-    {
-      isStatusCode302,
-      validateAuthorizationResponse
-    }
-  )
-  return new URL(res.headers.Location).searchParams.get('code')!
-}
-
-export function postGenerateClientAttestation(publicKeyJwk: JsonWebKey): string {
-  const requestBody = {
-    jwk: {
-      kty: publicKeyJwk.kty,
-      use: 'sig',
-      crv: publicKeyJwk.crv,
-      x: publicKeyJwk.x,
-      y: publicKeyJwk.y
-    }
-  }
-
-  const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
-  // Create a SignatureV4 signer for API Gateway
-  const apiGatewaySigner = new SignatureV4({
-    service: 'execute-api',
-    region: getEnv('AWS_REGION'),
-    credentials: {
-      accessKeyId: credentials.AccessKeyId,
-      secretAccessKey: credentials.SecretAccessKey,
-      sessionToken: credentials.SessionToken
-    },
-    uriEscapePath: false,
-    applyChecksum: false
-  })
-  const signedRequest = apiGatewaySigner.sign({
-    method: 'POST',
-    protocol: 'https',
-    hostname: config.stsMockClientBaseUrl.split('https://')[1],
-    path: '/generate-client-attestation',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(requestBody)
-  })
-
-  const res = timeGroup(
-    groupMap.getServiceAccessToken[4],
-    () => {
-      return http.post(signedRequest.url, JSON.stringify(requestBody), { headers: signedRequest.headers })
-    },
-    {
-      isStatusCode200,
-      validateGenerateClientAttestationResponse
-    }
-  )
-  return res.json('client_attestation') as string
-}
-
-export async function exchangeAuthorizationCode(
-  authorizationCode: string,
-  codeVerifier: string,
-  clientAttestation: string,
-  keypair: CryptoKeyPair
-): Promise<string> {
-  const nowInSeconds = Math.floor(Date.now() / 1000)
-  const proofOfPossession = await createJwt(
-    keypair.privateKey,
-    {
-      iss: config.clientId,
-      aud: config.stsBaseUrl,
-      exp: nowInSeconds + 180,
-      jti: crypto.randomUUID()
-    },
-    { typ: 'oauth-client-attestation-pop+jwt' }
-  )
-
-  const res = timeGroup(
-    groupMap.getServiceAccessToken[5],
-    () => {
-      return http.post(
-        `${config.stsBaseUrl}/token`,
-        {
-          grant_type: 'authorization_code',
-          code: authorizationCode,
-          redirect_uri: config.redirectUri,
-          code_verifier: codeVerifier
-        },
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'OAuth-Client-Attestation': clientAttestation,
-            'OAuth-Client-Attestation-PoP': proofOfPossession
-          }
-        }
-      )
-    },
-    {
-      isStatusCode200,
-      validateAccessTokenResponse
-    }
-  )
-  return res.json('access_token') as string
-}
-
-function simulateAppCallToStsJwks(): void {
-  timeGroup(
-    groupMap.getServiceAccessToken[6],
-    () => {
-      return http.get(`${config.stsBaseUrl}/.well-known/jwks.json`)
-    },
-    {
-      isStatusCode200
-    }
-  )
-}
-
-export async function exchangeAccessToken(accessToken: string, scope: string): Promise<string> {
-  const res = timeGroup(
-    groupMap.getServiceAccessToken[7],
-    () => {
-      return http.post(
-        `${config.stsBaseUrl}/token`,
-        {
-          grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
-          subject_token: accessToken,
-          subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',
-          scope
-        },
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }
-      )
-    },
-    {
-      isStatusCode200,
-      validateTokenExchangeResponse
-    }
-  )
-  return res.json('access_token') as string
-}
-
-function simulateIdCheckCallToStsJwks(): void {
-  timeGroup(
-    groupMap.getServiceAccessToken[8],
-    () => {
-      return http.get(`${config.stsBaseUrl}/.well-known/jwks.json`)
-    },
-    {
-      isStatusCode200
-    }
-  )
-}
-
-// assertions - move these later
-export function validateOrchestrationRedirect(res: Response): boolean {
-  const url = new URL(res.headers.Location)
-  if (url.origin !== config.orchestrationBaseUrl) return false
-  if (url.pathname !== '/authorize') return false
-  const queryParams = url.searchParams
-  const requiredQueryParams = ['client_id', 'scope', 'response_type', 'request']
-  if (requiredQueryParams.some(paramName => !queryParams.has(paramName))) return false
-  return true
-}
-
-export function validateAuthorizationResponse(res: Response): boolean {
-  const url = new URL(res.headers.Location)
-  if (`${url.origin}${url.pathname}` !== config.redirectUri) return false
-  const queryParams = url.searchParams
-  const requiredQueryParams = ['code', 'state']
-  if (requiredQueryParams.some(paramName => !queryParams.has(paramName))) return false
-  if (queryParams.get('state') !== 'STATE') return false
-  return true
-}
-
-export function validateGenerateClientAttestationResponse(res: Response): boolean {
-  return res.json('client_attestation') !== undefined
-}
-
-export function validateAccessTokenResponse(res: Response): boolean {
-  return res.json('access_token') !== undefined && res.json('id_token') !== undefined
-}
-
-export function validateTokenExchangeResponse(res: Response): boolean {
-  return res.json('access_token') !== undefined
 }

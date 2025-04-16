@@ -279,3 +279,67 @@ export function createScenario(
   }
   return list
 }
+
+export function createI3SpikeSignUpScenario(
+  exec: string,
+  target: number = 1,
+  iterationDuration: number = 30,
+  rampUpNFR: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round(((target / 10) * iterationDuration) / 2)
+  const maxVUs = Math.round((target / 10) * iterationDuration)
+  const step = Math.round(target / 10 / 3)
+  const spikeRamp = Math.round(rampUpNFR / 5)
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 1,
+    timeUnit: '10s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target: step, duration: '4m' }, // Ramp up to 33% target throughput over 4 minutes
+      { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+      { target, duration: `${spikeRamp}s` }, // Ramp up to 100% target throughput at 5 X PERF008 growth rate
+      { target, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
+      { target: step, duration: '1s' }, // Ramp down to 33% over 1 second
+      { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+      { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
+      { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
+    ],
+    exec
+  }
+  return list
+}
+
+export function createI3SpikeSignInScenario(
+  exec: string,
+  target: number = 1,
+  iterationDuration: number = 30,
+  rampUpNFR: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
+  const maxVUs = target * iterationDuration
+  const step = Math.round(target / 3)
+  const spikeRamp = Math.round(rampUpNFR / 5)
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 2,
+    timeUnit: '1s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target: step, duration: '4m' }, // Ramp up to 33% target throughput over 4 minutes
+      { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+      { target, duration: `${spikeRamp}s` }, // Ramp up to 100% target throughput at 5 X PERF008 growth rate
+      { target, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
+      { target: step, duration: '1s' }, // Ramp down to 33% over 1 second
+      { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+      { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
+      { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
+    ],
+    exec
+  }
+  return list
+}

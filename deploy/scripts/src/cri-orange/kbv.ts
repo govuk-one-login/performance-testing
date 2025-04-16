@@ -87,7 +87,7 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration3SpikeTest: {
-    ...createI3SpikeSignUpScenario('KBV', 49, 12, 50)
+    ...createI3SpikeSignUpScenario('kbv', 49, 12, 50)
   }
 }
 

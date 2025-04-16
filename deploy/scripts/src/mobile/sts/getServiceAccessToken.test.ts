@@ -12,7 +12,6 @@ import { timeGroup } from '../../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302 } from '../../common/utils/checks/assertions'
 import http, { type Response } from 'k6/http'
 import { URL } from '../../common/utils/jslib/url'
-import { createHash } from 'k6/crypto'
 import { b64encode } from 'k6/encoding'
 import { algParamMap, JwtAlgorithm } from '../../common/utils/authentication/jwt'
 import { getEnv } from '../../common/utils/config/environment-variables'
@@ -21,19 +20,21 @@ import { AssumeRoleOutput } from '../../common/utils/aws/types'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('getIdCheckAccessToken', LoadProfile.smoke)
+    ...createScenario('getServiceAccessToken', LoadProfile.smoke)
   }
 }
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  getIdCheckAccessToken: [
+  getServiceAccessToken: [
     'GET /authorize (STS)',
     'GET /.well-known/jwks.json',
     'GET /authorize (Orchestration)',
     'GET /redirect',
     'POST /generate-client-attestation',
     'POST /token (authorization code exchange)',
+    'GET /.well-known/jwks.json',
+    'POST /token (access token exchange)',
     'GET /.well-known/jwks.json'
   ]
 } as const
@@ -48,17 +49,23 @@ export function setup(): void {
   describeProfile(loadProfile)
 }
 
-export async function getIdCheckAccessToken(): Promise<void> {
-  iterationsStarted.add(1)
+export async function getServiceAccessToken(): Promise<void> {
   const keyPair = await generateKey()
   const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
-  const orchestrationAuthorizeUrl = getAuthorize()
+
+  const codeVerifier = crypto.randomUUID()
+  const codeChallenge = await generateCodeChallenge(codeVerifier)
+
+  iterationsStarted.add(1)
+  const orchestrationAuthorizeUrl = getAuthorize(codeChallenge)
   simulateOrchestrationCallToStsJwks()
   const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(orchestrationAuthorizeUrl)
   const stsAuthorizationCode = getRedirect(state, orchestrationAuthorizationCode)
   const clientAttestation = postGenerateClientAttestation(publicKeyJwk)
   const accessToken = await exchangeAuthorizationCode(stsAuthorizationCode, codeVerifier, clientAttestation, keyPair)
   simulateAppCallToStsJwks()
+  await exchangeAccessToken(accessToken, 'sts-test.hello-world.read')
+  simulateIdCheckCallToStsJwks()
   iterationsCompleted.add(1)
 }
 
@@ -69,18 +76,16 @@ const stsMockClientBaseUrl = 'https://test-resources-jl-mock-client.token.dev.ac
 const redirectUri = 'https://mobile.dev.account.gov.uk/redirect'
 // const orchestrationBaseUrl = 'https://auth-stub.mobile.dev.account.gov.uk'
 const orchestrationBaseUrl = 'https://auth-stub-jl.mobile.dev.account.gov.uk'
-const codeVerifier = crypto.randomUUID()
-const codeChallenge = generateCodeChallenge(codeVerifier)
 const clientId = 'bCAOfDdDSwO4ug2ZNNU1EZrlGrg'
 
-function generateCodeChallenge(codeVerifier: string): string {
-  const hasher = createHash('sha256')
-  hasher.update(codeVerifier)
-  return hasher.digest('base64rawurl')
+async function generateCodeChallenge(codeVerifier: string): Promise<string> {
+  const data = strToBuf(codeVerifier)
+  const buf = await crypto.subtle.digest('SHA-256', data)
+  return b64encode(buf, 'rawurl')
 }
 
 async function generateKey() {
-  return await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign'])
+  return await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign'])
 }
 
 function strToBuf(str: string): ArrayBuffer {
@@ -111,7 +116,7 @@ async function createJwt(key: CryptoKey, payload: object, additionalHeaderParame
 }
 
 // steps
-export function getAuthorize(): string {
+export function getAuthorize(codeChallenge: string): string {
   const url = new URL('authorize', stsBaseUrl)
   url.searchParams.set('client_id', clientId)
   url.searchParams.set('redirect_uri', redirectUri)
@@ -123,7 +128,7 @@ export function getAuthorize(): string {
   url.searchParams.set('code_challenge_method', 'S256')
   const authorizeRequestUrl = url.toString()
   const res = timeGroup(
-    groupMap.getIdCheckAccessToken[0],
+    groupMap.getServiceAccessToken[0],
     () => {
       return http.get(authorizeRequestUrl, { redirects: 0 })
     },
@@ -137,7 +142,7 @@ export function getAuthorize(): string {
 
 function simulateOrchestrationCallToStsJwks(): void {
   timeGroup(
-    groupMap.getIdCheckAccessToken[1],
+    groupMap.getServiceAccessToken[1],
     () => {
       return http.get(`${stsBaseUrl}/.well-known/jwks.json`)
     },
@@ -151,7 +156,7 @@ function getCodeFromOrchestration(orchestrationAuthorizeUrl: string): {
   state: string
   orchestrationAuthorizationCode: string
 } {
-  const res = timeGroup(groupMap.getIdCheckAccessToken[2], () =>
+  const res = timeGroup(groupMap.getServiceAccessToken[2], () =>
     http.get(orchestrationAuthorizeUrl, {
       headers: { 'x-headless-mode-enabled': 'true' }
     })
@@ -169,7 +174,7 @@ export function getRedirect(state: string, orchestrationAuthorizationCode: strin
   url.searchParams.set('state', state)
   const redirectRequestUrl = url.toString()
   const res = timeGroup(
-    groupMap.getIdCheckAccessToken[3],
+    groupMap.getServiceAccessToken[3],
     () => {
       return http.get(redirectRequestUrl, { redirects: 0 })
     },
@@ -217,7 +222,7 @@ export function postGenerateClientAttestation(publicKeyJwk: JsonWebKey): string 
   })
 
   const res = timeGroup(
-    groupMap.getIdCheckAccessToken[4],
+    groupMap.getServiceAccessToken[4],
     () => {
       return http.post(signedRequest.url, JSON.stringify(requestBody), { headers: signedRequest.headers })
     },
@@ -248,7 +253,7 @@ export async function exchangeAuthorizationCode(
   )
 
   const res = timeGroup(
-    groupMap.getIdCheckAccessToken[5],
+    groupMap.getServiceAccessToken[5],
     () => {
       return http.post(
         `${stsBaseUrl}/token`,
@@ -277,7 +282,46 @@ export async function exchangeAuthorizationCode(
 
 function simulateAppCallToStsJwks(): void {
   timeGroup(
-    groupMap.getIdCheckAccessToken[6],
+    groupMap.getServiceAccessToken[6],
+    () => {
+      return http.get(`${stsBaseUrl}/.well-known/jwks.json`)
+    },
+    {
+      isStatusCode200
+    }
+  )
+}
+
+export async function exchangeAccessToken(accessToken: string, scope: string): Promise<string> {
+  const res = timeGroup(
+    groupMap.getServiceAccessToken[7],
+    () => {
+      return http.post(
+        `${stsBaseUrl}/token`,
+        {
+          grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
+          subject_token: accessToken,
+          subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',
+          scope
+        },
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      )
+    },
+    {
+      isStatusCode200,
+      validateTokenExchangeResponse
+    }
+  )
+  return res.json('access_token') as string
+}
+
+function simulateIdCheckCallToStsJwks(): void {
+  timeGroup(
+    groupMap.getServiceAccessToken[8],
     () => {
       return http.get(`${stsBaseUrl}/.well-known/jwks.json`)
     },
@@ -314,4 +358,8 @@ export function validateGenerateClientAttestationResponse(res: Response): boolea
 
 export function validateAccessTokenResponse(res: Response): boolean {
   return res.json('access_token') !== undefined && res.json('id_token') !== undefined
+}
+
+export function validateTokenExchangeResponse(res: Response): boolean {
+  return res.json('access_token') !== undefined
 }

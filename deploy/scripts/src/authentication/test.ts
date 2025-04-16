@@ -10,7 +10,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
@@ -157,6 +159,10 @@ const profiles: ProfileList = {
       ],
       exec: 'signIn'
     }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('signUp', 490, 33, 491),
+    ...createI3SpikeSignInScenario('signIn', 71, 18, 33)
   }
 }
 const loadProfile = selectProfile(profiles)

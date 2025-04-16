@@ -7,7 +7,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { timeGroup } from '../common/utils/request/timing'
 import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
@@ -236,6 +238,10 @@ const profiles: ProfileList = {
       ],
       exec: 'idReuse'
     }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('identity', 490, 36, 491),
+    ...createI3SpikeSignInScenario('idReuse', 71, 6, 33)
   }
 }
 

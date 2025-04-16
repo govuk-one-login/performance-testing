@@ -9,8 +9,8 @@ COPY scripts ${WORKDIR}/scripts
 
 WORKDIR ${WORKDIR}/scripts
 
-#RUN npm install --ignore-scripts \
-#  && npm start
+RUN npm install --ignore-scripts \
+  && npm start
 
 # -------------------------------
 # Build k6 binary with extensions

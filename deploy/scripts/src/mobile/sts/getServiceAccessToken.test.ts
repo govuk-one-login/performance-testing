@@ -17,6 +17,7 @@ import { algParamMap, JwtAlgorithm } from '../../common/utils/authentication/jwt
 import { getEnv } from '../../common/utils/config/environment-variables'
 import { SignatureV4 } from '../../common/utils/jslib/aws-signature'
 import { AssumeRoleOutput } from '../../common/utils/aws/types'
+import { config } from './utils/config'
 
 const profiles: ProfileList = {
   smoke: {
@@ -69,15 +70,6 @@ export async function getServiceAccessToken(): Promise<void> {
   iterationsCompleted.add(1)
 }
 
-// const stsBaseUrl = 'https://token.dev.account.gov.uk'
-const stsBaseUrl = 'https://backend-api-jl.token.dev.account.gov.uk'
-const stsMockClientBaseUrl = 'https://test-resources-jl-mock-client.token.dev.account.gov.uk'
-// const stsMockClientBaseUrl = 'https://mock-client.token.dev.account.gov.uk'
-const redirectUri = 'https://mobile.dev.account.gov.uk/redirect'
-// const orchestrationBaseUrl = 'https://auth-stub.mobile.dev.account.gov.uk'
-const orchestrationBaseUrl = 'https://auth-stub-jl.mobile.dev.account.gov.uk'
-const clientId = 'bCAOfDdDSwO4ug2ZNNU1EZrlGrg'
-
 async function generateCodeChallenge(codeVerifier: string): Promise<string> {
   const data = strToBuf(codeVerifier)
   const buf = await crypto.subtle.digest('SHA-256', data)
@@ -117,9 +109,9 @@ async function createJwt(key: CryptoKey, payload: object, additionalHeaderParame
 
 // steps
 export function getAuthorize(codeChallenge: string): string {
-  const url = new URL('authorize', stsBaseUrl)
-  url.searchParams.set('client_id', clientId)
-  url.searchParams.set('redirect_uri', redirectUri)
+  const url = new URL('authorize', config.stsBaseUrl)
+  url.searchParams.set('client_id', config.clientId)
+  url.searchParams.set('redirect_uri', config.redirectUri)
   url.searchParams.set('state', 'STATE')
   url.searchParams.set('nonce', 'NONCE')
   url.searchParams.set('response_type', 'code')
@@ -144,7 +136,7 @@ function simulateOrchestrationCallToStsJwks(): void {
   timeGroup(
     groupMap.getServiceAccessToken[1],
     () => {
-      return http.get(`${stsBaseUrl}/.well-known/jwks.json`)
+      return http.get(`${config.stsBaseUrl}/.well-known/jwks.json`)
     },
     {
       isStatusCode200
@@ -169,7 +161,7 @@ function getCodeFromOrchestration(orchestrationAuthorizeUrl: string): {
 }
 
 export function getRedirect(state: string, orchestrationAuthorizationCode: string): string {
-  const url = new URL('redirect', stsBaseUrl)
+  const url = new URL('redirect', config.stsBaseUrl)
   url.searchParams.set('code', orchestrationAuthorizationCode)
   url.searchParams.set('state', state)
   const redirectRequestUrl = url.toString()
@@ -213,7 +205,7 @@ export function postGenerateClientAttestation(publicKeyJwk: JsonWebKey): string 
   const signedRequest = apiGatewaySigner.sign({
     method: 'POST',
     protocol: 'https',
-    hostname: stsMockClientBaseUrl.split('https://')[1],
+    hostname: config.stsMockClientBaseUrl.split('https://')[1],
     path: '/generate-client-attestation',
     headers: {
       'Content-Type': 'application/json'
@@ -244,8 +236,8 @@ export async function exchangeAuthorizationCode(
   const proofOfPossession = await createJwt(
     keypair.privateKey,
     {
-      iss: clientId,
-      aud: stsBaseUrl,
+      iss: config.clientId,
+      aud: config.stsBaseUrl,
       exp: nowInSeconds + 180,
       jti: crypto.randomUUID()
     },
@@ -256,11 +248,11 @@ export async function exchangeAuthorizationCode(
     groupMap.getServiceAccessToken[5],
     () => {
       return http.post(
-        `${stsBaseUrl}/token`,
+        `${config.stsBaseUrl}/token`,
         {
           grant_type: 'authorization_code',
           code: authorizationCode,
-          redirect_uri: redirectUri,
+          redirect_uri: config.redirectUri,
           code_verifier: codeVerifier
         },
         {
@@ -284,7 +276,7 @@ function simulateAppCallToStsJwks(): void {
   timeGroup(
     groupMap.getServiceAccessToken[6],
     () => {
-      return http.get(`${stsBaseUrl}/.well-known/jwks.json`)
+      return http.get(`${config.stsBaseUrl}/.well-known/jwks.json`)
     },
     {
       isStatusCode200
@@ -297,7 +289,7 @@ export async function exchangeAccessToken(accessToken: string, scope: string): P
     groupMap.getServiceAccessToken[7],
     () => {
       return http.post(
-        `${stsBaseUrl}/token`,
+        `${config.stsBaseUrl}/token`,
         {
           grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
           subject_token: accessToken,
@@ -323,7 +315,7 @@ function simulateIdCheckCallToStsJwks(): void {
   timeGroup(
     groupMap.getServiceAccessToken[8],
     () => {
-      return http.get(`${stsBaseUrl}/.well-known/jwks.json`)
+      return http.get(`${config.stsBaseUrl}/.well-known/jwks.json`)
     },
     {
       isStatusCode200
@@ -334,7 +326,7 @@ function simulateIdCheckCallToStsJwks(): void {
 // assertions - move these later
 export function validateOrchestrationRedirect(res: Response): boolean {
   const url = new URL(res.headers.Location)
-  if (url.origin !== orchestrationBaseUrl) return false
+  if (url.origin !== config.orchestrationBaseUrl) return false
   if (url.pathname !== '/authorize') return false
   const queryParams = url.searchParams
   const requiredQueryParams = ['client_id', 'scope', 'response_type', 'request']
@@ -344,7 +336,7 @@ export function validateOrchestrationRedirect(res: Response): boolean {
 
 export function validateAuthorizationResponse(res: Response): boolean {
   const url = new URL(res.headers.Location)
-  if (`${url.origin}${url.pathname}` !== redirectUri) return false
+  if (`${url.origin}${url.pathname}` !== config.redirectUri) return false
   const queryParams = url.searchParams
   const requiredQueryParams = ['code', 'state']
   if (requiredQueryParams.some(paramName => !queryParams.has(paramName))) return false

@@ -9,7 +9,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeOLHScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { timeGroup } from '../common/utils/request/timing'
@@ -290,6 +292,13 @@ const profiles: ProfileList = {
       ],
       exec: 'landingPage'
     }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeOLHScenario('changeEmail', 4, 24, 1),
+    ...createI3SpikeOLHScenario('changePassword', 4, 21, 1),
+    ...createI3SpikeOLHScenario('changePhone', 4, 24, 1),
+    ...createI3SpikeOLHScenario('deleteAccount', 4, 18, 1),
+    ...createI3SpikeSignInScenario('landingPage', 7, 6, 5)
   }
 }
 

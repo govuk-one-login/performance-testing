@@ -10,6 +10,7 @@ import {
   describeProfile,
   createScenario,
   LoadProfile,
+  createI3SpikeOLHScenario,
   createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
@@ -293,10 +294,10 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration3SpikeTest: {
-    ...createI3SpikeSignInScenario('changeEmail', 1, 24, 1),
-    ...createI3SpikeSignInScenario('changePassword', 1, 21, 1),
-    ...createI3SpikeSignInScenario('changePhone', 1, 24, 1),
-    ...createI3SpikeSignInScenario('deleteAccount', 1, 18, 1),
+    ...createI3SpikeOLHScenario('changeEmail', 4, 24, 1),
+    ...createI3SpikeOLHScenario('changePassword', 4, 21, 1),
+    ...createI3SpikeOLHScenario('changePhone', 4, 24, 1),
+    ...createI3SpikeOLHScenario('deleteAccount', 4, 18, 1),
     ...createI3SpikeSignInScenario('landingPage', 7, 6, 5)
   }
 }

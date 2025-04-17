@@ -6,7 +6,7 @@ import { isStatusCode200 } from '../../../common/utils/checks/assertions'
 import { groupMap } from '../getServiceAccessToken.test'
 import { signRequest } from './signatureV4'
 import { config } from './config'
-import {validateGenerateClientAttestationResponse} from "./assertions";
+import { validateGenerateClientAttestationResponse } from './assertions'
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 
@@ -34,7 +34,7 @@ export function postGenerateClientAttestation(publicKeyJwk: JsonWebKey): string 
   )
 
   const res = timeGroup(
-    groupMap.getServiceAccessToken[4],
+    groupMap.getServiceAccessToken[5],
     () => {
       return http.post(signedRequest.url, JSON.stringify(requestBody), { headers: signedRequest.headers })
     },

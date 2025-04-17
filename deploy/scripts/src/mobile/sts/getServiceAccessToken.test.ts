@@ -15,7 +15,7 @@ import {
   getAuthorize,
   getCodeFromOrchestration,
   getRedirect,
-  simulateAppCallToStsJwks,
+  simulateAppCallToStsJwks, simulateCallToStsJwks,
   simulateIdCheckCallToStsJwks,
   simulateOrchestrationCallToStsJwks
 } from './testSteps/backend'
@@ -34,6 +34,7 @@ export const groupMap = {
     'GET /.well-known/jwks.json',
     'GET /authorize (Orchestration)',
     'GET /redirect',
+    'GET /.well-known/jwks.json',
     'POST /generate-client-attestation',
     'POST /token (authorization code exchange)',
     'GET /.well-known/jwks.json',
@@ -61,13 +62,14 @@ export async function getServiceAccessToken(): Promise<void> {
 
   iterationsStarted.add(1)
   const orchestrationAuthorizeUrl = getAuthorize(codeChallenge)
-  simulateOrchestrationCallToStsJwks()
+  simulateCallToStsJwks(groupMap.getServiceAccessToken[1])
   const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(orchestrationAuthorizeUrl)
   const stsAuthorizationCode = getRedirect(state, orchestrationAuthorizationCode)
+  simulateCallToStsJwks(groupMap.getServiceAccessToken[4])
   const clientAttestation = postGenerateClientAttestation(publicKeyJwk)
   const accessToken = await exchangeAuthorizationCode(stsAuthorizationCode, codeVerifier, clientAttestation, keyPair)
-  simulateAppCallToStsJwks()
+  simulateCallToStsJwks(groupMap.getServiceAccessToken[7])
   exchangeAccessToken(accessToken, 'sts-test.hello-world.read')
-  simulateIdCheckCallToStsJwks()
+  simulateCallToStsJwks(groupMap.getServiceAccessToken[9])
   iterationsCompleted.add(1)
 }

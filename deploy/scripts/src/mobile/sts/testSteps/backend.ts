@@ -36,18 +36,6 @@ export function getAuthorize(codeChallenge: string): string {
   return res.headers.Location
 }
 
-export function simulateOrchestrationCallToStsJwks(): void {
-  timeGroup(
-    groupMap.getServiceAccessToken[1],
-    () => {
-      return http.get(`${config.stsBaseUrl}/.well-known/jwks.json`)
-    },
-    {
-      isStatusCode200
-    }
-  )
-}
-
 export function getCodeFromOrchestration(orchestrationAuthorizeUrl: string): {
   state: string
   orchestrationAuthorizationCode: string
@@ -104,7 +92,7 @@ export async function exchangeAuthorizationCode(
   )
 
   const res = timeGroup(
-    groupMap.getServiceAccessToken[5],
+    groupMap.getServiceAccessToken[6],
     () => {
       return http.post(
         `${config.stsBaseUrl}/token`,
@@ -131,21 +119,9 @@ export async function exchangeAuthorizationCode(
   return res.json('access_token') as string
 }
 
-export function simulateAppCallToStsJwks(): void {
-  timeGroup(
-    groupMap.getServiceAccessToken[6],
-    () => {
-      return http.get(`${config.stsBaseUrl}/.well-known/jwks.json`)
-    },
-    {
-      isStatusCode200
-    }
-  )
-}
-
 export function exchangeAccessToken(accessToken: string, scope: string): string {
   const res = timeGroup(
-    groupMap.getServiceAccessToken[7],
+    groupMap.getServiceAccessToken[8],
     () => {
       return http.post(
         `${config.stsBaseUrl}/token`,
@@ -170,9 +146,9 @@ export function exchangeAccessToken(accessToken: string, scope: string): string 
   return res.json('access_token') as string
 }
 
-export function simulateIdCheckCallToStsJwks(): void {
+export function simulateCallToStsJwks(groupName: string): void {
   timeGroup(
-    groupMap.getServiceAccessToken[8],
+    groupName,
     () => {
       return http.get(`${config.stsBaseUrl}/.well-known/jwks.json`)
     },

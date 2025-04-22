@@ -1,17 +1,3 @@
-# -----------------------
-# Typescript > Javascript
-# -----------------------
-FROM node:20-alpine3.18 AS node-build
-
-ENV WORKDIR=/home/node
-
-COPY scripts ${WORKDIR}/scripts
-
-WORKDIR ${WORKDIR}/scripts
-
-RUN npm install --ignore-scripts \
-  && npm start
-
 # -------------------------------
 # Build k6 binary with extensions
 # -------------------------------

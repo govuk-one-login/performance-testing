@@ -39,7 +39,7 @@ RUN apk add --no-cache aws-cli chromium curl jq
 
 USER k6
 RUN mkdir ${WORKDIR}/scripts
-COPY scripts/dist ${WORKDIR}/scripts
+COPY dist ${WORKDIR}/scripts
 COPY reporting ${WORKDIR}/reporting
 
 ENTRYPOINT ["sh"]

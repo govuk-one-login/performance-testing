@@ -85,7 +85,7 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration3SpikeTest: {
-    ...createI3SpikeSignUpScenario('ninoCheck', 5, 6, 61)
+    ...createI3SpikeSignUpScenario('ninoCheck', 5, 6, 6)
   }
 }
 

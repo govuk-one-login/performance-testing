@@ -59,7 +59,7 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration3SpikeTest: {
-    ...createI3SpikeSignUpScenario('otg', 5, 3, 31)
+    ...createI3SpikeSignUpScenario('otg', 5, 3, 6)
   }
 }
 

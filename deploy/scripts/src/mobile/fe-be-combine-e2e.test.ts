@@ -66,6 +66,20 @@ const profiles: ProfileList = {
       ],
       exec: 'mamIphonePassport'
     }
+  },
+  perf006Iteration3PeakTest: {
+    mamIphonePassport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 338,
+      maxVUs: 675,
+      stages: [
+        { target: 150, duration: '151s' },
+        { target: 150, duration: '30m' }
+      ],
+      exec: 'mamIphonePassport'
+    }
   }
 }
 

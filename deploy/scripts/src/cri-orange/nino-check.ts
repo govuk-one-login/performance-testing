@@ -85,7 +85,7 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration3SpikeTest: {
-    ...createI3SpikeSignUpScenario('ninoCheck', 5, 6, 61) //0.49 j/sec rounding to 5  ( 5/10 in profile)
+    ...createI3SpikeSignUpScenario('ninoCheck', 5, 6, 61)
   }
 }
 

@@ -6,7 +6,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { b64encode } from 'k6/encoding'
 import { timeGroup } from '../common/utils/request/timing'
@@ -55,6 +56,9 @@ const profiles: ProfileList = {
       ],
       exec: 'BAV'
     }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('ninoCheck', 5, 21, 6)
   }
 }
 

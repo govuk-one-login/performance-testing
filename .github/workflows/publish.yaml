@@ -50,7 +50,7 @@ jobs:
         run: npm run lint
 
       - name: Transpile TypeScript test scripts
-        run: npm start
+        run: npm start && ls -lt
 
       - name: Deploy SAM app to ECR
         uses: govuk-one-login/devplatform-upload-action-ecr@5431bcea6158b6c12776a96e067b1e02bf91b13d # 1.3.0

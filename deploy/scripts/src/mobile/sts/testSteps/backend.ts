@@ -3,7 +3,7 @@ import { config } from '../utils/config'
 import { timeGroup } from '../../../common/utils/request/timing'
 import http from 'k6/http'
 import { isStatusCode200, isStatusCode302 } from '../../../common/utils/checks/assertions'
-import { groupMap } from '../getServiceAccessToken.test'
+import { groupMap } from '../../v2-sts-get-service-access-token'
 import { validateAccessTokenResponse, validateRedirect, validateTokenExchangeResponse } from '../utils/assertions'
 import { signJwt } from '../utils/crypto'
 

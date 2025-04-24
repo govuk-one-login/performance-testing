@@ -5,7 +5,7 @@ const outbase = './src'
 const outdir = './dist'
 
 build({
-  entryPoints: sync(['src/*/*.ts', 'src/mobile/**/*.test.ts']),
+  entryPoints: sync(['src/*/*.ts']),
   outbase,
   outdir,
   target: 'es2017',
@@ -25,7 +25,7 @@ build({
 })
   .then(() => {
     console.log('Test scripts transpiled:')
-    sync(outdir + '/**/*.js')
+    sync(outdir + '/*/*.js')
       .sort()
       .forEach(file => {
         console.log(`+ \x1b[32m${file}\x1b[0m`)

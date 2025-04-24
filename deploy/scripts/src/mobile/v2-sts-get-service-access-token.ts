@@ -4,11 +4,11 @@ import {
   LoadProfile,
   ProfileList,
   selectProfile
-} from '../../common/utils/config/load-profiles'
+} from '../common/utils/config/load-profiles'
 import { Options } from 'k6/options'
-import { getThresholds } from '../../common/utils/config/thresholds'
-import { iterationsCompleted, iterationsStarted } from '../../common/utils/custom_metric/counter'
-import { postGenerateClientAttestation } from './utils/mockClient'
+import { getThresholds } from '../common/utils/config/thresholds'
+import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
+import { postGenerateClientAttestation } from './sts/utils/mockClient'
 import {
   exchangeAccessToken,
   exchangeAuthorizationCode,
@@ -16,8 +16,8 @@ import {
   getCodeFromOrchestration,
   getRedirect,
   simulateCallToStsJwks
-} from './testSteps/backend'
-import { generateCodeChallenge, generateKey } from './utils/crypto'
+} from './sts/testSteps/backend'
+import { generateCodeChallenge, generateKey } from './sts/utils/crypto'
 
 const profiles: ProfileList = {
   smoke: {

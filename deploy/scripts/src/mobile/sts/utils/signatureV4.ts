@@ -1,4 +1,3 @@
-import { AssumeRoleOutput } from '../../../common/utils/aws/types'
 import { SignatureV4 } from '../../../common/utils/jslib/aws-signature'
 
 type Credentials = {

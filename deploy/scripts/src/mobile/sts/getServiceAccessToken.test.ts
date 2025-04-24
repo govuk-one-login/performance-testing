@@ -15,9 +15,7 @@ import {
   getAuthorize,
   getCodeFromOrchestration,
   getRedirect,
-  simulateAppCallToStsJwks, simulateCallToStsJwks,
-  simulateIdCheckCallToStsJwks,
-  simulateOrchestrationCallToStsJwks
+  simulateCallToStsJwks
 } from './testSteps/backend'
 import { generateCodeChallenge, generateKey } from './utils/crypto'
 

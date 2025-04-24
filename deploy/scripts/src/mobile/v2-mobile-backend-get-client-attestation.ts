@@ -45,7 +45,7 @@ export async function getClientAttestation(): Promise<void> {
   iterationsStarted.add(1)
   getAppInfo()
   const appCheckToken = getAppCheckToken()
-  console.log(postClientAttestation(publicKeyJwk, appCheckToken))
+  postClientAttestation(publicKeyJwk, appCheckToken)
   simulateCallToMobileBackendJwks()
   iterationsCompleted.add(1)
 }

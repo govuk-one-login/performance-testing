@@ -14,7 +14,6 @@
     "esbuild-plugin-copy": "^2.1.1",
     "eslint": "^9.24.0",
     "eslint-plugin-prettier": "^5.2.6",
-    "firebase": "11.6.0",
     "glob": "^11.0.1",
     "globals": "^16.0.0",
     "k6": "0.0.0",

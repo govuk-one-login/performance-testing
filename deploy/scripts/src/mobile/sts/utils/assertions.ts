@@ -18,7 +18,7 @@ export function validateRedirect(redirectUri: string, requiredQueryParams?: stri
   }
 }
 
-// TODO: Ask if these types of assertions shoud be kept or not - it is implied by the STS specification that if the status code is 200, then these fields should already be present, so perhaps checking their presence is redundant for a performance test
+// TODO: Ask if these types of assertions should be kept or not - it is implied by the STS specification that if the status code is 200, then these fields should already be present, so perhaps checking their presence is redundant for a performance test
 export function validateGenerateClientAttestationResponse(res: Response): boolean {
   return res.json('client_attestation') !== undefined
 }

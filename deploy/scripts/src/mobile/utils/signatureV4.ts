@@ -1,4 +1,4 @@
-import { SignatureV4 } from '../../../common/utils/jslib/aws-signature'
+import { SignatureV4 } from '../../common/utils/jslib/aws-signature'
 
 type Credentials = {
   AccessKeyId: string

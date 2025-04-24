@@ -1,17 +1,3 @@
-# -----------------------
-# Typescript > Javascript
-# -----------------------
-FROM node:20-alpine3.18 AS node-build
-
-ENV WORKDIR=/home/node
-
-COPY scripts ${WORKDIR}/scripts
-
-WORKDIR ${WORKDIR}/scripts
-
-RUN npm install --ignore-scripts \
-  && npm start
-
 # -------------------------------
 # Build k6 binary with extensions
 # -------------------------------
@@ -53,7 +39,7 @@ RUN apk add --no-cache aws-cli chromium curl jq
 
 USER k6
 RUN mkdir ${WORKDIR}/scripts
-COPY --from=node-build /home/node/scripts/dist ${WORKDIR}/scripts
+COPY dist ${WORKDIR}/scripts
 COPY reporting ${WORKDIR}/reporting
 
 ENTRYPOINT ["sh"]

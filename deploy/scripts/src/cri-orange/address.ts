@@ -141,8 +141,8 @@ const profiles: ProfileList = {
   },
 
   perf006Iteration3SpikeTest: {
-    ...createI3SpikeSignUpScenario('address', 100, 15, 491),
-    ...createI3SpikeSignUpScenario('addressME', 390, 15, 491)
+    ...createI3SpikeSignUpScenario('address', 100, 15, 101),
+    ...createI3SpikeSignUpScenario('addressME', 390, 15, 391)
   }
 }
 

@@ -9,7 +9,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeGroup } from '../common/utils/request/timing'
@@ -137,6 +138,11 @@ const profiles: ProfileList = {
       ],
       exec: 'addressME'
     }
+  },
+
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('address', 100, 15, 101),
+    ...createI3SpikeSignUpScenario('addressME', 390, 15, 391)
   }
 }
 

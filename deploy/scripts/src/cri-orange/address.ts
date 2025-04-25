@@ -142,7 +142,25 @@ const profiles: ProfileList = {
 
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignUpScenario('address', 100, 15, 101),
-    ...createI3SpikeSignUpScenario('addressME', 390, 15, 391)
+    addressME: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 45,
+      maxVUs: 90,
+      stages: [
+        { target: 0, duration: '101s' }, // Wait until the happy path scenario ramps up to target load
+        { target: 130, duration: '4m' }, // Ramp up to 33% target throughput over 4 minutes
+        { target: 130, duration: '5m' }, // // Maintain steady state at 33% target throughput for 5 minutes
+        { target: 390, duration: '78s' }, // Ramp up to 100% target throughput at 5 X PERF008 growth rate
+        { target: 390, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
+        { target: 130, duration: '1s' }, // Ramp down to 33% over 1 second
+        { target: 130, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+        { target: 390, duration: '391' }, // Ramp up to 100% target throughput at the rate defined in PERF008
+        { target: 390, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
+      ],
+      exec: 'addressME'
+    }
   }
 }
 

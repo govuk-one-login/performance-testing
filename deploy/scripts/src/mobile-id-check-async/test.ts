@@ -8,20 +8,17 @@ import {
 } from '../common/utils/config/load-profiles'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
-import { timeGroup } from '../common/utils/request/timing'
-import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
-import http from 'k6/http'
-import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { createSession } from './testSteps/createSession'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('idCheckAsyncV2', LoadProfile.smoke)
+    ...createScenario('idCheckAsync', LoadProfile.smoke)
   }
 }
 
 const loadProfile = selectProfile(profiles)
-const groupMap = {
-  idCheckAsyncV2: ['01_IDCheckAsyncV2_Step1', '01_IDCheckAsyncV2_Step2']
+export const groupMap = {
+  idCheckAsync: ['01 POST /async/token', '02 POST /async/credential']
 } as const
 
 export const options: Options = {
@@ -34,15 +31,9 @@ export function setup(): void {
   describeProfile(loadProfile)
 }
 
-export function idCheckAsyncV2(): void {
-  const groups = groupMap.idCheckAsyncV2
+export function idCheckAsync(): void {
   iterationsStarted.add(1)
-  timeGroup(groups[0], () => http.get('Endpoint_Step1'), {
-    isStatusCode200,
-    ...pageContentCheck('Page content to validate')
-  })
-
-  sleepBetween(0.5, 1)
-
+  createSession()
   iterationsCompleted.add(1)
 }
+

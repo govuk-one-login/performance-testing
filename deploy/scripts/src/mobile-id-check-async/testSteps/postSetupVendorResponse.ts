@@ -30,5 +30,5 @@ export function postSetupVendorResponse(testData: { biometricSessionId: string, 
 }
 
 function getSetupVendorResponsePath(biometricSessionId: string): string {
-  return `/setupVendorResponse/${biometricSessionId}`
+  return `/v2/setupVendorResponse/${biometricSessionId}`
 }

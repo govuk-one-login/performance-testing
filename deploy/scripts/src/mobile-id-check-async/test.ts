@@ -16,6 +16,8 @@ import { getWellknownJwks } from './testSteps/getWellKnownJwks'
 import { postTxmaEvent } from './testSteps/postTxmaEvent'
 import { postSetupVendorResponse } from './testSteps/postSetupVendorResponse'
 import { uuidv4 } from '../common/utils/jslib'
+import { postFinishBiometricSession } from './testSteps/postFinishBiometricSession'
+import { postAbortSession } from './testSteps/postAbortSession'
 
 const profiles: ProfileList = {
   smoke: {
@@ -34,6 +36,8 @@ export const groupMap = {
     '05 GET /async/.well-known/jwks.json',
     '06 POST /async/txmaEvent',
     '07 POST readid-mock /setupVendorResponse',
+    '08 POST async/finishBiometricSession',
+    '09 POST async/abortSession',
   ]
 } as const
 
@@ -64,6 +68,9 @@ export function idCheckAsync(): void {
   sleepBetween(0.5, 1)
   const biometricSessionId = uuidv4()
   postSetupVendorResponse({ biometricSessionId, opaqueId })
+  sleepBetween(0.5, 1)
+  // postFinishBiometricSession({ biometricSessionId, sessionId })
+  postAbortSession(sessionId)
 
   /* 
   To do:

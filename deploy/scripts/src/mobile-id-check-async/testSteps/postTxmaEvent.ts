@@ -17,5 +17,5 @@ export function postTxmaEvent(sessionId: string): void {
 }
 
 function getAsyncTxmaEventUrl() {
-  return `${config.sessionsApiUrl}/async/tmxaEvent`
+  return `${config.sessionsApiUrl}/async/txmaEvent`
 }

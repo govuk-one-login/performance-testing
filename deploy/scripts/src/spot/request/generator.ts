@@ -71,7 +71,7 @@ export function generatePassportPayload(sub: string): PassportPayload {
       evidence: [
         {
           validityScore: 2,
-          strengthScore: 3,
+          strengthScore: 4,
           txn: uuidv4(),
           type: 'IdentityCheck'
         }

@@ -18,6 +18,7 @@ import {
   simulateCallToStsJwks
 } from './sts/testSteps/backend'
 import { generateCodeChallenge, generateKey } from './sts/utils/crypto'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
@@ -61,6 +62,7 @@ export async function getServiceAccessToken(): Promise<void> {
   iterationsStarted.add(1)
   const orchestrationAuthorizeUrl = getAuthorize(codeChallenge)
   simulateCallToStsJwks(groupMap.getServiceAccessToken[1])
+  sleepBetween(1, 2)
   const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(orchestrationAuthorizeUrl)
   const stsAuthorizationCode = getRedirect(state, orchestrationAuthorizationCode)
   simulateCallToStsJwks(groupMap.getServiceAccessToken[4])

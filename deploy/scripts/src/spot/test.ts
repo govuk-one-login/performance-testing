@@ -5,7 +5,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
@@ -30,6 +31,23 @@ const profiles: ProfileList = {
   },
   stress: {
     ...createScenario('spot', LoadProfile.full, 2000, 3)
+  },
+  perf006Iteration3PeakTest: {
+    spot: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 60,
+      maxVUs: 120,
+      stages: [
+        { target: 40, duration: '19s' },
+        { target: 40, duration: '30m' }
+      ],
+      exec: 'spot'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignInScenario('spot', 120, 3, 55)
   }
 }
 

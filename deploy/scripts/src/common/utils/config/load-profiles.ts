@@ -104,8 +104,7 @@ export enum LoadProfile {
   spikeNFRSignInL2,
   spikeI2LowTraffic,
   spikeI2HighTraffic,
-  steadyStateOnly,
-  regression
+  steadyStateOnly
 }
 function createStages(type: LoadProfile, target: number): Stage[] {
   switch (type) {
@@ -237,11 +236,6 @@ function createStages(type: LoadProfile, target: number): Stage[] {
         { target, duration: '6m' } // Maintain 100% volume for 6 minutes
       ]
     }
-    case LoadProfile.regression:
-      return [
-        { target, duration: '2m' }, // Ramps up to target volume(5x of prod) in 2 minutes
-        { target, duration: '3m' } // Maintain steady state at target throughput for 3 minutes
-      ]
   }
 }
 
@@ -374,6 +368,30 @@ export function createI3SpikeOLHScenario(
       { target, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
       { target: step, duration: '1s' }, // Ramp down to 33% over 1 second
       { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+      { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
+      { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
+    ],
+    exec
+  }
+  return list
+}
+
+export function createI3RegressionScenario(
+  exec: string,
+  target: number = 1,
+  iterationDuration: number = 5,
+  rampUpNFR: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
+  const maxVUs = target * iterationDuration
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 1,
+    timeUnit: '1s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
       { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
       { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
     ],

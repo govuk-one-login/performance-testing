@@ -7,7 +7,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib'
@@ -121,6 +123,11 @@ const profiles: ProfileList = {
       ],
       exec: 'summariseVC'
     }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('persistVC', 490, 5, 491),
+    ...createI3SpikeSignUpScenario('updateVC', 490, 7, 491),
+    ...createI3SpikeSignInScenario('summariseVC', 71, 6, 33)
   }
 }
 

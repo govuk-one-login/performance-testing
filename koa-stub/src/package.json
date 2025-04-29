@@ -4,7 +4,7 @@
   "description": "An example config for a RP stub",
   "main": "app.js",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.782.0",
+    "@aws-sdk/client-dynamodb": "^3.788.0",
     "@codegenie/serverless-express": "^4.16.0",
     "@koa/cors": "^5.0.0",
     "axios": "^1.8.4",
@@ -24,7 +24,7 @@
   "devDependencies": {
     "aws-sdk-client-mock": "^4.1.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
-    "eslint": "^9.24.0",
+    "eslint": "^9.25.0",
     "fetch-cookie": "^3.1.0",
     "globals": "^16.0.0",
     "jest": "^29.7.0",

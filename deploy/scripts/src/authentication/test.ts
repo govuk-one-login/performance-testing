@@ -10,7 +10,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
@@ -154,6 +156,62 @@ const profiles: ProfileList = {
       stages: [
         { target: 24, duration: '12s' },
         { target: 24, duration: '30m' }
+      ],
+      exec: 'signIn'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('signUp', 490, 33, 491),
+    ...createI3SpikeSignInScenario('signIn', 71, 18, 33)
+  },
+  perf006Iteration3RegressionTest: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 33,
+      maxVUs: 66,
+      stages: [
+        { target: 20, duration: '21s' },
+        { target: 20, duration: '5m' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 45,
+      maxVUs: 90,
+      stages: [
+        { target: 5, duration: '3s' },
+        { target: 5, duration: '5m' }
+      ],
+      exec: 'signIn'
+    }
+  },
+  perf006Iteration3SoakTest: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 30,
+      maxVUs: 36,
+      stages: [
+        { target: 11, duration: '12s' },
+        { target: 11, duration: '6h' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 30,
+      maxVUs: 36,
+      stages: [
+        { target: 2, duration: '1s' },
+        { target: 2, duration: '6h' }
       ],
       exec: 'signIn'
     }

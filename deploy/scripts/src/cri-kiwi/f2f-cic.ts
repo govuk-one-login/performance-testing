@@ -7,7 +7,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import execution from 'k6/execution'
 import { b64encode } from 'k6/encoding'
@@ -83,6 +84,10 @@ const profiles: ProfileList = {
       ],
       exec: 'CIC'
     }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('FaceToFace', 12, 42, 13),
+    ...createI3SpikeSignUpScenario('CIC', 12, 21, 13)
   }
 }
 
@@ -268,7 +273,7 @@ export function FaceToFace(): void {
   const groups = groupMap.FaceToFace
   let res: Response
   const iteration = execution.scenario.iterationInInstance
-  const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL']
+  const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'UKDL']
   const path = paths[iteration % paths.length]
   const expiry = randomDate(new Date(2030, 1, 1), new Date(2030, 12, 31)) // Expiry 5 years from now
   const expiryDay = expiry.getDate().toString()

@@ -8,7 +8,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
@@ -82,6 +83,9 @@ const profiles: ProfileList = {
       ],
       exec: 'ninoCheck'
     }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('ninoCheck', 5, 6, 6)
   }
 }
 

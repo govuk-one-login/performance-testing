@@ -5,7 +5,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import {
@@ -61,6 +63,36 @@ const profiles: ProfileList = {
   spikeI2HighTraffic: {
     ...createScenario('authEvent', LoadProfile.spikeI2HighTraffic, 32),
     ...createScenario('allEvents', LoadProfile.spikeI2HighTraffic, 1)
+  },
+  perf006Iteration3PeakTest: {
+    authEvent: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 24, duration: '12s' },
+        { target: 24, duration: '30m' }
+      ],
+      exec: 'authEvent'
+    },
+    allEvents: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 4, duration: '5s' },
+        { target: 4, duration: '30m' }
+      ],
+      exec: 'allEvents'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('allEvents', 12, 20, 13),
+    ...createI3SpikeSignInScenario('authEvent', 71, 5, 7)
   }
 }
 

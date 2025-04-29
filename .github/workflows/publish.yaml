@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'deploy/**'
-      - '.github/workflows/publish.yaml'
+      - "deploy/**"
+      - ".github/workflows/publish.yaml"
 
 defaults:
   run:

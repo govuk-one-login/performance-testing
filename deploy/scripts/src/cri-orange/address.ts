@@ -9,7 +9,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3RegressionScenario,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeGroup } from '../common/utils/request/timing'
@@ -20,6 +22,7 @@ import { getThresholds } from '../common/utils/config/thresholds'
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('address', LoadProfile.smoke),
+    ...createScenario('addressME', LoadProfile.smoke),
     ...createScenario('internationalAddress', LoadProfile.smoke),
     ...createScenario('addressAdhocScenario', LoadProfile.smoke)
   },
@@ -115,14 +118,34 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',
-      preAllocatedVUs: 100,
-      maxVUs: 400,
+      preAllocatedVUs: 75,
+      maxVUs: 150,
       stages: [
-        { target: 160, duration: '161s' },
-        { target: 160, duration: '30m' }
+        { target: 100, duration: '101s' },
+        { target: 100, duration: '30m' }
       ],
       exec: 'address'
+    },
+    addressME: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 45,
+      maxVUs: 90,
+      stages: [
+        { target: 0, duration: '101s' }, // Wait until the happy path scenario ramps up to target load
+        { target: 60, duration: '61s' }, // Ramp up to target load
+        { target: 60, duration: '30m' } // Maintain a steady state at the target load for 30 minutes.
+      ],
+      exec: 'addressME'
     }
+  },
+  perf006RegressionTest: {
+    ...createI3RegressionScenario('address', 5, 15, 6)
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('address', 100, 15, 101),
+    ...createI3SpikeSignUpScenario('addressME', 390, 15, 391)
   }
 }
 
@@ -138,6 +161,17 @@ const groupMap = {
     'B02_Address_05_ConfirmDetails',
     'B02_Address_05_ConfirmDetails::01_AddCRICall',
     'B02_Address_05_ConfirmDetails::02_CoreStubCall'
+  ],
+  addressME: [
+    'B02_AddressME_01_AddressCRIEntryFromStub',
+    'B02_AddressME_01_AddressCRIEntryFromStub::01_CoreStubCall',
+    'B02_AddressME_01_AddressCRIEntryFromStub::02_AddCRICall',
+    'B02_AddressME_02_SearchPostCode',
+    'B02_AddressME_03_ContinueWithManulEntryPage',
+    'B02_AddressME_04_EnterAddressManually',
+    'B02_AddressME_05_ConfirmDetails',
+    'B02_AddressME_05_ConfirmDetails::01_AddCRICall',
+    'B02_AddressME_05_ConfirmDetails::02_CoreStubCall'
   ],
   coreStubCall: ['01_CoreStubCall'],
   internationalAddress: [
@@ -178,6 +212,17 @@ interface Address {
 
 const csvData1: Address[] = new SharedArray('csvDataAddress', () => {
   return open('./data/addressCRIData.csv')
+    .split('\n')
+    .slice(1)
+    .map(postcode => {
+      return {
+        postcode
+      }
+    })
+})
+
+const csvData2: Address[] = new SharedArray('csvDataAddressME', () => {
+  return open('./data/addressMEData.csv')
     .split('\n')
     .slice(1)
     .map(postcode => {
@@ -285,6 +330,97 @@ export function address(): void {
           headers: { Authorization: `Basic ${encodedCredentials}` }
         }),
       { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
+    )
+  })
+  iterationsCompleted.add(1)
+}
+
+export function addressME(): void {
+  const groups = groupMap.addressME
+  let res: Response
+  const userAddressME = csvData2[exec.scenario.iterationInTest % csvData2.length]
+  const manualAddress = enterAddressDetails()
+  iterationsStarted.add(1)
+
+  // B02_AddressME_01_AddressCRIEntryFromStub
+  timeGroup(groups[0], () => {
+    // 01_CoreStubCall
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.get(env.ipvCoreStub + '/credential-issuer?cri=address-cri-' + env.envName, {
+          redirects: 0,
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode302 }
+    )
+    // 02_AddCRICall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Find your address')
+    })
+  })
+
+  sleep(1)
+
+  // B02_AddressME_02_SearchPostCode
+  res = timeGroup(
+    groups[3],
+    () =>
+      res.submitForm({
+        fields: { addressSearch: userAddressME.postcode },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('<p>We cannot find any addresses with the postcode <b>E11 3BW') }
+  )
+
+  // B02_AddressME_03_ContinueWithManulEntryPage
+  res = timeGroup(
+    groups[4],
+    () =>
+      res.submitForm({
+        fields: { addressBreak: 'continue' },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Enter your address') }
+  )
+
+  sleep(1)
+
+  // B02_AddressME_04_EnterAddressManually
+  res = timeGroup(
+    groups[5],
+    () =>
+      res.submitForm({
+        fields: {
+          addressFlatNumber: `${manualAddress.flatNumber}`,
+          addressHouseNumber: '',
+          addressHouseName: manualAddress.houseName,
+          addressStreetName: manualAddress.streetName,
+          addressLocality: manualAddress.locality,
+          addressYearFrom: `${manualAddress.year}`
+        },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Confirm your details') }
+  )
+
+  sleep(1)
+
+  // B02_AddressME_05_ConfirmDetails
+  timeGroup(groups[6], () => {
+    // 01_AddCRICall
+    res = timeGroup(groups[7].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
+      isStatusCode302
+    })
+    // 02_CoreStubCall
+    res = timeGroup(
+      groups[8].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode200, ...pageContentCheck('VerifiableCredential') }
     )
   })
   iterationsCompleted.add(1)
@@ -466,4 +602,22 @@ export function addressAdhocScenario(): void {
     )*/
   })
   iterationsCompleted.add(1)
+}
+
+interface AddressME {
+  flatNumber: number
+  houseName: string
+  streetName: string
+  locality: string
+  year: number
+}
+
+function enterAddressDetails(): AddressME {
+  return {
+    flatNumber: Math.floor(Math.random() * 100) + 1,
+    houseName: `RandomBuilding${Math.floor(Math.random() * 99998) + 1}`,
+    streetName: `RandomStreet${Math.floor(Math.random() * 99998) + 1}`,
+    locality: `RandomCity${Math.floor(Math.random() * 999) + 1}`,
+    year: Math.floor(Math.random() * 71) + 1950
+  }
 }

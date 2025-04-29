@@ -7,7 +7,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { timeGroup } from '../common/utils/request/timing'
 import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
@@ -223,6 +225,48 @@ const profiles: ProfileList = {
         { target: 160, duration: '30m' }
       ],
       exec: 'identityM1C'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 144,
+      stages: [
+        { target: 24, duration: '12s' },
+        { target: 24, duration: '30m' }
+      ],
+      exec: 'idReuse'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('identity', 490, 36, 491),
+    ...createI3SpikeSignInScenario('idReuse', 71, 6, 33)
+  },
+  perf006I3RegressionTest: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 576,
+      stages: [
+        { target: 4, duration: '2s' },
+        { target: 4, duration: '5m' }
+      ],
+      exec: 'identity'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 144,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '5m' }
+      ],
+      exec: 'idReuse'
     }
   }
 }

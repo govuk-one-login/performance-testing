@@ -276,7 +276,7 @@ Resources:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [TiCF, Build, AccountID]
-                    - "di-ticf-*"
+                    - "ticf-cri-main*"
               - Fn::Join:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"

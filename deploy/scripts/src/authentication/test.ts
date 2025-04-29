@@ -195,11 +195,11 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',
-      preAllocatedVUs: 30,
-      maxVUs: 36,
+      preAllocatedVUs: 33,
+      maxVUs: 66,
       stages: [
-        { target: 11, duration: '12s' },
-        { target: 11, duration: '6h' }
+        { target: 20, duration: '21s' },
+        { target: 20, duration: '6h' }
       ],
       exec: 'signUp'
     },
@@ -207,11 +207,11 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 2,
       timeUnit: '1s',
-      preAllocatedVUs: 30,
-      maxVUs: 36,
+      preAllocatedVUs: 27,
+      maxVUs: 54,
       stages: [
-        { target: 2, duration: '1s' },
-        { target: 2, duration: '6h' }
+        { target: 3, duration: '3s' },
+        { target: 3, duration: '6h' }
       ],
       exec: 'signIn'
     }

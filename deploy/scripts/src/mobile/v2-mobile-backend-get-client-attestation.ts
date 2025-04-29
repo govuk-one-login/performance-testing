@@ -11,6 +11,7 @@ import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_m
 import { generateKey } from './utils/crypto'
 import { getAppInfo, postClientAttestation, simulateCallToMobileBackendJwks } from './mobile-backend/testSteps/backend'
 import { getAppCheckToken } from './mobile-backend/utils/appCheckToken'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
@@ -44,6 +45,7 @@ export async function getClientAttestation(): Promise<void> {
 
   iterationsStarted.add(1)
   getAppInfo()
+  sleepBetween(1, 2)
   const appCheckToken = getAppCheckToken()
   postClientAttestation(publicKeyJwk, appCheckToken)
   simulateCallToMobileBackendJwks()

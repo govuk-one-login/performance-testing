@@ -21,10 +21,10 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 export const groupMap = {
   getClientAttestation: [
-    'GET /appInfo',
-    'GET /app-check-token',
-    'POST /client-attestation',
-    'GET /.well-known/jwks.json'
+    '01 GET /appInfo',
+    '02 GET /app-check-token',
+    '03 POST /client-attestation',
+    '04 GET /.well-known/jwks.json'
   ]
 } as const
 

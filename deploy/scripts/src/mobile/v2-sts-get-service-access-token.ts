@@ -28,16 +28,16 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 export const groupMap = {
   getServiceAccessToken: [
-    'GET /authorize (STS)',
-    'GET /.well-known/jwks.json',
-    'GET /authorize (Orchestration)',
-    'GET /redirect',
-    'GET /.well-known/jwks.json',
-    'POST /generate-client-attestation',
-    'POST /token (authorization code exchange)',
-    'GET /.well-known/jwks.json',
-    'POST /token (access token exchange)',
-    'GET /.well-known/jwks.json'
+    '01 GET /authorize (STS)',
+    '02 GET /.well-known/jwks.json',
+    '03 GET /authorize (Orchestration)',
+    '04 GET /redirect',
+    '05 GET /.well-known/jwks.json',
+    '06 POST /generate-client-attestation',
+    '07 POST /token (authorization code exchange)',
+    '08 GET /.well-known/jwks.json',
+    '09 POST /token (access token exchange)',
+    '10 GET /.well-known/jwks.json'
   ]
 } as const
 

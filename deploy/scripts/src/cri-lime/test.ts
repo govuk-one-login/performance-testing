@@ -8,7 +8,8 @@ import {
   describeProfile,
   createScenario,
   LoadProfile,
-  createI3SpikeSignUpScenario
+  createI3SpikeSignUpScenario,
+  createI3RegressionScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
@@ -302,6 +303,9 @@ const profiles: ProfileList = {
     ...createI3SpikeSignUpScenario('drivingLicence', 61, 9, 62),
     ...createI3SpikeSignUpScenario('drivingLicenceAttestation', 103, 9, 104),
     ...createI3SpikeSignUpScenario('fraud', 490, 6, 491)
+  },
+  perf006RegressionTest: {
+    ...createI3RegressionScenario('fraud', 5, 6, 6)
   }
 }
 

@@ -9,7 +9,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3RegressionScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeGroup } from '../common/utils/request/timing'
@@ -137,6 +138,9 @@ const profiles: ProfileList = {
       ],
       exec: 'addressME'
     }
+  },
+  perf006RegressionTest: {
+    ...createI3RegressionScenario('address', 5, 15, 6)
   }
 }
 

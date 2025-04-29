@@ -388,7 +388,7 @@ export function createI3RegressionScenario(
   list[exec] = {
     executor: 'ramping-arrival-rate',
     startRate: 1,
-    timeUnit: '1s',
+    timeUnit: '10s',
     preAllocatedVUs,
     maxVUs,
     stages: [

@@ -47,7 +47,7 @@ export function idCheckAsync(): void {
   /* 
   To do:
 
-  1) Simulate call to async/.well-known/jwks.json endpoint 
+  1) Simulate call to GET async/.well-known/jwks.json endpoint 
   2) POST /async/biomtericToken
   2) 20% weighted journey to POST /async/abortSession
   3) 80% weighted journey to:

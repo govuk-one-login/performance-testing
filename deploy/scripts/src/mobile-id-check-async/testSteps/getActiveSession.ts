@@ -4,7 +4,7 @@ import { groupMap } from "../test"
 import { config } from "../utils/config"
 import { isStatusCode200 } from "../../common/utils/checks/assertions"
 
-export function getActiveSession(sub: string): { sessionId: string } {
+export function getActiveSession(sub: string): string {
 
   const stsMockRequestBody = new URLSearchParams({
     subject_token: sub,
@@ -23,8 +23,7 @@ export function getActiveSession(sub: string): { sessionId: string } {
     isStatusCode200
   })
 
-
-  return { sessionId: asyncActiveSessionResponse.json('sessionId') as string }
+  return asyncActiveSessionResponse.json('sessionId') as string
 
 }
 

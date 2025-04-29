@@ -69,18 +69,21 @@ export function idCheckAsync(): void {
   const biometricSessionId = uuidv4()
   postSetupVendorResponse({ biometricSessionId, opaqueId })
   sleepBetween(0.5, 1)
-  // postFinishBiometricSession({ biometricSessionId, sessionId })
-  postAbortSession(sessionId)
-
-  /* 
-  To do:
-
-  1) Simulate call to GET async/.well-known/jwks.json endpoint 
-  2) 10% weighted journey to POST /async/abortSession
-  3) 90% weighted journey to:
-    - POST /async/txmaEvent * 3
-    - POST /async/finishBiometricSession
-  */
+  postFinishBiometricSession({ biometricSessionId, sessionId })
+  sleepBetween(0.5, 1)
+  // postAbortSession(sessionId)
   iterationsCompleted.add(1)
 }
 
+/*
+At this point we either call:
+
+1) postSetupVendorResponse and then
+2) postFinishBiometricSession
+
+or we call
+
+1) postAbortSession
+
+I would steer towards a split of 80% / 20% with the 20% being postAbortSession
+*/

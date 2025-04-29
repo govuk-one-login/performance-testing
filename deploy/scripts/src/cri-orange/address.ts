@@ -10,6 +10,7 @@ import {
   describeProfile,
   createScenario,
   LoadProfile,
+  createI3RegressionScenario,
   createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
@@ -139,7 +140,9 @@ const profiles: ProfileList = {
       exec: 'addressME'
     }
   },
-
+  perf006RegressionTest: {
+    ...createI3RegressionScenario('address', 5, 15, 6)
+  },
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignUpScenario('address', 100, 15, 101),
     ...createI3SpikeSignUpScenario('addressME', 390, 15, 391)

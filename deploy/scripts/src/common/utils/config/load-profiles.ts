@@ -375,3 +375,27 @@ export function createI3SpikeOLHScenario(
   }
   return list
 }
+
+export function createI3RegressionScenario(
+  exec: string,
+  target: number = 1,
+  iterationDuration: number = 5,
+  rampUpNFR: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
+  const maxVUs = target * iterationDuration
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 1,
+    timeUnit: '10s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
+      { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
+    ],
+    exec
+  }
+  return list
+}

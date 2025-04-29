@@ -25,3 +25,158 @@ export interface SpotRequestInfo {
   sector: string
   salt: string
 }
+
+export type IdentityCheckType = 'IDENTITY_CHECK' | 'IdentityCheck'
+export type NamePartType = 'GivenName' | 'FamilyName'
+export type VerifiableCredentialType =
+  | 'IdentityCheckCredential'
+  | 'VerifiableCredential'
+  | 'VerifiableIdentityCredential'
+  | 'IdentityAssertionCredential'
+  | 'AddressCredential'
+  | 'RiskAssessmentCredential'
+  | 'SecurityCheckCredential'
+
+export interface FraudPayload {
+  sub: string
+  nbf: number
+  iss: string
+  vc: {
+    evidence: [
+      {
+        identityFraudScore: number
+        txn: string
+        type: IdentityCheckType
+      }
+    ]
+    credentialSubject: {
+      address: [
+        {
+          addressCountry: string
+          buildingName: string
+          streetName: string
+          postalCode: string
+          buildingNumber: string
+          addressLocality: string
+          validFrom: string
+        }
+      ]
+      name: [
+        {
+          nameParts: [
+            {
+              type: NamePartType
+              value: string
+            },
+            {
+              type: NamePartType
+              value: string
+            }
+          ]
+        }
+      ]
+      birthDate: [
+        {
+          value: string
+        }
+      ]
+    }
+    type: VerifiableCredentialType[]
+    '@context': string[]
+  }
+}
+
+export interface PassportPayload {
+  sub: string
+  nbf: number
+  iss: string
+  vc: {
+    evidence: [
+      {
+        validityScore: number
+        strengthScore: number
+        txn: string
+        type: IdentityCheckType
+      }
+    ]
+    credentialSubject: {
+      passport: [
+        {
+          expiryDate: string
+          icaoIssuerCode: string
+          documentNumber: string
+        }
+      ]
+      name: [
+        {
+          nameParts: [
+            {
+              type: NamePartType
+              value: string
+            },
+            {
+              type: NamePartType
+              value: string
+            }
+          ]
+        }
+      ]
+      birthDate: [
+        {
+          value: string
+        }
+      ]
+    }
+    type: VerifiableCredentialType[]
+    '@context': string[]
+  }
+}
+
+export interface KBVPayload {
+  sub: string
+  nbf: number
+  iss: string
+  vc: {
+    evidence: [
+      {
+        verificationScore: number
+        txn: string
+        type: IdentityCheckType
+      }
+    ]
+    credentialSubject: {
+      address: [
+        {
+          addressCountry: string
+          buildingName: string
+          streetName: string
+          postalCode: string
+          buildingNumber: string
+          addressLocality: string
+          validFrom: string
+        }
+      ]
+      name: [
+        {
+          nameParts: [
+            {
+              type: NamePartType
+              value: string
+            },
+            {
+              type: NamePartType
+              value: string
+            }
+          ]
+        }
+      ]
+      birthDate: [
+        {
+          value: string
+        }
+      ]
+    }
+    type: VerifiableCredentialType[]
+    '@context': string[]
+  }
+}

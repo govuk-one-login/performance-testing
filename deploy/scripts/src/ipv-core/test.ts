@@ -242,6 +242,32 @@ const profiles: ProfileList = {
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignUpScenario('identity', 490, 36, 491),
     ...createI3SpikeSignInScenario('idReuse', 71, 6, 33)
+  },
+  perf006I3RegressionTest: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 576,
+      stages: [
+        { target: 4, duration: '2s' },
+        { target: 4, duration: '5m' }
+      ],
+      exec: 'identity'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 144,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '5m' }
+      ],
+      exec: 'idReuse'
+    }
   }
 }
 

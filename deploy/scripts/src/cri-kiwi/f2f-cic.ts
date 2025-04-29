@@ -273,7 +273,7 @@ export function FaceToFace(): void {
   const groups = groupMap.FaceToFace
   let res: Response
   const iteration = execution.scenario.iterationInInstance
-  const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL']
+  const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'UKDL']
   const path = paths[iteration % paths.length]
   const expiry = randomDate(new Date(2030, 1, 1), new Date(2030, 12, 31)) // Expiry 5 years from now
   const expiryDay = expiry.getDate().toString()

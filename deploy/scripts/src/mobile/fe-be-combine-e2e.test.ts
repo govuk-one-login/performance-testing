@@ -72,11 +72,11 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',
-      preAllocatedVUs: 338,
-      maxVUs: 675,
+      preAllocatedVUs: 270,
+      maxVUs: 540,
       stages: [
-        { target: 150, duration: '151s' },
-        { target: 150, duration: '30m' }
+        { target: 120, duration: '121s' },
+        { target: 120, duration: '30m' }
       ],
       exec: 'mamIphonePassport'
     }
@@ -100,8 +100,8 @@ const groupMap = {
     'POST /finishBiometricSession', //BE
     'GET /redirect', //BE
     'POST /token', //BE
-    'POST /v2/setupVendorResponse/' //BE
-    //'POST /userinfo/v2' //BE
+    'POST /v2/setupVendorResponse/', //BE
+    'POST /userinfo/v2' //BE
   ]
 } as const
 

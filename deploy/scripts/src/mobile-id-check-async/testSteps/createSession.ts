@@ -1,7 +1,6 @@
 import http from "k6/http"
 import { timeGroup } from "../../common/utils/request/timing"
 import { groupMap } from "../test"
-import { SignatureV4 } from "../../common/utils/jslib/aws-signature"
 import { config } from "../utils/config"
 import { b64encode } from "k6/encoding"
 import { isStatusCode200, isStatusCode201 } from "../../common/utils/checks/assertions"
@@ -9,22 +8,12 @@ import { sleepBetween } from "../../common/utils/sleep/sleepBetween"
 
 import { URL } from "../../common/utils/jslib/url"
 import { uuidv4 } from "../../common/utils/jslib"
+import { apiSignaturev4Signer } from "../utils/apiSignatureV4Signer"
 
-export function createSession(): { sessionId: string } {
-  const credentials = JSON.parse(config.awsExecutionCredentials)
-  const apiGatewaySigner = new SignatureV4({
-    service: 'execute-api',
-    region: "eu-west-2",
-    credentials: {
-      accessKeyId: credentials.AccessKeyId,
-      secretAccessKey: credentials.SecretAccessKey,
-      sessionToken: credentials.SessionToken,
-    },
-    uriEscapePath: false,
-    applyChecksum: false
-  })
+export function createSession(): string{
+
   const asyncTokenRequestBody = "grant_type=client_credentials"
-  const signedAsyncTokenRequest = apiGatewaySigner.sign({
+  const signedAsyncTokenRequest = apiSignaturev4Signer.sign({
     method: 'POST',
     protocol: 'https',
     hostname: new URL(getUrl()).hostname,
@@ -39,29 +28,30 @@ export function createSession(): { sessionId: string } {
 
   sleepBetween(0.5, 1)
 
+  const sub = uuidv4()
+
   const asyncCredentialRequestBody = {
     "state": "mockState",
-    "sub": uuidv4(),
+    sub,
     "client_id": config.clientId,
     "govuk_signin_journey_id": "performanceTest"
   }
 
   const accessToken = asyncTokenResponse.json('access_token') as string
 
-  const signedAsyncCredentialRequest = apiGatewaySigner.sign({
+  const signedAsyncCredentialRequest = apiSignaturev4Signer.sign({
     method: 'POST',
     protocol: 'https',
     hostname: new URL(getUrl()).hostname,
     path: "/async/credential",
-    headers: getCredentialRequestHeader(accessToken),
+    headers: getAsyncCredentialRequestHeader(accessToken),
     body: JSON.stringify(asyncCredentialRequestBody)
   })
 
-  timeGroup(groupMap.idCheckAsync[1], () => http.post(signedAsyncCredentialRequest.url, JSON.stringify(asyncCredentialRequestBody), { headers: { ...signedAsyncCredentialRequest.headers, ...getCredentialRequestHeader(accessToken) } }), {
+  timeGroup(groupMap.idCheckAsync[1], () => http.post(signedAsyncCredentialRequest.url, JSON.stringify(asyncCredentialRequestBody), { headers: { ...signedAsyncCredentialRequest.headers, ...getAsyncCredentialRequestHeader(accessToken) } }), {
     isStatusCode201
   })
-  throw Error("STS mock + active session")
-  return { sessionId: "" }
+  return sub
 }
 
 function getUrl(): string {
@@ -85,7 +75,7 @@ function getTokenRequestHeader(): Record<string, string> {
   return { Authorization: `Basic ${encodedClientCredentials}` }
 }
 
-function getCredentialRequestHeader(accessToken: string): Record<string, string> {
+function getAsyncCredentialRequestHeader(accessToken: string): Record<string, string> {
   const authHeader = `Bearer ${accessToken}`
   if (useProxyApi()) {
     return {

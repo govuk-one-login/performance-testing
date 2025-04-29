@@ -10,7 +10,7 @@ import {
   describeProfile,
   createScenario,
   LoadProfile,
-  createI3RegressionScenario
+  createI3RegressionScenario,
   createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'

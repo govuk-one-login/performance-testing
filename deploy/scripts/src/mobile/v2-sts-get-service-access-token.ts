@@ -17,7 +17,7 @@ import {
   getRedirect,
   simulateCallToStsJwks
 } from './sts/testSteps/backend'
-import { generateCodeChallenge, generateKey } from './sts/utils/crypto'
+import { generateCodeChallenge, generateKey } from './utils/crypto'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {

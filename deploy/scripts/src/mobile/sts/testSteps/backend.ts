@@ -5,7 +5,7 @@ import http from 'k6/http'
 import { isStatusCode200, isStatusCode302 } from '../../../common/utils/checks/assertions'
 import { groupMap } from '../../v2-sts-get-service-access-token'
 import { validateRedirect } from '../utils/assertions'
-import { signJwt } from '../utils/crypto'
+import { signJwt } from '../../utils/crypto'
 
 export function getAuthorize(codeChallenge: string): string {
   const url = new URL('authorize', config.stsBaseUrl)

@@ -1,4 +1,4 @@
-import { algParamMap, JwtAlgorithm } from '../../../common/utils/authentication/jwt'
+import { algParamMap, JwtAlgorithm } from '../../common/utils/authentication/jwt'
 import { b64encode } from 'k6/encoding'
 
 export async function signJwt(

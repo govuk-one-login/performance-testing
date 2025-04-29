@@ -14,7 +14,7 @@ export function getAppCheckToken(): string {
     getEnv('AWS_REGION'),
     credentials,
     'GET',
-    config.firebaseProxyBaseUrl.split('https://')[1],
+    config.appCheckStubBaseUrl.split('https://')[1],
     '/app-check-token',
     {},
     ''

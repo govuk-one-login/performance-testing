@@ -10,12 +10,13 @@ import {
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
-import { generatePayload, generateSPOTRequest, Issuer } from './request/generator'
+import { generateSPOTRequest } from './request/generator'
 import { signJwt } from '../common/utils/authentication/jwt'
 import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
 import crypto from 'k6/crypto'
 import { b64decode } from 'k6/encoding'
 import { SpotRequestInfo } from './request/types'
+import { generateFraudPayload, generateKBVPayload, generatePassportPayload } from './request/generator'
 
 const profiles: ProfileList = {
   smoke: {
@@ -82,10 +83,14 @@ export async function spot(): Promise<void> {
   }
 
   const payloads = {
-    fraud: generatePayload(pairwiseSub('fraudSector'), Issuer.Fraud),
-    passport: generatePayload(pairwiseSub('passportSector'), Issuer.Passport),
-    kbv: generatePayload(pairwiseSub('verificationSector'), Issuer.KBV)
+    fraud: generateFraudPayload(pairwiseSub('fraudSector')),
+    passport: generatePassportPayload(pairwiseSub('passportSector')),
+    kbv: generateKBVPayload(pairwiseSub('verificationSector'))
   }
+
+  console.log(payloads.fraud)
+  console.log(payloads.passport)
+  console.log(payloads.kbv)
   const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
@@ -97,6 +102,7 @@ export async function spot(): Promise<void> {
     await createJwt(keys.kbv, payloads.kbv)
   ]
   const payload = generateSPOTRequest(pairwiseSub(config.sector), config, jwts)
+  console.log(payloads)
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(payload))
   iterationsCompleted.add(1)

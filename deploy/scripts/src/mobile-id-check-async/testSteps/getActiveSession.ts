@@ -3,6 +3,7 @@ import { timeGroup } from "../../common/utils/request/timing"
 import { groupMap } from "../test"
 import { config } from "../utils/config"
 import { isStatusCode200 } from "../../common/utils/checks/assertions"
+import { sleepBetween } from "../../common/utils/sleep/sleepBetween"
 
 export function getActiveSession(sub: string): string {
 
@@ -18,6 +19,8 @@ export function getActiveSession(sub: string): string {
   })
 
   const accessToken = stsMockResponse.json('access_token') as string
+
+  sleepBetween(0.5, 1)
 
   const asyncActiveSessionResponse = timeGroup(groupMap.idCheckAsync[3], () => http.get(getAsyncActiveSessionUrl(), { headers: { Authorization: getAsyncActiveSessionAuthorizationHeader(accessToken) } }), {
     isStatusCode200

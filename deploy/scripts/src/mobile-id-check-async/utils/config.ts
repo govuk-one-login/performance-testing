@@ -14,7 +14,9 @@ export const config = {
   clientSecret: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_CLIENT_SECRET`),
   privateApiUrl: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_PRIVATE_API_URL`),
   proxyApiUrl: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_PROXY_API_URL`),
+  readidMockApiUrl: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_READ_ID_MOCK_API_URL`),
   sessionsApiUrl: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_SESSIONS_API_URL`),
   stsMockApiUrl: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_STS_MOCK_API_URL`),
   useProxyApi: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_USE_PROXY_API`),
+  biometricSessionTestData: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_BIOMETRIC_SESSION_TEST_DATA`),
 }

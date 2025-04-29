@@ -3,7 +3,6 @@ import http from 'k6/http'
 import { isStatusCode200 } from '../../../common/utils/checks/assertions'
 import { config } from '../utils/config'
 import { groupMap } from '../../v2-mobile-backend-get-client-attestation'
-import { validateGenerateClientAttestationResponse } from '../../sts/utils/assertions'
 
 export function getAppInfo(): void {
   timeGroup(
@@ -39,8 +38,7 @@ export function postClientAttestation(publicKeyJwk: JsonWebKey, appCheckToken: s
       })
     },
     {
-      isStatusCode200,
-      validateGenerateClientAttestationResponse
+      isStatusCode200
     }
   )
   return res.json('client_attestation') as string

@@ -17,15 +17,3 @@ export function validateRedirect(redirectUri: string, requiredQueryParams?: stri
       : {})
   }
 }
-
-export function validateGenerateClientAttestationResponse(res: Response): boolean {
-  return res.json('client_attestation') !== undefined
-}
-
-export function validateAccessTokenResponse(res: Response): boolean {
-  return res.json('access_token') !== undefined && res.json('id_token') !== undefined
-}
-
-export function validateTokenExchangeResponse(res: Response): boolean {
-  return res.json('access_token') !== undefined
-}

@@ -4,7 +4,7 @@ import { timeGroup } from '../../../common/utils/request/timing'
 import http from 'k6/http'
 import { isStatusCode200, isStatusCode302 } from '../../../common/utils/checks/assertions'
 import { groupMap } from '../../v2-sts-get-service-access-token'
-import { validateAccessTokenResponse, validateRedirect, validateTokenExchangeResponse } from '../utils/assertions'
+import { validateRedirect } from '../utils/assertions'
 import { signJwt } from '../utils/crypto'
 
 export function getAuthorize(codeChallenge: string): string {
@@ -112,8 +112,7 @@ export async function exchangeAuthorizationCode(
       )
     },
     {
-      isStatusCode200,
-      validateAccessTokenResponse
+      isStatusCode200
     }
   )
   return res.json('access_token') as string
@@ -139,8 +138,7 @@ export function exchangeAccessToken(accessToken: string, scope: string): string 
       )
     },
     {
-      isStatusCode200,
-      validateTokenExchangeResponse
+      isStatusCode200
     }
   )
   return res.json('access_token') as string

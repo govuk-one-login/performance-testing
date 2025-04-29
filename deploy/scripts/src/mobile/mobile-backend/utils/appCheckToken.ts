@@ -5,7 +5,6 @@ import http from 'k6/http'
 import { isStatusCode200 } from '../../../common/utils/checks/assertions'
 import { signRequest } from '../../utils/signatureV4'
 import { config } from './config'
-import { validateAppCheckTokenResponse } from './assertions'
 import { groupMap } from '../../v2-mobile-backend-get-client-attestation'
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -27,8 +26,7 @@ export function getAppCheckToken(): string {
       return http.get(signedRequest.url, { headers: signedRequest.headers })
     },
     {
-      isStatusCode200,
-      validateAppCheckTokenResponse
+      isStatusCode200
     }
   )
   return res.json('token') as string

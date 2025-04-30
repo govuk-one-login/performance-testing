@@ -122,6 +122,7 @@ export function persistIV(): void {
   const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend)
   const persistIVMessage = JSON.stringify(persistIVPayload)
   iterationsStarted.add(1)
+  //// B01_PersistIV_01_PostInterventionData
   sqs.sendMessage(env.sqs_queue, persistIVMessage)
   iterationsCompleted.add(1)
 }

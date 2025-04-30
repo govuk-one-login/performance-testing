@@ -5,7 +5,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen'
@@ -65,6 +66,10 @@ const profiles: ProfileList = {
       ],
       exec: 'retrieveIV'
     }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignInScenario('persistIV', 30, 3, 15),
+    ...createI3SpikeSignInScenario('retrieveIV', 303, 3, 139)
   }
 }
 

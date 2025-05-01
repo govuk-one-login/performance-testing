@@ -532,6 +532,16 @@ Resources:
               MOBILE_DEV_FRONTEND_URL: "/perfTest/mobile/dev/frontendUrl"
               MOBILE_DEV_REQ_BODY: "/perfTest/mobile/dev/reqBody"
               MOBILE_DEV_TEST_CLIENT_URL: "/perfTest/mobile/dev/testClientUrl"
+              MOBILE_STS_BUILD_STS_BASE_URL: "/perfTest/mobile/sts/build/baseUrl"
+              MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL: "/perfTest/mobile/sts/build/mockClientBaseUrl"
+              MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL: "/perfTest/mobile/sts/build/orchBaseUrl"
+              MOBILE_STS_BUILD_CLIENT_ID: "/perfTest/mobile/sts/build/clientId"
+              MOBILE_STS_BUILD_REDIRECT_URI: "/perfTest/mobile/sts/build/redirectURI"
+              MOBILE_STS_DEV_STS_BASE_URL: "/perfTest/mobile/sts/dev/baseUrl"
+              MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL: "/perfTest/mobile/sts/dev/mockClientBaseUrl"
+              MOBILE_STS_DEV_ORCHESTRATION_BASE_URL: "/perfTest/mobile/sts/dev/orchBaseUrl"
+              MOBILE_STS_DEV_CLIENT_ID: "/perfTest/mobile/sts/dev/clientId"
+              MOBILE_STS_DEV_REDIRECT_URI: "/perfTest/mobile/sts/dev/redirectURI"
               SLACK_OAUTH_TOKEN: "/perfTest/slack/OAuthToken"
           phases:
             pre_build:

@@ -23,6 +23,20 @@ import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('getServiceAccessToken', LoadProfile.smoke)
+  },
+  perf006Iteration3PeakTest: {
+    getServiceAccessToken: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 528,
+      stages: [
+        { target: 150, duration: '151s' },
+        { target: 150, duration: '30m' }
+      ],
+      exec: 'getServiceAccessToken'
+    }
   }
 }
 

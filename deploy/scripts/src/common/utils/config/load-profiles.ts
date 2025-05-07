@@ -344,6 +344,58 @@ export function createI3SpikeSignInScenario(
   return list
 }
 
+export function createI4PeakTestSignUpScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
+  const maxVUs = target * iterationDuration * 2
+
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 1,
+    timeUnit: '10s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: `30m` }
+    ],
+    exec
+  }
+
+  return list
+}
+
+export function createI4PeakTestSignInScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
+  const maxVUs = target * iterationDuration * 2
+
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 2,
+    timeUnit: '1s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: `30m` }
+    ],
+    exec
+  }
+
+  return list
+}
+
 export function createI3SpikeOLHScenario(
   exec: string,
   target: number = 1,

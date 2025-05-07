@@ -1,5 +1,5 @@
-const { GetItemCommand } = require("@aws-sdk/client-dynamodb");
-const { errorMonitor } = require("koa");
+import { GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { errorMonitor } from 'koa';
 
 // Check the data we have aligns with this user.
 async function checkUserStateAgainstDB(ctx, nonce, state) {
@@ -97,6 +97,6 @@ async function getUserInfo(ctx, access_token) {
   throw new Error(`Userinfo endpoint not authorising`);
 }
 
-module.exports = {
+export default {
   processCallback,
 };

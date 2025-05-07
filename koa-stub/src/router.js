@@ -20,4 +20,4 @@ router.get("/", (ctx) => {
     "Welcome to the RP stub, please see the tests for instructions on how to use.";
 });
 
-module.exports = router;
+export default router;

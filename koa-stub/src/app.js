@@ -1,8 +1,8 @@
-const Koa = require("koa");
+import Koa from 'koa';
 const app = new Koa();
-const cors = require("@koa/cors");
-const router = require("./router");
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+import cors from '@koa/cors';
+import router from './router';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 
 let config = {};
 if (process.env.AWS_SAM_LOCAL) {
@@ -15,4 +15,4 @@ app.context.ddbClient = new DynamoDBClient(config);
 
 app.use(cors()).use(router.routes());
 
-module.exports = app;
+export default app;

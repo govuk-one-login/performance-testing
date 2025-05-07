@@ -2,13 +2,15 @@
   "name": "koa-stub",
   "version": "0.0.1",
   "description": "An example config for a RP stub",
-  "main": "app.js",
+  "exports": "./app.js",
+  "type": "module",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.788.0",
     "@codegenie/serverless-express": "^4.16.0",
     "@koa/cors": "^5.0.0",
     "axios": "^1.8.4",
     "axios-cookiejar-support": "^5.0.5",
+    "jest-environment-jsdom": "^29.7.0",
     "koa": "^2.16.1",
     "koa-cookie": "^1.0.0",
     "koa-router": "^13.0.1",
@@ -16,7 +18,7 @@
     "tough-cookie": "^5.1.1"
   },
   "scripts": {
-    "test": "jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
     "lint": "eslint"
   },
   "author": "Andy Loughran & Coral Smith",
@@ -46,6 +48,8 @@
       "/build/",
       "/coverage/"
     ],
-    "verbose": true
+    "verbose": true,
+    "transform": {},
+    "testEnvironment": "node"
   }
 }

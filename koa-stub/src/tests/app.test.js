@@ -1,15 +1,16 @@
-const { expect } = require("expect");
-require("aws-sdk-client-mock-jest");
-const axios = require("axios");
-const cookieJar = require("tough-cookie");
-const wrapper = require("axios-cookiejar-support");
-const app = require("../app");
-const { mockClient } = require("aws-sdk-client-mock");
-const {
-  PutItemCommand,
-  DynamoDBClient,
-  GetItemCommand,
-} = require("@aws-sdk/client-dynamodb");
+
+import { expect } from 'expect';
+import 'aws-sdk-client-mock-jest';
+import axios from 'axios';
+import cookieJar from 'tough-cookie';
+import wrapper from 'axios-cookiejar-support';
+import app from '../app';
+import { mockClient } from 'aws-sdk-client-mock';
+import { PutItemCommand, DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { OAuth2Server } from 'oauth2-mock-server';
+import { setupClient } from '../utils/onelogin.util';
+
+jest.useFakeTimers();
 
 const expiry = new Date();
 expiry.setDate(expiry.getDate() + 1);
@@ -26,8 +27,7 @@ dynamoDBMock.on(GetItemCommand).resolves({
   },
 });
 
-const { OAuth2Server } = require("oauth2-mock-server");
-const { setupClient } = require("../utils/onelogin.util");
+
 
 let oidc_server = new OAuth2Server();
 let service = oidc_server.service;

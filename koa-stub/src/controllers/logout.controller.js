@@ -1,4 +1,4 @@
-const { GetItemCommand } = require("@aws-sdk/client-dynamodb");
+import { GetItemCommand } from '@aws-sdk/client-dynamodb';
 
 const rpInitiateLogout = async (ctx) => {
   try {
@@ -35,6 +35,6 @@ const rpInitiateLogout = async (ctx) => {
   }
 };
 
-module.exports = {
+export default {
   rpInitiateLogout,
 };

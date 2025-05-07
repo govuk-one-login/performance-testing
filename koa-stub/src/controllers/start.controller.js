@@ -1,6 +1,6 @@
-const { PutItemCommand } = require("@aws-sdk/client-dynamodb");
-const { generators } = require("openid-client");
-const crypto = require("crypto");
+import { PutItemCommand } from '@aws-sdk/client-dynamodb';
+import { generators } from 'openid-client';
+import crypto from 'crypto';
 
 async function createSession(ctx) {
   const nonce = generators.nonce();
@@ -63,6 +63,6 @@ const setNonceAndRedirect = async (ctx) => {
   }
 };
 
-module.exports = {
+export default {
   setNonceAndRedirect,
 };

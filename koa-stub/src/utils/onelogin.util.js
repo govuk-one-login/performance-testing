@@ -1,4 +1,4 @@
-const { Issuer, custom } = require("openid-client");
+import { Issuer, custom } from 'openid-client';
 
 custom.setHttpOptionsDefaults({
   timeout: 30000, // Longer than API Gateway
@@ -21,4 +21,4 @@ async function setupClient() {
   return client;
 }
 
-module.exports = { setupClient };
+export default { setupClient };

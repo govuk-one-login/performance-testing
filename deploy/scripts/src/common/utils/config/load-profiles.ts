@@ -348,8 +348,7 @@ export function createI4PeakTestSignUpScenario(
   exec: string,
   target: number,
   iterationDuration: number,
-  rampUpDuration: number,
-  peakDuration: number = 1800 // 30 minutes in seconds
+  rampUpDuration: number
 ): ScenarioList {
   const list: ScenarioList = {}
   const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
@@ -363,7 +362,7 @@ export function createI4PeakTestSignUpScenario(
     maxVUs,
     stages: [
       { target, duration: `${rampUpDuration}s` },
-      { target, duration: `${peakDuration}s` }
+      { target, duration: `30m` }
     ],
     exec
   }
@@ -375,8 +374,7 @@ export function createI4PeakTestSignInScenario(
   exec: string,
   target: number,
   iterationDuration: number,
-  rampUpDuration: number,
-  peakDuration: number = 1800 // 30 minutes in seconds
+  rampUpDuration: number
 ): ScenarioList {
   const list: ScenarioList = {}
   const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
@@ -390,7 +388,7 @@ export function createI4PeakTestSignInScenario(
     maxVUs,
     stages: [
       { target, duration: `${rampUpDuration}s` },
-      { target, duration: `${peakDuration}s` }
+      { target, duration: `30m` }
     ],
     exec
   }

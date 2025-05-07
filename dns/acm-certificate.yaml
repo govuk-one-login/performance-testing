@@ -17,9 +17,6 @@ Parameters:
     AllowedValues:
       - build # This is used for non-production
       - staging # This is used for production
-  PublicHostedZoneId:
-    Description: The hosted zone id
-    Type: String
 
 Resources:
   ExternalCertificate:
@@ -41,7 +38,7 @@ Resources:
             - "${DNSSUFFIX}"
             - DNSSUFFIX:
                 !FindInMap [PlatformConfiguration, !Ref Environment, DNSSUFFIX]
-          HostedZoneId: !Ref PublicHostedZoneId
+          HostedZoneId: "{{resolve:ssm:PrimaryZoneID}}"
       ValidationMethod: DNS
       Tags:
         - Key: Name

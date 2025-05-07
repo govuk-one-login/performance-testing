@@ -63,6 +63,6 @@ const setNonceAndRedirect = async (ctx) => {
   }
 };
 
-export default {
+export  {
   setNonceAndRedirect,
 };

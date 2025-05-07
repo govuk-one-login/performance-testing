@@ -1,5 +1,4 @@
 import { GetItemCommand } from '@aws-sdk/client-dynamodb';
-import { errorMonitor } from 'koa';
 
 // Check the data we have aligns with this user.
 async function checkUserStateAgainstDB(ctx, nonce, state) {
@@ -97,6 +96,7 @@ async function getUserInfo(ctx, access_token) {
   throw new Error(`Userinfo endpoint not authorising`);
 }
 
-export default {
+export {
   processCallback,
+  handleCallbackAndGetTokenSet,
 };

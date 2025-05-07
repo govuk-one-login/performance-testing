@@ -21,4 +21,4 @@ async function setupClient() {
   return client;
 }
 
-export default { setupClient };
+export { setupClient };

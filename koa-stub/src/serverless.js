@@ -1,7 +1,8 @@
 //require('source-map-support/register')
-const serverlessExpress = require('@codegenie/serverless-express')
-const app = require('./app')
-const { setupClient } = require('./utils/onelogin.util')
+import serverlessExpress from '@codegenie/serverless-express';
+
+import { app } from './app.js';
+import { setupClient } from './utils/onelogin.util.js';
 
 let serverlessExpressInstance;
 
@@ -18,4 +19,5 @@ function handler (event, context) {
   return setup(event, context)
 }
 
-exports.handler = handler
+export { handler }
+export default handler

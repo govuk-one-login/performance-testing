@@ -1,9 +1,9 @@
-const Router = require("koa-router");
+import Router from 'koa-router';
 const router = new Router();
-const { setNonceAndRedirect } = require("./controllers/start.controller");
-const { processCallback } = require("./controllers/callback.controller");
-const { rpInitiateLogout } = require("./controllers/logout.controller");
-const cookie = require("koa-cookie");
+import { setNonceAndRedirect } from './controllers/start.controller.js';
+import { processCallback } from './controllers/callback.controller.js';
+import { rpInitiateLogout } from './controllers/logout.controller.js';
+import cookie from 'koa-cookie';
 
 router.use(cookie.default());
 

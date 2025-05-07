@@ -35,6 +35,6 @@ const rpInitiateLogout = async (ctx) => {
   }
 };
 
-export default {
+export  {
   rpInitiateLogout,
 };

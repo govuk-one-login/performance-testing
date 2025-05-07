@@ -19,7 +19,8 @@
   },
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
-    "lint": "eslint"
+    "lint": "eslint",
+    "start": "node server.js"
   },
   "author": "Andy Loughran & Coral Smith",
   "license": "MIT",

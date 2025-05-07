@@ -64,7 +64,7 @@ Resources:
         CertificateArn: "{{ resolve:ssm:PrimaryZoneWildcardCertificateARN }}"
         DomainName: !If
           - IsStaging
-          - "rp-stub.perf.account.gov.uk"
+          - "rp-stub.perf.staging.account.gov.uk"
           - "rp-stub.perf.build.account.gov.uk"
         EndpointConfiguration: REGIONAL
         Route53:

@@ -7,22 +7,13 @@ Parameters:
     AllowedValues:
       - build # This is used for non-production
       - staging # This is used for production
-Conditions:
-  IsStaging:
-    Fn::Equals:
-      - Ref: Environment
-      - staging
 Resources:
   PublicHostedZone:
     Type: AWS::Route53::HostedZone
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      Name:
-        Fn::If:
-          - IsStaging
-          - perf.account.gov.uk
-          - Fn::Sub: perf.${Environment}.account.gov.uk
+      Name: !Sub perf.${Environment}.account.gov.uk
     Metadata:
       SamResourceId: PublicHostedZone
   PublicHostedZoneSSM:

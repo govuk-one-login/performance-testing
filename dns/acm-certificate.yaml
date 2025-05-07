@@ -8,7 +8,7 @@ Mappings:
     build:
       DNSSUFFIX: perf.build.account.gov.uk
     staging:
-      DNSSUFFIX: perf.account.gov.uk
+      DNSSUFFIX: perf.staging.account.gov.uk
 
 Parameters:
   Environment:

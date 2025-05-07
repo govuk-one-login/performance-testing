@@ -28,8 +28,8 @@
   "author": "Andy Loughran & Coral Smith",
   "license": "MIT",
   "devDependencies": {
-    "aws-sdk-client-mock": "^4.1.0",
-    "aws-sdk-client-mock-jest": "^4.1.0",
+    "aws-sdk-client-mock": "^4.0.0",
+    "aws-sdk-client-mock-jest": "^4.0.0",
     "eslint": "^9.25.0",
     "fetch-cookie": "^3.1.0",
     "globals": "^16.0.0",

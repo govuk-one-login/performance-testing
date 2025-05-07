@@ -33,6 +33,10 @@ Conditions:
       - Fn::Equals:
           - !Ref PermissionsBoundary
           - "none"
+  IsStaging:
+    Fn::Equals:
+      - !Ref Environment
+      - staging
 
 Globals:
   Function:
@@ -56,6 +60,15 @@ Resources:
     Properties:
       StageName: prod
       BinaryMediaTypes: ["*/*"]
+      Domain:
+        CertificateArn: "{{ resolve:ssm:PrimaryZoneWildcardCertificateARN }}"
+        DomainName: !If
+          - IsStaging
+          - "rp-stub.perf.staging.account.gov.uk"
+          - "rp-stub.perf.build.account.gov.uk"
+        EndpointConfiguration: REGIONAL
+        Route53:
+          HostedZoneId: "{{ resolve:ssm:PrimaryZoneID }}"
       Auth:
         ResourcePolicy:
           CustomStatements:

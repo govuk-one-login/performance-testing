@@ -382,7 +382,7 @@ export function createI4PeakTestSignInScenario(
 
   list[exec] = {
     executor: 'ramping-arrival-rate',
-    startRate: 1,
+    startRate: 2,
     timeUnit: '1s',
     preAllocatedVUs,
     maxVUs,

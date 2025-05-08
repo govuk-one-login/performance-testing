@@ -59,7 +59,7 @@ const profiles: ProfileList = {
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 3389, 3, 1542)
   },
-  PeakTest2000: {
+  peakTest2000: {
     sendRegularEventWithEnrichment: {
       executor: 'ramping-arrival-rate',
       startRate: 2,

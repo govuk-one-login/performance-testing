@@ -58,6 +58,20 @@ const profiles: ProfileList = {
   },
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 3389, 3, 1542)
+  },
+  PeakTest2000: {
+    sendRegularEventWithEnrichment: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 3000,
+      maxVUs: 6000,
+      stages: [
+        { target: 2000, duration: '911s' },
+        { target: 2000, duration: '30m' }
+      ],
+      exec: 'sendRegularEventWithEnrichment'
+    }
   }
 }
 

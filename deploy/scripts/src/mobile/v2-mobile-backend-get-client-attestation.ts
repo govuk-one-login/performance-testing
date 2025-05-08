@@ -1,4 +1,5 @@
 import {
+  createI4PeakTestSignUpScenario,
   createScenario,
   describeProfile,
   LoadProfile,
@@ -30,6 +31,9 @@ const profiles: ProfileList = {
       ],
       exec: 'getClientAttestation'
     }
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('getClientAttestation', 450, 12, 451)
   }
 }
 

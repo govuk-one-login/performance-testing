@@ -24,7 +24,10 @@ import { check } from 'k6'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('ticf', LoadProfile.smoke)
+    ...createScenario('signInSuccess', LoadProfile.smoke),
+    ...createScenario('signUpSuccess', LoadProfile.smoke),
+    ...createScenario('identityProvingSuccess', LoadProfile.smoke),
+    ...createScenario('identityReuseSuccess', LoadProfile.smoke)
   }
 }
 
@@ -39,9 +42,12 @@ export const options: Options = {
 }
 
 const env = {
-  sqs_queue: getEnv('TiCF_SQS_QUEUE'), // Need to change this and implement the actual SQS Queue.
-  authAPIID: getEnv('TiCF_AUTH_API_ID'),
-  authResourcePath: getEnv('TiCF_AUTH_RESOURCE_PATH')
+  sqs_queue: getEnv('TiCF_SQS_QUEUE'),
+  authAPIURL: getEnv('TiCF_AUTH_URL'),
+  ipvAPIURL: getEnv('TiCF_IPV_URL'),
+  identityJWT1: getEnv('TiCF_IPV_JWT_1'),
+  identityJWT2: getEnv('TiCF_IPV_JWT_2'),
+  identityJWT3: getEnv('TiCF_IPV_JWT_3')
 }
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -50,7 +56,7 @@ const awsConfig = new AWSConfig({
   accessKeyId: credentials.AccessKeyId,
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken
-}) //This means to run a smoke test we will need to assume the perf tester role locally (due to permissions)
+})
 
 const sqs = new SQSClient(awsConfig)
 
@@ -60,59 +66,18 @@ const journeyID = `perfJourney${uuidv4()}`
 const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
 const eventID = `${testID}_${uuidv4()}`
 
-export function signInSuccess(userID: string): void {
+export function signInSuccess(): void {
+  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
   const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
   const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID))
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
+  iterationsStarted.add(1)
 
   sqs.sendMessage(env.sqs_queue, authAuthorizationInitiatedPayload)
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
-}
 
-export function signUpSuccess(userID: string): void {
-  const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
-
-  const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID))
-  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
-  const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
-
-  sqs.sendMessage(env.sqs_queue, authAuthorizationInitiatedPayload)
-  sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
-  sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
-  sqs.sendMessage(env.sqs_queue, authUpdatePhonePayload)
-}
-
-export function identityProvingSuccess(userID: string): void {
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
-  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID))
-  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID))
-  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID))
-  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID))
-
-  sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
-  sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
-  sqs.sendMessage(env.sqs_queue, ipvDLCRIVCIssuedPayload)
-  sqs.sendMessage(env.sqs_queue, ipvAddressCRIVCIssuedPayload)
-  sqs.sendMessage(env.sqs_queue, ipvKBVCRIStartPayload)
-  sqs.sendMessage(env.sqs_queue, ipvKBVCRIEndPayload)
-}
-
-export function identityReuseSuccess(userID: string): void {
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
-
-  sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
-  sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
-}
-
-export function authSignInAPICall() {
-  //This should be a POST request to the API and then a 202 response validation
-  const authAPIID = env.authAPIID
-  const authResourcePath = env.authResourcePath
-  const authAPIURL = `https://${authAPIID}.execute-api.<eu-west-2>.amazonaws.com/dev${authResourcePath}`
+  sleepBetween(1, 3)
 
   const authSignInPayload = {
     vtr: ['Cl'],
@@ -127,47 +92,123 @@ export function authSignInAPICall() {
     }
   }
 
-  const res = http.post(authAPIURL, JSON.stringify(authSignInPayload), params)
+  const res = http.post(env.authAPIURL, JSON.stringify(authSignInPayload), params)
   check(res, {
     'status is 202': r => r.status === 202
   })
-}
-
-export function authSignUpAPICall() {}
-
-export function identityReuseAPICall() {}
-
-export function identityProvingAPICall() {}
-
-export function ticf(): void {
-  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
-  iterationsStarted.add(1)
-
-  signInSuccess(userID)
-  sleepBetween(1, 3)
-  authSignInAPICall()
-  sleepBetween(1, 3)
-
-  //For Auth signUp we are sending the TxMA events to the SQS queue, waiting, and then making the API call
-  signUpSuccess(userID)
-  sleepBetween(1, 3)
-  authSignUpAPICall()
-  sleepBetween(1, 3)
-
-  //For Identity Reuse we are sending the TxMA events to the SQS queue, waiting, and then making the API call
-  identityReuseSuccess(userID)
-  sleepBetween(1, 3)
-  identityReuseAPICall()
-  sleepBetween(1, 3)
-
-  //For Identity Proving we are sending the TxMA events to the SQS queue, waiting, and then making the API call
-  identityProvingSuccess(userID)
-  sleepBetween(1, 3)
-  identityProvingAPICall()
-  sleepBetween(1, 3)
 
   iterationsCompleted.add(1)
 }
 
-//Also need to update permissions in the CF template to allow us to push to the queue
-//Double check payoad values
+export function signUpSuccess(): void {
+  const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
+  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+
+  const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID))
+  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
+  const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
+  iterationsStarted.add(1)
+
+  sqs.sendMessage(env.sqs_queue, authAuthorizationInitiatedPayload)
+  sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
+  sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
+  sqs.sendMessage(env.sqs_queue, authUpdatePhonePayload)
+
+  sleepBetween(1, 3)
+
+  const authSignUpPayload = {
+    vtr: ['Cl.Cm'],
+    sub: 'urn:fdc:gov.uk:EC941A39-46E4-4A7C-B4AA-BF69A334C9BE',
+    govuk_signin_journey_id: 'C5D8FB80-BE95-4FA5-B782-202D214DB0CE',
+    authenticated: 'Y',
+    initial_registration: 'Y',
+    '2fa_method': ['SMS']
+  }
+
+  const params = {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+
+  const res = http.post(env.authAPIURL, JSON.stringify(authSignUpPayload), params)
+  check(res, {
+    'status is 202': r => r.status === 202
+  })
+
+  iterationsCompleted.add(1)
+}
+
+export function identityProvingSuccess(): void {
+  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
+  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID))
+  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID))
+  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID))
+  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID))
+
+  iterationsStarted.add(1)
+
+  sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
+  sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
+  sqs.sendMessage(env.sqs_queue, ipvDLCRIVCIssuedPayload)
+  sqs.sendMessage(env.sqs_queue, ipvAddressCRIVCIssuedPayload)
+  sqs.sendMessage(env.sqs_queue, ipvKBVCRIStartPayload)
+  sqs.sendMessage(env.sqs_queue, ipvKBVCRIEndPayload)
+
+  sleepBetween(1, 3)
+  const identityProvingPayload = {
+    vtr: ['P2'],
+    vot: 'P2',
+    vtm: 'https://oidc.account.gov.uk/trustmark',
+    sub: 'urn:fdc:gov.uk:450A3674-E25F-4968-87F4-73795FE35A79',
+    govuk_signin_journey_id: 'A68DCA14-E5AF-4729-A063-B7EDAD4A2AA3',
+    'https://vocab.account.gov.uk/v1/credentialJWT': [env.identityJWT1, env.identityJWT2, env.identityJWT3]
+  }
+
+  const params = {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+
+  const res = http.post(env.authAPIURL, JSON.stringify(identityProvingPayload), params)
+  check(res, {
+    'status is 202': r => r.status === 202
+  })
+  iterationsCompleted.add(1)
+}
+
+export function identityReuseSuccess(): void {
+  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
+  iterationsStarted.add(1)
+
+  sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
+  sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
+
+  sleepBetween(1, 3)
+  const identityReusePayload = {
+    vtr: ['Cl.Cm.P2'],
+    vot: 'P2',
+    vtm: 'https://oidc.account.gov.uk/trustmark',
+    sub: 'urn:fdc:gov.uk:B51CD5A0-022F-40FF-A909-33D466FB6930',
+    govuk_signin_journey_id: '94191C18-D88B-4B47-A5F3-AC4AAE2C11DE',
+    'https://vocab.account.gov.uk/v1/credentialJWT': []
+  }
+
+  const params = {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+
+  const res = http.post(env.authAPIURL, JSON.stringify(identityReusePayload), params)
+  check(res, {
+    'status is 202': r => r.status === 202
+  })
+  iterationsCompleted.add(1)
+}

@@ -61,14 +61,14 @@ Resources:
       StageName: prod
       BinaryMediaTypes: ["*/*"]
       Domain:
-        CertificateArn: "{{ resolve:ssm:PrimaryZoneWildcardCertificateARN }}"
+        CertificateArn: !ImportValue dns-records-certificate-arn
         DomainName: !If
           - IsStaging
           - "rp-stub.perf.staging.account.gov.uk"
           - "rp-stub.perf.build.account.gov.uk"
         EndpointConfiguration: REGIONAL
         Route53:
-          HostedZoneId: "{{ resolve:ssm:PrimaryZoneID }}"
+          HostedZoneId: !ImportValue PublicHostedZoneId
       Auth:
         ResourcePolicy:
           CustomStatements:

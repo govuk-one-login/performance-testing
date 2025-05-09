@@ -12,14 +12,17 @@ import {
   IPVDLCRIVCIssued,
   IPVAddressCRIVCIssued,
   IPVKBVCRIStart,
-  IPVKBVCRIEnd
+  IPVKBVCRIEnd,
+  AuthAuthorisationReqParsedEnrichment,
+  AuthLogInSuccessEnrichment
 } from './txmaReqFormat'
 
 export function generateAuthCreateAccount(
   testID: string,
   userID: string,
   emailID: string,
-  pairWiseID: string
+  pairWiseID: string,
+  journeyID: string
 ): AuthCreateAccount {
   const eventID = `${testID}_${uuidv4()}`
   return {
@@ -31,7 +34,7 @@ export function generateAuthCreateAccount(
     event_timestamp_ms: Math.floor(Date.now()),
     user: {
       user_id: userID, // `${testID}_performanceTestClientId_${userID}_performanceTestCommonSubjectId`
-      govuk_signin_journey_id: uuidv4(),
+      govuk_signin_journey_id: journeyID,
       ip_address: '1.2.3.4',
       email: emailID,
       session_id: uuidv4(),
@@ -392,6 +395,71 @@ export function generateIPVKBVCRIEnd(journeyID: string, userID: string): IPVKBVC
       persistent_session_id: uuidv4(),
       session_id: uuidv4(),
       user_id: userID
+    }
+  }
+}
+
+export function generateAuthLogInSuccessEnrichment(
+  eventID: string,
+  userID: string,
+  emailID: string,
+  journeyID: string
+): AuthLogInSuccessEnrichment {
+  return {
+    event_id: eventID,
+    event_name: 'AUTH_LOG_IN_SUCCESS',
+    component_id: 'SharedSignalPerfTest',
+    timestamp: Math.floor(Date.now() / 1000),
+    event_timestamp_ms: Math.floor(Date.now()),
+    user: {
+      user_id: userID, // `${testID}_performanceTestClientId_${userID}_performanceTestCommonSubjectId`,
+      govuk_signin_journey_id: journeyID,
+      ip_address: '1.2.3.4',
+      session_id: uuidv4(),
+      email: emailID,
+      persistent_session_id: uuidv4(),
+      phone: '07777777777'
+    },
+    extensions: {
+      phone_number_country_code: 44
+    },
+    restricted: {
+      device_information: {
+        request_timestamp_ms: Math.floor(Date.now()),
+        ip_address: '1.2.3.4',
+        connection_port: 12345,
+        country_code: 'GB',
+        user_agent: 'k6/0.52.0 (https://k6.io/)',
+        accepted_language: 24234233,
+        ja3_fingerprint: uuidv4()
+      }
+    }
+  }
+}
+
+export function generateAuthReqParsedEnrichment(
+  journeyID: string,
+  testID: string
+): AuthAuthorisationReqParsedEnrichment {
+  const eventTime = new Date().toISOString()
+  const eventID = `${testID}_${uuidv4()}`
+  return {
+    client_id: 'performanceTestClientId',
+    component_id: 'https://oidc.account.gov.uk/',
+    event_id: eventID,
+    event_name: 'AUTH_AUTHORISATION_REQUEST_PARSED',
+    event_timestamp_ms: Math.floor(Date.now()),
+    event_timestamp_ms_formatted: eventTime,
+    timestamp: Math.floor(Date.now() / 1000),
+    timestamp_formatted: eventTime,
+    user: {
+      govuk_signin_journey_id: journeyID,
+      ip_address: '01.01.01.001',
+      persistent_session_id: 'vJNUUY3s3pa95VcIXmytYF65ogE--1738669313306',
+      session_id: uuidv4()
+    },
+    txma: {
+      obfuscated: true
     }
   }
 }

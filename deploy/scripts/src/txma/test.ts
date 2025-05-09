@@ -14,10 +14,8 @@ import { getEnv } from '../common/utils/config/environment-variables'
 import {
   generateAuthLogInSuccess,
   generateAuthCreateAccount,
-  generateAuthReqParsed,
-  generateDcmawAbortWeb
+  generateAuthReqParsed
 } from '../common/requestGenerator/txmaReqGen'
-import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {

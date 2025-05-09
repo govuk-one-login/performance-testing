@@ -1,4 +1,5 @@
 import {
+  createI4PeakTestSignUpScenario,
   createScenario,
   describeProfile,
   LoadProfile,
@@ -37,6 +38,9 @@ const profiles: ProfileList = {
       ],
       exec: 'getServiceAccessToken'
     }
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('getServiceAccessToken', 450, 30, 451)
   }
 }
 

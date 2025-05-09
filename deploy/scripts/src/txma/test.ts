@@ -15,7 +15,7 @@ import {
   generateAuthLogInSuccess,
   generateAuthCreateAccount,
   generateAuthReqParsed
-} from './requestGenerator/txmaReqGen'
+} from '../common/requestGenerator/txmaReqGen'
 
 const profiles: ProfileList = {
   smoke: {

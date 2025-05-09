@@ -51,6 +51,7 @@ export interface F2fYotiStart {
     document_details: [
       {
         documentType: string
+        issuingCountry: string
       }
     ]
   }

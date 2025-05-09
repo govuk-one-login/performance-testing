@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Creates the necessary components to manage DNS for the Performance Test Setup.
+
+Mappings:
+  PlatformConfiguration:
+    build:
+      DNSSUFFIX: perf.build.account.gov.uk
+    staging:
+      DNSSUFFIX: perf.staging.account.gov.uk
+
+Parameters:
+  Environment:
+    Description: The name of the environment to deploy to
+    Type: String
+    AllowedValues:
+      - build # This is used for non-production
+      - staging # This is used for production
+
+Resources:
+  ExternalCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub
+        - "${DNSSUFFIX}"
+        - DNSSUFFIX:
+            !FindInMap [PlatformConfiguration, !Ref Environment, DNSSUFFIX]
+
+      SubjectAlternativeNames:
+        - !Sub
+          - "*.${DNSSUFFIX}"
+          - DNSSUFFIX:
+              !FindInMap [PlatformConfiguration, !Ref Environment, DNSSUFFIX]
+
+      DomainValidationOptions:
+        - DomainName: !Sub
+            - "${DNSSUFFIX}"
+            - DNSSUFFIX:
+                !FindInMap [PlatformConfiguration, !Ref Environment, DNSSUFFIX]
+          HostedZoneId: "{{resolve:ssm:PrimaryZoneID}}"
+      ValidationMethod: DNS
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${DNSSUFFIX}"
+            - DNSSUFFIX:
+                !FindInMap [PlatformConfiguration, !Ref Environment, DNSSUFFIX]
+        - Key: Product
+          Value: "Gov.UK One Login - Performance Testing"
+        - Key: System
+          Value: "Performance Testing"
+        - Key: Environment
+          Value: !Sub "${Environment}"
+
+  CertificateARNSSM:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: The Certificate ARN
+      Name: PrimaryZoneWildcardCertificateARN
+      Type: String
+      Value: !Ref ExternalCertificate
+      Tags:
+        Name: "PrimaryZoneWildcardCertificateARN"
+        Product: "GOV.UK One Login - Performance Testing"
+        System: "Performance Testing"
+        Environment: !Sub "${Environment}"
+
+Outputs:
+  CertificateARN:
+    Description: The ARN for the ACM Certificate created in this template
+    Value: !Ref ExternalCertificate
+    Export:
+      Name: dns-records-certificate-arn

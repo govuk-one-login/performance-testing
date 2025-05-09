@@ -5,7 +5,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen'
@@ -39,6 +40,36 @@ const profiles: ProfileList = {
       maxDuration: '60m',
       exec: 'dataCreationForRetrieve'
     }
+  },
+  perf006Iteration2PeakTest: {
+    persistIV: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 20,
+      maxVUs: 90,
+      stages: [
+        { target: 30, duration: '15s' },
+        { target: 30, duration: '30m' }
+      ],
+      exec: 'persistIV'
+    },
+    retrieveIV: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 200,
+      maxVUs: 909,
+      stages: [
+        { target: 303, duration: '139s' },
+        { target: 303, duration: '30m' }
+      ],
+      exec: 'retrieveIV'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignInScenario('persistIV', 30, 3, 15),
+    ...createI3SpikeSignInScenario('retrieveIV', 303, 3, 139)
   }
 }
 
@@ -91,6 +122,7 @@ export function persistIV(): void {
   const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend)
   const persistIVMessage = JSON.stringify(persistIVPayload)
   iterationsStarted.add(1)
+  //// B01_PersistIV_01_PostInterventionData
   sqs.sendMessage(env.sqs_queue, persistIVMessage)
   iterationsCompleted.add(1)
 }
@@ -103,7 +135,7 @@ export function retrieveIV(): void {
   // B02_RetrieveIV_01_GetInterventionData
   timeGroup(groups[0], () => http.get(env.aisEnvURL + `/v1/ais/${retrieveData.userID}?history=true`), {
     isStatusCode200,
-    ...pageContentCheck('Perf Testing')
+    ...pageContentCheck('intervention')
   })
   iterationsCompleted.add(1)
 }

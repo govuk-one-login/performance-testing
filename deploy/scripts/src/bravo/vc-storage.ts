@@ -7,7 +7,11 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignUpScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib'
@@ -40,6 +44,97 @@ const profiles: ProfileList = {
       maxDuration: '120m',
       exec: 'persistVC'
     }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('persistVC', LoadProfile.spikeI2HighTraffic, 35, 16),
+    ...createScenario('updateVC', LoadProfile.spikeI2HighTraffic, 35, 16),
+    ...createScenario('summariseVC', LoadProfile.spikeI2HighTraffic, 32, 15)
+  },
+  perf006Iteration2PeakTest: {
+    persistVC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 30,
+      maxVUs: 36,
+      stages: [
+        { target: 120, duration: '121s' },
+        { target: 120, duration: '30m' }
+      ],
+      exec: 'persistVC'
+    },
+    updateVC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 30,
+      maxVUs: 36,
+      stages: [
+        { target: 120, duration: '121s' },
+        { target: 120, duration: '30m' }
+      ],
+      exec: 'updateVC'
+    },
+    summariseVC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 50,
+      maxVUs: 66,
+      stages: [
+        { target: 11, duration: '6s' },
+        { target: 11, duration: '30m' }
+      ],
+      exec: 'summariseVC'
+    }
+  },
+  perf006Iteration3PeakTest: {
+    persistVC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 30,
+      maxVUs: 48,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '30m' }
+      ],
+      exec: 'persistVC'
+    },
+    updateVC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 30,
+      maxVUs: 96,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '30m' }
+      ],
+      exec: 'updateVC'
+    },
+    summariseVC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 50,
+      maxVUs: 144,
+      stages: [
+        { target: 24, duration: '12s' },
+        { target: 24, duration: '30m' }
+      ],
+      exec: 'summariseVC'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('persistVC', 490, 5, 491),
+    ...createI3SpikeSignUpScenario('updateVC', 490, 7, 491),
+    ...createI3SpikeSignInScenario('summariseVC', 71, 6, 33)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('persistVC', 470, 5, 471),
+    ...createI4PeakTestSignUpScenario('updateVC', 470, 7, 471),
+    ...createI4PeakTestSignInScenario('summariseVC', 43, 6, 21)
   }
 }
 

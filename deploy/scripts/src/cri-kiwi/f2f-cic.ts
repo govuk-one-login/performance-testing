@@ -7,12 +7,13 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import execution from 'k6/execution'
 import { b64encode } from 'k6/encoding'
 import { timeGroup } from '../common/utils/request/timing'
-import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl } from './utils/authorization'
 import { getAccessToken } from '../common/utils/authorization/authorization'
@@ -27,19 +28,81 @@ const profiles: ProfileList = {
   load: {
     ...createScenario('FaceToFace', LoadProfile.short, 3),
     ...createScenario('CIC', LoadProfile.short, 3)
+  },
+  spikeI2LowTraffic: {
+    ...createScenario('FaceToFace', LoadProfile.spikeI2LowTraffic, 1), //rounded to 1 from 0.4 based on the iteration 2 plan
+    ...createScenario('CIC', LoadProfile.spikeI2LowTraffic, 1)
+  },
+  perf006Iteration2PeakTest: {
+    FaceToFace: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 10,
+      maxVUs: 100,
+      stages: [
+        { target: 3, duration: '4s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'FaceToFace'
+    },
+    CIC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 10,
+      maxVUs: 100,
+      stages: [
+        { target: 3, duration: '4s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'CIC'
+    }
+  },
+  perf006Iteration3PeakTest: {
+    FaceToFace: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 10,
+      maxVUs: 100,
+      stages: [
+        { target: 4, duration: '5s' },
+        { target: 4, duration: '30m' }
+      ],
+      exec: 'FaceToFace'
+    },
+    CIC: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 10,
+      maxVUs: 100,
+      stages: [
+        { target: 4, duration: '5s' },
+        { target: 4, duration: '30m' }
+      ],
+      exec: 'CIC'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('FaceToFace', 12, 42, 13),
+    ...createI3SpikeSignUpScenario('CIC', 12, 21, 13)
   }
 }
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
   CIC: [
-    'B01_BAV_01_IPVStubCall',
-    'B01_BAV_02_Authorize',
-    'B01_BAV_03_Continue',
-    'B01_BAV_04_BankDetails',
-    'B01_BAV_05_CheckDetails',
-    'B01_BAV_06_SendAuthorizationCode',
-    'B01_BAV_07_SendBearerToken'
+    'B01_CIC_01_IPVStubCall',
+    'B01_CIC_02_Authorize',
+    'B01_CIC_03_UserDetails',
+    'B01_CIC_04_UserBirthdate',
+    'B01_CIC_05_CheckDetails',
+    'B01_CIC_05_CheckDetails::01_CICCall',
+    'B01_CIC_05_CheckDetails::01_IPVStubCall',
+    'B01_CIC_06_SendAuthorizationCode',
+    'B01_CIC_07_SendBearerToken'
   ],
   FaceToFace: [
     'B02_FaceToFace_01_IPVStubCall',
@@ -61,16 +124,17 @@ const groupMap = {
     'B02_FaceToFace_05_NonUKPassport_ExpiryOption',
     'B02_FaceToFace_06_NonUKPassport_Details',
     'B02_FaceToFace_07_NonUKPassport_WhichCountry', // pragma: allowlist secret
-    'B02_FaceToFace_04_BRP_ChoosePhotoId',
-    'B02_FaceToFace_05_BRP_Details',
     'B02_FaceToFace_04_UKDL_ChoosePhotoId',
     'B02_FaceToFace_05_UKDL_Details',
     'B02_FaceToFace_06_UKDL_CurrentAddress',
-    'B02_FaceToFace_08_FindPostOffice',
-    'B02_FaceToFace_09_ChoosePostOffice',
-    'B02_FaceToFace_10_CheckDetails',
-    'B02_FaceToFace_11_SendAuthorizationCode',
-    'B02_FaceToFace_12_SendBearerToken'
+    'B02_FaceToFace_09_FindPostOffice',
+    'B02_FaceToFace_10_ChoosePostOffice',
+    'B02_FaceToFace_11_SelectMailingOption',
+    'B02_FaceToFace_12_CheckDetails',
+    'B02_FaceToFace_12_CheckDetails::01_F2FCall',
+    'B02_FaceToFace_12_CheckDetails::02_IPVStubCall',
+    'B02_FaceToFace_13_SendAuthorizationCode',
+    'B02_FaceToFace_14_SendBearerToken'
   ]
 } as const
 
@@ -156,23 +220,30 @@ export function CIC(): void {
   )
 
   // B01_CIC_05_CheckDetails
-  res = timeGroup(
-    groups[4],
-    () =>
-      res.submitForm({
-        submitSelector: '#continue'
-      }),
-    {
+  timeGroup(groups[4], () => {
+    //01_CICCall
+    res = timeGroup(
+      groups[5].split('::')[1],
+      () =>
+        res.submitForm({
+          submitSelector: '#submitDetails',
+          params: { redirects: 2 }
+        }),
+      { isStatusCode302 }
+    )
+
+    //02_IPVStubCall
+    res = timeGroup(groups[6].split('::')[1], () => http.get(res.headers.Location), {
       'verify url body': r => r.url.includes(clientId)
-    }
-  )
+    })
+  })
   const codeUrl = getCodeFromUrl(res.url)
 
   sleepBetween(1, 3)
 
   // B01_CIC_06_SendAuthorizationCode
   res = timeGroup(
-    groups[5],
+    groups[7],
     () =>
       http.post(env.CIC.target + '/token', {
         grant_type: 'authorization_code',
@@ -191,7 +262,7 @@ export function CIC(): void {
     headers: { Authorization: authHeader }
   }
   // B01_CIC_07_SendBearerToken
-  res = timeGroup(groups[6], () => http.post(env.CIC.target + '/userinfo', {}, options), {
+  res = timeGroup(groups[8], () => http.post(env.CIC.target + '/userinfo', {}, options), {
     isStatusCode200,
     ...pageContentCheck('credentialJWT')
   })
@@ -202,9 +273,9 @@ export function FaceToFace(): void {
   const groups = groupMap.FaceToFace
   let res: Response
   const iteration = execution.scenario.iterationInInstance
-  const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'BRP', 'UKDL']
+  const paths = ['UKPassport', 'NationalIDEEA', 'EU-DL', 'Non-UKPassport', 'UKDL']
   const path = paths[iteration % paths.length]
-  const expiry = randomDate(new Date(2025, 1, 1), new Date(2025, 12, 31))
+  const expiry = randomDate(new Date(2030, 1, 1), new Date(2030, 12, 31)) // Expiry 5 years from now
   const expiryDay = expiry.getDate().toString()
   const expiryMonth = (expiry.getMonth() + 1).toString()
   const expiryYear = expiry.getFullYear().toString()
@@ -521,45 +592,10 @@ export function FaceToFace(): void {
         }
       )
       break
-    case 'BRP':
-      // B02_FaceToFace_04_BRP_ChoosePhotoId
-      res = timeGroup(
-        groups[19],
-        () =>
-          res.submitForm({
-            fields: { photoIdChoice: 'brp' },
-            submitSelector: '#continue'
-          }),
-        {
-          isStatusCode200,
-          ...pageContentCheck('When does your biometric residence permit (BRP) expire?')
-        }
-      )
-
-      sleepBetween(1, 3)
-
-      // B02_FaceToFace_05_BRP_Details
-      res = timeGroup(
-        groups[20],
-        () =>
-          res.submitForm({
-            fields: {
-              'brpExpiryDate-day': expiryDay,
-              'brpExpiryDate-month': expiryMonth,
-              'brpExpiryDate-year': expiryYear
-            },
-            submitSelector: '#continue'
-          }),
-        {
-          isStatusCode200,
-          ...pageContentCheck('Find a Post Office where you can prove your identity')
-        }
-      )
-      break
     case 'UKDL':
       // B02_FaceToFace_04_UKDL_ChoosePhotoId
       res = timeGroup(
-        groups[21],
+        groups[19],
         () =>
           res.submitForm({
             fields: { photoIdChoice: 'ukPhotocardDl' },
@@ -575,7 +611,7 @@ export function FaceToFace(): void {
 
       // B02_FaceToFace_05_UKDL_Details
       res = timeGroup(
-        groups[22],
+        groups[20],
         () =>
           res.submitForm({
             fields: {
@@ -593,7 +629,7 @@ export function FaceToFace(): void {
 
       // B02_FaceToFace_06_UKDL_CurrentAddress
       res = timeGroup(
-        groups[23],
+        groups[21],
         () =>
           res.submitForm({
             fields: { ukPhotocardDlAddressCheck: 'current' },
@@ -611,9 +647,9 @@ export function FaceToFace(): void {
 
   sleepBetween(1, 3)
 
-  // B02_FaceToFace_08_FindPostOffice
+  // B02_FaceToFace_09_FindPostOffice
   res = timeGroup(
-    groups[24],
+    groups[22],
     () =>
       res.submitForm({
         fields: { postcode: 'SW1A 2AA' },
@@ -627,12 +663,22 @@ export function FaceToFace(): void {
 
   sleepBetween(1, 3)
 
-  // B02_FaceToFace_09_ChoosePostOffice
+  // B02_FaceToFace_10_ChoosePostOffice
   res = timeGroup(
-    groups[25],
+    groups[23],
     () =>
       res.submitForm({
         fields: { branches: '1' },
+        submitSelector: '#continue'
+      }),
+    { isStatusCode200, ...pageContentCheck('Your Post Office customer letter') }
+  )
+  // B02_FaceToFace_11_SelectMailingOption
+  res = timeGroup(
+    groups[24],
+    () =>
+      res.submitForm({
+        fields: { postOfficeCustomerLetterChoice: 'email' },
         submitSelector: '#continue'
       }),
     { isStatusCode200, ...pageContentCheck('Check your answers') }
@@ -640,24 +686,33 @@ export function FaceToFace(): void {
 
   sleepBetween(1, 3)
 
-  // B02_FaceToFace_10_CheckDetails
-  res = timeGroup(
-    groups[26],
-    () =>
-      res.submitForm({
-        submitSelector: '#continue'
-      }),
-    {
+  // B02_FaceToFace_12_CheckDetails
+  timeGroup(groups[25], () => {
+    //01_F2FCall
+    res = timeGroup(
+      groups[26].split('::')[1],
+      () =>
+        res.submitForm({
+          submitSelector: '#submitDetails',
+          params: { redirects: 2 }
+        }),
+      { isStatusCode302 }
+    )
+
+    //02_IPVStubCall
+    res = timeGroup(groups[27].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
       'verify url body': r => r.url.includes(clientId)
-    }
-  )
+    })
+  })
+
   const codeUrl = getCodeFromUrl(res.url)
 
   sleepBetween(1, 3)
 
-  // B02_FaceToFace_11_SendAuthorizationCode
+  // B02_FaceToFace_13_SendAuthorizationCode
   res = timeGroup(
-    groups[27],
+    groups[28],
     () =>
       http.post(env.F2F.target + '/token', {
         grant_type: 'authorization_code',
@@ -676,8 +731,8 @@ export function FaceToFace(): void {
       Authorization: authHeader
     }
   }
-  // B02_FaceToFace_12_SendBearerToken
-  res = timeGroup(groups[28], () => http.post(env.F2F.target + '/userinfo', {}, options), {
+  // B02_FaceToFace_14_SendBearerToken
+  res = timeGroup(groups[29], () => http.post(env.F2F.target + '/userinfo', {}, options), {
     'is status 202': r => r.status === 202,
     ...pageContentCheck('sub')
   })

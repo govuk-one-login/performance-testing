@@ -10,7 +10,11 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignUpScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
@@ -26,14 +30,6 @@ const profiles: ProfileList = {
   lowVolume: {
     ...createScenario('signIn', LoadProfile.short, 30),
     ...createScenario('signUp', LoadProfile.short, 30)
-  },
-  load10: {
-    ...createScenario('signIn', LoadProfile.full, 190, 25),
-    ...createScenario('signUp', LoadProfile.full, 10, 30)
-  },
-  load20: {
-    ...createScenario('signIn', LoadProfile.full, 380, 25),
-    ...createScenario('signUp', LoadProfile.full, 20, 30)
   },
   load: {
     ...createScenario('signIn', LoadProfile.full, 500, 20)
@@ -57,38 +53,6 @@ const profiles: ProfileList = {
         }
       }
     }
-  },
-  loadMar2025_L1: {
-    ...createScenario('signUp', LoadProfile.short, 45, 48),
-    ...createScenario('signIn', LoadProfile.short, 60, 24)
-  },
-  soakMar2025_L1: {
-    ...createScenario('signUp', LoadProfile.soak, 45, 48),
-    ...createScenario('signIn', LoadProfile.soak, 60, 24)
-  },
-  spikeNFR_L1: {
-    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 45, 48),
-    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 60, 24)
-  },
-  spikeSudden_L1: {
-    ...createScenario('signUp', LoadProfile.spikeSudden, 45, 48),
-    ...createScenario('signIn', LoadProfile.spikeSudden, 60, 24)
-  },
-  loadMar2025_L2: {
-    ...createScenario('signUp', LoadProfile.short, 90, 48),
-    ...createScenario('signIn', LoadProfile.short, 120, 24)
-  },
-  soakMar2025_L2: {
-    ...createScenario('signUp', LoadProfile.soak, 90, 48),
-    ...createScenario('signIn', LoadProfile.soak, 120, 24)
-  },
-  spikeNFR_L2: {
-    ...createScenario('signUp', LoadProfile.spikeNFRSignUp, 90, 48),
-    ...createScenario('signIn', LoadProfile.spikeNFRSignIn, 120, 24)
-  },
-  spikeSudden_L2: {
-    ...createScenario('signUp', LoadProfile.spikeSudden, 90, 48),
-    ...createScenario('signIn', LoadProfile.spikeSudden, 120, 24)
   },
   lowVolPerf007Test: {
     signUp: {
@@ -141,6 +105,168 @@ const profiles: ProfileList = {
       ],
       exec: 'signIn'
     }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('signUp', LoadProfile.spikeI2HighTraffic, 35, 48),
+    ...createScenario('signIn', LoadProfile.spikeI2HighTraffic, 32, 24)
+  },
+  perf006Iteration2PeakTest: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 576,
+      stages: [
+        { target: 120, duration: '121s' },
+        { target: 120, duration: '30m' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 264,
+      stages: [
+        { target: 11, duration: '6s' },
+        { target: 11, duration: '30m' }
+      ],
+      exec: 'signIn'
+    }
+  },
+  perf006Iteration3PeakTest: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 528,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '30m' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 432,
+      stages: [
+        { target: 24, duration: '12s' },
+        { target: 24, duration: '30m' }
+      ],
+      exec: 'signIn'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('signUp', 490, 33, 491),
+    ...createI3SpikeSignInScenario('signIn', 71, 18, 33)
+  },
+  perf006Iteration3RegressionTest: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 33,
+      maxVUs: 66,
+      stages: [
+        { target: 20, duration: '21s' },
+        { target: 20, duration: '5m' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 45,
+      maxVUs: 90,
+      stages: [
+        { target: 5, duration: '3s' },
+        { target: 5, duration: '5m' }
+      ],
+      exec: 'signIn'
+    }
+  },
+  perf006Iteration3SoakTest: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 33,
+      maxVUs: 66,
+      stages: [
+        { target: 20, duration: '21s' },
+        { target: 20, duration: '6h' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 27,
+      maxVUs: 54,
+      stages: [
+        { target: 3, duration: '3s' },
+        { target: 3, duration: '6h' }
+      ],
+      exec: 'signIn'
+    }
+  },
+  perf006Iteration3StressTest: {
+    signUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 1584,
+      maxVUs: 3168,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '300s' },
+        { target: 320, duration: '161s' },
+        { target: 320, duration: '300s' },
+        { target: 480, duration: '161s' },
+        { target: 480, duration: '300s' },
+        { target: 640, duration: '161s' },
+        { target: 640, duration: '300s' },
+        { target: 800, duration: '161s' },
+        { target: 800, duration: '300s' },
+        { target: 960, duration: '161s' },
+        { target: 960, duration: '300s' }
+      ],
+      exec: 'signUp'
+    },
+    signIn: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 1296,
+      maxVUs: 2592,
+      stages: [
+        { target: 24, duration: '13s' },
+        { target: 24, duration: '448s' },
+        { target: 48, duration: '13s' },
+        { target: 48, duration: '448s' },
+        { target: 72, duration: '13s' },
+        { target: 72, duration: '448s' },
+        { target: 96, duration: '13s' },
+        { target: 96, duration: '448s' },
+        { target: 120, duration: '13s' },
+        { target: 120, duration: '448s' },
+        { target: 144, duration: '13s' },
+        { target: 144, duration: '448s' }
+      ],
+      exec: 'signIn'
+    }
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('signUp', 470, 33, 471),
+    ...createI4PeakTestSignInScenario('signIn', 43, 18, 21)
   }
 }
 const loadProfile = selectProfile(profiles)

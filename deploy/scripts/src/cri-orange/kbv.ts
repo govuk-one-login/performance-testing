@@ -6,7 +6,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeGroup } from '../common/utils/request/timing'
@@ -52,6 +53,41 @@ const profiles: ProfileList = {
       ],
       exec: 'kbv'
     }
+  },
+  spikeI2LowTraffic: {
+    ...createScenario('kbv', LoadProfile.spikeI2LowTraffic, 4) //rounded to 4 from 3.5
+  },
+
+  perf006Iteration2PeakTest: {
+    kbv: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 12, duration: '13s' },
+        { target: 12, duration: '30m' }
+      ],
+      exec: 'kbv'
+    }
+  },
+  perf006Iteration3PeakTest: {
+    kbv: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 16, duration: '17s' },
+        { target: 16, duration: '30m' }
+      ],
+      exec: 'kbv'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('kbv', 49, 12, 50)
   }
 }
 

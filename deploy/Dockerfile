@@ -8,6 +8,7 @@ ENV WORKDIR=/home/node
 COPY scripts ${WORKDIR}/scripts
 
 WORKDIR ${WORKDIR}/scripts
+
 RUN npm install --ignore-scripts \
   && npm start
 
@@ -18,18 +19,18 @@ FROM golang:1.24-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
-  && xk6 build v0.54.0 --with github.com/LeonAdato/xk6-output-statsd@v0.2.0 --output /k6
+  && xk6 build v0.58.0 --with github.com/LeonAdato/xk6-output-statsd@v0.2.1 --output /k6
 
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.120.0 AS otel
+FROM otel/opentelemetry-collector-contrib:0.123.0 AS otel
 COPY otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---
 # Run
 # ---
-FROM grafana/k6:0.57.0
+FROM grafana/k6:0.58.0
 COPY --from=k6-build /k6 /usr/bin/k6
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true

@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Creates the necessary components to manage DNS zones for the Performance Test Setup.
+Parameters:
+  Environment:
+    Description: The name of the environment to deploy to
+    Type: String
+    AllowedValues:
+      - build # This is used for non-production
+      - staging # This is used for production
+Resources:
+  PublicHostedZone:
+    Type: AWS::Route53::HostedZone
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Name: !Sub perf.${Environment}.account.gov.uk
+    Metadata:
+      SamResourceId: PublicHostedZone
+  PublicHostedZoneSSM:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: The ARN of hosted zone
+      Name: PrimaryZoneID
+      Type: String
+      Value:
+        Fn::GetAtt:
+          - PublicHostedZone
+          - Id
+    Metadata:
+      SamResourceId: PublicHostedZoneSSM
+Outputs:
+  PublicHostedZoneNameServers:
+    Value:
+      Fn::Join:
+        - ","
+        - Fn::GetAtt:
+            - PublicHostedZone
+            - NameServers
+  PublicHostedZoneId:
+    Value:
+      Fn::GetAtt:
+        - PublicHostedZone
+        - Id
+    Export:
+      Name: PublicHostedZoneId

@@ -48,6 +48,11 @@ Mappings:
   IPVR:
     AWS:
       AccountID: "073717171046"
+  TiCF:
+    Build:
+      AccountID: "769837561067"
+    Dev:
+      AccountID: "105566562881"
 
 Resources:
   CodeBuildServiceRole:
@@ -219,6 +224,16 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
                     - !FindInMap [TxMA, Staging, AccountID]
                     - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [TiCF, Build, AccountID]
+                    - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [TiCF, Dev, AccountID]
+                    - "key/*"
           - Effect: "Allow"
             Action:
               - "execute-api:*"
@@ -257,6 +272,16 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [TxMA, Staging, AccountID]
                     - "self-staging-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [TiCF, Build, AccountID]
+                    - "ticf-cri-main*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [TiCF, Dev, AccountID]
+                    - "dev-cri-fpad-*"
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"
@@ -275,6 +300,16 @@ Resources:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
                     - !FindInMap [TxMA, Staging, AccountID]
+                    - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [TiCF, Build, AccountID]
+                    - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [TiCF, Dev, AccountID]
                     - "function:*"
 
   VPCTestPolicy:
@@ -484,12 +519,33 @@ Resources:
               IDENTITY_ORCH_STUB_USERNAME: "/perfTest/identity/orchStubUsername"
               IDENTITY_PASSPORT_URL: "/perfTest/identity/lime/passportUrl"
               IDENTITY_SPOT_SQS: "/perfTest/identity/spot/SQS"
+              IDENTITY_SPOT_FRAUDKEY: "/perfTest/identity/spot/fraudKey"
+              IDENTITY_SPOT_KBVKEY: "/perfTest/identity/spot/kbvKey"
+              IDENTITY_SPOT_PASSPORTKEY: "/perfTest/identity/spot/passportKey"
+              MOBILE_BACKEND_BUILD_MOBILE_BACKEND_BASE_URL: "/perfTest/mobile/backend/build/backendBaseUrl"
+              MOBILE_BACKEND_BUILD_APP_CHECK_STUB_BASE_URL: "/perfTest/mobile/backend/build/appCheckStubBaseUrl"
+              MOBILE_BACKEND_DEV_MOBILE_BACKEND_BASE_URL: "/perfTest/mobile/backend/dev/backendBaseUrl"
+              MOBILE_BACKEND_DEV_APP_CHECK_STUB_BASE_URL: "/perfTest/mobile/backend/dev/appCheckStubBaseUrl"
               MOBILE_BUILD_BACKEND_URL: "/perfTest/mobile/build/backendUrl"
+              MOBILE_BUILD_DCAMOCK_READID_URL: "/perfTest/mobile/build/dcaMockReadIdUrl"
               MOBILE_BUILD_FRONTEND_URL: "/perfTest/mobile/build/frontendUrl"
+              MOBILE_BUILD_REQ_BODY: "/perfTest/mobile/build/reqBody"
               MOBILE_BUILD_TEST_CLIENT_URL: "/perfTest/mobile/build/testClientUrl"
               MOBILE_DEV_BACKEND_URL: "/perfTest/mobile/dev/backendUrl"
+              MOBILE_DEV_DCAMOCK_READID_URL: "/perfTest/mobile/dev/dcaMockReadIdUrl"
               MOBILE_DEV_FRONTEND_URL: "/perfTest/mobile/dev/frontendUrl"
+              MOBILE_DEV_REQ_BODY: "/perfTest/mobile/dev/reqBody"
               MOBILE_DEV_TEST_CLIENT_URL: "/perfTest/mobile/dev/testClientUrl"
+              MOBILE_STS_BUILD_STS_BASE_URL: "/perfTest/mobile/sts/build/baseUrl"
+              MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL: "/perfTest/mobile/sts/build/mockClientBaseUrl"
+              MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL: "/perfTest/mobile/sts/build/orchBaseUrl"
+              MOBILE_STS_BUILD_CLIENT_ID: "/perfTest/mobile/sts/build/clientId"
+              MOBILE_STS_BUILD_REDIRECT_URI: "/perfTest/mobile/sts/build/redirectURI"
+              MOBILE_STS_DEV_STS_BASE_URL: "/perfTest/mobile/sts/dev/baseUrl"
+              MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL: "/perfTest/mobile/sts/dev/mockClientBaseUrl"
+              MOBILE_STS_DEV_ORCHESTRATION_BASE_URL: "/perfTest/mobile/sts/dev/orchBaseUrl"
+              MOBILE_STS_DEV_CLIENT_ID: "/perfTest/mobile/sts/dev/clientId"
+              MOBILE_STS_DEV_REDIRECT_URI: "/perfTest/mobile/sts/dev/redirectURI"
               SLACK_OAUTH_TOKEN: "/perfTest/slack/OAuthToken"
           phases:
             pre_build:

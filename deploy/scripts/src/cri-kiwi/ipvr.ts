@@ -5,7 +5,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import {
@@ -17,6 +19,7 @@ import {
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { sleep } from 'k6'
 
 const profiles: ProfileList = {
   smoke: {
@@ -30,6 +33,66 @@ const profiles: ProfileList = {
   stress: {
     ...createScenario('authEvent', LoadProfile.full, 2000, 2),
     ...createScenario('allEvents', LoadProfile.full, 12, 2)
+  },
+  perf006Iteration2PeakTest: {
+    authEvent: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 11, duration: '6s' },
+        { target: 11, duration: '30m' }
+      ],
+      exec: 'authEvent'
+    },
+    allEvents: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 3, duration: '4s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'allEvents'
+    }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('authEvent', LoadProfile.spikeI2HighTraffic, 32),
+    ...createScenario('allEvents', LoadProfile.spikeI2HighTraffic, 1)
+  },
+  perf006Iteration3PeakTest: {
+    authEvent: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 24, duration: '12s' },
+        { target: 24, duration: '30m' }
+      ],
+      exec: 'authEvent'
+    },
+    allEvents: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 4, duration: '5s' },
+        { target: 4, duration: '30m' }
+      ],
+      exec: 'allEvents'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('allEvents', 12, 20, 13),
+    ...createI3SpikeSignInScenario('authEvent', 71, 5, 7)
   }
 }
 
@@ -79,8 +142,11 @@ export function allEvents(): void {
   const ipvPayload = generateIPVRequest(userID, signinJourneyID)
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(authPayload))
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(f2fPayload))
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(docUploadPayload))
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
   iterationsCompleted.add(1)
 }

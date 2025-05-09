@@ -7,7 +7,10 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3RegressionScenario,
+  createI4PeakTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
@@ -16,11 +19,13 @@ import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/ut
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
+import { claimsTextPayload } from './data/ClaimsTextPayload'
 
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('fraud', LoadProfile.smoke),
     ...createScenario('drivingLicence', LoadProfile.smoke),
+    ...createScenario('drivingLicenceAttestation', LoadProfile.smoke),
     ...createScenario('passport', LoadProfile.smoke)
   },
   bau1x: {
@@ -125,6 +130,18 @@ const profiles: ProfileList = {
       ],
       exec: 'drivingLicence'
     },
+    drivingLicenceAttestation: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 400,
+      stages: [
+        { target: 40, duration: '400s' },
+        { target: 40, duration: '180s' }
+      ],
+      exec: 'drivingLicenceAttestation'
+    },
     passport: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
@@ -175,6 +192,127 @@ const profiles: ProfileList = {
       ],
       exec: 'passport'
     }
+  },
+  spikeI2HighTraffic: {
+    ...createScenario('drivingLicence', LoadProfile.spikeI2HighTraffic, 4, 9),
+    ...createScenario('drivingLicenceAttestation', LoadProfile.spikeI2HighTraffic, 7, 10),
+    ...createScenario('fraud', LoadProfile.spikeI2HighTraffic, 35, 6),
+    ...createScenario('passport', LoadProfile.spikeI2HighTraffic, 4, 6)
+  },
+  perf006Iteration2PeakTest: {
+    drivingLicence: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 9,
+      maxVUs: 9,
+      stages: [
+        { target: 15, duration: '16s' },
+        { target: 15, duration: '30m' }
+      ],
+      exec: 'drivingLicence'
+    },
+    drivingLicenceAttestation: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 14,
+      maxVUs: 14,
+      stages: [
+        { target: 23, duration: '24s' },
+        { target: 23, duration: '30m' }
+      ],
+      exec: 'drivingLicenceAttestation'
+    },
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 72,
+      maxVUs: 72,
+      stages: [
+        { target: 120, duration: '121s' },
+        { target: 120, duration: '30m' }
+      ],
+      exec: 'fraud'
+    },
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 20,
+      maxVUs: 72,
+      stages: [
+        { target: 12, duration: '13s' },
+        { target: 12, duration: '30m' }
+      ],
+      exec: 'passport'
+    }
+  },
+  perf006Iteration3PeakTest: {
+    drivingLicence: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 9,
+      maxVUs: 18,
+      stages: [
+        { target: 20, duration: '21s' },
+        { target: 20, duration: '30m' }
+      ],
+      exec: 'drivingLicence'
+    },
+    drivingLicenceAttestation: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 15,
+      maxVUs: 31,
+      stages: [
+        { target: 34, duration: '35s' },
+        { target: 34, duration: '30m' }
+      ],
+      exec: 'drivingLicenceAttestation'
+    },
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 48,
+      maxVUs: 96,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '30m' }
+      ],
+      exec: 'fraud'
+    },
+    passport: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 4,
+      maxVUs: 8,
+      stages: [
+        { target: 16, duration: '17s' },
+        { target: 16, duration: '30m' }
+      ],
+      exec: 'passport'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('passport', 47, 6, 48),
+    ...createI3SpikeSignUpScenario('drivingLicence', 61, 9, 62),
+    ...createI3SpikeSignUpScenario('drivingLicenceAttestation', 103, 9, 104),
+    ...createI3SpikeSignUpScenario('fraud', 490, 6, 491)
+  },
+  perf006RegressionTest: {
+    ...createI3RegressionScenario('fraud', 5, 6, 6)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('passport', 47, 6, 48),
+    ...createI4PeakTestSignUpScenario('drivingLicence', 59, 9, 60),
+    ...createI4PeakTestSignUpScenario('drivingLicenceAttestation', 47, 9, 48),
+    ...createI4PeakTestSignUpScenario('fraud', 470, 6, 471)
   }
 }
 
@@ -199,6 +337,15 @@ const groupMap = {
     'B02_Driving_03_EnterDetailsConfirm_DVLA',
     'B02_Driving_03_EnterDetailsConfirm_DVLA::01_CRICall',
     'B02_Driving_03_EnterDetailsConfirm_DVLA::02_CoreStubCall'
+  ],
+  drivingLicenceAttestation: [
+    'B04_DLattestation_01_CoreStubtoUserSearch',
+    'B04_DLattestation_01_CoreStubtoUserSearch::01_CoreStubCall',
+    'B04_DLattestation_01_CoreStubtoUserSearch::02_CRICall',
+    'B04_DLattestation_02_ContinueToCheckDLdetails',
+    'B04_DLattestation_03_ConfirmConsentform',
+    'B04_DLattestation_03_ConfirmConsentform::01_CRICall',
+    'B04_DLattestation_03_ConfirmConsentform::02_CoreStubCall'
   ],
   passport: [
     'B03_Passport_01_PassportCRIEntryFromStub',
@@ -232,6 +379,10 @@ const env = {
 const stubCreds = {
   userName: getEnv('IDENTITY_CORE_STUB_USERNAME'),
   password: getEnv('IDENTITY_CORE_STUB_PASSWORD')
+}
+
+const profile = {
+  m1c: getEnv('IDENTITY_FRAUD_M1C') == 'true'
 }
 
 interface DrivingLicenseUser {
@@ -348,6 +499,7 @@ export function fraud(): void {
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
   iterationsStarted.add(1)
+  const userSurname = profile.m1c ? 'M1C_500' : userDetails.lastName
 
   // B01_Fraud_01_CoreStubEditUserContinue
   timeGroup(groups[0], () => {
@@ -361,7 +513,7 @@ export function fraud(): void {
             cri: `fraud-cri-${env.envName}`,
             rowNumber: '197',
             firstName: userDetails.firstName,
-            surname: userDetails.lastName,
+            surname: userSurname,
             'dateOfBirth-day': `${userDetails.day}`,
             'dateOfBirth-month': `${userDetails.month}`,
             'dateOfBirth-year': `${userDetails.year}`,
@@ -407,6 +559,7 @@ export function fraud(): void {
 
   // B01_Fraud_02_ContinueToCheckFraudDetails
   timeGroup(groups[3], () => {
+    const pageContent = profile.m1c ? 'failedCheckDetails' : 'identityFraudScore'
     // 01_CRICall
     res = timeGroup(
       groups[4].split('::')[1],
@@ -424,7 +577,7 @@ export function fraud(): void {
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }
         }),
-      { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
+      { isStatusCode200, ...pageContentCheck(pageContent) }
     )
   })
   iterationsCompleted.add(1)
@@ -536,6 +689,77 @@ export function drivingLicence(): void {
       { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
     )
   })
+  iterationsCompleted.add(1)
+}
+
+export function drivingLicenceAttestation(): void {
+  const groups = groupMap.drivingLicenceAttestation
+  let res: Response
+  const credentials = `${stubCreds.userName}:${stubCreds.password}`
+  const encodedCredentials = encoding.b64encode(credentials)
+  iterationsStarted.add(1)
+  //B04_DLattestation_01_CoreStubtoUserSearch
+  timeGroup(groups[0], () => {
+    // 01_CoreStubCall
+    res = timeGroup(
+      groups[1].split('::')[1],
+      () =>
+        http.post(
+          env.ipvCoreStub + '/user-search',
+          {
+            cri: `driving-licence-cri-${env.envName}`,
+            context: 'check_details',
+            claimsText: claimsTextPayload
+          },
+          {
+            headers: { Authorization: `Basic ${encodedCredentials}` },
+            redirects: 0
+          }
+        ),
+      { isStatusCode302 }
+    )
+    // 02_CRICall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Check your UK photocard driving licence details')
+    })
+  })
+
+  //B04_DLattestation_02_ContinueToCheckDLdetails
+  res = timeGroup(
+    groups[3],
+    () =>
+      res.submitForm({
+        fields: { confirmDetails: 'detailsConfirmed' }
+      }),
+    { isStatusCode200, ...pageContentCheck('We need to check your driving licence details') }
+  )
+  //B04_DLattestation_03_ConfirmConsentform
+  timeGroup(groups[4], () => {
+    //01_CRI Call
+    res = timeGroup(
+      groups[5].split('::')[1],
+      () =>
+        res.submitForm({
+          fields: {
+            issuerDependent: 'DVLA',
+            consentCheckbox: 'true'
+          },
+          params: { redirects: 2 },
+          submitSelector: '#continue'
+        }),
+      { isStatusCode302 }
+    )
+  })
+  //02_StubCall
+  res = timeGroup(
+    groups[6].split('::')[1],
+    () =>
+      http.get(res.headers.Location, {
+        headers: { Authorization: `Basic ${encodedCredentials}` }
+      }),
+    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
+  )
   iterationsCompleted.add(1)
 }
 

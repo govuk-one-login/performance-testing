@@ -9,7 +9,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeOLHScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { timeGroup } from '../common/utils/request/timing'
@@ -156,6 +158,206 @@ const profiles: ProfileList = {
       stages: [
         { target: 90, duration: '451s' },
         { target: 90, duration: '15m' }
+      ],
+      exec: 'landingPage'
+    }
+  },
+  spikeI2LowTraffic: {
+    ...createScenario('changeEmail', LoadProfile.spikeI2LowTraffic, 1, 24),
+    ...createScenario('changePassword', LoadProfile.spikeI2LowTraffic, 1, 22),
+    ...createScenario('changePhone', LoadProfile.spikeI2LowTraffic, 1, 24),
+    ...createScenario('deleteAccount', LoadProfile.spikeI2LowTraffic, 1, 18),
+    ...createScenario('landingPage', LoadProfile.spikeI2LowTraffic, 3, 6)
+  },
+  perf006Iteration2PeakTest: {
+    changeEmail: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
+      ],
+      exec: 'changeEmail'
+    },
+    changePassword: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
+      ],
+      exec: 'changePassword'
+    },
+    changePhone: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
+      ],
+      exec: 'changePhone'
+    },
+    deleteAccount: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '30m' }
+      ],
+      exec: 'deleteAccount'
+    },
+    landingPage: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 66, duration: '7s' },
+        { target: 66, duration: '30m' }
+      ],
+      exec: 'landingPage'
+    }
+  },
+  perf006Iteration3PeakTest: {
+    changeEmail: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 2, duration: '1s' },
+        { target: 2, duration: '30m' }
+      ],
+      exec: 'changeEmail'
+    },
+    changePassword: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 2, duration: '1s' },
+        { target: 2, duration: '30m' }
+      ],
+      exec: 'changePassword'
+    },
+    changePhone: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 2, duration: '1s' },
+        { target: 2, duration: '30m' }
+      ],
+      exec: 'changePhone'
+    },
+    deleteAccount: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 2, duration: '1s' },
+        { target: 2, duration: '30m' }
+      ],
+      exec: 'deleteAccount'
+    },
+    landingPage: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 100,
+      maxVUs: 1000,
+      stages: [
+        { target: 138, duration: '13s' },
+        { target: 138, duration: '30m' }
+      ],
+      exec: 'landingPage'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeOLHScenario('changeEmail', 4, 24, 1),
+    ...createI3SpikeOLHScenario('changePassword', 4, 21, 1),
+    ...createI3SpikeOLHScenario('changePhone', 4, 24, 1),
+    ...createI3SpikeOLHScenario('deleteAccount', 4, 18, 1),
+    ...createI3SpikeSignInScenario('landingPage', 7, 6, 5)
+  },
+  perf006Iteration4PeakTest: {
+    changeEmail: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 12,
+      maxVUs: 24,
+      stages: [
+        { target: 3, duration: '1s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'changeEmail'
+    },
+    changePassword: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 11,
+      maxVUs: 21,
+      stages: [
+        { target: 3, duration: '1s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'changePassword'
+    },
+    changePhone: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 12,
+      maxVUs: 24,
+      stages: [
+        { target: 3, duration: '1s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'changePhone'
+    },
+    deleteAccount: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 9,
+      maxVUs: 18,
+      stages: [
+        { target: 3, duration: '1s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'deleteAccount'
+    },
+    landingPage: {
+      executor: 'ramping-arrival-rate',
+      startRate: 12,
+      timeUnit: '1m',
+      preAllocatedVUs: 13,
+      maxVUs: 25,
+      stages: [
+        { target: 246, duration: '3s' },
+        { target: 246, duration: '30m' }
       ],
       exec: 'landingPage'
     }

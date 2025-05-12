@@ -59,7 +59,12 @@ export function generateAuthCreateAccount(
   }
 }
 
-export function generateAuthLogInSuccess(eventID: string, userID: string, emailID: string): AuthLogInSuccess {
+export function generateAuthLogInSuccess(
+  eventID: string,
+  userID: string,
+  emailID: string,
+  journeyID: string
+): AuthLogInSuccess {
   return {
     event_id: eventID,
     event_name: 'AUTH_LOG_IN_SUCCESS',
@@ -69,7 +74,7 @@ export function generateAuthLogInSuccess(eventID: string, userID: string, emailI
     event_timestamp_ms: Math.floor(Date.now()),
     user: {
       user_id: userID, // `${testID}_performanceTestClientId_${userID}_performanceTestCommonSubjectId`,
-      govuk_signin_journey_id: uuidv4(),
+      govuk_signin_journey_id: journeyID,
       ip_address: '1.2.3.4',
       session_id: uuidv4(),
       email: emailID,

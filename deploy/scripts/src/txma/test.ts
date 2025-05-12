@@ -78,10 +78,11 @@ export function setup(): string {
 export function sendRegularEvent(authCreateAccPayload: string): void {
   iterationsStarted.add(1)
   const authCreatePayload = JSON.parse(authCreateAccPayload)
+  const journeyID = uuidv4()
   const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
   const eventID = `${testID}_${uuidv4()}`
   const authLogInSuccessPayload = JSON.stringify(
-    generateAuthLogInSuccess(eventID, `${authCreatePayload.user.user_id}`, `${authCreatePayload.user.email}`)
+    generateAuthLogInSuccess(eventID, `${authCreatePayload.user.user_id}`, `${authCreatePayload.user.email}`, journeyID)
   )
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   iterationsCompleted.add(1)

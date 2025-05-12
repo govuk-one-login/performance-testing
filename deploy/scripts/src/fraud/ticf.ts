@@ -62,14 +62,14 @@ const sqs = new SQSClient(awsConfig)
 
 const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
 const testID = `perfTestID${timestamp}`
-const journeyID = `perfJourney${uuidv4()}`
 const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
 const eventID = `${testID}_${uuidv4()}`
 
 export function signInSuccess(): void {
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const journeyID = `perfJourney${uuidv4()}`
   const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID))
+  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
   iterationsStarted.add(1)
 
@@ -103,9 +103,10 @@ export function signInSuccess(): void {
 export function signUpSuccess(): void {
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const journeyID = `perfJourney${uuidv4()}`
 
   const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID))
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
   const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
   iterationsStarted.add(1)
@@ -142,6 +143,7 @@ export function signUpSuccess(): void {
 
 export function identityProvingSuccess(): void {
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const journeyID = `perfJourney${uuidv4()}`
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
   const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
   const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID))
@@ -183,6 +185,7 @@ export function identityProvingSuccess(): void {
 
 export function identityReuseSuccess(): void {
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const journeyID = `perfJourney${uuidv4()}`
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
   const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
   iterationsStarted.add(1)

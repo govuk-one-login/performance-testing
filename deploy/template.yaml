@@ -547,6 +547,12 @@ Resources:
               MOBILE_STS_DEV_CLIENT_ID: "/perfTest/mobile/sts/dev/clientId"
               MOBILE_STS_DEV_REDIRECT_URI: "/perfTest/mobile/sts/dev/redirectURI"
               SLACK_OAUTH_TOKEN: "/perfTest/slack/OAuthToken"
+              TiCF_SQS_QUEUE: "/perfTest/fraud/TiCF/SQSQueue"
+              TiCF_AUTH_URL: "/perfTest/fraud/TiCF/authUrl"
+              TiCF_IPV_URL: "/perfTest/fraud/TiCF/ipvUrl"
+              TiCF_IPV_JWT_1: "/perfTest/fraud/TiCF/JWT1"
+              TiCF_IPV_JWT_2: "/perfTest/fraud/TiCF/JWT2"
+              TiCF_IPV_JWT_3: "/perfTest/fraud/TiCF/JWT3"
           phases:
             pre_build:
               commands:

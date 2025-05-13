@@ -129,6 +129,17 @@ const profiles: ProfileList = {
       stages: [{ target: 250, duration: '6m' }],
       exec: 'fraud'
     }
+  },
+  load260: {
+    fraud: {
+      executor: 'ramping-arrival-rate',
+      startRate: 260,
+      timeUnit: '1s',
+      preAllocatedVUs: 390,
+      maxVUs: 780,
+      stages: [{ target: 260, duration: '6m' }],
+      exec: 'fraud'
+    }
   }
 }
 

@@ -351,8 +351,8 @@ export function createI4PeakTestSignUpScenario(
   rampUpDuration: number
 ): ScenarioList {
   const list: ScenarioList = {}
-  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
-  const maxVUs = target * iterationDuration * 2
+  const preAllocatedVUs = Math.round(((target / 10) * iterationDuration) / 2)
+  const maxVUs = Math.round((target / 10) * iterationDuration)
 
   list[exec] = {
     executor: 'ramping-arrival-rate',

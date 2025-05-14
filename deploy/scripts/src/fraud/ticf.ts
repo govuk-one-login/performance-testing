@@ -81,8 +81,8 @@ export function signInSuccess(): void {
 
   const authSignInPayload = {
     vtr: ['Cl'],
-    sub: 'urn:fdc:gov.uk:EC941A39-46E4-4A7C-B4AA-BF69A334C9BE',
-    govuk_signin_journey_id: '8CAC19F3-73E6-4D34-BF52-2D9BDFC4775F',
+    sub: userID,
+    govuk_signin_journey_id: journeyID,
     authenticated: 'Y'
   }
 
@@ -120,8 +120,8 @@ export function signUpSuccess(): void {
 
   const authSignUpPayload = {
     vtr: ['Cl.Cm'],
-    sub: 'urn:fdc:gov.uk:EC941A39-46E4-4A7C-B4AA-BF69A334C9BE',
-    govuk_signin_journey_id: 'C5D8FB80-BE95-4FA5-B782-202D214DB0CE',
+    sub: userID,
+    govuk_signin_journey_id: journeyID,
     authenticated: 'Y',
     initial_registration: 'Y',
     '2fa_method': ['SMS']
@@ -165,8 +165,8 @@ export function identityProvingSuccess(): void {
     vtr: ['P2'],
     vot: 'P2',
     vtm: 'https://oidc.account.gov.uk/trustmark',
-    sub: 'urn:fdc:gov.uk:450A3674-E25F-4968-87F4-73795FE35A79',
-    govuk_signin_journey_id: 'A68DCA14-E5AF-4729-A063-B7EDAD4A2AA3',
+    sub: userID,
+    govuk_signin_journey_id: journeyID,
     'https://vocab.account.gov.uk/v1/credentialJWT': [env.identityJWT1, env.identityJWT2, env.identityJWT3]
   }
 
@@ -198,8 +198,8 @@ export function identityReuseSuccess(): void {
     vtr: ['Cl.Cm.P2'],
     vot: 'P2',
     vtm: 'https://oidc.account.gov.uk/trustmark',
-    sub: 'urn:fdc:gov.uk:B51CD5A0-022F-40FF-A909-33D466FB6930',
-    govuk_signin_journey_id: '94191C18-D88B-4B47-A5F3-AC4AAE2C11DE',
+    sub: userID,
+    govuk_signin_journey_id: journeyID,
     'https://vocab.account.gov.uk/v1/credentialJWT': []
   }
 

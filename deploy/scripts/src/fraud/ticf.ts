@@ -20,7 +20,7 @@ import {
 import { uuidv4 } from '../common/utils/jslib/index'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import http from 'k6/http'
-import { check } from 'k6'
+import { check, sleep } from 'k6'
 
 const profiles: ProfileList = {
   smoke: {
@@ -74,7 +74,9 @@ export function signInSuccess(): void {
   iterationsStarted.add(1)
 
   sqs.sendMessage(env.sqs_queue, authAuthorizationInitiatedPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
 
   sleepBetween(1, 3)
@@ -112,8 +114,11 @@ export function signUpSuccess(): void {
   iterationsStarted.add(1)
 
   sqs.sendMessage(env.sqs_queue, authAuthorizationInitiatedPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, authUpdatePhonePayload)
 
   sleepBetween(1, 3)
@@ -154,10 +159,15 @@ export function identityProvingSuccess(): void {
   iterationsStarted.add(1)
 
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, ipvDLCRIVCIssuedPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, ipvAddressCRIVCIssuedPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, ipvKBVCRIStartPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, ipvKBVCRIEndPayload)
 
   sleepBetween(1, 3)
@@ -191,6 +201,7 @@ export function identityReuseSuccess(): void {
   iterationsStarted.add(1)
 
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
+  sleep(5)
   sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
 
   sleepBetween(1, 3)

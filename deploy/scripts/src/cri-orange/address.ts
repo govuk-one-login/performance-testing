@@ -11,7 +11,8 @@ import {
   createScenario,
   LoadProfile,
   createI3RegressionScenario,
-  createI3SpikeSignUpScenario
+  createI3SpikeSignUpScenario,
+  createI4PeakTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeGroup } from '../common/utils/request/timing'
@@ -148,18 +149,7 @@ const profiles: ProfileList = {
     ...createI3SpikeSignUpScenario('addressME', 390, 15, 391)
   },
   perf006Iteration4PeakTest: {
-    address: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '10s',
-      preAllocatedVUs: 75,
-      maxVUs: 150,
-      stages: [
-        { target: 100, duration: '101s' },
-        { target: 100, duration: '30m' }
-      ],
-      exec: 'address'
-    },
+    ...createI4PeakTestSignUpScenario('address', 100, 15, 101),
     addressME: {
       executor: 'ramping-arrival-rate',
       startRate: 1,

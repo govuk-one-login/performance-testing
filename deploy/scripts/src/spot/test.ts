@@ -50,7 +50,7 @@ const profiles: ProfileList = {
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignInScenario('spot', 120, 3, 55)
   },
-  perf006Iteration4SpikeTest: {
+  perf006Iteration4PeakTest: {
     ...createI4PeakTestSignInScenario('spot', 90, 3, 21)
   }
 }

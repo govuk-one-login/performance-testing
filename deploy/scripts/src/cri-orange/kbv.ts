@@ -7,7 +7,8 @@ import {
   describeProfile,
   createScenario,
   LoadProfile,
-  createI3SpikeSignUpScenario
+  createI3SpikeSignUpScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeGroup } from '../common/utils/request/timing'
@@ -88,6 +89,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignUpScenario('kbv', 49, 12, 50)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignInScenario('kbv', 47, 12, 48)
   }
 }
 

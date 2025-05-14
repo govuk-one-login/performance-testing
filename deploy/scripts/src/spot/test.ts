@@ -6,7 +6,8 @@ import {
   describeProfile,
   createScenario,
   LoadProfile,
-  createI3SpikeSignInScenario
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
@@ -48,6 +49,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignInScenario('spot', 120, 3, 55)
+  },
+  perf006Iteration4SpikeTest: {
+    ...createI4PeakTestSignInScenario('spot', 90, 3, 21)
   }
 }
 

@@ -18,7 +18,6 @@ import {
   generateIPVKBVCRIStart
 } from '../common/requestGenerator/txmaReqGen'
 import { uuidv4 } from '../common/utils/jslib/index'
-import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import http from 'k6/http'
 import { check, sleep } from 'k6'
 
@@ -60,14 +59,11 @@ const awsConfig = new AWSConfig({
 
 const sqs = new SQSClient(awsConfig)
 
-const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
-const testID = `perfTestID${timestamp}`
-const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-const eventID = `${testID}_${uuidv4()}`
-
 export function signInSuccess(): void {
-  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
   const journeyID = `perfJourney${uuidv4()}`
+  const eventID = `perfTestID$_${uuidv4()}`
   const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
   const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
@@ -78,8 +74,7 @@ export function signInSuccess(): void {
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   sleep(5)
   sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
-
-  sleepBetween(1, 3)
+  sleep(5)
 
   const authSignInPayload = {
     vtr: ['Cl'],
@@ -88,13 +83,7 @@ export function signInSuccess(): void {
     authenticated: 'Y'
   }
 
-  const params = {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }
-
-  const res = http.post(env.authAPIURL, JSON.stringify(authSignInPayload), params)
+  const res = http.post(env.authAPIURL, JSON.stringify(authSignInPayload))
   check(res, {
     'status is 202': r => r.status === 202
   })
@@ -103,8 +92,10 @@ export function signInSuccess(): void {
 }
 
 export function signUpSuccess(): void {
-  const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
-  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const testID = `perfTestID${timestamp}`
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
+  const pairWiseID = `performanceTestRpPairwiseId${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
 
   const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
@@ -121,7 +112,7 @@ export function signUpSuccess(): void {
   sleep(5)
   sqs.sendMessage(env.sqs_queue, authUpdatePhonePayload)
 
-  sleepBetween(1, 3)
+  sleep(5)
 
   const authSignUpPayload = {
     vtr: ['Cl.Cm'],
@@ -132,13 +123,7 @@ export function signUpSuccess(): void {
     '2fa_method': ['SMS']
   }
 
-  const params = {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }
-
-  const res = http.post(env.authAPIURL, JSON.stringify(authSignUpPayload), params)
+  const res = http.post(env.authAPIURL, JSON.stringify(authSignUpPayload))
   check(res, {
     'status is 202': r => r.status === 202
   })
@@ -147,7 +132,7 @@ export function signUpSuccess(): void {
 }
 
 export function identityProvingSuccess(): void {
-  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
   const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
@@ -170,7 +155,7 @@ export function identityProvingSuccess(): void {
   sleep(5)
   sqs.sendMessage(env.sqs_queue, ipvKBVCRIEndPayload)
 
-  sleepBetween(1, 3)
+  sleep(5)
   const identityProvingPayload = {
     vtr: ['P2'],
     vot: 'P2',
@@ -180,13 +165,7 @@ export function identityProvingSuccess(): void {
     'https://vocab.account.gov.uk/v1/credentialJWT': [env.identityJWT1, env.identityJWT2, env.identityJWT3]
   }
 
-  const params = {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }
-
-  const res = http.post(env.authAPIURL, JSON.stringify(identityProvingPayload), params)
+  const res = http.post(env.authAPIURL, JSON.stringify(identityProvingPayload))
   check(res, {
     'status is 202': r => r.status === 202
   })
@@ -194,7 +173,7 @@ export function identityProvingSuccess(): void {
 }
 
 export function identityReuseSuccess(): void {
-  const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
   const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
@@ -204,7 +183,7 @@ export function identityReuseSuccess(): void {
   sleep(5)
   sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
 
-  sleepBetween(1, 3)
+  sleep(5)
   const identityReusePayload = {
     vtr: ['Cl.Cm.P2'],
     vot: 'P2',
@@ -214,13 +193,7 @@ export function identityReuseSuccess(): void {
     'https://vocab.account.gov.uk/v1/credentialJWT': []
   }
 
-  const params = {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }
-
-  const res = http.post(env.authAPIURL, JSON.stringify(identityReusePayload), params)
+  const res = http.post(env.authAPIURL, JSON.stringify(identityReusePayload))
   check(res, {
     'status is 202': r => r.status === 202
   })

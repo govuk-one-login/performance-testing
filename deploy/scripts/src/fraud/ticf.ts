@@ -92,6 +92,7 @@ export function signInSuccess(): void {
 }
 
 export function signUpSuccess(): void {
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
   const testID = `perfTestID${timestamp}`
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`

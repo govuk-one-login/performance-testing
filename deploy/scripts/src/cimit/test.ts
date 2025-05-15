@@ -97,15 +97,12 @@ export async function putContraIndicators(): Promise<void> {
   const payloads = {
     putContraIndicatorPayload: generatePutContraIndicatorPayload(pairwiseSub('cimit'))
   }
-
-  console.log(payloads)
   const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     return signJwt('ES256', importedKey, payload)
   }
   const jwts = [await createJwt(keys.cimit, payloads.putContraIndicatorPayload)]
-  console.log(jwts)
 
   iterationsStarted.add(1)
   // B01_CIMIT_01_PutContraIndicator
@@ -151,15 +148,12 @@ export async function postMitigations(): void {
   const payloads = {
     postMitigationsPayload: generatePostMitigationsPayload(pairwiseSub('cimit'))
   }
-
-  console.log(payloads)
   const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     return signJwt('ES256', importedKey, payload)
   }
   const jwts = [await createJwt(keys.cimit, payloads.postMitigationsPayload)]
-  console.log(jwts)
 
   iterationsStarted.add(1)
   // B03_CIMIT_01_PostMitigations

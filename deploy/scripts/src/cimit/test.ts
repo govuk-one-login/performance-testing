@@ -75,7 +75,7 @@ const env = {
 }
 
 const keys = {
-  cimit: JSON.parse(getEnv('IDENTITY_CIMIT_KEY'))
+  cimit: JSON.parse(getEnv('IDENTITY_CIMIT_KEY')) as JWK
 }
 
 export async function putContraIndicators(): Promise<void> {

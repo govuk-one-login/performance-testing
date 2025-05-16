@@ -107,14 +107,10 @@ export async function putContraIndicators(): Promise<void> {
 
   iterationsStarted.add(1)
   // B01_CIMIT_01_PutContraIndicator
-  timeGroup(
-    groups[0],
-    () =>
-      http.post(env.envURL + '/v1/contra-indicators/detect', {
-        signed_jwt: requestBody
-      }),
-    { isStatusCode200, ...pageContentCheck('success') }
-  )
+  timeGroup(groups[0], () => http.post(env.envURL + '/v1/contra-indicators/detect', requestBody), {
+    isStatusCode200,
+    ...pageContentCheck('success')
+  })
   iterationsCompleted.add(1)
 }
 

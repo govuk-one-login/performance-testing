@@ -384,7 +384,7 @@ const csvData: IDReuseUserID[] = new SharedArray('ID Reuse User ID', function ()
 })
 
 const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
-const validEnvironments = ['BUILD', 'DEV', 'DEFAULT']
+const validEnvironments = ['BUILD', 'DEV', 'DEFAULT', 'PERF']
 if (!validEnvironments.includes(environment))
   throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 
@@ -693,6 +693,7 @@ export function identity(stubOnly: boolean = false): void {
     )
   })
   iterationsCompleted.add(1)
+  console.log(userId, testEmail)
 }
 
 export function idReuse(): void {

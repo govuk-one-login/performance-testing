@@ -1,5 +1,4 @@
-export type NamePartType = 'GivenName' | 'FamilyName'
-export type VerifiableCredentialType =
+type VerifiableCredentialType =
   | 'IdentityCheckCredential'
   | 'VerifiableCredential'
   | 'VerifiableIdentityCredential'
@@ -7,6 +6,28 @@ export type VerifiableCredentialType =
   | 'AddressCredential'
   | 'RiskAssessmentCredential'
   | 'SecurityCheckCredential'
+
+interface MitigatingCredentialClass {
+  id?: string
+  issuer?: string
+  txn?: string
+  validFrom?: string
+}
+
+interface MitigationClass {
+  code?: string
+  mitigatingCredential?: MitigatingCredentialClass[]
+}
+
+interface ContraIndicatorClass {
+  code?: string
+  issuanceDate?: string
+  document?: string
+  txn?: string[]
+  issuers?: string[]
+  incompleteMitigation?: MitigationClass[]
+  mitigation?: MitigationClass[]
+}
 
 export interface CimitPayLoad {
   sub: string
@@ -19,38 +40,7 @@ export interface CimitPayLoad {
     evidence: [
       {
         type?: string
-        contraIndicator?: [
-          {
-            code?: string
-            issuanceDate?: string
-            document?: string
-            txn?: string[]
-            mitigation?: [
-              {
-                code?: string
-                mitigatingCredential?: [
-                  {
-                    issue?: string
-                    txn?: string
-                    validFrom?: string
-                  }
-                ]
-              }
-            ]
-            incompleteMitigation?: [
-              {
-                code?: string
-                mitigatingCredential?: [
-                  {
-                    issue?: string
-                    txn?: string
-                    validFrom?: string
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+        contraIndicator?: ContraIndicatorClass[]
       }
     ]
   }

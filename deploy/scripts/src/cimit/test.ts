@@ -39,7 +39,7 @@ const profiles: ProfileList = {
 }
 
 interface GetCICData {
-  userID: string
+  subID: string
 }
 
 const getCICData: GetCICData[] = new SharedArray('Get CIC Data', function () {
@@ -102,7 +102,7 @@ export async function putContraIndicators(): Promise<void> {
     const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     return signJwt('ES256', importedKey, payload)
   }
-  const jwts = [await createJwt(keys.cimit, payloads.putContraIndicatorPayload)]
+  const jwts = await createJwt(keys.cimit, payloads.putContraIndicatorPayload)
 
   iterationsStarted.add(1)
   // B01_CIMIT_01_PutContraIndicator
@@ -122,14 +122,14 @@ export function getContraIndicatorCredentials(): void {
   const getContraIndicatorData = getCICData[execution.vu.idInTest - 1]
   iterationsStarted.add(1)
   // B02_CIMIT_01_GetContraIndicatorCredentials
-  timeGroup(groups[1], () => http.get(env.envURL + `/v1/contra-indicators?userId=${getContraIndicatorData.subID}`), {
+  timeGroup(groups[0], () => http.get(env.envURL + `/v1/contra-indicators?userId=${getContraIndicatorData.subID}`), {
     isStatusCode200,
     ...pageContentCheck('vc')
   })
   iterationsCompleted.add(1)
 }
 
-export async function postMitigations(): void {
+export async function postMitigations(): Promise<void> {
   const groups = groupMap.postMitigations
   const config = {
     host: 'a-simple-local-account-id',
@@ -153,7 +153,7 @@ export async function postMitigations(): void {
     const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     return signJwt('ES256', importedKey, payload)
   }
-  const jwts = [await createJwt(keys.cimit, payloads.postMitigationsPayload)]
+  const jwts = await createJwt(keys.cimit, payloads.postMitigationsPayload)
 
   iterationsStarted.add(1)
   // B03_CIMIT_01_PostMitigations
@@ -161,7 +161,7 @@ export async function postMitigations(): void {
     groups[0],
     () =>
       http.post(env.envURL + '/v1/contra-indicators/mitigate', {
-        signed_jwts: [jwts]
+        signed_jwts: jwts
       }),
     { isStatusCode200, ...pageContentCheck('success') }
   )

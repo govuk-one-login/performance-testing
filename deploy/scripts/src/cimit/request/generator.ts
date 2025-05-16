@@ -13,13 +13,12 @@ export function generatePutContraIndicatorPayload(sub: string): CimitPayLoad {
       evidence: [
         {
           type: 'SecurityCheck',
-          txn: uuidv4(),
           contraIndicator: [
             {
               code: 'V03',
               issuanceDate: new Date().toISOString(), //2025-05-13T13:44:06.974Z
               document: 'passport/GBR/12345678',
-              txn: ['txn'],
+              txn: [uuidv4()],
               mitigation: [],
               incompleteMitigation: []
             }
@@ -42,13 +41,12 @@ export function generatePostMitigationsPayload(sub: string): CimitPayLoad {
       evidence: [
         {
           type: 'SecurityCheck',
-          txn: uuidv4(),
           contraIndicator: [
             {
               code: 'V03',
               issuanceDate: new Date().toISOString(), //2025-05-13T13:44:06.974Z
               document: 'passport/GBR/12345678',
-              txn: ['txn'],
+              txn: [uuidv4()],
               mitigation: [
                 {
                   mitigatingCredential: [

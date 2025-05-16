@@ -9,7 +9,8 @@ import {
   describeProfile,
   createScenario,
   LoadProfile,
-  createI3SpikeSignUpScenario
+  createI3SpikeSignUpScenario,
+  createI4PeakTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
@@ -86,6 +87,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignUpScenario('ninoCheck', 5, 6, 6)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('ninoCheck', 5, 6, 6)
   }
 }
 

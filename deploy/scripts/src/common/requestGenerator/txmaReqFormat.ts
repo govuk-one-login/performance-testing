@@ -174,7 +174,7 @@ export interface IPVJourneyStart {
   event_timestamp_ms: number
   extensions: {
     reprove_identity: boolean
-    vtr: [string]
+    vtr: string[]
   }
   restricted: {
     device_information: {

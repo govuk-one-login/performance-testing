@@ -4,7 +4,6 @@ import {
   AuthCreateAccount,
   AuthAuthorisationReqParsed,
   DcmawAbortWeb,
-  AuthAuthorizationInitiated,
   AuthCodeVerified,
   AuthUpdateProfilePhoneNumber,
   IPVJourneyStart,
@@ -14,7 +13,8 @@ import {
   IPVKBVCRIStart,
   IPVKBVCRIEnd,
   AuthAuthorisationReqParsedEnrichment,
-  AuthLogInSuccessEnrichment
+  AuthLogInSuccessEnrichment,
+  AuthAuthorisationInitiated
 } from './txmaReqFormat'
 
 export function generateAuthCreateAccount(
@@ -145,11 +145,11 @@ export function generateDcmawAbortWeb(userID: string, journeyID: string, emailID
   }
 }
 
-export function generateAuthAuthorizationInitiated(journeyID: string): AuthAuthorizationInitiated {
+export function generateAuthAuthorisationInitiated(journeyID: string): AuthAuthorisationInitiated {
   return {
     client_id: 'performanceTestClientId',
     component_id: 'perfTest',
-    event_name: 'AUTH_AUTHORIZATION_INITIATED',
+    event_name: 'AUTH_AUTHORISATION_INITIATED',
     event_timestamp_ms: Math.floor(Date.now()),
     extensions: {
       'client-name': 'PerfTest',
@@ -182,7 +182,7 @@ export function generateAuthCodeVerified(emailID: string, journeyID: string, use
     timestamp: Math.floor(Date.now() / 1000),
     user: {
       email: emailID,
-      govuk_sigin_journey_id: journeyID,
+      govuk_signin_journey_id: journeyID,
       ip_address: '1.2.3.4',
       persistent_session_id: uuidv4(),
       session_id: uuidv4(),
@@ -227,10 +227,10 @@ export function generateIPVJourneyStart(journeyID: string, userID: string): IPVJ
     event_timestamp_ms: Math.floor(Date.now()),
     extensions: {
       reprove_identity: false,
-      vtr: 'CI'
+      vtr: ['CI']
     },
     restricted: {
-      device_infomation: {
+      device_information: {
         encoded: 'RW5jb2RlZCBkYXRhIHdpbGwgYmUgaGVyZQ==' //pragma: allowlist secret
       }
     },
@@ -275,58 +275,66 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string): IPV
     event_name: 'IPV_DL_CRI_VC_ISSUED',
     event_timestamp_ms: Math.floor(Date.now()),
     extensions: {
-      evidence: {
-        activityHistoryScore: 4,
-        checkDetails: {
-          activityForm: '20200101',
-          checkMethod: 'vpip',
-          identityCheckPolicy: 'policy'
-        },
-        ci: 'string', //This should be an array[string], i don't know how to implement that/if it needs changing.
-        failedCheckDetails: {
-          checkMethod: 'vpip',
-          identityCheckPolicy: 'policy'
-        },
-        strengthScore: 4,
-        txn: 'UNKOWN',
-        type: 'UNKNOWN',
-        validityScore: 4
-      },
+      evidence: [
+        {
+          activityHistoryScore: 4,
+          checkDetails: [
+            {
+              activityFrom: '20200101',
+              checkMethod: 'vpip',
+              identityCheckPolicy: 'policy'
+            }
+          ],
+          strengthScore: 4,
+          txn: 'UNKOWN',
+          type: 'UNKNOWN',
+          validityScore: 4
+        }
+      ],
       iss: 'perfTest'
     },
     restricted: {
-      address: {
-        postalCode: 'AB12 3CD'
-      },
-      birthDate: {
-        value: '19900101'
-      },
-      drivingPermit: {
-        expiryDate: '20300101',
-        issueDate: '20200101',
-        issueNumber: '1234',
-        issuedBy: 'DVLA',
-        personalNumber: '12345'
-      },
-      name: {
-        description: 'name',
-        nameParts: {
-          type: 'FamilyName',
-          validFrom: '19900101',
-          validUntil: '20500101',
-          value: 'Smith'
-        },
-        validFrom: '19900101',
-        validUntil: '20500101'
-      },
-      timestamp: Math.floor(Date.now() / 1000),
-      user: {
-        govuk_signin_journey_id: journeyID,
-        ip_address: '1.2.3.4',
-        persistent_session_id: uuidv4(),
-        session_id: uuidv4(),
-        user_id: userID
-      }
+      address: [
+        {
+          postalCode: 'AB12 3CD'
+        }
+      ],
+      birthDate: [
+        {
+          value: '19900101'
+        }
+      ],
+      drivingPermit: [
+        {
+          expiryDate: '20300101',
+          issueDate: '20200101',
+          issueNumber: '1234',
+          issuedBy: 'DVLA',
+          personalNumber: '12345'
+        }
+      ],
+      name: [
+        {
+          nameParts: [
+            {
+              type: 'GivenName',
+              value: 'John'
+            },
+            {
+              type: 'FamilyName',
+              value: 'Smith'
+            }
+          ]
+        }
+      ]
+    },
+    timestamp: Math.floor(Date.now() / 1000),
+    user: {
+      govuk_signin_journey_id: journeyID,
+      ip_address: '1.2.3.4',
+      persistent_session_id: uuidv4(),
+      session_id: uuidv4(),
+      user_id: userID
     }
   }
 }
@@ -342,17 +350,19 @@ export function generateIPVAddressCRIVCIssued(journeyID: string, userID: string)
       iss: 'perfTest'
     },
     restricted: {
-      address: {
-        addressCountry: 'GB',
-        addressLocality: 'London',
-        buildingName: 'Highfield House',
-        buildingNumber: '44',
-        postalCode: 'AB12 3CD',
-        streetName: 'HIGH STREET',
-        uprn: 123456789012,
-        validFrom: '19900101',
-        validUntil: '20300101'
-      }
+      address: [
+        {
+          addressCountry: 'GB',
+          addressLocality: 'London',
+          buildingName: 'Highfield House',
+          buildingNumber: '44',
+          postalCode: 'AB12 3CD',
+          streetName: 'HIGH STREET',
+          uprn: 123456789012,
+          validFrom: '19900101',
+          validUntil: '20300101'
+        }
+      ]
     },
     timestamp: Math.floor(Date.now() / 1000),
     user: {
@@ -372,7 +382,7 @@ export function generateIPVKBVCRIStart(journeyID: string, userID: string): IPVKB
     event_name: 'IPV_KBV_CRI_START',
     event_timestamp_ms: Math.floor(Date.now()),
     restricted: {
-      device_infomation: {
+      device_information: {
         encoded: 'RW5jb2RlZCBkYXRhIHdpbGwgYmUgaGVyZQ==,' //pragma: allowlist secret
       }
     },

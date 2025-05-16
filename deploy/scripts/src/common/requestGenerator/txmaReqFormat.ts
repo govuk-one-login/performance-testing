@@ -103,7 +103,7 @@ export interface DcmawAbortWeb {
   }
 }
 
-export interface AuthAuthorizationInitiated {
+export interface AuthAuthorisationInitiated {
   client_id: string
   component_id: string
   event_name: string
@@ -137,7 +137,7 @@ export interface AuthCodeVerified {
   timestamp: number
   user: {
     email: string
-    govuk_sigin_journey_id: string
+    govuk_signin_journey_id: string
     ip_address: string
     persistent_session_id: string
     session_id: string
@@ -174,10 +174,10 @@ export interface IPVJourneyStart {
   event_timestamp_ms: number
   extensions: {
     reprove_identity: boolean
-    vtr: string
+    vtr: string[]
   }
   restricted: {
-    device_infomation: {
+    device_information: {
       encoded: string
     }
   }
@@ -218,58 +218,66 @@ export interface IPVDLCRIVCIssued {
   event_name: string
   event_timestamp_ms: number
   extensions: {
-    evidence: {
-      activityHistoryScore: number
-      checkDetails: {
-        activityForm: string
-        checkMethod: string
-        identityCheckPolicy: string
+    evidence: [
+      {
+        activityHistoryScore: number
+        checkDetails: [
+          {
+            activityFrom: string
+            checkMethod: string
+            identityCheckPolicy: string
+          }
+        ]
+        strengthScore: number
+        txn: string
+        type: string
+        validityScore: number
       }
-      ci: string
-      failedCheckDetails: {
-        checkMethod: string
-        identityCheckPolicy: string
-      }
-      strengthScore: number
-      txn: string
-      type: string
-      validityScore: number
-    }
+    ]
     iss: string
   }
   restricted: {
-    address: {
-      postalCode: string
-    }
-    birthDate: {
-      value: string
-    }
-    drivingPermit: {
-      expiryDate: string
-      issueDate: string
-      issueNumber: string
-      issuedBy: string
-      personalNumber: string
-    }
-    name: {
-      description: string
-      nameParts: {
-        type: string
-        validFrom: string
-        validUntil: string
+    address: [
+      {
+        postalCode: string
+      }
+    ]
+    birthDate: [
+      {
         value: string
       }
-      validFrom: string
-      validUntil: string
-    }
-    timestamp: number
-    user: {
-      govuk_signin_journey_id: string
-      ip_address: string
-      persistent_session_id: string
-      session_id: string
-      user_id: string
-    }
+    ]
+    drivingPermit: [
+      {
+        expiryDate: string
+        issueDate: string
+        issueNumber: string
+        issuedBy: string
+        personalNumber: string
+      }
+    ]
+    name: [
+      {
+        nameParts: [
+          {
+            type: string
+            value: string
+          },
+          {
+            type: string
+            value: string
+          }
+        ]
+      }
+    ]
+  }
+  timestamp: number
+  user: {
+    govuk_signin_journey_id: string
+    ip_address: string
+    persistent_session_id: string
+    session_id: string
+    user_id: string
   }
 }
 
@@ -283,17 +291,19 @@ export interface IPVAddressCRIVCIssued {
     iss: string
   }
   restricted: {
-    address: {
-      addressCountry: string
-      addressLocality: string
-      buildingName: string
-      buildingNumber: string
-      postalCode: string
-      streetName: string
-      uprn: number
-      validFrom: string
-      validUntil: string
-    }
+    address: [
+      {
+        addressCountry: string
+        addressLocality: string
+        buildingName: string
+        buildingNumber: string
+        postalCode: string
+        streetName: string
+        uprn: number
+        validFrom: string
+        validUntil: string
+      }
+    ]
   }
   timestamp: number
   user: {
@@ -311,7 +321,7 @@ export interface IPVKBVCRIStart {
   event_name: string
   event_timestamp_ms: number
   restricted: {
-    device_infomation: {
+    device_information: {
       encoded: string
     }
   }

@@ -103,6 +103,7 @@ export async function putContraIndicators(): Promise<void> {
     return signJwt('ES256', importedKey, payload)
   }
   const jwts = await createJwt(keys.cimit, payloads.putContraIndicatorPayload)
+  const requestBody = JSON.stringify(jwts)
 
   iterationsStarted.add(1)
   // B01_CIMIT_01_PutContraIndicator
@@ -110,7 +111,7 @@ export async function putContraIndicators(): Promise<void> {
     groups[0],
     () =>
       http.post(env.envURL + '/v1/contra-indicators/detect', {
-        signed_jwt: jwts
+        signed_jwt: requestBody
       }),
     { isStatusCode200, ...pageContentCheck('success') }
   )
@@ -154,6 +155,7 @@ export async function postMitigations(): Promise<void> {
     return signJwt('ES256', importedKey, payload)
   }
   const jwts = await createJwt(keys.cimit, payloads.postMitigationsPayload)
+  const requestBody = JSON.stringify(jwts)
 
   iterationsStarted.add(1)
   // B03_CIMIT_01_PostMitigations
@@ -161,7 +163,7 @@ export async function postMitigations(): Promise<void> {
     groups[0],
     () =>
       http.post(env.envURL + '/v1/contra-indicators/mitigate', {
-        signed_jwts: jwts
+        signed_jwts: requestBody
       }),
     { isStatusCode200, ...pageContentCheck('success') }
   )

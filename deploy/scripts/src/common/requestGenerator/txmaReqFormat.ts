@@ -103,7 +103,7 @@ export interface DcmawAbortWeb {
   }
 }
 
-export interface AuthAuthorizationInitiated {
+export interface AuthAuthorisationInitiated {
   client_id: string
   component_id: string
   event_name: string
@@ -137,7 +137,7 @@ export interface AuthCodeVerified {
   timestamp: number
   user: {
     email: string
-    govuk_sigin_journey_id: string
+    govuk_signin_journey_id: string
     ip_address: string
     persistent_session_id: string
     session_id: string

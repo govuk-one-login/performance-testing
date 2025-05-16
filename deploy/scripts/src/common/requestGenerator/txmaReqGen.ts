@@ -4,7 +4,6 @@ import {
   AuthCreateAccount,
   AuthAuthorisationReqParsed,
   DcmawAbortWeb,
-  AuthAuthorizationInitiated,
   AuthCodeVerified,
   AuthUpdateProfilePhoneNumber,
   IPVJourneyStart,
@@ -14,7 +13,8 @@ import {
   IPVKBVCRIStart,
   IPVKBVCRIEnd,
   AuthAuthorisationReqParsedEnrichment,
-  AuthLogInSuccessEnrichment
+  AuthLogInSuccessEnrichment,
+  AuthAuthorisationInitiated
 } from './txmaReqFormat'
 
 export function generateAuthCreateAccount(
@@ -145,11 +145,11 @@ export function generateDcmawAbortWeb(userID: string, journeyID: string, emailID
   }
 }
 
-export function generateAuthAuthorizationInitiated(journeyID: string): AuthAuthorizationInitiated {
+export function generateAuthAuthorisationInitiated(journeyID: string): AuthAuthorisationInitiated {
   return {
     client_id: 'performanceTestClientId',
     component_id: 'perfTest',
-    event_name: 'AUTH_AUTHORIZATION_INITIATED',
+    event_name: 'AUTH_AUTHORISATION_INITIATED',
     event_timestamp_ms: Math.floor(Date.now()),
     extensions: {
       'client-name': 'PerfTest',
@@ -182,7 +182,7 @@ export function generateAuthCodeVerified(emailID: string, journeyID: string, use
     timestamp: Math.floor(Date.now() / 1000),
     user: {
       email: emailID,
-      govuk_sigin_journey_id: journeyID,
+      govuk_signin_journey_id: journeyID,
       ip_address: '1.2.3.4',
       persistent_session_id: uuidv4(),
       session_id: uuidv4(),

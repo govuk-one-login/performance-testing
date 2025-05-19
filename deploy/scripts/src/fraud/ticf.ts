@@ -5,7 +5,6 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import {
-  generateAuthAuthorizationInitiated,
   generateAuthCodeVerified,
   generateAuthCreateAccount,
   generateAuthLogInSuccess,
@@ -15,7 +14,8 @@ import {
   generateIPVJourneyStart,
   generateIPVSubJourneyStart,
   generateIPVKBVCRIEnd,
-  generateIPVKBVCRIStart
+  generateIPVKBVCRIStart,
+  generateAuthAuthorisationInitiated
 } from '../common/requestGenerator/txmaReqGen'
 import { uuidv4 } from '../common/utils/jslib/index'
 import http from 'k6/http'
@@ -74,12 +74,12 @@ export function signInSuccess(): void {
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
-  const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
   iterationsStarted.add(1)
 
-  sqs.sendMessage(env.sqs_queue, authAuthorizationInitiatedPayload)
+  sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(5)
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   sleep(5)
@@ -110,13 +110,13 @@ export function signUpSuccess(): void {
   const pairWiseID = `performanceTestRpPairwiseId${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
 
-  const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
   const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
   iterationsStarted.add(1)
 
-  sqs.sendMessage(env.sqs_queue, authAuthorizationInitiatedPayload)
+  sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(5)
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
   sleep(5)

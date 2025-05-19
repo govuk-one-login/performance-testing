@@ -76,6 +76,7 @@ const groupMap = {
     'B01_BAV_05_CheckDetails',
     'B01_BAV_05_CheckDetails::01_BAVCall',
     'B01_BAV_05_CheckDetails::02_IPVStubCall',
+    'B01_BAV_05_IPVStubCall_getClientAssertion',
     'B01_BAV_06_SendAuthorizationCode',
     'B01_BAV_07_SendBearerToken'
   ]
@@ -107,7 +108,7 @@ export function BAV(): void {
 
   // B01_BAV_01_IPVStubCall
   res = timeGroup(groups[0], () => http.post(env.BAV.ipvStub + '/start', JSON.stringify({ bankingPayload })), {
-    'is status 201': r => r.status === 201,
+    'is status 200': r => r.status === 200,
     ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
   })
   const authorizeLocation = getAuthorizeauthorizeLocation(res)
@@ -172,12 +173,18 @@ export function BAV(): void {
 
   sleepBetween(1, 3)
 
-  // B01_BAV_06_SendAuthorizationCode
+  // B01_BAV_05_IPVStubCall_getClientAssertion
+  res = timeGroup(groups[7], () => http.post(env.BAV.ipvStub + '/generate-token-request'))
+  const client_assertion = String(res.body)
+
+  // B01_BAV_06_SendAuthorizationCodes
   res = timeGroup(
-    groups[7],
+    groups[8],
     () =>
       http.post(env.BAV.target + '/token', {
         grant_type: 'authorization_code',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+        client_assertion: client_assertion,
         code: codeUrl,
         redirect_uri: env.BAV.ipvStub + '/redirect?id=bav'
       }),
@@ -193,7 +200,7 @@ export function BAV(): void {
     headers: { Authorization: authHeader }
   }
   // B01_BAV_07_SendBearerToken
-  res = timeGroup(groups[8], () => http.post(env.BAV.target + '/userinfo', {}, options), {
+  res = timeGroup(groups[9], () => http.post(env.BAV.target + '/userinfo', {}, options), {
     isStatusCode200,
     ...pageContentCheck('credentialJWT')
   })

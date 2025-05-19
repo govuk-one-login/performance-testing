@@ -103,7 +103,7 @@ export async function putContraIndicators(): Promise<void> {
     return signJwt('ES256', importedKey, payload)
   }
   const jwts = await createJwt(keys.cimit, payloads.putContraIndicatorPayload)
-  const requestBody = JSON.stringify({ signed_jwts: jwts })
+  const requestBody = JSON.stringify({ signed_jwt: jwts })
 
   iterationsStarted.add(1)
   // B01_CIMIT_01_PutContraIndicator

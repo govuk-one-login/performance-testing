@@ -105,6 +105,7 @@ export interface DcmawAbortWeb {
 
 export interface AuthAuthorisationInitiated {
   client_id: string
+  event_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number
@@ -123,6 +124,7 @@ export interface AuthAuthorisationInitiated {
 
 export interface AuthCodeVerified {
   client_id: string
+  event_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number

@@ -539,7 +539,7 @@ Resources:
               MOBILE_ID_CHECK_ASYNC_BUILD_CLIENT_ID: "/perfTest/mobile/idCheckAsync/build/clientId"
               MOBILE_ID_CHECK_ASYNC_BUILD_CLIENT_SECRET: "/perfTest/mobile/idCheckAsync/build/clientSecret"
               MOBILE_ID_CHECK_ASYNC_BUILD_PRIVATE_API_URL: "/perfTest/mobile/idCheckAsync/build/privateApiUrl"
-              MOBILE_ID_CHECK_ASYNC_BUILD_USE_PROXY_API: "/perfTest/mobile/idCheckAsync/build/proxyApi"
+              MOBILE_ID_CHECK_ASYNC_BUILD_USE_PROXY_API: "/perfTest/mobile/idCheckAsync/build/useProxyApi"
               MOBILE_ID_CHECK_ASYNC_BUILD_STS_MOCK_API_URL: "/perfTest/mobile/idCheckAsync/build/stsMockApiUrl"
               MOBILE_ID_CHECK_ASYNC_BUILD_SESSIONS_API_URL: "/perfTest/mobile/idCheckAsync/build/sessionsApiUrl"
               MOBILE_ID_CHECK_ASYNC_BUILD_READ_ID_MOCK_API_URL: "/perfTest/mobile/idCheckAsync/build/readIdMockApiUrl"

@@ -112,9 +112,11 @@ export function signUpSuccess(): void {
   const eventID = `perfTestID$_${uuidv4()}`
 
   const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
+  const authCreateAccPayload = JSON.stringify(
+    generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, eventID)
+  )
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
-  const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
+  const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID, eventID))
   iterationsStarted.add(1)
 
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
@@ -148,12 +150,13 @@ export function identityProvingSuccess(): void {
   const groups = groupMap.idProveApiCall
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
-  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID))
-  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID))
-  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID))
-  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID))
+  const eventID = `perfTestID$_${uuidv4()}`
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, eventID))
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, eventID))
+  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID, eventID))
+  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID, eventID))
+  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID, eventID))
+  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID, eventID))
 
   iterationsStarted.add(1)
 
@@ -194,8 +197,9 @@ export function identityReuseSuccess(): void {
   const groups = groupMap.idReuseApiCall
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
+  const eventID = `perfTestID$_${uuidv4()}`
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, eventID))
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, eventID))
   iterationsStarted.add(1)
 
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)

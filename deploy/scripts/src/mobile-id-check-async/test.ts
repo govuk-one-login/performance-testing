@@ -28,16 +28,16 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 export const groupMap = {
   idCheckAsync: [
-    '00 POST /async/token',
-    '01 POST /async/credential',
-    '02 POST sts-mock /token',
-    '03 GET /async/activeSession',
-    '04 POST /async/biometricToken',
-    '05 GET /async/.well-known/jwks.json',
-    '06 POST /async/txmaEvent',
-    '07 POST readid-mock /setupVendorResponse',
-    '08 POST async/finishBiometricSession',
-    '09 POST async/abortSession'
+    'B01_IDCheckV2_00_POST_/async/token',
+    'B01_IDCheckV2_01_POST_/async/credential', //pragma: allowlist secret
+    'B01_IDCheckV2_02_POST_sts-mock /token',
+    'B01_IDCheckV2_03_GET_/async/activeSession', //pragma: allowlist secret
+    'B01_IDCheckV2_04_POST_/async/biometricToken', //pragma: allowlist secret
+    'B01_IDCheckV2_05_GET_/async/.well-known/jwks.json',
+    'B01_IDCheckV2_06_POST_/async/txmaEvent', //pragma: allowlist secret
+    'B01_IDCheckV2_07_POST_readid-mock /setupVendorResponse',
+    'B01_IDCheckV2_08_POST_async/finishBiometricSession', //pragma: allowlist secret
+    'B01_IDCheckV2_09_POST async/abortSession'
   ]
 } as const
 
@@ -66,12 +66,18 @@ export function idCheckAsync(): void {
   sleepBetween(0.5, 1)
   postTxmaEvent(sessionId)
   sleepBetween(0.5, 1)
-  const biometricSessionId = uuidv4()
-  postSetupVendorResponse({ biometricSessionId, opaqueId })
-  sleepBetween(0.5, 1)
-  postFinishBiometricSession({ biometricSessionId, sessionId })
-  sleepBetween(0.5, 1)
-  // postAbortSession(sessionId)
+
+  if (Math.random() <= 0.8) {
+    // Approximately 80% of users complete journey successfully
+    const biometricSessionId = uuidv4()
+    postSetupVendorResponse({ biometricSessionId, opaqueId })
+    sleepBetween(0.5, 1)
+    postFinishBiometricSession({ biometricSessionId, sessionId })
+    sleepBetween(0.5, 1)
+  } else {
+    // Approximately 20% of users abort journey
+    postAbortSession(sessionId)
+  }
   iterationsCompleted.add(1)
 }
 

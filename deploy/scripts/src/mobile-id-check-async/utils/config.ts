@@ -1,4 +1,3 @@
-import { AssumeRoleOutput } from '../../common/utils/aws/types'
 import { getEnv } from '../../common/utils/config/environment-variables'
 
 // Refer to deploy/scripts/README.md for guidance on how to set environment variables

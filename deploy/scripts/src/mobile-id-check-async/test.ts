@@ -4,7 +4,8 @@ import {
   type ProfileList,
   selectProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI4PeakTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
@@ -22,6 +23,9 @@ import { postAbortSession } from './testSteps/postAbortSession'
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('idCheckAsync', LoadProfile.smoke)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('idCheckAsync', 450, 27, 451)
   }
 }
 

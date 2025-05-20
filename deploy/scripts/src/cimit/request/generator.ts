@@ -1,70 +1,104 @@
-import { CimitPayLoad } from '../request/types'
+import { PassportPayload } from '../request/types'
 import { uuidv4 } from '../../common/utils/jslib'
 
-export function generatePutContraIndicatorPayload(sub: string): CimitPayLoad {
+export function generatePassportPayloadCI(sub: string): PassportPayload {
   return {
     sub: sub,
-    iss: 'did:web:identity.build.account.gov.uk:cimit',
     nbf: Math.floor(Date.now() / 1000),
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000),
+    iss: 'https://passport-cri.account.gov.uk',
     vc: {
-      type: ['VerifiableCredential', 'SecurityCheckCredential'],
       evidence: [
         {
-          type: 'SecurityCheck',
+          validityScore: 2,
+          strengthScore: 4,
           txn: uuidv4(),
-          contraIndicator: [
-            {
-              code: 'V03',
-              issuanceDate: new Date().toISOString(), //2025-05-13T13:44:06.974Z
-              document: 'passport/GBR/12345678',
-              txn: ['txn'],
-              mitigation: [],
-              incompleteMitigation: []
-            }
-          ]
+          type: 'IdentityCheck',
+          ci: ['D01']
         }
+      ],
+      credentialSubject: {
+        passport: [
+          {
+            expiryDate: '2030-01-01',
+            icaoIssuerCode: 'GBR',
+            documentNumber: '321654987'
+          }
+        ],
+        name: [
+          {
+            nameParts: [
+              {
+                type: 'GivenName',
+                value: 'Kenneth'
+              },
+              {
+                type: 'FamilyName',
+                value: 'Decerqueira'
+              }
+            ]
+          }
+        ],
+        birthDate: [
+          {
+            value: '1965-07-08'
+          }
+        ]
+      },
+      type: ['VerifiableCredential', 'IdentityCheckCredential'],
+      '@context': [
+        'https://www.w3.org/2018/credentials/v1',
+        'https://vocab.london.cloudapps.digital/contexts/identity-v1.jsonld'
       ]
     }
   }
 }
 
-export function generatePostMitigationsPayload(sub: string): CimitPayLoad {
+export function generatePassportPayloadMitigation(sub: string): PassportPayload {
   return {
     sub: sub,
-    iss: 'did:web:identity.build.account.gov.uk:cimit',
     nbf: Math.floor(Date.now() / 1000),
-    iat: Math.floor(Date.now() / 1000) - 1000,
-    exp: Math.floor(Date.now() / 1000) + 1000,
+    iss: 'https://passport-cri.account.gov.uk',
     vc: {
-      type: ['VerifiableCredential', 'SecurityCheckCredential'],
       evidence: [
         {
-          type: 'SecurityCheck',
+          validityScore: 2,
+          strengthScore: 4,
           txn: uuidv4(),
-          contraIndicator: [
-            {
-              code: 'V03',
-              issuanceDate: new Date().toISOString(), //2025-05-13T13:44:06.974Z
-              document: 'passport/GBR/12345678',
-              txn: ['txn'],
-              mitigation: [
-                {
-                  mitigatingCredential: [
-                    {
-                      issuer: 'https://review-p.dev.account.gov.uk',
-                      txn: 'txt',
-                      validFrom: new Date().toISOString()
-                    }
-                  ],
-                  code: 'M01'
-                }
-              ],
-              incompleteMitigation: []
-            }
-          ]
+          type: 'IdentityCheck'
         }
+      ],
+      credentialSubject: {
+        passport: [
+          {
+            expiryDate: '2030-01-01',
+            icaoIssuerCode: 'GBR',
+            documentNumber: '321654987'
+          }
+        ],
+        name: [
+          {
+            nameParts: [
+              {
+                type: 'GivenName',
+                value: 'Kenneth'
+              },
+              {
+                type: 'FamilyName',
+                value: 'Decerqueira'
+              }
+            ]
+          }
+        ],
+        birthDate: [
+          {
+            value: '1965-07-08'
+          }
+        ]
+      },
+      type: ['VerifiableCredential', 'IdentityCheckCredential'],
+      '@context': [
+        'https://www.w3.org/2018/credentials/v1',
+        'https://vocab.london.cloudapps.digital/contexts/identity-v1.jsonld'
       ]
     }
   }

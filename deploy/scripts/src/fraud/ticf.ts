@@ -5,7 +5,6 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import {
-  generateAuthAuthorizationInitiated,
   generateAuthCodeVerified,
   generateAuthCreateAccount,
   generateAuthLogInSuccess,
@@ -15,11 +14,14 @@ import {
   generateIPVJourneyStart,
   generateIPVSubJourneyStart,
   generateIPVKBVCRIEnd,
-  generateIPVKBVCRIStart
+  generateIPVKBVCRIStart,
+  generateAuthAuthorisationInitiated
 } from '../common/requestGenerator/txmaReqGen'
 import { uuidv4 } from '../common/utils/jslib/index'
 import http from 'k6/http'
-import { check, sleep } from 'k6'
+import { sleep } from 'k6'
+import { isStatusCode202 } from '../common/utils/checks/assertions'
+import { timeGroup } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
   smoke: {
@@ -31,6 +33,12 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  signInApiCall: ['B01_SignInSuccess_01_SignInAPICall'],
+  signUpApiCall: ['B02_SignUpSuccess_01_SignUpAPICall'],
+  idProveApiCall: ['B03_IdentityProvingSuccess_01_IdProveAPICall'], // pragma: allowlist secret
+  idReuseApiCall: ['B04_IdReuse_01_IdReuseAPICall']
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
@@ -46,7 +54,8 @@ const env = {
   ipvAPIURL: getEnv('TiCF_IPV_URL'),
   identityJWT1: getEnv('TiCF_IPV_JWT_1'),
   identityJWT2: getEnv('TiCF_IPV_JWT_2'),
-  identityJWT3: getEnv('TiCF_IPV_JWT_3')
+  identityJWT3: getEnv('TiCF_IPV_JWT_3'),
+  envName: getEnv('ENVIRONMENT')
 }
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -60,16 +69,17 @@ const awsConfig = new AWSConfig({
 const sqs = new SQSClient(awsConfig)
 
 export function signInSuccess(): void {
+  const groups = groupMap.signInApiCall
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
-  const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
   iterationsStarted.add(1)
 
-  sqs.sendMessage(env.sqs_queue, authAuthorizationInitiatedPayload)
+  sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(5)
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   sleep(5)
@@ -83,28 +93,30 @@ export function signInSuccess(): void {
     authenticated: 'Y'
   }
 
-  const res = http.post(env.authAPIURL, JSON.stringify(authSignInPayload))
-  check(res, {
-    'status is 202': r => r.status === 202
+  // B01_SignInSuccess_01_SignInAPICall
+  timeGroup(groups[0], () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignInPayload)), {
+    isStatusCode202
   })
 
   iterationsCompleted.add(1)
 }
 
 export function signUpSuccess(): void {
+  const groups = groupMap.signUpApiCall
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
   const testID = `perfTestID${timestamp}`
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
   const pairWiseID = `performanceTestRpPairwiseId${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
 
-  const authAuthorizationInitiatedPayload = JSON.stringify(generateAuthAuthorizationInitiated(journeyID))
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
   const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
   iterationsStarted.add(1)
 
-  sqs.sendMessage(env.sqs_queue, authAuthorizationInitiatedPayload)
+  sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(5)
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
   sleep(5)
@@ -123,15 +135,16 @@ export function signUpSuccess(): void {
     '2fa_method': ['SMS']
   }
 
-  const res = http.post(env.authAPIURL, JSON.stringify(authSignUpPayload))
-  check(res, {
-    'status is 202': r => r.status === 202
+  // B02_SignUpSuccess_01_SignUpAPICall
+  timeGroup(groups[0], () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignUpPayload)), {
+    isStatusCode202
   })
 
   iterationsCompleted.add(1)
 }
 
 export function identityProvingSuccess(): void {
+  const groups = groupMap.idProveApiCall
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
@@ -165,14 +178,19 @@ export function identityProvingSuccess(): void {
     'https://vocab.account.gov.uk/v1/credentialJWT': [env.identityJWT1, env.identityJWT2, env.identityJWT3]
   }
 
-  const res = http.post(env.authAPIURL, JSON.stringify(identityProvingPayload))
-  check(res, {
-    'status is 202': r => r.status === 202
-  })
+  // B03_IdentityProvingSuccess_01_IdProveAPICall
+  timeGroup(
+    groups[0],
+    () => http.post(`${env.ipvAPIURL}/${env.envName}/ipvcore`, JSON.stringify(identityProvingPayload)),
+    {
+      isStatusCode202
+    }
+  )
   iterationsCompleted.add(1)
 }
 
 export function identityReuseSuccess(): void {
+  const groups = groupMap.idReuseApiCall
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
@@ -193,9 +211,13 @@ export function identityReuseSuccess(): void {
     'https://vocab.account.gov.uk/v1/credentialJWT': []
   }
 
-  const res = http.post(env.authAPIURL, JSON.stringify(identityReusePayload))
-  check(res, {
-    'status is 202': r => r.status === 202
-  })
+  // B04_IdReuse_01_IdReuseAPICall
+  timeGroup(
+    groups[0],
+    () => http.post(`${env.ipvAPIURL}/${env.envName}/ipvcore`, JSON.stringify(identityReusePayload)),
+    {
+      isStatusCode202
+    }
+  )
   iterationsCompleted.add(1)
 }

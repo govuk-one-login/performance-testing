@@ -1,5 +1,6 @@
+export type IdentityCheckType = 'IDENTITY_CHECK' | 'IdentityCheck'
 export type NamePartType = 'GivenName' | 'FamilyName'
-export type VerifiableCredentialType =
+type VerifiableCredentialType =
   | 'IdentityCheckCredential'
   | 'VerifiableCredential'
   | 'VerifiableIdentityCredential'
@@ -8,50 +9,49 @@ export type VerifiableCredentialType =
   | 'RiskAssessmentCredential'
   | 'SecurityCheckCredential'
 
-export interface CimitPayLoad {
+export interface PassportPayload {
   sub: string
-  iss: string
   nbf: number
-  iat: number
-  exp: number
+  iss: string
   vc: {
-    type?: VerifiableCredentialType[]
+    type: VerifiableCredentialType[]
     evidence: [
       {
-        type?: string
-        contraIndicator?: [
-          {
-            code?: string
-            issuanceDate?: string
-            document?: string
-            txn?: string[]
-            mitigation?: [
-              {
-                code?: string
-                mitigatingCredential?: [
-                  {
-                    issue?: string
-                    txn?: string
-                    validFrom?: string
-                  }
-                ]
-              }
-            ]
-            incompleteMitigation?: [
-              {
-                code?: string
-                mitigatingCredential?: [
-                  {
-                    issue?: string
-                    txn?: string
-                    validFrom?: string
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+        type: IdentityCheckType
+        validityScore: number
+        strengthScore: number
+        txn: string
+        ci?: string[]
       }
     ]
+    credentialSubject: {
+      passport: [
+        {
+          expiryDate: string
+          icaoIssuerCode: string
+          documentNumber: string
+        }
+      ]
+      name: [
+        {
+          nameParts: [
+            {
+              type: NamePartType
+              value: string
+            },
+            {
+              type: NamePartType
+              value: string
+            }
+          ]
+        }
+      ]
+      birthDate: [
+        {
+          value: string
+        }
+      ]
+    }
+    '@context': string[]
   }
 }

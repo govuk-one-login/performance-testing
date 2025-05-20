@@ -5,17 +5,20 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
-import { generatePayload, generateSPOTRequest, Issuer } from './request/generator'
+import { generateSPOTRequest } from './request/generator'
 import { signJwt } from '../common/utils/authentication/jwt'
 import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
 import crypto from 'k6/crypto'
 import { b64decode } from 'k6/encoding'
 import { SpotRequestInfo } from './request/types'
+import { generateFraudPayload, generateKBVPayload, generatePassportPayload } from './request/generator'
 
 const profiles: ProfileList = {
   smoke: {
@@ -29,6 +32,26 @@ const profiles: ProfileList = {
   },
   stress: {
     ...createScenario('spot', LoadProfile.full, 2000, 3)
+  },
+  perf006Iteration3PeakTest: {
+    spot: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 60,
+      maxVUs: 120,
+      stages: [
+        { target: 40, duration: '19s' },
+        { target: 40, duration: '30m' }
+      ],
+      exec: 'spot'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignInScenario('spot', 120, 3, 55)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignInScenario('spot', 90, 3, 21)
   }
 }
 
@@ -82,9 +105,9 @@ export async function spot(): Promise<void> {
   }
 
   const payloads = {
-    fraud: generatePayload(pairwiseSub('fraudSector'), Issuer.Fraud),
-    passport: generatePayload(pairwiseSub('passportSector'), Issuer.Passport),
-    kbv: generatePayload(pairwiseSub('verificationSector'), Issuer.KBV)
+    fraud: generateFraudPayload(pairwiseSub('fraudSector')),
+    passport: generatePassportPayload(pairwiseSub('passportSector')),
+    kbv: generateKBVPayload(pairwiseSub('verificationSector'))
   }
   const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }

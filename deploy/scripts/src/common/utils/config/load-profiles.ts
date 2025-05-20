@@ -344,6 +344,58 @@ export function createI3SpikeSignInScenario(
   return list
 }
 
+export function createI4PeakTestSignUpScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round(((target / 10) * iterationDuration) / 2)
+  const maxVUs = Math.round((target / 10) * iterationDuration)
+
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 1,
+    timeUnit: '10s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: `30m` }
+    ],
+    exec
+  }
+
+  return list
+}
+
+export function createI4PeakTestSignInScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
+  const maxVUs = target * iterationDuration
+
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 2,
+    timeUnit: '1s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: `30m` }
+    ],
+    exec
+  }
+
+  return list
+}
+
 export function createI3SpikeOLHScenario(
   exec: string,
   target: number = 1,
@@ -368,6 +420,30 @@ export function createI3SpikeOLHScenario(
       { target, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
       { target: step, duration: '1s' }, // Ramp down to 33% over 1 second
       { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+      { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
+      { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
+    ],
+    exec
+  }
+  return list
+}
+
+export function createI3RegressionScenario(
+  exec: string,
+  target: number = 1,
+  iterationDuration: number = 5,
+  rampUpNFR: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
+  const maxVUs = target * iterationDuration
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 1,
+    timeUnit: '10s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
       { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
       { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
     ],

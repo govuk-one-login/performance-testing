@@ -1,3 +1,17 @@
+# -----------------------
+# Typescript > Javascript
+# -----------------------
+FROM node:20-alpine3.18 AS node-build
+
+ENV WORKDIR=/home/node
+
+COPY scripts ${WORKDIR}/scripts
+
+WORKDIR ${WORKDIR}/scripts
+
+RUN npm install --ignore-scripts \
+  && npm start
+
 # -------------------------------
 # Build k6 binary with extensions
 # -------------------------------
@@ -5,12 +19,12 @@ FROM golang:1.24-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
-  && xk6 build v0.54.0 --with github.com/LeonAdato/xk6-output-statsd@v0.2.0 --output /k6
+  && xk6 build v0.58.0 --with github.com/LeonAdato/xk6-output-statsd@v0.2.1 --output /k6
 
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.123.0 AS otel
+FROM otel/opentelemetry-collector-contrib:0.126.0 AS otel
 COPY otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---
@@ -39,7 +53,7 @@ RUN apk add --no-cache aws-cli chromium curl jq
 
 USER k6
 RUN mkdir ${WORKDIR}/scripts
-COPY scripts/dist ${WORKDIR}/scripts
+COPY --from=node-build /home/node/scripts/dist ${WORKDIR}/scripts
 COPY reporting ${WORKDIR}/reporting
 
 ENTRYPOINT ["sh"]

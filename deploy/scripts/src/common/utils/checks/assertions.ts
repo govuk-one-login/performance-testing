@@ -30,6 +30,20 @@ export function isStatusCode201(response: Response): boolean {
 }
 
 /**
+ * Function to check that a `Response` has status code 202/Accepted
+ * @param {Response} response `Response` to check that status code of
+ * @returns {boolean} `true` if status code is `202`, `false` otherwise
+ * @example
+ * const res = timeRequest(
+ *   () => http.get(url),
+ *   { isStatusCode202 }
+ * )
+ */
+export function isStatusCode202(response: Response): boolean {
+  return response.status === 202
+}
+
+/**
  * Function to check that a `Response` has status code 302/Found
  * @param {Response} response `Response` to check that status code of
  * @returns {boolean} `true` if status code is `302`, `false` otherwise

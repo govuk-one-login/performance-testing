@@ -1,0 +1,22 @@
+version = 0.1
+[build.deploy.parameters]
+stack_name = "acm-build"
+resolve_s3 = true
+s3_prefix = "acm-build"
+region = "eu-west-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = "Environment=\"build\""
+image_repositories = []
+
+[staging.deploy.parameters]
+stack_name = "acm-staging"
+resolve_s3 = true
+s3_prefix = "acm-staging"
+region = "eu-west-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = "Environment=\"staging\""
+image_repositories = []

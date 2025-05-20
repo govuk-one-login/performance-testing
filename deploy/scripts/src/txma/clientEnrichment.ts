@@ -5,7 +5,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
@@ -15,7 +16,7 @@ import {
   generateAuthCreateAccount,
   generateAuthReqParsedEnrichment,
   generateAuthLogInSuccessEnrichment
-} from './requestGenerator/txmaReqGen'
+} from '../common/requestGenerator/txmaReqGen'
 
 const profiles: ProfileList = {
   smoke: {
@@ -51,6 +52,23 @@ const profiles: ProfileList = {
       stages: [
         { target: 1136, duration: '518s' },
         { target: 1136, duration: '30m' }
+      ],
+      exec: 'sendRegularEventWithEnrichment'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 3389, 3, 1542)
+  },
+  peakTest2000: {
+    sendRegularEventWithEnrichment: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 3000,
+      maxVUs: 6000,
+      stages: [
+        { target: 2000, duration: '911s' },
+        { target: 2000, duration: '30m' }
       ],
       exec: 'sendRegularEventWithEnrichment'
     }

@@ -9,7 +9,9 @@ import {
   createScenario,
   LoadProfile,
   createI3SpikeSignUpScenario,
-  createI3SpikeSignInScenario
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignUpScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { timeGroup } from '../common/utils/request/timing'
 import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
@@ -242,6 +244,36 @@ const profiles: ProfileList = {
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignUpScenario('identity', 490, 36, 491),
     ...createI3SpikeSignInScenario('idReuse', 71, 6, 33)
+  },
+  perf006I3RegressionTest: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 576,
+      stages: [
+        { target: 4, duration: '2s' },
+        { target: 4, duration: '5m' }
+      ],
+      exec: 'identity'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 144,
+      stages: [
+        { target: 1, duration: '1s' },
+        { target: 1, duration: '5m' }
+      ],
+      exec: 'idReuse'
+    }
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 470, 36, 471),
+    ...createI4PeakTestSignInScenario('idReuse', 43, 6, 21)
   }
 }
 
@@ -352,7 +384,7 @@ const csvData: IDReuseUserID[] = new SharedArray('ID Reuse User ID', function ()
 })
 
 const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
-const validEnvironments = ['BUILD', 'DEV', 'DEFAULT']
+const validEnvironments = ['BUILD', 'DEV', 'DEFAULT', 'PERF']
 if (!validEnvironments.includes(environment))
   throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 

@@ -9,7 +9,10 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3RegressionScenario,
+  createI3SpikeSignUpScenario,
+  createI4PeakTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeGroup } from '../common/utils/request/timing'
@@ -134,6 +137,29 @@ const profiles: ProfileList = {
         { target: 0, duration: '101s' }, // Wait until the happy path scenario ramps up to target load
         { target: 60, duration: '61s' }, // Ramp up to target load
         { target: 60, duration: '30m' } // Maintain a steady state at the target load for 30 minutes.
+      ],
+      exec: 'addressME'
+    }
+  },
+  perf006RegressionTest: {
+    ...createI3RegressionScenario('address', 5, 15, 6)
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('address', 100, 15, 101),
+    ...createI3SpikeSignUpScenario('addressME', 390, 15, 391)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('address', 100, 15, 101),
+    addressME: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 278,
+      maxVUs: 555,
+      stages: [
+        { target: 0, duration: '101s' }, // Wait until the happy path scenario ramps up to target load
+        { target: 370, duration: '371s' }, // Ramp up to target load
+        { target: 370, duration: '30m' } // Maintain a steady state at the target load for 30 minutes.
       ],
       exec: 'addressME'
     }

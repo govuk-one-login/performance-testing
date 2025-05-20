@@ -18,3 +18,9 @@ export function getAuthorizeauthorizeLocation(r: Response): string {
   if (authorizeLocation !== null && typeof authorizeLocation === 'string') return authorizeLocation
   fail('AuthorizeLocation not found')
 }
+
+export function getclientassertion(r: Response): string {
+  const client_assertion = r.body
+  if (client_assertion !== null && typeof client_assertion === 'string') return client_assertion
+  fail('client assertion is not found')
+}

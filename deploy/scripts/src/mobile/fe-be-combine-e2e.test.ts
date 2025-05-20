@@ -5,7 +5,8 @@ import {
   type ProfileList,
   selectProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI4PeakTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import {
   postSelectDevice,
@@ -80,6 +81,9 @@ const profiles: ProfileList = {
       ],
       exec: 'mamIphonePassport'
     }
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('mamIphonePassport', 450, 48, 451)
   }
 }
 
@@ -100,8 +104,8 @@ const groupMap = {
     'POST /finishBiometricSession', //BE
     'GET /redirect', //BE
     'POST /token', //BE
-    'POST /v2/setupVendorResponse/' //BE
-    //'POST /userinfo/v2' //BE
+    'POST /v2/setupVendorResponse/', //BE
+    'POST /userinfo/v2' //BE
   ]
 } as const
 

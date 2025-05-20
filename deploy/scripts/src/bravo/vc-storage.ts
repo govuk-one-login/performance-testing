@@ -9,7 +9,9 @@ import {
   createScenario,
   LoadProfile,
   createI3SpikeSignUpScenario,
-  createI3SpikeSignInScenario
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignUpScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib'
@@ -128,6 +130,11 @@ const profiles: ProfileList = {
     ...createI3SpikeSignUpScenario('persistVC', 490, 5, 491),
     ...createI3SpikeSignUpScenario('updateVC', 490, 7, 491),
     ...createI3SpikeSignInScenario('summariseVC', 71, 6, 33)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('persistVC', 470, 5, 471),
+    ...createI4PeakTestSignUpScenario('updateVC', 470, 7, 471),
+    ...createI4PeakTestSignInScenario('summariseVC', 43, 6, 21)
   }
 }
 

@@ -5,7 +5,11 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignUpScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import {
@@ -87,6 +91,14 @@ const profiles: ProfileList = {
       ],
       exec: 'allEvents'
     }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('allEvents', 12, 20, 13),
+    ...createI3SpikeSignInScenario('authEvent', 71, 5, 7)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('allEvents', 12, 20, 13),
+    ...createI4PeakTestSignInScenario('authEvent', 43, 5, 21)
   }
 }
 

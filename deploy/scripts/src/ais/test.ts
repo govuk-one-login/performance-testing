@@ -5,7 +5,9 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen'
@@ -65,6 +67,14 @@ const profiles: ProfileList = {
       ],
       exec: 'retrieveIV'
     }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignInScenario('persistIV', 30, 3, 15),
+    ...createI3SpikeSignInScenario('retrieveIV', 303, 3, 139)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignInScenario('persistIV', 30, 3, 15),
+    ...createI4PeakTestSignInScenario('retrieveIV', 129, 3, 21)
   }
 }
 
@@ -117,6 +127,7 @@ export function persistIV(): void {
   const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend)
   const persistIVMessage = JSON.stringify(persistIVPayload)
   iterationsStarted.add(1)
+  //// B01_PersistIV_01_PostInterventionData
   sqs.sendMessage(env.sqs_queue, persistIVMessage)
   iterationsCompleted.add(1)
 }

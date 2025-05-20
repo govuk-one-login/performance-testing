@@ -5,7 +5,7 @@ export function generatePassportPayloadCI(sub: string): PassportPayload {
   return {
     sub: sub,
     nbf: Math.floor(Date.now() / 1000),
-    iss: 'https://review-p.dev.account.gov.uk',
+    iss: 'https://passport-cri.account.gov.uk',
     vc: {
       evidence: [
         {
@@ -57,7 +57,7 @@ export function generatePassportPayloadMitigation(sub: string): PassportPayload 
   return {
     sub: sub,
     nbf: Math.floor(Date.now() / 1000),
-    iss: 'https://review-p.dev.account.gov.uk',
+    iss: 'https://passport-cri.account.gov.uk',
     vc: {
       evidence: [
         {

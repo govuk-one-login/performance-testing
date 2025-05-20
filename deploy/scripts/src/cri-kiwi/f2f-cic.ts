@@ -8,14 +8,15 @@ import {
   describeProfile,
   createScenario,
   LoadProfile,
-  createI3SpikeSignUpScenario
+  createI3SpikeSignUpScenario,
+  createI4PeakTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import execution from 'k6/execution'
 import { b64encode } from 'k6/encoding'
 import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
-import { getAuthorizeauthorizeLocation, getClientID, getCodeFromUrl } from './utils/authorization'
+import { getAuthorizeauthorizeLocation, getclientassertion, getClientID, getCodeFromUrl } from './utils/authorization'
 import { getAccessToken } from '../common/utils/authorization/authorization'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
@@ -88,6 +89,10 @@ const profiles: ProfileList = {
   perf006Iteration3SpikeTest: {
     ...createI3SpikeSignUpScenario('FaceToFace', 12, 42, 13),
     ...createI3SpikeSignUpScenario('CIC', 12, 21, 13)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('FaceToFace', 12, 45, 13),
+    ...createI4PeakTestSignUpScenario('CIC', 12, 24, 13)
   }
 }
 
@@ -101,8 +106,9 @@ const groupMap = {
     'B01_CIC_05_CheckDetails',
     'B01_CIC_05_CheckDetails::01_CICCall',
     'B01_CIC_05_CheckDetails::01_IPVStubCall',
-    'B01_CIC_06_SendAuthorizationCode',
-    'B01_CIC_07_SendBearerToken'
+    'B01_CIC_06_getClientAssertion_IPVStubCall', // pragma: allowlist secret
+    'B01_CIC_07_SendAuthorizationCode',
+    'B01_CIC_08_SendBearerToken'
   ],
   FaceToFace: [
     'B02_FaceToFace_01_IPVStubCall',
@@ -133,8 +139,9 @@ const groupMap = {
     'B02_FaceToFace_12_CheckDetails',
     'B02_FaceToFace_12_CheckDetails::01_F2FCall',
     'B02_FaceToFace_12_CheckDetails::02_IPVStubCall',
-    'B02_FaceToFace_13_SendAuthorizationCode',
-    'B02_FaceToFace_14_SendBearerToken'
+    'B02_FaceToFace_13_getClientAssertion_IPVStubCall', // pragma: allowlist secret
+    'B02_FaceToFace_14_SendAuthorizationCode',
+    'B02_FaceToFace_15_SendBearerToken'
   ]
 } as const
 
@@ -175,7 +182,7 @@ export function CIC(): void {
         })
       ),
     {
-      'is status 201': r => r.status === 201,
+      isStatusCode200,
       ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
     }
   )
@@ -240,13 +247,20 @@ export function CIC(): void {
   const codeUrl = getCodeFromUrl(res.url)
 
   sleepBetween(1, 3)
+  // B01_CIC_06_getClientAssertion_IPVStubCall
+  res = timeGroup(groups[7], () => http.post(env.CIC.ipvStub + '/generate-token-request'), {
+    isStatusCode200
+  })
+  const client_assertion = getclientassertion(res)
 
-  // B01_CIC_06_SendAuthorizationCode
+  // B01_CIC_07_SendAuthorizationCode
   res = timeGroup(
-    groups[7],
+    groups[8],
     () =>
       http.post(env.CIC.target + '/token', {
         grant_type: 'authorization_code',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+        client_assertion: client_assertion,
         code: codeUrl,
         redirect_uri: env.CIC.ipvStub + '/redirect'
       }),
@@ -261,8 +275,8 @@ export function CIC(): void {
   const options = {
     headers: { Authorization: authHeader }
   }
-  // B01_CIC_07_SendBearerToken
-  res = timeGroup(groups[8], () => http.post(env.CIC.target + '/userinfo', {}, options), {
+  // B01_CIC_08_SendBearerToken
+  res = timeGroup(groups[9], () => http.post(env.CIC.target + '/userinfo', {}, options), {
     isStatusCode200,
     ...pageContentCheck('credentialJWT')
   })
@@ -292,7 +306,7 @@ export function FaceToFace(): void {
         })
       ),
     {
-      'is status 201': r => r.status === 201,
+      'is status 200': r => r.status === 200,
       ...pageContentCheck(b64encode('{"alg":"RSA', 'rawstd'))
     }
   )
@@ -709,13 +723,20 @@ export function FaceToFace(): void {
   const codeUrl = getCodeFromUrl(res.url)
 
   sleepBetween(1, 3)
+  // B02_FaceToFace_13_getClientAssertion_IPVStubCall
+  res = timeGroup(groups[28], () => http.post(env.F2F.ipvStub + '/generate-token-request'), {
+    isStatusCode200
+  })
+  const client_assertion = getclientassertion(res)
 
-  // B02_FaceToFace_13_SendAuthorizationCode
+  // B02_FaceToFace_14_SendAuthorizationCode
   res = timeGroup(
-    groups[28],
+    groups[29],
     () =>
       http.post(env.F2F.target + '/token', {
         grant_type: 'authorization_code',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+        client_assertion: client_assertion,
         code: codeUrl,
         redirect_uri: env.F2F.ipvStub + '/redirect?id=f2f'
       }),
@@ -732,7 +753,7 @@ export function FaceToFace(): void {
     }
   }
   // B02_FaceToFace_14_SendBearerToken
-  res = timeGroup(groups[29], () => http.post(env.F2F.target + '/userinfo', {}, options), {
+  res = timeGroup(groups[30], () => http.post(env.F2F.target + '/userinfo', {}, options), {
     'is status 202': r => r.status === 202,
     ...pageContentCheck('sub')
   })

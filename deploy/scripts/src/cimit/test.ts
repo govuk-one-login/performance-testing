@@ -14,10 +14,9 @@ import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { generatePassportPayloadCI, generatePassportPayloadMitigation } from './request/generator'
 import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
-import crypto from 'k6/crypto'
-import { b64decode } from 'k6/encoding'
 import { signJwt } from '../common/utils/authentication/jwt'
 import { sleep } from 'k6'
+import { uuidv4 } from '../common/utils/jslib'
 
 const profiles: ProfileList = {
   smoke: {
@@ -60,21 +59,7 @@ const keys = {
 
 export async function cimitAPIs(): Promise<void> {
   const groups = groupMap.cimitAPIs
-  const config = {
-    host: 'a-simple-local-account-id',
-    sector: 'a.simple.sector.id',
-    salt: 'YS1zaW1wbGUtc2FsdA=='
-  }
-  const pairwiseSub = (sectorId: string): string => {
-    const hasher = crypto.createHash('sha256')
-    hasher.update(sectorId)
-    hasher.update(config.host)
-    hasher.update(b64decode(config.salt))
-    const id = hasher.digest('base64rawurl')
-    return 'urn:fdc:gov.uk:2022:' + id
-  }
-
-  const subjectID = pairwiseSub('cimit')
+  const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
 
   const payloads = {
     putContraIndicatorPayload: generatePassportPayloadCI(subjectID),
@@ -89,18 +74,28 @@ export async function cimitAPIs(): Promise<void> {
   const putContraIndicatorReqBody = JSON.stringify({ signed_jwt: putContraIndicatorJWT })
   const postMitigationsJWT = await createJwt(keys.cimit, payloads.postMitigationsPayload)
   const postMitigationReqBody = JSON.stringify({ signed_jwts: postMitigationsJWT })
+  const params = {
+    headers: {
+      'govuk-signin-journey-id': uuidv4(),
+      'ip-address': '1.2.3.4'
+    }
+  }
 
   iterationsStarted.add(1)
   // B01_CIMIT_01_PutContraIndicator
-  timeGroup(groups[0], () => http.post(env.envURL + '/v1/contra-indicators/detect', putContraIndicatorReqBody), {
-    isStatusCode200,
-    ...pageContentCheck('success')
-  })
+  timeGroup(
+    groups[0],
+    () => http.post(env.envURL + '/v1/contra-indicators/detect', putContraIndicatorReqBody, params),
+    {
+      isStatusCode200,
+      ...pageContentCheck('success')
+    }
+  )
 
   sleep(5)
 
   // B02_CIMIT_01_GetContraIndicatorCredentials
-  timeGroup(groups[1], () => http.get(env.envURL + `/v1/contra-indicators?userId=${subjectID}`), {
+  timeGroup(groups[1], () => http.get(env.envURL + `/v1/contra-indicators?user_id=${subjectID}`, params), {
     isStatusCode200,
     ...pageContentCheck('vc')
   })
@@ -108,7 +103,7 @@ export async function cimitAPIs(): Promise<void> {
   sleep(5)
 
   // B03_CIMIT_01_PostMitigations
-  timeGroup(groups[2], () => http.post(env.envURL + '/v1/contra-indicators/mitigate', postMitigationReqBody), {
+  timeGroup(groups[2], () => http.post(env.envURL + '/v1/contra-indicators/mitigate', postMitigationReqBody, params), {
     isStatusCode200,
     ...pageContentCheck('success')
   })

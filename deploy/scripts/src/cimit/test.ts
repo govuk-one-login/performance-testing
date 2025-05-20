@@ -100,7 +100,7 @@ export async function cimitAPIs(): Promise<void> {
   sleep(5)
 
   // B02_CIMIT_01_GetContraIndicatorCredentials
-  timeGroup(groups[1], () => http.get(env.envURL + `/v1/contra-indicators?userId=${subjectID}`), {
+  timeGroup(groups[1], () => http.get(env.envURL + `/v1/contra-indicators?user_id=${subjectID}`), {
     isStatusCode200,
     ...pageContentCheck('vc')
   })

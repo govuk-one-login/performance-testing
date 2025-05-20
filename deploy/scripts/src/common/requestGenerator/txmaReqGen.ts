@@ -145,9 +145,10 @@ export function generateDcmawAbortWeb(userID: string, journeyID: string, emailID
   }
 }
 
-export function generateAuthAuthorisationInitiated(journeyID: string): AuthAuthorisationInitiated {
+export function generateAuthAuthorisationInitiated(journeyID: string, eventID: string): AuthAuthorisationInitiated {
   return {
     client_id: 'performanceTestClientId',
+    event_id: eventID,
     component_id: 'perfTest',
     event_name: 'AUTH_AUTHORISATION_INITIATED',
     event_timestamp_ms: Math.floor(Date.now()),
@@ -165,9 +166,15 @@ export function generateAuthAuthorisationInitiated(journeyID: string): AuthAutho
   }
 }
 
-export function generateAuthCodeVerified(emailID: string, journeyID: string, userID: string): AuthCodeVerified {
+export function generateAuthCodeVerified(
+  emailID: string,
+  journeyID: string,
+  userID: string,
+  eventID: string
+): AuthCodeVerified {
   return {
     client_id: 'performanceTestClientId',
+    event_id: eventID,
     component_id: 'perfTest',
     event_name: 'AUTH_CODE_VERIFIED',
     event_timestamp_ms: Math.floor(Date.now()),

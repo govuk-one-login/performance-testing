@@ -149,6 +149,7 @@ export interface AuthCodeVerified {
 
 export interface AuthUpdateProfilePhoneNumber {
   client_id: string
+  event_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number
@@ -171,6 +172,7 @@ export interface AuthUpdateProfilePhoneNumber {
 
 export interface IPVJourneyStart {
   client_id: string
+  event_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number
@@ -194,6 +196,7 @@ export interface IPVJourneyStart {
 
 export interface IPVSubJourneyStart {
   client_id: string
+  event_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number
@@ -216,6 +219,7 @@ export interface IPVSubJourneyStart {
 
 export interface IPVDLCRIVCIssued {
   client_id: string
+  event_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number
@@ -285,6 +289,7 @@ export interface IPVDLCRIVCIssued {
 
 export interface IPVAddressCRIVCIssued {
   client_id: string
+  event_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number
@@ -319,6 +324,7 @@ export interface IPVAddressCRIVCIssued {
 
 export interface IPVKBVCRIStart {
   client_id: string
+  event_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number
@@ -339,6 +345,7 @@ export interface IPVKBVCRIStart {
 
 export interface IPVKBVCRIEnd {
   client_id: string
+  event_id: string
   component_id: string
   event_name: string
   event_timestamp_ms: number

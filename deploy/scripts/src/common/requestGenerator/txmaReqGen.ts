@@ -22,9 +22,9 @@ export function generateAuthCreateAccount(
   userID: string,
   emailID: string,
   pairWiseID: string,
-  journeyID: string
+  journeyID: string,
+  eventID: string
 ): AuthCreateAccount {
-  const eventID = `${testID}_${uuidv4()}`
   return {
     event_id: eventID,
     event_name: 'AUTH_CREATE_ACCOUNT',
@@ -201,10 +201,12 @@ export function generateAuthCodeVerified(
 export function generateAuthUpdatePhone(
   emailID: string,
   journeyID: string,
-  userID: string
+  userID: string,
+  eventID: string
 ): AuthUpdateProfilePhoneNumber {
   return {
     client_id: 'performanceTestClientId',
+    event_id: eventID,
     component_id: 'perfTest',
     event_name: 'AUTH_UPDATE_PROFILE_PHONE_NUMBER',
     event_timestamp_ms: Math.floor(Date.now()),
@@ -226,9 +228,10 @@ export function generateAuthUpdatePhone(
   }
 }
 
-export function generateIPVJourneyStart(journeyID: string, userID: string): IPVJourneyStart {
+export function generateIPVJourneyStart(journeyID: string, userID: string, eventID: string): IPVJourneyStart {
   return {
     client_id: 'performanceTestClientId',
+    event_id: eventID,
     component_id: 'perfTest',
     event_name: 'IPV_JOURNEY_START',
     event_timestamp_ms: Math.floor(Date.now()),
@@ -251,9 +254,10 @@ export function generateIPVJourneyStart(journeyID: string, userID: string): IPVJ
   }
 }
 
-export function generateIPVSubJourneyStart(journeyID: string, userID: string): IPVSubJourneyStart {
+export function generateIPVSubJourneyStart(journeyID: string, userID: string, eventID: string): IPVSubJourneyStart {
   return {
     client_id: 'performanceTestClientId',
+    event_id: eventID,
     component_id: 'perfTest',
     event_name: 'IPV_SUBJOURNEY_START',
     event_timestamp_ms: Math.floor(Date.now()),
@@ -275,9 +279,10 @@ export function generateIPVSubJourneyStart(journeyID: string, userID: string): I
   }
 }
 
-export function generateIPVDLCRIVCIssued(userID: string, journeyID: string): IPVDLCRIVCIssued {
+export function generateIPVDLCRIVCIssued(userID: string, journeyID: string, eventID: string): IPVDLCRIVCIssued {
   return {
     client_id: 'performanceTestClientId',
+    event_id: eventID,
     component_id: 'perfTest',
     event_name: 'IPV_DL_CRI_VC_ISSUED',
     event_timestamp_ms: Math.floor(Date.now()),
@@ -346,9 +351,14 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string): IPV
   }
 }
 
-export function generateIPVAddressCRIVCIssued(journeyID: string, userID: string): IPVAddressCRIVCIssued {
+export function generateIPVAddressCRIVCIssued(
+  journeyID: string,
+  userID: string,
+  eventID: string
+): IPVAddressCRIVCIssued {
   return {
     client_id: 'performanceTestClientId',
+    event_id: eventID,
     component_id: 'perfTest',
     event_name: 'IPV_ADDRESS_CRI_VC_ISSUED',
     event_timestamp_ms: Math.floor(Date.now()),
@@ -382,9 +392,10 @@ export function generateIPVAddressCRIVCIssued(journeyID: string, userID: string)
   }
 }
 
-export function generateIPVKBVCRIStart(journeyID: string, userID: string): IPVKBVCRIStart {
+export function generateIPVKBVCRIStart(journeyID: string, userID: string, eventID: string): IPVKBVCRIStart {
   return {
     client_id: 'performanceTestClientID',
+    event_id: eventID,
     component_id: 'perfTest',
     event_name: 'IPV_KBV_CRI_START',
     event_timestamp_ms: Math.floor(Date.now()),
@@ -404,9 +415,10 @@ export function generateIPVKBVCRIStart(journeyID: string, userID: string): IPVKB
   }
 }
 
-export function generateIPVKBVCRIEnd(journeyID: string, userID: string): IPVKBVCRIEnd {
+export function generateIPVKBVCRIEnd(journeyID: string, userID: string, eventID: string): IPVKBVCRIEnd {
   return {
     client_id: 'performanceTestClientID',
+    event_id: eventID,
     component_id: 'perfTest',
     event_name: 'IPV_KBV_CRI_END',
     event_timestamp_ms: Math.floor(Date.now()),

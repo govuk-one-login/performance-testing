@@ -107,7 +107,10 @@ export function setup(): string {
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
   const journeyID = 'journeyID'
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
+  const eventID = `${testID}_${uuidv4()}`
+  const authCreateAccPayload = JSON.stringify(
+    generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, eventID)
+  )
   const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID, testID))
 
   console.log('Sending primer event 1')

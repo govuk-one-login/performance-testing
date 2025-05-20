@@ -14,10 +14,9 @@ import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { generatePassportPayloadCI, generatePassportPayloadMitigation } from './request/generator'
 import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
-import crypto from 'k6/crypto'
-import { b64decode } from 'k6/encoding'
 import { signJwt } from '../common/utils/authentication/jwt'
 import { sleep } from 'k6'
+import { uuidv4 } from '../common/utils/jslib'
 
 const profiles: ProfileList = {
   smoke: {
@@ -60,21 +59,7 @@ const keys = {
 
 export async function cimitAPIs(): Promise<void> {
   const groups = groupMap.cimitAPIs
-  const config = {
-    host: 'a-simple-local-account-id',
-    sector: 'a.simple.sector.id',
-    salt: 'YS1zaW1wbGUtc2FsdA=='
-  }
-  const pairwiseSub = (sectorId: string): string => {
-    const hasher = crypto.createHash('sha256')
-    hasher.update(sectorId)
-    hasher.update(config.host)
-    hasher.update(b64decode(config.salt))
-    const id = hasher.digest('base64rawurl')
-    return 'urn:fdc:gov.uk:2022:' + id
-  }
-
-  const subjectID = pairwiseSub('cimit')
+  const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
 
   const payloads = {
     putContraIndicatorPayload: generatePassportPayloadCI(subjectID),

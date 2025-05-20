@@ -76,9 +76,9 @@ const groupMap = {
     'B01_BAV_05_CheckDetails',
     'B01_BAV_05_CheckDetails::01_BAVCall',
     'B01_BAV_05_CheckDetails::02_IPVStubCall',
-    'B01_BAV_05_getClientAssertion_IPVStubCall',
-    'B01_BAV_06_SendAuthorizationCode',
-    'B01_BAV_07_SendBearerToken'
+    'B01_BAV_06_getClientAssertion_IPVStubCall',
+    'B01_BAV_07_SendAuthorizationCode',
+    'B01_BAV_08_SendBearerToken'
   ]
 } as const
 
@@ -173,13 +173,13 @@ export function BAV(): void {
 
   sleepBetween(1, 3)
 
-  // B01_BAV_05_getClientAssertion_IPVStubCall
+  // B01_BAV_06_getClientAssertion_IPVStubCall
   res = timeGroup(groups[7], () => http.post(env.BAV.ipvStub + '/generate-token-request'), {
     isStatusCode200
   })
   const client_assertion = getclientassertion(res)
 
-  // B01_BAV_06_SendAuthorizationCodes
+  // B01_BAV_07_SendAuthorizationCodes
   res = timeGroup(
     groups[8],
     () =>
@@ -201,7 +201,7 @@ export function BAV(): void {
   const options = {
     headers: { Authorization: authHeader }
   }
-  // B01_BAV_07_SendBearerToken
+  // B01_BAV_08_SendBearerToken
   res = timeGroup(groups[9], () => http.post(env.BAV.target + '/userinfo', {}, options), {
     isStatusCode200,
     ...pageContentCheck('credentialJWT')

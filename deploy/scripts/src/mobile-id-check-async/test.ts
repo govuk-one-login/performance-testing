@@ -80,16 +80,3 @@ export function idCheckAsync(): void {
   }
   iterationsCompleted.add(1)
 }
-
-/*
-At this point we either call:
-
-1) postSetupVendorResponse and then
-2) postFinishBiometricSession
-
-or we call
-
-1) postAbortSession
-
-I would steer towards a split of 80% / 20% with the 20% being postAbortSession
-*/

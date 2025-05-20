@@ -1,3 +1,5 @@
+export type IdentityCheckType = 'IDENTITY_CHECK' | 'IdentityCheck'
+export type NamePartType = 'GivenName' | 'FamilyName'
 type VerifiableCredentialType =
   | 'IdentityCheckCredential'
   | 'VerifiableCredential'
@@ -7,41 +9,49 @@ type VerifiableCredentialType =
   | 'RiskAssessmentCredential'
   | 'SecurityCheckCredential'
 
-interface MitigatingCredentialClass {
-  id?: string
-  issuer?: string
-  txn?: string
-  validFrom?: string
-}
-
-interface MitigationClass {
-  code?: string
-  mitigatingCredential?: MitigatingCredentialClass[]
-}
-
-interface ContraIndicatorClass {
-  code?: string
-  issuanceDate?: string
-  document?: string
-  txn?: string[]
-  issuers?: string[]
-  incompleteMitigation?: MitigationClass[]
-  mitigation?: MitigationClass[]
-}
-
-export interface CimitPayLoad {
+export interface PassportPayload {
   sub: string
-  iss: string
   nbf: number
-  iat: number
-  exp: number
+  iss: string
   vc: {
-    type?: VerifiableCredentialType[]
+    type: VerifiableCredentialType[]
     evidence: [
       {
-        type?: string
-        contraIndicator?: ContraIndicatorClass[]
+        type: IdentityCheckType
+        validityScore: number
+        strengthScore: number
+        txn: string
+        ci?: string[]
       }
     ]
+    credentialSubject: {
+      passport: [
+        {
+          expiryDate: string
+          icaoIssuerCode: string
+          documentNumber: string
+        }
+      ]
+      name: [
+        {
+          nameParts: [
+            {
+              type: NamePartType
+              value: string
+            },
+            {
+              type: NamePartType
+              value: string
+            }
+          ]
+        }
+      ]
+      birthDate: [
+        {
+          value: string
+        }
+      ]
+    }
+    '@context': string[]
   }
 }

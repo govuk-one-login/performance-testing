@@ -1,6 +1,5 @@
-import { AssumeRoleOutput } from "../../common/utils/aws/types"
-import { getEnv } from "../../common/utils/config/environment-variables"
-
+import { AssumeRoleOutput } from '../../common/utils/aws/types'
+import { getEnv } from '../../common/utils/config/environment-variables'
 
 // Refer to deploy/scripts/README.md for guidance on how to set environment variables
 export const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
@@ -18,5 +17,5 @@ export const config = {
   sessionsApiUrl: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_SESSIONS_API_URL`),
   stsMockApiUrl: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_STS_MOCK_API_URL`),
   useProxyApi: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_USE_PROXY_API`),
-  biometricSessionTestData: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_BIOMETRIC_SESSION_TEST_DATA`),
+  biometricSessionTestData: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_BIOMETRIC_SESSION_TEST_DATA`)
 }

@@ -37,7 +37,7 @@ export const groupMap = {
     '06 POST /async/txmaEvent',
     '07 POST readid-mock /setupVendorResponse',
     '08 POST async/finishBiometricSession',
-    '09 POST async/abortSession',
+    '09 POST async/abortSession'
   ]
 } as const
 

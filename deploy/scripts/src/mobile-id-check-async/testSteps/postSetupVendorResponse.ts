@@ -1,12 +1,11 @@
-import http from "k6/http"
-import { timeGroup } from "../../common/utils/request/timing"
-import { groupMap } from "../test"
-import { config } from "../utils/config"
-import { isStatusCode201 } from "../../common/utils/checks/assertions"
-import { apiSignaturev4Signer } from "../utils/apiSignatureV4Signer"
+import http from 'k6/http'
+import { timeGroup } from '../../common/utils/request/timing'
+import { groupMap } from '../test'
+import { config } from '../utils/config'
+import { isStatusCode201 } from '../../common/utils/checks/assertions'
+import { apiSignaturev4Signer } from '../utils/apiSignatureV4Signer'
 
-export function postSetupVendorResponse(testData: { biometricSessionId: string, opaqueId: string }): void {
-
+export function postSetupVendorResponse(testData: { biometricSessionId: string; opaqueId: string }): void {
   const biometricSession = JSON.parse(config.biometricSessionTestData)
 
   const setupVendorResponseBody = {
@@ -24,9 +23,13 @@ export function postSetupVendorResponse(testData: { biometricSessionId: string, 
     headers: {}
   })
 
-  timeGroup(groupMap.idCheckAsync[7], () => http.post(signedRequest.url, JSON.stringify(setupVendorResponseBody), { headers: signedRequest.headers }), {
-    isStatusCode201
-  })
+  timeGroup(
+    groupMap.idCheckAsync[7],
+    () => http.post(signedRequest.url, JSON.stringify(setupVendorResponseBody), { headers: signedRequest.headers }),
+    {
+      isStatusCode201
+    }
+  )
 }
 
 function getSetupVendorResponsePath(biometricSessionId: string): string {

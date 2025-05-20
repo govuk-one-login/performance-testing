@@ -7,7 +7,6 @@ if (!validEnvironments.includes(environment))
   throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 
 export const config = {
-  awsExecutionCredentials: getEnv('EXECUTION_CREDENTIALS'),
   clientId: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_CLIENT_ID`),
   clientSecret: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_CLIENT_SECRET`),
   privateApiUrl: getEnv(`MOBILE_ID_CHECK_ASYNC_${environment}_PRIVATE_API_URL`),

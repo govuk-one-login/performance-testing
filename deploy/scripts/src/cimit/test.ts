@@ -3,7 +3,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI4PeakTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import http from 'k6/http'
 import { type Options } from 'k6/options'
@@ -27,6 +28,9 @@ const profiles: ProfileList = {
   },
   load: {
     ...createScenario('cimitAPIs', LoadProfile.full, 400, 5)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('cimitAPIs', 188, 19, 471)
   }
 }
 
@@ -34,8 +38,8 @@ const loadProfile = selectProfile(profiles)
 const groupMap = {
   cimitAPIs: [
     'B01_CIMIT_01_PutContraIndicator',
-    'B02_CIMIT_01_GetContraIndicatorCredentials',
-    'B03_CIMIT_01_PostMitigations'
+    'B02_CIMIT_02_GetContraIndicatorCredentials',
+    'B03_CIMIT_03_PostMitigations'
   ]
 } as const
 
@@ -94,7 +98,7 @@ export async function cimitAPIs(): Promise<void> {
 
   sleep(5)
 
-  // B02_CIMIT_01_GetContraIndicatorCredentials
+  // B02_CIMIT_02_GetContraIndicatorCredentials
   timeGroup(groups[1], () => http.get(env.envURL + `/v1/contra-indicators?user_id=${subjectID}`, params), {
     isStatusCode200,
     ...pageContentCheck('vc')
@@ -102,7 +106,7 @@ export async function cimitAPIs(): Promise<void> {
 
   sleep(5)
 
-  // B03_CIMIT_01_PostMitigations
+  // B03_CIMIT_03_PostMitigations
   timeGroup(groups[2], () => http.post(env.envURL + '/v1/contra-indicators/mitigate', postMitigationReqBody, params), {
     isStatusCode200,
     ...pageContentCheck('success')

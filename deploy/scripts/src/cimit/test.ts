@@ -73,7 +73,7 @@ export async function cimitAPIs(): Promise<void> {
   const putContraIndicatorJWT = await createJwt(keys.cimit, payloads.putContraIndicatorPayload)
   const putContraIndicatorReqBody = JSON.stringify({ signed_jwt: putContraIndicatorJWT })
   const postMitigationsJWT = await createJwt(keys.cimit, payloads.postMitigationsPayload)
-  const postMitigationReqBody = JSON.stringify({ signed_jwts: postMitigationsJWT })
+  const postMitigationReqBody = JSON.stringify({ signed_jwts: [postMitigationsJWT] })
   const params = {
     headers: {
       'govuk-signin-journey-id': uuidv4(),

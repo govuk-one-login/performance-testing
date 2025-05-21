@@ -12,7 +12,7 @@ import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assert
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
-import { generatePassportPayloadCI, generatePassportPayloadMitigation } from './request/generator'
+import { generatePassportPayloadCI, generateDrivingLicensePayloadMitigation } from './request/generator'
 import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
 import { signJwt } from '../common/utils/authentication/jwt'
 import { sleep } from 'k6'
@@ -54,25 +54,25 @@ const env = {
 }
 
 const keys = {
-  cimit: JSON.parse(getEnv('IDENTITY_CIMIT_KEY')) as JWK
+  passport: JSON.parse(getEnv('IDENTITY_CIMIT_PASSPORTKEY')) as JWK,
+  drivingLicense: JSON.parse(getEnv('IDENTITY_CIMIT_DLKEY')) as JWK
 }
 
 export async function cimitAPIs(): Promise<void> {
   const groups = groupMap.cimitAPIs
   const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
-
   const payloads = {
     putContraIndicatorPayload: generatePassportPayloadCI(subjectID),
-    postMitigationsPayload: generatePassportPayloadMitigation(subjectID)
+    postMitigationsPayload: generateDrivingLicensePayloadMitigation(subjectID)
   }
   const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     return signJwt('ES256', importedKey, payload)
   }
-  const putContraIndicatorJWT = await createJwt(keys.cimit, payloads.putContraIndicatorPayload)
+  const putContraIndicatorJWT = await createJwt(keys.passport, payloads.putContraIndicatorPayload)
   const putContraIndicatorReqBody = JSON.stringify({ signed_jwt: putContraIndicatorJWT })
-  const postMitigationsJWT = await createJwt(keys.cimit, payloads.postMitigationsPayload)
+  const postMitigationsJWT = await createJwt(keys.drivingLicense, payloads.postMitigationsPayload)
   const postMitigationReqBody = JSON.stringify({ signed_jwts: [postMitigationsJWT] })
   const params = {
     headers: {

@@ -544,7 +544,6 @@ Resources:
               MOBILE_ID_CHECK_ASYNC_BUILD_STS_MOCK_API_URL: "/perfTest/mobile/idCheckAsync/build/stsMockApiUrl"
               MOBILE_ID_CHECK_ASYNC_BUILD_SESSIONS_API_URL: "/perfTest/mobile/idCheckAsync/build/sessionsApiUrl"
               MOBILE_ID_CHECK_ASYNC_BUILD_READ_ID_MOCK_API_URL: "/perfTest/mobile/idCheckAsync/build/readIdMockApiUrl"
-              MOBILE_ID_CHECK_ASYNC_BUILD_BIOMETRIC_SESSION_TEST_DATA: "/perfTest/mobile/idCheckAsync/build/biometricSessionTestData"
               MOBILE_STS_BUILD_STS_BASE_URL: "/perfTest/mobile/sts/build/baseUrl"
               MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL: "/perfTest/mobile/sts/build/mockClientBaseUrl"
               MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL: "/perfTest/mobile/sts/build/orchBaseUrl"

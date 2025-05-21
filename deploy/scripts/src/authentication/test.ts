@@ -386,7 +386,7 @@ export async function uiSignIn() {
 
   let targetUrl = env.stubEndpoint
   if (route === 'RP') {
-    targetUrl += '/prod/start'
+    targetUrl += '/start'
   } else if (route === 'ORCH') {
     targetUrl += '?reauthenticate=&level=Cl.Cm&authenticated=no&authenticatedLevel=Cl.Cm&channel=none'
   }
@@ -667,7 +667,7 @@ export function rpStubSubmit(groups: readonly string[]): Response {
 
   return timeGroup(groups[3], () => {
     // 01_RPStubCall (Initial Request)
-    res = timeGroup(groups[4].split('::')[1], () => http.get(env.stubEndpoint + '/prod/start', { redirects: 0 }), {
+    res = timeGroup(groups[4].split('::')[1], () => http.get(env.stubEndpoint + '/start', { redirects: 0 }), {
       //changed orchStub to stubEndPoint
       isStatusCode302
     })

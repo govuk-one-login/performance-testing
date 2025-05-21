@@ -1,10 +1,11 @@
-import { PassportPayload } from '../request/types'
+import { DrivingLicensePayload, PassportPayload } from '../request/types'
 import { uuidv4 } from '../../common/utils/jslib'
 
 export function generatePassportPayloadCI(sub: string): PassportPayload {
   return {
     sub: sub,
     nbf: Math.floor(Date.now() / 1000),
+    iat: Math.floor(Date.now() / 1000) - 10000,
     iss: 'https://passport-cri.account.gov.uk',
     vc: {
       evidence: [
@@ -13,7 +14,7 @@ export function generatePassportPayloadCI(sub: string): PassportPayload {
           strengthScore: 4,
           txn: uuidv4(),
           type: 'IdentityCheck',
-          ci: ['D01']
+          ci: ['D02']
         }
       ],
       credentialSubject: {
@@ -21,7 +22,7 @@ export function generatePassportPayloadCI(sub: string): PassportPayload {
           {
             expiryDate: '2030-01-01',
             icaoIssuerCode: 'GBR',
-            documentNumber: '321654987'
+            documentNumber: '44442444'
           }
         ],
         name: [
@@ -29,18 +30,18 @@ export function generatePassportPayloadCI(sub: string): PassportPayload {
             nameParts: [
               {
                 type: 'GivenName',
-                value: 'Kenneth'
+                value: 'Alice'
               },
               {
                 type: 'FamilyName',
-                value: 'Decerqueira'
+                value: 'Parker'
               }
             ]
           }
         ],
         birthDate: [
           {
-            value: '1965-07-08'
+            value: '1970-01-01'
           }
         ]
       },
@@ -53,26 +54,37 @@ export function generatePassportPayloadCI(sub: string): PassportPayload {
   }
 }
 
-export function generatePassportPayloadMitigation(sub: string): PassportPayload {
+export function generateDrivingLicensePayloadMitigation(sub: string): DrivingLicensePayload {
   return {
     sub: sub,
     nbf: Math.floor(Date.now() / 1000),
-    iss: 'https://passport-cri.account.gov.uk',
+    iat: Math.floor(Date.now() / 1000),
+    iss: 'https://driving-license-cri.account.gov.uk',
     vc: {
       evidence: [
         {
+          type: 'IdentityCheck',
           validityScore: 2,
-          strengthScore: 4,
-          txn: uuidv4(),
-          type: 'IdentityCheck'
+          strengthScore: 3,
+          activityHistoryScore: 1,
+          checkDetails: [
+            {
+              identityCheckPolicy: 'published',
+              activityFrom: '1982-05-23',
+              checkMethod: 'data'
+            }
+          ],
+          txn: uuidv4()
         }
       ],
       credentialSubject: {
-        passport: [
+        drivingPermit: [
           {
-            expiryDate: '2030-01-01',
-            icaoIssuerCode: 'GBR',
-            documentNumber: '321654987'
+            issuedBy: 'DVLA',
+            issueDate: '2005-02-02',
+            personalNumber: 'PARKE710112PBFGA',
+            expiryDate: '2032-02-02',
+            issueNumber: '23'
           }
         ],
         name: [
@@ -80,18 +92,18 @@ export function generatePassportPayloadMitigation(sub: string): PassportPayload 
             nameParts: [
               {
                 type: 'GivenName',
-                value: 'Kenneth'
+                value: 'Alice'
               },
               {
                 type: 'FamilyName',
-                value: 'Decerqueira'
+                value: 'Parker'
               }
             ]
           }
         ],
         birthDate: [
           {
-            value: '1965-07-08'
+            value: '1970-01-01'
           }
         ]
       },

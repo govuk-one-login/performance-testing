@@ -9,7 +9,6 @@ import {
 } from '../common/utils/config/load-profiles'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
-import { createSession } from './testSteps/createSession'
 import { getActiveSession } from './testSteps/getActiveSession'
 import { postBiometricToken } from './testSteps/postBiometricToken'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
@@ -19,6 +18,8 @@ import { postSetupVendorResponse } from './testSteps/postSetupVendorResponse'
 import { uuidv4 } from '../common/utils/jslib'
 import { postFinishBiometricSession } from './testSteps/postFinishBiometricSession'
 import { postAbortSession } from './testSteps/postAbortSession'
+import { postToken } from './testSteps/postToken'
+import { postCredential } from './testSteps/postCredential'
 
 const profiles: ProfileList = {
   smoke: {
@@ -57,17 +58,29 @@ export function setup(): void {
 
 export function idCheckAsync(): void {
   iterationsStarted.add(1)
-  const sub = createSession()
+
+  const accessToken = postToken()
+  sleepBetween(0.5, 1)
+
+  const sub = uuidv4()
+  postCredential({ accessToken, sub })
+  sleepBetween(0.5, 1)
+
   const sessionId = getActiveSession(sub)
   sleepBetween(0.5, 1)
+
   getWellknownJwks()
   sleepBetween(0.5, 1)
+
   const opaqueId = postBiometricToken(sessionId)
   sleepBetween(0.5, 1)
+
   postTxmaEvent(sessionId)
   sleepBetween(0.5, 1)
+
   postTxmaEvent(sessionId)
   sleepBetween(0.5, 1)
+
   postTxmaEvent(sessionId)
   sleepBetween(0.5, 1)
 
@@ -76,11 +89,16 @@ export function idCheckAsync(): void {
     const biometricSessionId = uuidv4()
     postSetupVendorResponse({ biometricSessionId, opaqueId })
     sleepBetween(0.5, 1)
+
     postFinishBiometricSession({ biometricSessionId, sessionId })
+    sleepBetween(0.5, 1)
+
+    getWellknownJwks()
     sleepBetween(0.5, 1)
   } else {
     // Approximately 20% of users abort journey
     postAbortSession(sessionId)
+    sleepBetween(0.5, 1)
   }
   iterationsCompleted.add(1)
 }

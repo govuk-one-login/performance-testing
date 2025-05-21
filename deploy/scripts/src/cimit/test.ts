@@ -30,7 +30,7 @@ const profiles: ProfileList = {
     ...createScenario('cimitAPIs', LoadProfile.full, 400, 5)
   },
   perf006Iteration4PeakTest: {
-    ...createI4PeakTestSignUpScenario('cimitAPIs', 188, 19, 471)
+    ...createI4PeakTestSignUpScenario('cimitAPIs', 1880, 19, 471)
   }
 }
 

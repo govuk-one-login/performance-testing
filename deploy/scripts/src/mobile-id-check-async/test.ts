@@ -14,12 +14,12 @@ import { postBiometricToken } from './testSteps/postBiometricToken'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getWellknownJwks } from './testSteps/getWellKnownJwks'
 import { postTxmaEvent } from './testSteps/postTxmaEvent'
-import { postSetupVendorResponse } from './testSteps/postSetupVendorResponse'
 import { uuidv4 } from '../common/utils/jslib'
 import { postFinishBiometricSession } from './testSteps/postFinishBiometricSession'
 import { postAbortSession } from './testSteps/postAbortSession'
 import { postToken } from './testSteps/postToken'
 import { postCredential } from './testSteps/postCredential'
+import { postSetupBiometricSessionByScenario } from './testSteps/postSetupBiometricSessionByScenario'
 
 const profiles: ProfileList = {
   smoke: {
@@ -40,7 +40,7 @@ export const groupMap = {
     'B01_IDCheckV2_04_POST_/async/biometricToken', //pragma: allowlist secret
     'B01_IDCheckV2_05_GET_/async/.well-known/jwks.json',
     'B01_IDCheckV2_06_POST_/async/txmaEvent', //pragma: allowlist secret
-    'B01_IDCheckV2_07_POST_readid-mock /setupVendorResponse',
+    'B01_IDCheckV2_07_POST_readid-mock /postSetupBiometricSessionByScenario',
     'B01_IDCheckV2_08_POST_async/finishBiometricSession', //pragma: allowlist secret
     'B01_IDCheckV2_09_POST async/abortSession'
   ]
@@ -87,7 +87,7 @@ export function idCheckAsync(): void {
   if (Math.random() <= 0.8) {
     // Approximately 80% of users complete journey successfully
     const biometricSessionId = uuidv4()
-    postSetupVendorResponse({ biometricSessionId, opaqueId })
+    postSetupBiometricSessionByScenario({ biometricSessionId, opaqueId })
     sleepBetween(0.5, 1)
 
     postFinishBiometricSession({ biometricSessionId, sessionId })

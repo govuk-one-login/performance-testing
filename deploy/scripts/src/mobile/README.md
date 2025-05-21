@@ -2,7 +2,6 @@
 
 This repository contains the performance test framework for testing DCMAW journeys.
 
-
 ## Required Installations
 
 Pre-commit for running pre-commit hooks locally
@@ -12,25 +11,27 @@ brew install pre-commit && pre-commit install && pre-commit install -tprepare-co
 ```
 
 k6 for testing and executing scripts locally
+
 ```bash
 brew install k6
 ```
 
 Install test dependencies
+
 ```bash
 npm install
 ```
 
-
 ## Run Command
+
 K6 environment variables can be found in config.ts file.
 Test Scripts are located in the `/mobile` folder with naming convention `*.test.ts`. Profile and scenario can be found in each script file.
-
 
 ```bash
 # Generating dist files
 npm start
 ```
+
 Replace `your_environment` variable with `DEV` or `BUILD` value. Replace the url variables with the corresponding one for the selected environment.
 
 ```bash

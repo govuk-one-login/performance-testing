@@ -17,7 +17,7 @@ build({
   plugins: [
     copy({
       assets: {
-        from: [outbase + '/**/*.csv', outbase + '/**/*.json'],
+        from: [outbase + '/**/*.csv', outbase + '/**/*.json', outbase + '/**/*.txt'],
         to: ['.']
       }
     })

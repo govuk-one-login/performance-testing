@@ -38,8 +38,8 @@ const loadProfile = selectProfile(profiles)
 const groupMap = {
   cimitAPIs: [
     'B01_CIMIT_01_PutContraIndicator',
-    'B02_CIMIT_02_GetContraIndicatorCredentials',
-    'B03_CIMIT_03_PostMitigations'
+    'B03_CIMIT_02_PostMitigations',
+    'B02_CIMIT_03_GetContraIndicatorCredentials'
   ]
 } as const
 
@@ -98,18 +98,18 @@ export async function cimitAPIs(): Promise<void> {
 
   sleep(5)
 
-  // B02_CIMIT_02_GetContraIndicatorCredentials
-  timeGroup(groups[1], () => http.get(env.envURL + `/v1/contra-indicators?user_id=${subjectID}`, params), {
-    isStatusCode200,
-    ...pageContentCheck('vc')
-  })
-
-  sleep(5)
-
-  // B03_CIMIT_03_PostMitigations
+  // B03_CIMIT_02_PostMitigations
   timeGroup(groups[2], () => http.post(env.envURL + '/v1/contra-indicators/mitigate', postMitigationReqBody, params), {
     isStatusCode200,
     ...pageContentCheck('success')
   })
   iterationsCompleted.add(1)
+
+  sleep(5)
+
+  // B02_CIMIT_03_GetContraIndicatorCredentials
+  timeGroup(groups[1], () => http.get(env.envURL + `/v1/contra-indicators?user_id=${subjectID}`, params), {
+    isStatusCode200,
+    ...pageContentCheck('vc')
+  })
 }

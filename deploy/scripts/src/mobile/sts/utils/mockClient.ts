@@ -7,7 +7,9 @@ import { groupMap } from '../../v2-sts-get-service-access-token'
 import { signRequest } from '../../utils/signatureV4'
 import { config } from './config'
 
-const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
+const credentialsEnvironmentVariable =
+  getEnv('LOCAL', false) === 'true' ? 'STS_EXECUTION_CREDENTIALS' : 'EXECUTION_CREDENTIALS'
+const credentials = (JSON.parse(getEnv(credentialsEnvironmentVariable)) as AssumeRoleOutput).Credentials
 
 export function postGenerateClientAttestation(publicKeyJwk: JsonWebKey): string {
   const requestBody = {

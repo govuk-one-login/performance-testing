@@ -85,7 +85,12 @@ export async function getServiceAccessToken(): Promise<void> {
   const stsAuthorizationCode = getRedirect(state, orchestrationAuthorizationCode)
   simulateCallToStsJwks(groupMap.getServiceAccessToken[4])
   const clientAttestation = postGenerateClientAttestation(publicKeyJwk)
-  const accessToken = await exchangeAuthorizationCode(stsAuthorizationCode, codeVerifier, clientAttestation, keyPair)
+  const { accessToken } = await exchangeAuthorizationCode(
+    stsAuthorizationCode,
+    codeVerifier,
+    clientAttestation,
+    keyPair.privateKey
+  )
   simulateCallToStsJwks(groupMap.getServiceAccessToken[7])
   exchangeAccessToken(accessToken, 'sts-test.hello-world.read')
   simulateCallToStsJwks(groupMap.getServiceAccessToken[9])

@@ -6,6 +6,7 @@ import { isStatusCode200, isStatusCode302 } from '../../../common/utils/checks/a
 import { groupMap } from '../../v2-sts-get-service-access-token'
 import { validateRedirect } from '../utils/assertions'
 import { signJwt } from '../../utils/crypto'
+import { validateJsonResponse } from '../../utils/assertions'
 
 export function getAuthorize(codeChallenge: string): string {
   const url = new URL('authorize', config.stsBaseUrl)
@@ -76,12 +77,12 @@ export async function exchangeAuthorizationCode(
   authorizationCode: string,
   codeVerifier: string,
   clientAttestation: string,
-  keypair: CryptoKeyPair
-): Promise<string> {
+  privateKey: CryptoKey
+): Promise<{ accessToken: string; idToken: string }> {
   const nowInSeconds = Math.floor(Date.now() / 1000)
   const proofOfPossession = await signJwt(
     'ES256',
-    keypair.privateKey,
+    privateKey,
     {
       iss: config.clientId,
       aud: config.stsBaseUrl,
@@ -112,10 +113,14 @@ export async function exchangeAuthorizationCode(
       )
     },
     {
-      isStatusCode200
+      isStatusCode200,
+      ...validateJsonResponse(['access_token', 'id_token'])
     }
   )
-  return res.json('access_token') as string
+  return {
+    accessToken: res.json('access_token') as string,
+    idToken: res.json('id_token') as string
+  }
 }
 
 export function exchangeAccessToken(accessToken: string, scope: string): string {

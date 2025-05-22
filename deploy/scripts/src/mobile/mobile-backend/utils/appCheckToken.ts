@@ -7,7 +7,9 @@ import { signRequest } from '../../utils/signatureV4'
 import { config } from './config'
 import { groupMap } from '../../v2-mobile-backend-get-client-attestation'
 
-const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
+const credentialsEnvironmentVariable =
+  getEnv('LOCAL', false) === 'true' ? 'MOBILE_PLATFORM_EXECUTION_CREDENTIALS' : 'EXECUTION_CREDENTIALS'
+const credentials = (JSON.parse(getEnv(credentialsEnvironmentVariable)) as AssumeRoleOutput).Credentials
 
 export function getAppCheckToken(): string {
   const signedRequest = signRequest(

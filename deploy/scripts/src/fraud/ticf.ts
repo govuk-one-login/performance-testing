@@ -67,11 +67,10 @@ const awsConfig = new AWSConfig({
 
 const sqs = new SQSClient(awsConfig)
 
-export function signUpSuccess(userID: string): void {
+export function signUpSuccess(userID: string, emailID: string): void {
   const groups = groupMap.ticf
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
   const testID = `perfTestID${timestamp}`
-  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
   const pairWiseID = `performanceTestRpPairwiseId${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
@@ -108,9 +107,8 @@ export function signUpSuccess(userID: string): void {
   })
 }
 
-export function signInSuccess(userID: string): void {
+export function signInSuccess(userID: string, emailID: string): void {
   const groups = groupMap.ticf
-  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
   const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
@@ -213,12 +211,13 @@ export function identityReuseSuccess(userID: string): void {
 
 export function ticf(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
 
   iterationsStarted.add(1)
 
-  signUpSuccess(userID)
+  signUpSuccess(userID, emailID)
   sleep(5)
-  signInSuccess(userID)
+  signInSuccess(userID, emailID)
   sleep(5)
   identityProvingSuccess(userID)
   sleep(5)

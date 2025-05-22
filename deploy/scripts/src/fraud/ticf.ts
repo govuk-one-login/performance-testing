@@ -32,8 +32,8 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 const groupMap = {
   ticf: [
-    'B01_SignInSuccess_01_SignInAPICall',
-    'B01_SignUpSuccess_02_SignUpAPICall',
+    'B01_SignUpSuccess_01_SignUpAPICall',
+    'B01_SignInSuccess_02_SignInAPICall',
     'B01_IdentityProvingSuccess_03_IdProveAPICall', // pragma: allowlist secret
     'B01_IdReuse_04_IdReuseAPICall'
   ]
@@ -66,35 +66,6 @@ const awsConfig = new AWSConfig({
 })
 
 const sqs = new SQSClient(awsConfig)
-
-export function signInSuccess(userID: string): void {
-  const groups = groupMap.ticf
-  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-  const journeyID = `perfJourney${uuidv4()}`
-  const eventID = `perfTestID$_${uuidv4()}`
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
-  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
-
-  sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
-  sleep(5)
-
-  const authSignInPayload = {
-    vtr: ['Cl'],
-    sub: userID,
-    govuk_signin_journey_id: journeyID,
-    authenticated: 'Y'
-  }
-
-  // B01_SignInSuccess_01_SignInAPICall
-  timeGroup(groups[0], () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignInPayload)), {
-    isStatusCode202
-  })
-}
 
 export function signUpSuccess(userID: string): void {
   const groups = groupMap.ticf
@@ -131,8 +102,37 @@ export function signUpSuccess(userID: string): void {
     '2fa_method': ['SMS']
   }
 
-  // B01_SignUpSuccess_02_SignUpAPICall
-  timeGroup(groups[1], () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignUpPayload)), {
+  // B01_SignUpSuccess_01_SignUpAPICall
+  timeGroup(groups[0], () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignUpPayload)), {
+    isStatusCode202
+  })
+}
+
+export function signInSuccess(userID: string): void {
+  const groups = groupMap.ticf
+  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
+  const journeyID = `perfJourney${uuidv4()}`
+  const eventID = `perfTestID$_${uuidv4()}`
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
+  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
+  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
+
+  sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
+  sleep(5)
+  sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
+  sleep(5)
+  sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
+  sleep(5)
+
+  const authSignInPayload = {
+    vtr: ['Cl'],
+    sub: userID,
+    govuk_signin_journey_id: journeyID,
+    authenticated: 'Y'
+  }
+
+  // B01_SignInSuccess_02_SignInAPICall
+  timeGroup(groups[1], () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignInPayload)), {
     isStatusCode202
   })
 }
@@ -216,9 +216,9 @@ export function ticf(): void {
 
   iterationsStarted.add(1)
 
-  signInSuccess(userID)
-  sleep(5)
   signUpSuccess(userID)
+  sleep(5)
+  signInSuccess(userID)
   sleep(5)
   identityProvingSuccess(userID)
   sleep(5)

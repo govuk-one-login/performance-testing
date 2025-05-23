@@ -1,5 +1,10 @@
 import { type Options } from 'k6/options'
-import { selectProfile, type ProfileList, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
+import {
+  selectProfile,
+  type ProfileList,
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignInScenario
+} from '../common/utils/config/load-profiles'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
@@ -24,8 +29,22 @@ import { isStatusCode202 } from '../common/utils/checks/assertions'
 import { timeGroup } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
-  smoke: {
-    ...createScenario('ticf', LoadProfile.smoke)
+  ticfSmoke: {
+    ticf: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [{ target: 1, duration: '5m' }],
+      exec: 'ticf'
+    }
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignInScenario('ticf', 47, 12, 23)
+  },
+  perf006Iteration4SpikeTest: {
+    ...createI3SpikeSignInScenario('ticf', 129, 12, 60)
   }
 }
 

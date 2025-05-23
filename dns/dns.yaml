@@ -16,18 +16,7 @@ Resources:
       Name: !Sub perf.${Environment}.account.gov.uk
     Metadata:
       SamResourceId: PublicHostedZone
-  PublicHostedZoneSSM:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Description: The ARN of hosted zone
-      Name: PrimaryZoneID
-      Type: String
-      Value:
-        Fn::GetAtt:
-          - PublicHostedZone
-          - Id
-    Metadata:
-      SamResourceId: PublicHostedZoneSSM
+
 Outputs:
   PublicHostedZoneNameServers:
     Value:

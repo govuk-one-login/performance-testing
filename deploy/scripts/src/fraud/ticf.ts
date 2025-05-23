@@ -95,10 +95,13 @@ export function signUpSuccess(userID: string, emailID: string): void {
   const eventID = `perfTestID$_${uuidv4()}`
 
   const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
+  sleep(2)
   const authCreateAccPayload = JSON.stringify(
     generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, eventID)
   )
+  sleep(2)
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
+  sleep(2)
   const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID, eventID))
 
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
@@ -131,7 +134,9 @@ export function signInSuccess(userID: string, emailID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
   const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
+  sleep(2)
   const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
+  sleep(2)
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
 
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
@@ -159,10 +164,15 @@ export function identityProvingSuccess(userID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, eventID))
+  sleep(2)
   const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, eventID))
+  sleep(2)
   const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID, eventID))
+  sleep(2)
   const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID, eventID))
+  sleep(2)
   const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID, eventID))
+  sleep(2)
   const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID, eventID))
 
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
@@ -202,6 +212,7 @@ export function identityReuseSuccess(userID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, eventID))
+  sleep(2)
   const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, eventID))
 
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)

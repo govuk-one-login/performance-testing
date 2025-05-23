@@ -9,6 +9,7 @@ if (!validEnvironments.includes(environment))
 export const config = {
   stsBaseUrl: getEnv(`MOBILE_STS_${environment}_STS_BASE_URL`),
   stsMockClientBaseUrl: getEnv(`MOBILE_STS_${environment}_STS_MOCK_CLIENT_BASE_URL`),
+  stsMockExternalCriBaseUrl: getEnv(`MOBILE_STS_${environment}_MOCK_EXTERNAL_CRI_BASE_URL`),
   orchestrationBaseUrl: getEnv(`MOBILE_STS_${environment}_ORCHESTRATION_BASE_URL`),
   clientId: getEnv(`MOBILE_STS_${environment}_CLIENT_ID`),
   redirectUri: getEnv(`MOBILE_STS_${environment}_REDIRECT_URI`)

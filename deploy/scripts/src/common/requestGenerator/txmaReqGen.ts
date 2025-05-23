@@ -313,7 +313,7 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string, even
       ],
       birthDate: [
         {
-          value: '19900101'
+          value: '1990-01-01'
         }
       ],
       drivingPermit: [

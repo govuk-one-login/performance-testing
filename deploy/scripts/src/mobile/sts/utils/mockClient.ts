@@ -3,7 +3,6 @@ import { AssumeRoleOutput } from '../../../common/utils/aws/types'
 import { timeGroup } from '../../../common/utils/request/timing'
 import http from 'k6/http'
 import { isStatusCode200 } from '../../../common/utils/checks/assertions'
-import { groupMap } from '../../v2-sts-get-service-access-token'
 import { signRequest } from '../../utils/signatureV4'
 import { config } from './config'
 
@@ -11,7 +10,7 @@ const credentialsEnvironmentVariable =
   getEnv('LOCAL', false) === 'true' ? 'STS_EXECUTION_CREDENTIALS' : 'EXECUTION_CREDENTIALS'
 const credentials = (JSON.parse(getEnv(credentialsEnvironmentVariable)) as AssumeRoleOutput).Credentials
 
-export function postGenerateClientAttestation(publicKeyJwk: JsonWebKey): string {
+export function postGenerateClientAttestation(groupName: string, publicKeyJwk: JsonWebKey): string {
   const requestBody = {
     jwk: {
       kty: publicKeyJwk.kty,
@@ -35,7 +34,7 @@ export function postGenerateClientAttestation(publicKeyJwk: JsonWebKey): string 
   )
 
   const res = timeGroup(
-    groupMap.getServiceAccessToken[5],
+    groupName,
     () => {
       return http.post(signedRequest.url, JSON.stringify(requestBody), { headers: signedRequest.headers })
     },

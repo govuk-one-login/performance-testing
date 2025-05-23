@@ -3,12 +3,11 @@ import { config } from '../utils/config'
 import { timeGroup } from '../../../common/utils/request/timing'
 import http from 'k6/http'
 import { isStatusCode200, isStatusCode302 } from '../../../common/utils/checks/assertions'
-import { groupMap } from '../../v2-sts-get-service-access-token'
 import { validateRedirect } from '../utils/assertions'
 import { signJwt } from '../../utils/crypto'
 import { validateJsonResponse } from '../../utils/assertions'
 
-export function getAuthorize(codeChallenge: string): string {
+export function getAuthorize(groupName: string, codeChallenge: string): string {
   const url = new URL('authorize', config.stsBaseUrl)
   url.searchParams.set('client_id', config.clientId)
   url.searchParams.set('redirect_uri', config.redirectUri)
@@ -20,7 +19,7 @@ export function getAuthorize(codeChallenge: string): string {
   url.searchParams.set('code_challenge_method', 'S256')
   const authorizeRequestUrl = url.toString()
   const res = timeGroup(
-    groupMap.getServiceAccessToken[0],
+    groupName,
     () => {
       return http.get(authorizeRequestUrl, { redirects: 0 })
     },
@@ -37,12 +36,15 @@ export function getAuthorize(codeChallenge: string): string {
   return res.headers.Location
 }
 
-export function getCodeFromOrchestration(orchestrationAuthorizeUrl: string): {
+export function getCodeFromOrchestration(
+  groupName: string,
+  orchestrationAuthorizeUrl: string
+): {
   state: string
   orchestrationAuthorizationCode: string
 } {
   const res = timeGroup(
-    groupMap.getServiceAccessToken[2],
+    groupName,
     () =>
       http.get(orchestrationAuthorizeUrl, {
         headers: { 'x-headless-mode-enabled': 'true' }
@@ -55,13 +57,13 @@ export function getCodeFromOrchestration(orchestrationAuthorizeUrl: string): {
   }
 }
 
-export function getRedirect(state: string, orchestrationAuthorizationCode: string): string {
+export function getRedirect(groupName: string, state: string, orchestrationAuthorizationCode: string): string {
   const url = new URL('redirect', config.stsBaseUrl)
   url.searchParams.set('code', orchestrationAuthorizationCode)
   url.searchParams.set('state', state)
   const redirectRequestUrl = url.toString()
   const res = timeGroup(
-    groupMap.getServiceAccessToken[3],
+    groupName,
     () => {
       return http.get(redirectRequestUrl, { redirects: 0 })
     },
@@ -74,6 +76,7 @@ export function getRedirect(state: string, orchestrationAuthorizationCode: strin
 }
 
 export async function exchangeAuthorizationCode(
+  groupName: string,
   authorizationCode: string,
   codeVerifier: string,
   clientAttestation: string,
@@ -93,7 +96,7 @@ export async function exchangeAuthorizationCode(
   )
 
   const res = timeGroup(
-    groupMap.getServiceAccessToken[6],
+    groupName,
     () => {
       return http.post(
         `${config.stsBaseUrl}/token`,
@@ -123,9 +126,9 @@ export async function exchangeAuthorizationCode(
   }
 }
 
-export function exchangeAccessToken(accessToken: string, scope: string): string {
+export function exchangeAccessToken(groupName: string, accessToken: string, scope: string): string {
   const res = timeGroup(
-    groupMap.getServiceAccessToken[8],
+    groupName,
     () => {
       return http.post(
         `${config.stsBaseUrl}/token`,

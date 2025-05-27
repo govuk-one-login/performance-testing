@@ -41,10 +41,10 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration4PeakTest: {
-    ...createI4PeakTestSignInScenario('ticf', 47, 12, 23)
+    ...createI4PeakTestSignInScenario('ticf', 47, 66, 23)
   },
   perf006Iteration4SpikeTest: {
-    ...createI3SpikeSignInScenario('ticf', 129, 12, 60)
+    ...createI3SpikeSignInScenario('ticf', 129, 66, 60)
   }
 }
 
@@ -95,24 +95,21 @@ export function signUpSuccess(userID: string, emailID: string): void {
   const eventID = `perfTestID$_${uuidv4()}`
 
   const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
-  sleep(2)
   const authCreateAccPayload = JSON.stringify(
     generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, eventID)
   )
-  sleep(2)
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
-  sleep(2)
   const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID, eventID))
 
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, authUpdatePhonePayload)
 
-  sleep(5)
+  sleep(3)
 
   const authSignUpPayload = {
     vtr: ['Cl.Cm'],
@@ -134,17 +131,15 @@ export function signInSuccess(userID: string, emailID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
   const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
-  sleep(2)
   const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
-  sleep(2)
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
 
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
-  sleep(5)
+  sleep(3)
 
   const authSignInPayload = {
     vtr: ['Cl'],
@@ -164,30 +159,25 @@ export function identityProvingSuccess(userID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, eventID))
-  sleep(2)
   const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, eventID))
-  sleep(2)
   const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID, eventID))
-  sleep(2)
   const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID, eventID))
-  sleep(2)
   const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID, eventID))
-  sleep(2)
   const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID, eventID))
 
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, ipvDLCRIVCIssuedPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, ipvAddressCRIVCIssuedPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, ipvKBVCRIStartPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, ipvKBVCRIEndPayload)
 
-  sleep(5)
+  sleep(3)
   const identityProvingPayload = {
     vtr: ['P2'],
     vot: 'P2',
@@ -212,14 +202,13 @@ export function identityReuseSuccess(userID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, eventID))
-  sleep(2)
   const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, eventID))
 
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
-  sleep(5)
+  sleep(3)
   sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
 
-  sleep(5)
+  sleep(3)
   const identityReusePayload = {
     vtr: ['Cl.Cm.P2'],
     vot: 'P2',
@@ -246,11 +235,11 @@ export function ticf(): void {
   iterationsStarted.add(1)
 
   signUpSuccess(userID, emailID)
-  sleep(5)
+  sleep(3)
   signInSuccess(userID, emailID)
-  sleep(5)
+  sleep(3)
   identityProvingSuccess(userID)
-  sleep(5)
+  sleep(3)
   identityReuseSuccess(userID)
 
   iterationsCompleted.add(1)

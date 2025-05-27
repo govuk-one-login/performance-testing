@@ -4,7 +4,8 @@ import {
   describeProfile,
   createScenario,
   LoadProfile,
-  createI4PeakTestSignUpScenario
+  createI4PeakTestSignUpScenario,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import http from 'k6/http'
 import { type Options } from 'k6/options'
@@ -31,6 +32,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration4PeakTest: {
     ...createI4PeakTestSignUpScenario('cimitAPIs', 1880, 19, 471)
+  },
+  perf006Iteration4SpikeTest: {
+    ...createI3SpikeSignUpScenario('cimitAPIs', 4520, 19, 1131)
   }
 }
 

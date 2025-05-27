@@ -292,7 +292,7 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string, even
           activityHistoryScore: 4,
           checkDetails: [
             {
-              activityFrom: '20200101',
+              activityFrom: '2020-01-01',
               checkMethod: 'vpip',
               identityCheckPolicy: 'policy'
             }
@@ -313,13 +313,13 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string, even
       ],
       birthDate: [
         {
-          value: '19900101'
+          value: '1990-01-01'
         }
       ],
       drivingPermit: [
         {
-          expiryDate: '20300101',
-          issueDate: '20200101',
+          expiryDate: '2030-01-01',
+          issueDate: '2020-01-01',
           issueNumber: '1234',
           issuedBy: 'DVLA',
           personalNumber: '12345'
@@ -376,8 +376,8 @@ export function generateIPVAddressCRIVCIssued(
           postalCode: 'AB12 3CD',
           streetName: 'HIGH STREET',
           uprn: 123456789012,
-          validFrom: '19900101',
-          validUntil: '20300101'
+          validFrom: '1990-01-01',
+          validUntil: '2030-01-01'
         }
       ]
     },

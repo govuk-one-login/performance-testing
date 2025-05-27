@@ -578,7 +578,7 @@ export function changeEmail(): void {
   res = timeGroup(
     groups[7],
     () => {
-      const r = http.get(env.envURL + '/enter-password?type=changeEmail')
+      const r = http.get(env.envURL + '/enter-password?from=security&edit=true&type=changeEmail')
       if (!pageContentCheck('Enter your password').validatePageContent(r)) {
         console.log(' Expected "Enter your password", got: ', r.html('h1').text())
       }
@@ -597,7 +597,7 @@ export function changeEmail(): void {
     groups[8],
     () => {
       const r = res.submitForm({
-        formSelector: "form[action='/enter-password']",
+        formSelector: "form[action='/enter-password?from=security&edit=true&type=changeEmail']",
         fields: {
           requestType: 'changeEmail',
           password: credentials.currPassword
@@ -726,10 +726,14 @@ export function changePassword(): void {
   sleepBetween(1, 3)
 
   // B02_ChangePassword_04_ClickChangePasswordLink
-  res = timeGroup(groups[7], () => http.get(env.envURL + '/enter-password?type=changePassword'), {
-    isStatusCode200,
-    ...pageContentCheck('Enter your current password')
-  })
+  res = timeGroup(
+    groups[7],
+    () => http.get(env.envURL + '/enter-password?from=security&edit=true&type=changePassword'),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your current password')
+    }
+  )
 
   sleepBetween(1, 3)
 
@@ -738,7 +742,7 @@ export function changePassword(): void {
     groups[8],
     () =>
       res.submitForm({
-        formSelector: "form[action='/enter-password']",
+        formSelector: "form[action='/enter-password?from=security&edit=true&type=changePassword']",
         fields: {
           requestType: 'changePassword',
           password: credentials.currPassword
@@ -771,7 +775,7 @@ export function changePassword(): void {
     //01_OLHCall
     res = timeGroup(
       groups[11].split('::')[1],
-      () => res.submitForm({ formSelector: "form[action='/sign-out']", params: { redirects: 0 } }),
+      () => res.submitForm({ formSelector: "form[action='/sign-out']", params: { redirects: 1 } }),
       { isStatusCode302 }
     )
 
@@ -833,10 +837,14 @@ export function changePhone(): void {
   sleepBetween(1, 3)
 
   // B03_ChangePhone_04_ClickChangePhoneNumberLink
-  res = timeGroup(groups[7], () => http.get(env.envURL + '/enter-password?type=changePhoneNumber'), {
-    isStatusCode200,
-    ...pageContentCheck('Enter your password')
-  })
+  res = timeGroup(
+    groups[7],
+    () => http.get(env.envURL + '/enter-password?from=security&edit=true&type=changePhoneNumber'),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your password')
+    }
+  )
 
   sleepBetween(1, 3)
 
@@ -845,7 +853,7 @@ export function changePhone(): void {
     groups[8],
     () =>
       res.submitForm({
-        formSelector: "form[action='/enter-password']",
+        formSelector: "form[action='/enter-password?from=security&edit=true&type=changePhoneNumber']",
         fields: {
           requestType: 'changePhoneNumber',
           password: credentials.currPassword
@@ -957,10 +965,14 @@ export function deleteAccount(): void {
   sleepBetween(1, 3)
 
   // B04_DeleteAccount_04_ClickDeleteAccountLink
-  res = timeGroup(groups[7], () => http.get(env.envURL + '/enter-password?type=deleteAccount'), {
-    isStatusCode200,
-    ...pageContentCheck('Enter your password')
-  })
+  res = timeGroup(
+    groups[7],
+    () => http.get(env.envURL + '/enter-password?from=security&edit=true&type=deleteAccount'),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your password')
+    }
+  )
 
   sleepBetween(1, 3)
 
@@ -969,7 +981,7 @@ export function deleteAccount(): void {
     groups[8],
     () =>
       res.submitForm({
-        formSelector: "form[action='/enter-password']",
+        formSelector: "form[action='/enter-password?from=security&edit=true&type=deleteAccount']",
         fields: {
           requestType: 'deleteAccount',
           password: credentials.currPassword
@@ -990,7 +1002,7 @@ export function deleteAccount(): void {
       res.submitForm({
         formSelector: "form[action='/delete-account']"
       }),
-    { isStatusCode200, ...pageContentCheck('You have signed out') }
+    { isStatusCode200, ...pageContentCheck('You’ve deleted your GOV.UK One Login') }
   )
   iterationsCompleted.add(1)
 }

@@ -56,8 +56,6 @@ export function setup(): void {
 }
 
 export async function walletCredentialIssuance(): Promise<void> {
-  const group = groupMap.walletCredentialIssuance
-
   const keyPair = await generateKey()
   const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
 
@@ -65,23 +63,34 @@ export async function walletCredentialIssuance(): Promise<void> {
   const codeChallenge = await generateCodeChallenge(codeVerifier)
 
   iterationsStarted.add(1)
-  const orchestrationAuthorizeUrl = getAuthorize(group[0], codeChallenge)
-  simulateCallToStsJwks(group[1])
+  const orchestrationAuthorizeUrl = getAuthorize(groupMap.walletCredentialIssuance[0], codeChallenge)
+  simulateCallToStsJwks(groupMap.walletCredentialIssuance[1])
   sleepBetween(1, 2)
-  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(group[2], orchestrationAuthorizeUrl)
-  const stsAuthorizationCode = getRedirect(group[3], state, orchestrationAuthorizationCode)
-  simulateCallToStsJwks(group[4])
-  const clientAttestation = postGenerateClientAttestation(group[5], publicKeyJwk)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.walletCredentialIssuance[2],
+    orchestrationAuthorizeUrl
+  )
+  const stsAuthorizationCode = getRedirect(groupMap.walletCredentialIssuance[3], state, orchestrationAuthorizationCode)
+  simulateCallToStsJwks(groupMap.walletCredentialIssuance[4])
+  const clientAttestation = postGenerateClientAttestation(groupMap.walletCredentialIssuance[5], publicKeyJwk)
   const { accessToken } = await exchangeAuthorizationCode(
-    group[6],
+    groupMap.walletCredentialIssuance[6],
     stsAuthorizationCode,
     codeVerifier,
     clientAttestation,
     keyPair.privateKey
   )
-  const preAuthorizedCode = getPreAuthorizedCode(group[7])
-  const preAuthorizedCodeExchangeServiceToken = exchangeAccessToken(group[8], accessToken, 'sts.wallet.pre-auth-code')
-  exchangePreAuthorizedCode(group[9], preAuthorizedCode, preAuthorizedCodeExchangeServiceToken)
-  simulateCallToStsJwks(group[10])
+  const preAuthorizedCode = getPreAuthorizedCode(groupMap.walletCredentialIssuance[7])
+  const preAuthorizedCodeExchangeServiceToken = exchangeAccessToken(
+    groupMap.walletCredentialIssuance[8],
+    accessToken,
+    'sts.wallet.pre-auth-code'
+  )
+  exchangePreAuthorizedCode(
+    groupMap.walletCredentialIssuance[9],
+    preAuthorizedCode,
+    preAuthorizedCodeExchangeServiceToken
+  )
+  simulateCallToStsJwks(groupMap.walletCredentialIssuance[10])
   iterationsCompleted.add(1)
 }

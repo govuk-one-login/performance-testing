@@ -71,8 +71,6 @@ export function setup(): void {
 }
 
 export async function getServiceAccessToken(): Promise<void> {
-  const group = groupMap.getServiceAccessToken
-
   const keyPair = await generateKey()
   const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
 
@@ -80,22 +78,25 @@ export async function getServiceAccessToken(): Promise<void> {
   const codeChallenge = await generateCodeChallenge(codeVerifier)
 
   iterationsStarted.add(1)
-  const orchestrationAuthorizeUrl = getAuthorize(group[0], codeChallenge)
-  simulateCallToStsJwks(group[1])
+  const orchestrationAuthorizeUrl = getAuthorize(groupMap.getServiceAccessToken[0], codeChallenge)
+  simulateCallToStsJwks(groupMap.getServiceAccessToken[1])
   sleepBetween(1, 2)
-  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(group[2], orchestrationAuthorizeUrl)
-  const stsAuthorizationCode = getRedirect(group[3], state, orchestrationAuthorizationCode)
-  simulateCallToStsJwks(group[4])
-  const clientAttestation = postGenerateClientAttestation(group[5], publicKeyJwk)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.getServiceAccessToken[2],
+    orchestrationAuthorizeUrl
+  )
+  const stsAuthorizationCode = getRedirect(groupMap.getServiceAccessToken[3], state, orchestrationAuthorizationCode)
+  simulateCallToStsJwks(groupMap.getServiceAccessToken[4])
+  const clientAttestation = postGenerateClientAttestation(groupMap.getServiceAccessToken[5], publicKeyJwk)
   const { accessToken } = await exchangeAuthorizationCode(
-    group[6],
+    groupMap.getServiceAccessToken[6],
     stsAuthorizationCode,
     codeVerifier,
     clientAttestation,
     keyPair.privateKey
   )
-  simulateCallToStsJwks(group[7])
-  exchangeAccessToken(group[8], accessToken, 'sts-test.hello-world.read')
-  simulateCallToStsJwks(group[9])
+  simulateCallToStsJwks(groupMap.getServiceAccessToken[7])
+  exchangeAccessToken(groupMap.getServiceAccessToken[8], accessToken, 'sts-test.hello-world.read')
+  simulateCallToStsJwks(groupMap.getServiceAccessToken[9])
   iterationsCompleted.add(1)
 }

@@ -11,7 +11,8 @@ import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_m
 import { postGenerateClientAttestation } from './sts/utils/mockClient'
 import {
   exchangeAccessToken,
-  exchangeAuthorizationCode, exchangePreAuthorizedCode,
+  exchangeAuthorizationCode,
+  exchangePreAuthorizedCode,
   getAuthorize,
   getCodeFromOrchestration,
   getRedirect,

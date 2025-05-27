@@ -15,7 +15,7 @@ export function getPreAuthorizedCode(groupName: string): string {
     getEnv('AWS_REGION'),
     credentials,
     'GET',
-    config.stsMockExternalCriBaseUrl.split('https://')[1],
+    config.mockExternalCriBaseUrl.split('https://')[1],
     '/generate-pre-auth-code',
     {}
   )

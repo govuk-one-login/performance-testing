@@ -120,8 +120,8 @@ For example, to run tests against Build using the performance test role, run the
 EXECUTION_ROLE=arn:aws:iam::330163506186:role/perftest-PerformanceTesterRole
 EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name `date +%s` --profile perf-test-prod-pu)
 
-MOBILE_BACKEND_DEV_MOBILE_BACKEND_BASE_URL=https://mobile.build.account.gov.uk
-MOBILE_BACKEND_DEV_APP_CHECK_STUB_BASE_URL=https://app-check-stub.mobile.build.account.gov.uk
+MOBILE_BACKEND_BUILD_MOBILE_BACKEND_BASE_URL=https://mobile.build.account.gov.uk
+MOBILE_BACKEND_BUILD_APP_CHECK_STUB_BASE_URL=https://app-check-stub.mobile.build.account.gov.uk
 
 npm start && k6 run dist/mobile/<your-test-script>.js \
   -e PROFILE=<profile> -e SCENARIO=<scenario> \

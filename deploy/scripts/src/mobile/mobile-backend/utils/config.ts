@@ -8,5 +8,7 @@ if (!validEnvironments.includes(environment))
 
 export const config = {
   mobileBackendBaseUrl: getEnv(`MOBILE_BACKEND_${environment}_MOBILE_BACKEND_BASE_URL`),
-  appCheckStubBaseUrl: getEnv(`MOBILE_BACKEND_${environment}_APP_CHECK_STUB_BASE_URL`)
+  appCheckStubBaseUrl: getEnv(`MOBILE_BACKEND_${environment}_APP_CHECK_STUB_BASE_URL`),
+  oneLoginAppStsClientId: getEnv(`MOBILE_BACKEND_${environment}_ONE_LOGIN_APP_STS_CLIENT_ID`),
+  oneLoginAppStsRedirectUri: getEnv(`MOBILE_BACKEND_${environment}_ONE_LOGIN_APP_STS_REDIRECT_URI`)
 }

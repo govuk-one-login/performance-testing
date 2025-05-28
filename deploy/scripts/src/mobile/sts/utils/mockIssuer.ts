@@ -10,37 +10,24 @@ const credentialsEnvironmentVariable =
   getEnv('LOCAL', false) === 'true' ? 'STS_EXECUTION_CREDENTIALS' : 'EXECUTION_CREDENTIALS'
 const credentials = (JSON.parse(getEnv(credentialsEnvironmentVariable)) as AssumeRoleOutput).Credentials
 
-export function postGenerateClientAttestation(groupName: string, publicKeyJwk: JsonWebKey): string {
-  const requestBody = {
-    jwk: {
-      kty: publicKeyJwk.kty,
-      use: 'sig',
-      crv: publicKeyJwk.crv,
-      x: publicKeyJwk.x,
-      y: publicKeyJwk.y
-    }
-  }
-
+export function getPreAuthorizedCode(groupName: string): string {
   const signedRequest = signRequest(
     getEnv('AWS_REGION'),
     credentials,
-    'POST',
-    config.stsMockClientBaseUrl.split('https://')[1],
-    '/generate-client-attestation',
-    {
-      'Content-Type': 'application/json'
-    },
-    JSON.stringify(requestBody)
+    'GET',
+    config.mockExternalCriBaseUrl.split('https://')[1],
+    '/generate-pre-auth-code',
+    {}
   )
 
   const res = timeGroup(
     groupName,
     () => {
-      return http.post(signedRequest.url, JSON.stringify(requestBody), { headers: signedRequest.headers })
+      return http.get(signedRequest.url, { headers: signedRequest.headers })
     },
     {
       isStatusCode200
     }
   )
-  return res.json('client_attestation') as string
+  return res.json('preAuthCode') as string
 }

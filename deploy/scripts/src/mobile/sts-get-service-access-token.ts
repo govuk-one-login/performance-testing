@@ -103,6 +103,7 @@ export async function getServiceAccessToken(): Promise<void> {
     groupMap.getServiceAccessToken[6],
     stsAuthorizationCode,
     codeVerifier,
+    config.mockClientId,
     config.redirectUri,
     clientAttestation,
     keyPair.privateKey

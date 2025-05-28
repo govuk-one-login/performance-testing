@@ -70,9 +70,7 @@ export function getRedirect(
   const res = timeGroup(
     groupName,
     () => {
-      const res = http.get(redirectRequestUrl, { redirects: 0 })
-      console.log('REDIRECT URL', res.url.toString())
-      return res
+      return http.get(redirectRequestUrl, { redirects: 0 })
     },
     {
       isStatusCode302,
@@ -86,6 +84,7 @@ export async function exchangeAuthorizationCode(
   groupName: string,
   authorizationCode: string,
   codeVerifier: string,
+  clientId: string,
   redirectUri: string,
   clientAttestation: string,
   privateKey: CryptoKey
@@ -95,7 +94,7 @@ export async function exchangeAuthorizationCode(
     'ES256',
     privateKey,
     {
-      iss: config.mockClientId,
+      iss: clientId,
       aud: config.stsBaseUrl,
       exp: nowInSeconds + 180,
       jti: crypto.randomUUID()

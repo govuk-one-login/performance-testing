@@ -94,12 +94,12 @@ export function signUpSuccess(userID: string, emailID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
 
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   const authCreateAccPayload = JSON.stringify(
     generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, eventID)
   )
-  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
-  const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID, eventID))
+  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
+  const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
 
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(3)
@@ -130,9 +130,9 @@ export function signInSuccess(userID: string, emailID: string): void {
   const groups = groupMap.ticf
   const journeyID = `perfJourney${uuidv4()}`
   const eventID = `perfTestID$_${uuidv4()}`
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
-  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
+  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
 
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(3)
@@ -157,13 +157,12 @@ export function signInSuccess(userID: string, emailID: string): void {
 export function identityProvingSuccess(userID: string): void {
   const groups = groupMap.ticf
   const journeyID = `perfJourney${uuidv4()}`
-  const eventID = `perfTestID$_${uuidv4()}`
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, eventID))
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, eventID))
-  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID, eventID))
-  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID, eventID))
-  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID, eventID))
-  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID, eventID))
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
+  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID))
+  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID))
+  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID))
+  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID))
 
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
   sleep(3)
@@ -200,9 +199,8 @@ export function identityProvingSuccess(userID: string): void {
 export function identityReuseSuccess(userID: string): void {
   const groups = groupMap.ticf
   const journeyID = `perfJourney${uuidv4()}`
-  const eventID = `perfTestID$_${uuidv4()}`
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, eventID))
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, eventID))
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
 
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
   sleep(3)

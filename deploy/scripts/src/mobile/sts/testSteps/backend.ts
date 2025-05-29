@@ -7,7 +7,13 @@ import { validateRedirect } from '../utils/assertions'
 import { signJwt } from '../../utils/crypto'
 import { validateJsonResponse } from '../../utils/assertions'
 
-export function getAuthorize(groupName: string, clientId: string, redirectUri: string, codeChallenge: string): string {
+export function getAuthorize(
+  groupName: string,
+  clientId: string,
+  redirectUri: string,
+  codeChallenge: string,
+  persistentSessionId?: string
+): string {
   const url = new URL('authorize', config.stsBaseUrl)
   url.searchParams.set('client_id', clientId)
   url.searchParams.set('redirect_uri', redirectUri)
@@ -17,6 +23,9 @@ export function getAuthorize(groupName: string, clientId: string, redirectUri: s
   url.searchParams.set('scope', 'openid')
   url.searchParams.set('code_challenge', codeChallenge)
   url.searchParams.set('code_challenge_method', 'S256')
+  if (persistentSessionId) {
+    url.searchParams.set('govuk_signin_session_id', persistentSessionId)
+  }
   const authorizeRequestUrl = url.toString()
   const res = timeGroup(
     groupName,
@@ -157,6 +166,31 @@ export function exchangeAccessToken(groupName: string, accessToken: string, scop
     }
   )
   return res.json('access_token') as string
+}
+
+export function exchangePreAuthorizedCode(groupName: string, preAuthorizedCode: string, accessToken: string) {
+  timeGroup(
+    groupName,
+    () => {
+      return http.post(
+        `${config.stsBaseUrl}/token`,
+        {
+          grant_type: 'urn:ietf:params:oauth:grant-type:pre-authorized_code',
+          client_id: config.mockClientId,
+          'pre-authorized_code': preAuthorizedCode
+        },
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: ` Bearer ${accessToken}`
+          }
+        }
+      )
+    },
+    {
+      isStatusCode200
+    }
+  )
 }
 
 export function simulateCallToStsJwks(groupName: string): void {

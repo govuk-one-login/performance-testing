@@ -22,11 +22,10 @@ export function generateAuthCreateAccount(
   userID: string,
   emailID: string,
   pairWiseID: string,
-  journeyID: string,
-  eventID: string
+  journeyID: string
 ): AuthCreateAccount {
   return {
-    event_id: eventID,
+    event_id: `perfTestID$_${uuidv4()}`,
     event_name: 'AUTH_CREATE_ACCOUNT',
     client_id: 'performanceTestClientId',
     component_id: 'SharedSignalPerfTest',
@@ -59,14 +58,9 @@ export function generateAuthCreateAccount(
   }
 }
 
-export function generateAuthLogInSuccess(
-  eventID: string,
-  userID: string,
-  emailID: string,
-  journeyID: string
-): AuthLogInSuccess {
+export function generateAuthLogInSuccess(userID: string, emailID: string, journeyID: string): AuthLogInSuccess {
   return {
-    event_id: eventID,
+    event_id: `perfTestID$_${uuidv4()}`,
     event_name: 'AUTH_LOG_IN_SUCCESS',
     client_id: 'performanceTestClientId',
     component_id: 'SharedSignalPerfTest',

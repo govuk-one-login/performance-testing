@@ -92,12 +92,9 @@ export function signUpSuccess(userID: string, emailID: string): void {
   const testID = `perfTestID${timestamp}`
   const pairWiseID = `performanceTestRpPairwiseId${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
-  const eventID = `perfTestID$_${uuidv4()}`
 
   const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
-  const authCreateAccPayload = JSON.stringify(
-    generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, eventID)
-  )
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
   const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
 
@@ -129,9 +126,8 @@ export function signUpSuccess(userID: string, emailID: string): void {
 export function signInSuccess(userID: string, emailID: string): void {
   const groups = groupMap.ticf
   const journeyID = `perfJourney${uuidv4()}`
-  const eventID = `perfTestID$_${uuidv4()}`
   const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
+  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID, journeyID))
   const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
 
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)

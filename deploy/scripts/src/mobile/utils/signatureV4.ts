@@ -13,7 +13,7 @@ export function signRequest(
   hostname: string,
   path: string,
   headers: Record<string, string>,
-  requestBody: string
+  requestBody?: string
 ): {
   headers: Record<string, string>
   url: string

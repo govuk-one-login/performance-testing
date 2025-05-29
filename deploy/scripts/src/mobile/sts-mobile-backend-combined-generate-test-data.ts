@@ -13,6 +13,7 @@ import { exchangeAuthorizationCode, getAuthorize, getCodeFromOrchestration, getR
 import { generateCodeChallenge, generateKey } from './utils/crypto'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { b64decode } from 'k6/encoding'
+import { config } from './mobile-backend/utils/config'
 
 const profiles: ProfileList = {
   smoke: {
@@ -42,17 +43,12 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 export const groupMap = {
-  getServiceAccessToken: [
+  generateTestData: [
     '01 GET /authorize (STS)',
-    '02 GET /.well-known/jwks.json',
-    '03 GET /authorize (Orchestration)',
-    '04 GET /redirect',
-    '05 GET /.well-known/jwks.json',
-    '06 POST /generate-client-attestation',
-    '07 POST /token (authorization code exchange)',
-    '08 GET /.well-known/jwks.json',
-    '09 POST /token (access token exchange)',
-    '10 GET /.well-known/jwks.json'
+    '02 GET /authorize (Orchestration)',
+    '03 GET /redirect',
+    '04 POST /generate-client-attestation',
+    '05 POST /token (authorization code exchange)'
   ]
 } as const
 
@@ -66,9 +62,9 @@ export function setup(): void {
   describeProfile(loadProfile)
 }
 
-export function teardown(): void {}
+export async function generateTestData(): Promise<void> {
+  const group = groupMap.generateTestData
 
-export async function getServiceAccessToken(): Promise<void> {
   const keyPair = await generateKey()
   const privateKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.privateKey)
   const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
@@ -76,14 +72,27 @@ export async function getServiceAccessToken(): Promise<void> {
   const codeVerifier = crypto.randomUUID()
   const codeChallenge = await generateCodeChallenge(codeVerifier)
 
-  const orchestrationAuthorizeUrl = getAuthorize(codeChallenge)
+  const orchestrationAuthorizeUrl = getAuthorize(
+    group[0],
+    config.oneLoginAppStsClientId,
+    config.oneLoginAppStsRedirectUri,
+    codeChallenge
+  )
   sleepBetween(1, 2)
-  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(orchestrationAuthorizeUrl)
-  const stsAuthorizationCode = getRedirect(state, orchestrationAuthorizationCode)
-  const clientAttestation = postGenerateClientAttestation(publicKeyJwk)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(group[1], orchestrationAuthorizeUrl)
+  const stsAuthorizationCode = getRedirect(
+    group[2],
+    state,
+    orchestrationAuthorizationCode,
+    config.oneLoginAppStsRedirectUri
+  )
+  const clientAttestation = postGenerateClientAttestation(group[3], publicKeyJwk)
   const { idToken } = await exchangeAuthorizationCode(
+    group[4],
     stsAuthorizationCode,
     codeVerifier,
+    config.oneLoginAppStsClientId,
+    config.oneLoginAppStsRedirectUri,
     clientAttestation,
     keyPair.privateKey
   )

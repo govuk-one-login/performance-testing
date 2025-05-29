@@ -2,11 +2,10 @@ import { timeGroup } from '../../../common/utils/request/timing'
 import http from 'k6/http'
 import { isStatusCode200 } from '../../../common/utils/checks/assertions'
 import { config } from '../utils/config'
-import { groupMap } from '../../v2-mobile-backend-get-client-attestation'
 
-export function getAppInfo(): void {
+export function getAppInfo(groupName: string): void {
   timeGroup(
-    groupMap.getClientAttestation[0],
+    groupName,
     () => {
       return http.get(`${config.mobileBackendBaseUrl}/appInfo`)
     },
@@ -16,7 +15,7 @@ export function getAppInfo(): void {
   )
 }
 
-export function postClientAttestation(publicKeyJwk: JsonWebKey, appCheckToken: string): string {
+export function postClientAttestation(groupName: string, publicKeyJwk: JsonWebKey, appCheckToken: string): string {
   const requestBody = {
     jwk: {
       kty: publicKeyJwk.kty,
@@ -28,7 +27,7 @@ export function postClientAttestation(publicKeyJwk: JsonWebKey, appCheckToken: s
   }
 
   const res = timeGroup(
-    groupMap.getClientAttestation[2],
+    groupName,
     () => {
       return http.post(`${config.mobileBackendBaseUrl}/client-attestation`, JSON.stringify(requestBody), {
         headers: {
@@ -44,9 +43,41 @@ export function postClientAttestation(publicKeyJwk: JsonWebKey, appCheckToken: s
   return res.json('client_attestation') as string
 }
 
-export function simulateCallToMobileBackendJwks(): void {
+export function postTxmaEvent(groupName: string, eventName: string, accessToken: string) {
+  const nowInMilliseconds = Date.now()
+  const requestBody = {
+    component_id: 'WALLET',
+    timestamp: Math.floor(nowInMilliseconds / 1000),
+    event_timestamp_ms: nowInMilliseconds,
+    event_name: eventName,
+    restricted: {
+      credential_id: 'mock_credential_id'
+    },
+    extensions: {
+      credential_type: ['mock_credential_type_1', 'mock_credential_type_2'],
+      installation_id: 'mock_installation_id'
+    }
+  }
+
   timeGroup(
-    groupMap.getClientAttestation[3],
+    groupName,
+    () => {
+      return http.post(`${config.mobileBackendBaseUrl}/txma-event`, JSON.stringify(requestBody), {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: ` Bearer ${accessToken}`
+        }
+      })
+    },
+    {
+      isStatusCode200
+    }
+  )
+}
+
+export function simulateCallToMobileBackendJwks(groupName: string): void {
+  timeGroup(
+    groupName,
     () => {
       return http.get(`${config.mobileBackendBaseUrl}/.well-known/jwks.json`)
     },

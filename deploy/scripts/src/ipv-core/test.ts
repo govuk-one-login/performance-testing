@@ -280,8 +280,8 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',
-      preAllocatedVUs: 5,
-      maxVUs: 11,
+      preAllocatedVUs: 54,
+      maxVUs: 108,
       stages: [
         { target: 30, duration: '31s' },
         { target: 30, duration: '6h' }

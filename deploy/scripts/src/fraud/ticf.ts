@@ -136,10 +136,6 @@ export function signInSuccess(userID: string, emailID: string): void {
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   sleep(3)
 
-  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
-  sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
-  sleep(3)
-
   const authSignInPayload = {
     vtr: ['Cl'],
     sub: userID,
@@ -182,7 +178,7 @@ export function identityProvingSuccess(userID: string): void {
   sleep(3)
 
   const identityProvingPayload = {
-    vtr: ['P2'],
+    vtr: ['Cl.Cm.P2'],
     vot: 'P2',
     vtm: 'https://oidc.account.gov.uk/trustmark',
     sub: userID,

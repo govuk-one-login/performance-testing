@@ -5,7 +5,8 @@ import {
   selectProfile,
   createScenario,
   LoadProfile,
-  createI4PeakTestSignUpScenario
+  createI4PeakTestSignUpScenario,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
@@ -27,6 +28,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration4PeakTest: {
     ...createI4PeakTestSignUpScenario('idCheckAsync', 450, 27, 451)
+  },
+  perf006Iteration4SpikeTest: {
+    ...createI3SpikeSignUpScenario('idCheckAsync', 1074, 27, 1075)
   }
 }
 

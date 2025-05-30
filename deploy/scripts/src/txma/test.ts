@@ -67,10 +67,7 @@ export function setup(): string {
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
   const journeyID = uuidv4()
-  const eventID = `${testID}_${uuidv4()}`
-  const authCreateAccPayload = JSON.stringify(
-    generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, eventID)
-  )
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
 
   console.log('Sending primer event 1')
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
@@ -82,10 +79,8 @@ export function sendRegularEvent(authCreateAccPayload: string): void {
   iterationsStarted.add(1)
   const authCreatePayload = JSON.parse(authCreateAccPayload)
   const journeyID = uuidv4()
-  const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
-  const eventID = `${testID}_${uuidv4()}`
   const authLogInSuccessPayload = JSON.stringify(
-    generateAuthLogInSuccess(eventID, `${authCreatePayload.user.user_id}`, `${authCreatePayload.user.email}`, journeyID)
+    generateAuthLogInSuccess(`${authCreatePayload.user.user_id}`, `${authCreatePayload.user.email}`, journeyID)
   )
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   iterationsCompleted.add(1)

@@ -274,6 +274,78 @@ const profiles: ProfileList = {
   perf006Iteration4PeakTest: {
     ...createI4PeakTestSignUpScenario('identity', 470, 36, 471),
     ...createI4PeakTestSignInScenario('idReuse', 43, 6, 21)
+  },
+  perf006Iteration4SoakTest: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 36,
+      maxVUs: 72,
+      stages: [
+        { target: 20, duration: '31s' },
+        { target: 20, duration: '6h' }
+      ],
+      exec: 'identity'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 6,
+      maxVUs: 12,
+      stages: [
+        { target: 2, duration: '3s' },
+        { target: 2, duration: '6h' }
+      ],
+      exec: 'idReuse'
+    }
+  },
+  perf006Iteration4StressTest: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 1728,
+      maxVUs: 3456,
+      stages: [
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '300s' },
+        { target: 320, duration: '161s' },
+        { target: 320, duration: '300s' },
+        { target: 480, duration: '161s' },
+        { target: 480, duration: '300s' },
+        { target: 640, duration: '161s' },
+        { target: 640, duration: '300s' },
+        { target: 800, duration: '161s' },
+        { target: 800, duration: '300s' },
+        { target: 960, duration: '161s' },
+        { target: 960, duration: '300s' }
+      ],
+      exec: 'identity'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 432,
+      maxVUs: 864,
+      stages: [
+        { target: 24, duration: '13s' },
+        { target: 24, duration: '448s' },
+        { target: 48, duration: '13s' },
+        { target: 48, duration: '448s' },
+        { target: 72, duration: '13s' },
+        { target: 72, duration: '448s' },
+        { target: 96, duration: '13s' },
+        { target: 96, duration: '448s' },
+        { target: 120, duration: '13s' },
+        { target: 120, duration: '448s' },
+        { target: 144, duration: '13s' },
+        { target: 144, duration: '448s' }
+      ],
+      exec: 'idReuse'
+    }
   }
 }
 

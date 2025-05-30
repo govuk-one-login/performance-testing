@@ -7,16 +7,25 @@ import { validateRedirect } from '../utils/assertions'
 import { signJwt } from '../../utils/crypto'
 import { validateJsonResponse } from '../../utils/assertions'
 
-export function getAuthorize(groupName: string, codeChallenge: string): string {
+export function getAuthorize(
+  groupName: string,
+  clientId: string,
+  redirectUri: string,
+  codeChallenge: string,
+  persistentSessionId?: string
+): string {
   const url = new URL('authorize', config.stsBaseUrl)
-  url.searchParams.set('client_id', config.clientId)
-  url.searchParams.set('redirect_uri', config.redirectUri)
+  url.searchParams.set('client_id', clientId)
+  url.searchParams.set('redirect_uri', redirectUri)
   url.searchParams.set('state', 'STATE')
   url.searchParams.set('nonce', 'NONCE')
   url.searchParams.set('response_type', 'code')
   url.searchParams.set('scope', 'openid')
   url.searchParams.set('code_challenge', codeChallenge)
   url.searchParams.set('code_challenge_method', 'S256')
+  if (persistentSessionId) {
+    url.searchParams.set('govuk_signin_session_id', persistentSessionId)
+  }
   const authorizeRequestUrl = url.toString()
   const res = timeGroup(
     groupName,
@@ -57,7 +66,12 @@ export function getCodeFromOrchestration(
   }
 }
 
-export function getRedirect(groupName: string, state: string, orchestrationAuthorizationCode: string): string {
+export function getRedirect(
+  groupName: string,
+  state: string,
+  orchestrationAuthorizationCode: string,
+  redirectUri: string
+): string {
   const url = new URL('redirect', config.stsBaseUrl)
   url.searchParams.set('code', orchestrationAuthorizationCode)
   url.searchParams.set('state', state)
@@ -69,7 +83,7 @@ export function getRedirect(groupName: string, state: string, orchestrationAutho
     },
     {
       isStatusCode302,
-      ...validateRedirect(config.redirectUri, ['code', 'state'])
+      ...validateRedirect(redirectUri, ['code', 'state'])
     }
   )
   return new URL(res.headers.Location).searchParams.get('code')!
@@ -79,6 +93,8 @@ export async function exchangeAuthorizationCode(
   groupName: string,
   authorizationCode: string,
   codeVerifier: string,
+  clientId: string,
+  redirectUri: string,
   clientAttestation: string,
   privateKey: CryptoKey
 ): Promise<{ accessToken: string; idToken: string }> {
@@ -87,7 +103,7 @@ export async function exchangeAuthorizationCode(
     'ES256',
     privateKey,
     {
-      iss: config.clientId,
+      iss: clientId,
       aud: config.stsBaseUrl,
       exp: nowInSeconds + 180,
       jti: crypto.randomUUID()
@@ -103,7 +119,7 @@ export async function exchangeAuthorizationCode(
         {
           grant_type: 'authorization_code',
           code: authorizationCode,
-          redirect_uri: config.redirectUri,
+          redirect_uri: redirectUri,
           code_verifier: codeVerifier
         },
         {
@@ -160,7 +176,7 @@ export function exchangePreAuthorizedCode(groupName: string, preAuthorizedCode: 
         `${config.stsBaseUrl}/token`,
         {
           grant_type: 'urn:ietf:params:oauth:grant-type:pre-authorized_code',
-          client_id: config.clientId,
+          client_id: config.mockClientId,
           'pre-authorized_code': preAuthorizedCode
         },
         {

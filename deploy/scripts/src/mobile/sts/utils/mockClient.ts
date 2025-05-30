@@ -3,7 +3,6 @@ import { AssumeRoleOutput } from '../../../common/utils/aws/types'
 import { timeGroup } from '../../../common/utils/request/timing'
 import http from 'k6/http'
 import { isStatusCode200 } from '../../../common/utils/checks/assertions'
-import { groupMap } from '../../sts-get-service-access-token'
 import { signRequest } from '../../utils/signatureV4'
 import { config } from './config'
 

@@ -110,7 +110,7 @@ function createStages(type: LoadProfile, target: number): Stage[] {
   switch (type) {
     case LoadProfile.smoke:
       return [
-        { target, duration: '60s' } // 1 minute smoke test
+        { target, duration: '10s' } // 1 minute smoke test
       ]
     case LoadProfile.short:
       return [

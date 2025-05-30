@@ -46,99 +46,28 @@ k6 run ./dist/mobile/<your_test_file>.test.js -e PROFILE=<your_profile_name> -e 
 The STS reauthentication journey requires a persistent session ID which is obtained from a previous authentication
 journey with STS. In order to test this, we need to have pre-generated test data with the persistent session ID from a
 previous journey. The test data for the dev and build environments is stored in
-`./data/sts-reauthentication-test-data-DEV` and `./data/sts-reauthentication-test-data-BUILD`, respectively. The data in
-these files is valid for up to 1 year, after which it will need regenerated.
+`./data/sts-reauthentication-test-data-DEV.json` and `./data/sts-reauthentication-test-data-BUILD.json`, respectively.
+The data in these files is valid for up to 1 year, after which it will need to be regenerated.
 
-To generate a new set of test data, if you have access to the performance test account PowerUser role, run the following
-command from the `/deploy/scripts` directory:
+Generating new sets of test data for the dev and build environments can be done automatically be running the respective
+bash scripts, `./generate-sts-reauthentication-test-data-dev.sh $EXECUTION_CREDENTIALS` and
+`./generate-sts-reauthentication-test-data-build.sh $EXECUTION_CREDENTIALS` when in the `/deploy/scripts/src/mobile`
+directory, where `EXECUTION_CREDENTIALS` is the credentials you use to run the test script.
+
+The commands below can be used to generate the test data for Build, depending on which credentials you have access to.
+
+If you have access to the performance test account PowerUser role:
 ```bash
 EXECUTION_ROLE=arn:aws:iam::330163506186:role/perftest-PerformanceTesterRole
 EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name `date +%s` --profile perf-test-prod-pu)
-
-ENVIRONMENT=BUILD # replace with DEV if generating test data for the DEV environment
-
-DATA_FILE_PATH=src/mobile/data
-DATA_FILE_NAME=sts-reauthentication-test-data-$ENVIRONMENT.txt
-
-MOBILE_STS_DEV_STS_BASE_URL=https://token.dev.account.gov.uk
-MOBILE_STS_DEV_ORCHESTRATION_BASE_URL=https://auth-stub.mobile.dev.account.gov.uk
-MOBILE_STS_DEV_MOCK_EXTERNAL_CRI_BASE_URL=https://mock-issuer.token.dev.account.gov.uk
-MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL=https://mock-client.token.dev.account.gov.uk
-MOBILE_STS_DEV_MOCK_CLIENT_ID=bCAOfDdDSwO4ug2ZNNU1EZrlGrg
-MOBILE_STS_DEV_REDIRECT_URI=https://mobile.dev.account.gov.uk/redirect
-
-MOBILE_STS_BUILD_STS_BASE_URL=https://token.build.account.gov.uk
-MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL=https://auth-stub.mobile.build.account.gov.uk
-MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL=https://mock-issuer.token.build.account.gov.uk
-MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL=https://mock-client.token.build.account.gov.uk
-MOBILE_STS_BUILD_MOCK_CLIENT_ID=krlMiqGQSwoDsF9lMKM6Nr4EbCo
-MOBILE_STS_BUILD_REDIRECT_URI=https://mobile.build.account.gov.uk/redirect
-
-# Need to update PROFILE env var below with profile that will generate largest set of test data, to ensure maximum amount of pre-generated test data is available for all tests
-rm -f $DATA_FILE_PATH/$DATA_FILE_NAME && mkdir -p $DATA_FILE_NAME && touch $DATA_FILE_PATH/$DATA_FILE_NAME \
-  && npm start && k6 run dist/mobile/sts.js -e PROFILE=smoke -e SCENARIO=generateReauthenticationTestData \
-  -e EXECUTION_CREDENTIALS="$EXECUTION_CREDENTIALS" \
-  -e MOBILE_STS_DEV_STS_BASE_URL=$MOBILE_STS_DEV_STS_BASE_URL \
-  -e MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL=$MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL \
-  -e MOBILE_STS_DEV_MOCK_EXTERNAL_CRI_BASE_URL=$MOBILE_STS_DEV_MOCK_EXTERNAL_CRI_BASE_URL \
-  -e MOBILE_STS_DEV_ORCHESTRATION_BASE_URL=$MOBILE_STS_DEV_ORCHESTRATION_BASE_URL \
-  -e MOBILE_STS_DEV_MOCK_CLIENT_ID=$MOBILE_STS_DEV_MOCK_CLIENT_ID \
-  -e MOBILE_STS_DEV_REDIRECT_URI=$MOBILE_STS_DEV_REDIRECT_URI \
-  -e MOBILE_STS_BUILD_STS_BASE_URL=$MOBILE_STS_BUILD_STS_BASE_URL \
-  -e MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL=$MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL \
-  -e MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL=$MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL \
-  -e MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL=$MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL \
-  -e MOBILE_STS_BUILD_MOCK_CLIENT_ID=$MOBILE_STS_BUILD_MOCK_CLIENT_ID \
-  -e MOBILE_STS_BUILD_REDIRECT_URI=$MOBILE_STS_BUILD_REDIRECT_URI \
-  -e ENVIRONMENT=$ENVIRONMENT -e AWS_REGION=eu-west-2 \
-  --console-output $DATA_FILE_PATH/$DATA_FILE_NAME
+./generate-sts-reauthentication-test-data-build.sh $EXECUTION_CREDENTIALS
 ```
 
-If you do not have access to the performance test account PowerUser role (for example, if you have access to a role in
-the STS account that has access to the stub APIs), run the following command from the `/deploy/scripts` directory to
-generate a new set of test data:
+If you have access to the corresponding STS role for the dev or build environments:
 ```bash
-AWS_PROFILE=<your-sts-aws-profile>  # Replace with STS profile from your AWS config
+AWS_PROFILE=<your-sts-aws-profile>
 STS_EXECUTION_CREDENTIALS="$(jq -n --argjson Credentials "$(aws configure export-credentials --profile $AWS_PROFILE)" '{Credentials: $Credentials}')"
-
-ENVIRONMENT=BUILD # replace with DEV if generating test data for the DEV environment
-
-DATA_FILE_PATH=src/mobile/data
-DATA_FILE_NAME=sts-reauthentication-test-data-$ENVIRONMENT.txt
-
-MOBILE_STS_DEV_STS_BASE_URL=https://token.dev.account.gov.uk
-MOBILE_STS_DEV_ORCHESTRATION_BASE_URL=https://auth-stub.mobile.dev.account.gov.uk
-MOBILE_STS_DEV_MOCK_EXTERNAL_CRI_BASE_URL=https://mock-issuer.token.dev.account.gov.uk
-MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL=https://mock-client.token.dev.account.gov.uk
-MOBILE_STS_DEV_MOCK_CLIENT_ID=bCAOfDdDSwO4ug2ZNNU1EZrlGrg
-MOBILE_STS_DEV_REDIRECT_URI=https://mobile.dev.account.gov.uk/redirect
-
-MOBILE_STS_BUILD_STS_BASE_URL=https://token.build.account.gov.uk
-MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL=https://auth-stub.mobile.build.account.gov.uk
-MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL=https://mock-issuer.token.build.account.gov.uk
-MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL=https://mock-client.token.build.account.gov.uk
-MOBILE_STS_BUILD_MOCK_CLIENT_ID=krlMiqGQSwoDsF9lMKM6Nr4EbCo
-MOBILE_STS_BUILD_REDIRECT_URI=https://mobile.build.account.gov.uk/redirect
-
-# Need to update PROFILE env var below with profile that will generate largest set of test data, to ensure maximum amount of pre-generated test data is available for all tests
-rm -f $DATA_FILE_PATH/$DATA_FILE_NAME && mkdir -p $DATA_FILE_NAME && touch $DATA_FILE_PATH/$DATA_FILE_NAME \
-  && npm start && k6 run dist/mobile/sts.js -e PROFILE=smoke -e SCENARIO=generateReauthenticationTestData \
-  -e STS_EXECUTION_CREDENTIALS="$STS_EXECUTION_CREDENTIALS" \
-  -e MOBILE_STS_DEV_STS_BASE_URL=$MOBILE_STS_DEV_STS_BASE_URL \
-  -e MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL=$MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL \
-  -e MOBILE_STS_DEV_MOCK_EXTERNAL_CRI_BASE_URL=$MOBILE_STS_DEV_MOCK_EXTERNAL_CRI_BASE_URL \
-  -e MOBILE_STS_DEV_ORCHESTRATION_BASE_URL=$MOBILE_STS_DEV_ORCHESTRATION_BASE_URL \
-  -e MOBILE_STS_DEV_MOCK_CLIENT_ID=$MOBILE_STS_DEV_MOCK_CLIENT_ID \
-  -e MOBILE_STS_DEV_REDIRECT_URI=$MOBILE_STS_DEV_REDIRECT_URI \
-  -e MOBILE_STS_BUILD_STS_BASE_URL=$MOBILE_STS_BUILD_STS_BASE_URL \
-  -e MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL=$MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL \
-  -e MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL=$MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL \
-  -e MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL=$MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL \
-  -e MOBILE_STS_BUILD_MOCK_CLIENT_ID=$MOBILE_STS_BUILD_MOCK_CLIENT_ID \
-  -e MOBILE_STS_BUILD_REDIRECT_URI=$MOBILE_STS_BUILD_REDIRECT_URI \
-  -e ENVIRONMENT=$ENVIRONMENT -e AWS_REGION=eu-west-2 \
-  -e LOCAL=true
-  --console-output $DATA_FILE_PATH/$DATA_FILE_NAME
+./generate-sts-reauthentication-test-data-build.sh $EXECUTION_CREDENTIALS
 ```
 
 To allow for small differences in test runtime and to ensure that the test does not fail because there

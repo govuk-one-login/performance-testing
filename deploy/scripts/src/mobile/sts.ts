@@ -98,11 +98,18 @@ interface ReauthenticationContext {
   persistentSessionId: string
 }
 
-const reauthenticationContextData: ReauthenticationContext[] = new SharedArray('sessionContext', () => {
-  const lines = open(`./data/sts-reauthentication-test-data-${getEnv('ENVIRONMENT')}.txt`).split('\n')
-  return lines.slice(0, -1).map(line => {
-    return JSON.parse(line)
-  })
+const reauthenticationContextData: ReauthenticationContext[] = new SharedArray('reauthenticationContext', () => {
+  const reauthenticationDataFile = `./data/sts-reauthentication-test-data-${getEnv('ENVIRONMENT')}.json`
+  try {
+    const reauthenticationContextData = open(reauthenticationDataFile)
+    return JSON.parse(reauthenticationContextData)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (err) {
+    console.warn(
+      `Failed to open file with reauthentication data at ${reauthenticationDataFile}. Attempts to run reauthentication scenario may fail.`
+    )
+    return []
+  }
 })
 
 export async function authentication(): Promise<void> {

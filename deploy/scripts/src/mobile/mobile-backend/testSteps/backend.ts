@@ -43,7 +43,7 @@ export function postClientAttestation(groupName: string, publicKeyJwk: JsonWebKe
   return res.json('client_attestation') as string
 }
 
-export function postTxmaEvent(groupName: string, eventName: string, accessToken: string) {
+export function postTxmaEvent(groupName: string, eventName: string, credentialId: string, accessToken: string) {
   const nowInMilliseconds = Date.now()
   const requestBody = {
     component_id: 'WALLET',
@@ -51,7 +51,7 @@ export function postTxmaEvent(groupName: string, eventName: string, accessToken:
     event_timestamp_ms: nowInMilliseconds,
     event_name: eventName,
     restricted: {
-      credential_id: 'mock_credential_id'
+      credential_id: credentialId
     },
     extensions: {
       credential_type: ['mock_credential_type_1', 'mock_credential_type_2'],

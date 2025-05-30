@@ -9,14 +9,29 @@ import {
 import { Options } from 'k6/options'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
-import { generateKey } from './utils/crypto'
-import { getAppInfo, postClientAttestation, simulateCallToMobileBackendJwks } from './mobile-backend/testSteps/backend'
+import { generateCodeChallenge, generateKey } from './utils/crypto'
+import {
+  getAppInfo,
+  postClientAttestation,
+  postTxmaEvent,
+  simulateCallToMobileBackendJwks
+} from './mobile-backend/testSteps/backend'
 import { getAppCheckToken } from './mobile-backend/utils/appCheckToken'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
+import { uuidv4 } from '../common/utils/jslib'
+import {
+  exchangeAccessToken,
+  exchangeAuthorizationCode,
+  getAuthorize,
+  getCodeFromOrchestration,
+  getRedirect
+} from './sts/testSteps/backend'
+import { config } from './mobile-backend/utils/config'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('getClientAttestation', LoadProfile.smoke)
+    ...createScenario('getClientAttestation', LoadProfile.smoke),
+    ...createScenario('walletCredentialIssuance', LoadProfile.smoke)
   },
   perf006Iteration3PeakTest: {
     getClientAttestation: {
@@ -44,6 +59,18 @@ export const groupMap = {
     '02_GET_/app-check-token',
     '03_POST_/client-attestation',
     '04_GET_/.well-known/jwks.json'
+  ],
+  walletCredentialIssuance: [
+    '01 GET /authorize (STS)',
+    '02 GET /authorize (Orchestration)',
+    '03 GET /redirect',
+    '04 GET /app-check-token',
+    '05 POST /client-attestation',
+    '06 POST /token (authorization code exchange)',
+    '07 POST /token (access token exchange - TxMA event service token)',
+    '08 POST /txma-event (WALLET_CREDENTIAL_ADD_ATTEMPT event)',
+    '09 POST /txma-event (WALLET_CREDENTIAL_CONSENT_GIVEN event)',
+    '10 POST /txma-event (WALLET_CREDENTIAL_ADDED event)'
   ]
 } as const
 
@@ -69,5 +96,64 @@ export async function getClientAttestation(): Promise<void> {
   const appCheckToken = getAppCheckToken(group[1])
   postClientAttestation(group[2], publicKeyJwk, appCheckToken)
   simulateCallToMobileBackendJwks(group[3])
+  iterationsCompleted.add(1)
+}
+
+export async function walletCredentialIssuance(): Promise<void> {
+  const keyPair = await generateKey()
+  const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+
+  const codeVerifier = crypto.randomUUID()
+  const codeChallenge = await generateCodeChallenge(codeVerifier)
+
+  const credentialId = uuidv4()
+
+  iterationsStarted.add(1)
+  const orchestrationAuthorizeUrl = getAuthorize(
+    groupMap.walletCredentialIssuance[0],
+    config.oneLoginAppStsClientId,
+    config.oneLoginAppStsRedirectUri,
+    codeChallenge
+  )
+  sleepBetween(1, 2)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.walletCredentialIssuance[1],
+    orchestrationAuthorizeUrl
+  )
+  const stsAuthorizationCode = getRedirect(
+    groupMap.walletCredentialIssuance[2],
+    state,
+    orchestrationAuthorizationCode,
+    config.oneLoginAppStsRedirectUri
+  )
+  const appCheckToken = getAppCheckToken(groupMap.walletCredentialIssuance[3])
+  const clientAttestation = postClientAttestation(groupMap.walletCredentialIssuance[4], publicKeyJwk, appCheckToken)
+  const { accessToken } = await exchangeAuthorizationCode(
+    groupMap.walletCredentialIssuance[5],
+    stsAuthorizationCode,
+    codeVerifier,
+    config.oneLoginAppStsClientId,
+    config.oneLoginAppStsRedirectUri,
+    clientAttestation,
+    keyPair.privateKey
+  )
+  const txmaEventServiceToken = exchangeAccessToken(
+    groupMap.walletCredentialIssuance[6],
+    accessToken,
+    'mobile.txma-event.write'
+  )
+  postTxmaEvent(
+    groupMap.walletCredentialIssuance[7],
+    'WALLET_CREDENTIAL_ADD_ATTEMPT',
+    credentialId,
+    txmaEventServiceToken
+  )
+  postTxmaEvent(
+    groupMap.walletCredentialIssuance[8],
+    'WALLET_CREDENTIAL_CONSENT_GIVEN',
+    credentialId,
+    txmaEventServiceToken
+  )
+  postTxmaEvent(groupMap.walletCredentialIssuance[9], 'WALLET_CREDENTIAL_ADDED', credentialId, txmaEventServiceToken)
   iterationsCompleted.add(1)
 }

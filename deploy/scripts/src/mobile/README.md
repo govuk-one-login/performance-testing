@@ -43,7 +43,7 @@ k6 run ./dist/mobile/<your_test_file>.test.js -e PROFILE=<your_profile_name> -e 
 
 ### STS
 
-Performance test scripts for STS are at the top level of the `mobile` directory and start with the prefix `sts-`.
+Performance test scripts for STS are found within `sts.js`.
 
 The below example commands for running the tests should be run from the `/deploy/scripts` directory. Tests can be run
 using against either the Dev or Build environment by providing the respective value of the `ENVIRONMENT` environment
@@ -59,17 +59,17 @@ MOBILE_STS_BUILD_STS_BASE_URL=https://token.build.account.gov.uk
 MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL=https://mock-client.token.build.account.gov.uk
 MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL=https://auth-stub.mobile.build.account.gov.uk
 MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL=https://mock-issuer.token.build.account.gov.uk
-MOBILE_STS_BUILD_CLIENT_ID=krlMiqGQSwoDsF9lMKM6Nr4EbCo
+MOBILE_STS_BUILD_MOCK_CLIENT_ID=krlMiqGQSwoDsF9lMKM6Nr4EbCo
 MOBILE_STS_BUILD_REDIRECT_URI=https://mobile.build.account.gov.uk/redirect
 
-npm start && k6 run dist/mobile/<your-test-script>.js \
+npm start && k6 run dist/mobile/sts.js \
   -e PROFILE=<profile> -e SCENARIO=<scenario> \
   -e EXECUTION_CREDENTIALS="$EXECUTION_CREDENTIALS" \
   -e MOBILE_STS_BUILD_STS_BASE_URL=$MOBILE_STS_BUILD_STS_BASE_URL \
   -e MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL=$MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL \
   -e MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL=$MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL \
   -e MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL=$MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL \
-  -e MOBILE_STS_BUILD_CLIENT_ID=$MOBILE_STS_BUILD_CLIENT_ID \
+  -e MOBILE_STS_BUILD_MOCK_CLIENT_ID=$MOBILE_STS_BUILD_MOCK_CLIENT_ID \
   -e MOBILE_STS_BUILD_REDIRECT_URI=$MOBILE_STS_BUILD_REDIRECT_URI \
   -e ENVIRONMENT=BUILD -e AWS_REGION=eu-west-2
 ```
@@ -89,17 +89,17 @@ MOBILE_STS_BUILD_STS_BASE_URL=https://token.build.account.gov.uk
 MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL=https://mock-client.token.build.account.gov.uk
 MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL=https://auth-stub.mobile.build.account.gov.uk
 MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL=https://mock-issuer.token.build.account.gov.uk
-MOBILE_STS_BUILD_CLIENT_ID=krlMiqGQSwoDsF9lMKM6Nr4EbCo
+MOBILE_STS_BUILD_MOCK_CLIENT_ID=krlMiqGQSwoDsF9lMKM6Nr4EbCo
 MOBILE_STS_BUILD_REDIRECT_URI=https://mobile.build.account.gov.uk/redirect
 
-npm start && k6 run dist/mobile/<your-test-script>.js \
+npm start && k6 run dist/mobile/sts.js \
   -e PROFILE=<profile> -e SCENARIO=<scenario> \
   -e STS_EXECUTION_CREDENTIALS="$STS_EXECUTION_CREDENTIALS" \
   -e MOBILE_STS_BUILD_STS_BASE_URL=$MOBILE_STS_BUILD_STS_BASE_URL \
   -e MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL=$MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL \
   -e MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL=$MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL \
   -e MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL=$MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL \
-  -e MOBILE_STS_BUILD_CLIENT_ID=$MOBILE_STS_BUILD_CLIENT_ID \
+  -e MOBILE_STS_BUILD_MOCK_CLIENT_ID=$MOBILE_STS_BUILD_MOCK_CLIENT_ID \
   -e MOBILE_STS_BUILD_REDIRECT_URI=$MOBILE_STS_BUILD_REDIRECT_URI \
   -e ENVIRONMENT=BUILD -e AWS_REGION=eu-west-2 \
   -e LOCAL=true
@@ -123,15 +123,11 @@ EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-se
 MOBILE_BACKEND_BUILD_MOBILE_BACKEND_BASE_URL=https://mobile.build.account.gov.uk
 MOBILE_BACKEND_BUILD_APP_CHECK_STUB_BASE_URL=https://app-check-stub.mobile.build.account.gov.uk
 
-npm start && k6 run dist/mobile/<your-test-script>.js \
+npm start && k6 run dist/mobile/mobile-backend-get-client-attestation.js \
   -e PROFILE=<profile> -e SCENARIO=<scenario> \
   -e EXECUTION_CREDENTIALS="$EXECUTION_CREDENTIALS" \
-  -e MOBILE_STS_BUILD_STS_BASE_URL=$MOBILE_STS_BUILD_STS_BASE_URL \
-  -e MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL=$MOBILE_STS_BUILD_STS_MOCK_CLIENT_BASE_URL \
-  -e MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL=$MOBILE_STS_BUILD_MOCK_EXTERNAL_CRI_BASE_URL \
-  -e MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL=$MOBILE_STS_BUILD_ORCHESTRATION_BASE_URL \
-  -e MOBILE_STS_BUILD_CLIENT_ID=$MOBILE_STS_BUILD_CLIENT_ID \
-  -e MOBILE_STS_BUILD_REDIRECT_URI=$MOBILE_STS_BUILD_REDIRECT_URI \
+  -e MOBILE_BACKEND_BUILD_MOBILE_BACKEND_BASE_URL=$MOBILE_BACKEND_BUILD_MOBILE_BACKEND_BASE_URL \
+  -e MOBILE_BACKEND_BUILD_APP_CHECK_STUB_BASE_URL=$MOBILE_BACKEND_BUILD_APP_CHECK_STUB_BASE_URL \
   -e ENVIRONMENT=BUILD -e AWS_REGION=eu-west-2
 ```
 
@@ -149,7 +145,7 @@ MOBILE_PLATFORM_EXECUTION_CREDENTIALS="$(jq -n --argjson Credentials "$(aws conf
 MOBILE_BACKEND_BUILD_MOBILE_BACKEND_BASE_URL=https://mobile.build.account.gov.uk
 MOBILE_BACKEND_BUILD_APP_CHECK_STUB_BASE_URL=https://app-check-stub.mobile.build.account.gov.uk
 
-npm start && k6 run dist/mobile/<your-test-script>.js \
+npm start && k6 run dist/mobile/mobile-backend-get-client-attestation.js \
   -e PROFILE=<profile> -e SCENARIO=<scenario> \
   -e MOBILE_PLATFORM_EXECUTION_CREDENTIALS="$MOBILE_PLATFORM_EXECUTION_CREDENTIALS" \
   -e MOBILE_BACKEND_BUILD_MOBILE_BACKEND_BASE_URL=$MOBILE_BACKEND_BUILD_MOBILE_BACKEND_BASE_URL \

@@ -2,7 +2,7 @@ import { timeGroup } from '../../../common/utils/request/timing'
 import http from 'k6/http'
 import { isStatusCode200 } from '../../../common/utils/checks/assertions'
 import { config } from '../utils/config'
-import { groupMap } from '../../mobile-backend-get-client-attestation'
+import { groupMap } from '../../v2-mobile-backend-get-client-attestation'
 
 export function getAppInfo(): void {
   timeGroup(

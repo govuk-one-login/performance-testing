@@ -5,7 +5,7 @@ import http from 'k6/http'
 import { isStatusCode200 } from '../../../common/utils/checks/assertions'
 import { signRequest } from '../../utils/signatureV4'
 import { config } from './config'
-import { groupMap } from '../../mobile-backend-get-client-attestation'
+import { groupMap } from '../../v2-mobile-backend-get-client-attestation'
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 

@@ -1,5 +1,10 @@
 import { type Options } from 'k6/options'
-import { selectProfile, type ProfileList, createScenario, LoadProfile } from '../common/utils/config/load-profiles'
+import {
+  selectProfile,
+  type ProfileList,
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignInScenario
+} from '../common/utils/config/load-profiles'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
@@ -24,8 +29,22 @@ import { isStatusCode202 } from '../common/utils/checks/assertions'
 import { timeGroup } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
-  smoke: {
-    ...createScenario('ticf', LoadProfile.smoke)
+  ticfSmoke: {
+    ticf: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [{ target: 1, duration: '5m' }],
+      exec: 'ticf'
+    }
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignInScenario('ticf', 47, 66, 23)
+  },
+  perf006Iteration4SpikeTest: {
+    ...createI3SpikeSignInScenario('ticf', 129, 66, 60)
   }
 }
 
@@ -73,24 +92,22 @@ export function signUpSuccess(userID: string, emailID: string): void {
   const testID = `perfTestID${timestamp}`
   const pairWiseID = `performanceTestRpPairwiseId${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
-  const eventID = `perfTestID$_${uuidv4()}`
 
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
-  const authCreateAccPayload = JSON.stringify(
-    generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, eventID)
-  )
-  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
-  const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID, eventID))
-
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, authUpdatePhonePayload)
+  sleep(3)
 
-  sleep(5)
+  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
+  sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
+  sleep(3)
+
+  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
+  sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
+  sleep(3)
+
+  const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
+  sqs.sendMessage(env.sqs_queue, authUpdatePhonePayload)
+  sleep(3)
 
   const authSignUpPayload = {
     vtr: ['Cl.Cm'],
@@ -110,17 +127,14 @@ export function signUpSuccess(userID: string, emailID: string): void {
 export function signInSuccess(userID: string, emailID: string): void {
   const groups = groupMap.ticf
   const journeyID = `perfJourney${uuidv4()}`
-  const eventID = `perfTestID$_${uuidv4()}`
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, eventID))
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(eventID, userID, emailID, journeyID))
-  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, eventID))
 
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
-  sleep(5)
+  sleep(3)
+
+  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID, journeyID))
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
-  sleep(5)
+  sleep(3)
 
   const authSignInPayload = {
     vtr: ['Cl'],
@@ -138,29 +152,33 @@ export function signInSuccess(userID: string, emailID: string): void {
 export function identityProvingSuccess(userID: string): void {
   const groups = groupMap.ticf
   const journeyID = `perfJourney${uuidv4()}`
-  const eventID = `perfTestID$_${uuidv4()}`
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, eventID))
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, eventID))
-  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID, eventID))
-  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID, eventID))
-  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID, eventID))
-  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID, eventID))
 
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, ipvDLCRIVCIssuedPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, ipvAddressCRIVCIssuedPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, ipvKBVCRIStartPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, ipvKBVCRIEndPayload)
+  sleep(3)
 
-  sleep(5)
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
+  sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
+  sleep(3)
+
+  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID))
+  sqs.sendMessage(env.sqs_queue, ipvDLCRIVCIssuedPayload)
+  sleep(3)
+
+  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID))
+  sqs.sendMessage(env.sqs_queue, ipvAddressCRIVCIssuedPayload)
+  sleep(3)
+
+  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID))
+  sqs.sendMessage(env.sqs_queue, ipvKBVCRIStartPayload)
+  sleep(3)
+
+  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID))
+  sqs.sendMessage(env.sqs_queue, ipvKBVCRIEndPayload)
+  sleep(3)
+
   const identityProvingPayload = {
-    vtr: ['P2'],
+    vtr: ['Cl.Cm.P2'],
     vot: 'P2',
     vtm: 'https://oidc.account.gov.uk/trustmark',
     sub: userID,
@@ -181,15 +199,15 @@ export function identityProvingSuccess(userID: string): void {
 export function identityReuseSuccess(userID: string): void {
   const groups = groupMap.ticf
   const journeyID = `perfJourney${uuidv4()}`
-  const eventID = `perfTestID$_${uuidv4()}`
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, eventID))
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, eventID))
 
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
-  sleep(5)
-  sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
+  sleep(3)
 
-  sleep(5)
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
+  sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
+  sleep(3)
+
   const identityReusePayload = {
     vtr: ['Cl.Cm.P2'],
     vot: 'P2',
@@ -216,11 +234,11 @@ export function ticf(): void {
   iterationsStarted.add(1)
 
   signUpSuccess(userID, emailID)
-  sleep(5)
+  sleep(3)
   signInSuccess(userID, emailID)
-  sleep(5)
+  sleep(3)
   identityProvingSuccess(userID)
-  sleep(5)
+  sleep(3)
   identityReuseSuccess(userID)
 
   iterationsCompleted.add(1)

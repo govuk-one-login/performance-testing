@@ -267,6 +267,10 @@ const profiles: ProfileList = {
   perf006Iteration4PeakTest: {
     ...createI4PeakTestSignUpScenario('signUp', 470, 33, 471),
     ...createI4PeakTestSignInScenario('signIn', 43, 18, 21)
+  },
+  perf006Iteration4SpikeTest: {
+    ...createI3SpikeSignUpScenario('signUp', 1130, 33, 1131),
+    ...createI3SpikeSignInScenario('signIn', 129, 18, 60)
   }
 }
 const loadProfile = selectProfile(profiles)
@@ -386,7 +390,7 @@ export async function uiSignIn() {
 
   let targetUrl = env.stubEndpoint
   if (route === 'RP') {
-    targetUrl += '/prod/start'
+    targetUrl += '/start'
   } else if (route === 'ORCH') {
     targetUrl += '?reauthenticate=&level=Cl.Cm&authenticated=no&authenticatedLevel=Cl.Cm&channel=none'
   }
@@ -667,7 +671,7 @@ export function rpStubSubmit(groups: readonly string[]): Response {
 
   return timeGroup(groups[3], () => {
     // 01_RPStubCall (Initial Request)
-    res = timeGroup(groups[4].split('::')[1], () => http.get(env.stubEndpoint + '/prod/start', { redirects: 0 }), {
+    res = timeGroup(groups[4].split('::')[1], () => http.get(env.stubEndpoint + '/start', { redirects: 0 }), {
       //changed orchStub to stubEndPoint
       isStatusCode302
     })

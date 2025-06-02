@@ -163,6 +163,10 @@ const profiles: ProfileList = {
       ],
       exec: 'addressME'
     }
+  },
+  perf006Iteration4SpikeTest: {
+    ...createI3SpikeSignUpScenario('address', 100, 15, 101),
+    ...createI3SpikeSignUpScenario('addressME', 1030, 15, 1031)
   }
 }
 

@@ -55,6 +55,7 @@ bash scripts, `./generate-sts-reauthentication-test-data-dev.sh $EXECUTION_CREDE
 directory, where `EXECUTION_CREDENTIALS` is the credentials you use to run the test script.
 
 The commands below can be used to generate the test data for Build, depending on which credentials you have access to.
+These commands must be run from this directory to ensure test data is output to the correct location.
 
 If you have access to the performance test account PowerUser role:
 ```bash

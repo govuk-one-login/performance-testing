@@ -38,7 +38,7 @@ Resources:
             - "${DNSSUFFIX}"
             - DNSSUFFIX:
                 !FindInMap [PlatformConfiguration, !Ref Environment, DNSSUFFIX]
-          HostedZoneId: "{{resolve:ssm:PrimaryZoneID}}"
+          HostedZoneId: !ImportValue PublicHostedZoneId
       ValidationMethod: DNS
       Tags:
         - Key: Name
@@ -52,19 +52,6 @@ Resources:
           Value: "Performance Testing"
         - Key: Environment
           Value: !Sub "${Environment}"
-
-  CertificateARNSSM:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Description: The Certificate ARN
-      Name: PrimaryZoneWildcardCertificateARN
-      Type: String
-      Value: !Ref ExternalCertificate
-      Tags:
-        Name: "PrimaryZoneWildcardCertificateARN"
-        Product: "GOV.UK One Login - Performance Testing"
-        System: "Performance Testing"
-        Environment: !Sub "${Environment}"
 
 Outputs:
   CertificateARN:

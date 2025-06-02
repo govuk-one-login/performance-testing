@@ -5,12 +5,11 @@ import http from 'k6/http'
 import { isStatusCode200 } from '../../../common/utils/checks/assertions'
 import { signRequest } from '../../utils/signatureV4'
 import { config } from './config'
+import { groupMap } from '../../mobile-backend-get-client-attestation'
 
-const credentialsEnvironmentVariable =
-  getEnv('LOCAL', false) === 'true' ? 'MOBILE_PLATFORM_EXECUTION_CREDENTIALS' : 'EXECUTION_CREDENTIALS'
-const credentials = (JSON.parse(getEnv(credentialsEnvironmentVariable)) as AssumeRoleOutput).Credentials
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 
-export function getAppCheckToken(groupName: string): string {
+export function getAppCheckToken(): string {
   const signedRequest = signRequest(
     getEnv('AWS_REGION'),
     credentials,
@@ -22,7 +21,7 @@ export function getAppCheckToken(groupName: string): string {
   )
 
   const res = timeGroup(
-    groupName,
+    groupMap.getClientAttestation[1],
     () => {
       return http.get(signedRequest.url, { headers: signedRequest.headers })
     },

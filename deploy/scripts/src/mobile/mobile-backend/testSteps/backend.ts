@@ -2,10 +2,11 @@ import { timeGroup } from '../../../common/utils/request/timing'
 import http from 'k6/http'
 import { isStatusCode200 } from '../../../common/utils/checks/assertions'
 import { config } from '../utils/config'
+import { groupMap } from '../../mobile-backend-get-client-attestation'
 
-export function getAppInfo(groupName: string): void {
+export function getAppInfo(): void {
   timeGroup(
-    groupName,
+    groupMap.getClientAttestation[0],
     () => {
       return http.get(`${config.mobileBackendBaseUrl}/appInfo`)
     },
@@ -15,7 +16,7 @@ export function getAppInfo(groupName: string): void {
   )
 }
 
-export function postClientAttestation(groupName: string, publicKeyJwk: JsonWebKey, appCheckToken: string): string {
+export function postClientAttestation(publicKeyJwk: JsonWebKey, appCheckToken: string): string {
   const requestBody = {
     jwk: {
       kty: publicKeyJwk.kty,
@@ -27,7 +28,7 @@ export function postClientAttestation(groupName: string, publicKeyJwk: JsonWebKe
   }
 
   const res = timeGroup(
-    groupName,
+    groupMap.getClientAttestation[2],
     () => {
       return http.post(`${config.mobileBackendBaseUrl}/client-attestation`, JSON.stringify(requestBody), {
         headers: {
@@ -43,9 +44,9 @@ export function postClientAttestation(groupName: string, publicKeyJwk: JsonWebKe
   return res.json('client_attestation') as string
 }
 
-export function simulateCallToMobileBackendJwks(groupName: string): void {
+export function simulateCallToMobileBackendJwks(): void {
   timeGroup(
-    groupName,
+    groupMap.getClientAttestation[3],
     () => {
       return http.get(`${config.mobileBackendBaseUrl}/.well-known/jwks.json`)
     },

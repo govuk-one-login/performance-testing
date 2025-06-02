@@ -361,6 +361,13 @@ const profiles: ProfileList = {
       ],
       exec: 'landingPage'
     }
+  },
+  perf006Iteration4SpikeTest: {
+    ...createI3SpikeOLHScenario('changeEmail', 8, 24, 1),
+    ...createI3SpikeOLHScenario('changePassword', 8, 21, 1),
+    ...createI3SpikeOLHScenario('changePhone', 8, 24, 1),
+    ...createI3SpikeOLHScenario('deleteAccount', 8, 18, 1),
+    ...createI3SpikeSignInScenario('landingPage', 12, 6, 7) // rounded the to 12 from 12.4
   }
 }
 

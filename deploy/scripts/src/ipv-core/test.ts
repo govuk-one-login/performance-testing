@@ -544,7 +544,7 @@ export function identity(stubOnly: boolean = false): void {
     // 02_CoreCall
     res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Do you live in the UK, the Channel Islands or the Isle of Man') // Do you live in the UK, the Channel Islands or the Isle of Man
+      ...pageContentCheck('Where do you live?') // Do you live in the UK, the Channel Islands or the Isle of Man
     })
   })
   if (stubOnly) {

@@ -356,7 +356,7 @@ const profiles: ProfileList = {
       maxVUs: 18,
       stages: [
         { target: 5, duration: '6s' },
-        { target: 5, duration: '5m' }
+        { target: 5, duration: '15m' }
       ],
       exec: 'identity'
     },
@@ -368,11 +368,11 @@ const profiles: ProfileList = {
       maxVUs: 1,
       stages: [
         { target: 6, duration: '1s' },
-        { target: 6, duration: '5m' }
+        { target: 6, duration: '15m' }
       ],
       exec: 'idReuse'
     }
-  },
+  }
 }
 
 const loadProfile = selectProfile(profiles)

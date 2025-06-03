@@ -346,7 +346,33 @@ const profiles: ProfileList = {
       ],
       exec: 'idReuse'
     }
-  }
+  },
+  perf006I4RegressionTest: {
+    identity: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 9,
+      maxVUs: 18,
+      stages: [
+        { target: 5, duration: '6s' },
+        { target: 5, duration: '5m' }
+      ],
+      exec: 'identity'
+    },
+    idReuse: {
+      executor: 'ramping-arrival-rate',
+      startRate: 6,
+      timeUnit: '1m',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [
+        { target: 6, duration: '1s' },
+        { target: 6, duration: '5m' }
+      ],
+      exec: 'idReuse'
+    }
+  },
 }
 
 const loadProfile = selectProfile(profiles)

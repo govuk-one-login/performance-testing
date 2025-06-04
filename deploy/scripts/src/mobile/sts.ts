@@ -147,11 +147,9 @@ const reauthenticationContextData: ReauthenticationContext[] = new SharedArray('
   try {
     const reauthenticationContextData = open(reauthenticationDataFile)
     return JSON.parse(reauthenticationContextData)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (err) {
+  } catch (err: unknown) {
     console.warn(
-      `Failed to open file with reauthentication data at ${reauthenticationDataFile}. Attempts to run reauthentication scenario may fail.`,
-      err
+      `Failed to open file with reauthentication data at ${reauthenticationDataFile}. Attempts to run reauthentication scenario may fail. Error: ${err}`
     )
     return []
   }

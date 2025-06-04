@@ -6,7 +6,9 @@ import { isStatusCode200 } from '../../../common/utils/checks/assertions'
 import { signRequest } from '../../utils/signatureV4'
 import { config } from './config'
 
-const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
+const credentialsEnvironmentVariable =
+  getEnv('LOCAL', false) === 'true' ? 'MOBILE_PLATFORM_EXECUTION_CREDENTIALS' : 'EXECUTION_CREDENTIALS'
+const credentials = (JSON.parse(getEnv(credentialsEnvironmentVariable)) as AssumeRoleOutput).Credentials
 
 export function getAppCheckToken(groupName: string): string {
   const signedRequest = signRequest(

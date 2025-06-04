@@ -156,8 +156,6 @@ const reauthenticationContextData: ReauthenticationContext[] = new SharedArray('
 })
 
 export async function authentication(): Promise<void> {
-  const group = groupMap.authentication
-
   const keyPair = await generateKey()
   const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
 
@@ -165,15 +163,28 @@ export async function authentication(): Promise<void> {
   const codeChallenge = await generateCodeChallenge(codeVerifier)
 
   iterationsStarted.add(1)
-  const orchestrationAuthorizeUrl = getAuthorize(group[0], config.mockClientId, config.redirectUri, codeChallenge)
-  simulateCallToStsJwks(group[1])
+  const orchestrationAuthorizeUrl = getAuthorize(
+    groupMap.authentication[0],
+    config.mockClientId,
+    config.redirectUri,
+    codeChallenge
+  )
+  simulateCallToStsJwks(groupMap.authentication[1])
   sleepBetween(1, 2)
-  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(group[2], orchestrationAuthorizeUrl)
-  const stsAuthorizationCode = getRedirect(group[3], state, orchestrationAuthorizationCode, config.redirectUri)
-  simulateCallToStsJwks(group[4])
-  const clientAttestation = postGenerateClientAttestation(group[5], publicKeyJwk)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.authentication[2],
+    orchestrationAuthorizeUrl
+  )
+  const stsAuthorizationCode = getRedirect(
+    groupMap.authentication[3],
+    state,
+    orchestrationAuthorizationCode,
+    config.redirectUri
+  )
+  simulateCallToStsJwks(groupMap.authentication[4])
+  const clientAttestation = postGenerateClientAttestation(groupMap.authentication[5], publicKeyJwk)
   const { accessToken } = await exchangeAuthorizationCode(
-    group[6],
+    groupMap.authentication[6],
     stsAuthorizationCode,
     codeVerifier,
     config.mockClientId,
@@ -181,14 +192,12 @@ export async function authentication(): Promise<void> {
     clientAttestation,
     keyPair.privateKey
   )
-  exchangeAccessToken(group[7], accessToken, 'sts-test.hello-world.read')
-  simulateCallToStsJwks(group[8])
+  exchangeAccessToken(groupMap.authentication[7], accessToken, 'sts-test.hello-world.read')
+  simulateCallToStsJwks(groupMap.authentication[8])
   iterationsCompleted.add(1)
 }
 
 export async function reauthentication(): Promise<void> {
-  const group = groupMap.reauthentication
-
   const reauthenticationContext = reauthenticationContextData[exec.scenario.iterationInTest]
 
   const keyPair = await generateKey()
@@ -199,20 +208,28 @@ export async function reauthentication(): Promise<void> {
 
   iterationsStarted.add(1)
   const orchestrationAuthorizeUrl = getAuthorize(
-    group[0],
+    groupMap.reauthentication[0],
     config.mockClientId,
     config.redirectUri,
     codeChallenge,
     reauthenticationContext.persistentSessionId
   )
-  simulateCallToStsJwks(group[1])
+  simulateCallToStsJwks(groupMap.reauthentication[1])
   sleepBetween(1, 2)
-  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(group[2], orchestrationAuthorizeUrl)
-  const stsAuthorizationCode = getRedirect(group[3], state, orchestrationAuthorizationCode, config.redirectUri)
-  simulateCallToStsJwks(group[4])
-  const clientAttestation = postGenerateClientAttestation(group[5], publicKeyJwk)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.reauthentication[2],
+    orchestrationAuthorizeUrl
+  )
+  const stsAuthorizationCode = getRedirect(
+    groupMap.reauthentication[3],
+    state,
+    orchestrationAuthorizationCode,
+    config.redirectUri
+  )
+  simulateCallToStsJwks(groupMap.reauthentication[4])
+  const clientAttestation = postGenerateClientAttestation(groupMap.reauthentication[5], publicKeyJwk)
   const { accessToken } = await exchangeAuthorizationCode(
-    group[6],
+    groupMap.reauthentication[6],
     stsAuthorizationCode,
     codeVerifier,
     config.mockClientId,
@@ -220,14 +237,12 @@ export async function reauthentication(): Promise<void> {
     clientAttestation,
     keyPair.privateKey
   )
-  exchangeAccessToken(group[7], accessToken, 'sts-test.hello-world.read')
-  simulateCallToStsJwks(group[8])
+  exchangeAccessToken(groupMap.reauthentication[7], accessToken, 'sts-test.hello-world.read')
+  simulateCallToStsJwks(groupMap.reauthentication[8])
   iterationsCompleted.add(1)
 }
 
 export async function walletCredentialIssuance(): Promise<void> {
-  const group = groupMap.walletCredentialIssuance
-
   const keyPair = await generateKey()
   const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
 
@@ -235,15 +250,28 @@ export async function walletCredentialIssuance(): Promise<void> {
   const codeChallenge = await generateCodeChallenge(codeVerifier)
 
   iterationsStarted.add(1)
-  const orchestrationAuthorizeUrl = getAuthorize(group[0], config.mockClientId, config.redirectUri, codeChallenge)
-  simulateCallToStsJwks(group[1])
+  const orchestrationAuthorizeUrl = getAuthorize(
+    groupMap.walletCredentialIssuance[0],
+    config.mockClientId,
+    config.redirectUri,
+    codeChallenge
+  )
+  simulateCallToStsJwks(groupMap.walletCredentialIssuance[1])
   sleepBetween(1, 2)
-  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(group[2], orchestrationAuthorizeUrl)
-  const stsAuthorizationCode = getRedirect(group[3], state, orchestrationAuthorizationCode, config.redirectUri)
-  simulateCallToStsJwks(group[4])
-  const clientAttestation = postGenerateClientAttestation(group[5], publicKeyJwk)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.walletCredentialIssuance[2],
+    orchestrationAuthorizeUrl
+  )
+  const stsAuthorizationCode = getRedirect(
+    groupMap.walletCredentialIssuance[3],
+    state,
+    orchestrationAuthorizationCode,
+    config.redirectUri
+  )
+  simulateCallToStsJwks(groupMap.walletCredentialIssuance[4])
+  const clientAttestation = postGenerateClientAttestation(groupMap.walletCredentialIssuance[5], publicKeyJwk)
   const { accessToken } = await exchangeAuthorizationCode(
-    group[6],
+    groupMap.walletCredentialIssuance[6],
     stsAuthorizationCode,
     codeVerifier,
     config.mockClientId,
@@ -251,9 +279,9 @@ export async function walletCredentialIssuance(): Promise<void> {
     clientAttestation,
     keyPair.privateKey
   )
-  exchangeAccessToken(group[7], accessToken, 'sts-test.hello-world.read')
-  simulateCallToStsJwks(group[8])
-  const preAuthorizedCode = getPreAuthorizedCode(group[9])
+  exchangeAccessToken(groupMap.walletCredentialIssuance[7], accessToken, 'sts-test.hello-world.read')
+  simulateCallToStsJwks(groupMap.walletCredentialIssuance[8])
+  const preAuthorizedCode = getPreAuthorizedCode(groupMap.walletCredentialIssuance[9])
   const preAuthorizedCodeExchangeServiceToken = exchangeAccessToken(
     groupMap.walletCredentialIssuance[10],
     accessToken,
@@ -269,21 +297,32 @@ export async function walletCredentialIssuance(): Promise<void> {
 }
 
 export async function generateReauthenticationTestData(): Promise<void> {
-  const group = groupMap.generateReauthenticationTestData
-
   const keyPair = await generateKey()
   const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
 
   const codeVerifier = crypto.randomUUID()
   const codeChallenge = await generateCodeChallenge(codeVerifier)
 
-  const orchestrationAuthorizeUrl = getAuthorize(group[0], config.mockClientId, config.redirectUri, codeChallenge)
+  const orchestrationAuthorizeUrl = getAuthorize(
+    groupMap.generateReauthenticationTestData[0],
+    config.mockClientId,
+    config.redirectUri,
+    codeChallenge
+  )
   sleepBetween(1, 2)
-  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(group[1], orchestrationAuthorizeUrl)
-  const stsAuthorizationCode = getRedirect(group[2], state, orchestrationAuthorizationCode, config.redirectUri)
-  const clientAttestation = postGenerateClientAttestation(group[3], publicKeyJwk)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.generateReauthenticationTestData[1],
+    orchestrationAuthorizeUrl
+  )
+  const stsAuthorizationCode = getRedirect(
+    groupMap.generateReauthenticationTestData[2],
+    state,
+    orchestrationAuthorizationCode,
+    config.redirectUri
+  )
+  const clientAttestation = postGenerateClientAttestation(groupMap.generateReauthenticationTestData[3], publicKeyJwk)
   const { idToken } = await exchangeAuthorizationCode(
-    group[4],
+    groupMap.generateReauthenticationTestData[4],
     stsAuthorizationCode,
     codeVerifier,
     config.mockClientId,

@@ -78,7 +78,7 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('sendRegularEventWithEnrichment', 2423, 3, 66)
   },
   perf006Iteration4SpikeTest: {
-    ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 6261, 5, 169)
+    ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 6261, 3, 169)
   }
 }
 

@@ -1,4 +1,5 @@
 import {
+  createI4PeakTestSignUpScenario,
   createScenario,
   describeProfile,
   LoadProfile,
@@ -33,6 +34,49 @@ const profiles: ProfileList = {
     ...createScenario('reauthentication', LoadProfile.smoke),
     ...createScenario('walletCredentialIssuance', LoadProfile.smoke),
     ...createScenario('generateReauthenticationTestData', LoadProfile.smoke)
+  },
+  perf006Iteration3PeakTest: {
+    authentication: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 100,
+      maxVUs: 528,
+      stages: [
+        { target: 150, duration: '151s' },
+        { target: 150, duration: '30m' }
+      ],
+      exec: 'authentication'
+    }
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('authentication', 450, 30, 451)
+  },
+  walletPerfTestSTS: {
+    authentication: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 240,
+      maxVUs: 480,
+      stages: [
+        { target: 16, duration: '8s' },
+        { target: 16, duration: '60m' }
+      ],
+      exec: 'authentication'
+    },
+    walletCredentialIssuance: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 741,
+      maxVUs: 1428,
+      stages: [
+        { target: 38, duration: '18s' },
+        { target: 38, duration: '60m' }
+      ],
+      exec: 'walletCredentialIssuance'
+    }
   }
 }
 

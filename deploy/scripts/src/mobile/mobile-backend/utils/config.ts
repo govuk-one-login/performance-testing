@@ -1,4 +1,5 @@
 import { getEnv } from '../../../common/utils/config/environment-variables'
+
 // Refer to deploy/scripts/README.md for guidance on how to set environment variables
 export const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
 const validEnvironments = ['BUILD', 'DEV']

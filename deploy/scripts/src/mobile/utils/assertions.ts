@@ -24,3 +24,11 @@ export function validateQueryParam(param: string): Checkers<Response> {
     }
   }
 }
+
+export function validateJsonResponse(keys: string[]): Checkers<Response> {
+  return {
+    'validate JSON response': res => {
+      return keys.every(key => res.json(key) !== null)
+    }
+  }
+}

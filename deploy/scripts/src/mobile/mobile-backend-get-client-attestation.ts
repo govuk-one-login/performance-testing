@@ -58,14 +58,16 @@ export function setup(): void {
 }
 
 export async function getClientAttestation(): Promise<void> {
+  const group = groupMap.getClientAttestation
+
   const keyPair = await generateKey()
   const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
 
   iterationsStarted.add(1)
-  getAppInfo()
+  getAppInfo(group[0])
   sleepBetween(1, 2)
-  const appCheckToken = getAppCheckToken()
-  postClientAttestation(publicKeyJwk, appCheckToken)
-  simulateCallToMobileBackendJwks()
+  const appCheckToken = getAppCheckToken(group[1])
+  postClientAttestation(group[2], publicKeyJwk, appCheckToken)
+  simulateCallToMobileBackendJwks(group[3])
   iterationsCompleted.add(1)
 }

@@ -43,6 +43,38 @@ export function postClientAttestation(groupName: string, publicKeyJwk: JsonWebKe
   return res.json('client_attestation') as string
 }
 
+export function postTxmaEvent(groupName: string, eventName: string, credentialId: string, accessToken: string) {
+  const nowInMilliseconds = Date.now()
+  const requestBody = {
+    component_id: 'WALLET',
+    timestamp: Math.floor(nowInMilliseconds / 1000),
+    event_timestamp_ms: nowInMilliseconds,
+    event_name: eventName,
+    restricted: {
+      credential_id: credentialId
+    },
+    extensions: {
+      credential_type: ['mock_credential_type_1', 'mock_credential_type_2'],
+      installation_id: 'mock_installation_id'
+    }
+  }
+
+  timeGroup(
+    groupName,
+    () => {
+      return http.post(`${config.mobileBackendBaseUrl}/txma-event`, JSON.stringify(requestBody), {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: ` Bearer ${accessToken}`
+        }
+      })
+    },
+    {
+      isStatusCode200
+    }
+  )
+}
+
 export function simulateCallToMobileBackendJwks(groupName: string): void {
   timeGroup(
     groupName,

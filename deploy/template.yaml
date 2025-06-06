@@ -570,7 +570,7 @@ Resources:
                 - |
                   sed -e "s#{URL}#$DYNATRACE_URL#" -e "s#{APITOKEN}#$DYNATRACE_APITOKEN#" -e "s#{ID}#$CODEBUILD_BUILD_NUMBER#" $OTEL_TEMPLATE > $OTEL_CONFIG
                 - /otel/otelcol-contrib  --config=$OTEL_CONFIG > $OTEL_LOG 2>&1 &
-                - export EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name $CODEBUILD_BUILD_NUMBER --duration-seconds 5400)
+                - export EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name $CODEBUILD_BUILD_NUMBER)
                 - source ${REPORTING_DIR}/slack.sh POST
             build:
               commands:

@@ -49,6 +49,32 @@ const profiles: ProfileList = {
   },
   perf006Iteration4PeakTest: {
     ...createI4PeakTestSignUpScenario('getClientAttestation', 450, 12, 451)
+  },
+  walletPerfTestSTS: {
+    getClientAttestation: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 240,
+      maxVUs: 480,
+      stages: [
+        { target: 16, duration: '8s' },
+        { target: 16, duration: '60m' }
+      ],
+      exec: 'getClientAttestation'
+    },
+    walletCredentialIssuance: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 741,
+      maxVUs: 1428,
+      stages: [
+        { target: 38, duration: '18s' },
+        { target: 38, duration: '60m' }
+      ],
+      exec: 'walletCredentialIssuance'
+    }
   }
 }
 

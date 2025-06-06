@@ -33,3 +33,12 @@ export function strToBuf(str: string): ArrayBuffer {
   }
   return buf
 }
+
+export function bufToString(buf: ArrayBuffer): string {
+  let str = ''
+  const bufView = new Uint8Array(buf)
+  for (let i = 0, bufLen = bufView.length; i < bufLen; i++) {
+    str += String.fromCharCode(bufView[i])
+  }
+  return str
+}

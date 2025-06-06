@@ -178,6 +178,7 @@ Resources:
                   - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_di-perf-test-prod-admin_*" # Prod Admin Control Tower Role
                   - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_AWSPowerUserAccess_*" # Prod Power User Control Tower Role
                   - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_di-perf-test-prod-testers_*" # Prod Tester Control Tower Role
+      MaxSessionDuration: 5400
       PermissionsBoundary:
         !If [
           UsePermissionsBoundary,
@@ -524,8 +525,12 @@ Resources:
               IDENTITY_SPOT_PASSPORTKEY: "/perfTest/identity/spot/passportKey"
               MOBILE_BACKEND_BUILD_MOBILE_BACKEND_BASE_URL: "/perfTest/mobile/backend/build/backendBaseUrl"
               MOBILE_BACKEND_BUILD_APP_CHECK_STUB_BASE_URL: "/perfTest/mobile/backend/build/appCheckStubBaseUrl"
+              MOBILE_BACKEND_BUILD_ONE_LOGIN_APP_STS_CLIENT_ID: "/perfTest/mobile/backend/build/oneLoginAppStsClientId"
+              MOBILE_BACKEND_BUILD_ONE_LOGIN_APP_STS_REDIRECT_URI: "/perfTest/mobile/backend/build/oneLoginAppStsRedirectURI"
               MOBILE_BACKEND_DEV_MOBILE_BACKEND_BASE_URL: "/perfTest/mobile/backend/dev/backendBaseUrl"
               MOBILE_BACKEND_DEV_APP_CHECK_STUB_BASE_URL: "/perfTest/mobile/backend/dev/appCheckStubBaseUrl"
+              MOBILE_BACKEND_DEV_ONE_LOGIN_APP_STS_CLIENT_ID: "/perfTest/mobile/backend/dev/oneLoginAppStsClientId"
+              MOBILE_BACKEND_DEV_ONE_LOGIN_APP_STS_REDIRECT_URI: "/perfTest/mobile/backend/dev/oneLoginAppStsRedirectURI"
               MOBILE_BUILD_BACKEND_URL: "/perfTest/mobile/build/backendUrl"
               MOBILE_BUILD_DCAMOCK_READID_URL: "/perfTest/mobile/build/dcaMockReadIdUrl"
               MOBILE_BUILD_FRONTEND_URL: "/perfTest/mobile/build/frontendUrl"

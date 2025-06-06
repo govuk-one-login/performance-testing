@@ -50,7 +50,7 @@ const profiles: ProfileList = {
   perf006Iteration4PeakTest: {
     ...createI4PeakTestSignUpScenario('getClientAttestation', 450, 12, 451)
   },
-  walletPerfTestSTS: {
+  walletPerfTestBackend: {
     getClientAttestation: {
       executor: 'ramping-arrival-rate',
       startRate: 2,
@@ -71,7 +71,7 @@ const profiles: ProfileList = {
       maxVUs: 1428,
       stages: [
         { target: 38, duration: '18s' },
-        { target: 38, duration: '60m' }
+        { target: 38, duration: '55m' }
       ],
       exec: 'walletCredentialIssuance'
     }

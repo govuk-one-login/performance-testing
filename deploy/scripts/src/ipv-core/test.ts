@@ -601,7 +601,8 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[10].split('::')[1], () => http.get(env.ipvCoreURL + res.headers.Location), {
+
+    res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Enter your UK passport details')
     })

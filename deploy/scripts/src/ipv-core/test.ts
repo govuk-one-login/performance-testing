@@ -596,7 +596,7 @@ export function identity(stubOnly: boolean = false): void {
             requested_oauth_error_endpoint: 'auth',
             requested_oauth_error: 'access_denied'
           },
-          params: { redirects: 1 }
+          params: { redirects: 0 }
         }),
       { isStatusCode302 }
     )

@@ -25,9 +25,9 @@ export const claimsTextPayload = JSON.stringify({
   drivingPermit: [
     {
       personalNumber: 'DECER607085K99AE',
-      expiryDate: '2025-04-27',
-      issueDate: '2023-08-22',
-      issueNumber: '16',
+      expiryDate: '2035-05-01',
+      issueDate: '2025-05-02',
+      issueNumber: '17',
       issuedBy: 'DVLA',
       fullAddress: '8 HADLEY ROAD BATH BA2 5AA'
     }

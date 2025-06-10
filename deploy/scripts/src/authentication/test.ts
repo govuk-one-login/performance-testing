@@ -271,6 +271,10 @@ const profiles: ProfileList = {
   perf006Iteration4SpikeTest: {
     ...createI3SpikeSignUpScenario('signUp', 1130, 33, 1131),
     ...createI3SpikeSignInScenario('signIn', 129, 18, 60)
+  },
+  perf006Iteration5PeakTest: {
+    ...createI4PeakTestSignUpScenario('signUp', 570, 33, 571),
+    ...createI4PeakTestSignInScenario('signIn', 65, 18, 31)
   }
 }
 const loadProfile = selectProfile(profiles)

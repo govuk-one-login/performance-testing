@@ -463,7 +463,7 @@ export function createOLHPeakTestScenario(
   const maxVUs = target * iterationDuration
   list[exec] = {
     executor: 'ramping-arrival-rate',
-    startRate: 12,
+    startRate: 4,
     timeUnit: '1m',
     preAllocatedVUs,
     maxVUs,

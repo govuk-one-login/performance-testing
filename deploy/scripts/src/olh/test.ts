@@ -11,7 +11,9 @@ import {
   createScenario,
   LoadProfile,
   createI3SpikeOLHScenario,
-  createI3SpikeSignInScenario
+  createI3SpikeSignInScenario,
+  createOLHPeakTestScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { timeGroup } from '../common/utils/request/timing'
@@ -368,6 +370,13 @@ const profiles: ProfileList = {
     ...createI3SpikeOLHScenario('changePhone', 8, 24, 1),
     ...createI3SpikeOLHScenario('deleteAccount', 8, 18, 1),
     ...createI3SpikeSignInScenario('landingPage', 12, 6, 7) // rounded the target to 12 from 12.4
+  },
+  perf006Iteration5PeakTest: {
+    ...createOLHPeakTestScenario('changeEmail', 4, 24, 1),
+    ...createOLHPeakTestScenario('changePassword', 4, 21, 1),
+    ...createOLHPeakTestScenario('changePhone', 4, 24, 1),
+    ...createOLHPeakTestScenario('deleteAccount', 4, 18, 1),
+    ...createI4PeakTestSignInScenario('landingPage', 6, 9, 4)
   }
 }
 

@@ -451,3 +451,27 @@ export function createI3RegressionScenario(
   }
   return list
 }
+
+export function createOLHPeakTestScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
+  const maxVUs = target * iterationDuration
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 4,
+    timeUnit: '1m',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: '30m' }
+    ],
+    exec
+  }
+  return list
+}

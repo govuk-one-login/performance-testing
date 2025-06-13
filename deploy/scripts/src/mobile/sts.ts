@@ -86,6 +86,20 @@ const profiles: ProfileList = {
       maxDuration: '120m',
       exec: 'generateReauthenticationTestData'
     }
+  },
+  reauthenticationPerfTest: {
+    reauthentication: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 216,
+      maxVUs: 432,
+      stages: [
+        { target: 16, duration: '9s' },
+        { target: 16, duration: '55m' }
+      ],
+      exec: 'reauthentication'
+    }
   }
 }
 

@@ -35,6 +35,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration4SpikeTest: {
     ...createI3SpikeSignUpScenario('cimitAPIs', 4520, 19, 1131)
+  },
+  perf006Iteration5PeakTest: {
+    ...createI4PeakTestSignUpScenario('cimitAPIs', 2280, 19, 571)
   }
 }
 

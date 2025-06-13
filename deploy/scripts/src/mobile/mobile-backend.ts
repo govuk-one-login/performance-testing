@@ -95,8 +95,7 @@ export const groupMap = {
     '06 POST /token (authorization code exchange)',
     '07 POST /token (access token exchange - TxMA event service token)',
     '08 POST /txma-event (WALLET_CREDENTIAL_ADD_ATTEMPT event)',
-    '09 POST /txma-event (WALLET_CREDENTIAL_CONSENT_GIVEN event)',
-    '10 POST /txma-event (WALLET_CREDENTIAL_ADDED event)'
+    '09 POST /txma-event (WALLET_CREDENTIAL_ADDED event)'
   ]
 } as const
 
@@ -174,12 +173,6 @@ export async function walletCredentialIssuance(): Promise<void> {
     credentialId,
     txmaEventServiceToken
   )
-  postTxmaEvent(
-    groupMap.walletCredentialIssuance[8],
-    'WALLET_CREDENTIAL_CONSENT_GIVEN',
-    credentialId,
-    txmaEventServiceToken
-  )
-  postTxmaEvent(groupMap.walletCredentialIssuance[9], 'WALLET_CREDENTIAL_ADDED', credentialId, txmaEventServiceToken)
+  postTxmaEvent(groupMap.walletCredentialIssuance[8], 'WALLET_CREDENTIAL_ADDED', credentialId, txmaEventServiceToken)
   iterationsCompleted.add(1)
 }

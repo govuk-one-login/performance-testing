@@ -77,6 +77,15 @@ const profiles: ProfileList = {
       ],
       exec: 'walletCredentialIssuance'
     }
+  },
+  dataCreationForReAuthentication: {
+    generateReauthenticationTestData: {
+      executor: 'per-vu-iterations',
+      vus: 250,
+      iterations: 300,
+      maxDuration: '120m',
+      exec: 'generateReauthenticationTestData'
+    }
   }
 }
 

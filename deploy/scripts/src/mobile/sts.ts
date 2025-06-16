@@ -9,7 +9,8 @@ import {
 import { Options } from 'k6/options'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
-import { generateCodeChallenge, generateKey } from './utils/crypto'
+import { SharedArray } from 'k6/data'
+import { bufToString, generateCodeChallenge, generateKey } from './utils/crypto'
 import {
   exchangeAccessToken,
   exchangeAuthorizationCode,
@@ -23,11 +24,16 @@ import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { postGenerateClientAttestation } from './sts/utils/mockClient'
 import { config } from './sts/utils/config'
 import { getPreAuthorizedCode } from './sts/utils/mockIssuer'
+import exec from 'k6/execution'
+import { b64decode } from 'k6/encoding'
+import { getEnv } from '../common/utils/config/environment-variables'
 
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('authentication', LoadProfile.smoke),
-    ...createScenario('walletCredentialIssuance', LoadProfile.smoke)
+    ...createScenario('reauthentication', LoadProfile.smoke),
+    ...createScenario('walletCredentialIssuance', LoadProfile.smoke),
+    ...createScenario('generateReauthenticationTestData', LoadProfile.smoke)
   },
   perf006Iteration3PeakTest: {
     authentication: {
@@ -71,6 +77,29 @@ const profiles: ProfileList = {
       ],
       exec: 'walletCredentialIssuance'
     }
+  },
+  dataCreationForReAuthentication: {
+    generateReauthenticationTestData: {
+      executor: 'per-vu-iterations',
+      vus: 250,
+      iterations: 300,
+      maxDuration: '120m',
+      exec: 'generateReauthenticationTestData'
+    }
+  },
+  reauthenticationPerfTest: {
+    reauthentication: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 216,
+      maxVUs: 432,
+      stages: [
+        { target: 16, duration: '9s' },
+        { target: 16, duration: '55m' }
+      ],
+      exec: 'reauthentication'
+    }
   }
 }
 
@@ -87,6 +116,17 @@ export const groupMap = {
     'AUTHENTICATION_08 POST /token (access token exchange)',
     'AUTHENTICATION_09 GET /.well-known/jwks.json (STS)'
   ],
+  reauthentication: [
+    'REAUTHENTICATION_01 GET /authorize (STS)',
+    'REAUTHENTICATION_02 GET /.well-known/jwks.json (STS)',
+    'REAUTHENTICATION_03 GET /authorize (Orchestration)',
+    'REAUTHENTICATION_04 GET /redirect',
+    'REAUTHENTICATION_05 GET /.well-known/jwks.json (STS)',
+    'REAUTHENTICATION_06 POST /generate-client-attestation',
+    'REAUTHENTICATION_07 POST /token (authorization code exchange)',
+    'REAUTHENTICATION_08 POST /token (access token exchange)',
+    'REAUTHENTICATION_09 GET /.well-known/jwks.json (STS)'
+  ],
   walletCredentialIssuance: [
     'WALLET_CREDENTIAL_ISSUANCE_01 GET /authorize (STS)',
     'WALLET_CREDENTIAL_ISSUANCE_02 GET /.well-known/jwks.json (STS)',
@@ -101,6 +141,13 @@ export const groupMap = {
     'WALLET_CREDENTIAL_ISSUANCE_11 POST /token (access token exchange)',
     'WALLET_CREDENTIAL_ISSUANCE_12 POST /token (pre-authorized code exchange)',
     'WALLET_CREDENTIAL_ISSUANCE_13 GET /.well-known/jwks.json (STS)'
+  ],
+  generateReauthenticationTestData: [
+    '01 GET /authorize (STS)',
+    '02 GET /authorize (Orchestration)',
+    '03 GET /redirect',
+    '04 POST /generate-client-attestation',
+    '05 POST /token (authorization code exchange)'
   ]
 } as const
 
@@ -113,6 +160,23 @@ export const options: Options = {
 export function setup(): void {
   describeProfile(loadProfile)
 }
+
+interface ReauthenticationContext {
+  persistentSessionId: string
+}
+
+const reauthenticationContextData: ReauthenticationContext[] = new SharedArray('reauthenticationContext', () => {
+  const reauthenticationDataFile = `./data/sts-reauthentication-test-data-${getEnv('ENVIRONMENT')}.json`
+  try {
+    const reauthenticationContextData = open(reauthenticationDataFile)
+    return JSON.parse(reauthenticationContextData)
+  } catch (err: unknown) {
+    console.warn(
+      `Failed to open file with reauthentication data at ${reauthenticationDataFile}. Attempts to run reauthentication scenario may fail. Error: ${err}`
+    )
+    return []
+  }
+})
 
 export async function authentication(): Promise<void> {
   const keyPair = await generateKey()
@@ -153,6 +217,51 @@ export async function authentication(): Promise<void> {
   )
   exchangeAccessToken(groupMap.authentication[7], accessToken, 'sts-test.hello-world.read')
   simulateCallToStsJwks(groupMap.authentication[8])
+  iterationsCompleted.add(1)
+}
+
+export async function reauthentication(): Promise<void> {
+  const reauthenticationContext = reauthenticationContextData[exec.scenario.iterationInTest]
+
+  const keyPair = await generateKey()
+  const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+
+  const codeVerifier = crypto.randomUUID()
+  const codeChallenge = await generateCodeChallenge(codeVerifier)
+
+  iterationsStarted.add(1)
+  const orchestrationAuthorizeUrl = getAuthorize(
+    groupMap.reauthentication[0],
+    config.mockClientId,
+    config.redirectUri,
+    codeChallenge,
+    reauthenticationContext.persistentSessionId
+  )
+  simulateCallToStsJwks(groupMap.reauthentication[1])
+  sleepBetween(1, 2)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.reauthentication[2],
+    orchestrationAuthorizeUrl
+  )
+  const stsAuthorizationCode = getRedirect(
+    groupMap.reauthentication[3],
+    state,
+    orchestrationAuthorizationCode,
+    config.redirectUri
+  )
+  simulateCallToStsJwks(groupMap.reauthentication[4])
+  const clientAttestation = postGenerateClientAttestation(groupMap.reauthentication[5], publicKeyJwk)
+  const { accessToken } = await exchangeAuthorizationCode(
+    groupMap.reauthentication[6],
+    stsAuthorizationCode,
+    codeVerifier,
+    config.mockClientId,
+    config.redirectUri,
+    clientAttestation,
+    keyPair.privateKey
+  )
+  exchangeAccessToken(groupMap.reauthentication[7], accessToken, 'sts-test.hello-world.read')
+  simulateCallToStsJwks(groupMap.reauthentication[8])
   iterationsCompleted.add(1)
 }
 
@@ -208,4 +317,49 @@ export async function walletCredentialIssuance(): Promise<void> {
   )
   simulateCallToStsJwks(groupMap.walletCredentialIssuance[12])
   iterationsCompleted.add(1)
+}
+
+export async function generateReauthenticationTestData(): Promise<void> {
+  const keyPair = await generateKey()
+  const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+
+  const codeVerifier = crypto.randomUUID()
+  const codeChallenge = await generateCodeChallenge(codeVerifier)
+
+  const orchestrationAuthorizeUrl = getAuthorize(
+    groupMap.generateReauthenticationTestData[0],
+    config.mockClientId,
+    config.redirectUri,
+    codeChallenge
+  )
+  sleepBetween(1, 2)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.generateReauthenticationTestData[1],
+    orchestrationAuthorizeUrl
+  )
+  const stsAuthorizationCode = getRedirect(
+    groupMap.generateReauthenticationTestData[2],
+    state,
+    orchestrationAuthorizationCode,
+    config.redirectUri
+  )
+  const clientAttestation = postGenerateClientAttestation(groupMap.generateReauthenticationTestData[3], publicKeyJwk)
+  const { idToken } = await exchangeAuthorizationCode(
+    groupMap.generateReauthenticationTestData[4],
+    stsAuthorizationCode,
+    codeVerifier,
+    config.mockClientId,
+    config.redirectUri,
+    clientAttestation,
+    keyPair.privateKey
+  )
+
+  const idTokenPayload = idToken.split('.')[1]
+  const decodedIdTokenPayload = JSON.parse(bufToString(b64decode(idTokenPayload, 'rawurl')))
+  const persistentSessionId = decodedIdTokenPayload.persistent_id
+  const reauthenticationContext: ReauthenticationContext = {
+    persistentSessionId
+  }
+
+  console.log(reauthenticationContext)
 }

@@ -61,7 +61,7 @@ const profiles: ProfileList = {
       maxVUs: 480,
       stages: [
         { target: 16, duration: '8s' },
-        { target: 16, duration: '60m' }
+        { target: 16, duration: '55m' }
       ],
       exec: 'authentication'
     },
@@ -76,6 +76,18 @@ const profiles: ProfileList = {
         { target: 38, duration: '55m' }
       ],
       exec: 'walletCredentialIssuance'
+    },
+    reauthentication: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 156,
+      maxVUs: 312,
+      stages: [
+        { target: 8, duration: '5s' },
+        { target: 8, duration: '55m' }
+      ],
+      exec: 'reauthentication'
     }
   },
   dataCreationForReAuthentication: {

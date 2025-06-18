@@ -169,8 +169,8 @@ const profiles: ProfileList = {
     ...createI3SpikeSignUpScenario('addressME', 1030, 15, 1031)
   },
   perf006Iteration5SpikeTest: {
-    ...createI3SpikeSignUpScenario('address', 114, 15, 115),
-    ...createI3SpikeSignUpScenario('addressME', 450, 15, 451),
+    ...createI3SpikeSignUpScenario('address', 100, 15, 101),
+    ...createI3SpikeSignUpScenario('addressME', 451, 15, 452),
     ...createI3SpikeSignUpScenario('internationalAddress', 6, 12, 7)
   }
 }

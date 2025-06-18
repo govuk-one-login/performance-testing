@@ -73,9 +73,6 @@ export function idCheckAsync(): void {
   const sessionId = getActiveSession(sub)
   sleepBetween(0.5, 1)
 
-  getWellknownJwks()
-  sleepBetween(0.5, 1)
-
   const opaqueId = postBiometricToken(sessionId)
   sleepBetween(0.5, 1)
 

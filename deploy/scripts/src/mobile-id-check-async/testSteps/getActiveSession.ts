@@ -25,7 +25,7 @@ export function getActiveSession(groupNameStsToken: string, groupNameAsyncActive
   sleepBetween(0.5, 1)
 
   const asyncActiveSessionResponse = timeGroup(
-    groupNameAsyncSession,
+    groupNameAsyncActiveSession,
     () =>
       http.get(getAsyncActiveSessionUrl(), {
         headers: { Authorization: getAsyncActiveSessionAuthorizationHeader(accessToken) }

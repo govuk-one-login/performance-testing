@@ -69,7 +69,7 @@ export function postIphoneModel(): void {
     timeRequest(() => http.post(buildFrontendUrl('/iphoneModel'), { 'select-option': 'iphone7OrNewer' }), {
       isStatusCode200,
       ...validatePageRedirect('/idCheckApp'),
-      ...pageContentCheck('Use your passport and a GOV.UK app to confirm your identity')
+      ...pageContentCheck('Use your passport and an app to prove your identity')
     })
   )
 }

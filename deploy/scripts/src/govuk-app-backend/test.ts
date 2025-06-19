@@ -19,15 +19,6 @@ import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('govUkAppBackend', LoadProfile.smoke)
-  },
-  smokePerVUIterations: {
-    govUkAppBackend: {
-      executor: 'per-vu-iterations',
-      vus: 1,
-      iterations: 1,
-      maxDuration: '30s',
-      exec: 'govUkAppBackend'
-    }
   }
 }
 
@@ -57,14 +48,14 @@ const env = {
   tokenGenURL: getEnv('GOVUKAPP_TOKEN_GEN_URL'),
   tokenExchangeURL: getEnv('GOVUKAPP_TOKEN_EXCHANGE_URL'),
   clientID: getEnv('GOVUKAPP_CLIENT_ID'),
-  redirectURI: getEnv('GOVUKAPP_REDIRECT_URI')
+  redirectURI: getEnv('GOVUKAPP_REDIRECT_URI'),
+  clientSecret: getEnv('GOVUKAPP_CLIENT_SECRET')
 }
 
 export function govUkAppBackend(): void {
   const groups = groupMap.govUkAppBackend
   let res: Response
   const codeVerifierString = uuidv4()
-  const codeChallenge = encoding.b64encode(codeVerifierString)
   const encodedRedirectURI = encodeURIComponent(env.redirectURI)
   const scope = 'openid email'
   const encodedScope = encodeURIComponent(scope)
@@ -76,14 +67,13 @@ export function govUkAppBackend(): void {
     () =>
       http.get(
         env.authURL +
-          `/oauth2/authorize?client_id=${env.clientID}&response_type=code&redirect_uri=${encodedRedirectURI}&scope=${encodedScope}&code_challenge=${codeChallenge}&code_challenge_method=S256&state=debug123`
+          `/oauth2/authorize?client_id=${env.clientID}&response_type=code&redirect_uri=${encodedRedirectURI}&scope=${encodedScope}&state=debug123`
       ),
     { isStatusCode200, ...pageContentCheck('Successfully signed in') }
   )
 
-  sleepBetween(3, 5)
+  sleepBetween(0.5, 1)
   const codeFromOL = findBetween(res.url, 'code=', '&state=').toString()
-  console.log(codeFromOL)
 
   // B01_GovUKAppBackend_02_TokenGenerationCall
   const tokenGenHeaders = {
@@ -97,16 +87,14 @@ export function govUkAppBackend(): void {
       http.post(
         env.tokenGenURL + '/dev/token',
         JSON.stringify({
-          length: '1'
+          length: 1
         }),
         tokenGenHeaders
       ),
     { isStatusCode200, ...pageContentCheck('tokens') }
   )
-  sleepBetween(3, 5)
-  console.log(res.body)
+  sleepBetween(0.5, 1)
   const token = res.json('tokens') as string
-  console.log(`The attestation token value is ${token}`)
 
   const tokenExchangeHeaders = {
     headers: {
@@ -120,63 +108,59 @@ export function govUkAppBackend(): void {
     () =>
       http.post(
         env.tokenExchangeURL + '/dev/oauth2/token',
-        JSON.stringify({
+        {
           grant_type: 'authorization_code',
           client_id: env.clientID,
           code: codeFromOL,
           code_verifier: codeVerifierString,
           redirect_uri: env.redirectURI,
           scope: scope
-        }),
+        },
         tokenExchangeHeaders
       ),
     { isStatusCode200, ...pageContentCheck('refresh_token') }
   )
-  sleepBetween(3, 5)
-  console.log(res.body)
+  sleepBetween(0.5, 1)
 
   const refreshToken = res.json('refresh_token') as string
-  console.log(`The refresh token value is ${refreshToken}`)
 
   // B01_GovUKAppBackend_04_TokenRefreshCall
-  res = timeGroup(
+  timeGroup(
     groups[3],
     () =>
       http.post(
         env.tokenExchangeURL + '/dev/oauth2/token',
-        JSON.stringify({
+        {
           grant_type: 'refresh_token',
           client_id: env.clientID,
           refresh_token: refreshToken
-        }),
+        },
         tokenExchangeHeaders
       ),
     { isStatusCode200, ...pageContentCheck('expires_in') }
   )
-  sleepBetween(3, 5)
-  console.log(res.body)
+  sleepBetween(0.5, 1)
 
   const revokeTokenHeaders = {
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${encoding.b64encode(env.clientID + ':' + env.clientSecret)}`
     }
   }
 
   // B01_GovUKAppBackend_05_RevokeToken
-  res = timeGroup(
+  timeGroup(
     groups[4],
     () =>
       http.post(
         env.authURL + '/oauth2/revoke',
-        JSON.stringify({
-          token: refreshToken,
-          client_id: env.clientID
-        }),
+        {
+          token: refreshToken
+        },
         revokeTokenHeaders
       ),
     { isStatusCode200 }
   )
-  console.log(res.body)
 
   iterationsCompleted.add(1)
 }

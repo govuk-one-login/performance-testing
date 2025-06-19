@@ -114,10 +114,8 @@ export function idCheckAsync(): void {
 }
 
 export function idCheckAsyncSignIn(): void {
-  iterationsStarted.add(1)
-
   const sub = uuidv4()
-
+  iterationsStarted.add(1)
   getActiveSession(groupMap.idCheckAsyncSignIn[0], groupMap.idCheckAsyncSignIn[1], sub)
 
   iterationsCompleted.add(1)

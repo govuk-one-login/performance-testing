@@ -1,10 +1,15 @@
 import http from 'k6/http'
 import { timeGroup } from '../../common/utils/request/timing'
 import { config } from '../utils/config'
-import { isStatusCode200 } from '../../common/utils/checks/assertions'
+import { isStatusCode200, isSpecificStatusCode } from '../../common/utils/checks/assertions'
 import { sleepBetween } from '../../common/utils/sleep/sleepBetween'
 
-export function getActiveSession(groupNameStsToken: string, groupNameAsyncActiveSession: string, sub: string): string {
+export function getActiveSession(
+  groupNameStsToken: string,
+  groupNameAsyncActiveSession: string,
+  expectedAsyncActiveSessionStatus: number,
+  sub: string
+): string {
   const stsMockRequestBody = new URLSearchParams({
     subject_token: sub,
     scope: 'idCheck.activeSession.read',
@@ -31,7 +36,7 @@ export function getActiveSession(groupNameStsToken: string, groupNameAsyncActive
         headers: { Authorization: getAsyncActiveSessionAuthorizationHeader(accessToken) }
       }),
     {
-      isStatusCode200
+      ...isSpecificStatusCode(expectedAsyncActiveSessionStatus)
     }
   )
 

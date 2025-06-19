@@ -1,5 +1,7 @@
 import { type Response } from 'k6/http'
 import { type Checkers } from 'k6'
+import { check } from 'k6'
+
 
 /**
  * Function to check that a `Response` has status code 200/OK
@@ -72,5 +74,17 @@ export function isStatusCode302(response: Response): boolean {
 export function pageContentCheck(content: string): Checkers<Response> {
   return {
     validatePageContent: r => (r.body as string).includes(content)
+  }
+}
+
+/**
+ * Generates a k6 check function for a specific HTTP status code.
+ * @param {number} expectedStatus The status code to check for.
+ * @returns {Checkers<Response>} An object containing a named check function.
+ */
+
+export function isSpecificStatusCode(expectedStatus: number): Checkers<Response> {
+  return {
+    [`isStatusCode${expectedStatus}`]: (res: Response) => res.status === expectedStatus
   }
 }

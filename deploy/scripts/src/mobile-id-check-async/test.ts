@@ -80,7 +80,7 @@ export function idCheckAsyncSignUp(): void {
   postCredential(groupMap.idCheckAsyncSignUp[1], { accessToken, sub })
   sleepBetween(0.5, 1)
 
-  const sessionId = getActiveSession(groupMap.idCheckAsyncSignUp[2], groupMap.idCheckAsyncSignUp[3], sub)
+  const sessionId = getActiveSession(groupMap.idCheckAsyncSignUp[2], groupMap.idCheckAsyncSignUp[3], 200, sub)
   sleepBetween(0.5, 1)
 
   const opaqueId = postBiometricToken(groupMap.idCheckAsyncSignUp[4], sessionId)
@@ -114,7 +114,7 @@ export function idCheckAsyncSignUp(): void {
 export function idCheckAsyncSignIn(): void {
   const sub = uuidv4()
   iterationsStarted.add(1)
-  getActiveSession(groupMap.idCheckAsyncSignIn[0], groupMap.idCheckAsyncSignIn[1], sub)
+  getActiveSession(groupMap.idCheckAsyncSignIn[0], groupMap.idCheckAsyncSignIn[1], 404, sub)
   sleepBetween(0.5, 1)
   iterationsCompleted.add(1)
 }

@@ -19,6 +19,42 @@ import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('govUkAppBackend', LoadProfile.smoke)
+  },
+  peakTest: {
+    govUkAppBackend: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 78,
+      maxVUs: 156,
+      stages: [
+        { target: 3, duration: '2s' },
+        { target: 3, duration: '30m' }
+      ],
+      exec: 'govUkAppBackend'
+    }
+  },
+  stressTest: {
+    govUkAppBackend: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 728,
+      maxVUs: 1456,
+      stages: [
+        { target: 5, duration: '3s' },
+        { target: 5, duration: '5m' },
+        { target: 10, duration: '3s' },
+        { target: 10, duration: '5m' },
+        { target: 15, duration: '3s' },
+        { target: 15, duration: '5m' },
+        { target: 20, duration: '3s' },
+        { target: 20, duration: '5m' },
+        { target: 28, duration: '5s' },
+        { target: 28, duration: '5m' }
+      ],
+      exec: 'govUkAppBackend'
+    }
   }
 }
 

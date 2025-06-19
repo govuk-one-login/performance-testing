@@ -4,7 +4,7 @@ import { config } from '../utils/config'
 import { isStatusCode200 } from '../../common/utils/checks/assertions'
 import { sleepBetween } from '../../common/utils/sleep/sleepBetween'
 
-export function getActiveSession(groupNameStsToken: string, groupNameAsyncSession: string, sub: string): string {
+export function getActiveSession(groupNameStsToken: string, groupNameAsyncActiveSession: string, sub: string): string {
   const stsMockRequestBody = new URLSearchParams({
     subject_token: sub,
     scope: 'idCheck.activeSession.read',

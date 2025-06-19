@@ -91,9 +91,6 @@ export function idCheckAsync(): void {
   postTxmaEvent(groupMap.idCheckAsync[6], sessionId)
   sleepBetween(0.5, 1)
 
-  postTxmaEvent(groupMap.idCheckAsync[6], sessionId)
-  sleepBetween(0.5, 1)
-
   if (Math.random() <= 0.8) {
     // Approximately 80% of users complete journey successfully
     const biometricSessionId = uuidv4()

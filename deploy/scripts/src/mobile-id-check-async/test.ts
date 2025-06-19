@@ -6,7 +6,8 @@ import {
   createScenario,
   LoadProfile,
   createI4PeakTestSignUpScenario,
-  createI3SpikeSignUpScenario
+  createI3SpikeSignUpScenario,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
@@ -31,6 +32,10 @@ const profiles: ProfileList = {
   },
   perf006Iteration4SpikeTest: {
     ...createI3SpikeSignUpScenario('idCheckAsync', 1074, 27, 1075)
+  },
+  perf006Iteration4CombinedPeakTest: {
+    ...createI4PeakTestSignUpScenario('idCheckAsync', 450, 27, 451),
+    ...createI4PeakTestSignInScenario('idCheckAsyncSignIn', 43, 3, 21)
   }
 }
 
@@ -47,6 +52,10 @@ export const groupMap = {
     'B01_IDCheckV2_07_POST_readid-mock /postSetupBiometricSessionByScenario',
     'B01_IDCheckV2_08_POST_async/finishBiometricSession', //pragma: allowlist secret
     'B01_IDCheckV2_09_POST async/abortSession'
+  ],
+  idCheckAsyncSignIn: [
+    'B02_IDCheckSignInV2_00_POST_sts-mock /token',
+    'B02_IDCheckSignInV2_01_GET_/async/activeSession' //pragma: allowlist secret
   ]
 } as const
 
@@ -63,43 +72,53 @@ export function setup(): void {
 export function idCheckAsync(): void {
   iterationsStarted.add(1)
 
-  const accessToken = postToken()
+  const accessToken = postToken(groupMap.idCheckAsync[0])
   sleepBetween(0.5, 1)
 
   const sub = uuidv4()
-  postCredential({ accessToken, sub })
+  postCredential(groupMap.idCheckAsync[1], { accessToken, sub })
   sleepBetween(0.5, 1)
 
-  const sessionId = getActiveSession(sub)
+  const sessionId = getActiveSession(groupMap.idCheckAsync[2], groupMap.idCheckAsync[3], sub)
   sleepBetween(0.5, 1)
 
-  const opaqueId = postBiometricToken(sessionId)
+  const opaqueId = postBiometricToken(groupMap.idCheckAsync[4], sessionId)
   sleepBetween(0.5, 1)
 
-  postTxmaEvent(sessionId)
+  postTxmaEvent(groupMap.idCheckAsync[6], sessionId)
   sleepBetween(0.5, 1)
 
-  postTxmaEvent(sessionId)
+  postTxmaEvent(groupMap.idCheckAsync[6], sessionId)
   sleepBetween(0.5, 1)
 
-  postTxmaEvent(sessionId)
+  postTxmaEvent(groupMap.idCheckAsync[6], sessionId)
   sleepBetween(0.5, 1)
 
   if (Math.random() <= 0.8) {
     // Approximately 80% of users complete journey successfully
     const biometricSessionId = uuidv4()
-    postSetupBiometricSessionByScenario({ biometricSessionId, opaqueId })
+    postSetupBiometricSessionByScenario(groupMap.idCheckAsync[7], { biometricSessionId, opaqueId })
     sleepBetween(0.5, 1)
 
-    postFinishBiometricSession({ biometricSessionId, sessionId })
+    postFinishBiometricSession(groupMap.idCheckAsync[8], { biometricSessionId, sessionId })
     sleepBetween(0.5, 1)
 
-    getWellknownJwks()
+    getWellknownJwks(groupMap.idCheckAsync[5])
     sleepBetween(0.5, 1)
   } else {
     // Approximately 20% of users abort journey
-    postAbortSession(sessionId)
+    postAbortSession(groupMap.idCheckAsync[9], sessionId)
     sleepBetween(0.5, 1)
   }
+  iterationsCompleted.add(1)
+}
+
+export function idCheckAsyncSignIn(): void {
+  iterationsStarted.add(1)
+
+  const sub = uuidv4()
+
+  getActiveSession(groupMap.idCheckAsyncSignIn[0], groupMap.idCheckAsyncSignIn[1], sub)
+
   iterationsCompleted.add(1)
 }

@@ -1,7 +1,6 @@
 import http from 'k6/http'
 import { isStatusCode201 } from '../../common/utils/checks/assertions'
 import { timeGroup } from '../../common/utils/request/timing'
-import { groupMap } from '../test'
 import { apiSignaturev4Signer } from '../utils/apiSignatureV4Signer'
 import { config } from '../utils/config'
 import { useProxyApi } from '../utils/useProxyApi'
@@ -12,17 +11,17 @@ interface PostCredentialConfig {
   sub: string
 }
 
-export function postCredential(postCredentialConfig: PostCredentialConfig): string {
+export function postCredential(groupName: string, postCredentialConfig: PostCredentialConfig): string {
   const { sub, accessToken } = postCredentialConfig
   if (useProxyApi()) {
-    postCredentialProxyApi({ sub, accessToken })
+    postCredentialProxyApi(groupName, { sub, accessToken })
   } else {
-    postCredentialPrivateApi({ sub, accessToken })
+    postCredentialPrivateApi(groupName, { sub, accessToken })
   }
   return sub
 }
 
-function postCredentialProxyApi(postCredentialConfig: PostCredentialConfig): string {
+function postCredentialProxyApi(groupName: string, postCredentialConfig: PostCredentialConfig): string {
   const { sub, accessToken } = postCredentialConfig
   const signedAsyncCredentialRequest = apiSignaturev4Signer.sign({
     method: 'POST',
@@ -34,7 +33,7 @@ function postCredentialProxyApi(postCredentialConfig: PostCredentialConfig): str
   })
 
   const asyncCredentialResponse = timeGroup(
-    groupMap.idCheckAsync[0],
+    groupName,
     () =>
       http.post(signedAsyncCredentialRequest.url, getCredentialBody(sub), {
         headers: { ...signedAsyncCredentialRequest.headers, ...getCredentialProxyApiXCustomAuthHeader(accessToken) }
@@ -71,10 +70,10 @@ function getCredentialBody(sub: string): string {
   })
 }
 
-function postCredentialPrivateApi(postCredentialConfig: PostCredentialConfig): string {
+function postCredentialPrivateApi(groupName: string, postCredentialConfig: PostCredentialConfig): string {
   const { sub, accessToken } = postCredentialConfig
   const ayncCredentialResponse = timeGroup(
-    groupMap.idCheckAsync[0],
+    groupName,
     () =>
       http.post(`${getPrivateApiUrl()}${getCredentialPath()}`, getCredentialBody(sub), {
         headers: getCredentialPrivateApiAuthorizationHeader(accessToken)

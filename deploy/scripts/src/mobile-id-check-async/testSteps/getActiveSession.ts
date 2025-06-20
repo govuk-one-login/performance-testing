@@ -1,11 +1,15 @@
 import http from 'k6/http'
 import { timeGroup } from '../../common/utils/request/timing'
-import { groupMap } from '../test'
 import { config } from '../utils/config'
-import { isStatusCode200 } from '../../common/utils/checks/assertions'
+import { isStatusCode200, isSpecificStatusCode } from '../../common/utils/checks/assertions'
 import { sleepBetween } from '../../common/utils/sleep/sleepBetween'
 
-export function getActiveSession(sub: string): string {
+export function getActiveSession(
+  groupNameStsToken: string,
+  groupNameAsyncActiveSession: string,
+  expectedAsyncActiveSessionStatus: number,
+  sub: string
+): string {
   const stsMockRequestBody = new URLSearchParams({
     subject_token: sub,
     scope: 'idCheck.activeSession.read',
@@ -14,7 +18,7 @@ export function getActiveSession(sub: string): string {
   })
 
   const stsMockResponse = timeGroup(
-    groupMap.idCheckAsync[2],
+    groupNameStsToken,
     () => http.post(getStsTokenUrl(), stsMockRequestBody.toString()),
     {
       isStatusCode200
@@ -26,13 +30,13 @@ export function getActiveSession(sub: string): string {
   sleepBetween(0.5, 1)
 
   const asyncActiveSessionResponse = timeGroup(
-    groupMap.idCheckAsync[3],
+    groupNameAsyncActiveSession,
     () =>
       http.get(getAsyncActiveSessionUrl(), {
         headers: { Authorization: getAsyncActiveSessionAuthorizationHeader(accessToken) }
       }),
     {
-      isStatusCode200
+      ...isSpecificStatusCode(expectedAsyncActiveSessionStatus)
     }
   )
 

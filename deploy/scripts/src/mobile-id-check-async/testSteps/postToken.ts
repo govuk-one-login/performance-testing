@@ -1,6 +1,5 @@
 import http from 'k6/http'
 import { timeGroup } from '../../common/utils/request/timing'
-import { groupMap } from '../test'
 import { apiSignaturev4Signer } from '../utils/apiSignatureV4Signer'
 import { config } from '../utils/config'
 import { b64encode } from 'k6/encoding'
@@ -8,14 +7,14 @@ import { isStatusCode200 } from '../../common/utils/checks/assertions'
 import { useProxyApi } from '../utils/useProxyApi'
 import { URL } from '../../common/utils/jslib/url'
 
-export function postToken(): string {
+export function postToken(groupName: string): string {
   if (useProxyApi()) {
-    return postTokenProxyApi()
+    return postTokenProxyApi(groupName)
   } else {
-    return postTokenPrivateApi()
+    return postTokenPrivateApi(groupName)
   }
 }
-function postTokenProxyApi(): string {
+function postTokenProxyApi(groupName: string): string {
   const signedAsyncTokenRequest = apiSignaturev4Signer.sign({
     method: 'POST',
     protocol: 'https',
@@ -26,7 +25,7 @@ function postTokenProxyApi(): string {
   })
 
   const asyncTokenResponse = timeGroup(
-    groupMap.idCheckAsync[0],
+    groupName,
     () =>
       http.post(signedAsyncTokenRequest.url, getTokenBody(), {
         headers: { ...signedAsyncTokenRequest.headers, ...getTokenProxyApiXCustomAuthHeader() }
@@ -61,9 +60,9 @@ function getEncodedClientCredentials(): string {
   return b64encode(`${config.clientId}:${config.clientSecret}`)
 }
 
-function postTokenPrivateApi(): string {
+function postTokenPrivateApi(groupName: string): string {
   const asyncTokenResponse = timeGroup(
-    groupMap.idCheckAsync[0],
+    groupName,
     () =>
       http.post(`${getPrivateApiUrl()}${getTokenPath()}`, getTokenBody(), {
         headers: getTokenApiPrivateApiAuthorizationHeader()

@@ -74,3 +74,15 @@ export function pageContentCheck(content: string): Checkers<Response> {
     validatePageContent: r => (r.body as string).includes(content)
   }
 }
+
+/**
+ * Generates a k6 check function for a specific HTTP status code.
+ * @param {number} expectedStatus The status code to check for.
+ * @returns {Checkers<Response>} An object containing a named check function.
+ */
+
+export function isSpecificStatusCode(expectedStatus: number): Checkers<Response> {
+  return {
+    [`isStatusCode${expectedStatus}`]: (res: Response) => res.status === expectedStatus
+  }
+}

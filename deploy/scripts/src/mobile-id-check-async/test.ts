@@ -115,6 +115,5 @@ export function idCheckAsyncSignIn(): void {
   const sub = uuidv4()
   iterationsStarted.add(1)
   getActiveSession(groupMap.idCheckAsyncSignIn[0], groupMap.idCheckAsyncSignIn[1], 404, sub)
-  sleepBetween(0.5, 1)
   iterationsCompleted.add(1)
 }

@@ -45,6 +45,12 @@ const profiles: ProfileList = {
   },
   perf006Iteration4SpikeTest: {
     ...createI3SpikeSignInScenario('ticf', 129, 66, 60)
+  },
+  perf006Iteration5PeakTest: {
+    ...createI4PeakTestSignInScenario('ticf', 65, 66, 31)
+  },
+  perf006Iteration5SpikeTest: {
+    ...createI3SpikeSignInScenario('ticf', 162, 66, 75)
   }
 }
 

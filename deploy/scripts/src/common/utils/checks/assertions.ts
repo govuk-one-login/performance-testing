@@ -1,7 +1,5 @@
 import { type Response } from 'k6/http'
 import { type Checkers } from 'k6'
-import { check } from 'k6'
-
 
 /**
  * Function to check that a `Response` has status code 200/OK

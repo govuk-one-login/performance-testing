@@ -112,6 +112,9 @@ const profiles: ProfileList = {
       ],
       exec: 'reauthentication'
     }
+  },
+  perf006Iteration5PeakTest: {
+    ...createI4PeakTestSignUpScenario('authentication', 540, 30, 541)
   }
 }
 

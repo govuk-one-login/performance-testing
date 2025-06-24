@@ -75,6 +75,9 @@ const profiles: ProfileList = {
       ],
       exec: 'walletCredentialIssuance'
     }
+  },
+  perf006Iteration5PeakTest: {
+    ...createI4PeakTestSignUpScenario('getClientAttestation', 540, 12, 541)
   }
 }
 

@@ -99,6 +99,10 @@ const profiles: ProfileList = {
   perf006Iteration4PeakTest: {
     ...createI4PeakTestSignUpScenario('allEvents', 12, 20, 13),
     ...createI4PeakTestSignInScenario('authEvent', 43, 5, 21)
+  },
+  perf006Iteration5PeakTest: {
+    ...createI4PeakTestSignUpScenario('allEvents', 14, 20, 15),
+    ...createI4PeakTestSignInScenario('authEvent', 65, 5, 30)
   }
 }
 

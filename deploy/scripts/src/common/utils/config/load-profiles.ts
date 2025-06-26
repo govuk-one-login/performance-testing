@@ -414,6 +414,7 @@ export function createI3SpikeOLHScenario(
     preAllocatedVUs,
     maxVUs,
     stages: [
+      { target: step, duration: '1s' }, // Ramp down from 120/m to step target in 1 sec
       { target: step, duration: '4m' }, // Ramp up to 33% target throughput over 4 minutes
       { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
       { target, duration: `${spikeRamp}s` }, // Ramp up to 100% target throughput at 5 X PERF008 growth rate

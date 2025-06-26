@@ -5,6 +5,7 @@ import {
   createScenario,
   LoadProfile,
   createI4PeakTestSignUpScenario,
+  createI4PeakTestSignInScenario,
   createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import http from 'k6/http'
@@ -22,22 +23,24 @@ import { uuidv4 } from '../common/utils/jslib'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('cimitAPIs', LoadProfile.smoke)
+    ...createScenario('cimitSignUpAPIs', LoadProfile.smoke),
+    ...createScenario('cimitSignInAPI', LoadProfile.smoke)
   },
   lowVolume: {
-    ...createScenario('cimitAPIs', LoadProfile.short, 30, 5)
+    ...createScenario('cimitSignUpAPIs', LoadProfile.short, 30, 5)
   },
   load: {
-    ...createScenario('cimitAPIs', LoadProfile.full, 400, 5)
+    ...createScenario('cimitSignUpAPIs', LoadProfile.full, 400, 5)
   },
   perf006Iteration4PeakTest: {
-    ...createI4PeakTestSignUpScenario('cimitAPIs', 1880, 19, 471)
+    ...createI4PeakTestSignUpScenario('cimitSignUpAPIs', 1880, 19, 471)
   },
   perf006Iteration4SpikeTest: {
-    ...createI3SpikeSignUpScenario('cimitAPIs', 4520, 19, 1131)
+    ...createI3SpikeSignUpScenario('cimitSignUpAPIs', 4520, 19, 1131)
   },
   perf006Iteration5PeakTest: {
-    ...createI4PeakTestSignUpScenario('cimitAPIs', 2280, 19, 571)
+    ...createI4PeakTestSignUpScenario('cimitSignUpAPIs', 2280, 19, 571),
+    ...createI4PeakTestSignInScenario('cimitSignInAPI', 65, 6, 30)
   }
 }
 
@@ -69,7 +72,7 @@ const keys = {
   drivingLicense: JSON.parse(getEnv('IDENTITY_CIMIT_DLKEY')) as JWK
 }
 
-export async function cimitAPIs(): Promise<void> {
+export async function cimitSignUpAPIs(): Promise<void> {
   const groups = groupMap.cimitAPIs
   const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
   const payloads = {
@@ -119,4 +122,25 @@ export async function cimitAPIs(): Promise<void> {
     isStatusCode200,
     ...pageContentCheck('vc')
   })
+}
+
+export async function cimitSignInAPI(): Promise<void> {
+  const groups = groupMap.cimitAPIs
+  const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
+
+  const params = {
+    headers: {
+      'govuk-signin-journey-id': uuidv4(),
+      'ip-address': '1.2.3.4'
+    }
+  }
+
+  iterationsStarted.add(1)
+
+  // B02_CIMIT_03_GetContraIndicatorCredentials
+  timeGroup(groups[1], () => http.get(env.envURL + `/v1/contra-indicators?user_id=${subjectID}`, params), {
+    isStatusCode200,
+    ...pageContentCheck('vc')
+  })
+  iterationsCompleted.add(1)
 }

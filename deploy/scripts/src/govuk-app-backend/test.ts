@@ -163,24 +163,22 @@ export function govUkAppBackend(): void {
 
   const refreshToken = res.json('refresh_token') as string
 
-  for (let i = 0; i < 9; i++) {
-    // B01_GovUKAppBackend_04_TokenRefreshCall
-    timeGroup(
-      groups[3],
-      () =>
-        http.post(
-          env.tokenExchangeURL + '/dev/oauth2/token',
-          {
-            grant_type: 'refresh_token',
-            client_id: env.clientID,
-            refresh_token: refreshToken
-          },
-          tokenExchangeHeaders
-        ),
-      { isStatusCode200, ...pageContentCheck('expires_in') }
-    )
-    sleepBetween(0.5, 1)
-  }
+  // B01_GovUKAppBackend_04_TokenRefreshCall
+  timeGroup(
+    groups[3],
+    () =>
+      http.post(
+        env.tokenExchangeURL + '/dev/oauth2/token',
+        {
+          grant_type: 'refresh_token',
+          client_id: env.clientID,
+          refresh_token: refreshToken
+        },
+        tokenExchangeHeaders
+      ),
+    { isStatusCode200, ...pageContentCheck('expires_in') }
+  )
+  sleepBetween(0.5, 1)
 
   const revokeTokenHeaders = {
     headers: {

@@ -59,7 +59,7 @@ const profiles: ProfileList = {
       maxVUs: 288,
       stages: [
         { target: 24, duration: '12s' },
-        { target: 24, duration: '60m' }
+        { target: 24, duration: '55m' }
       ],
       exec: 'getClientAttestation'
     },

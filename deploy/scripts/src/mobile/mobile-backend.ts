@@ -55,11 +55,11 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 2,
       timeUnit: '1s',
-      preAllocatedVUs: 240,
-      maxVUs: 480,
+      preAllocatedVUs: 144,
+      maxVUs: 288,
       stages: [
-        { target: 16, duration: '8s' },
-        { target: 16, duration: '60m' }
+        { target: 24, duration: '12s' },
+        { target: 24, duration: '60m' }
       ],
       exec: 'getClientAttestation'
     },
@@ -67,8 +67,8 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 2,
       timeUnit: '1s',
-      preAllocatedVUs: 741,
-      maxVUs: 1428,
+      preAllocatedVUs: 513,
+      maxVUs: 1026,
       stages: [
         { target: 38, duration: '18s' },
         { target: 38, duration: '55m' }

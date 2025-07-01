@@ -1,3 +1,4 @@
+import { URL } from '../common/utils/jslib/url'
 import {
   selectProfile,
   type ProfileList,
@@ -13,7 +14,7 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
 import encoding from 'k6/encoding'
-import { findBetween, uuidv4 } from '../common/utils/jslib'
+import { uuidv4 } from '../common/utils/jslib'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
@@ -109,7 +110,9 @@ export function govUkAppBackend(): void {
   )
 
   sleepBetween(0.5, 1)
-  const codeFromOL = findBetween(res.url, 'code=', '&state=').toString()
+
+  const redirectURL = new URL(res.url)
+  const codeFromOL = redirectURL.searchParams.get('code') as string
 
   // B01_GovUKAppBackend_02_TokenGenerationCall
   const tokenGenHeaders = {

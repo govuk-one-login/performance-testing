@@ -4,7 +4,8 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import http, { type Response } from 'k6/http'
 import { type Options } from 'k6/options'
@@ -21,7 +22,7 @@ const profiles: ProfileList = {
   smoke: {
     ...createScenario('govUkAppBackend', LoadProfile.smoke)
   },
-  peakTest: {
+  averageVolumeTest: {
     govUkAppBackend: {
       executor: 'ramping-arrival-rate',
       startRate: 2,
@@ -29,11 +30,42 @@ const profiles: ProfileList = {
       preAllocatedVUs: 78,
       maxVUs: 156,
       stages: [
-        { target: 3, duration: '2s' },
-        { target: 3, duration: '30m' }
+        { target: 3, duration: '2s' }, //Ramp up to 3 iterations per second in 2 seconds
+        { target: 3, duration: '30m' } //Maintain target of 3 iteration per second for 30 minutes
       ],
       exec: 'govUkAppBackend'
     }
+  },
+  peakVolumeTest: {
+    govUkAppBackend: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 266,
+      maxVUs: 532,
+      stages: [
+        { target: 28, duration: '13s' }, //Ramp up to 28 iterations per second in 2 seconds
+        { target: 28, duration: '30m' } //Maintain target of 28 iteration per second for 30 minutes
+      ],
+      exec: 'govUkAppBackend'
+    }
+  },
+  soakTest: {
+    govUkAppBackend: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 78,
+      maxVUs: 156,
+      stages: [
+        { target: 3, duration: '2s' }, //Ramp up to 3 iterations per second in 2 seconds
+        { target: 3, duration: '6h' } //Maintain target of 3 iteration per second for 6 hours
+      ],
+      exec: 'govUkAppBackend'
+    }
+  },
+  spikeTest: {
+    ...createI3SpikeSignInScenario('govUkAppBackend', 84, 19, 39)
   },
   stressTest: {
     govUkAppBackend: {
@@ -43,16 +75,18 @@ const profiles: ProfileList = {
       preAllocatedVUs: 728,
       maxVUs: 1456,
       stages: [
-        { target: 5, duration: '3s' },
-        { target: 5, duration: '5m' },
-        { target: 10, duration: '3s' },
-        { target: 10, duration: '5m' },
-        { target: 15, duration: '3s' },
-        { target: 15, duration: '5m' },
-        { target: 20, duration: '3s' },
-        { target: 20, duration: '5m' },
-        { target: 28, duration: '5s' },
-        { target: 28, duration: '5m' }
+        { target: 30, duration: '15s' }, // Ramp up to 30 iterations per second in 15 seconds
+        { target: 30, duration: '5m' }, // Maintain 30 iterations per second for 5 minutes
+        { target: 60, duration: '15s' }, // Ramp up from 30 to 60 iterations per second in 15 seconds
+        { target: 60, duration: '5m' }, // Maintain 60 iterations per second for 5 minutes
+        { target: 90, duration: '15s' }, // Ramp up from 60 to 90 iterations per second in 15 seconds
+        { target: 90, duration: '5m' }, // Maintain 90 iterations per second for 5 minutes
+        { target: 120, duration: '15s' }, // Ramp up from 90 to 120 iterations per second in 15 seconds
+        { target: 120, duration: '5m' }, // Maintain 120 iterations per second for 5 minutes
+        { target: 150, duration: '15s' }, // Ramp up from 120 to 150 iterations per second in 15 seconds
+        { target: 150, duration: '5m' }, // Maintain 150 iterations per second for 5 minutes
+        { target: 167, duration: '9s' }, // Ramp up from 150 to 167 iterations per second in 15 seconds
+        { target: 167, duration: '5m' } // Maintain 167 iterations per second for 5 minutes
       ],
       exec: 'govUkAppBackend'
     }

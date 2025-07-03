@@ -32,6 +32,15 @@ const profiles: ProfileList = {
   load: {
     ...createScenario('cimitSignUpAPIs', LoadProfile.full, 400, 5)
   },
+  dataCreationGenerateCIs: {
+    generateCIs: {
+      executor: 'per-vu-iterations',
+      vus: 100,
+      iterations: 500,
+      maxDuration: '60m',
+      exec: 'generateCIs'
+    }
+  },
   perf006Iteration4PeakTest: {
     ...createI4PeakTestSignUpScenario('cimitSignUpAPIs', 1880, 19, 471)
   },
@@ -126,8 +135,7 @@ export async function cimitSignUpAPIs(): Promise<void> {
 
 export async function cimitSignInAPI(): Promise<void> {
   const groups = groupMap.cimitAPIs
-  const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
-
+  const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4() //Temporary
   const params = {
     headers: {
       'govuk-signin-journey-id': uuidv4(),
@@ -143,4 +151,50 @@ export async function cimitSignInAPI(): Promise<void> {
     ...pageContentCheck('vc')
   })
   iterationsCompleted.add(1)
+}
+
+export async function generateCIs(): Promise<void> {
+  const groups = groupMap.cimitAPIs
+  const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
+  const payloads = {
+    putContraIndicatorPayload: generatePassportPayloadCI(subjectID),
+    postMitigationsPayload: generateDrivingLicensePayloadMitigation(subjectID)
+  }
+  const createJwt = async (key: JWK, payload: object): Promise<string> => {
+    const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
+    const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+    return signJwt('ES256', importedKey, payload)
+  }
+  const putContraIndicatorJWT = await createJwt(keys.passport, payloads.putContraIndicatorPayload)
+  const putContraIndicatorReqBody = JSON.stringify({ signed_jwt: putContraIndicatorJWT })
+  const postMitigationsJWT = await createJwt(keys.drivingLicense, payloads.postMitigationsPayload)
+  const postMitigationReqBody = JSON.stringify({ signed_jwts: [postMitigationsJWT] })
+  const params = {
+    headers: {
+      'govuk-signin-journey-id': uuidv4(),
+      'ip-address': '1.2.3.4'
+    }
+  }
+
+  iterationsStarted.add(1)
+  // B01_CIMIT_01_PutContraIndicator
+  timeGroup(
+    groups[0],
+    () => http.post(env.envURL + '/v1/contra-indicators/detect', putContraIndicatorReqBody, params),
+    {
+      isStatusCode200,
+      ...pageContentCheck('success')
+    }
+  )
+
+  sleep(5)
+
+  // B03_CIMIT_02_PostMitigations
+  timeGroup(groups[2], () => http.post(env.envURL + '/v1/contra-indicators/mitigate', postMitigationReqBody, params), {
+    isStatusCode200,
+    ...pageContentCheck('success')
+  })
+  iterationsCompleted.add(1)
+
+  console.log(subjectID)
 }

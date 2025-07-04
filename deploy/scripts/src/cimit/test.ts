@@ -21,6 +21,7 @@ import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/web
 import { signJwt } from '../common/utils/authentication/jwt'
 import { sleep } from 'k6'
 import { uuidv4 } from '../common/utils/jslib'
+import execution from 'k6/execution'
 
 const profiles: ProfileList = {
   smoke: {
@@ -57,11 +58,11 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 const groupMap = {
   cimitSignUpAPIs: [
-    'B01_CIMIT_01_PutContraIndicator',
-    'B03_CIMIT_02_PostMitigations',
-    'B02_CIMIT_03_GetContraIndicatorCredentials'
+    'B01_CIMITSignUp_01_PutContraIndicator',
+    'B01_CIMITSignUp_02_PostMitigations',
+    'B01_CIMITSignUp_03_GetContraIndicatorCredentials'
   ],
-  cimitSignInAPIs: ['B02_CIMIT_03_GetContraIndicatorCredentials']
+  cimitSignInAPIs: ['B02_CIMITSignIn_01_GetContraIndicatorCredentials']
 } as const
 
 export const options: Options = {
@@ -152,7 +153,7 @@ export async function cimitSignUpAPIs(): Promise<void> {
 }
 
 export async function cimitSignInAPI(): Promise<void> {
-  const retrieveData = csvData[Math.floor(Math.random() * csvData.length)]
+  const retrieveData = csvData[execution.vu.idInTest - 1]
   const groups = groupMap.cimitSignInAPIs
   const params = {
     headers: {

@@ -68,7 +68,7 @@ jobs:
         with:
           node-version: 20
       - name: Setup SAM CLI
-        uses: aws-actions/setup-sam@819220f63fb333a9a394dd0a5cab2d8303fd17e2 # v2
+        uses: aws-actions/setup-sam@f664fad9e12492edfc187a31f575537dfbb0ff63 # v2
 
       - name: SAM Validate
         run: |

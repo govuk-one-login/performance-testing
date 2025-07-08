@@ -140,7 +140,6 @@ export async function cimitSignUpAPIs(): Promise<void> {
     isStatusCode200,
     ...pageContentCheck('success')
   })
-  iterationsCompleted.add(1)
 
   sleep(5)
 
@@ -149,7 +148,10 @@ export async function cimitSignUpAPIs(): Promise<void> {
     isStatusCode200,
     ...pageContentCheck('vc')
   })
+
   console.log(subjectID)
+
+  iterationsCompleted.add(1)
 }
 
 export async function cimitSignInAPI(): Promise<void> {

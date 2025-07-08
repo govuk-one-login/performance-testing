@@ -62,7 +62,7 @@ const groupMap = {
     'B01_CIMITSignUp_02_PostMitigations',
     'B01_CIMITSignUp_03_GetContraIndicatorCredentials'
   ],
-  cimitSignInAPIs: ['B02_CIMITSignIn_01_GetContraIndicatorCredentials']
+  cimitSignInAPI: ['B02_CIMITSignIn_01_GetContraIndicatorCredentials']
 } as const
 
 export const options: Options = {
@@ -154,7 +154,7 @@ export async function cimitSignUpAPIs(): Promise<void> {
 
 export async function cimitSignInAPI(): Promise<void> {
   const retrieveData = csvData[execution.vu.idInTest - 1]
-  const groups = groupMap.cimitSignInAPIs
+  const groups = groupMap.cimitSignInAPI
   const params = {
     headers: {
       'govuk-signin-journey-id': uuidv4(),

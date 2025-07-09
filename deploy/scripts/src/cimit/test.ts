@@ -25,36 +25,36 @@ import execution from 'k6/execution'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('cimitSignUpAPIs', LoadProfile.smoke),
+    ...createScenario('cimitIDProvingAPIs', LoadProfile.smoke),
     ...createScenario('cimitSignInAPI', LoadProfile.smoke)
   },
   lowVolume: {
-    ...createScenario('cimitSignUpAPIs', LoadProfile.short, 30, 5)
+    ...createScenario('cimitIDProvingAPIs', LoadProfile.short, 30, 5)
   },
   load: {
-    ...createScenario('cimitSignUpAPIs', LoadProfile.full, 400, 5)
+    ...createScenario('cimitIDProvingAPIs', LoadProfile.full, 400, 5)
   },
   dataCreationGenerateCIs: {
-    cimitSignUpAPIs: {
+    cimitIDProvingAPIs: {
       executor: 'per-vu-iterations',
       vus: 100,
       iterations: 500,
       maxDuration: '60m',
-      exec: 'cimitSignUpAPIs'
+      exec: 'cimitIDProvingAPIs'
     }
   },
   perf006Iteration4PeakTest: {
-    ...createI4PeakTestSignUpScenario('cimitSignUpAPIs', 1880, 19, 471)
+    ...createI4PeakTestSignUpScenario('cimitIDProvingAPIs', 1880, 19, 471)
   },
   perf006Iteration4SpikeTest: {
-    ...createI3SpikeSignUpScenario('cimitSignUpAPIs', 4520, 19, 1131)
+    ...createI3SpikeSignUpScenario('cimitIDProvingAPIs', 4520, 19, 1131)
   },
   perf006Iteration5PeakTest: {
-    ...createI4PeakTestSignUpScenario('cimitSignUpAPIs', 2280, 19, 571),
+    ...createI4PeakTestSignUpScenario('cimitIDProvingAPIs', 2280, 19, 571),
     ...createI4PeakTestSignInScenario('cimitSignInAPI', 65, 6, 30)
   },
   perf006Iteration5SpikeTest: {
-    cimitSignUpAPIs: {
+    cimitIDProvingAPIs: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',
@@ -70,7 +70,7 @@ const profiles: ProfileList = {
         { target: 4520, duration: '1130s' },
         { target: 4520, duration: '5m' }
       ],
-      exec: 'cimitSignUpAPIs'
+      exec: 'cimitIDProvingAPIs'
     },
     cimitSignInAPI: {
       executor: 'ramping-arrival-rate',
@@ -95,10 +95,10 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  cimitSignUpAPIs: [
-    'B01_CIMITSignUp_01_PutContraIndicator',
-    'B01_CIMITSignUp_02_PostMitigations',
-    'B01_CIMITSignUp_03_GetContraIndicatorCredentials'
+  cimitIDProvingAPIs: [
+    'B01_CIMITIDProving_01_PutContraIndicator',
+    'B01_CIMITIDProving_02_PostMitigations',
+    'B01_CIMITIDProving_03_GetContraIndicatorCredentials'
   ],
   cimitSignInAPI: ['B02_CIMITSignIn_01_GetContraIndicatorCredentials']
 } as const
@@ -137,8 +137,8 @@ const keys = {
   drivingLicense: JSON.parse(getEnv('IDENTITY_CIMIT_DLKEY')) as JWK
 }
 
-export async function cimitSignUpAPIs(): Promise<void> {
-  const groups = groupMap.cimitSignUpAPIs
+export async function cimitIDProvingAPIs(): Promise<void> {
+  const groups = groupMap.cimitIDProvingAPIs
   const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
   const payloads = {
     putContraIndicatorPayload: generatePassportPayloadCI(subjectID),

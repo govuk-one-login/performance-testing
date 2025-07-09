@@ -54,7 +54,7 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('cimitSignInAPI', 65, 6, 30)
   },
   perf006Iteration5SpikeTest: {
-    cimitSignUpAPIs: {
+    cimitIDProvingAPIs: {
       executor: 'ramping-arrival-rate',
       startRate: 1,
       timeUnit: '10s',
@@ -70,7 +70,7 @@ const profiles: ProfileList = {
         { target: 4520, duration: '1130s' },
         { target: 4520, duration: '5m' }
       ],
-      exec: 'cimitSignUpAPIs'
+      exec: 'cimitIDProvingAPIs'
     },
     cimitSignInAPI: {
       executor: 'ramping-arrival-rate',
@@ -95,10 +95,10 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  cimitSignUpAPIs: [
-    'B01_CIMITSignUp_01_PutContraIndicator',
-    'B01_CIMITSignUp_02_PostMitigations',
-    'B01_CIMITSignUp_03_GetContraIndicatorCredentials'
+  cimitIDProvingAPIs: [
+    'B01_CIMITIDProving_01_PutContraIndicator',
+    'B01_CIMITIDProving_02_PostMitigations',
+    'B01_CIMITIDProving_03_GetContraIndicatorCredentials'
   ],
   cimitSignInAPI: ['B02_CIMITSignIn_01_GetContraIndicatorCredentials']
 } as const
@@ -137,8 +137,8 @@ const keys = {
   drivingLicense: JSON.parse(getEnv('IDENTITY_CIMIT_DLKEY')) as JWK
 }
 
-export async function cimitSignUpAPIs(): Promise<void> {
-  const groups = groupMap.cimitSignUpAPIs
+export async function cimitIDProvingAPIs(): Promise<void> {
+  const groups = groupMap.cimitIDProvingAPIs
   const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
   const payloads = {
     putContraIndicatorPayload: generatePassportPayloadCI(subjectID),

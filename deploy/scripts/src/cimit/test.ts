@@ -52,6 +52,44 @@ const profiles: ProfileList = {
   perf006Iteration5PeakTest: {
     ...createI4PeakTestSignUpScenario('cimitSignUpAPIs', 2280, 19, 571),
     ...createI4PeakTestSignInScenario('cimitSignInAPI', 65, 6, 30)
+  },
+  perf006Iteration5SpikeTest: {
+    cimitSignUpAPIs: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 2500,
+      maxVUs: 5000,
+      stages: [
+        { target: 1510, duration: '4m' },
+        { target: 1510, duration: '5m' },
+        { target: 4520, duration: '226s' },
+        { target: 4520, duration: '5m' },
+        { target: 1510, duration: '1s' },
+        { target: 1510, duration: '5m' },
+        { target: 4520, duration: '1130s' },
+        { target: 4520, duration: '5m' }
+      ],
+      exec: 'cimitSignUpAPIs'
+    },
+    cimitSignInAPIs: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 243,
+      maxVUs: 486,
+      stages: [
+        { target: 54, duration: '4m' },
+        { target: 54, duration: '5m' },
+        { target: 162, duration: '15s' },
+        { target: 162, duration: '5m' },
+        { target: 54, duration: '1s' },
+        { target: 54, duration: '5m' },
+        { target: 162, duration: '75s' },
+        { target: 162, duration: '5m' }
+      ],
+      exec: 'cimitSignInAPIs'
+    }
   }
 }
 
@@ -150,8 +188,6 @@ export async function cimitSignUpAPIs(): Promise<void> {
   })
 
   iterationsCompleted.add(1)
-
-  console.log(subjectID)
 }
 
 export async function cimitSignInAPI(): Promise<void> {

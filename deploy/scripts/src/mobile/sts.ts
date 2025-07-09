@@ -1,4 +1,5 @@
 import {
+  createI3SpikeSignUpScenario,
   createI4PeakTestSignUpScenario,
   createScenario,
   describeProfile,
@@ -115,6 +116,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration5PeakTest: {
     ...createI4PeakTestSignUpScenario('authentication', 540, 30, 541)
+  },
+  perf006Iteration5SpikeTest: {
+    ...createI3SpikeSignUpScenario('authentication', 1074, 30, 1075)
   }
 }
 

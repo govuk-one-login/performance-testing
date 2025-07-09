@@ -72,7 +72,7 @@ const profiles: ProfileList = {
       ],
       exec: 'cimitSignUpAPIs'
     },
-    cimitSignInAPIs: {
+    cimitSignInAPI: {
       executor: 'ramping-arrival-rate',
       startRate: 2,
       timeUnit: '1s',
@@ -88,7 +88,7 @@ const profiles: ProfileList = {
         { target: 162, duration: '75s' },
         { target: 162, duration: '5m' }
       ],
-      exec: 'cimitSignInAPIs'
+      exec: 'cimitSignInAPI'
     }
   }
 }

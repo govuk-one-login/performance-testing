@@ -718,7 +718,7 @@ export function signIn(): void {
   // B02_SignIn_02_ClickSignIn
   res = timeGroup(groups[7], () => res.submitForm(), {
     isStatusCode200,
-    ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
+    ...pageContentCheck('Enter your email address')
   })
 
   sleep(1)

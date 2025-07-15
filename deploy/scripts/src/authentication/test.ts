@@ -815,7 +815,6 @@ export function signIn(): void {
         })
       }
     }
-    iterationsCompleted.add(1)
 
     if (acceptNewTerms) {
       // B02_SignIn_06_AcceptTermsConditions
@@ -849,7 +848,7 @@ export function signIn(): void {
           })
         }
       })
-      iterationsCompleted.add(1)
     }
   })
+  iterationsCompleted.add(1)
 }

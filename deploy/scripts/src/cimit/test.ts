@@ -17,11 +17,40 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { generatePassportPayloadCI, generateDrivingLicensePayloadMitigation } from './request/generator'
-import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
 import { signJwt } from '../common/utils/authentication/jwt'
 import { sleep } from 'k6'
 import { uuidv4 } from '../common/utils/jslib'
 import execution from 'k6/execution'
+
+declare type EcKeyImportParams = {
+  name: string
+  namedCurve: string
+}
+
+declare type JWK = {
+  kty?: string
+  use?: string
+  key_ops?: string[]
+  alg?: string
+  kid?: string
+  x5u?: string
+  x5c?: string[]
+  x5t?: string
+  'x5t#S256'?: string
+  n?: string
+  e?: string
+  d?: string
+  p?: string
+  q?: string
+  dp?: string
+  dq?: string
+  qi?: string
+  crv?: string
+  x?: string
+  y?: string
+  d_?: string
+  k?: string
+}
 
 const profiles: ProfileList = {
   smoke: {
@@ -146,7 +175,7 @@ export async function cimitIDProvingAPIs(): Promise<void> {
   }
   const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
-    const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+    const importedKey = await crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     return signJwt('ES256', importedKey, payload)
   }
   const putContraIndicatorJWT = await createJwt(keys.passport, payloads.putContraIndicatorPayload)

@@ -1,13 +1,19 @@
-import {
-  crypto,
-  type HmacKeyGenParams,
-  type EcKeyGenParams,
-  type EcdsaParams,
-  type CryptoKey,
-  type Algorithm,
-  type CryptoKeyPair
-} from 'k6/experimental/webcrypto'
+// import {
+//   crypto,
+//   type HmacKeyGenParams,
+//   type EcKeyGenParams,
+//   type EcdsaParams,
+//   type CryptoKey,
+//   type Algorithm,
+//   type CryptoKeyPair
+// } from 'k6/experimental/webcrypto'
+
 import { b64decode, b64encode } from 'k6/encoding'
+
+declare type CustomAlgorithm<T extends string = string> = {
+  name: T
+  [key: string]: unknown
+}
 
 // Supported JWT algorithms
 export type HmacAlgorithm = 'HS256' | 'HS384' | 'HS512'
@@ -25,7 +31,7 @@ export const algKeyMap: Record<JwtAlgorithm, HmacKeyGenParams | EcKeyGenParams> 
   ES384: { name: 'ECDSA', namedCurve: 'P-384' },
   ES512: { name: 'ECDSA', namedCurve: 'P-521' }
 }
-export const algParamMap: Record<JwtAlgorithm, 'HMAC' | Algorithm<'HMAC'> | EcdsaParams> = {
+export const algParamMap: Record<JwtAlgorithm, 'HMAC' | CustomAlgorithm<'HMAC'> | EcdsaParams> = {
   HS256: { name: 'HMAC' },
   HS384: { name: 'HMAC' },
   HS512: { name: 'HMAC' },

@@ -275,6 +275,10 @@ const profiles: ProfileList = {
   perf006Iteration5PeakTest: {
     ...createI4PeakTestSignUpScenario('signUp', 570, 33, 571),
     ...createI4PeakTestSignInScenario('signIn', 65, 18, 31)
+  },
+  perf006Iteration5SpikeTest: {
+    ...createI3SpikeSignUpScenario('signUp', 1130, 33, 1131),
+    ...createI3SpikeSignInScenario('signIn', 162, 18, 74)
   }
 }
 const loadProfile = selectProfile(profiles)
@@ -714,7 +718,7 @@ export function signIn(): void {
   // B02_SignIn_02_ClickSignIn
   res = timeGroup(groups[7], () => res.submitForm(), {
     isStatusCode200,
-    ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
+    ...pageContentCheck('Enter your email address')
   })
 
   sleep(1)

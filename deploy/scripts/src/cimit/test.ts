@@ -192,8 +192,6 @@ export async function cimitIDProvingAPIs(): Promise<void> {
   })
 
   iterationsCompleted.add(1)
-
-  console.log(subjectID)
 }
 
 export async function cimitSignInAPI(): Promise<void> {

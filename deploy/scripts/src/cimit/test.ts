@@ -90,6 +90,10 @@ const profiles: ProfileList = {
       ],
       exec: 'cimitSignInAPI'
     }
+  },
+  perf006Iteration6PeakTest: {
+    ...createI4PeakTestSignUpScenario('cimitIDProvingAPIs', 4720, 19, 921),
+    ...createI4PeakTestSignInScenario('cimitSignInAPI', 104, 6, 48)
   }
 }
 
@@ -188,6 +192,8 @@ export async function cimitIDProvingAPIs(): Promise<void> {
   })
 
   iterationsCompleted.add(1)
+
+  console.log(subjectID)
 }
 
 export async function cimitSignInAPI(): Promise<void> {

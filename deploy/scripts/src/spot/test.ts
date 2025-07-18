@@ -14,11 +14,36 @@ import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { generateSPOTRequest } from './request/generator'
 import { signJwt } from '../common/utils/authentication/jwt'
-import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
-import crypto from 'k6/crypto'
+import k6crypto from 'k6/crypto' //
 import { b64decode } from 'k6/encoding'
 import { SpotRequestInfo } from './request/types'
 import { generateFraudPayload, generateKBVPayload, generatePassportPayload } from './request/generator'
+
+declare type EcKeyImportParams = { name: string; namedCurve: string }
+declare type JWK = {
+  kty?: string
+  use?: string
+  key_ops?: string[]
+  alg?: string
+  kid?: string
+  x5u?: string
+  x5c?: string[]
+  x5t?: string
+  'x5t#S256'?: string
+  n?: string
+  e?: string
+  d?: string
+  p?: string
+  q?: string
+  dp?: string
+  dq?: string
+  qi?: string
+  crv?: string
+  x?: string
+  y?: string
+  d_?: string
+  k?: string
+}
 
 const profiles: ProfileList = {
   smoke: {
@@ -105,7 +130,9 @@ export async function spot(): Promise<void> {
   }
 
   const pairwiseSub = (sectorId: string): string => {
-    const hasher = crypto.createHash('sha256')
+    //const hasher = crypto.createHash('sha256')
+    const hasher = k6crypto.createHash('sha256')
+
     hasher.update(sectorId)
     hasher.update(config.host)
     hasher.update(b64decode(config.salt))
@@ -120,7 +147,9 @@ export async function spot(): Promise<void> {
   }
   const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
-    const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+    //const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+    const importedKey = await crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+
     return signJwt('ES256', importedKey, payload)
   }
   const jwts = [

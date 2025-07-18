@@ -381,7 +381,7 @@ if (!validRoute.includes(route)) throw new Error(`Route '${route}' not in [${val
 
 const env = {
   stubEndpoint: getEnv(`ACCOUNT_${route}_STUB`),
-  staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true',
+  staticResources: __ENV.K6_NO_STATIC_RESOURCES == 'true',
   authStagingURL: getEnv('ACCOUNT_STAGING_URL')
 }
 

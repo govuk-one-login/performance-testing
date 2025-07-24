@@ -720,7 +720,8 @@ export function identity(stubOnly: boolean = false): void {
           fields: passport
             ? {
                 jsonPayload: fraudPayloadP,
-                identityFraudScore: '2'
+                identityFraudScore: '2',
+                activityHistoryScore: '1'
               }
             : {
                 jsonPayload: fraudPayloadDL,

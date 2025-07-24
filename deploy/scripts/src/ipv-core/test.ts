@@ -395,37 +395,35 @@ const groupMap = {
     'B01_Identity_02_GoToFullJourneyRoute::01_OrchStubCall',
     'B01_Identity_02_GoToFullJourneyRoute::02_CoreCall',
     'B01_Identity_03_LiveInTheUK',
-    'B01_Identity_04_ClickContinueStartPage',
-    'B01_Identity_04_ClickContinueStartPage::01_CoreCall',
-    'B01_Identity_04_ClickContinueStartPage::02_DCMAWStub',
-    'B01_Identity_05_DCMAWContinue',
-    'B01_Identity_05_DCMAWContinue::01_DCMAWStub',
-    'B01_Identity_05_DCMAWContinue::02_CoreCall',
-    'B01_Identity_06_ContinueOnPYIStartPage',
-    'B01_Identity_06_ContinueOnPYIStartPage::01_CoreCall',
-    'B01_Identity_06_ContinueOnPYIStartPage::02_PassStub',
-    'B01_Identity_06_ContinueOnPYIStartPage::02_DLStub',
-    'B01_Identity_07_DocumentDataContinue',
-    'B01_Identity_07_DocumentDataContinue::01_PassStub',
-    'B01_Identity_07_DocumentDataContinue::01_DLStub',
-    'B01_Identity_07_DocumentDataContinue::02_CoreCall',
-    'B01_Identity_07_DocumentDataContinue::03_AddStub',
-    'B01_Identity_08_AddrDataContinue',
-    'B01_Identity_08_AddrDataContinue::01_AddStub',
-    'B01_Identity_08_AddrDataContinue::02_CoreCall',
-    'B01_Identity_08_AddrDataContinue::03_FraudStub',
-    'B01_Identity_09_FraudDataContinue',
-    'B01_Identity_09_FraudDataContinue::01_FraudStub',
-    'B01_Identity_09_FraudDataContinue::02_CoreCall',
-    'B01_Identity_10_PreKBVTransition',
-    'B01_Identity_10_PreKBVTransition::01_CoreCall',
-    'B01_Identity_10_PreKBVTransition::02_KBVStub',
-    'B01_Identity_11_KBVDataContinue',
-    'B01_Identity_11_KBVDataContinue::01_KBVStub',
-    'B01_Identity_11_KBVDataContinue::02_CoreCall',
-    'B01_Identity_12_ContinueSuccessPage',
-    'B01_Identity_12_ContinueSuccessPage::01_CoreCall',
-    'B01_Identity_12_ContinueSuccessPage::02_OrchStub'
+    'B01_Identity_04_SelectPhotoIDChoice',
+    'B01_Identity_05_SelectDeviceOption',
+    'B01_Identity_06_SelectNoSmartphone',
+    'B01_Identity_07_SelectAnotherWayToProveIdentity',
+    'B01_Identity_08_SelectDocumentType',
+    'B01_Identity_08_SelectDocumentType::01_CoreCall',
+    'B01_Identity_08_SelectDocumentType::02_PassStub',
+    'B01_Identity_08_SelectDocumentType::02_DLStub',
+    'B01_Identity_09_DocumentDataContinue',
+    'B01_Identity_09_DocumentDataContinue::01_PassStub',
+    'B01_Identity_09_DocumentDataContinue::01_DLStub',
+    'B01_Identity_09_DocumentDataContinue::02_CoreCall',
+    'B01_Identity_09_DocumentDataContinue::03_AddStub',
+    'B01_Identity_10_AddrDataContinue',
+    'B01_Identity_10_AddrDataContinue::01_AddStub',
+    'B01_Identity_10_AddrDataContinue::02_CoreCall',
+    'B01_Identity_10_AddrDataContinue::03_FraudStub',
+    'B01_Identity_11_FraudDataContinue',
+    'B01_Identity_11_FraudDataContinue::01_FraudStub',
+    'B01_Identity_11_FraudDataContinue::02_CoreCall',
+    'B01_Identity_12_PreKBVTransition',
+    'B01_Identity_12_PreKBVTransition::01_CoreCall',
+    'B01_Identity_12_PreKBVTransition::02_KBVStub',
+    'B01_Identity_13_KBVDataContinue',
+    'B01_Identity_13_KBVDataContinue::01_KBVStub',
+    'B01_Identity_13_KBVDataContinue::02_CoreCall',
+    'B01_Identity_14_ContinueSuccessPage',
+    'B01_Identity_14_ContinueSuccessPage::01_CoreCall',
+    'B01_Identity_14_ContinueSuccessPage::02_OrchStub'
   ],
   idReuse: [
     'B02_IDReuse_01_LoginToCore',
@@ -576,57 +574,61 @@ export function identity(stubOnly: boolean = false): void {
     { isStatusCode200, ...pageContentCheck('Tell us if you have one of the following types of photo ID') }
   )
 
-  // B01_Identity_04_ClickContinueStartPage
-  timeGroup(groups[5], () => {
-    // 01_CoreCall
-    res = timeGroup(
-      groups[6].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: { journey: 'appTriage' },
-          params: { redirects: 0 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_DCMAWStub
-    res = timeGroup(groups[7].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('DOC Checking App (Stub)')
-    })
-  })
+  sleepBetween(0.5, 1)
+
+  // B01_Identity_04_SelectPhotoIDChoice
+  res = timeGroup(
+    groups[5],
+    () =>
+      res.submitForm({
+        fields: { journey: 'appTriage' }
+      }),
+    { isStatusCode200, ...pageContentCheck('Are you on a computer or a tablet right now?') }
+  )
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_05_DCMAWContinue
-  timeGroup(groups[8], () => {
-    // 01_DCMAWStub
-    res = timeGroup(
-      groups[9].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: {
-            requested_oauth_error_endpoint: 'auth',
-            requested_oauth_error: 'access_denied'
-          },
-          params: { redirects: 0 }
-        }),
-      { isStatusCode302 }
-    )
-    // 02_CoreCall
-
-    res = timeGroup(groups[10].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
-      ...pageContentCheck('Enter your UK passport details')
-    })
-  })
+  // B01_Identity_05_SelectDeviceOption
+  res = timeGroup(
+    groups[6],
+    () =>
+      res.submitForm({
+        fields: { journey: 'computer-or-tablet' }
+      }),
+    { isStatusCode200, ...pageContentCheck('Do you have access to an iPhone or Android phone?') }
+  )
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_06_ContinueOnPYIStartPage
-  timeGroup(groups[11], () => {
+  // B01_Identity_06_SelectNoSmartphone
+  res = timeGroup(
+    groups[7],
+    () =>
+      res.submitForm({
+        fields: { journey: 'neither' }
+      }),
+    { isStatusCode200, ...pageContentCheck('Are you sure you want to try to prove your identity another way?') }
+  )
+
+  sleepBetween(0.5, 1)
+
+  // B01_Identity_07_SelectAnotherWayToProveIdentity
+  res = timeGroup(
+    groups[8],
+    () =>
+      res.submitForm({
+        fields: { journey: 'anotherWay' }
+      }),
+    { isStatusCode200, ...pageContentCheck('How would you like to prove your identity?') }
+  )
+
+  sleepBetween(0.5, 1)
+
+  // B01_Identity_08_SelectDocumentType
+  timeGroup(groups[9], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[12].split('::')[1],
+      groups[10].split('::')[1],
       () =>
         res.submitForm({
           fields: { journey: passport ? 'ukPassport' : 'drivingLicence' },
@@ -635,7 +637,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_XXXStub
-    const name = (passport ? groups[13] : groups[14]).split('::')[1]
+    const name = (passport ? groups[11] : groups[12]).split('::')[1]
     const content = passport ? 'UK Passport (Stub)' : 'Driving Licence (Stub)'
     res = timeGroup(name, () => http.get(res.headers.Location), {
       isStatusCode200,
@@ -645,10 +647,10 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_07_DocumentDataContinue
-  timeGroup(groups[15], () => {
+  // B01_Identity_09_DocumentDataContinue
+  timeGroup(groups[13], () => {
     // 01_XXXStub
-    const name = (passport ? groups[16] : groups[17]).split('::')[1]
+    const name = (passport ? groups[14] : groups[15]).split('::')[1] // groups[14] is PassStub, groups[15] is DLStub
     res = timeGroup(
       name,
       () =>
@@ -671,11 +673,11 @@ export function identity(stubOnly: boolean = false): void {
     )
 
     // 02_CoreCall
-    res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
       isStatusCode302
     })
     // 03_AddStub
-    res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[17].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Address (Stub)')
     })
@@ -683,11 +685,11 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_08_AddrDataContinue
-  timeGroup(groups[20], () => {
+  // B01_Identity_10_AddrDataContinue
+  timeGroup(groups[18], () => {
     // 01_AddStub
     res = timeGroup(
-      groups[21].split('::')[1],
+      groups[19].split('::')[1],
       () =>
         res.submitForm({
           fields: { jsonPayload: passport ? addressPayloadP : addressPayloadDL },
@@ -696,11 +698,11 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[22].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
       isStatusCode302
     })
     // 03_FraudStub
-    res = timeGroup(groups[23].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Fraud Check (Stub)')
     })
@@ -708,17 +710,18 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_09_FraudDataContinue
-  timeGroup(groups[24], () => {
+  // B01_Identity_11_FraudDataContinue
+  timeGroup(groups[22], () => {
     // 01_FraudStub
     res = timeGroup(
-      groups[25].split('::')[1],
+      groups[23].split('::')[1],
       () =>
         res.submitForm({
           fields: passport
             ? {
                 jsonPayload: fraudPayloadP,
-                identityFraudScore: '2'
+                identityFraudScore: '2',
+                activityHistoryScore: '1'
               }
             : {
                 jsonPayload: fraudPayloadDL,
@@ -730,7 +733,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[26].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[24].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Answer security questions')
     })
@@ -738,11 +741,11 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_10_PreKBVTransition
-  timeGroup(groups[27], () => {
+  // B01_Identity_12_PreKBVTransition
+  timeGroup(groups[25], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[28].split('::')[1],
+      groups[26].split('::')[1],
       () =>
         res.submitForm({
           params: { redirects: 0 }
@@ -750,7 +753,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_KBVStub
-    res = timeGroup(groups[29].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[27].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Knowledge Based Verification (Stub)')
     })
@@ -758,11 +761,11 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_11_KBVDataContinue
-  timeGroup(groups[30], () => {
+  // B01_Identity_13_KBVDataContinue
+  timeGroup(groups[28], () => {
     // 01_KBVStub
     res = timeGroup(
-      groups[31].split('::')[1],
+      groups[29].split('::')[1],
       () =>
         res.submitForm({
           fields: {
@@ -774,7 +777,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[32].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[30].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Continue to the service you need to use')
     })
@@ -782,11 +785,11 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_12_ContinueSuccessPage
-  timeGroup(groups[33], () => {
+  // B01_Identity_14_ContinueSuccessPage
+  timeGroup(groups[31], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[34].split('::')[1],
+      groups[32].split('::')[1],
       () =>
         res.submitForm({
           params: { redirects: 0 }
@@ -795,7 +798,7 @@ export function identity(stubOnly: boolean = false): void {
     )
     // 02_OrchStub
     res = timeGroup(
-      groups[35].split('::')[1],
+      groups[33].split('::')[1],
       () =>
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }

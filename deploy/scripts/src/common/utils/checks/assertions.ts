@@ -44,6 +44,20 @@ export function isStatusCode202(response: Response): boolean {
 }
 
 /**
+ * Function to check that a `Response` has status code 204 No Content
+ * @param {Response} response `Response` to check that status code of
+ * @returns {boolean} `true` if status code is `204`, `false` otherwise
+ * @example
+ * const res = timeRequest(
+ *   () => http.get(url),
+ *   { isStatusCode204 }
+ * )
+ */
+export function isStatusCode204(response: Response): boolean {
+  return response.status === 204
+}
+
+/**
  * Function to check that a `Response` has status code 302/Found
  * @param {Response} response `Response` to check that status code of
  * @returns {boolean} `true` if status code is `302`, `false` otherwise

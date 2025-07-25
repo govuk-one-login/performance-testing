@@ -27,7 +27,7 @@ const profiles: ProfileList = {
     ...createScenario('invalidate', LoadProfile.smoke)
   },
   perf006Iteration6PeakTest: {
-    ...createI4PeakTestSignUpScenario('identity', 4720, 19, 921),
+    ...createI4PeakTestSignUpScenario('identity', 570, 11, 571),
     ...createI4PeakTestSignInScenario('invalidate', 104, 6, 48)
   }
 }

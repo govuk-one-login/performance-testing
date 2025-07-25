@@ -381,7 +381,7 @@ if (!validRoute.includes(route)) throw new Error(`Route '${route}' not in [${val
 
 const env = {
   stubEndpoint: getEnv(`ACCOUNT_${route}_STUB`),
-  staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true',
+  staticResources: __ENV.K6_NO_STATIC_RESOURCES == 'true',
   authStagingURL: getEnv('ACCOUNT_STAGING_URL')
 }
 
@@ -815,7 +815,6 @@ export function signIn(): void {
         })
       }
     }
-    iterationsCompleted.add(1)
 
     if (acceptNewTerms) {
       // B02_SignIn_06_AcceptTermsConditions
@@ -849,7 +848,7 @@ export function signIn(): void {
           })
         }
       })
-      iterationsCompleted.add(1)
     }
   })
+  iterationsCompleted.add(1)
 }

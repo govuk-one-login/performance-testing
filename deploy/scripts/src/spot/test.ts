@@ -86,6 +86,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration5SpikeTest: {
     ...createI3SpikeSignInScenario('spot', 275, 3, 126)
+  },
+  perf006Iteration6PeakTest: {
+    ...createI4PeakTestSignInScenario('spot', 161, 3, 48)
   }
 }
 

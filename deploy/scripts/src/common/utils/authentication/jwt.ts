@@ -16,6 +16,7 @@ export type JwtAlgorithm = HmacAlgorithm | EcAlgorithm
 export type JwtHeader = {
   typ: 'JWT'
   alg: JwtAlgorithm
+  kid: string
 }
 export const algKeyMap: Record<JwtAlgorithm, HmacKeyGenParams | EcKeyGenParams> = {
   HS256: { name: 'HMAC', hash: 'SHA-256' },
@@ -69,8 +70,8 @@ export async function createKey(type: JwtAlgorithm): Promise<CryptoKey | CryptoK
  * // Create JWT string
  * const jwt = await signJwt('EC256', keys.privateKey, payload)
  */
-export async function signJwt(type: JwtAlgorithm, key: CryptoKey, data: object): Promise<string> {
-  const header = b64encode(JSON.stringify({ alg: type, typ: 'JWT' }), 'rawurl')
+export async function signJwt(type: JwtAlgorithm, key: CryptoKey, data: object, kid: string): Promise<string> {
+  const header = b64encode(JSON.stringify({ alg: type, typ: 'JWT', kid: kid }), 'rawurl')
   const payload = b64encode(JSON.stringify(data), 'rawurl')
   const buf = strToBuf(`${header}.${payload}`)
   const sigBuf = await crypto.subtle.sign(algParamMap[type], key, buf)

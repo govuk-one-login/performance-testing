@@ -50,7 +50,8 @@ export function setup(): void {
 
 const env = {
   envURL: getEnv('IDENTITY_SIS_URL'),
-  envApiKey: getEnv('IDENTITY_SIS_API_KEY')
+  envApiKey: getEnv('IDENTITY_SIS_API_KEY'),
+  keyID: getEnv('IDENTITY_SIS_KID')
 }
 const keys = {
   identity: JSON.parse(getEnv('IDENTITY_SIS_PRIVATEKEY')) as JWK
@@ -65,7 +66,7 @@ export async function identity(): Promise<void> {
   const createJwt = async (key: JWK, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
-    return signJwt('ES256', importedKey, payload)
+    return signJwt('ES256', importedKey, payload, env.keyID)
   }
   const identityJWT = await createJwt(keys.identity, payloads.identityPayload)
   const identityReqBody = JSON.stringify({

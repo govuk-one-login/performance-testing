@@ -141,6 +141,11 @@ const keys = {
   drivingLicense: JSON.parse(getEnv('IDENTITY_CIMIT_DLKEY')) as JWK
 }
 
+const kids = {
+  passport: getEnv('IDENTITY_CIMIT_PASSPORT_KID'),
+  drivingLicence: getEnv('IDENTITY_CIMIT_DL_KID')
+}
+
 export async function cimitIDProvingAPIs(): Promise<void> {
   const groups = groupMap.cimitIDProvingAPIs
   const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
@@ -148,14 +153,14 @@ export async function cimitIDProvingAPIs(): Promise<void> {
     putContraIndicatorPayload: generatePassportPayloadCI(subjectID),
     postMitigationsPayload: generateDrivingLicensePayloadMitigation(subjectID)
   }
-  const createJwt = async (key: JWK, payload: object): Promise<string> => {
+  const createJwt = async (key: JWK, payload: object, kid: string): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
-    return signJwt('ES256', importedKey, payload)
+    return signJwt('ES256', importedKey, payload, kid)
   }
-  const putContraIndicatorJWT = await createJwt(keys.passport, payloads.putContraIndicatorPayload)
+  const putContraIndicatorJWT = await createJwt(keys.passport, payloads.putContraIndicatorPayload, kids.passport)
   const putContraIndicatorReqBody = JSON.stringify({ signed_jwt: putContraIndicatorJWT })
-  const postMitigationsJWT = await createJwt(keys.drivingLicense, payloads.postMitigationsPayload)
+  const postMitigationsJWT = await createJwt(keys.drivingLicense, payloads.postMitigationsPayload, kids.drivingLicence)
   const postMitigationReqBody = JSON.stringify({ signed_jwts: [postMitigationsJWT] })
   const params = {
     headers: {

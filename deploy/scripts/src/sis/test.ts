@@ -73,10 +73,7 @@ export async function identity(): Promise<void> {
     userId: subjectID,
     si: {
       jwt: identityJWT,
-      vot: 'P2',
-      metadata: {
-        xyz: 'abc'
-      }
+      vot: 'P2'
     }
   })
   const invalidateReqBody = JSON.stringify({

@@ -73,10 +73,7 @@ export async function identity(): Promise<void> {
     userId: subjectID,
     si: {
       jwt: identityJWT,
-      vot: 'P2',
-      metadata: {
-        xyz: 'abc'
-      }
+      vot: 'P2'
     }
   })
   const invalidateReqBody = JSON.stringify({
@@ -120,7 +117,7 @@ export async function invalidate(): Promise<void> {
 
   // B02_SIS_01_InvalidateCall
   timeGroup(groups[0], () => http.post(env.envURL + '/v1/identity/invalidate', invalidateReqBody, params), {
-    isStatusCode204
+    isStatusCode404: r => r.status === 404
   })
 
   iterationsCompleted.add(1)

@@ -762,16 +762,16 @@ export function drivingLicenceAttestation(): void {
         }),
       { isStatusCode302 }
     )
+    //02_StubCall
+    res = timeGroup(
+      groups[6].split('::')[1],
+      () =>
+        http.get(res.headers.Location, {
+          headers: { Authorization: `Basic ${encodedCredentials}` }
+        }),
+      { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
+    )
   })
-  //02_StubCall
-  res = timeGroup(
-    groups[6].split('::')[1],
-    () =>
-      http.get(res.headers.Location, {
-        headers: { Authorization: `Basic ${encodedCredentials}` }
-      }),
-    { isStatusCode200, ...pageContentCheck('Verifiable Credentials') }
-  )
   iterationsCompleted.add(1)
 }
 

@@ -100,3 +100,21 @@ export function isSpecificStatusCode(expectedStatus: number): Checkers<Response>
     [`isStatusCode${expectedStatus}`]: (res: Response) => res.status === expectedStatus
   }
 }
+
+/**
+ * Generates a `Checkers<Response>` Object to validate the header of redirect location
+ * includes the given string
+ * @param {string} content String that the redirect location is expected to contain
+ * @returns {Checkers<Response>} `Checkers<Response>` object containing one
+ * named `Checker<Response` function
+ * @example
+ * const res = timeRequest(
+ *   () => http.get(url),
+ *   { ...redirectLocationValidation('/authorize') }
+ * )
+ */
+export function redirectLocationValidation(content: string): Checkers<Response> {
+  return {
+    validateRedirectLocation: r => (r.headers.Location as string).includes(content)
+  }
+}

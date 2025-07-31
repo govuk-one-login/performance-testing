@@ -4,7 +4,12 @@ import execution from 'k6/execution'
 import http, { type Response } from 'k6/http'
 import { type Options } from 'k6/options'
 import TOTP from '../common/utils/authentication/totp'
-import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
+import {
+  isStatusCode200,
+  isStatusCode302,
+  pageContentCheck,
+  redirectLocationValidation
+} from '../common/utils/checks/assertions'
 import {
   selectProfile,
   type ProfileList,
@@ -279,6 +284,10 @@ const profiles: ProfileList = {
   perf006Iteration5SpikeTest: {
     ...createI3SpikeSignUpScenario('signUp', 1130, 33, 1131),
     ...createI3SpikeSignInScenario('signIn', 162, 18, 74)
+  },
+  perf006Iteration6PeakTest: {
+    ...createI4PeakTestSignUpScenario('signUp', 920, 33, 921),
+    ...createI4PeakTestSignInScenario('signIn', 104, 18, 48)
   }
 }
 const loadProfile = selectProfile(profiles)
@@ -689,7 +698,8 @@ export function rpStubSubmit(groups: readonly string[]): Response {
       groups[5].split('::')[1],
       () => http.get(res.headers.Location, { redirects: 0 }), // Follow the redirect
       {
-        isStatusCode302
+        isStatusCode302,
+        ...redirectLocationValidation(`${env.authStagingURL}/authorize`)
       }
     )
     // 03_AuthCall

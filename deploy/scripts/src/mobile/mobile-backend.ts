@@ -78,12 +78,6 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration5PeakTest: {
-    ...createI4PeakTestSignUpScenario('getClientAttestation', 540, 12, 541)
-  },
-  perf006Iteration5SpikeTest: {
-    ...createI3SpikeSignUpScenario('getClientAttestation', 1074, 12, 1075)
-  },
-  perf006Iteration6RegressionTest: {
     ...createI4PeakTestSignUpScenario('getClientAttestation', 540, 12, 541),
     walletCredentialIssuance: {
       executor: 'ramping-arrival-rate',
@@ -97,6 +91,9 @@ const profiles: ProfileList = {
       ],
       exec: 'walletCredentialIssuance'
     }
+  },
+  perf006Iteration5SpikeTest: {
+    ...createI3SpikeSignUpScenario('getClientAttestation', 1074, 12, 1075)
   }
 }
 

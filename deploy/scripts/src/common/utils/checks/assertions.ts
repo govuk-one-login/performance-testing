@@ -44,6 +44,20 @@ export function isStatusCode202(response: Response): boolean {
 }
 
 /**
+ * Function to check that a `Response` has status code 204 No Content
+ * @param {Response} response `Response` to check that status code of
+ * @returns {boolean} `true` if status code is `204`, `false` otherwise
+ * @example
+ * const res = timeRequest(
+ *   () => http.get(url),
+ *   { isStatusCode204 }
+ * )
+ */
+export function isStatusCode204(response: Response): boolean {
+  return response.status === 204
+}
+
+/**
  * Function to check that a `Response` has status code 302/Found
  * @param {Response} response `Response` to check that status code of
  * @returns {boolean} `true` if status code is `302`, `false` otherwise
@@ -84,5 +98,23 @@ export function pageContentCheck(content: string): Checkers<Response> {
 export function isSpecificStatusCode(expectedStatus: number): Checkers<Response> {
   return {
     [`isStatusCode${expectedStatus}`]: (res: Response) => res.status === expectedStatus
+  }
+}
+
+/**
+ * Generates a `Checkers<Response>` Object to validate the header of redirect location
+ * includes the given string
+ * @param {string} content String that the redirect location is expected to contain
+ * @returns {Checkers<Response>} `Checkers<Response>` object containing one
+ * named `Checker<Response` function
+ * @example
+ * const res = timeRequest(
+ *   () => http.get(url),
+ *   { ...redirectLocationValidation('/authorize') }
+ * )
+ */
+export function redirectLocationValidation(content: string): Checkers<Response> {
+  return {
+    validateRedirectLocation: r => (r.headers.Location as string).includes(content)
   }
 }

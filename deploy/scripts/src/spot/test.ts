@@ -116,6 +116,12 @@ const keys = {
   kbv: JSON.parse(getEnv('IDENTITY_SPOT_KBVKEY')) as JWK
 }
 
+const kids = {
+  fraud: getEnv('IDENTITY_SPOT_FRAUD_KID'),
+  passport: getEnv('IDENTITY_SPOT_PASSPORT_KID'),
+  kbv: getEnv('IDENTITY_SPOT_KBV_KID')
+}
+
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
   region: getEnv('AWS_REGION'),
@@ -148,17 +154,17 @@ export async function spot(): Promise<void> {
     passport: generatePassportPayload(pairwiseSub('passportSector')),
     kbv: generateKBVPayload(pairwiseSub('verificationSector'))
   }
-  const createJwt = async (key: JWK, payload: object): Promise<string> => {
+  const createJwt = async (key: JWK, payload: object, kid: string): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     //const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     const importedKey = await crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
 
-    return signJwt('ES256', importedKey, payload)
+    return signJwt('ES256', importedKey, payload, kid)
   }
   const jwts = [
-    await createJwt(keys.fraud, payloads.fraud),
-    await createJwt(keys.passport, payloads.passport),
-    await createJwt(keys.kbv, payloads.kbv)
+    await createJwt(keys.fraud, payloads.fraud, kids.fraud),
+    await createJwt(keys.passport, payloads.passport, kids.passport),
+    await createJwt(keys.kbv, payloads.kbv, kids.kbv)
   ]
   const payload = generateSPOTRequest(pairwiseSub(config.sector), config, jwts)
   iterationsStarted.add(1)

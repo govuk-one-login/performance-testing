@@ -22,36 +22,6 @@ import { sleep } from 'k6'
 import { uuidv4 } from '../common/utils/jslib'
 import execution from 'k6/execution'
 
-declare type EcKeyImportParams = {
-  name: string
-  namedCurve: string
-}
-
-declare type JWK = {
-  kty?: string
-  use?: string
-  key_ops?: string[]
-  alg?: string
-  kid?: string
-  x5u?: string
-  x5c?: string[]
-  x5t?: string
-  'x5t#S256'?: string
-  n?: string
-  e?: string
-  d?: string
-  p?: string
-  q?: string
-  dp?: string
-  dq?: string
-  qi?: string
-  crv?: string
-  x?: string
-  y?: string
-  d_?: string
-  k?: string
-}
-
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('cimitIDProvingAPIs', LoadProfile.smoke),
@@ -166,8 +136,8 @@ const csvData: RetrieveSubjectId[] = new SharedArray('Retrieve SubjectId', funct
 })
 
 const keys = {
-  passport: JSON.parse(getEnv('IDENTITY_CIMIT_PASSPORTKEY')) as JWK,
-  drivingLicense: JSON.parse(getEnv('IDENTITY_CIMIT_DLKEY')) as JWK
+  passport: JSON.parse(getEnv('IDENTITY_CIMIT_PASSPORTKEY')) as JsonWebKey,
+  drivingLicense: JSON.parse(getEnv('IDENTITY_CIMIT_DLKEY')) as JsonWebKey
 }
 
 const kids = {
@@ -182,9 +152,9 @@ export async function cimitIDProvingAPIs(): Promise<void> {
     putContraIndicatorPayload: generatePassportPayloadCI(subjectID),
     postMitigationsPayload: generateDrivingLicensePayloadMitigation(subjectID)
   }
-  const createJwt = async (key: JWK, payload: object, kid: string): Promise<string> => {
+  const createJwt = async (key: JsonWebKey, payload: object, kid: string): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
-    const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+    const importedKey = await crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     return signJwt('ES256', importedKey, payload, kid)
   }
   const putContraIndicatorJWT = await createJwt(keys.passport, payloads.putContraIndicatorPayload, kids.passport)

@@ -12,38 +12,15 @@ import {
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
-import { generateSPOTRequest } from './request/generator'
 import { signJwt } from '../common/utils/authentication/jwt'
-import k6crypto from 'k6/crypto' //
-import { b64decode } from 'k6/encoding'
 import { SpotRequestInfo } from './request/types'
-import { generateFraudPayload, generateKBVPayload, generatePassportPayload } from './request/generator'
-
-declare type EcKeyImportParams = { name: string; namedCurve: string }
-declare type JWK = {
-  kty?: string
-  use?: string
-  key_ops?: string[]
-  alg?: string
-  kid?: string
-  x5u?: string
-  x5c?: string[]
-  x5t?: string
-  'x5t#S256'?: string
-  n?: string
-  e?: string
-  d?: string
-  p?: string
-  q?: string
-  dp?: string
-  dq?: string
-  qi?: string
-  crv?: string
-  x?: string
-  y?: string
-  d_?: string
-  k?: string
-}
+import {
+  generateFraudPayload,
+  generateKBVPayload,
+  generatePassportPayload,
+  generateSPOTRequest,
+  pairwiseSub
+} from './request/generator'
 
 const profiles: ProfileList = {
   smoke: {
@@ -111,9 +88,9 @@ const env = {
 }
 
 const keys = {
-  fraud: JSON.parse(getEnv('IDENTITY_SPOT_FRAUDKEY')) as JWK,
-  passport: JSON.parse(getEnv('IDENTITY_SPOT_PASSPORTKEY')) as JWK,
-  kbv: JSON.parse(getEnv('IDENTITY_SPOT_KBVKEY')) as JWK
+  fraud: JSON.parse(getEnv('IDENTITY_SPOT_FRAUDKEY')) as JsonWebKey,
+  passport: JSON.parse(getEnv('IDENTITY_SPOT_PASSPORTKEY')) as JsonWebKey,
+  kbv: JSON.parse(getEnv('IDENTITY_SPOT_KBVKEY')) as JsonWebKey
 }
 
 const kids = {
@@ -138,23 +115,12 @@ export async function spot(): Promise<void> {
     salt: 'YS1zaW1wbGUtc2FsdA=='
   }
 
-  const pairwiseSub = (sectorId: string): string => {
-    //const hasher = crypto.createHash('sha256')
-    const hasher = k6crypto.createHash('sha256')
-
-    hasher.update(sectorId)
-    hasher.update(config.host)
-    hasher.update(b64decode(config.salt))
-    const id = hasher.digest('base64rawurl')
-    return 'urn:fdc:gov.uk:2022:' + id
-  }
-
   const payloads = {
-    fraud: generateFraudPayload(pairwiseSub('fraudSector')),
-    passport: generatePassportPayload(pairwiseSub('passportSector')),
-    kbv: generateKBVPayload(pairwiseSub('verificationSector'))
+    fraud: generateFraudPayload(pairwiseSub('fraudSector', config.host, config.salt)),
+    passport: generatePassportPayload(pairwiseSub('passportSector', config.host, config.salt)),
+    kbv: generateKBVPayload(pairwiseSub('verificationSector', config.host, config.salt))
   }
-  const createJwt = async (key: JWK, payload: object, kid: string): Promise<string> => {
+  const createJwt = async (key: JsonWebKey, payload: object, kid: string): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
     //const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     const importedKey = await crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
@@ -166,7 +132,7 @@ export async function spot(): Promise<void> {
     await createJwt(keys.passport, payloads.passport, kids.passport),
     await createJwt(keys.kbv, payloads.kbv, kids.kbv)
   ]
-  const payload = generateSPOTRequest(pairwiseSub(config.sector), config, jwts)
+  const payload = generateSPOTRequest(pairwiseSub(config.sector, config.host, config.salt), config, jwts)
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(payload))
   iterationsCompleted.add(1)

@@ -16,7 +16,6 @@ import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_m
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { generateIdentityPayload } from './request/generator'
-import { crypto as webcrypto, EcKeyImportParams, JWK } from 'k6/experimental/webcrypto'
 import { signJwt } from '../common/utils/authentication/jwt'
 import { sleep } from 'k6'
 import { uuidv4 } from '../common/utils/jslib'
@@ -54,7 +53,7 @@ const env = {
   keyID: getEnv('IDENTITY_SIS_KID')
 }
 const keys = {
-  identity: JSON.parse(getEnv('IDENTITY_SIS_PRIVATEKEY')) as JWK
+  identity: JSON.parse(getEnv('IDENTITY_SIS_PRIVATEKEY')) as JsonWebKey
 }
 
 export async function identity(): Promise<void> {
@@ -63,9 +62,9 @@ export async function identity(): Promise<void> {
   const payloads = {
     identityPayload: generateIdentityPayload(subjectID)
   }
-  const createJwt = async (key: JWK, payload: object): Promise<string> => {
+  const createJwt = async (key: JsonWebKey, payload: object): Promise<string> => {
     const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
-    const importedKey = await webcrypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
+    const importedKey = await crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
     return signJwt('ES256', importedKey, payload, env.keyID)
   }
   const identityJWT = await createJwt(keys.identity, payloads.identityPayload)

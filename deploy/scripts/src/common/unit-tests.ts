@@ -28,7 +28,6 @@ import { type GroupMap, type Thresholds, getThresholds } from './utils/config/th
 import { getEnv } from './utils/config/environment-variables'
 import { type RampingArrivalRateScenario } from 'k6/options'
 import { createKey, signJwt, verifyJwt } from './utils/authentication/jwt'
-import { crypto, EcKeyImportParams, HmacImportParams, JWK } from 'k6/experimental/webcrypto'
 
 export const options = {
   vus: 1,
@@ -41,9 +40,9 @@ export const options = {
 }
 
 const keys = {
-  hs256: JSON.parse(open('./example-data/hs256-key.json')) as JWK,
-  es256private: JSON.parse(open('./example-data/es256-private.json')) as JWK,
-  es256public: JSON.parse(open('./example-data/es256-public.json')) as JWK
+  hs256: JSON.parse(open('./example-data/hs256-key.json')) as JsonWebKey,
+  es256private: JSON.parse(open('./example-data/es256-private.json')) as JsonWebKey,
+  es256public: JSON.parse(open('./example-data/es256-public.json')) as JsonWebKey
 }
 
 export default async (): Promise<void> => {
@@ -60,10 +59,16 @@ export default async (): Promise<void> => {
     es256private: await crypto.subtle.importKey('jwk', keys.es256private, escdaParam, true, usages),
     es256public: await crypto.subtle.importKey('jwk', keys.es256public, escdaParam, true, usages)
   }
+
+  const keyIDs = {
+    hs256: 'PlaceholderKid',
+    hs512: 'PlaceholderKid',
+    es256: 'PlaceholderKid'
+  }
   const jwts = [
-    await signJwt('HS256', importedKeys.hs256, payload),
-    await signJwt('HS256', importedKeys.hs512, payload),
-    await signJwt('ES256', importedKeys.es256private, payload)
+    await signJwt('HS256', importedKeys.hs256, payload, keyIDs.hs256),
+    await signJwt('HS256', importedKeys.hs512, payload, keyIDs.hs512),
+    await signJwt('ES256', importedKeys.es256private, payload, keyIDs.es256)
   ]
   const checks = [
     await verifyJwt(jwts[0], importedKeys.hs256),

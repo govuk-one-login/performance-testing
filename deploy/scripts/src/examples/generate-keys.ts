@@ -1,6 +1,5 @@
 import { type Options } from 'k6/options'
 import { createKey } from '../common/utils/authentication/jwt'
-import { crypto } from 'k6/experimental/webcrypto'
 import { ProfileList, selectProfile } from '../common/utils/config/load-profiles'
 
 const profiles: ProfileList = {

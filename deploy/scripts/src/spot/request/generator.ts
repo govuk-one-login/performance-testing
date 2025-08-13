@@ -1,6 +1,8 @@
 import { FraudPayload, PassportPayload, KBVPayload } from '../request/types'
 import { uuidv4 } from '../../common/utils/jslib'
 import { SpotRequest, SpotRequestInfo } from './types'
+import crypto from 'k6/crypto'
+import { b64decode } from 'k6/encoding'
 
 export enum Issuer {
   Fraud,
@@ -189,4 +191,13 @@ export function generateSPOTRequest(sub: string, config: SpotRequestInfo, jwts: 
     },
     out_sub: sub
   }
+}
+
+export const pairwiseSub = (sectorId: string, host: string, salt: string): string => {
+  const hasher = crypto.createHash('sha256')
+  hasher.update(sectorId)
+  hasher.update(host)
+  hasher.update(b64decode(salt))
+  const id = hasher.digest('base64rawurl')
+  return 'urn:fdc:gov.uk:2022:' + id
 }

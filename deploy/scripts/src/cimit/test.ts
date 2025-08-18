@@ -6,7 +6,8 @@ import {
   LoadProfile,
   createI4PeakTestSignUpScenario,
   createI4PeakTestSignInScenario,
-  createI3SpikeSignUpScenario
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import http from 'k6/http'
 import { SharedArray } from 'k6/data'
@@ -95,42 +96,8 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('cimitSignInAPI', 104, 6, 48)
   },
   perf006Iteration6SpikeTest: {
-    cimitIDProvingAPIs: {
-      executor: 'ramping-arrival-rate',
-      startRate: 1,
-      timeUnit: '10s',
-      preAllocatedVUs: 2166,
-      maxVUs: 4332,
-      stages: [
-        { target: 760, duration: '4m' },
-        { target: 760, duration: '5m' },
-        { target: 2280, duration: '114s' },
-        { target: 2280, duration: '5m' },
-        { target: 760, duration: '1s' },
-        { target: 760, duration: '5m' },
-        { target: 2280, duration: '571s' },
-        { target: 2280, duration: '5m' }
-      ],
-      exec: 'cimitIDProvingAPIs'
-    },
-    cimitSignInAPI: {
-      executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
-      preAllocatedVUs: 390,
-      maxVUs: 780,
-      stages: [
-        { target: 87, duration: '4m' },
-        { target: 87, duration: '5m' },
-        { target: 260, duration: '24s' },
-        { target: 260, duration: '5m' },
-        { target: 87, duration: '1s' },
-        { target: 87, duration: '5m' },
-        { target: 260, duration: '119s' },
-        { target: 260, duration: '5m' }
-      ],
-      exec: 'cimitSignInAPI'
-    }
+    ...createI3SpikeSignUpScenario('cimitIDProvingAPIs', 2280, 19, 571),
+    ...createI3SpikeSignInScenario('cimitSignInAPI', 260, 6, 119)
   }
 }
 

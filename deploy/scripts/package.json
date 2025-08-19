@@ -6,20 +6,20 @@
   "main": "index.js",
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.31.0",
+    "@eslint/js": "^9.33.0",
     "@types/k6": "^1.0.2",
-    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
     "core-js": "^3.44.0",
     "esbuild": "^0.25.6",
     "esbuild-plugin-copy": "^2.1.1",
-    "eslint": "^9.31.0",
-    "eslint-plugin-prettier": "^5.5.1",
+    "eslint": "^9.33.0",
+    "eslint-plugin-prettier": "^5.5.4",
     "glob": "^11.0.3",
     "globals": "^16.3.0",
     "k6": "0.0.0",
     "prettier": "^3.6.2",
     "typedoc": "^0.28.10",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "lint": "npx eslint 'src/**/*.ts'",

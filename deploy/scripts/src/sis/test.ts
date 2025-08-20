@@ -5,7 +5,9 @@ import {
   createScenario,
   LoadProfile,
   createI4PeakTestSignUpScenario,
-  createI4PeakTestSignInScenario
+  createI4PeakTestSignInScenario,
+  createI3SpikeSignUpScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import http from 'k6/http'
 
@@ -28,6 +30,10 @@ const profiles: ProfileList = {
   perf006Iteration6PeakTest: {
     ...createI4PeakTestSignUpScenario('identity', 570, 11, 571),
     ...createI4PeakTestSignInScenario('invalidate', 104, 6, 48)
+  },
+  perf006Iteration6SpikeTest: {
+    ...createI3SpikeSignUpScenario('identity', 570, 11, 571),
+    ...createI3SpikeSignInScenario('invalidate', 260, 6, 119)
   }
 }
 

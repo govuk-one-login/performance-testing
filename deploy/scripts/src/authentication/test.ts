@@ -795,7 +795,7 @@ export function signIn(): void {
       // 02_AuthAcceptTerms
       res = timeGroup(groups[12].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
         isStatusCode200,
-        ...pageContentCheck('terms of use update')
+        ...pageContentCheck('We’ve updated our terms of use')
       })
     } else {
       // 03_AuthCall

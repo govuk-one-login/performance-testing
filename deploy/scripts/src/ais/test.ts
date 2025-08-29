@@ -86,7 +86,7 @@ const profiles: ProfileList = {
   },
   perf006Iteration6SpikeTest: {
     ...createI3SpikeSignInScenario('persistIV', 30, 3, 15),
-    ...createI3SpikeSignInScenario('retrieveIV', 780, 3, 74)
+    ...createI3SpikeSignInScenario('retrieveIV', 780, 3, 119)
   }
 }
 

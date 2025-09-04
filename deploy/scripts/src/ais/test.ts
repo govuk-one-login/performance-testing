@@ -83,11 +83,16 @@ const profiles: ProfileList = {
   perf006Iteration6PeakTest: {
     ...createI4PeakTestSignInScenario('persistIV', 30, 3, 15),
     ...createI4PeakTestSignInScenario('retrieveIV', 312, 3, 48)
+  },
+  perf006Iteration6SpikeTest: {
+    ...createI3SpikeSignInScenario('persistIV', 30, 3, 15),
+    ...createI3SpikeSignInScenario('retrieveIV', 780, 3, 119)
   }
 }
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
+  persistIV: ['B01_PersistIV_01_PostInterventionData'],
   retrieveIV: ['B02_RetrieveIV_01_GetInterventionData']
 } as const
 
@@ -131,12 +136,13 @@ const awsConfig = new AWSConfig({
 const sqs = new SQSClient(awsConfig)
 
 export function persistIV(): void {
+  const groups = groupMap.persistIV
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const persistIVPayload = generatePersistIVRequest(userID, interventionCodes.suspend)
   const persistIVMessage = JSON.stringify(persistIVPayload)
   iterationsStarted.add(1)
-  //// B01_PersistIV_01_PostInterventionData
-  sqs.sendMessage(env.sqs_queue, persistIVMessage)
+  // B01_PersistIV_01_PostInterventionData
+  timeGroup(groups[0], () => sqs.sendMessage(env.sqs_queue, persistIVMessage))
   iterationsCompleted.add(1)
 }
 

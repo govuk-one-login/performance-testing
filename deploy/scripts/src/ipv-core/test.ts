@@ -383,11 +383,15 @@ const profiles: ProfileList = {
   },
   perf006Iteration6PeakTest: {
     ...createI4PeakTestSignUpScenario('identity', 570, 36, 571),
-    ...createI4PeakTestSignInScenario('idReuse', 104, 6, 48)
+    ...createI4PeakTestSignInScenario('idReuse', 100, 6, 48)
   },
   perf006Iteration6SpikeTest: {
     ...createI3SpikeSignUpScenario('identity', 570, 36, 571),
     ...createI3SpikeSignInScenario('idReuse', 260, 6, 119)
+  },
+  perf006SISPhase2PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 200, 42, 201),
+    ...createI4PeakTestSignInScenario('idReuse', 100, 6, 46)
   }
 }
 
@@ -811,6 +815,7 @@ export function identity(stubOnly: boolean = false): void {
     )
   })
   iterationsCompleted.add(1)
+  console.log(userId, testEmail)
 }
 
 export function idReuse(): void {

@@ -122,7 +122,7 @@ const profiles: ProfileList = {
     ...createI3SpikeSignUpScenario('authentication', 1074, 30, 1075)
   },
   perf006Iteration6PeakTest: {
-    ...createI4PeakTestSignUpScenario('authentication', 190, 27, 19),
+    ...createI4PeakTestSignUpScenario('authentication', 190, 27, 191),
     ...createI4PeakTestSignInScenario('reauthentication', 6, 27, 4),
     ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 27, 18)
   }

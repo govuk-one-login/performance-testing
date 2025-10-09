@@ -1,5 +1,5 @@
 #!/bin/bash
-# Utility script for reporting on key metrics from a k6 performance test using
+# Utility script for generating data for IPV CORE, EVCS and AIS
 # the JSON file output
 #
 # ARGUMENTS:
@@ -18,15 +18,15 @@ if [[ ! -f "$OUTPUT/TestData.json" ]]; then # Do not unzip or copy if this has a
 fi
 cd $OUTPUT
 echo ''
-echo '┌-----------------------------------------┐'
-echo '| Request Duration by Timestamp and Group |'
-echo '└-----------------------------------------┘'
+echo '┌------------------------------------------┐'
+echo '|Output to CSV file from TestData.json file|'
+echo '└------------------------------------------┘'
 if [[ ! -f "TestData.csv" ]]; then # Do not filter if this has already been done
     jq -rc 'select(
-         .level=="info"
-   and .source=="console"
-       )
-   |[
+    .level=="info"
+    and .source=="console"
+)
+|[
    .msg
    ]
     | @csv' TestData.json >TestData.csv

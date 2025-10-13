@@ -1,6 +1,6 @@
 #!/bin/bash
 # Utility script for generating data for IPV CORE, EVCS and AIS
-# the JSON file output
+# JSON file output to CSV format
 #
 # ARGUMENTS:
 #  $1: path to a .gz archive containing test results in JSON format

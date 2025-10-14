@@ -125,7 +125,7 @@ export function setup() {
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-  const journeyID = Math.floor(Date.now() / 1000).toString()
+  const journeyID = `perfJourneyID_${Math.floor(Date.now() / 1000)}`
   const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
   const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID, testID))
 

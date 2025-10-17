@@ -392,6 +392,10 @@ const profiles: ProfileList = {
   perf006SISPhase2PeakTest: {
     ...createI4PeakTestSignUpScenario('identity', 200, 42, 201),
     ...createI4PeakTestSignInScenario('idReuse', 100, 6, 46)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 180, 42, 181),
+    ...createI4PeakTestSignInScenario('idReuse', 71, 6, 33)
   }
 }
 

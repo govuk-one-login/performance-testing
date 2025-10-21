@@ -6,6 +6,7 @@ import { isStatusCode200, isStatusCode302 } from '../../../common/utils/checks/a
 import { validateRedirect } from '../utils/assertions'
 import { signJwt } from '../../utils/crypto'
 import { validateJsonResponse } from '../../utils/assertions'
+import { b64encode } from 'k6/encoding'
 
 export function getAuthorize(
   groupName: string,
@@ -47,7 +48,8 @@ export function getAuthorize(
 
 export function getCodeFromOrchestration(
   groupName: string,
-  orchestrationAuthorizeUrl: string
+  orchestrationAuthorizeUrl: string,
+  responseOverrides?: object
 ): {
   state: string
   orchestrationAuthorizationCode: string
@@ -56,7 +58,10 @@ export function getCodeFromOrchestration(
     groupName,
     () =>
       http.get(orchestrationAuthorizeUrl, {
-        headers: { 'x-headless-mode-enabled': 'true' }
+        headers: {
+          'x-headless-mode-enabled': 'true',
+          ...(responseOverrides && { 'x-response-overrides': b64encode(JSON.stringify(responseOverrides), 'rawurl') })
+        }
       }),
     { isStatusCode200 }
   )
@@ -139,6 +144,74 @@ export async function exchangeAuthorizationCode(
   return {
     accessToken: res.json('access_token') as string,
     idToken: res.json('id_token') as string
+  }
+}
+
+export async function exchangeAuthorizationCodeForRefreshToken(
+  groupName: string,
+  authorizationCode: string,
+  codeVerifier: string,
+  clientId: string,
+  redirectUri: string,
+  clientAttestation: string,
+  privateKey: CryptoKey,
+  publicKey: JsonWebKey
+): Promise<{ accessToken: string; idToken: string; refreshToken: string }> {
+  const nowInSeconds = Math.floor(Date.now() / 1000)
+  const proofOfPossession = await signJwt(
+    'ES256',
+    privateKey,
+    {
+      iss: clientId,
+      aud: config.stsBaseUrl,
+      exp: nowInSeconds + 180,
+      jti: crypto.randomUUID()
+    },
+    { typ: 'oauth-client-attestation-pop+jwt' }
+  )
+
+  const dpop = await signJwt(
+    'ES256',
+    privateKey,
+    {
+      htm: 'POST',
+      htu: config.stsBaseUrl + '/token',
+      iat: nowInSeconds,
+      jti: crypto.randomUUID()
+    },
+    { typ: 'dpop+jwt', jwk: publicKey }
+  )
+
+  const res = timeGroup(
+    groupName,
+    () => {
+      return http.post(
+        `${config.stsBaseUrl}/token`,
+        {
+          grant_type: 'authorization_code',
+          code: authorizationCode,
+          redirect_uri: redirectUri,
+          code_verifier: codeVerifier
+        },
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'OAuth-Client-Attestation': clientAttestation,
+            'OAuth-Client-Attestation-PoP': proofOfPossession,
+            DPoP: dpop
+          }
+        }
+      )
+    },
+    {
+      isStatusCode200,
+      ...validateJsonResponse(['access_token', 'id_token', 'refresh_token'])
+    }
+  )
+  return {
+    accessToken: res.json('access_token') as string,
+    idToken: res.json('id_token') as string,
+    refreshToken: res.json('refresh_token') as string
   }
 }
 

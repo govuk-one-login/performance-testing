@@ -16,6 +16,7 @@ import { bufToString, generateCodeChallenge, generateKey } from './utils/crypto'
 import {
   exchangeAccessToken,
   exchangeAuthorizationCode,
+  exchangeAuthorizationCodeForRefreshToken,
   exchangePreAuthorizedCode,
   getAuthorize,
   getCodeFromOrchestration,
@@ -35,7 +36,8 @@ const profiles: ProfileList = {
     ...createScenario('authentication', LoadProfile.smoke),
     ...createScenario('reauthentication', LoadProfile.smoke),
     ...createScenario('walletCredentialIssuance', LoadProfile.smoke),
-    ...createScenario('generateReauthenticationTestData', LoadProfile.smoke)
+    ...createScenario('generateReauthenticationTestData', LoadProfile.smoke),
+    ...createScenario('generateRefreshTokenTestData', LoadProfile.smoke)
   },
   perf006Iteration3PeakTest: {
     authentication: {
@@ -168,6 +170,13 @@ export const groupMap = {
     'WALLET_CREDENTIAL_ISSUANCE_13 GET /.well-known/jwks.json (STS)'
   ],
   generateReauthenticationTestData: [
+    '01 GET /authorize (STS)',
+    '02 GET /authorize (Orchestration)',
+    '03 GET /redirect',
+    '04 POST /generate-client-attestation',
+    '05 POST /token (authorization code exchange)'
+  ],
+  generateRefreshTokenTestData: [
     '01 GET /authorize (STS)',
     '02 GET /authorize (Orchestration)',
     '03 GET /redirect',
@@ -387,4 +396,49 @@ export async function generateReauthenticationTestData(): Promise<void> {
   }
 
   console.log(reauthenticationContext)
+}
+
+export async function generateRefreshTokenTestData(): Promise<void> {
+  const keyPair = await generateKey()
+  const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+
+  const codeVerifier = crypto.randomUUID()
+  const codeChallenge = await generateCodeChallenge(codeVerifier)
+
+  const orchestrationAuthorizeUrl = getAuthorize(
+    groupMap.generateRefreshTokenTestData[0],
+    config.mockClientId,
+    config.redirectUri,
+    codeChallenge
+  )
+  const responseOverrides = {
+    idToken: {
+      subjectId: '7c5c7479-6ebe-490e-a4b0-a6b3c9cb2ec6'
+    }
+  }
+  sleepBetween(1, 2)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.generateRefreshTokenTestData[1],
+    orchestrationAuthorizeUrl,
+    responseOverrides
+  )
+  const stsAuthorizationCode = getRedirect(
+    groupMap.generateRefreshTokenTestData[2],
+    state,
+    orchestrationAuthorizationCode,
+    config.redirectUri
+  )
+  const clientAttestation = postGenerateClientAttestation(groupMap.generateRefreshTokenTestData[3], publicKeyJwk)
+  const { refreshToken } = await exchangeAuthorizationCodeForRefreshToken(
+    groupMap.generateRefreshTokenTestData[4],
+    stsAuthorizationCode,
+    codeVerifier,
+    config.mockClientId,
+    config.redirectUri,
+    clientAttestation,
+    keyPair.privateKey,
+    publicKeyJwk
+  )
+
+  console.log(refreshToken)
 }

@@ -36,6 +36,7 @@ const profiles: ProfileList = {
     ...createScenario('authentication', LoadProfile.smoke),
     ...createScenario('reauthentication', LoadProfile.smoke),
     ...createScenario('walletCredentialIssuance', LoadProfile.smoke),
+    ...createScenario('exchangeRefreshToken', LoadProfile.smoke),
     ...createScenario('generateReauthenticationTestData', LoadProfile.smoke),
     ...createScenario('generateRefreshTokenTestData', LoadProfile.smoke)
   },
@@ -168,6 +169,14 @@ export const groupMap = {
     'WALLET_CREDENTIAL_ISSUANCE_11 POST /token (access token exchange)',
     'WALLET_CREDENTIAL_ISSUANCE_12 POST /token (pre-authorized code exchange)',
     'WALLET_CREDENTIAL_ISSUANCE_13 GET /.well-known/jwks.json (STS)'
+  ],
+  exchangeRefreshToken: [
+    '01 GET /authorize (STS)',
+    '02 GET /authorize (Orchestration)',
+    '03 GET /redirect',
+    '04 POST /generate-client-attestation',
+    '05 POST /token (refresh token exchange)',
+    '06 POST /token (refresh token exchange)'
   ],
   generateReauthenticationTestData: [
     '01 GET /authorize (STS)',
@@ -399,8 +408,16 @@ export async function generateReauthenticationTestData(): Promise<void> {
 }
 
 export async function generateRefreshTokenTestData(): Promise<void> {
-  const keyPair = await generateKey()
-  const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+  const privateKeyJwk = JSON.parse(config.clientInstanceKey)
+  const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
+    'sign'
+  ])
+  const publicKeyJwk = {
+    kty: privateKeyJwk.kty,
+    x: privateKeyJwk.x,
+    y: privateKeyJwk.y,
+    crv: privateKeyJwk.crv
+  }
 
   const codeVerifier = crypto.randomUUID()
   const codeChallenge = await generateCodeChallenge(codeVerifier)
@@ -436,7 +453,7 @@ export async function generateRefreshTokenTestData(): Promise<void> {
     config.mockClientId,
     config.redirectUri,
     clientAttestation,
-    keyPair.privateKey,
+    privateKey,
     publicKeyJwk
   )
 

@@ -53,6 +53,6 @@ service:
 
   pipelines:
     metrics:
-      receivers: [statsd, hostmetrics]
+      receivers: [hostmetrics]
       processors: [filter, batch, metricstransform]
       exporters: [otlphttp]

@@ -18,10 +18,12 @@ RUN npm install --ignore-scripts \
 FROM golang:1.25-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
-RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
-  && xk6 build v1.3.0 --with github.com/LeonAdato/xk6-output-statsd@v0.2.1 --output /k6
+RUN apk add --no-cache git \
+&& go install go.k6.io/xk6/cmd/xk6@v1.2.3 \
+&& xk6 build --with github.com/Dynatrace/xk6-output-dynatrace --output /k6
 
-# -----------------------
+
+  # -----------------------
 # OpenTelemetry Collector
 # -----------------------
 FROM otel/opentelemetry-collector-contrib:0.136.0 AS otel
@@ -33,9 +35,9 @@ COPY otel-config-template.yaml /etc/otelcol/config-template.yaml
 FROM grafana/k6:1.3.0
 COPY --from=k6-build /k6 /usr/bin/k6
 COPY --from=otel / /otel
-ENV K6_STATSD_ENABLE_TAGS=true
-ENV K6_STATSD_BUFFER_SIZE=100
-ENV K6_STATSD_PUSH_INTERVAL=100ms
+#ENV K6_STATSD_ENABLE_TAGS=true
+#ENV K6_STATSD_BUFFER_SIZE=100
+#ENV K6_STATSD_PUSH_INTERVAL=100ms
 ENV K6_SUMMARY_TIME_UNIT=ms
 ENV K6_SUMMARY_TREND_STATS=avg,min,med,p(95),p(99),max
 ENV K6_SYSTEM_TAGS=status,method,group,check,error,scenario

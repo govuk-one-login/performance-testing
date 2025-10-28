@@ -215,6 +215,66 @@ export async function exchangeAuthorizationCodeForRefreshToken(
   }
 }
 
+export async function refreshAccessToken(
+  groupName: string,
+  refreshToken: string,
+  clientAttestation: string,
+  privateKey: CryptoKey,
+  publicKey: JsonWebKey,
+  clientId: string
+): Promise<{ accessToken: string }> {
+  const nowInSeconds = Math.floor(Date.now() / 1000)
+  const proofOfPossession = await signJwt(
+    'ES256',
+    privateKey,
+    {
+      iss: clientId,
+      aud: config.stsBaseUrl,
+      exp: nowInSeconds + 180,
+      jti: crypto.randomUUID()
+    },
+    { typ: 'oauth-client-attestation-pop+jwt' }
+  )
+
+  const dpop = await signJwt(
+    'ES256',
+    privateKey,
+    {
+      htm: 'POST',
+      htu: config.stsBaseUrl + '/token',
+      iat: nowInSeconds,
+      jti: crypto.randomUUID()
+    },
+    { typ: 'dpop+jwt', jwk: publicKey }
+  )
+  const res = timeGroup(
+    groupName,
+    () => {
+      return http.post(
+        `${config.stsBaseUrl}/token`,
+        {
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken
+        },
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'OAuth-Client-Attestation': clientAttestation,
+            'OAuth-Client-Attestation-PoP': proofOfPossession,
+            DPoP: dpop
+          }
+        }
+      )
+    },
+    {
+      isStatusCode200
+    }
+  )
+  return {
+    accessToken: res.json('access_token') as string
+  }
+}
+
 export function exchangeAccessToken(groupName: string, accessToken: string, scope: string): string {
   const res = timeGroup(
     groupName,

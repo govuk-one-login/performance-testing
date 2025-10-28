@@ -21,6 +21,7 @@ import {
   getAuthorize,
   getCodeFromOrchestration,
   getRedirect,
+  refreshAccessToken,
   simulateCallToStsJwks
 } from './sts/testSteps/backend'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
@@ -171,12 +172,10 @@ export const groupMap = {
     'WALLET_CREDENTIAL_ISSUANCE_13 GET /.well-known/jwks.json (STS)'
   ],
   exchangeRefreshToken: [
-    '01 GET /authorize (STS)',
-    '02 GET /authorize (Orchestration)',
-    '03 GET /redirect',
-    '04 POST /generate-client-attestation',
-    '05 POST /token (refresh token exchange)',
-    '06 POST /token (refresh token exchange)'
+    'EXCHANGE_REFRESH_TOKEN_01 POST /generate-client-attestation',
+    'EXCHANGE_REFRESH_TOKEN_02 POST /token (refresh token exchange)',
+    'EXCHANGE_REFRESH_TOKEN_03 POST /token (access token exchange)',
+    'EXCHANGE_REFRESH_TOKEN_04 GET /.well-known/jwks.json (STS)'
   ],
   generateReauthenticationTestData: [
     '01 GET /authorize (STS)',
@@ -208,6 +207,10 @@ interface ReauthenticationContext {
   persistentSessionId: string
 }
 
+interface ExchangeRefreshTokenContext {
+  refreshToken: string
+}
+
 const reauthenticationContextData: ReauthenticationContext[] = new SharedArray('reauthenticationContext', () => {
   const reauthenticationDataFile = `./data/sts-reauthentication-test-data-${getEnv('ENVIRONMENT')}.json`
   try {
@@ -220,6 +223,26 @@ const reauthenticationContextData: ReauthenticationContext[] = new SharedArray('
     return []
   }
 })
+
+const exchangeRefreshTokenContextData: ExchangeRefreshTokenContext[] = new SharedArray(
+  'exchangeRefreshTokenContext',
+  () => {
+    const exchangeRefreshTokenDataFile = `./data/sts-refresh-token-test-data-${getEnv('ENVIRONMENT')}.csv`
+    try {
+      const exchangeRefreshTokenContextData = open(exchangeRefreshTokenDataFile)
+      const parsedCsvData = exchangeRefreshTokenContextData
+        .split('\n')
+        .filter(line => line.trim() !== '') // Remove empty lines
+        .map(line => ({ refreshToken: line.trim() }))
+      return parsedCsvData
+    } catch (err: unknown) {
+      console.warn(
+        `Failed to open file with refresh token data at ${exchangeRefreshTokenDataFile}. Attempts to run exchange refresh token scenario may fail. Error: ${err}`
+      )
+      return []
+    }
+  }
+)
 
 export async function authentication(): Promise<void> {
   const keyPair = await generateKey()
@@ -359,6 +382,39 @@ export async function walletCredentialIssuance(): Promise<void> {
     preAuthorizedCodeExchangeServiceToken
   )
   simulateCallToStsJwks(groupMap.walletCredentialIssuance[12])
+  iterationsCompleted.add(1)
+}
+
+export async function exchangeRefreshToken(): Promise<void> {
+  const exchangeRefreshTokenContext = exchangeRefreshTokenContextData[exec.scenario.iterationInTest]
+  console.log('exchange_refresh_token_context', exchangeRefreshTokenContext)
+  const privateKeyJwk = JSON.parse(config.clientInstanceKey)
+  console.log('privateKeyJwk', privateKeyJwk)
+  const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
+    'sign'
+  ])
+  const publicKeyJwk = {
+    kty: privateKeyJwk.kty,
+    x: privateKeyJwk.x,
+    y: privateKeyJwk.y,
+    crv: privateKeyJwk.crv
+  }
+
+  iterationsStarted.add(1)
+  console.log('404')
+  const clientAttestation = postGenerateClientAttestation(groupMap.exchangeRefreshToken[0], publicKeyJwk)
+  const { accessToken } = await refreshAccessToken(
+    groupMap.exchangeRefreshToken[1],
+    exchangeRefreshTokenContext.refreshToken,
+    clientAttestation,
+    privateKey,
+    publicKeyJwk,
+    config.mockClientId
+  )
+
+  exchangeAccessToken(groupMap.exchangeRefreshToken[2], accessToken, 'sts-test.hello-world.read')
+
+  simulateCallToStsJwks(groupMap.exchangeRefreshToken[3])
   iterationsCompleted.add(1)
 }
 

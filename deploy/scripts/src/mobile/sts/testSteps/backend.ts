@@ -147,6 +147,11 @@ export async function exchangeAuthorizationCode(
   }
 }
 
+type Keys = {
+  privateKey: CryptoKey
+  publicKey: JsonWebKey
+}
+
 export async function exchangeAuthorizationCodeForRefreshToken(
   groupName: string,
   authorizationCode: string,
@@ -154,13 +159,12 @@ export async function exchangeAuthorizationCodeForRefreshToken(
   clientId: string,
   redirectUri: string,
   clientAttestation: string,
-  privateKey: CryptoKey,
-  publicKey: JsonWebKey
+  keys: Keys
 ): Promise<{ accessToken: string; idToken: string; refreshToken: string }> {
   const nowInSeconds = Math.floor(Date.now() / 1000)
   const proofOfPossession = await signJwt(
     'ES256',
-    privateKey,
+    keys.privateKey,
     {
       iss: clientId,
       aud: config.stsBaseUrl,
@@ -172,14 +176,14 @@ export async function exchangeAuthorizationCodeForRefreshToken(
 
   const dpop = await signJwt(
     'ES256',
-    privateKey,
+    keys.privateKey,
     {
       htm: 'POST',
       htu: config.stsBaseUrl + '/token',
       iat: nowInSeconds,
       jti: crypto.randomUUID()
     },
-    { typ: 'dpop+jwt', jwk: publicKey }
+    { typ: 'dpop+jwt', jwk: keys.publicKey }
   )
 
   const res = timeGroup(

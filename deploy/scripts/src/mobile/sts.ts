@@ -508,8 +508,7 @@ export async function generateRefreshTokenTestData(): Promise<void> {
     config.mockClientId,
     config.redirectUri,
     clientAttestation,
-    privateKey,
-    publicKeyJwk
+    { privateKey, publicKey: publicKeyJwk }
   )
 
   console.log(refreshToken)

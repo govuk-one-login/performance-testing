@@ -387,9 +387,8 @@ export async function walletCredentialIssuance(): Promise<void> {
 
 export async function exchangeRefreshToken(): Promise<void> {
   const exchangeRefreshTokenContext = exchangeRefreshTokenContextData[exec.scenario.iterationInTest]
-  console.log('exchange_refresh_token_context', exchangeRefreshTokenContext)
+
   const privateKeyJwk = JSON.parse(config.clientInstanceKey)
-  console.log('privateKeyJwk', privateKeyJwk)
   const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
     'sign'
   ])
@@ -401,7 +400,7 @@ export async function exchangeRefreshToken(): Promise<void> {
   }
 
   iterationsStarted.add(1)
-  console.log('404')
+
   const clientAttestation = postGenerateClientAttestation(groupMap.exchangeRefreshToken[0], publicKeyJwk)
   const { accessToken } = await refreshAccessToken(
     groupMap.exchangeRefreshToken[1],

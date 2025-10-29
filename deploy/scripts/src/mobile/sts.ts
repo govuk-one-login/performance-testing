@@ -275,8 +275,8 @@ export async function authentication(): Promise<void> {
     groupMap.authentication[6],
     stsAuthorizationCode,
     codeVerifier,
-    config.redirectUri,
     config.mockClientId,
+    config.redirectUri,
     clientAttestation,
     keyPair.privateKey
   )
@@ -320,8 +320,8 @@ export async function reauthentication(): Promise<void> {
     groupMap.reauthentication[6],
     stsAuthorizationCode,
     codeVerifier,
-    config.redirectUri,
     config.mockClientId,
+    config.redirectUri,
     clientAttestation,
     keyPair.privateKey
   )
@@ -362,8 +362,8 @@ export async function walletCredentialIssuance(): Promise<void> {
     groupMap.walletCredentialIssuance[6],
     stsAuthorizationCode,
     codeVerifier,
-    config.redirectUri,
     config.mockClientId,
+    config.redirectUri,
     clientAttestation,
     keyPair.privateKey
   )
@@ -440,8 +440,8 @@ export async function generateReauthenticationTestData(): Promise<void> {
     groupMap.generateReauthenticationTestData[4],
     stsAuthorizationCode,
     codeVerifier,
-    config.redirectUri,
     config.mockClientId,
+    config.redirectUri,
     clientAttestation,
     keyPair.privateKey
   )

@@ -12,7 +12,7 @@ import { Options } from 'k6/options'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { SharedArray } from 'k6/data'
-import { bufToString, generateCodeChallenge, generateKey } from './utils/crypto'
+import { bufToString, generateCodeChallenge, generateKey, getPublicKeyJwkForPrivateKey } from './utils/crypto'
 import {
   exchangeAccessToken,
   exchangeAuthorizationCode,
@@ -391,12 +391,7 @@ export async function exchangeRefreshToken(): Promise<void> {
   const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
     'sign'
   ])
-  const publicKeyJwk = {
-    kty: privateKeyJwk.kty,
-    x: privateKeyJwk.x,
-    y: privateKeyJwk.y,
-    crv: privateKeyJwk.crv
-  }
+  const publicKeyJwk = getPublicKeyJwkForPrivateKey(privateKeyJwk)
 
   iterationsStarted.add(1)
 
@@ -466,12 +461,7 @@ export async function generateRefreshTokenTestData(): Promise<void> {
   const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
     'sign'
   ])
-  const publicKeyJwk = {
-    kty: privateKeyJwk.kty,
-    x: privateKeyJwk.x,
-    y: privateKeyJwk.y,
-    crv: privateKeyJwk.crv
-  }
+  const publicKeyJwk = getPublicKeyJwkForPrivateKey(privateKeyJwk)
 
   const codeVerifier = crypto.randomUUID()
   const codeChallenge = await generateCodeChallenge(codeVerifier)

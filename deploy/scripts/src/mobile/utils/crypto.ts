@@ -42,3 +42,12 @@ export function bufToString(buf: ArrayBuffer): string {
   }
   return str
 }
+
+export function getPublicKeyJwkForPrivateKey(privateKeyJwk: JsonWebKey) {
+  return {
+    kty: privateKeyJwk.kty,
+    x: privateKeyJwk.x,
+    y: privateKeyJwk.y,
+    crv: privateKeyJwk.crv
+  }
+}

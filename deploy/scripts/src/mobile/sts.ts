@@ -485,7 +485,7 @@ export async function generateRefreshTokenTestData(): Promise<void> {
   )
   const responseOverrides = {
     idToken: {
-      subjectId: '7c5c7479-6ebe-490e-a4b0-a6b3c9cb2ec6'
+      subjectId: '7c5c7479-6ebe-490e-a4b0-a6b3c9cb2ec6' // Specific subject ID used to guarantee a refresh token will be returned in test while phased release is ongoing
     }
   }
   sleepBetween(1, 2)

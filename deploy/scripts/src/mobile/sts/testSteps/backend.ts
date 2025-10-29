@@ -98,8 +98,8 @@ export async function exchangeAuthorizationCode(
   groupName: string,
   authorizationCode: string,
   codeVerifier: string,
-  clientId: string,
   redirectUri: string,
+  clientId: string,
   clientAttestation: string,
   privateKey: CryptoKey
 ): Promise<{ accessToken: string; idToken: string }> {
@@ -156,8 +156,8 @@ export async function exchangeAuthorizationCodeForRefreshToken(
   groupName: string,
   authorizationCode: string,
   codeVerifier: string,
-  clientId: string,
   redirectUri: string,
+  clientId: string,
   clientAttestation: string,
   keys: Keys
 ): Promise<{ accessToken: string; idToken: string; refreshToken: string }> {
@@ -222,10 +222,10 @@ export async function exchangeAuthorizationCodeForRefreshToken(
 export async function refreshAccessToken(
   groupName: string,
   refreshToken: string,
+  clientId: string,
   clientAttestation: string,
   privateKey: CryptoKey,
-  publicKey: JsonWebKey,
-  clientId: string
+  publicKey: JsonWebKey
 ): Promise<{ accessToken: string }> {
   const nowInSeconds = Math.floor(Date.now() / 1000)
   const proofOfPossession = await signJwt(

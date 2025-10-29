@@ -276,8 +276,8 @@ export async function authentication(): Promise<void> {
     groupMap.authentication[6],
     stsAuthorizationCode,
     codeVerifier,
-    config.mockClientId,
     config.redirectUri,
+    config.mockClientId,
     clientAttestation,
     keyPair.privateKey
   )
@@ -321,8 +321,8 @@ export async function reauthentication(): Promise<void> {
     groupMap.reauthentication[6],
     stsAuthorizationCode,
     codeVerifier,
-    config.mockClientId,
     config.redirectUri,
+    config.mockClientId,
     clientAttestation,
     keyPair.privateKey
   )
@@ -363,8 +363,8 @@ export async function walletCredentialIssuance(): Promise<void> {
     groupMap.walletCredentialIssuance[6],
     stsAuthorizationCode,
     codeVerifier,
-    config.mockClientId,
     config.redirectUri,
+    config.mockClientId,
     clientAttestation,
     keyPair.privateKey
   )
@@ -405,10 +405,10 @@ export async function exchangeRefreshToken(): Promise<void> {
   const { accessToken } = await refreshAccessToken(
     groupMap.exchangeRefreshToken[1],
     exchangeRefreshTokenContext.refreshToken,
+    config.mockClientId,
     clientAttestation,
     privateKey,
-    publicKeyJwk,
-    config.mockClientId
+    publicKeyJwk
   )
 
   exchangeAccessToken(groupMap.exchangeRefreshToken[2], accessToken, 'sts-test.hello-world.read')
@@ -446,8 +446,8 @@ export async function generateReauthenticationTestData(): Promise<void> {
     groupMap.generateReauthenticationTestData[4],
     stsAuthorizationCode,
     codeVerifier,
-    config.mockClientId,
     config.redirectUri,
+    config.mockClientId,
     clientAttestation,
     keyPair.privateKey
   )
@@ -505,8 +505,8 @@ export async function generateRefreshTokenTestData(): Promise<void> {
     groupMap.generateRefreshTokenTestData[4],
     stsAuthorizationCode,
     codeVerifier,
-    config.mockClientId,
     config.redirectUri,
+    config.mockClientId,
     clientAttestation,
     { privateKey, publicKey: publicKeyJwk }
   )

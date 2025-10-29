@@ -230,11 +230,10 @@ const exchangeRefreshTokenContextData: ExchangeRefreshTokenContext[] = new Share
     const exchangeRefreshTokenDataFile = `./data/sts-refresh-token-test-data-${getEnv('ENVIRONMENT')}.csv`
     try {
       const exchangeRefreshTokenContextData = open(exchangeRefreshTokenDataFile)
-      const parsedCsvData = exchangeRefreshTokenContextData
+      return exchangeRefreshTokenContextData
         .split('\n')
         .filter(line => line.trim() !== '') // Remove empty lines
         .map(line => ({ refreshToken: line.trim() }))
-      return parsedCsvData
     } catch (err: unknown) {
       console.warn(
         `Failed to open file with refresh token data at ${exchangeRefreshTokenDataFile}. Attempts to run exchange refresh token scenario may fail. Error: ${err}`

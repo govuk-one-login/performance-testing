@@ -577,6 +577,8 @@ Resources:
               MOBILE_STS_DEV_STS_BASE_URL: "/perfTest/mobile/sts/dev/baseUrl"
               MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL: "/perfTest/mobile/sts/dev/mockClientBaseUrl"
               SLACK_OAUTH_TOKEN: "/perfTest/slack/OAuthToken"
+              STATUS_LIST_JWT_MOCK_URL: "/perfTest/statusList/build/mockJWTSignUrl"
+              STATUS_LIST_URL: "/perfTest/statusList/build/slUrl"
               TiCF_SQS_QUEUE: "/perfTest/fraud/TiCF/SQSQueue"
               TiCF_AUTH_URL: "/perfTest/fraud/TiCF/authUrl"
               TiCF_IPV_URL: "/perfTest/fraud/TiCF/ipvUrl"

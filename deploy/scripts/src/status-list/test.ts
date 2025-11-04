@@ -9,10 +9,10 @@ import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { timeGroup } from '../common/utils/request/timing'
-import { isStatusCode200 } from '../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode202 } from '../common/utils/checks/assertions'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
-import { generateIssuePayload } from './generate-payload'
+import { generateIssuePayload, generateRevokePayload } from './generator'
 
 const profiles: ProfileList = {
   smoke: {
@@ -23,7 +23,12 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 
 const groupMap = {
-  statusList: ['B01_StatusList_00_PayLoadSign', 'B01_StatusList_01_IssueSLEntry', 'B01_StatusList_02_RevokeSLEntry']
+  statusList: [
+    'B01_StatusList_01_IssuePayLoadSign',
+    'B01_StatusList_02_IssueSLEntry',
+    'B01_StatusList_03_RevokePayloadSign',
+    'B01_StatusList_04_RevokeSLEntry'
+  ]
 }
 
 export const options: Options = {
@@ -50,38 +55,60 @@ const mockParams = {
   }
 }
 
-// const slParams = {
-//   headers: {
-//     'Content-Type': 'application/jwt',
-//     Accept: 'application/json'
-//   }
+const slParams = {
+  headers: {
+    'Content-Type': 'application/jwt',
+    Accept: 'application/json'
+  }
+}
+export interface RevokeParams {
+  cUrl: string
+  idx: number
+}
+// export interface issueResponse {
+//   uri: string
+//   idx: number
 // }
 
 export function statusList(): void {
   const groups = groupMap.statusList
   let res: Response
-  const signedPayload = sig4SignRequest(generateIssuePayload()) //WIP progress -- Sign the 'payload' with  AWS protect SigV4
+  let basePayload = sigV4Sign(generateIssuePayload()) //placeholder function, WIP
 
   iterationsStarted.add(1)
 
-  //B01_StatusList_00_SignPayload
-  res = timeGroup(groups[0], () => http.post(env.mockEnvUrl + 'mock-cri/sign-jwt-payload', signedPayload, mockParams), {
+  //  B01_StatusList_01_IssuePayLoadSign
+
+  res = timeGroup(groups[0], () => http.post(env.mockEnvUrl + 'mock-cri/sign-jwt-payload', basePayload, mockParams), {
     isStatusCode200
   })
 
   sleepBetween(1, 3)
 
-  //B01_StatusList_01_IssueSLEntry
-  // res = timeGroup(groups[1],() => http.post(env.slEnvUrl + '/build/issue', xxxx, slParams)){
-  //     isStatusCode200
-  // }
+  // B01_StatusList_02_IssueSLEntry
+
+  res = timeGroup(groups[1], () => http.post(env.slEnvUrl + '/build/issue', res.body, slParams), {
+    isStatusCode200
+    // candidate for content check?? "uri": "https://crs.account.gov.uk
+  })
+
+  // const resData = res.json<issueResponse>()
 
   sleepBetween(1, 3)
 
-  //B01_StatusList_02_RevokeSLEntry
-  // res = timeGroup(groups[2],() => http.post(env.slEnvUrl + '/build/revoke', xxx)){
-  //     isStatusCode202
-  // }
+  // 'B01_StatusList_02_RevokePayloadSign',
+
+  basePayload = sigV4Sign(generateRevokePayload(res.body.uri, res.body.idx)) // uri and idx to be passed as arguments..
+
+  res = timeGroup(groups[3], () => http.post(env.mockEnvUrl + 'mock-cri/sign-jwt-payload', basePayload, mockParams), {
+    isStatusCode200
+  })
+
+  //B01_StatusList_04_RevokeSLEntry
+
+  res = timeGroup(groups[2], () => http.post(env.slEnvUrl + '/build/revoke', res.body, slParams), {
+    isStatusCode202
+  })
 
   iterationsCompleted.add(1)
 }

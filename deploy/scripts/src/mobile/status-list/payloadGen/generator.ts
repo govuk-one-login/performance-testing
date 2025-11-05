@@ -1,4 +1,4 @@
-import { uuidv4 } from '../common/utils/jslib/index'
+import { uuidv4 } from '../../../common/utils/jslib/index'
 
 interface statusListIssuePayload {
   iss: string
@@ -7,9 +7,9 @@ interface statusListIssuePayload {
   statusExpiry: number
 }
 
-export function generateIssuePayload(): statusListIssuePayload {
+export function generateIssuePayload(clientID: string): statusListIssuePayload {
   return {
-    iss: 'exampleclientIDabcd123',
+    iss: clientID,
     iat: Math.floor(Date.now() / 1000),
     jti: uuidv4(),
     statusExpiry: Math.floor(Date.now() / 1000) + 1000 //statusExpiry must be equal to or later than the credential’s technical expiry date, known as the validUntil property.
@@ -24,12 +24,17 @@ interface statusListRevokePayload {
   idx: number
 }
 
-export function generateRevokePayload(crUrl: string, idx: number): statusListRevokePayload {
+export function generateRevokePayload(
+  clientID: string,
+  issuedAt: number,
+  uriValue: string,
+  idx: number
+): statusListRevokePayload {
   return {
-    iss: 'exampleclientIDabcd123',
-    iat: Math.floor(Date.now() / 1000),
+    iss: clientID,
+    iat: issuedAt,
     jti: uuidv4(),
-    uri: `${crUrl}`,
+    uri: uriValue,
     idx: idx
   }
 }

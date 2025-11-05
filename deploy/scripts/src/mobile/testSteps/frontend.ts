@@ -58,16 +58,6 @@ export function postBiometricChip(): void {
   group('POST /biometricChip', () =>
     timeRequest(() => http.post(buildFrontendUrl('/biometricChip'), { 'select-option': 'yes' }), {
       isStatusCode200,
-      ...validatePageRedirect('/iphoneModel'),
-      ...pageContentCheck('Which iPhone model do you have?')
-    })
-  )
-}
-
-export function postIphoneModel(): void {
-  group('POST /iphoneModel', () =>
-    timeRequest(() => http.post(buildFrontendUrl('/iphoneModel'), { 'select-option': 'iphone7OrNewer' }), {
-      isStatusCode200,
       ...validatePageRedirect('/idCheckApp'),
       ...pageContentCheck('Use your passport and an app to prove your identity')
     })

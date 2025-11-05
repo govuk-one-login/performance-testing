@@ -13,7 +13,6 @@ import {
   postSelectSmartphone,
   postValidPassport,
   postBiometricChip,
-  postIphoneModel,
   postIdCheckApp,
   startJourney,
   getSessionIdFromCookieJar
@@ -99,7 +98,6 @@ const groupMap = {
     'POST /selectSmartphone',
     'POST /validPassport',
     'POST /biometricChip',
-    'POST /iphoneModel',
     'POST /idCheckApp',
     'GET /appInfo', //BE
     'GET /biometricToken/v2',
@@ -133,8 +131,6 @@ export function mamIphonePassport(): void {
   postValidPassport()
   simulateUserWait()
   postBiometricChip()
-  simulateUserWait()
-  postIphoneModel()
   simulateUserWait()
   postIdCheckApp()
   simulateUserWait()

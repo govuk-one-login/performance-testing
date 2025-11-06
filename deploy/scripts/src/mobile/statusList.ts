@@ -15,7 +15,7 @@ import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { generateIssuePayload, generateRevokePayload } from './status-list/payloadGen/generator'
 import { signRequest } from './utils/signatureV4'
 import { AssumeRoleOutput } from '../common/utils/aws/types'
-import { getURI, getIDX } from './status-list/utils/issueResponse'
+import { getURI, getIDX } from './status-list/utils/issueResponseValidation'
 import { environment, config } from './status-list/utils/config'
 
 const profiles: ProfileList = {

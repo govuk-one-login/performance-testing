@@ -6,8 +6,8 @@ if (!validEnvironments.includes(environment))
   throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 
 export const config = {
-  mockURL: getEnv('STATUS_LIST_JWT_MOCK_URL'),
-  envURL: getEnv('STATUS_LIST_URL'),
-  clientID: getEnv('STATUS_LIST_CLIENT_ID'),
+  mockURL: getEnv(`STATUS_LIST_MOCK_URL_${environment}`),
+  envURL: getEnv(`STATUS_LIST_URL_${environment}`),
+  clientID: getEnv(`STATUS_LIST_CLIENT_ID_${environment}`),
   isProxy: getEnv('STATUS_LIST_PROXY_API')
 }

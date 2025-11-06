@@ -7,8 +7,8 @@ export function getURI(r: Response): string {
   fail('URI not found')
 }
 
-export function getIDX(r: Response): string {
+export function getIDX(r: Response): number {
   const idxValue = r.json('idx')
-  if (idxValue !== null && typeof idxValue === 'string') return idxValue
+  if (idxValue !== null && typeof idxValue === 'number') return idxValue
   fail('IDX not found')
 }

@@ -101,6 +101,10 @@ const profiles: ProfileList = {
   perf006Iteration5PeakTest: {
     ...createI4PeakTestSignUpScenario('FaceToFace', 14, 42, 15),
     ...createI4PeakTestSignUpScenario('CIC', 14, 21, 15)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignUpScenario('FaceToFace', 5, 42, 6),
+    ...createI4PeakTestSignUpScenario('CIC', 5, 21, 6)
   }
 }
 

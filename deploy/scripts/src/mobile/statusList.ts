@@ -17,6 +17,7 @@ import { signRequest } from './utils/signatureV4'
 import { AssumeRoleOutput } from '../common/utils/aws/types'
 import { getURI, getIDX } from './status-list/utils/issueResponseValidation'
 import { environment, config } from './status-list/utils/config'
+import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
@@ -39,10 +40,8 @@ const groupMap = {
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'],
-    http_req_failed: ['rate<0.05']
-  }
+  thresholds: getThresholds(groupMap),
+  tags: { name: '' }
 }
 
 export function setup(): void {

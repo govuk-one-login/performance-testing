@@ -156,6 +156,10 @@ const profiles: ProfileList = {
   perf006Iteration6SpikeTest: {
     ...createI3SpikeSignUpScenario('updateVC', 570, 7, 571),
     ...createI3SpikeSignInScenario('summariseVC', 260, 6, 119)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignUpScenario('updateVC', 180, 7, 181),
+    ...createI4PeakTestSignInScenario('summariseVC', 71, 6, 33)
   }
 }
 

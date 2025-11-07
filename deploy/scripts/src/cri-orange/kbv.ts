@@ -95,6 +95,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration4SpikeTest: {
     ...createI3SpikeSignUpScenario('kbv', 113, 12, 114)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignUpScenario('kbv', 18, 12, 19)
   }
 }
 

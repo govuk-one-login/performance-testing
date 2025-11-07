@@ -1,13 +1,13 @@
 import { uuidv4 } from '../../../common/utils/jslib/index'
 
-interface statusListIssuePayload {
+interface issuePayload {
   iss: string
   iat: number
   jti: string
   statusExpiry: number
 }
 
-export function generateIssuePayload(clientID: string): statusListIssuePayload {
+export function generateIssuePayload(clientID: string): issuePayload {
   return {
     iss: clientID,
     iat: Math.floor(Date.now() / 1000),
@@ -16,7 +16,7 @@ export function generateIssuePayload(clientID: string): statusListIssuePayload {
   }
 }
 
-interface statusListRevokePayload {
+interface revokePayload {
   iss: string
   iat: number
   jti: string
@@ -29,7 +29,7 @@ export function generateRevokePayload(
   issuedAt: number,
   uriValue: string,
   idx: number
-): statusListRevokePayload {
+): revokePayload {
   return {
     iss: clientID,
     iat: issuedAt,

@@ -12,7 +12,6 @@ import {
   postSelectSmartphone,
   postValidPassport,
   postBiometricChip,
-  postIphoneModel,
   getRedirect,
   postIdCheckApp,
   getAbortCommand,
@@ -71,7 +70,6 @@ const groupMap = {
     'POST /selectSmartphone',
     'POST /validPassport',
     'POST /biometricChip',
-    'POST /iphoneModel',
     'POST /idCheckApp',
     'GET /biometricToken/v2',
     'POST /finishBiometricSession',
@@ -100,8 +98,6 @@ export function mamIphonePassport(): void {
   postValidPassport()
   simulateUserWait()
   postBiometricChip()
-  simulateUserWait()
-  postIphoneModel()
   simulateUserWait()
   postIdCheckApp()
   simulateUserWait()

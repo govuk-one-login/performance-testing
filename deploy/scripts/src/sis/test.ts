@@ -142,7 +142,6 @@ export async function invalidate(): Promise<void> {
 }
 
 export async function useridentity(): Promise<void> {
-  let res: Response
   const groups = groupMap.useridentity
   const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
 
@@ -164,14 +163,10 @@ export async function useridentity(): Promise<void> {
   )
 
   // B03_SIS_01_PersistVCStubCall
-  res = timeGroup(
-    groups[0],
-    () => http.post(env.evcsStubUrl + `/vcs/${subjectID}`, persistVCReqBody, persistVCHeaders),
-    {
-      isStatusCode202: r => r.status === 202,
-      ...pageContentCheck('messageId')
-    }
-  )
+  timeGroup(groups[0], () => http.post(env.evcsStubUrl + `/vcs/${subjectID}`, persistVCReqBody, persistVCHeaders), {
+    isStatusCode202: r => r.status === 202,
+    ...pageContentCheck('messageId')
+  })
 
   //Signing Stored Identity(SIS) payload record
   const payloads = {
@@ -183,7 +178,6 @@ export async function useridentity(): Promise<void> {
     return signJwt('ES256', importedKey, payload, env.userIdentityKid)
   }
   const identityJWT = await createJwt(keys.useridentity, payloads.identityPayload)
-  //B03_SIS_02_IdentityStubCall
   const identityReqBody = JSON.stringify({
     userId: subjectID,
     si: {
@@ -197,12 +191,13 @@ export async function useridentity(): Promise<void> {
     }
   }
 
-  res = timeGroup(groups[1], () => http.post(env.evcsStubUrl + '/v1/identity', identityReqBody, identityHeaders), {
+  //B03_SIS_02_IdentityStubCall
+  timeGroup(groups[1], () => http.post(env.evcsStubUrl + '/v1/identity', identityReqBody, identityHeaders), {
     isStatusCode202
   })
 
   // B03_SIS_03_GetMockToken
-  res = timeGroup(
+  const res: Response = timeGroup(
     groups[2],
     () =>
       http.post(
@@ -229,7 +224,7 @@ export async function useridentity(): Promise<void> {
   })
 
   // B03_SIS_04_UserIdentityCall
-  res = timeGroup(
+  timeGroup(
     groups[3],
     () => http.post(env.userIdentityUrl + '/user-identity', useridentityReqBody, userIdentityHeaders),
     {

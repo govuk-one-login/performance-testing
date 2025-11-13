@@ -110,10 +110,15 @@ export function statusList(): void {
     )
   } else {
     // B01_StatusList_03_IssueAPICallViaPrivateAPI
-    res = timeGroup(groups[2], () => http.post(`${config.envURL}/${environment}/issue`, res.body, statusListHeaders), {
-      isStatusCode200,
-      ...pageContentCheck('idx')
-    })
+    const environmentName = environment.toLowerCase()
+    res = timeGroup(
+      groups[2],
+      () => http.post(`${config.envURL}/${environmentName}/issue`, res.body, statusListHeaders),
+      {
+        isStatusCode200,
+        ...pageContentCheck('idx')
+      }
+    )
   }
 
   const uriValue = getURI(res)

@@ -59,6 +59,7 @@ export function statusList(): void {
   const groups = groupMap.statusList
   let res: Response
   const issuePayload = JSON.stringify(generateIssuePayload(config.clientID))
+  const environmentName = environment.toLowerCase()
 
   const signedRequestMockIssue = signRequest(
     getEnv('AWS_REGION'),
@@ -110,7 +111,6 @@ export function statusList(): void {
     )
   } else {
     // B01_StatusList_03_IssueAPICallViaPrivateAPI
-    const environmentName = environment.toLowerCase()
     res = timeGroup(
       groups[2],
       () => http.post(`${config.envURL}/${environmentName}/issue`, res.body, statusListHeaders),
@@ -175,10 +175,14 @@ export function statusList(): void {
     )
   } else {
     //B01_StatusList_06_RevokeCallViaPrivateAPI
-    res = timeGroup(groups[5], () => http.post(`${config.envURL}/${environment}/revoke`, res.body, statusListHeaders), {
-      isStatusCode202,
-      ...pageContentCheck('Request processed for revocation')
-    })
+    res = timeGroup(
+      groups[5],
+      () => http.post(`${config.envURL}/${environmentName}/revoke`, res.body, statusListHeaders),
+      {
+        isStatusCode202,
+        ...pageContentCheck('Request processed for revocation')
+      }
+    )
   }
 
   iterationsCompleted.add(1)

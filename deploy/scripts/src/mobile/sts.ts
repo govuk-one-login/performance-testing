@@ -12,11 +12,10 @@ import { Options } from 'k6/options'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { SharedArray } from 'k6/data'
-import { bufToString, generateCodeChallenge, generateKey, getPublicKeyJwkForPrivateKey } from './utils/crypto'
+import { bufToString, generateCodeChallenge, getPublicKeyJwkForPrivateKey } from './utils/crypto'
 import {
   exchangeAccessToken,
   exchangeAuthorizationCode,
-  exchangeAuthorizationCodeForRefreshToken,
   exchangePreAuthorizedCode,
   getAuthorize,
   getCodeFromOrchestration,
@@ -244,8 +243,11 @@ const exchangeRefreshTokenContextData: ExchangeRefreshTokenContext[] = new Share
 )
 
 export async function authentication(): Promise<void> {
-  const keyPair = await generateKey()
-  const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+  const privateKeyJwk = JSON.parse(config.clientInstanceKey)
+  const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
+    'sign'
+  ])
+  const publicKeyJwk = getPublicKeyJwkForPrivateKey(privateKeyJwk)
 
   const codeVerifier = crypto.randomUUID()
   const codeChallenge = await generateCodeChallenge(codeVerifier)
@@ -278,7 +280,7 @@ export async function authentication(): Promise<void> {
     config.mockClientId,
     config.redirectUri,
     clientAttestation,
-    keyPair.privateKey
+    { privateKey, publicKey: publicKeyJwk }
   )
   exchangeAccessToken(groupMap.authentication[7], accessToken, 'sts-test.hello-world.read')
   simulateCallToStsJwks(groupMap.authentication[8])
@@ -288,8 +290,11 @@ export async function authentication(): Promise<void> {
 export async function reauthentication(): Promise<void> {
   const reauthenticationContext = reauthenticationContextData[exec.scenario.iterationInTest]
 
-  const keyPair = await generateKey()
-  const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+  const privateKeyJwk = JSON.parse(config.clientInstanceKey)
+  const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
+    'sign'
+  ])
+  const publicKeyJwk = getPublicKeyJwkForPrivateKey(privateKeyJwk)
 
   const codeVerifier = crypto.randomUUID()
   const codeChallenge = await generateCodeChallenge(codeVerifier)
@@ -323,7 +328,7 @@ export async function reauthentication(): Promise<void> {
     config.mockClientId,
     config.redirectUri,
     clientAttestation,
-    keyPair.privateKey
+    { privateKey, publicKey: publicKeyJwk }
   )
   exchangeAccessToken(groupMap.reauthentication[7], accessToken, 'sts-test.hello-world.read')
   simulateCallToStsJwks(groupMap.reauthentication[8])
@@ -331,8 +336,11 @@ export async function reauthentication(): Promise<void> {
 }
 
 export async function walletCredentialIssuance(): Promise<void> {
-  const keyPair = await generateKey()
-  const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+  const privateKeyJwk = JSON.parse(config.clientInstanceKey)
+  const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
+    'sign'
+  ])
+  const publicKeyJwk = getPublicKeyJwkForPrivateKey(privateKeyJwk)
 
   const codeVerifier = crypto.randomUUID()
   const codeChallenge = await generateCodeChallenge(codeVerifier)
@@ -365,7 +373,7 @@ export async function walletCredentialIssuance(): Promise<void> {
     config.mockClientId,
     config.redirectUri,
     clientAttestation,
-    keyPair.privateKey
+    { privateKey, publicKey: publicKeyJwk }
   )
   exchangeAccessToken(groupMap.walletCredentialIssuance[7], accessToken, 'sts-test.hello-world.read')
   simulateCallToStsJwks(groupMap.walletCredentialIssuance[8])
@@ -412,8 +420,11 @@ export async function exchangeRefreshToken(): Promise<void> {
 }
 
 export async function generateReauthenticationTestData(): Promise<void> {
-  const keyPair = await generateKey()
-  const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+  const privateKeyJwk = JSON.parse(config.clientInstanceKey)
+  const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
+    'sign'
+  ])
+  const publicKeyJwk = getPublicKeyJwkForPrivateKey(privateKeyJwk)
 
   const codeVerifier = crypto.randomUUID()
   const codeChallenge = await generateCodeChallenge(codeVerifier)
@@ -443,7 +454,7 @@ export async function generateReauthenticationTestData(): Promise<void> {
     config.mockClientId,
     config.redirectUri,
     clientAttestation,
-    keyPair.privateKey
+    { privateKey, publicKey: publicKeyJwk }
   )
 
   const idTokenPayload = idToken.split('.')[1]
@@ -490,7 +501,7 @@ export async function generateRefreshTokenTestData(): Promise<void> {
     config.redirectUri
   )
   const clientAttestation = postGenerateClientAttestation(groupMap.generateRefreshTokenTestData[3], publicKeyJwk)
-  const { refreshToken } = await exchangeAuthorizationCodeForRefreshToken(
+  const { refreshToken } = await exchangeAuthorizationCode(
     groupMap.generateRefreshTokenTestData[4],
     stsAuthorizationCode,
     codeVerifier,

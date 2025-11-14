@@ -94,65 +94,12 @@ export function getRedirect(
   return new URL(res.headers.Location).searchParams.get('code')!
 }
 
-export async function exchangeAuthorizationCode(
-  groupName: string,
-  authorizationCode: string,
-  codeVerifier: string,
-  clientId: string,
-  redirectUri: string,
-  clientAttestation: string,
-  privateKey: CryptoKey
-): Promise<{ accessToken: string; idToken: string }> {
-  const nowInSeconds = Math.floor(Date.now() / 1000)
-  const proofOfPossession = await signJwt(
-    'ES256',
-    privateKey,
-    {
-      iss: clientId,
-      aud: config.stsBaseUrl,
-      exp: nowInSeconds + 180,
-      jti: crypto.randomUUID()
-    },
-    { typ: 'oauth-client-attestation-pop+jwt' }
-  )
-
-  const res = timeGroup(
-    groupName,
-    () => {
-      return http.post(
-        `${config.stsBaseUrl}/token`,
-        {
-          grant_type: 'authorization_code',
-          code: authorizationCode,
-          redirect_uri: redirectUri,
-          code_verifier: codeVerifier
-        },
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'OAuth-Client-Attestation': clientAttestation,
-            'OAuth-Client-Attestation-PoP': proofOfPossession
-          }
-        }
-      )
-    },
-    {
-      isStatusCode200,
-      ...validateJsonResponse(['access_token', 'id_token'])
-    }
-  )
-  return {
-    accessToken: res.json('access_token') as string,
-    idToken: res.json('id_token') as string
-  }
-}
-
 type Keys = {
   privateKey: CryptoKey
   publicKey: JsonWebKey
 }
 
-export async function exchangeAuthorizationCodeForRefreshToken(
+export async function exchangeAuthorizationCode(
   groupName: string,
   authorizationCode: string,
   codeVerifier: string,

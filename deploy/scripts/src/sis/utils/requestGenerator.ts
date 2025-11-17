@@ -1,18 +1,17 @@
-import { IdentityPayload } from '../request/types'
+import { IdentityPayload } from './types'
 
 export function generateIdentityPayload(sub: string): IdentityPayload {
   return {
-    aud: 'https://reuse-identity.staging.account.gov.uk',
+    aud: 'https://reuse-identity.build.account.gov.uk',
     sub: sub,
     nbf: Math.floor(Date.now() / 1000),
-    iss: 'https://identity.staging.account.gov.uk',
+    iss: 'https://identity.build.account.gov.uk',
     vot: 'P2',
     iat: Math.floor(Date.now() / 1000) - 10000,
     credentials: [
       'xUPW2AvpVTBzeFrJSwrJz47N4RA3Eveyr-uWgCYfxSoNmpSPvuQQgenfS7lxBzs4esP8NSch999SrS6IFTkl-g', //pragma: allowlist secret
       'ZcXdVTWbkurRCl854IkYWCZHqAAn2y5WVhoqXs1p-n8pbEyS3xWFCog-_cVtBVrYQdkxtIQJN4jr6265bbTohA', //pragma: allowlist secret
-      'g610xpaS5QmLBWihiC9yc9iNcLIlm7U3BGvcqZGwj4PiLA1r5trOdSBZnJbk845INCAUXhMgn4TiIKmRk3g1cA', //pragma: allowlist secret
-      'NuYvaZ16kMwrDGMOMRTf5jl806KTu8Satw0ewtHtaZacFznhiKp2FdwJ0y1jbPSYTQWPJdByTgK5pZ1V6zhDxQ' //pragma: allowlist secret
+      'g610xpaS5QmLBWihiC9yc9iNcLIlm7U3BGvcqZGwj4PiLA1r5trOdSBZnJbk845INCAUXhMgn4TiIKmRk3g1cA' //pragma: allowlist secret
     ],
     claims: {
       'https://vocab.account.gov.uk/v1/coreIdentity': {

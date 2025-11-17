@@ -25,7 +25,8 @@ import { uuidv4 } from '../common/utils/jslib'
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('identity', LoadProfile.smoke),
-    ...createScenario('invalidate', LoadProfile.smoke)
+    ...createScenario('invalidate', LoadProfile.smoke),
+    ...createScenario('useridentity', LoadProfile.smoke)
   },
   perf006Iteration6PeakTest: {
     ...createI4PeakTestSignUpScenario('identity', 570, 11, 571),

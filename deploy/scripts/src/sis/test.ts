@@ -21,6 +21,7 @@ import { generateIdentityPayload } from './utils/requestGenerator'
 import { signJwt } from '../common/utils/authentication/jwt'
 import { fail, sleep } from 'k6'
 import { uuidv4 } from '../common/utils/jslib'
+import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
@@ -44,9 +45,10 @@ const groupMap = {
   invalidate: ['B02_SIS_01_InvalidateCall'],
   useridentity: [
     'B03_SIS_01_PersistVCStubCall',
-    'B03_SIS_02_IdentityStubCall',
-    'B03_SIS_03_GetMockToken',
-    'B03_SIS_04_UserIdentityCall'
+    'B03_SIS_02_GetMockTokenForIdentity',
+    'B03_SIS_03_IdentityStubCall',
+    'B03_SIS_04_GetMockTokenForUserIdentity',
+    'B03_SIS_05_UserIdentityCall'
   ]
 } as const
 
@@ -145,6 +147,7 @@ export async function invalidate(): Promise<void> {
 export async function useridentity(): Promise<void> {
   const groups = groupMap.useridentity
   const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
+  let res: Response
 
   iterationsStarted.add(1)
   const persistVCHeaders = {
@@ -169,6 +172,27 @@ export async function useridentity(): Promise<void> {
     ...pageContentCheck('messageId')
   })
 
+  sleepBetween(1, 3)
+
+  // B03_SIS_02_GetMockTokenForIdentity
+  res = timeGroup(
+    groups[1],
+    () =>
+      http.post(
+        env.mockTokenUrl + '/generate',
+        JSON.stringify({
+          sub: subjectID,
+          scope: null,
+          ttl: 120
+        })
+      ),
+    { isStatusCode200, ...pageContentCheck('token') }
+  )
+
+  sleepBetween(1, 3)
+
+  const identityMockToken = getToken(res)
+
   //Signing Stored Identity(SIS) payload record
   const payloads = {
     identityPayload: generateIdentityPayload(subjectID)
@@ -188,18 +212,21 @@ export async function useridentity(): Promise<void> {
   })
   const identityHeaders = {
     headers: {
+      Authorization: `Bearer ${identityMockToken}`,
       'x-api-key': env.evcsStubApiKey
     }
   }
 
-  //B03_SIS_02_IdentityStubCall
-  timeGroup(groups[1], () => http.post(env.evcsStubUrl + '/v1/identity', identityReqBody, identityHeaders), {
+  //B03_SIS_03_IdentityStubCall
+  timeGroup(groups[2], () => http.post(env.evcsStubUrl + '/v1/identity', identityReqBody, identityHeaders), {
     isStatusCode202
   })
 
-  // B03_SIS_03_GetMockToken
-  const res: Response = timeGroup(
-    groups[2],
+  sleepBetween(1, 3)
+
+  // B03_SIS_04_GetMockTokenForUserIdentity
+  res = timeGroup(
+    groups[3],
     () =>
       http.post(
         env.mockTokenUrl + '/generate',
@@ -211,11 +238,14 @@ export async function useridentity(): Promise<void> {
       ),
     { isStatusCode200, ...pageContentCheck('token') }
   )
-  const token = getToken(res)
+
+  sleepBetween(1, 3)
+
+  const userIdentityToken = getToken(res)
 
   const userIdentityHeaders = {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${userIdentityToken}`,
       'x-api-key': env.userIdentityApiKey
     }
   }
@@ -224,9 +254,9 @@ export async function useridentity(): Promise<void> {
     govukSigninJourneyId: uuidv4()
   })
 
-  // B03_SIS_04_UserIdentityCall
+  // B03_SIS_05_UserIdentityCall
   timeGroup(
-    groups[3],
+    groups[4],
     () => http.post(env.userIdentityUrl + '/user-identity', useridentityReqBody, userIdentityHeaders),
     {
       isStatusCode204

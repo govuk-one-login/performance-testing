@@ -263,7 +263,8 @@ export async function useridentity(): Promise<void> {
     groups[4],
     () => http.post(env.userIdentityUrl + '/user-identity', useridentityReqBody, userIdentityHeaders),
     {
-      isStatusCode204
+      isStatusCode200,
+      ...pageContentCheck('DECERQUEIRA')
     }
   )
 

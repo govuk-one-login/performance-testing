@@ -222,7 +222,7 @@ export async function useridentity(): Promise<void> {
   }
 
   //B03_SIS_03_IdentityStubCall
-  timeGroup(groups[2], () => http.post(env.evcsStubUrl + '/v1/identity', identityReqBody, identityHeaders), {
+  timeGroup(groups[2], () => http.post(env.evcsStubUrl + '/identity', identityReqBody, identityHeaders), {
     isStatusCode202
   })
 

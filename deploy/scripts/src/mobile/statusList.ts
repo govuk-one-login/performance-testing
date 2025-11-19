@@ -3,7 +3,8 @@ import {
   createScenario,
   describeProfile,
   LoadProfile,
-  type ProfileList
+  type ProfileList,
+  createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -22,6 +23,9 @@ import { getThresholds } from '../common/utils/config/thresholds'
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('statusList', LoadProfile.smoke)
+  },
+  loadTest: {
+    ...createI4PeakTestSignInScenario('statusList', 28, 18, 14)
   }
 }
 
@@ -141,48 +145,52 @@ export function statusList(): void {
 
   sleepBetween(1, 3)
 
-  // B01_StatusList_04_SignRevokePayload
-  res = timeGroup(
-    groups[3],
-    () => http.post(signedRequestMockRevoke.url, revokePayload, { headers: signedRequestMockRevoke.headers }),
-    {
-      isStatusCode200
+  // 90% of the users call /revoke
+
+  if (Math.random() <= 0.9) {
+    // B01_StatusList_04_SignRevokePayload
+    res = timeGroup(
+      groups[3],
+      () => http.post(signedRequestMockRevoke.url, revokePayload, { headers: signedRequestMockRevoke.headers }),
+      {
+        isStatusCode200
+      }
+    )
+    sleepBetween(1, 3)
+
+    if (config.isProxy === 'True') {
+      const signedRequestProxyRevoke = signRequest(
+        getEnv('AWS_REGION'),
+        credentials,
+        'POST',
+        config.envURL.split('https://')[1],
+        '/revoke',
+        {
+          'Content-Type': 'application/jwt'
+        },
+        res.body as string
+      )
+
+      // B01_StatusList_05_RevokeCallViaProxy
+      res = timeGroup(
+        groups[4],
+        () => http.post(signedRequestProxyRevoke.url, res.body, { headers: signedRequestProxyRevoke.headers }),
+        {
+          isStatusCode202,
+          ...pageContentCheck('Request processed for revocation')
+        }
+      )
+    } else {
+      //B01_StatusList_06_RevokeCallViaPrivateAPI
+      res = timeGroup(
+        groups[5],
+        () => http.post(`${config.envURL}/${environmentName}/revoke`, res.body, statusListHeaders),
+        {
+          isStatusCode202,
+          ...pageContentCheck('Request processed for revocation')
+        }
+      )
     }
-  )
-  sleepBetween(1, 3)
-
-  if (config.isProxy === 'True') {
-    const signedRequestProxyRevoke = signRequest(
-      getEnv('AWS_REGION'),
-      credentials,
-      'POST',
-      config.envURL.split('https://')[1],
-      '/revoke',
-      {
-        'Content-Type': 'application/jwt'
-      },
-      res.body as string
-    )
-
-    // B01_StatusList_05_RevokeCallViaProxy
-    res = timeGroup(
-      groups[4],
-      () => http.post(signedRequestProxyRevoke.url, res.body, { headers: signedRequestProxyRevoke.headers }),
-      {
-        isStatusCode202,
-        ...pageContentCheck('Request processed for revocation')
-      }
-    )
-  } else {
-    //B01_StatusList_06_RevokeCallViaPrivateAPI
-    res = timeGroup(
-      groups[5],
-      () => http.post(`${config.envURL}/${environmentName}/revoke`, res.body, statusListHeaders),
-      {
-        isStatusCode202,
-        ...pageContentCheck('Request processed for revocation')
-      }
-    )
   }
 
   iterationsCompleted.add(1)

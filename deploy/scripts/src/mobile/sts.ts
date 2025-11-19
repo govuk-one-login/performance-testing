@@ -12,7 +12,7 @@ import { Options } from 'k6/options'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { SharedArray } from 'k6/data'
-import { bufToString, generateCodeChallenge, generateKey } from './utils/crypto'
+import { bufToString, generateCodeChallenge, generateKey, getPublicKeyJwkForPrivateKey } from './utils/crypto'
 import {
   exchangeAccessToken,
   exchangeAuthorizationCode,
@@ -20,6 +20,7 @@ import {
   getAuthorize,
   getCodeFromOrchestration,
   getRedirect,
+  refreshAccessToken,
   simulateCallToStsJwks
 } from './sts/testSteps/backend'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
@@ -35,7 +36,9 @@ const profiles: ProfileList = {
     ...createScenario('authentication', LoadProfile.smoke),
     ...createScenario('reauthentication', LoadProfile.smoke),
     ...createScenario('walletCredentialIssuance', LoadProfile.smoke),
-    ...createScenario('generateReauthenticationTestData', LoadProfile.smoke)
+    ...createScenario('exchangeRefreshToken', LoadProfile.smoke),
+    ...createScenario('generateReauthenticationTestData', LoadProfile.smoke),
+    ...createScenario('generateRefreshTokenTestData', LoadProfile.smoke)
   },
   perf006Iteration3PeakTest: {
     authentication: {
@@ -167,7 +170,20 @@ export const groupMap = {
     'WALLET_CREDENTIAL_ISSUANCE_12 POST /token (pre-authorized code exchange)',
     'WALLET_CREDENTIAL_ISSUANCE_13 GET /.well-known/jwks.json (STS)'
   ],
+  exchangeRefreshToken: [
+    'EXCHANGE_REFRESH_TOKEN_01 POST /generate-client-attestation',
+    'EXCHANGE_REFRESH_TOKEN_02 POST /token (refresh token exchange)',
+    'EXCHANGE_REFRESH_TOKEN_03 POST /token (access token exchange)',
+    'EXCHANGE_REFRESH_TOKEN_04 GET /.well-known/jwks.json (STS)'
+  ],
   generateReauthenticationTestData: [
+    '01 GET /authorize (STS)',
+    '02 GET /authorize (Orchestration)',
+    '03 GET /redirect',
+    '04 POST /generate-client-attestation',
+    '05 POST /token (authorization code exchange)'
+  ],
+  generateRefreshTokenTestData: [
     '01 GET /authorize (STS)',
     '02 GET /authorize (Orchestration)',
     '03 GET /redirect',
@@ -190,6 +206,10 @@ interface ReauthenticationContext {
   persistentSessionId: string
 }
 
+interface ExchangeRefreshTokenContext {
+  refreshToken: string
+}
+
 const reauthenticationContextData: ReauthenticationContext[] = new SharedArray('reauthenticationContext', () => {
   const reauthenticationDataFile = `./data/sts-reauthentication-test-data-${getEnv('ENVIRONMENT')}.json`
   try {
@@ -202,6 +222,25 @@ const reauthenticationContextData: ReauthenticationContext[] = new SharedArray('
     return []
   }
 })
+
+const exchangeRefreshTokenContextData: ExchangeRefreshTokenContext[] = new SharedArray(
+  'exchangeRefreshTokenContext',
+  () => {
+    const exchangeRefreshTokenDataFile = `./data/sts-refresh-token-test-data-${getEnv('ENVIRONMENT')}.csv`
+    try {
+      const exchangeRefreshTokenContextData = open(exchangeRefreshTokenDataFile)
+      return exchangeRefreshTokenContextData
+        .split('\n')
+        .filter(line => line.trim() !== '') // Remove empty lines
+        .map(line => ({ refreshToken: line.trim() }))
+    } catch (err: unknown) {
+      console.warn(
+        `Failed to open file with refresh token data at ${exchangeRefreshTokenDataFile}. Attempts to run exchange refresh token scenario may fail. Error: ${err}`
+      )
+      return []
+    }
+  }
+)
 
 export async function authentication(): Promise<void> {
   const keyPair = await generateKey()
@@ -238,7 +277,7 @@ export async function authentication(): Promise<void> {
     config.mockClientId,
     config.redirectUri,
     clientAttestation,
-    keyPair.privateKey
+    { privateKey: keyPair.privateKey, publicKey: publicKeyJwk }
   )
   exchangeAccessToken(groupMap.authentication[7], accessToken, 'sts-test.hello-world.read')
   simulateCallToStsJwks(groupMap.authentication[8])
@@ -283,7 +322,7 @@ export async function reauthentication(): Promise<void> {
     config.mockClientId,
     config.redirectUri,
     clientAttestation,
-    keyPair.privateKey
+    { privateKey: keyPair.privateKey, publicKey: publicKeyJwk }
   )
   exchangeAccessToken(groupMap.reauthentication[7], accessToken, 'sts-test.hello-world.read')
   simulateCallToStsJwks(groupMap.reauthentication[8])
@@ -325,7 +364,7 @@ export async function walletCredentialIssuance(): Promise<void> {
     config.mockClientId,
     config.redirectUri,
     clientAttestation,
-    keyPair.privateKey
+    { privateKey: keyPair.privateKey, publicKey: publicKeyJwk }
   )
   exchangeAccessToken(groupMap.walletCredentialIssuance[7], accessToken, 'sts-test.hello-world.read')
   simulateCallToStsJwks(groupMap.walletCredentialIssuance[8])
@@ -341,6 +380,33 @@ export async function walletCredentialIssuance(): Promise<void> {
     preAuthorizedCodeExchangeServiceToken
   )
   simulateCallToStsJwks(groupMap.walletCredentialIssuance[12])
+  iterationsCompleted.add(1)
+}
+
+export async function exchangeRefreshToken(): Promise<void> {
+  const exchangeRefreshTokenContext = exchangeRefreshTokenContextData[exec.scenario.iterationInTest]
+
+  const privateKeyJwk = JSON.parse(config.clientInstanceKey)
+  const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
+    'sign'
+  ])
+  const publicKeyJwk = getPublicKeyJwkForPrivateKey(privateKeyJwk)
+
+  iterationsStarted.add(1)
+
+  const clientAttestation = postGenerateClientAttestation(groupMap.exchangeRefreshToken[0], publicKeyJwk)
+  const { accessToken } = await refreshAccessToken(
+    groupMap.exchangeRefreshToken[1],
+    exchangeRefreshTokenContext.refreshToken,
+    config.mockClientId,
+    clientAttestation,
+    privateKey,
+    publicKeyJwk
+  )
+
+  exchangeAccessToken(groupMap.exchangeRefreshToken[2], accessToken, 'sts-test.hello-world.read')
+
+  simulateCallToStsJwks(groupMap.exchangeRefreshToken[3])
   iterationsCompleted.add(1)
 }
 
@@ -376,7 +442,7 @@ export async function generateReauthenticationTestData(): Promise<void> {
     config.mockClientId,
     config.redirectUri,
     clientAttestation,
-    keyPair.privateKey
+    { privateKey: keyPair.privateKey, publicKey: publicKeyJwk }
   )
 
   const idTokenPayload = idToken.split('.')[1]
@@ -387,4 +453,51 @@ export async function generateReauthenticationTestData(): Promise<void> {
   }
 
   console.log(reauthenticationContext)
+}
+
+export async function generateRefreshTokenTestData(): Promise<void> {
+  const privateKeyJwk = JSON.parse(config.clientInstanceKey)
+  const privateKey = await crypto.subtle.importKey('jwk', privateKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, [
+    'sign'
+  ])
+  const publicKeyJwk = getPublicKeyJwkForPrivateKey(privateKeyJwk)
+
+  const codeVerifier = crypto.randomUUID()
+  const codeChallenge = await generateCodeChallenge(codeVerifier)
+
+  const orchestrationAuthorizeUrl = getAuthorize(
+    groupMap.generateRefreshTokenTestData[0],
+    config.mockClientId,
+    config.redirectUri,
+    codeChallenge
+  )
+  const responseOverrides = {
+    idToken: {
+      subjectId: '7c5c7479-6ebe-490e-a4b0-a6b3c9cb2ec6' // Specific subject ID used to guarantee a refresh token will be returned in test while phased release is ongoing
+    }
+  }
+  sleepBetween(1, 2)
+  const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+    groupMap.generateRefreshTokenTestData[1],
+    orchestrationAuthorizeUrl,
+    responseOverrides
+  )
+  const stsAuthorizationCode = getRedirect(
+    groupMap.generateRefreshTokenTestData[2],
+    state,
+    orchestrationAuthorizationCode,
+    config.redirectUri
+  )
+  const clientAttestation = postGenerateClientAttestation(groupMap.generateRefreshTokenTestData[3], publicKeyJwk)
+  const { refreshToken } = await exchangeAuthorizationCode(
+    groupMap.generateRefreshTokenTestData[4],
+    stsAuthorizationCode,
+    codeVerifier,
+    config.redirectUri,
+    config.mockClientId,
+    clientAttestation,
+    { privateKey, publicKey: publicKeyJwk }
+  )
+
+  console.log(refreshToken)
 }

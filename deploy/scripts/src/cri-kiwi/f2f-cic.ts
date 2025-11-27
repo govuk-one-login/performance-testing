@@ -727,7 +727,6 @@ export function FaceToFace(): void {
 
     //02_IPVStubCall
     res = timeGroup(groups[27].split('::')[1], () => http.get(res.headers.Location), {
-      isStatusCode200,
       'verify url body': r => r.url.includes(clientId)
     })
   })

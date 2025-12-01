@@ -183,12 +183,7 @@ export async function walletCredentialIssuance(): Promise<void> {
     accessToken,
     'mobile.txma-event.write'
   )
-  postTxmaEvent(
-    groupMap.walletCredentialIssuance[7],
-    'WALLET_CREDENTIAL_ADD_ATTEMPT',
-    credentialId,
-    txmaEventServiceToken
-  )
-  postTxmaEvent(groupMap.walletCredentialIssuance[8], 'WALLET_CREDENTIAL_ADDED', credentialId, txmaEventServiceToken)
+  postTxmaEvent(groupMap.walletCredentialIssuance[7], 'WALLET_CREDENTIAL_ADD_ATTEMPT', txmaEventServiceToken)
+  postTxmaEvent(groupMap.walletCredentialIssuance[8], 'WALLET_CREDENTIAL_ADDED', txmaEventServiceToken, credentialId)
   iterationsCompleted.add(1)
 }

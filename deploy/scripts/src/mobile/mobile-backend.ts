@@ -87,6 +87,10 @@ const profiles: ProfileList = {
   perf006Iteration6RegressionTest: {
     ...createI4PeakTestSignUpScenario('getClientAttestation', 540, 12, 541),
     ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 27, 18)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignUpScenario('getClientAttestation', 170, 12, 171),
+    ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 27, 18)
   }
 }
 

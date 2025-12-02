@@ -41,6 +41,11 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignUpScenario('identity', 180, 11, 181),
     ...createI4PeakTestSignInScenario('invalidate', 71, 6, 33),
     ...createI4PeakTestSignInScenario('useridentity', 71, 15, 33)
+  },
+  perf006Iteration7SpikeTest: {
+    ...createI3SpikeSignUpScenario('identity', 540, 11, 541),
+    ...createI3SpikeSignInScenario('invalidate', 143, 6, 66),
+    ...createI3SpikeSignInScenario('useridentity', 143, 15, 66)
   }
 }
 

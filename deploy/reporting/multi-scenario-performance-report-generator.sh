@@ -32,13 +32,13 @@ TIME_PARAM=$2            # Second argument: time parameters (optional)
 # ============================================================================
 # INTERACTIVE MODE: Prompt user for scenario configuration if not provided
 # ============================================================================
-if [ -z "$TIME_PARAM" ]; then
+if [[ -z "$TIME_PARAM" ]]; then
     echo ""
     echo "=== Performance Test Steady-State Configuration ==="
     echo ""
     read -p "Enter the total number of scenarios in the test: " SCENARIO_COUNT
 
-    if [ "$SCENARIO_COUNT" -eq 1 ]; then
+    if [[ "$SCENARIO_COUNT" -eq 1 ]]; then
         # Single scenario mode - collect one set of times
         # Format: ScenarioName:HH:MM:SS:HH:MM:SS
         echo ""
@@ -57,7 +57,7 @@ if [ -z "$TIME_PARAM" ]; then
             read -p "Enter Steady-State Start Time (HH:MM:SS): " START_TIME
             read -p "Enter Steady-State End Time (HH:MM:SS): " END_TIME
 
-            if [ $i -eq 1 ]; then
+            if [[ $i -eq 1 ]]; then
                 SCENARIO_TIMES="${SCENARIO_NAME}:${START_TIME}:${END_TIME}"
             else
                 SCENARIO_TIMES="${SCENARIO_TIMES},${SCENARIO_NAME}:${START_TIME}:${END_TIME}"
@@ -86,8 +86,8 @@ else
     # Single scenario mode - need third parameter
     START_TIME=$TIME_PARAM
     END_TIME=${3:-$THIRD_PARAM}
-    if [ -z "$END_TIME" ]; then
-        echo "Error: For single scenario, provide: results.gz START_TIME END_TIME"
+    if [[ -z "$END_TIME" ]]; then
+        echo "Error: For single scenario, provide: results.gz START_TIME END_TIME" >&2
         exit 1
     fi
     MODE="single"
@@ -744,7 +744,7 @@ echo ""
 
 JSON_FILE=$(ls -t perf_data_*.json 2>/dev/null | head -1)  # Find most recent JSON file
 
-if [ -n "$JSON_FILE" ] && [ -f "$JSON_FILE" ]; then
+if [[ -n "$JSON_FILE" ]] && [[ -f "$JSON_FILE" ]]; then
     # Extract timestamp from JSON filename (format: perf_data_YYYY-MM-DD-HH-MM-SS.json)
     TIMESTAMP=$(echo "$JSON_FILE" | sed 's/perf_data_\(.*\)\.json/\1/')
     echo "📊 Generating Excel report..."

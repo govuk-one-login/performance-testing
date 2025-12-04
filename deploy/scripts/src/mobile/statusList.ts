@@ -4,7 +4,8 @@ import {
   describeProfile,
   LoadProfile,
   type ProfileList,
-  createI4PeakTestSignInScenario
+  createI4PeakTestSignInScenario,
+  createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
@@ -26,6 +27,9 @@ const profiles: ProfileList = {
   },
   loadTest: {
     ...createI4PeakTestSignInScenario('statusList', 28, 18, 14)
+  },
+  perf006Iteration7SpikeTest: {
+    ...createI3SpikeSignInScenario('statusList', 140, 18, 65)
   }
 }
 

@@ -34,9 +34,9 @@ function parseScenarioConfig(configStr: string | undefined): DynamicProfileConfi
     if (!name || !target || !duration || !rampUp || !type) continue
 
     config[name] = {
-      target: parseInt(target),
-      duration: parseInt(duration),
-      rampUp: parseInt(rampUp),
+      target: Number.parseInt(target),
+      duration: Number.parseInt(duration),
+      rampUp: Number.parseInt(rampUp),
       type: type as 'peakSignUp' | 'peakSignIn' | 'spikeSignUp' | 'spikeSignIn'
     }
   }

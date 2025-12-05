@@ -13,6 +13,7 @@ import {
   createI4PeakTestSignUpScenario,
   createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
+import { createDynamicProfile } from '../common/utils/config/dynamic-profiles'
 import { timeGroup } from '../common/utils/request/timing'
 import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
 import { addressPayloadDL, kbvPayloaDL, fraudPayloadDL, drivingLicencePayload } from './data/drivingLicenceData'
@@ -400,7 +401,8 @@ const profiles: ProfileList = {
   perf006Iteration7SpikeTest: {
     ...createI3SpikeSignUpScenario('identity', 540, 36, 541),
     ...createI3SpikeSignInScenario('idReuse', 143, 6, 66)
-  }
+  },
+  dynamic: createDynamicProfile() ?? {}
 }
 
 const loadProfile = selectProfile(profiles)

@@ -38,6 +38,15 @@ const profiles: ProfileList = {
       maxVUs: 1,
       stages: [{ target: 1, duration: '5m' }],
       exec: 'ticf'
+    },
+    silentLogin: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [{ target: 1, duration: '5m' }],
+      exec: 'silentLogin'
     }
   },
   perf006Iteration4PeakTest: {
@@ -56,7 +65,8 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('ticf', 104, 66, 48)
   },
   perf006Iteration7PeakTest: {
-    ...createI4PeakTestSignInScenario('ticf', 71, 66, 33)
+    ...createI4PeakTestSignInScenario('ticf', 71, 66, 33),
+    ...createI4PeakTestSignInScenario('silentLogin', 21, 63, 10)
   }
 }
 

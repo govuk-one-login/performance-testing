@@ -3,7 +3,10 @@ import {
   selectProfile,
   type ProfileList,
   createI3SpikeSignInScenario,
-  createI4PeakTestSignInScenario
+  createI4PeakTestSignInScenario,
+  createScenario,
+  LoadProfile,
+  describeProfile
 } from '../common/utils/config/load-profiles'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
@@ -47,7 +50,8 @@ const profiles: ProfileList = {
       maxVUs: 1,
       stages: [{ target: 1, duration: '5m' }],
       exec: 'silentLogin'
-    }
+    },
+    ...createScenario('rawDataApi', LoadProfile.smoke)
   },
   perf006Iteration4PeakTest: {
     ...createI4PeakTestSignInScenario('ticf', 47, 66, 23)
@@ -82,7 +86,8 @@ const groupMap = {
     'B02_SilentLogin_01_SignUpAPICall',
     'B02_SilentLogin_02_SilentSignInAPICall',
     'B02_SilentLogin_03_IdProveAPICall' // pragma: allowlist secret
-  ]
+  ],
+  rawDataApi: ['B03_RawDataApi_01_RawDataAccess']
 } as const
 
 export const options: Options = {
@@ -91,6 +96,10 @@ export const options: Options = {
     http_req_duration: ['p(95)<=1000', 'p(99)<=2500'],
     http_req_failed: ['rate<0.05']
   }
+}
+
+export function setup(): void {
+  describeProfile(loadProfile)
 }
 
 const env = {
@@ -287,6 +296,21 @@ export function ticf(): void {
 }
 
 export function silentLogin(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfSilentLogin${uuidv4()}@digital.cabinet-office.gov.uk`
+
+  iterationsStarted.add(1)
+
+  signUpSuccess(groupMap.silentLogin[0], userID, emailID)
+  sleep(3)
+  signInSuccess(groupMap.silentLogin[1], userID, emailID)
+  sleep(3)
+  identityProvingSuccess(groupMap.silentLogin[2], userID)
+
+  iterationsCompleted.add(1)
+}
+
+export function rawDataApi(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const emailID = `perfSilentLogin${uuidv4()}@digital.cabinet-office.gov.uk`
 

@@ -411,7 +411,7 @@ const profiles: ProfileList = {
     ...createOLHPeakTestScenario('changePassword', 6, 21, 1),
     ...createOLHPeakTestScenario('changePhone', 6, 24, 1),
     ...createOLHPeakTestScenario('deleteAccount', 6, 18, 1),
-    ...createI4PeakTestSignInScenario('landingPage', 10, 9, 5)
+    ...createI4PeakTestSignInScenario('landingPage', 12, 9, 6)
   }
 }
 

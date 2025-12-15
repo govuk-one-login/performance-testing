@@ -66,6 +66,20 @@ export function generateF2FRequest(userID: string, signinJourneyID: string): F2f
           documentType: 'PASSPORT',
           issuingCountry: 'GBR'
         }
+      ],
+      nameParts: [
+        {
+          type: 'GivenName',
+          value: randomString(6)
+        },
+        {
+          type: 'GivenName',
+          value: randomString(6)
+        },
+        {
+          type: 'FamilyName',
+          value: randomString(6)
+        }
       ]
     }
   }

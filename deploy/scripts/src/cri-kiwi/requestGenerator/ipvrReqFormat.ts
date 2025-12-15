@@ -54,6 +54,20 @@ export interface F2fYotiStart {
         issuingCountry: string
       }
     ]
+    nameParts: [
+      {
+        type: string
+        value: string
+      },
+      {
+        type: string
+        value: string
+      },
+      {
+        type: string
+        value: string
+      }
+    ]
   }
 }
 

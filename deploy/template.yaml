@@ -175,9 +175,7 @@ Resources:
             Condition:
               ArnLike:
                 "aws:PrincipalArn":
-                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_di-perf-test-prod-admin_*" # Prod Admin Control Tower Role
-                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_AWSPowerUserAccess_*" # Prod Power User Control Tower Role
-                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_di-perf-test-prod-testers_*" # Prod Tester Control Tower Role
+                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_AdministratorAccessPermission_*" # Prod Admin Control Tower Role
       MaxSessionDuration: 5400
       PermissionsBoundary:
         !If [

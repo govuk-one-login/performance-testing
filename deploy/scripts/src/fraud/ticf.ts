@@ -28,7 +28,7 @@ import {
 import { uuidv4 } from '../common/utils/jslib/index'
 import http from 'k6/http'
 import { sleep } from 'k6'
-import { isStatusCode202 } from '../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode202 } from '../common/utils/checks/assertions'
 import { timeGroup } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
@@ -109,7 +109,16 @@ const env = {
   identityJWT1: getEnv('TiCF_IPV_JWT_1'),
   identityJWT2: getEnv('TiCF_IPV_JWT_2'),
   identityJWT3: getEnv('TiCF_IPV_JWT_3'),
-  envName: getEnv('ENVIRONMENT')
+  envName: getEnv('ENVIRONMENT'),
+  rawDataApiURL: getEnv('TiCF_RAW_DATA_URL')
+}
+
+const rawDataApiTestData = {
+  requestOriginator: getEnv('TiCF_RAWDATA_REQ_ORIGIN'),
+  subjectId: getEnv('TiCF_RAWDATA_SUB_ID'),
+  requestType: getEnv('TiCF_RAWDATA_REQ_TYPE'),
+  requestFieldName: getEnv('TiCF_RAWDATA_REQ_FIELD_NAME'),
+  requestFieldValue: getEnv('TiCF_RAWDATA_REQ_FIELD_VALUE')
 }
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -311,16 +320,19 @@ export function silentLogin(): void {
 }
 
 export function rawDataApi(): void {
-  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
-  const emailID = `perfSilentLogin${uuidv4()}@digital.cabinet-office.gov.uk`
+  const groups = groupMap.rawDataApi
+  const rawDataRequestBody = JSON.stringify({
+    requestOriginator: rawDataApiTestData.requestOriginator,
+    subjectId: rawDataApiTestData.subjectId,
+    requestType: rawDataApiTestData.requestFieldName,
+    requestField: { name: rawDataApiTestData.requestFieldName, value: rawDataApiTestData.requestFieldValue }
+  })
 
   iterationsStarted.add(1)
 
-  signUpSuccess(groupMap.silentLogin[0], userID, emailID)
-  sleep(3)
-  signInSuccess(groupMap.silentLogin[1], userID, emailID)
-  sleep(3)
-  identityProvingSuccess(groupMap.silentLogin[2], userID)
+  timeGroup(groups[0], () => http.post(`${env.rawDataApiURL}/${env.envName}/rawDataAccess}`, rawDataRequestBody), {
+    isStatusCode200
+  })
 
   iterationsCompleted.add(1)
 }

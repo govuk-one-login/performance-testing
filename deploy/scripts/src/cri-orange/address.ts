@@ -206,6 +206,23 @@ const profiles: ProfileList = {
       ],
       exec: 'addressME'
     }
+  },
+  perf006Iteration8PeakTest: {
+    ...createI4PeakTestSignUpScenario('address', 100, 15, 101),
+    ...createI4PeakTestSignUpScenario('internationalAddress', 2, 12, 3),
+    addressME: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 22,
+      maxVUs: 43,
+      stages: [
+        { target: 0, duration: '101s' }, // Wait until the happy path scenario ramps up to target load
+        { target: 70, duration: '71s' }, // Ramp up to target load
+        { target: 70, duration: '30m' } // Maintain a steady state at the target load for 30 minutes.
+      ],
+      exec: 'addressME'
+    }
   }
 }
 

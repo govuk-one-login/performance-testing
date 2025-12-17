@@ -12,7 +12,7 @@ import { Options } from 'k6/options'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { SharedArray } from 'k6/data'
-import { bufToString, generateCodeChallenge, generateKey, getPublicKeyJwkForPrivateKey } from './utils/crypto'
+import { bufToString, generateCodeChallenge, generateKey } from './utils/crypto'
 import {
   exchangeAccessToken,
   exchangeAuthorizationCode,
@@ -30,6 +30,9 @@ import { getPreAuthorizedCode } from './sts/utils/mockIssuer'
 import exec from 'k6/execution'
 import { b64decode } from 'k6/encoding'
 import { getEnv } from '../common/utils/config/environment-variables'
+import { uuidv4 } from '../common/utils/jslib'
+import { AssumeRoleOutput } from '../common/utils/aws/types'
+import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 
 const profiles: ProfileList = {
   smoke: {
@@ -38,7 +41,8 @@ const profiles: ProfileList = {
     ...createScenario('walletCredentialIssuance', LoadProfile.smoke),
     ...createScenario('exchangeRefreshToken', LoadProfile.smoke),
     ...createScenario('generateReauthenticationTestData', LoadProfile.smoke),
-    ...createScenario('generateRefreshTokenTestData', LoadProfile.smoke)
+    ...createScenario('generateRefreshTokenTestData', LoadProfile.smoke),
+    ...createScenario('accountIntervention', LoadProfile.smoke)
   },
   perf006Iteration3PeakTest: {
     authentication: {
@@ -173,12 +177,6 @@ export const groupMap = {
     'WALLET_CREDENTIAL_ISSUANCE_12 POST /token (pre-authorized code exchange)',
     'WALLET_CREDENTIAL_ISSUANCE_13 GET /.well-known/jwks.json (STS)'
   ],
-  exchangeRefreshToken: [
-    'EXCHANGE_REFRESH_TOKEN_01 POST /generate-client-attestation',
-    'EXCHANGE_REFRESH_TOKEN_02 POST /token (refresh token exchange)',
-    'EXCHANGE_REFRESH_TOKEN_03 POST /token (access token exchange)',
-    'EXCHANGE_REFRESH_TOKEN_04 GET /.well-known/jwks.json (STS)'
-  ],
   generateReauthenticationTestData: [
     '01 GET /authorize (STS)',
     '02 GET /authorize (Orchestration)',
@@ -186,12 +184,12 @@ export const groupMap = {
     '04 POST /generate-client-attestation',
     '05 POST /token (authorization code exchange)'
   ],
-  generateRefreshTokenTestData: [
-    '01 GET /authorize (STS)',
-    '02 GET /authorize (Orchestration)',
-    '03 GET /redirect',
-    '04 POST /generate-client-attestation',
-    '05 POST /token (authorization code exchange)'
+  accountIntervention: [
+    'B04_AIS_01 GET /authorize (STS)',
+    'B04_AIS_02 GET /authorize (Orchestration)',
+    'B04_AIS_03 GET /redirect',
+    'B04_AIS_04 POST /generate-client-attestation',
+    'B04_AIS_05 POST /token (authorization code exchange)'
   ]
 } as const
 
@@ -221,6 +219,15 @@ const reauthenticationContextData: ReauthenticationContext[] = new SharedArray('
     return []
   }
 })
+
+const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
+const awsConfig = new AWSConfig({
+  region: getEnv('AWS_REGION'),
+  accessKeyId: credentials.AccessKeyId,
+  secretAccessKey: credentials.SecretAccessKey,
+  sessionToken: credentials.SessionToken
+})
+const sqs = new SQSClient(awsConfig)
 
 export async function authentication(): Promise<void> {
   const keyPair = await generateKey()
@@ -426,4 +433,64 @@ export async function generateReauthenticationTestData(): Promise<void> {
   }
 
   console.log(reauthenticationContext)
+}
+
+export async function accountIntervention(): Promise<void> {
+  const keyPair = await generateKey()
+  const publicKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+
+  const codeVerifier = crypto.randomUUID()
+  const codeChallenge = await generateCodeChallenge(codeVerifier)
+
+  const subjectId = uuidv4()
+
+  iterationsStarted.add(1)
+  for (let i = 0; i < 2; i++) {
+    const orchestrationAuthorizeUrl = getAuthorize(
+      groupMap.accountIntervention[0],
+      config.mockClientId,
+      config.redirectUri,
+      codeChallenge
+    )
+    const responseOverrides = {
+      idToken: {
+        subjectId
+      }
+    }
+    sleepBetween(1, 2)
+    const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
+      groupMap.accountIntervention[1],
+      orchestrationAuthorizeUrl,
+      responseOverrides
+    )
+    const stsAuthorizationCode = getRedirect(
+      groupMap.accountIntervention[2],
+      state,
+      orchestrationAuthorizationCode,
+      config.redirectUri
+    )
+    const clientAttestation = postGenerateClientAttestation(groupMap.accountIntervention[3], publicKeyJwk)
+    await exchangeAuthorizationCode(
+      groupMap.authentication[4],
+      stsAuthorizationCode,
+      codeVerifier,
+      config.mockClientId,
+      config.redirectUri,
+      clientAttestation,
+      { privateKey: keyPair.privateKey, publicKey: publicKeyJwk }
+    )
+  }
+
+  const accountInterventionEventPayload = {
+    event_name: 'AUTH_UPDATE_EMAIL',
+    event_id: uuidv4(),
+    user: {
+      user_id: subjectId,
+      govuk_signin_journey_id: uuidv4()
+    },
+    event_timestamp_ms: Date.now()
+  }
+  sqs.sendMessage(config.sqs_queue_url, JSON.stringify(accountInterventionEventPayload))
+
+  iterationsCompleted.add(1)
 }

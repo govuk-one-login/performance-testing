@@ -13,5 +13,6 @@ export const config = {
   orchestrationBaseUrl: getEnv(`MOBILE_STS_${environment}_ORCHESTRATION_BASE_URL`),
   mockClientId: getEnv(`MOBILE_STS_${environment}_MOCK_CLIENT_ID`),
   redirectUri: getEnv(`MOBILE_STS_${environment}_REDIRECT_URI`),
-  clientInstanceKey: getEnv(`MOBILE_STS_${environment}_CLIENT_INSTANCE_KEY`)
+  clientInstanceKey: getEnv(`MOBILE_STS_${environment}_CLIENT_INSTANCE_KEY`),
+  sqs_queue_url: getEnv(`MOBILE_STS_${environment}_SQS_QUEUE`)
 }

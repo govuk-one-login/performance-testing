@@ -134,15 +134,18 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 export const groupMap = {
   authentication: [
-    'AUTHENTICATION_01 GET /authorize (STS)',
-    'AUTHENTICATION_02 GET /.well-known/jwks.json (STS)',
-    'AUTHENTICATION_03 GET /authorize (Orchestration)',
-    'AUTHENTICATION_04 GET /redirect',
-    'AUTHENTICATION_05 GET /.well-known/jwks.json (STS)',
-    'AUTHENTICATION_06 POST /generate-client-attestation',
-    'AUTHENTICATION_07 POST /token (authorization code exchange)',
-    'AUTHENTICATION_08 POST /token (access token exchange)',
-    'AUTHENTICATION_09 GET /.well-known/jwks.json (STS)'
+    'B01_AUTHENTICATION_01 GET /authorize (STS)',
+    'B01_AUTHENTICATION_02 GET /.well-known/jwks.json (STS)',
+    'B01_AUTHENTICATION_03 GET /authorize (Orchestration)',
+    'B01_AUTHENTICATION_04 GET /redirect',
+    'B01_AUTHENTICATION_05 GET /.well-known/jwks.json (STS)',
+    'B01_AUTHENTICATION_06 POST /generate-client-attestation',
+    'B01_AUTHENTICATION_07 POST /token (authorization code exchange)',
+    'B01_AUTHENTICATION_08 POST /token (access token exchange)',
+    'B01_AUTHENTICATION_09 GET /.well-known/jwks.json (STS)',
+    'B01_EXCHANGE_REFRESH_TOKEN_10 POST /token (refresh token exchange)',
+    'B01_EXCHANGE_REFRESH_TOKEN_11 POST /token (access token exchange)',
+    'B01_EXCHANGE_REFRESH_TOKEN_12 GET /.well-known/jwks.json (STS)'
   ],
   reauthentication: [
     'REAUTHENTICATION_01 GET /authorize (STS)',
@@ -258,9 +261,16 @@ export async function authentication(): Promise<void> {
   )
   simulateCallToStsJwks(groupMap.authentication[1])
   sleepBetween(1, 2)
+
+  const responseOverrides = {
+    idToken: {
+      subjectId: '7c5c7479-6ebe-490e-a4b0-a6b3c9cb2ec6' // Specific subject ID used to guarantee a refresh token will be returned in test while phased release is ongoing
+    }
+  }
   const { state, orchestrationAuthorizationCode } = getCodeFromOrchestration(
     groupMap.authentication[2],
-    orchestrationAuthorizeUrl
+    orchestrationAuthorizeUrl,
+    responseOverrides
   )
   const stsAuthorizationCode = getRedirect(
     groupMap.authentication[3],
@@ -270,7 +280,7 @@ export async function authentication(): Promise<void> {
   )
   simulateCallToStsJwks(groupMap.authentication[4])
   const clientAttestation = postGenerateClientAttestation(groupMap.authentication[5], publicKeyJwk)
-  const { accessToken } = await exchangeAuthorizationCode(
+  const { accessToken: accessTokenExchange, refreshToken: refreshTokenExchange } = await exchangeAuthorizationCode(
     groupMap.authentication[6],
     stsAuthorizationCode,
     codeVerifier,
@@ -279,8 +289,21 @@ export async function authentication(): Promise<void> {
     clientAttestation,
     { privateKey: keyPair.privateKey, publicKey: publicKeyJwk }
   )
-  exchangeAccessToken(groupMap.authentication[7], accessToken, 'sts-test.hello-world.read')
+  exchangeAccessToken(groupMap.authentication[7], accessTokenExchange, 'sts-test.hello-world.read')
   simulateCallToStsJwks(groupMap.authentication[8])
+
+  const { accessToken: accessTokenRefresh } = await refreshAccessToken(
+    groupMap.authentication[9],
+    refreshTokenExchange,
+    config.mockClientId,
+    clientAttestation,
+    keyPair.privateKey,
+    publicKeyJwk
+  )
+  exchangeAccessToken(groupMap.authentication[10], accessTokenRefresh, 'sts-test.hello-world.read')
+
+  simulateCallToStsJwks(groupMap.authentication[11])
+
   iterationsCompleted.add(1)
 }
 

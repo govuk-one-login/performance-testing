@@ -103,8 +103,8 @@ export async function exchangeAuthorizationCode(
   groupName: string,
   authorizationCode: string,
   codeVerifier: string,
-  redirectUri: string,
   clientId: string,
+  redirectUri: string,
   clientAttestation: string,
   keys: Keys
 ): Promise<{ accessToken: string; idToken: string; refreshToken: string }> {

@@ -392,6 +392,18 @@ const profiles: ProfileList = {
   perf006SISPhase2PeakTest: {
     ...createI4PeakTestSignUpScenario('identity', 200, 42, 201),
     ...createI4PeakTestSignInScenario('idReuse', 100, 6, 46)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 180, 42, 181),
+    ...createI4PeakTestSignInScenario('idReuse', 71, 6, 33)
+  },
+  perf006Iteration7SpikeTest: {
+    ...createI3SpikeSignUpScenario('identity', 540, 36, 541),
+    ...createI3SpikeSignInScenario('idReuse', 143, 6, 66)
+  },
+  perf006Iteration8PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 170, 42, 171),
+    ...createI4PeakTestSignInScenario('idReuse', 126, 6, 58)
   }
 }
 

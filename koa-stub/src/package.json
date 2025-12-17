@@ -4,14 +4,14 @@
   "description": "An example config for a RP stub",
   "main": "app.js",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.902.0",
+    "@aws-sdk/client-dynamodb": "^3.948.0",
     "@codegenie/serverless-express": "^4.16.0",
     "@koa/cors": "^5.0.0",
     "axios": "^1.12.0",
     "axios-cookiejar-support": "^5.0.5",
-    "koa": "^3.0.1",
+    "koa": "^3.1.1",
     "koa-cookie": "^1.0.0",
-    "koa-router": "^13.0.1",
+    "koa-router": "^14.0.0",
     "openid-client": "^5.7.0",
     "tough-cookie": "^5.1.1"
   },

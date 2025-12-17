@@ -43,7 +43,7 @@ export function postClientAttestation(groupName: string, publicKeyJwk: JsonWebKe
   return res.json('client_attestation') as string
 }
 
-export function postTxmaEvent(groupName: string, eventName: string, credentialId: string, accessToken: string) {
+export function postTxmaEvent(groupName: string, eventName: string, accessToken: string, credentialId?: string) {
   const nowInMilliseconds = Date.now()
   const requestBody = {
     component_id: 'WALLET',

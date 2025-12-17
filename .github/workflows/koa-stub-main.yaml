@@ -26,7 +26,7 @@ jobs:
           submodules: true
 
       - name: Setup nodeJS v20
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: 20
 
@@ -53,7 +53,7 @@ jobs:
         working-directory: koa-stub/
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
         with:
           aws-region: eu-west-2
           role-to-assume: ${{ secrets.PERF_STUB_GH_ACTIONS_ROLE_ARN }}
@@ -64,11 +64,11 @@ jobs:
           submodules: true
 
       - name: Setup nodeJS v20
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: 20
       - name: Setup SAM CLI
-        uses: aws-actions/setup-sam@f664fad9e12492edfc187a31f575537dfbb0ff63 # v2
+        uses: aws-actions/setup-sam@c71dd89d980e49367c70391e8ada4353f52f2800 # v2
 
       - name: SAM Validate
         run: |

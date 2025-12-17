@@ -53,6 +53,11 @@ Mappings:
       AccountID: "769837561067"
     Dev:
       AccountID: "105566562881"
+  STS:
+    Build:
+      AccountID: "626438094742"
+    Dev:
+      AccountID: "538651416014"
 
 Resources:
   CodeBuildServiceRole:
@@ -175,9 +180,7 @@ Resources:
             Condition:
               ArnLike:
                 "aws:PrincipalArn":
-                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_di-perf-test-prod-admin_*" # Prod Admin Control Tower Role
-                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_AWSPowerUserAccess_*" # Prod Power User Control Tower Role
-                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_di-perf-test-prod-testers_*" # Prod Tester Control Tower Role
+                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/${AWS::Region}/AWSReservedSSO_AdministratorAccessPermission_*" # Prod Admin Control Tower Role
       MaxSessionDuration: 5400
       PermissionsBoundary:
         !If [
@@ -235,6 +238,16 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
                     - !FindInMap [TiCF, Dev, AccountID]
                     - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [STS, Build, AccountID]
+                    - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [STS, Dev, AccountID]
+                    - "key/*"
           - Effect: "Allow"
             Action:
               - "execute-api:*"
@@ -283,6 +296,16 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [TiCF, Dev, AccountID]
                     - "dev-cri-fpad-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [STS, Build, AccountID]
+                    - "sts-test-resources-stub-txma-consumer-queue*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [STS, Dev, AccountID]
+                    - "sts-test-resources-stub-txma-consumer-queue*"
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"
@@ -311,6 +334,16 @@ Resources:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
                     - !FindInMap [TiCF, Dev, AccountID]
+                    - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [STS, Build, AccountID]
+                    - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [STS, Dev, AccountID]
                     - "function:*"
 
   VPCTestPolicy:
@@ -527,10 +560,17 @@ Resources:
               IDENTITY_ORCH_STUB_PASSWORD: "/perfTest/identity/orchStubPassword"
               IDENTITY_ORCH_STUB_USERNAME: "/perfTest/identity/orchStubUsername"
               IDENTITY_PASSPORT_URL: "/perfTest/identity/lime/passportUrl"
-              IDENTITY_SIS_API_KEY: "/perfTest/identity/sis/apiKey"
-              IDENTITY_SIS_KID: "/perfTest/identity/sis/keyID"
-              IDENTITY_SIS_PRIVATEKEY: "/perfTest/identity/sis/privateSigningKey"
-              IDENTITY_SIS_URL: "/perfTest/identity/sis/envURL"
+              IDENTITY_SIS_EVCSSTUB_APIKEY: "/perfTest/identity/sis/evcsStub/apiKey"
+              IDENTITY_SIS_EVCSSTUB_URL: "/perfTest/identity/sis/evcsStub/url"
+              IDENTITY_SIS_IDENTITY_APIKEY: "/perfTest/identity/sis/identity/apiKey"
+              IDENTITY_SIS_IDENTITY_KID: "/perfTest/identity/sis/identity/kid"
+              IDENTITY_SIS_IDENTITY_PRIVATEKEY: "/perfTest/identity/sis/identity/privateKey"
+              IDENTITY_SIS_IDENTITY_URL: "/perfTest/identity/sis/identity/url"
+              IDENTITY_SIS_MOCKTOKEN_URL: "/perfTest/identity/sis/mockToken/url"
+              IDENTITY_SIS_USERIDENTITY_APIKEY: "/perfTest/identity/sis/userIdentity/apiKey"
+              IDENTITY_SIS_USERIDENTITY_KID: "/perfTest/identity/sis/userIdentity/kid"
+              IDENTITY_SIS_USERIDENTITY_PRIVATEKEY: "/perfTest/identity/sis/userIdentity/privateKey"
+              IDENTITY_SIS_USERIDENTITY_URL: "/perfTest/identity/sis/userIdentity/url"
               IDENTITY_SPOT_SQS: "/perfTest/identity/spot/SQS"
               IDENTITY_SPOT_FRAUDKEY: "/perfTest/identity/spot/fraudKey"
               IDENTITY_SPOT_FRAUD_KID: "/perfTest/identity/spot/fraudKid"
@@ -577,6 +617,13 @@ Resources:
               MOBILE_STS_DEV_STS_BASE_URL: "/perfTest/mobile/sts/dev/baseUrl"
               MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL: "/perfTest/mobile/sts/dev/mockClientBaseUrl"
               SLACK_OAUTH_TOKEN: "/perfTest/slack/OAuthToken"
+              STATUS_LIST_CLIENT_ID_DEV: "/perfTest/statusList/dev/clientID"
+              STATUS_LIST_MOCK_URL_DEV: "/perfTest/statusList/dev/mockURL"
+              STATUS_LIST_PROXY_API: "/perfTest/statusList/isProxy"
+              STATUS_LIST_URL_DEV: "/perfTest/statusList/dev/statsListURL"
+              STATUS_LIST_CLIENT_ID_BUILD: "/perfTest/statusList/build/clientID"
+              STATUS_LIST_MOCK_URL_BUILD: "/perfTest/statusList/build/mockURL"
+              STATUS_LIST_URL_BUILD: "/perfTest/statusList/build/statsListURL"
               TiCF_SQS_QUEUE: "/perfTest/fraud/TiCF/SQSQueue"
               TiCF_AUTH_URL: "/perfTest/fraud/TiCF/authUrl"
               TiCF_IPV_URL: "/perfTest/fraud/TiCF/ipvUrl"

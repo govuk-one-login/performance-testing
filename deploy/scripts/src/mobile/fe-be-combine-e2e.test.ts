@@ -13,7 +13,6 @@ import {
   postSelectSmartphone,
   postValidPassport,
   postBiometricChip,
-  postIphoneModel,
   postIdCheckApp,
   startJourney,
   getSessionIdFromCookieJar
@@ -87,6 +86,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration5PeakTest: {
     ...createI4PeakTestSignUpScenario('mamIphonePassport', 540, 48, 541)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignUpScenario('mamIphonePassport', 170, 48, 171)
   }
 }
 
@@ -99,7 +101,6 @@ const groupMap = {
     'POST /selectSmartphone',
     'POST /validPassport',
     'POST /biometricChip',
-    'POST /iphoneModel',
     'POST /idCheckApp',
     'GET /appInfo', //BE
     'GET /biometricToken/v2',
@@ -133,8 +134,6 @@ export function mamIphonePassport(): void {
   postValidPassport()
   simulateUserWait()
   postBiometricChip()
-  simulateUserWait()
-  postIphoneModel()
   simulateUserWait()
   postIdCheckApp()
   simulateUserWait()

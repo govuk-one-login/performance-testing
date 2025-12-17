@@ -87,6 +87,10 @@ const profiles: ProfileList = {
   perf006Iteration6RegressionTest: {
     ...createI4PeakTestSignUpScenario('getClientAttestation', 540, 12, 541),
     ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 27, 18)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignUpScenario('getClientAttestation', 170, 12, 171),
+    ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 27, 18)
   }
 }
 
@@ -179,12 +183,7 @@ export async function walletCredentialIssuance(): Promise<void> {
     accessToken,
     'mobile.txma-event.write'
   )
-  postTxmaEvent(
-    groupMap.walletCredentialIssuance[7],
-    'WALLET_CREDENTIAL_ADD_ATTEMPT',
-    credentialId,
-    txmaEventServiceToken
-  )
-  postTxmaEvent(groupMap.walletCredentialIssuance[8], 'WALLET_CREDENTIAL_ADDED', credentialId, txmaEventServiceToken)
+  postTxmaEvent(groupMap.walletCredentialIssuance[7], 'WALLET_CREDENTIAL_ADD_ATTEMPT', txmaEventServiceToken)
+  postTxmaEvent(groupMap.walletCredentialIssuance[8], 'WALLET_CREDENTIAL_ADDED', txmaEventServiceToken, credentialId)
   iterationsCompleted.add(1)
 }

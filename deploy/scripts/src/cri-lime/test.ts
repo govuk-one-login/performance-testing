@@ -325,6 +325,18 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignUpScenario('drivingLicence', 70, 9, 71),
     ...createI4PeakTestSignUpScenario('drivingLicenceAttestation', 120, 9, 121),
     ...createI4PeakTestSignUpScenario('fraud', 570, 6, 571)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignUpScenario('passport', 18, 6, 19),
+    ...createI4PeakTestSignUpScenario('drivingLicence', 23, 9, 24),
+    ...createI4PeakTestSignUpScenario('drivingLicenceAttestation', 38, 9, 39),
+    ...createI4PeakTestSignUpScenario('fraud', 180, 6, 181)
+  },
+  perf006Iteration8PeakTest: {
+    ...createI4PeakTestSignUpScenario('passport', 17, 6, 18),
+    ...createI4PeakTestSignUpScenario('drivingLicence', 21, 9, 22),
+    ...createI4PeakTestSignUpScenario('drivingLicenceAttestation', 36, 9, 37),
+    ...createI4PeakTestSignUpScenario('fraud', 170, 6, 171)
   }
 }
 

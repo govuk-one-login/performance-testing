@@ -38,6 +38,15 @@ const profiles: ProfileList = {
       maxVUs: 1,
       stages: [{ target: 1, duration: '5m' }],
       exec: 'ticf'
+    },
+    silentLogin: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '1s',
+      preAllocatedVUs: 1,
+      maxVUs: 1,
+      stages: [{ target: 1, duration: '5m' }],
+      exec: 'silentLogin'
     }
   },
   perf006Iteration4PeakTest: {
@@ -54,16 +63,25 @@ const profiles: ProfileList = {
   },
   perf006Iteration6PeakTest: {
     ...createI4PeakTestSignInScenario('ticf', 104, 66, 48)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignInScenario('ticf', 71, 66, 33),
+    ...createI4PeakTestSignInScenario('silentLogin', 21, 63, 10)
   }
 }
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
   ticf: [
-    'B01_SignUpSuccess_01_SignUpAPICall',
-    'B01_SignInSuccess_02_SignInAPICall',
-    'B01_IdentityProvingSuccess_03_IdProveAPICall', // pragma: allowlist secret
-    'B01_IdReuse_04_IdReuseAPICall'
+    'B01_HappyPath_01_SignUpAPICall',
+    'B01_HappyPath_02_SignInAPICall',
+    'B01_HappyPath_03_IdProveAPICall', // pragma: allowlist secret
+    'B01_HappyPath_04_IdReuseAPICall'
+  ],
+  silentLogin: [
+    'B02_SilentLogin_01_SignUpAPICall',
+    'B02_SilentLogin_02_SilentSignInAPICall',
+    'B02_SilentLogin_03_IdProveAPICall' // pragma: allowlist secret
   ]
 } as const
 
@@ -95,8 +113,7 @@ const awsConfig = new AWSConfig({
 
 const sqs = new SQSClient(awsConfig)
 
-export function signUpSuccess(userID: string, emailID: string): void {
-  const groups = groupMap.ticf
+export function signUpSuccess(groupName: string, userID: string, emailID: string): void {
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
   const testID = `perfTestID${timestamp}`
   const pairWiseID = `performanceTestRpPairwiseId${uuidv4()}`
@@ -128,15 +145,13 @@ export function signUpSuccess(userID: string, emailID: string): void {
   }
 
   // B01_SignUpSuccess_01_SignUpAPICall
-  timeGroup(groups[0], () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignUpPayload)), {
+  timeGroup(groupName, () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignUpPayload)), {
     isStatusCode202
   })
 }
 
-export function signInSuccess(userID: string, emailID: string): void {
-  const groups = groupMap.ticf
+export function signInSuccess(groupName: string, userID: string, emailID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
-
   const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(3)
@@ -153,13 +168,32 @@ export function signInSuccess(userID: string, emailID: string): void {
   }
 
   // B01_SignInSuccess_02_SignInAPICall
-  timeGroup(groups[1], () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignInPayload)), {
+  timeGroup(groupName, () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignInPayload)), {
     isStatusCode202
   })
 }
 
-export function identityProvingSuccess(userID: string): void {
-  const groups = groupMap.ticf
+export function signInSilent(groupName: string, userID: string): void {
+  const journeyID = `perfJourney${uuidv4()}`
+
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
+  sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
+  sleep(3)
+
+  const authSignInPayload = {
+    vtr: ['Cl'],
+    sub: userID,
+    govuk_signin_journey_id: journeyID,
+    authenticated: 'Y'
+  }
+
+  // B01_SignInSuccess_02_SignInAPICall
+  timeGroup(groupName, () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignInPayload)), {
+    isStatusCode202
+  })
+}
+
+export function identityProvingSuccess(groupName: string, userID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
 
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
@@ -197,7 +231,7 @@ export function identityProvingSuccess(userID: string): void {
 
   // B01_IdentityProvingSuccess_03_IdProveAPICall
   timeGroup(
-    groups[2],
+    groupName,
     () => http.post(`${env.ipvAPIURL}/${env.envName}/ipvcore`, JSON.stringify(identityProvingPayload)),
     {
       isStatusCode202
@@ -205,8 +239,7 @@ export function identityProvingSuccess(userID: string): void {
   )
 }
 
-export function identityReuseSuccess(userID: string): void {
-  const groups = groupMap.ticf
+export function identityReuseSuccess(groupName: string, userID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
 
   const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
@@ -228,7 +261,7 @@ export function identityReuseSuccess(userID: string): void {
 
   // B01_IdReuse_04_IdReuseAPICall
   timeGroup(
-    groups[3],
+    groupName,
     () => http.post(`${env.ipvAPIURL}/${env.envName}/ipvcore`, JSON.stringify(identityReusePayload)),
     {
       isStatusCode202
@@ -238,17 +271,32 @@ export function identityReuseSuccess(userID: string): void {
 
 export function ticf(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
-  const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
+  const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
 
   iterationsStarted.add(1)
 
-  signUpSuccess(userID, emailID)
+  signUpSuccess(groupMap.ticf[0], userID, emailID)
   sleep(3)
-  signInSuccess(userID, emailID)
+  signInSuccess(groupMap.ticf[1], userID, emailID)
   sleep(3)
-  identityProvingSuccess(userID)
+  identityProvingSuccess(groupMap.ticf[2], userID)
   sleep(3)
-  identityReuseSuccess(userID)
+  identityReuseSuccess(groupMap.ticf[3], userID)
+
+  iterationsCompleted.add(1)
+}
+
+export function silentLogin(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfSilentLogin${uuidv4()}@digital.cabinet-office.gov.uk`
+
+  iterationsStarted.add(1)
+
+  signUpSuccess(groupMap.silentLogin[0], userID, emailID)
+  sleep(3)
+  signInSuccess(groupMap.silentLogin[1], userID, emailID)
+  sleep(3)
+  identityProvingSuccess(groupMap.silentLogin[2], userID)
 
   iterationsCompleted.add(1)
 }

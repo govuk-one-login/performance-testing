@@ -330,7 +330,7 @@ export function rawDataApi(): void {
 
   iterationsStarted.add(1)
 
-  timeGroup(groups[0], () => http.post(`${env.rawDataApiURL}/${env.envName}/rawDataAccess}`, rawDataRequestBody), {
+  timeGroup(groups[0], () => http.post(`${env.rawDataApiURL}/${env.envName}/rawDataAccess`, rawDataRequestBody), {
     isStatusCode200
   })
 

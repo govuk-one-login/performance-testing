@@ -3,7 +3,10 @@ import {
   selectProfile,
   type ProfileList,
   createI3SpikeSignInScenario,
-  createI4PeakTestSignInScenario
+  createI4PeakTestSignInScenario,
+  createScenario,
+  LoadProfile,
+  describeProfile
 } from '../common/utils/config/load-profiles'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
@@ -25,7 +28,7 @@ import {
 import { uuidv4 } from '../common/utils/jslib/index'
 import http from 'k6/http'
 import { sleep } from 'k6'
-import { isStatusCode202 } from '../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode202 } from '../common/utils/checks/assertions'
 import { timeGroup } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
@@ -47,7 +50,8 @@ const profiles: ProfileList = {
       maxVUs: 1,
       stages: [{ target: 1, duration: '5m' }],
       exec: 'silentLogin'
-    }
+    },
+    ...createScenario('rawDataApi', LoadProfile.smoke)
   },
   perf006Iteration4PeakTest: {
     ...createI4PeakTestSignInScenario('ticf', 47, 66, 23)
@@ -82,7 +86,8 @@ const groupMap = {
     'B02_SilentLogin_01_SignUpAPICall',
     'B02_SilentLogin_02_SilentSignInAPICall',
     'B02_SilentLogin_03_IdProveAPICall' // pragma: allowlist secret
-  ]
+  ],
+  rawDataApi: ['B03_RawDataApi_01_RawDataAccess']
 } as const
 
 export const options: Options = {
@@ -93,6 +98,10 @@ export const options: Options = {
   }
 }
 
+export function setup(): void {
+  describeProfile(loadProfile)
+}
+
 const env = {
   sqs_queue: getEnv('TiCF_SQS_QUEUE'),
   authAPIURL: getEnv('TiCF_AUTH_URL'),
@@ -100,7 +109,16 @@ const env = {
   identityJWT1: getEnv('TiCF_IPV_JWT_1'),
   identityJWT2: getEnv('TiCF_IPV_JWT_2'),
   identityJWT3: getEnv('TiCF_IPV_JWT_3'),
-  envName: getEnv('ENVIRONMENT')
+  envName: getEnv('ENVIRONMENT'),
+  rawDataApiURL: getEnv('TiCF_RAW_DATA_URL')
+}
+
+const rawDataApiTestData = {
+  requestOriginator: getEnv('TiCF_RAWDATA_REQ_ORIGIN'),
+  subjectId: getEnv('TiCF_RAWDATA_SUB_ID'),
+  requestType: getEnv('TiCF_RAWDATA_REQ_TYPE'),
+  requestFieldName: getEnv('TiCF_RAWDATA_REQ_FIELD_NAME'),
+  requestFieldValue: getEnv('TiCF_RAWDATA_REQ_FIELD_VALUE')
 }
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -297,6 +315,24 @@ export function silentLogin(): void {
   signInSuccess(groupMap.silentLogin[1], userID, emailID)
   sleep(3)
   identityProvingSuccess(groupMap.silentLogin[2], userID)
+
+  iterationsCompleted.add(1)
+}
+
+export function rawDataApi(): void {
+  const groups = groupMap.rawDataApi
+  const rawDataRequestBody = JSON.stringify({
+    requestOriginator: rawDataApiTestData.requestOriginator,
+    subjectId: rawDataApiTestData.subjectId,
+    requestType: rawDataApiTestData.requestFieldName,
+    requestField: { name: rawDataApiTestData.requestFieldName, value: rawDataApiTestData.requestFieldValue }
+  })
+
+  iterationsStarted.add(1)
+
+  timeGroup(groups[0], () => http.post(`${env.rawDataApiURL}/${env.envName}/rawDataAccess}`, rawDataRequestBody), {
+    isStatusCode200
+  })
 
   iterationsCompleted.add(1)
 }

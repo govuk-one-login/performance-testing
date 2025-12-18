@@ -13,6 +13,7 @@ import {
   createI4PeakTestSignUpScenario,
   createI4PeakTestSignInScenario
 } from '../common/utils/config/load-profiles'
+import { createDynamicProfile } from '../common/utils/config/dynamic-profiles'
 import { timeGroup } from '../common/utils/request/timing'
 import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
 import { addressPayloadDL, kbvPayloaDL, fraudPayloadDL, drivingLicencePayload } from './data/drivingLicenceData'
@@ -404,7 +405,8 @@ const profiles: ProfileList = {
   perf006Iteration8PeakTest: {
     ...createI4PeakTestSignUpScenario('identity', 170, 42, 171),
     ...createI4PeakTestSignInScenario('idReuse', 126, 6, 58)
-  }
+  },
+  dynamic: createDynamicProfile() ?? {}
 }
 
 const loadProfile = selectProfile(profiles)

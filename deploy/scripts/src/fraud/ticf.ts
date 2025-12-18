@@ -324,7 +324,7 @@ export function rawDataApi(): void {
   const rawDataRequestBody = JSON.stringify({
     requestOriginator: rawDataApiTestData.requestOriginator,
     subjectId: rawDataApiTestData.subjectId,
-    requestType: rawDataApiTestData.requestFieldName,
+    requestType: rawDataApiTestData.requestType,
     requestField: { name: rawDataApiTestData.requestFieldName, value: rawDataApiTestData.requestFieldValue }
   })
 

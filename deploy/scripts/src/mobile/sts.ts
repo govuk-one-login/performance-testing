@@ -476,7 +476,7 @@ export async function accountIntervention(): Promise<void> {
     )
     const clientAttestation = postGenerateClientAttestation(groupMap.accountIntervention[3], publicKeyJwk)
     await exchangeAuthorizationCode(
-      groupMap.authentication[4],
+      groupMap.accountIntervention[4],
       stsAuthorizationCode,
       codeVerifier,
       config.mockClientId,
@@ -495,7 +495,7 @@ export async function accountIntervention(): Promise<void> {
     },
     event_timestamp_ms: Date.now()
   }
-  sqs.sendMessage(config.sqs_queue_url, JSON.stringify(accountInterventionEventPayload))
+  sqs.sendMessage(config.sqsQueueUrl, JSON.stringify(accountInterventionEventPayload))
 
   iterationsCompleted.add(1)
 }

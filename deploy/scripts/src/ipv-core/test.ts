@@ -402,6 +402,10 @@ const profiles: ProfileList = {
     ...createI3SpikeSignUpScenario('identity', 540, 36, 541),
     ...createI3SpikeSignInScenario('idReuse', 143, 6, 66)
   },
+  perf006Iteration8PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 170, 42, 171),
+    ...createI4PeakTestSignInScenario('idReuse', 126, 6, 58)
+  },
   dynamic: createDynamicProfile() ?? {}
 }
 

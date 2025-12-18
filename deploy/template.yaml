@@ -53,6 +53,11 @@ Mappings:
       AccountID: "769837561067"
     Dev:
       AccountID: "105566562881"
+  STS:
+    Build:
+      AccountID: "626438094742"
+    Dev:
+      AccountID: "538651416014"
 
 Resources:
   CodeBuildServiceRole:
@@ -233,6 +238,16 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
                     - !FindInMap [TiCF, Dev, AccountID]
                     - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [STS, Build, AccountID]
+                    - "key/*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:kms:${AWS::Region}"
+                    - !FindInMap [STS, Dev, AccountID]
+                    - "key/*"
           - Effect: "Allow"
             Action:
               - "execute-api:*"
@@ -281,6 +296,16 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
                     - !FindInMap [TiCF, Dev, AccountID]
                     - "dev-cri-fpad-*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [STS, Build, AccountID]
+                    - "sts-test-resources-stub-txma-consumer-queue*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:sqs:${AWS::Region}"
+                    - !FindInMap [STS, Dev, AccountID]
+                    - "sts-test-resources-stub-txma-consumer-queue*"
           - Effect: "Allow"
             Action:
               - "lambda:InvokeFunction"
@@ -309,6 +334,16 @@ Resources:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
                     - !FindInMap [TiCF, Dev, AccountID]
+                    - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [STS, Build, AccountID]
+                    - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [STS, Dev, AccountID]
                     - "function:*"
 
   VPCTestPolicy:

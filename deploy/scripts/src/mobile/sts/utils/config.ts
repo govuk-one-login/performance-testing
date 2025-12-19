@@ -12,5 +12,6 @@ export const config = {
   mockExternalCriBaseUrl: getEnv(`MOBILE_STS_${environment}_MOCK_EXTERNAL_CRI_BASE_URL`),
   orchestrationBaseUrl: getEnv(`MOBILE_STS_${environment}_ORCHESTRATION_BASE_URL`),
   mockClientId: getEnv(`MOBILE_STS_${environment}_MOCK_CLIENT_ID`),
-  redirectUri: getEnv(`MOBILE_STS_${environment}_REDIRECT_URI`)
+  redirectUri: getEnv(`MOBILE_STS_${environment}_REDIRECT_URI`),
+  sqsQueueUrl: getEnv(`MOBILE_STS_${environment}_SQS_QUEUE`)
 }

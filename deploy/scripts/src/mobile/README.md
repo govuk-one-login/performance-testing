@@ -246,15 +246,13 @@ previous journey. The test data for the dev and build environments is stored in
 `./data/sts-reauthentication-test-data-DEV.json` and `./data/sts-reauthentication-test-data-BUILD.json`, respectively.
 The data in these files is valid for up to 1 year, after which it will need to be regenerated.
 
-Generating new sets of test data for the dev and build environments can be done automatically be running the respective
-bash scripts, `./generate-sts-reauthentication-test-data-dev.sh $EXECUTION_CREDENTIALS` and
-`./generate-sts-reauthentication-test-data-build.sh $EXECUTION_CREDENTIALS` when in the `/deploy/scripts/src/mobile`
-directory, where `EXECUTION_CREDENTIALS` is the credentials you use to run the test script.
+Generating new sets of test data for the dev and build environments can be done automatically by running the bash scripts on [this confluence page](https://govukverify.atlassian.net/wiki/spaces/QE/pages/5449482527/How+to+Generate+Test+Data+for+STS+Reauthentication+Journey).
 
 The commands below can be used to generate the test data for Build, depending on which credentials you have access to.
 These commands must be run from this directory to ensure test data is output to the correct location.
 
 If you have access to the performance test account PowerUser role:
+
 ```bash
 EXECUTION_ROLE=arn:aws:iam::330163506186:role/perftest-PerformanceTesterRole
 EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-session-name `date +%s` --profile perf-test-prod-pu)
@@ -262,6 +260,7 @@ EXECUTION_CREDENTIALS=$(aws sts assume-role --role-arn $EXECUTION_ROLE --role-se
 ```
 
 If you have access to the corresponding STS role for the dev or build environments:
+
 ```bash
 AWS_PROFILE=<your-sts-aws-profile>
 STS_EXECUTION_CREDENTIALS="$(jq -n --argjson Credentials "$(aws configure export-credentials --profile $AWS_PROFILE)" '{Credentials: $Credentials}')"

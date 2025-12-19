@@ -49,6 +49,10 @@ const profiles: ProfileList = {
   Perf006Iteration7CombinedPeakTest: {
     ...createI4PeakTestSignUpScenario('idCheckAsyncSignUp', 170, 30, 171),
     ...createI4PeakTestSignInScenario('idCheckAsyncSignIn', 71, 3, 33)
+  },
+  Perf006Iteration8CombinedPeakTest: {
+    ...createI4PeakTestSignUpScenario('idCheckAsyncSignUp', 160, 30, 161),
+    ...createI4PeakTestSignInScenario('idCheckAsyncSignIn', 126, 3, 58)
   }
 }
 

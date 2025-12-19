@@ -28,7 +28,7 @@ import {
 import { uuidv4 } from '../common/utils/jslib/index'
 import http from 'k6/http'
 import { sleep } from 'k6'
-import { isStatusCode200, isStatusCode202 } from '../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode202, pageContentCheck } from '../common/utils/checks/assertions'
 import { timeGroup } from '../common/utils/request/timing'
 
 const profiles: ProfileList = {
@@ -71,6 +71,22 @@ const profiles: ProfileList = {
   perf006Iteration7PeakTest: {
     ...createI4PeakTestSignInScenario('ticf', 71, 66, 33),
     ...createI4PeakTestSignInScenario('silentLogin', 21, 63, 10)
+  },
+  perf006Iteration8PeakTest: {
+    ...createI4PeakTestSignInScenario('ticf', 126, 66, 58),
+    ...createI4PeakTestSignInScenario('silentLogin', 38, 63, 18),
+    rawDataApi: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 150,
+      maxVUs: 300,
+      stages: [
+        { target: 100, duration: '46s' },
+        { target: 100, duration: '90m' }
+      ],
+      exec: 'rawDataApi'
+    }
   }
 }
 
@@ -331,7 +347,8 @@ export function rawDataApi(): void {
   iterationsStarted.add(1)
 
   timeGroup(groups[0], () => http.post(`${env.rawDataApiURL}/${env.envName}/rawDataAccess`, rawDataRequestBody), {
-    isStatusCode200
+    isStatusCode200,
+    ...pageContentCheck('SUCCESSFUL')
   })
 
   iterationsCompleted.add(1)

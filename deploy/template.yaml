@@ -630,6 +630,12 @@ Resources:
               TiCF_IPV_JWT_1: "/perfTest/fraud/TiCF/JWT1"
               TiCF_IPV_JWT_2: "/perfTest/fraud/TiCF/JWT2"
               TiCF_IPV_JWT_3: "/perfTest/fraud/TiCF/JWT3"
+              TiCF_RAW_DATA_URL: "/perfTest/fraud/TiCF/rawData/apiUrl"
+              TiCF_RAWDATA_REQ_ORIGIN: "/perfTest/fraud/TiCF/rawData/reqOrigin"
+              TiCF_RAWDATA_SUB_ID: "/perfTest/fraud/TiCF/rawData/subjectId"
+              TiCF_RAWDATA_REQ_TYPE: "/perfTest/fraud/TiCF/rawData/reqType"
+              TiCF_RAWDATA_REQ_FIELD_NAME: "/perfTest/fraud/TiCF/rawData/reqFieldName"
+              TiCF_RAWDATA_REQ_FIELD_VALUE: "/perfTest/fraud/TiCF/rawData/reqFieldValue"
           phases:
             pre_build:
               commands:

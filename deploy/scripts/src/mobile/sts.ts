@@ -69,7 +69,7 @@ const profiles: ProfileList = {
       preAllocatedVUs: 216,
       maxVUs: 432,
       stages: [
-        { target: 16, duration: '8s' },
+        { target: 16, duration: '161s' },
         { target: 16, duration: '55m' }
       ],
       exec: 'authentication'
@@ -95,6 +95,18 @@ const profiles: ProfileList = {
       stages: [
         { target: 8, duration: '5s' },
         { target: 8, duration: '55m' }
+      ],
+      exec: 'reauthentication'
+    },
+    accountIntervention: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 390,
+      maxVUs: 780,
+      stages: [
+        { target: 20, duration: '10s' },
+        { target: 20, duration: '55m' }
       ],
       exec: 'reauthentication'
     }
@@ -137,12 +149,6 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignUpScenario('authentication', 170, 27, 171),
     ...createI4PeakTestSignInScenario('reauthentication', 16, 27, 8),
     ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 39, 18)
-  },
-  perf006Iteration8PeakTest: {
-    ...createI4PeakTestSignUpScenario('authentication', 160, 36, 161),
-    ...createI4PeakTestSignInScenario('reauthentication', 8, 27, 4),
-    ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 39, 18),
-    ...createI4PeakTestSignInScenario('accountIntervention', 20, 15, 10)
   }
 }
 

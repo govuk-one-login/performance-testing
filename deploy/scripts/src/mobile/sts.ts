@@ -137,6 +137,12 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignUpScenario('authentication', 170, 27, 171),
     ...createI4PeakTestSignInScenario('reauthentication', 16, 27, 8),
     ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 39, 18)
+  },
+  perf006Iteration8PeakTest: {
+    ...createI4PeakTestSignUpScenario('authentication', 160, 36, 161),
+    ...createI4PeakTestSignInScenario('reauthentication', 8, 27, 4),
+    ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 39, 18),
+    ...createI4PeakTestSignInScenario('accountIntervention', 20, 15, 10)
   }
 }
 

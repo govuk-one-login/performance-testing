@@ -64,12 +64,12 @@ const profiles: ProfileList = {
   walletPerfTestSTS: {
     authentication: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
+      startRate: 1,
+      timeUnit: '10s',
       preAllocatedVUs: 216,
       maxVUs: 432,
       stages: [
-        { target: 16, duration: '8s' },
+        { target: 16, duration: '161s' },
         { target: 16, duration: '55m' }
       ],
       exec: 'authentication'
@@ -95,6 +95,18 @@ const profiles: ProfileList = {
       stages: [
         { target: 8, duration: '5s' },
         { target: 8, duration: '55m' }
+      ],
+      exec: 'reauthentication'
+    },
+    accountIntervention: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 390,
+      maxVUs: 780,
+      stages: [
+        { target: 20, duration: '10s' },
+        { target: 20, duration: '55m' }
       ],
       exec: 'reauthentication'
     }

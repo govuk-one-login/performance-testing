@@ -108,7 +108,7 @@ const profiles: ProfileList = {
         { target: 20, duration: '10s' },
         { target: 20, duration: '55m' }
       ],
-      exec: 'reauthentication'
+      exec: 'accountIntervention'
     }
   },
   dataCreationForReAuthentication: {

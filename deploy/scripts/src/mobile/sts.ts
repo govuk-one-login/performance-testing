@@ -69,8 +69,8 @@ const profiles: ProfileList = {
       preAllocatedVUs: 216,
       maxVUs: 432,
       stages: [
-        { target: 16, duration: '161s' },
-        { target: 16, duration: '55m' }
+        { target: 160, duration: '161s' },
+        { target: 160, duration: '55m' }
       ],
       exec: 'authentication'
     },

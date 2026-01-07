@@ -176,7 +176,7 @@ export async function walletCredentialIssuance(): Promise<void> {
     config.oneLoginAppStsClientId,
     config.oneLoginAppStsRedirectUri,
     clientAttestation,
-    keyPair.privateKey
+    { privateKey: keyPair.privateKey, publicKey: publicKeyJwk }
   )
   const txmaEventServiceToken = exchangeAccessToken(
     groupMap.walletCredentialIssuance[6],

@@ -64,8 +64,8 @@ const profiles: ProfileList = {
   walletPerfTestSTS: {
     authentication: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
+      startRate: 1,
+      timeUnit: '10s',
       preAllocatedVUs: 216,
       maxVUs: 432,
       stages: [

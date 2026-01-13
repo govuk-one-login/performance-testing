@@ -93,10 +93,6 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 27, 18)
   },
   perf006Iteration8PeakTest: {
-    ...createI4PeakTestSignUpScenario('getClientAttestation', 400, 12, 401),
-    ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 27, 18)
-  },
-  perf006Iteration8PeakTest55minSS: {
     getClientAttestation: {
       executor: 'ramping-arrival-rate',
       startRate: 1,

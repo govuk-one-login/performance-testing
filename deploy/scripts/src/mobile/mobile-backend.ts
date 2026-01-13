@@ -99,13 +99,13 @@ const profiles: ProfileList = {
   perf006Iteration8PeakTest55minSS: {
     getClientAttestation: {
       executor: 'ramping-arrival-rate',
-      startRate: 2,
-      timeUnit: '1s',
-      preAllocatedVUs: 240,
-      maxVUs: 480,
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 540,
+      maxVUs: 1080,
       stages: [
-        { target: 40, duration: '40s' },
-        { target: 40, duration: '55m' }
+        { target: 400, duration: '401s' },
+        { target: 400, duration: '55m' }
       ],
       exec: 'getClientAttestation'
     },
@@ -113,8 +113,8 @@ const profiles: ProfileList = {
       executor: 'ramping-arrival-rate',
       startRate: 2,
       timeUnit: '1s',
-      preAllocatedVUs: 513,
-      maxVUs: 1026,
+      preAllocatedVUs: 741,
+      maxVUs: 1482,
       stages: [
         { target: 38, duration: '18s' },
         { target: 38, duration: '55m' }

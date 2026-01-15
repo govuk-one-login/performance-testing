@@ -101,7 +101,7 @@ const profiles: ProfileList = {
       maxVUs: 1080,
       stages: [
         { target: 400, duration: '401s' },
-        { target: 400, duration: '55m' }
+        { target: 400, duration: '50m' }
       ],
       exec: 'getClientAttestation'
     },
@@ -113,7 +113,7 @@ const profiles: ProfileList = {
       maxVUs: 1482,
       stages: [
         { target: 38, duration: '18s' },
-        { target: 38, duration: '55m' }
+        { target: 38, duration: '50m' }
       ],
       exec: 'walletCredentialIssuance'
     }

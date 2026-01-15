@@ -124,14 +124,14 @@ const awsConfig = new AWSConfig({
 
 const sqs = new SQSClient(awsConfig)
 
-export function setup(): string {
+export function setup() {
   describeProfile(loadProfile)
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
   const testID = `perfTestID${timestamp}`
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-  const journeyID = 'journeyID'
+  const journeyID = `perfJourneyID_${Math.floor(Date.now() / 1000)}`
   const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
   const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID, testID))
 
@@ -142,15 +142,14 @@ export function setup(): string {
   console.log('Sending primer event 2')
   sqs.sendMessage(env.sqs_queue, authReqParsedPayloadEnrichment)
   console.log('Primer event 2 sent')
-  return authCreateAccPayload
+  return { authCreateAccPayload: authCreateAccPayload, journeyID: journeyID }
 }
 
-export function sendRegularEventWithEnrichment(authCreateAccPayload: string): void {
+export function sendRegularEventWithEnrichment(authCreateAccPayload: string, journeyID: string): void {
   iterationsStarted.add(1)
   const authCreatePayload = JSON.parse(authCreateAccPayload)
   const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
   const eventID = `${testID}_${uuidv4()}`
-  const journeyID = 'journeyID'
   const authLogInSuccessPayloadEnrichment = JSON.stringify(
     generateAuthLogInSuccessEnrichment(
       eventID,

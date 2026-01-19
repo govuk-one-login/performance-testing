@@ -72,6 +72,10 @@ const profiles: ProfileList = {
   perf006Iteration8PeakTest: {
     ...createI4PeakTestSignUpScenario('cimitIDProvingAPIs', 680, 19, 171),
     ...createI4PeakTestSignInScenario('cimitSignInAPI', 126, 6, 58)
+  },
+  perf006Iteration8SpikeTest: {
+    ...createI3SpikeSignUpScenario('cimitIDProvingAPIs', 2520, 19, 631),
+    ...createI3SpikeSignInScenario('cimitSignInAPI', 227, 6, 104)
   }
 }
 

@@ -91,6 +91,32 @@ const profiles: ProfileList = {
   perf006Iteration7PeakTest: {
     ...createI4PeakTestSignUpScenario('getClientAttestation', 170, 12, 171),
     ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 27, 18)
+  },
+  perf006Iteration8PeakTest: {
+    getClientAttestation: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 540,
+      maxVUs: 1080,
+      stages: [
+        { target: 400, duration: '401s' },
+        { target: 400, duration: '50m' }
+      ],
+      exec: 'getClientAttestation'
+    },
+    walletCredentialIssuance: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 741,
+      maxVUs: 1482,
+      stages: [
+        { target: 38, duration: '18s' },
+        { target: 38, duration: '50m' }
+      ],
+      exec: 'walletCredentialIssuance'
+    }
   }
 }
 
@@ -176,7 +202,7 @@ export async function walletCredentialIssuance(): Promise<void> {
     config.oneLoginAppStsClientId,
     config.oneLoginAppStsRedirectUri,
     clientAttestation,
-    keyPair.privateKey
+    { privateKey: keyPair.privateKey, publicKey: publicKeyJwk }
   )
   const txmaEventServiceToken = exchangeAccessToken(
     groupMap.walletCredentialIssuance[6],
@@ -184,6 +210,7 @@ export async function walletCredentialIssuance(): Promise<void> {
     'mobile.txma-event.write'
   )
   postTxmaEvent(groupMap.walletCredentialIssuance[7], 'WALLET_CREDENTIAL_ADD_ATTEMPT', txmaEventServiceToken)
+  sleepBetween(1, 2)
   postTxmaEvent(groupMap.walletCredentialIssuance[8], 'WALLET_CREDENTIAL_ADDED', txmaEventServiceToken, credentialId)
   iterationsCompleted.add(1)
 }

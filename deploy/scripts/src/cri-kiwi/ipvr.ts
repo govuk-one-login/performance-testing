@@ -107,6 +107,10 @@ const profiles: ProfileList = {
   perf006Iteration7PeakTest: {
     ...createI4PeakTestSignUpScenario('allEvents', 5, 20, 6),
     ...createI4PeakTestSignInScenario('authEvent', 71, 5, 33)
+  },
+  perf006Iteration8PeakTest: {
+    ...createI4PeakTestSignUpScenario('allEvents', 4, 20, 5),
+    ...createI4PeakTestSignInScenario('authEvent', 126, 5, 58)
   }
 }
 
@@ -156,11 +160,11 @@ export function allEvents(): void {
   const ipvPayload = generateIPVRequest(userID, signinJourneyID)
   iterationsStarted.add(1)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(authPayload))
-  sleep(5)
+  sleep(10)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(f2fPayload))
-  sleep(5)
+  sleep(10)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(docUploadPayload))
-  sleep(5)
+  sleep(10)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
   iterationsCompleted.add(1)
 }

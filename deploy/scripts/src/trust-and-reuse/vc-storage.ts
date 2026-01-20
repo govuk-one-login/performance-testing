@@ -189,7 +189,7 @@ interface SummariseSubjectID {
 }
 
 const csvData: SummariseSubjectID[] = new SharedArray('Summarise Subject ID', function () {
-  return open('./data/summariseSubjectID.csv')
+  return open('./evcs-sis/data/summariseSubjectID.csv')
     .split('\n')
     .slice(1)
     .map(subID => {

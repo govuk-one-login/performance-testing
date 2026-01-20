@@ -104,7 +104,7 @@ interface RetrieveSubjectId {
 }
 
 const csvData: RetrieveSubjectId[] = new SharedArray('Retrieve SubjectId', function () {
-  return open('./data/getSubjectId.csv')
+  return open('./cimit/data/getSubjectId.csv')
     .split('\n')
     .slice(1)
     .map(subjectId => {

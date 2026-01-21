@@ -412,6 +412,13 @@ const profiles: ProfileList = {
     ...createOLHPeakTestScenario('changePhone', 6, 24, 1),
     ...createOLHPeakTestScenario('deleteAccount', 6, 18, 1),
     ...createI4PeakTestSignInScenario('landingPage', 12, 9, 6)
+  },
+  perf006Iteration8SpikeTest: {
+    ...createI3SpikeOLHScenario('changeEmail', 12, 24, 1),
+    ...createI3SpikeOLHScenario('changePassword', 12, 21, 1),
+    ...createI3SpikeOLHScenario('changePhone', 12, 24, 1),
+    ...createI3SpikeOLHScenario('deleteAccount', 12, 18, 1),
+    ...createI3SpikeSignInScenario('landingPage', 22, 9, 11)
   }
 }
 

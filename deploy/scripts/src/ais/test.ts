@@ -95,6 +95,10 @@ const profiles: ProfileList = {
   perf006Iteration8PeakTest: {
     ...createI4PeakTestSignInScenario('persistIV', 30, 3, 15),
     ...createI4PeakTestSignInScenario('retrieveIV', 378, 3, 58)
+  },
+  perf006Iteration8SpikeTest: {
+    ...createI3SpikeSignInScenario('persistIV', 30, 3, 15),
+    ...createI3SpikeSignInScenario('retrieveIV', 681, 3, 104)
   }
 }
 

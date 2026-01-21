@@ -1,5 +1,5 @@
 import { FraudPayload, PassportPayload, KBVPayload } from '../request/types'
-import { uuidv4 } from '../../common/utils/jslib'
+import { uuidv4 } from '../../../common/utils/jslib'
 import { SpotRequest, SpotRequestInfo } from './types'
 import crypto from 'k6/crypto'
 import { b64decode } from 'k6/encoding'

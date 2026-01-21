@@ -13,14 +13,14 @@ import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { signJwt } from '../common/utils/authentication/jwt'
-import { SpotRequestInfo } from './request/types'
+import { SpotRequestInfo } from './spot/request/types'
 import {
   generateFraudPayload,
   generateKBVPayload,
   generatePassportPayload,
   generateSPOTRequest,
   pairwiseSub
-} from './request/generator'
+} from './spot/request/generator'
 
 const profiles: ProfileList = {
   smoke: {

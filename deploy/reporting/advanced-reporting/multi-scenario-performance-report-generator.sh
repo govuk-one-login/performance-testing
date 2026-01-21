@@ -87,7 +87,7 @@ if [[ "$TIME_PARAM" == *":"* ]]; then
 else
     # Single scenario mode - need third parameter
     START_TIME=$TIME_PARAM
-    END_TIME=${3:-$THIRD_PARAM}
+    END_TIME=$3
     if [[ -z "$END_TIME" ]]; then
         echo "Error: For single scenario, provide: results.gz START_TIME END_TIME" >&2
         exit 1
@@ -821,7 +821,7 @@ done
 
 
 
-if [ ${#BREACHED_TRANSACTIONS[@]} -eq 0 ]; then
+if [[ ${#BREACHED_TRANSACTIONS[@]} -eq 0 ]]; then
     echo "✅ No SLA breaches detected"
 fi
 
@@ -850,7 +850,7 @@ else
     echo "📊 Skipping detailed transaction analysis"
 fi
 
-if [ ${#TRANSACTIONS_TO_ANALYZE[@]} -gt 0 ]; then
+if [[ ${#TRANSACTIONS_TO_ANALYZE[@]} -gt 0 ]]; then
     echo ""
     echo "📊 Generating detailed analysis for ${#TRANSACTIONS_TO_ANALYZE[@]} transaction(s)..."
 

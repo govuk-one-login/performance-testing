@@ -827,12 +827,12 @@ fi
 
 # Ask user if they want detailed analysis
 echo ""
-read -p "Generate detailed transaction analysis? (yes/no) [no]: " DETAILED_ANALYSIS
+read -p "Generate response time graphs? (yes/no) [no]: " DETAILED_ANALYSIS
 DETAILED_ANALYSIS=${DETAILED_ANALYSIS:-no}
 
 if [[ "$DETAILED_ANALYSIS" == "yes" ]]; then
     echo ""
-    read -p "Analyze all transactions or only SLA breaches? (all/breach) [breach]: " ANALYSIS_MODE
+    read -p "Generate graphs for all the transactions or only SLA breaches? (all/breach) [breach]: " ANALYSIS_MODE
     ANALYSIS_MODE=${ANALYSIS_MODE:-breach}
 fi
 
@@ -847,22 +847,22 @@ if [[ "$DETAILED_ANALYSIS" == "yes" ]]; then
     fi
 else
     TRANSACTIONS_TO_ANALYZE=()
-    echo "📊 Skipping detailed transaction analysis"
+    echo "📊 Skipping Generation of response time graphs"
 fi
 
 if [[ ${#TRANSACTIONS_TO_ANALYZE[@]} -gt 0 ]]; then
     echo ""
-    echo "📊 Generating detailed analysis for ${#TRANSACTIONS_TO_ANALYZE[@]} transaction(s)..."
+    echo "📊 Generating response time graphs for ${#TRANSACTIONS_TO_ANALYZE[@]} transaction(s)..."
 
     # Extract transaction data from results.gz
-    if [[ -f "$INPUT" ]]; then
+    if [[ -f "../$INPUT" ]]; then
         echo "   Extracting transaction data..."
 
         # Filter and create CSV for each transaction
         for txn in "${TRANSACTIONS_TO_ANALYZE[@]}"; do
             # Sanitize filename
             safe_name=$(echo "$txn" | sed 's/[^a-zA-Z0-9_]/_/g')
-            output_file="${OUTPUT_DIR}/${safe_name}.csv"
+            output_file="${safe_name}.csv"
 
             echo "   Processing: $txn"
 
@@ -963,13 +963,14 @@ PYEOF
 
     echo ""
     echo "📁 Analysis Complete - All files saved to: $OUTPUT_DIR/"
-    echo "   - Transaction CSVs: $OUTPUT_DIR/*.csv"
+    echo "   - Steady-state CSVs: $OUTPUT_DIR/SS_RT_*.csv"
+    echo "   - Transaction data: $OUTPUT_DIR/*.csv"
     echo "   - Response time graphs: $OUTPUT_DIR/*.png"
     echo "   - Excel report: $OUTPUT_DIR/Performance_Report_${TIMESTAMP}.xlsx"
 else
     echo ""
     echo "📁 Analysis Complete - All files saved to: $OUTPUT_DIR/"
-    echo "   - Summary CSVs: $OUTPUT_DIR/SS_RT_*.csv"
+    echo "   - Steady-state CSVs: $OUTPUT_DIR/SS_RT_*.csv"
     echo "   - JSON data: $OUTPUT_DIR/perf_data_${TIMESTAMP}.json"
     echo "   - Excel report: $OUTPUT_DIR/Performance_Report_${TIMESTAMP}.xlsx"
 fi

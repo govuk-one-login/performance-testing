@@ -9,7 +9,9 @@ import {
   createScenario,
   LoadProfile,
   createI4PeakTestSignUpScenario,
-  createI4PeakTestSignInScenario
+  createI4PeakTestSignInScenario,
+  createI3SpikeSignInScenario,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { uuidv4 } from '../common/utils/jslib'
@@ -27,6 +29,52 @@ const profiles: ProfileList = {
     ...createScenario('updateVC', LoadProfile.smoke),
     ...createScenario('summariseVC', LoadProfile.smoke)
   },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignUpScenario('persistVC', 490, 5, 491),
+    ...createI3SpikeSignUpScenario('updateVC', 490, 7, 491),
+    ...createI3SpikeSignInScenario('summariseVC', 71, 6, 33)
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignUpScenario('persistVC', 470, 5, 471),
+    ...createI4PeakTestSignUpScenario('updateVC', 470, 7, 471),
+    ...createI4PeakTestSignInScenario('summariseVC', 43, 6, 21)
+  },
+  perf006Iteration4SpikeTest: {
+    ...createI3SpikeSignUpScenario('persistVC', 1130, 5, 1131),
+    ...createI3SpikeSignUpScenario('updateVC', 1130, 7, 1131),
+    ...createI3SpikeSignInScenario('summariseVC', 129, 6, 60)
+  },
+  perf006Iteration5PeakTest: {
+    ...createI4PeakTestSignUpScenario('updateVC', 570, 7, 571),
+    ...createI4PeakTestSignInScenario('summariseVC', 65, 6, 30)
+  },
+  perf006Iteration5SpikeTest: {
+    ...createI3SpikeSignUpScenario('updateVC', 1130, 7, 1131),
+    ...createI3SpikeSignInScenario('summariseVC', 162, 6, 74)
+  },
+  perf006Iteration6PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 570, 11, 571),
+    ...createI4PeakTestSignInScenario('invalidate', 104, 6, 48),
+    ...createI4PeakTestSignUpScenario('updateVC', 920, 7, 921),
+    ...createI4PeakTestSignInScenario('summariseVC', 104, 6, 48)
+  },
+  perf006Iteration6SpikeTest: {
+    ...createI3SpikeSignUpScenario('identity', 570, 11, 571),
+    ...createI3SpikeSignInScenario('invalidate', 260, 6, 119),
+    ...createI3SpikeSignUpScenario('updateVC', 570, 7, 571),
+    ...createI3SpikeSignInScenario('summariseVC', 260, 6, 119)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 180, 11, 181),
+    ...createI4PeakTestSignInScenario('invalidate', 71, 6, 33),
+    ...createI4PeakTestSignUpScenario('updateVC', 180, 7, 181),
+    ...createI4PeakTestSignInScenario('summariseVC', 71, 6, 33)
+  },
+  perf006Iteration7SpikeTest: {
+    ...createI3SpikeSignUpScenario('identity', 540, 11, 541),
+    ...createI3SpikeSignInScenario('invalidate', 143, 6, 66),
+    ...createI3SpikeSignInScenario('useridentity', 143, 15, 66)
+  },
   perf006Iteration8PeakTest: {
     ...createI4PeakTestSignUpScenario('identity', 170, 11, 171),
     ...createI4PeakTestSignInScenario('invalidate', 126, 6, 58),
@@ -39,6 +87,7 @@ const loadProfile = selectProfile(profiles)
 const groupMap = {
   updateVC: ['R03_UpdateVC_01_CreateVC', 'R03_UpdateVC_02_UpdateVC'],
   summariseVC: ['R02_SummariseVC_01_GenerateTokenSummary', 'R02_SummariseVC_02_Summarise'],
+  persistVC: ['R01_PersistVC_01_CreateVC'],
   identity: ['B01_SIS_01_IdentityCall', 'B01_SIS_01_InvalidateCall'],
   invalidate: ['B02_SIS_01_InvalidateCall']
 } as const
@@ -145,6 +194,27 @@ export function summariseVC(): void {
   timeGroup(groups[1], () => http.get(env.envURL + `/summarise-vcs/${summariseData.subID}`, options), {
     isStatusCode200,
     ...pageContentCheck('vcs')
+  })
+  iterationsCompleted.add(1)
+}
+
+export function persistVC(): void {
+  const groups = groupMap.persistVC
+  const userID = uuidv4()
+  const subjectID = `urn:fdc:gov.uk:2022:${userID}`
+  iterationsStarted.add(1)
+  const options = {
+    headers: {
+      'x-api-key': env.envApiKey
+    }
+  }
+
+  const body = JSON.stringify(Object.values(jwtTokens).map(token => generateCreateVCPayload(token, 'CURRENT')))
+
+  // R01_PersistVC_01_CreateVC
+  timeGroup(groups[0], () => http.post(env.envURL + `/vcs/${subjectID}`, body, options), {
+    isStatusCode202: r => r.status === 202,
+    ...pageContentCheck('messageId')
   })
   iterationsCompleted.add(1)
 }

@@ -223,6 +223,11 @@ const profiles: ProfileList = {
       ],
       exec: 'addressME'
     }
+  },
+  perf006Iteration8SpikeTest: {
+    ...createI3SpikeSignUpScenario('address', 100, 15, 101),
+    ...createI3SpikeSignUpScenario('addressME', 520, 15, 521),
+    ...createI3SpikeSignUpScenario('internationalAddress', 6, 12, 7)
   }
 }
 

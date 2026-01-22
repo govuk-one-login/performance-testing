@@ -1,5 +1,5 @@
 import { DrivingLicensePayload, PassportPayload } from '../request/types'
-import { uuidv4 } from '../../common/utils/jslib'
+import { uuidv4 } from '../../../common/utils/jslib'
 
 export function generatePassportPayloadCI(sub: string): PassportPayload {
   return {

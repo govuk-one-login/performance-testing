@@ -4,63 +4,40 @@ import {
   describeProfile,
   createScenario,
   LoadProfile,
-  createI4PeakTestSignUpScenario,
   createI4PeakTestSignInScenario,
-  createI3SpikeSignUpScenario,
   createI3SpikeSignInScenario
 } from '../common/utils/config/load-profiles'
 import http, { type Response } from 'k6/http'
 
 import { type Options } from 'k6/options'
 import { timeGroup } from '../common/utils/request/timing'
-import { isStatusCode200, isStatusCode202, isStatusCode204, pageContentCheck } from '../common/utils/checks/assertions'
+import { isStatusCode200, isStatusCode202, pageContentCheck } from '../common/utils/checks/assertions'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
-import { generateIdentityPayload } from './utils/requestGenerator'
+import { generateIdentityPayload } from './sis/utils/requestGenerator'
 import { signJwt } from '../common/utils/authentication/jwt'
-import { fail, sleep } from 'k6'
+import { fail } from 'k6'
 import { uuidv4 } from '../common/utils/jslib'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('identity', LoadProfile.smoke),
-    ...createScenario('invalidate', LoadProfile.smoke),
     ...createScenario('useridentity', LoadProfile.smoke)
   },
-  perf006Iteration6PeakTest: {
-    ...createI4PeakTestSignUpScenario('identity', 570, 11, 571),
-    ...createI4PeakTestSignInScenario('invalidate', 104, 6, 48)
-  },
-  perf006Iteration6SpikeTest: {
-    ...createI3SpikeSignUpScenario('identity', 570, 11, 571),
-    ...createI3SpikeSignInScenario('invalidate', 260, 6, 119)
-  },
   perf006Iteration7PeakTest: {
-    ...createI4PeakTestSignUpScenario('identity', 180, 11, 181),
-    ...createI4PeakTestSignInScenario('invalidate', 71, 6, 33),
     ...createI4PeakTestSignInScenario('useridentity', 71, 15, 33)
   },
   perf006Iteration7SpikeTest: {
-    ...createI3SpikeSignUpScenario('identity', 540, 11, 541),
-    ...createI3SpikeSignInScenario('invalidate', 143, 6, 66),
     ...createI3SpikeSignInScenario('useridentity', 143, 15, 66)
   },
   perf006Iteration8PeakTest: {
-    ...createI4PeakTestSignUpScenario('identity', 170, 11, 171),
-    ...createI4PeakTestSignInScenario('invalidate', 126, 6, 58),
     ...createI4PeakTestSignInScenario('useridentity', 126, 15, 58)
-  },
-  perf006Iteration8SpikeTest: {
-    ...createI3SpikeSignInScenario('useridentity', 227, 15, 104)
   }
 }
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  identity: ['B01_SIS_01_IdentityCall', 'B01_SIS_01_InvalidateCall'],
-  invalidate: ['B02_SIS_01_InvalidateCall'],
   useridentity: [
     'B03_SIS_01_PersistVCStubCall',
     'B03_SIS_02_GetMockTokenForIdentity',
@@ -81,9 +58,6 @@ export function setup(): void {
 }
 
 const env = {
-  identityURL: getEnv('IDENTITY_SIS_IDENTITY_URL'),
-  identityApiKey: getEnv('IDENTITY_SIS_IDENTITY_APIKEY'),
-  identityKid: getEnv('IDENTITY_SIS_IDENTITY_KID'),
   evcsStubApiKey: getEnv('IDENTITY_SIS_EVCSSTUB_APIKEY'),
   evcsStubUrl: getEnv('IDENTITY_SIS_EVCSSTUB_URL'),
   mockTokenUrl: getEnv('IDENTITY_SIS_MOCKTOKEN_URL'),
@@ -92,74 +66,7 @@ const env = {
   userIdentityKid: getEnv('IDENTITY_SIS_USERIDENTITY_KID')
 }
 const keys = {
-  identity: JSON.parse(getEnv('IDENTITY_SIS_IDENTITY_PRIVATEKEY')) as JsonWebKey,
   useridentity: JSON.parse(getEnv('IDENTITY_SIS_USERIDENTITY_PRIVATEKEY')) as JsonWebKey
-}
-
-export async function identity(): Promise<void> {
-  const groups = groupMap.identity
-  const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
-  const payloads = {
-    identityPayload: generateIdentityPayload(subjectID)
-  }
-  const createJwt = async (key: JsonWebKey, payload: object): Promise<string> => {
-    const escdaParam: EcKeyImportParams = { name: 'ECDSA', namedCurve: 'P-256' }
-    const importedKey = await crypto.subtle.importKey('jwk', key, escdaParam, true, ['sign'])
-    return signJwt('ES256', importedKey, payload, env.identityKid)
-  }
-  const identityJWT = await createJwt(keys.identity, payloads.identityPayload)
-  const identityReqBody = JSON.stringify({
-    userId: subjectID,
-    si: {
-      jwt: identityJWT,
-      vot: 'P2'
-    }
-  })
-  const invalidateReqBody = JSON.stringify({
-    userId: subjectID
-  })
-  const params = {
-    headers: {
-      'x-api-key': env.identityApiKey
-    }
-  }
-
-  iterationsStarted.add(1)
-  // B01_SIS_01_IdentityCall
-  timeGroup(groups[0], () => http.post(env.identityURL + '/v1/identity', identityReqBody, params), {
-    isStatusCode202
-  })
-
-  sleep(5)
-
-  // B01_SIS_01_InvalidateCall
-  timeGroup(groups[1], () => http.post(env.identityURL + '/v1/identity/invalidate', invalidateReqBody, params), {
-    isStatusCode204
-  })
-
-  iterationsCompleted.add(1)
-}
-
-export async function invalidate(): Promise<void> {
-  const groups = groupMap.invalidate
-  const subjectID = 'urn:fdc:gov.uk:2022:' + uuidv4()
-  const invalidateReqBody = JSON.stringify({
-    userId: subjectID
-  })
-  const params = {
-    headers: {
-      'x-api-key': env.identityApiKey
-    }
-  }
-
-  iterationsStarted.add(1)
-
-  // B02_SIS_01_InvalidateCall
-  timeGroup(groups[0], () => http.post(env.identityURL + '/v1/identity/invalidate', invalidateReqBody, params), {
-    isStatusCode404: r => r.status === 404
-  })
-
-  iterationsCompleted.add(1)
 }
 
 export async function useridentity(): Promise<void> {

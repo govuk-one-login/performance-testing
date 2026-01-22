@@ -17,7 +17,7 @@ import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assert
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
-import { generatePassportPayloadCI, generateDrivingLicensePayloadMitigation } from './request/generator'
+import { generatePassportPayloadCI, generateDrivingLicensePayloadMitigation } from './cimit/request/generator'
 import { signJwt } from '../common/utils/authentication/jwt'
 import { sleep } from 'k6'
 import { uuidv4 } from '../common/utils/jslib'
@@ -72,10 +72,6 @@ const profiles: ProfileList = {
   perf006Iteration8PeakTest: {
     ...createI4PeakTestSignUpScenario('cimitIDProvingAPIs', 680, 19, 171),
     ...createI4PeakTestSignInScenario('cimitSignInAPI', 126, 6, 58)
-  },
-  perf006Iteration8SpikeTest: {
-    ...createI3SpikeSignUpScenario('cimitIDProvingAPIs', 2520, 19, 631),
-    ...createI3SpikeSignInScenario('cimitSignInAPI', 227, 6, 104)
   }
 }
 
@@ -108,7 +104,7 @@ interface RetrieveSubjectId {
 }
 
 const csvData: RetrieveSubjectId[] = new SharedArray('Retrieve SubjectId', function () {
-  return open('./data/getSubjectId.csv')
+  return open('./cimit/data/getSubjectId.csv')
     .split('\n')
     .slice(1)
     .map(subjectId => {

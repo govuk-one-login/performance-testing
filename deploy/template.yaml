@@ -347,10 +347,12 @@ Resources:
                     - "function:*"
           - Effect: "Allow"
             Action:
-              - "s3:ListAllMyBuckets"
+              - "s3:GetObject"
+              - "s3:GetBucketLocation"
+              - "s3:ListBucket"
             Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::*"
-              - !Sub "arn:${AWS::Partition}:s3:::*/*"
+              - !Sub ${ResultsBucket.Arn}/*
+              - !Sub ${ResultsBucket.Arn}
             Condition:
               StringEquals:
                 "s3:ResourceAccount":

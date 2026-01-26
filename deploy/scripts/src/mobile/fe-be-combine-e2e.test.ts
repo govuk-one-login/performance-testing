@@ -6,7 +6,8 @@ import {
   selectProfile,
   createScenario,
   LoadProfile,
-  createI4PeakTestSignUpScenario
+  createI4PeakTestSignUpScenario,
+  createI3SpikeSignUpScenario
 } from '../common/utils/config/load-profiles'
 import {
   postSelectDevice,
@@ -92,6 +93,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration8PeakTest: {
     ...createI4PeakTestSignUpScenario('mamIphonePassport', 160, 48, 161)
+  },
+  perf006Iteration8SpikeTest: {
+    ...createI3SpikeSignUpScenario('mamIphonePassport', 600, 48, 601)
   }
 }
 

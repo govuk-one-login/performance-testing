@@ -24,7 +24,7 @@ RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
 # -----------------------
 # OpenTelemetry Collector
 # -----------------------
-FROM otel/opentelemetry-collector-contrib:0.142.0 AS otel
+FROM otel/opentelemetry-collector-contrib:0.144.0 AS otel
 COPY otel-config-template.yaml /etc/otelcol/config-template.yaml
 
 # ---

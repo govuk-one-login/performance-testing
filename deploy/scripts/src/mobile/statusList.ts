@@ -9,6 +9,8 @@ import {
 } from '../common/utils/config/load-profiles'
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
+import { SharedArray } from 'k6/data'
+import exec from 'k6/execution'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode202, pageContentCheck } from '../common/utils/checks/assertions'
@@ -42,9 +44,21 @@ const groupMap = {
     'B01_StatusList_03_IssueAPICallViaPrivateAPI',
     'B01_StatusList_04_SignRevokePayload',
     'B01_StatusList_05_RevokeCallViaProxy',
-    'B01_StatusList_06_RevokeCallViaPrivateAPI'
+    'B01_StatusList_06_RevokeCallViaPrivateAPI',
+    'B01_StatusList_07_GetStatusList'
   ]
 }
+interface StatusListData {
+  statusListId: string
+}
+
+const statusListIds: StatusListData[] = new SharedArray('statusListIds', function () {
+  return open('./status-list/data/statusListIds.csv')
+    .split('\n')
+    .slice(1)
+    .filter(line => line.trim())
+    .map(line => ({ statusListId: line.trim() }))
+})
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
@@ -196,6 +210,13 @@ export function statusList(): void {
       )
     }
   }
+  sleepBetween(1, 3)
+
+  // B01_StatusList_07_GetStatusList
+  const statusListData = statusListIds[exec.scenario.iterationInTest % statusListIds.length]
+  timeGroup(groups[6], () => http.get(`https://crs.build.account.gov.uk/${statusListData.statusListId}`), {
+    isStatusCode200
+  })
 
   iterationsCompleted.add(1)
 }

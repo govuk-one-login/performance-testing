@@ -214,7 +214,7 @@ export function statusList(): void {
 
   // B01_StatusList_07_GetStatusList
   const statusListData = statusListIds[exec.scenario.iterationInTest % statusListIds.length]
-  timeGroup(groups[6], () => http.get(`https://crs.build.account.gov.uk/${statusListData.statusListId}`), {
+  timeGroup(groups[6], () => http.get(`${config.crsURL}/${statusListData.statusListId}`), {
     isStatusCode200
   })
 

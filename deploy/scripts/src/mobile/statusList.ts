@@ -10,7 +10,6 @@ import {
 import { type Options } from 'k6/options'
 import http, { type Response } from 'k6/http'
 import { SharedArray } from 'k6/data'
-import exec from 'k6/execution'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode202, pageContentCheck } from '../common/utils/checks/assertions'

@@ -25,28 +25,30 @@ import { getThresholds } from '../common/utils/config/thresholds'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('statusList', LoadProfile.smoke)
+    ...createScenario('issueAndRevokeStatusList', LoadProfile.smoke),
+    ...createScenario('getStatusList', LoadProfile.smoke)
   },
   loadTest: {
-    ...createI4PeakTestSignInScenario('statusList', 28, 18, 14)
+    ...createI4PeakTestSignInScenario('issueAndRevokeStatusList', 28, 18, 14),
+    ...createI4PeakTestSignInScenario('getStatusList', 278, 3, 127)
   },
   perf006Iteration7SpikeTest: {
-    ...createI3SpikeSignInScenario('statusList', 140, 18, 65)
+    ...createI3SpikeSignInScenario('issueAndRevokeStatusList', 140, 18, 65)
   }
 }
 
 const loadProfile = selectProfile(profiles)
 
 const groupMap = {
-  statusList: [
-    'B01_StatusList_01_SignIssuePayLoad',
-    'B01_StatusList_02_IssueAPICallViaProxy',
-    'B01_StatusList_03_IssueAPICallViaPrivateAPI',
-    'B01_StatusList_04_SignRevokePayload',
-    'B01_StatusList_05_RevokeCallViaProxy',
-    'B01_StatusList_06_RevokeCallViaPrivateAPI',
-    'B01_StatusList_07_GetStatusList'
-  ]
+  issueAndRevokeStatusList: [
+    'B01_IssueAndRevokeStatusList_01_SignIssuePayLoad',
+    'B01_IssueAndRevokeStatusList_02_IssueAPICallViaProxy', //pragma: allowlist secret
+    'B01_IssueAndRevokeStatusList_03_IssueAPICallViaPrivateAPI',
+    'B01_IssueAndRevokeStatusList_04_SignRevokePayload',
+    'B01_IssueAndRevokeStatusList_05_RevokeCallViaProxy', //pragma: allowlist secret
+    'B01_IssueAndRevokeStatusList_06_RevokeCallViaPrivateAPI'
+  ],
+  getStatusList: ['B02_GetStatusList_01_GetStatusList']
 }
 interface StatusListData {
   statusListId: string
@@ -77,8 +79,8 @@ const statusListHeaders = {
 }
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 
-export function statusList(): void {
-  const groups = groupMap.statusList
+export function issueAndRevokeStatusList(): void {
+  const groups = groupMap.issueAndRevokeStatusList
   let res: Response
   const issuePayload = JSON.stringify(generateIssuePayload(config.clientID))
   const environmentName = environment.toLowerCase()
@@ -98,7 +100,7 @@ export function statusList(): void {
 
   iterationsStarted.add(1)
 
-  //  B01_StatusList_01_SignIssuePayLoad
+  //  B01_IssueAndRevokeStatusList_01_SignIssuePayLoad
   res = timeGroup(
     groups[0],
     () => http.post(signedRequestMockIssue.url, issuePayload, { headers: signedRequestMockIssue.headers }),
@@ -122,7 +124,7 @@ export function statusList(): void {
       res.body as string
     )
 
-    //  B01_StatusList_02_IssueAPICallViaProxy
+    //  B01_IssueAndRevokeStatusList_02_IssueAPICallViaProxy
     res = timeGroup(
       groups[1],
       () => http.post(signedRequestProxyIssue.url, res.body, { headers: signedRequestProxyIssue.headers }),
@@ -132,7 +134,7 @@ export function statusList(): void {
       }
     )
   } else {
-    // B01_StatusList_03_IssueAPICallViaPrivateAPI
+    // B01_IssueAndRevokeStatusList_03_IssueAPICallViaPrivateAPI
     res = timeGroup(
       groups[2],
       () => http.post(`${config.envURL}/${environmentName}/issue`, res.body, statusListHeaders),
@@ -166,7 +168,7 @@ export function statusList(): void {
   // 90% of the users call /revoke
 
   if (Math.random() <= 0.9) {
-    // B01_StatusList_04_SignRevokePayload
+    // B01_IssueAndRevokeStatusList_04_SignRevokePayload
     res = timeGroup(
       groups[3],
       () => http.post(signedRequestMockRevoke.url, revokePayload, { headers: signedRequestMockRevoke.headers }),
@@ -189,7 +191,7 @@ export function statusList(): void {
         res.body as string
       )
 
-      // B01_StatusList_05_RevokeCallViaProxy
+      // B01_IssueAndRevokeStatusList_05_RevokeCallViaProxy
       res = timeGroup(
         groups[4],
         () => http.post(signedRequestProxyRevoke.url, res.body, { headers: signedRequestProxyRevoke.headers }),
@@ -199,7 +201,7 @@ export function statusList(): void {
         }
       )
     } else {
-      //B01_StatusList_06_RevokeCallViaPrivateAPI
+      //B01_IssueAndRevokeStatusList_06_RevokeCallViaPrivateAPI
       res = timeGroup(
         groups[5],
         () => http.post(`${config.envURL}/${environmentName}/revoke`, res.body, statusListHeaders),
@@ -210,11 +212,16 @@ export function statusList(): void {
       )
     }
   }
-  sleepBetween(1, 3)
 
-  // B01_StatusList_07_GetStatusList
+  iterationsCompleted.add(1)
+}
+
+export function getStatusList(): void {
+  iterationsStarted.add(1)
+
+  // B02_GetStatusList_01_GetStatusList
   const statusListData = statusListIds[exec.scenario.iterationInTest % statusListIds.length]
-  timeGroup(groups[6], () => http.get(`${config.crsURL}/${statusListData.statusListId}`), {
+  timeGroup(groupMap.getStatusList[0], () => http.get(`${config.crsURL}/${statusListData.statusListId}`), {
     isStatusCode200
   })
 

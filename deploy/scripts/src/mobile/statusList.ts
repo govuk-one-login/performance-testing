@@ -220,7 +220,7 @@ export function getStatusList(): void {
   iterationsStarted.add(1)
 
   // B02_GetStatusList_01_GetStatusList
-  const statusListData = statusListIds[exec.scenario.iterationInTest % statusListIds.length]
+  const statusListData = statusListIds[Math.floor(Math.random() * statusListIds.length)]
   timeGroup(groupMap.getStatusList[0], () => http.get(`${config.crsURL}/${statusListData.statusListId}`), {
     isStatusCode200
   })

@@ -626,6 +626,8 @@ Resources:
               STATUS_LIST_CLIENT_ID_BUILD: "/perfTest/statusList/build/clientID"
               STATUS_LIST_MOCK_URL_BUILD: "/perfTest/statusList/build/mockURL"
               STATUS_LIST_URL_BUILD: "/perfTest/statusList/build/statsListURL"
+              STATUS_LIST_CRS_URL_BUILD: "/perfTest/statusList/build/crsURL"
+              STATUS_LIST_CRS_URL_DEV: "/perfTest/statusList/dev/crsURL"
               TiCF_SQS_QUEUE: "/perfTest/fraud/TiCF/SQSQueue"
               TiCF_AUTH_URL: "/perfTest/fraud/TiCF/authUrl"
               TiCF_IPV_URL: "/perfTest/fraud/TiCF/ipvUrl"

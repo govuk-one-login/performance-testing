@@ -2,7 +2,7 @@ import { check, sleep } from 'k6'
 import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
 import http, { type Response } from 'k6/http'
-import { type Options } from 'k6/options'
+import { Options, Scenario } from 'k6/options'
 import TOTP from '../common/utils/authentication/totp'
 import {
   isStatusCode200,
@@ -26,6 +26,7 @@ import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_m
 import { timeGroup } from '../common/utils/request/timing'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { browser, type Page, type Response as PageResponse } from 'k6/browser'
+import { createDynamicTestProfile } from '../common/utils/config/dynamic-load-profiles' // <--- ADD THIS LINE
 
 const profiles: ProfileList = {
   smoke: {
@@ -310,7 +311,37 @@ const profiles: ProfileList = {
     ...createI3SpikeSignInScenario('signIn', 227, 18, 104)
   }
 }
-const loadProfile = selectProfile(profiles)
+
+type Profile = {
+  name: string
+  scenarios: Record<string, Scenario>
+}
+
+type DynamicTestType = 'stress' | 'peak' | 'soak' | 'spike'
+
+function isDynamicTestType(value: string): value is DynamicTestType {
+  return ['stress', 'peak', 'soak', 'spike'].includes(value)
+}
+
+let loadProfile: Profile
+let scenarios: Record<string, Scenario>
+
+const testType = (__ENV.TEST_TYPE || '').toLowerCase()
+
+if (isDynamicTestType(testType)) {
+  console.log(`[Profile] Using DYNAMIC profile generator for '${testType}'.`)
+  scenarios = createDynamicTestProfile(testType)
+
+  loadProfile = {
+    name: `Dynamic - ${testType}`,
+    scenarios: scenarios
+  }
+} else {
+  console.log(`[Profile] TEST_TYPE not set or invalid. Using STATIC profile selector.`)
+  loadProfile = selectProfile(profiles)
+  scenarios = loadProfile.scenarios
+}
+
 const groupMap = {
   signUp: [
     'B01_SignUp_01_OrchStubSubmit',

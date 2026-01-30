@@ -345,6 +345,18 @@ Resources:
                   - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
                     - !FindInMap [STS, Dev, AccountID]
                     - "function:*"
+          - Effect: "Allow"
+            Action:
+              - "s3:GetObject"
+              - "s3:GetBucketLocation"
+              - "s3:ListBucket"
+            Resource:
+              - !Sub ${ResultsBucket.Arn}/*
+              - !Sub ${ResultsBucket.Arn}
+            Condition:
+              StringEquals:
+                "s3:ResourceAccount":
+                  - !Sub "${AWS::AccountId}"
 
   VPCTestPolicy:
     Type: AWS::IAM::ManagedPolicy

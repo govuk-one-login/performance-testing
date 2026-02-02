@@ -33,6 +33,32 @@ const profiles: ProfileList = {
   },
   perf006Iteration7SpikeTest: {
     ...createI3SpikeSignInScenario('issueAndRevokeStatusList', 140, 18, 65)
+  },
+  perf006Iteration8PeakTest: {
+    issueAndRevokeStatusList: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 837,
+      maxVUs: 1674,
+      stages: [
+        { target: 93, duration: '43s' },
+        { target: 93, duration: '55m' }
+      ],
+      exec: 'issueAndRevokeStatusList'
+    },
+    getStatusList: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 417,
+      maxVUs: 834,
+      stages: [
+        { target: 278, duration: '127s' },
+        { target: 278, duration: '55m' }
+      ],
+      exec: 'getStatusList'
+    }
   }
 }
 

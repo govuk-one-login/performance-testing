@@ -28,7 +28,7 @@ const profiles: ProfileList = {
     ...createScenario('getStatusList', LoadProfile.smoke)
   },
   loadTest: {
-    ...createI4PeakTestSignInScenario('issueAndRevokeStatusList', 28, 18, 14),
+    ...createI4PeakTestSignInScenario('issueAndRevokeStatusList', 93, 18, 43),
     ...createI4PeakTestSignInScenario('getStatusList', 278, 3, 127)
   },
   perf006Iteration7SpikeTest: {

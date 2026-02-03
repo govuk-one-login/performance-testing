@@ -1,8 +1,6 @@
 import { getEnv } from '../common/utils/config/environment-variables'
 import { AssumeRoleOutput } from '../common/utils/aws/types'
 import { AWSConfig, S3Client } from '../common/utils/jslib/aws-s3'
-import { SharedArray } from 'k6/data'
-// import { SharedArray } from 'k6/data'
 
 const bucketDetails = {
   bucketName: getEnv('TICF_RAWDATA_S3_TEST_BUCKET'),
@@ -30,34 +28,27 @@ export async function setup(): Promise<RawData[]> {
   const testBucketName = bucketDetails.bucketName
   const testFileKey = bucketDetails.fileName
   const object = await s3.getObject(testBucketName, testFileKey)
-  // console.log(object)
   const testDataContent = JSON.stringify(object)
   console.log(testDataContent)
-  // return testDataContent
 
-  const splitData = new SharedArray<RawData>('rawData', function () {
-    const testData = testDataContent.slice(117, -2).split('\\r\\n')
-    const headers = testData[0].split(',')
-    const users: RawData[] = []
+  const splitData = testDataContent.slice(117, -2).split('\\r\\n')
+  const headers = splitData[0].split(',')
+  const users: RawData[] = []
 
-    for (let i = 1; i < testData.length; i++) {
-      if (testData[i].trim() === '') continue // Skip empty lines
-      const values = testData[i].split(',')
-      // Create a User object, ensuring properties match the interface
-      const user: RawData = {
-        requestOriginator: values[headers.indexOf('requestOriginator')].trim(),
-        subjectId: values[headers.indexOf('subjectId')].trim(),
-        requestType: values[headers.indexOf('requestType')].trim(),
-        requestFieldName: values[headers.indexOf('requestFieldName')].trim(),
-        requestFieldValue: values[headers.indexOf('requestFieldValue')].trim()
-      }
-      users.push(user)
+  for (let i = 1; i < splitData.length; i++) {
+    if (splitData[i].trim() === '') continue // Skip empty lines
+    const values = splitData[i].split(',')
+    // Create a User object, ensuring properties match the interface
+    const user: RawData = {
+      requestOriginator: values[headers.indexOf('requestOriginator')].trim(),
+      subjectId: values[headers.indexOf('subjectId')].trim(),
+      requestType: values[headers.indexOf('requestType')].trim(),
+      requestFieldName: values[headers.indexOf('requestFieldName')].trim(),
+      requestFieldValue: values[headers.indexOf('requestFieldValue')].trim()
     }
-    return users
-  })
-
-  console.log(`Loaded ${splitData.length} users in setup.`)
-  return splitData
+    users.push(user)
+  }
+  return users
 }
 
 export default async function testDataPOC(splitData: RawData[]): Promise<void> {

@@ -92,9 +92,9 @@ export class S3Client {
   ): {
     key: string
     lastModified: number
-    etag: string
     size: number
-    storageClass: string | Uint8Array | null
+    storageClass: storageClass
+    data: string | Uint8Array | null
   }
 
   /**
@@ -126,8 +126,19 @@ export class S3Client {
   ): Promise<{
     key: string
     lastModified: number
-    etag: string
     size: number
-    storageClass: string | Uint8Array | null
+    storageClass: storageClass
+    data: string | Uint8Array | null
   }>
+}
+
+export enum storageClass {
+  STANDARD,
+  REDUCED_REDUNDANCY,
+  GLACIER,
+  STANDARD_IA,
+  INTELLIGENT_TIERING,
+  DEEP_ARCHIVE,
+  OUTPOSTS,
+  GLACIER_IR
 }

@@ -48,8 +48,8 @@ export const options: Options = {
 }
 
 const bucketDetails = {
-  bucketName: getEnv('TICF_RAWDATA_S3_TEST_BUCKET'),
-  fileName: getEnv('TICF_RAWDATA_TEST_FILE')
+  bucketName: getEnv('TICF_RAW_DATA_S3_TEST_BUCKET'),
+  fileName: getEnv('TICF_RAW_DATA_TEST_FILE')
 }
 
 const env = {

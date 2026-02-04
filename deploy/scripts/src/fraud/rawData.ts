@@ -57,14 +57,6 @@ const env = {
   rawDataApiURL: getEnv('TiCF_RAW_DATA_URL')
 }
 
-/* const rawDataApiTestData = {
-  requestOriginator: getEnv('TiCF_RAWDATA_REQ_ORIGIN'),
-  subjectId: getEnv('TiCF_RAWDATA_SUB_ID'),
-  requestType: getEnv('TiCF_RAWDATA_REQ_TYPE'),
-  requestFieldName: getEnv('TiCF_RAWDATA_REQ_FIELD_NAME'),
-  requestFieldValue: getEnv('TiCF_RAWDATA_REQ_FIELD_VALUE')
-}*/
-
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
 const awsConfig = new AWSConfig({
   region: getEnv('AWS_REGION'),

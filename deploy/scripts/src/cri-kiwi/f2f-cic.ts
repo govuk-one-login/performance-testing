@@ -282,7 +282,7 @@ export function CIC(): void {
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: client_assertion,
         code: codeUrl,
-        redirect_uri: env.CIC.ipvStub + '/redirect'
+        redirect_uri: env.CIC.ipvStub + '/credential-issuer/callback?id=claimedIdentity'
       }),
     { isStatusCode200, ...pageContentCheck('access_token') }
   )

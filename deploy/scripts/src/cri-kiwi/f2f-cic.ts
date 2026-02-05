@@ -109,6 +109,10 @@ const profiles: ProfileList = {
   perf006Iteration8PeakTest: {
     ...createI4PeakTestSignUpScenario('FaceToFace', 4, 42, 5),
     ...createI4PeakTestSignUpScenario('CIC', 4, 21, 5)
+  },
+  perf006Iteration8SpikeTest: {
+    ...createI3SpikeSignUpScenario('FaceToFace', 16, 42, 17),
+    ...createI3SpikeSignUpScenario('CIC', 16, 21, 17)
   }
 }
 
@@ -278,7 +282,7 @@ export function CIC(): void {
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: client_assertion,
         code: codeUrl,
-        redirect_uri: env.CIC.ipvStub + '/redirect'
+        redirect_uri: env.CIC.ipvStub + '/credential-issuer/callback?id=claimedIdentity'
       }),
     { isStatusCode200, ...pageContentCheck('access_token') }
   )

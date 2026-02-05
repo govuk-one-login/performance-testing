@@ -19,7 +19,7 @@ FROM golang:1.25-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
-  && xk6 build v1.4.2 --with github.com/LeonAdato/xk6-output-statsd@v0.2.1 --output /k6
+  && xk6 build v1.5.0 --with github.com/LeonAdato/xk6-output-statsd@v0.2.1 --output /k6
 
 # -----------------------
 # OpenTelemetry Collector
@@ -30,7 +30,7 @@ COPY otel-config-template.yaml /etc/otelcol/config-template.yaml
 # ---
 # Run
 # ---
-FROM grafana/k6:1.4.2
+FROM grafana/k6:1.5.0
 COPY --from=k6-build /k6 /usr/bin/k6
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true

@@ -74,7 +74,7 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignUpScenario('BAV', 2, 24, 3)
   },
   perf006Iteration8SpikeTest: {
-    ...createI3SpikeSignUpScenario('BAV', 60, 24, 7)
+    ...createI3SpikeSignUpScenario('BAV', 6, 24, 7)
   }
 }
 

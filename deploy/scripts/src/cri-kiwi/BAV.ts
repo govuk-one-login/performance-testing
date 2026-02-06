@@ -72,6 +72,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration7PeakTest: {
     ...createI4PeakTestSignUpScenario('BAV', 2, 24, 3)
+  },
+  perf006Iteration8SpikeTest: {
+    ...createI3SpikeSignUpScenario('BAV', 6, 24, 7)
   }
 }
 
@@ -197,7 +200,7 @@ export function BAV(): void {
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: client_assertion,
         code: codeUrl,
-        redirect_uri: env.BAV.ipvStub + '/redirect?id=bav'
+        redirect_uri: env.BAV.ipvStub + '/credential-issuer/callback?id=bav'
       }),
     { isStatusCode200, ...pageContentCheck('access_token') }
   )

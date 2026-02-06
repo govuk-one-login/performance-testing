@@ -27,6 +27,9 @@ const profiles: ProfileList = {
   stress: {
     ...createScenario('kbv', LoadProfile.full, 14)
   },
+  spikeSudden: {
+    ...createScenario('kbv', LoadProfile.spikeSudden, 100, 3)
+  },
   lowVolumePERF007Test: {
     kbv: {
       executor: 'ramping-arrival-rate',
@@ -138,11 +141,13 @@ const kbvAnswersOBJ = {
 export function kbv(): void {
   const groups = groupMap.kbv
   let res: Response
+
   interface KbvAnswers {
     kbvAns1: string
     kbvAns2: string
     kbvAns3: string
   }
+
   const kbvAnsJSON: KbvAnswers = JSON.parse(kbvAnswersOBJ.kbvAnswers)
   iterationsStarted.add(1)
 

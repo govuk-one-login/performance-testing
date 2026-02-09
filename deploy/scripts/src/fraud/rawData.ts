@@ -1,4 +1,5 @@
 import { type Options } from 'k6/options'
+import exec from 'k6/execution'
 import {
   selectProfile,
   type ProfileList,
@@ -48,12 +49,12 @@ export const options: Options = {
 }
 
 const bucketDetails = {
-  bucketName: getEnv('TICF_RAW_DATA_S3_TEST_BUCKET'),
-  fileName: getEnv('TICF_RAW_DATA_TEST_FILE')
+  bucketName: getEnv('TiCF_RAW_DATA_S3_TEST_BUCKET'),
+  fileName: getEnv('TiCF_RAW_DATA_TEST_FILE')
 }
 
 const env = {
-  envName: getEnv('ENVIRONMENT'),
+  envName: getEnv('ENVIRONMENT').toLocaleLowerCase(),
   rawDataApiURL: getEnv('TiCF_RAW_DATA_URL')
 }
 
@@ -80,9 +81,17 @@ export async function setup(): Promise<RawData[]> {
   const testFileKey = bucketDetails.fileName
   const object = await s3.getObject(testBucketName, testFileKey)
   const testDataContent = JSON.stringify(object)
+  const startIndex = testDataContent.indexOf('requestOriginator')
+  if (startIndex === -1) {
+    console.error('requestOriginator header not found in the file')
+    return []
+  }
 
   // Better handling of the data extraction and splitting
-  const cleanedContent = testDataContent.slice(118, -2)
+  const cleanedContent = testDataContent
+    .substring(startIndex)
+    .replace(/\\r\\n"$/, '')
+    .replace(/"$/, '')
   const splitData = cleanedContent.split('\\r\\n').filter(line => line.trim() !== '')
 
   if (splitData.length === 0) {
@@ -150,13 +159,8 @@ export async function setup(): Promise<RawData[]> {
 }
 
 export function rawDataApi(users: RawData[]): void {
-  const userIndex: number = __VU % users.length
+  const userIndex: number = exec.scenario.iterationInTest % users.length
   const user: RawData = users[userIndex]
-  console.log(`VU ${__VU} using requestField: ${user.requestOriginator}`)
-  console.log(`VU ${__VU} using subjectID: ${user.subjectId}`)
-  console.log(`VU ${__VU} using requestType: ${user.requestType}`)
-  console.log(`VU ${__VU} using requestFieldName: ${user.requestFieldName}`)
-  console.log(`VU ${__VU} using requestFieldValue: ${user.requestFieldValue}`)
   const groups = groupMap.rawDataApi
   const rawDataRequestBody = JSON.stringify({
     requestOriginator: user.requestOriginator,

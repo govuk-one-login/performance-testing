@@ -1,4 +1,5 @@
 import { type Options } from 'k6/options'
+import exec from 'k6/execution'
 import {
   selectProfile,
   type ProfileList,
@@ -48,12 +49,12 @@ export const options: Options = {
 }
 
 const bucketDetails = {
-  bucketName: getEnv('TICF_RAW_DATA_S3_TEST_BUCKET'),
-  fileName: getEnv('TICF_RAW_DATA_TEST_FILE')
+  bucketName: getEnv('TiCF_RAW_DATA_S3_TEST_BUCKET'),
+  fileName: getEnv('TiCF_RAW_DATA_TEST_FILE')
 }
 
 const env = {
-  envName: getEnv('ENVIRONMENT'),
+  envName: getEnv('ENVIRONMENT').toLocaleLowerCase(),
   rawDataApiURL: getEnv('TiCF_RAW_DATA_URL')
 }
 
@@ -80,35 +81,86 @@ export async function setup(): Promise<RawData[]> {
   const testFileKey = bucketDetails.fileName
   const object = await s3.getObject(testBucketName, testFileKey)
   const testDataContent = JSON.stringify(object)
-  console.log(testDataContent)
-  const splitData = testDataContent.slice(117, -2).split('\\r\\n')
-  const headers = splitData[0].split(',')
+  const startIndex = testDataContent.indexOf('requestOriginator')
+  if (startIndex === -1) {
+    console.error('requestOriginator header not found in the file')
+    return []
+  }
+
+  // Better handling of the data extraction and splitting
+  const cleanedContent = testDataContent
+    .substring(startIndex)
+    .replace(/\\r\\n"$/, '')
+    .replace(/"$/, '')
+  const splitData = cleanedContent.split('\\r\\n').filter(line => line.trim() !== '')
+
+  if (splitData.length === 0) {
+    console.error('No data found in the file')
+    return []
+  }
+  const headers = splitData[0].split(',').map(header => header.trim())
   const users: RawData[] = []
 
+  // Add validation for required headers
+  const requiredHeaders = ['requestOriginator', 'subjectId', 'requestType', 'requestFieldName', 'requestFieldValue']
+  const missingHeaders = requiredHeaders.filter(header => !headers.includes(header))
+
+  if (missingHeaders.length > 0) {
+    console.error(`Missing required headers: ${missingHeaders.join(', ')}`)
+    return []
+  }
+
   for (let i = 1; i < splitData.length; i++) {
-    if (splitData[i].trim() === '') continue // Skip empty lines
-    const values = splitData[i].split(',')
-    // Create a User object, ensuring properties match the interface
-    const user: RawData = {
-      requestOriginator: values[headers.indexOf('requestOriginator')].trim(),
-      subjectId: values[headers.indexOf('subjectId')].trim(),
-      requestType: values[headers.indexOf('requestType')].trim(),
-      requestFieldName: values[headers.indexOf('requestFieldName')].trim(),
-      requestFieldValue: values[headers.indexOf('requestFieldValue')].trim()
+    const line = splitData[i].trim()
+    if (line === '') continue // Skip empty lines
+
+    const values = line.split(',').map(value => value.trim())
+
+    // Add validation to ensure we have enough values
+    if (values.length < headers.length) {
+      console.warn(`Skipping line ${i}: insufficient data - expected ${headers.length} values, got ${values.length}`)
+      continue
     }
+
+    // Add safe index access with fallback values
+    const getValueByHeader = (headerName: string): string => {
+      const index = headers.indexOf(headerName)
+      return index !== -1 && values[index] ? values[index].trim() : ''
+    }
+
+    const user: RawData = {
+      requestOriginator: getValueByHeader('requestOriginator'),
+      subjectId: getValueByHeader('subjectId'),
+      requestType: getValueByHeader('requestType'),
+      requestFieldName: getValueByHeader('requestFieldName'),
+      requestFieldValue: getValueByHeader('requestFieldValue')
+    }
+
+    // Validate that required fields are not empty
+    if (
+      !user.requestOriginator ||
+      !user.subjectId ||
+      !user.requestType ||
+      !user.requestFieldName ||
+      !user.requestFieldValue
+    ) {
+      console.warn(`Skipping line ${i}: missing required field values`)
+      continue
+    }
+
     users.push(user)
   }
+
+  if (users.length === 0) {
+    console.error('No valid user data found')
+  }
+
   return users
 }
 
 export function rawDataApi(users: RawData[]): void {
-  const userIndex: number = __VU % users.length
+  const userIndex: number = exec.scenario.iterationInTest % users.length
   const user: RawData = users[userIndex]
-  console.log(`VU ${__VU} using requestField: ${user.requestOriginator}`)
-  console.log(`VU ${__VU} using subjectID: ${user.subjectId}`)
-  console.log(`VU ${__VU} using requestType: ${user.requestType}`)
-  console.log(`VU ${__VU} using requestFieldName: ${user.requestFieldName}`)
-  console.log(`VU ${__VU} using requestFieldValue: ${user.requestFieldValue}`)
   const groups = groupMap.rawDataApi
   const rawDataRequestBody = JSON.stringify({
     requestOriginator: user.requestOriginator,

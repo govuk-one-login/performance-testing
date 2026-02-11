@@ -97,6 +97,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration8PeakTest: {
     ...createI4PeakTestSignInScenario('sendRegularEventWithEnrichment', 3654, 3, 171)
+  },
+  perf006Iteration8SpikeTest: {
+    ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 7135, 3, 631)
   }
 }
 

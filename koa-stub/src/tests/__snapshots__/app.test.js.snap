@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`Tests against the OIDC Servce The OIDC flow works 1`] = `
+exports[`Tests against the OIDC Service The OIDC flow works 1`] = `
 {
   "sub": "johndoe",
 }

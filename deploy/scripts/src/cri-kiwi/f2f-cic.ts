@@ -757,7 +757,7 @@ export function FaceToFace(): void {
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: client_assertion,
         code: codeUrl,
-        redirect_uri: env.F2F.ipvStub + '/redirect?id=f2f'
+        redirect_uri: env.F2F.ipvStub + '/credential-issuer/callback?id=f2f'
       }),
     { isStatusCode200, ...pageContentCheck('access_token') }
   )

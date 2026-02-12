@@ -62,7 +62,7 @@ beforeAll(async () => {
   await new Promise((resolve) => setTimeout(resolve, delay));
 });
 
-describe("Tests against the OIDC Servce", () => {
+describe("Tests against the OIDC Service", () => {
   test("The OIDC flow works", async () => {
     const url = `${app_url}/start`;
     const response = await client.get(url, { withCredentials: true });
@@ -87,8 +87,8 @@ describe("Tests against the OIDC Service with errors", () => {
     expect(response.status).toBe(200);
     expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
     expect(spyConsole).toHaveBeenCalledTimes(1);
-    expect(spyConsole).toBeCalledWith(
-      "Request to userinfo failed due to OPError: invalid_token"
+    expect(spyConsole).toHaveBeenCalledWith(
+      "Request to userinfo failed due to OPError: invalid_token",
     );
     expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
     expect(response.data).toMatchSnapshot();
@@ -117,8 +117,8 @@ describe("Tests against the OIDC Service with errors", () => {
 
     expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
     expect(spyConsole).toHaveBeenCalledTimes(3);
-    expect(spyConsole).toBeCalledWith(
-      "Request to userinfo failed due to OPError: invalid_token"
+    expect(spyConsole).toHaveBeenCalledWith(
+      "Request to userinfo failed due to OPError: invalid_token",
     );
     expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
   });

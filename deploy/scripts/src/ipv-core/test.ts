@@ -439,6 +439,7 @@ const groupMap = {
     'B01_Identity_11_FraudDataContinue',
     'B01_Identity_11_FraudDataContinue::01_FraudStub',
     'B01_Identity_11_FraudDataContinue::02_CoreCall',
+    'B01_Identity_11a_PersonalIndependencePayment',
     'B01_Identity_12_PreKBVTransition',
     'B01_Identity_12_PreKBVTransition::01_CoreCall',
     'B01_Identity_12_PreKBVTransition::02_KBVStub',
@@ -759,17 +760,29 @@ export function identity(stubOnly: boolean = false): void {
     // 02_CoreCall
     res = timeGroup(groups[24].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Answer security questions')
+      ...pageContentCheck('Tell us if you get Personal Independence Payment (PIP)')
     })
   })
 
   sleepBetween(0.5, 1)
 
+  // B01_Identity_11a_PersonalIndependencePayment
+  res = timeGroup(
+    groups[25],
+    () =>
+      res.submitForm({
+        fields: { journey: 'end' }
+      }),
+    { isStatusCode200, ...pageContentCheck('Answer security questions') }
+  )
+
+  sleepBetween(0.5, 1)
+
   // B01_Identity_12_PreKBVTransition
-  timeGroup(groups[25], () => {
+  timeGroup(groups[26], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[26].split('::')[1],
+      groups[27].split('::')[1],
       () =>
         res.submitForm({
           params: { redirects: 0 }
@@ -777,7 +790,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_KBVStub
-    res = timeGroup(groups[27].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[28].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Knowledge Based Verification (Stub)')
     })
@@ -786,10 +799,10 @@ export function identity(stubOnly: boolean = false): void {
   sleepBetween(0.5, 1)
 
   // B01_Identity_13_KBVDataContinue
-  timeGroup(groups[28], () => {
+  timeGroup(groups[29], () => {
     // 01_KBVStub
     res = timeGroup(
-      groups[29].split('::')[1],
+      groups[30].split('::')[1],
       () =>
         res.submitForm({
           fields: {
@@ -801,7 +814,7 @@ export function identity(stubOnly: boolean = false): void {
       { isStatusCode302 }
     )
     // 02_CoreCall
-    res = timeGroup(groups[30].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[31].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Continue to the service you need to use')
     })
@@ -810,19 +823,16 @@ export function identity(stubOnly: boolean = false): void {
   sleepBetween(0.5, 1)
 
   // B01_Identity_14_ContinueSuccessPage
-  timeGroup(groups[31], () => {
+  timeGroup(groups[32], () => {
     // 01_CoreCall
     res = timeGroup(
-      groups[32].split('::')[1],
-      () =>
-        res.submitForm({
-          params: { redirects: 0 }
-        }),
+      groups[33].split('::')[1],
+      () => http.get(env.ipvCoreURL + '/ipv/journey/page-ipv-success/next', { redirects: 0 }),
       { isStatusCode302 }
     )
     // 02_OrchStub
     res = timeGroup(
-      groups[33].split('::')[1],
+      groups[34].split('::')[1],
       () =>
         http.get(res.headers.Location, {
           headers: { Authorization: `Basic ${encodedCredentials}` }

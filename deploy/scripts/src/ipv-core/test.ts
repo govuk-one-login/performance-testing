@@ -841,6 +841,7 @@ export function identity(stubOnly: boolean = false): void {
     )
   })
   iterationsCompleted.add(1)
+  console.log(userId, testEmail)
 }
 
 export function idReuse(): void {
@@ -848,7 +849,7 @@ export function idReuse(): void {
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
   const encodedCredentials = encoding.b64encode(credentials)
-  const idReuseUserID = csvData[execution.vu.idInTest - 1]
+  const idReuseUserID = csvData[execution.scenario.iterationInTest % csvData.length]
   iterationsStarted.add(1)
   const signInJourneyId = uuidv4()
 
@@ -882,12 +883,7 @@ export function idReuse(): void {
     // 01_CoreCall
     res = timeGroup(
       groups[4].split('::')[1],
-      () =>
-        res.submitForm({
-          fields: { submitButton: '' },
-          params: { redirects: 0 },
-          submitSelector: '#continue'
-        }),
+      () => http.get(env.ipvCoreURL + '/ipv/journey/page-ipv-reuse/next', { redirects: 0 }),
       { isStatusCode302 }
     )
     // 02_OrchStub

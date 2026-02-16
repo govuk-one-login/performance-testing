@@ -439,16 +439,16 @@ const groupMap = {
     'B01_Identity_11_FraudDataContinue',
     'B01_Identity_11_FraudDataContinue::01_FraudStub',
     'B01_Identity_11_FraudDataContinue::02_CoreCall',
-    'B01_Identity_11a_PersonalIndependencePayment',
-    'B01_Identity_12_PreKBVTransition',
-    'B01_Identity_12_PreKBVTransition::01_CoreCall',
-    'B01_Identity_12_PreKBVTransition::02_KBVStub',
-    'B01_Identity_13_KBVDataContinue',
-    'B01_Identity_13_KBVDataContinue::01_KBVStub',
-    'B01_Identity_13_KBVDataContinue::02_CoreCall',
-    'B01_Identity_14_ContinueSuccessPage',
-    'B01_Identity_14_ContinueSuccessPage::01_CoreCall',
-    'B01_Identity_14_ContinueSuccessPage::02_OrchStub'
+    'B01_Identity_12_PersonalIndependencePayment',
+    'B01_Identity_13_PreKBVTransition',
+    'B01_Identity_13_PreKBVTransition::01_CoreCall',
+    'B01_Identity_13_PreKBVTransition::02_KBVStub',
+    'B01_Identity_14_KBVDataContinue',
+    'B01_Identity_14_KBVDataContinue::01_KBVStub',
+    'B01_Identity_14_KBVDataContinue::02_CoreCall',
+    'B01_Identity_15_ContinueSuccessPage',
+    'B01_Identity_15_ContinueSuccessPage::01_CoreCall',
+    'B01_Identity_15_ContinueSuccessPage::02_OrchStub'
   ],
   idReuse: [
     'B02_IDReuse_01_LoginToCore',
@@ -766,7 +766,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_11a_PersonalIndependencePayment
+  // B01_Identity_12_PersonalIndependencePayment
   res = timeGroup(
     groups[25],
     () =>
@@ -778,7 +778,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_12_PreKBVTransition
+  // B01_Identity_13_PreKBVTransition
   timeGroup(groups[26], () => {
     // 01_CoreCall
     res = timeGroup(
@@ -798,7 +798,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_13_KBVDataContinue
+  // B01_Identity_14_KBVDataContinue
   timeGroup(groups[29], () => {
     // 01_KBVStub
     res = timeGroup(
@@ -822,7 +822,7 @@ export function identity(stubOnly: boolean = false): void {
 
   sleepBetween(0.5, 1)
 
-  // B01_Identity_14_ContinueSuccessPage
+  // B01_Identity_15_ContinueSuccessPage
   timeGroup(groups[32], () => {
     // 01_CoreCall
     res = timeGroup(

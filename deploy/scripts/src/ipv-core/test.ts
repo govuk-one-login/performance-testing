@@ -841,7 +841,6 @@ export function identity(stubOnly: boolean = false): void {
     )
   })
   iterationsCompleted.add(1)
-  console.log(userId, testEmail)
 }
 
 export function idReuse(): void {

@@ -1,9 +1,9 @@
 # Multi-Scenario Performance Report Generator
 
 **Created:** 03-Dec-2025
-**Last Updated:** 21-Jan-2026
+**Last Updated:** 24-Feb-2026
 
-**Version:** 4.0
+**Version:** 4.1
 
 ---
 
@@ -28,7 +28,11 @@ Advanced performance reporting tool for k6 test results with multi-scenario supp
 ## Quick Start
 
 ### Prerequisites
-- Python 3 with `openpyxl`: `pip3 install openpyxl`
+
+**First-time setup?** See [INSTALLATION_GUIDE_MACOS.md](INSTALLATION_GUIDE_MACOS.md) for detailed installation instructions.
+
+**Required:**
+- Python 3.7+ with libraries: `pip3 install openpyxl pandas matplotlib`
 - `jq`, `awk`, `bc` (pre-installed on macOS/Linux)
 - k6 test results file (results.gz)
 
@@ -50,9 +54,9 @@ Enter Steady-State Start Time (HH:MM:SS): 17:43:10
 Enter Steady-State End Time (HH:MM:SS): 18:13:10
 ```
 
-**Prompt 2: Detailed Analysis** (after SLA breach detection)
+**Prompt 2: Response Time Graphs** (after SLA breach detection)
 ```
-Generate detailed transaction analysis? (yes/no) [no]: yes
+Generate response time graphs? (yes/no) [no]: yes
 ```
 - `no` → Quick summary only (CSV, Excel, JSON)
 - `yes` → Full analysis with transaction CSVs and graphs
@@ -88,7 +92,6 @@ All outputs saved in: `advanced-reporting/analysis_YYYY-MM-DD-HH-MM-SS/`
   - Response Time (steady-state & full duration percentiles)
   - Journey Error Rate
   - HTTP Requests by status
-  - SLA Breach Graphs (if breaches detected)
 - `perf_data_*.json` - JSON data for programmatic access
 
 ### Generated Only if Detailed Analysis = Yes
@@ -113,6 +116,8 @@ deploy/reporting/
 └── advanced-reporting/            # Advanced reporting
     ├── multi-scenario-performance-report-generator.sh
     ├── generate_excel_report.py
+    ├── INSTALLATION_GUIDE_MACOS.md
+    ├── MULTI-SCENARIO-PERF-REPORT-GEN-README.md
     └── analysis_YYYY-MM-DD-HH-MM-SS/  # Output folders
         ├── SS_RT_*.csv
         ├── Performance_Report_*.xlsx
@@ -137,8 +142,14 @@ deploy/reporting/
 - Use absolute path: `./multi-scenario-performance-report-generator.sh /full/path/to/results.gz`
 
 **Error: "openpyxl not installed"**
-- Install: `pip3 install openpyxl`
-- Script will still generate CSV and JSON files
+- Install: `pip3 install openpyxl pandas matplotlib`
+- If you get "externally-managed-environment" error, use virtual environment:
+  ```bash
+  python3 -m venv .venv
+  source .venv/bin/activate
+  pip install openpyxl pandas matplotlib
+  ```
+- Script will still generate CSV and JSON files without Python libraries
 
 **No data in steady-state window**
 - Verify scenario names match exactly (case-sensitive)
@@ -149,6 +160,10 @@ deploy/reporting/
 - Fixed in v3.0 using temp files and system sort
 - Handles transactions with any number of occurrences
 
+**Error: "Invalid frequency: 1S" (pandas)**
+- Fixed in v4.1 - pandas 2.0+ requires lowercase frequency strings
+- Update to latest version of the script if you encounter this error
+
 ---
 
 ## Tips
@@ -157,10 +172,16 @@ deploy/reporting/
 2. **Investigation**: Answer "yes" + "breach" to focus on problematic transactions
 3. **Comprehensive**: Answer "yes" + "all" for complete analysis (slower)
 4. **Cleanup**: Old output folders can be deleted manually to save space
+5. **Virtual Environment**: If using venv, activate it before running: `source .venv/bin/activate`
 
 ---
 
 ## Version History
+
+**v4.1 (Current)**
+- Fixed pandas resample frequency from '1S' to '1s' for compatibility with pandas 2.0+
+- Updated installation guide with virtual environment troubleshooting
+- Added reference link to installation guide in README
 
 **v4.0 (21-Jan-2026)**
 - Added folder inside report i.e. Advanced-reporting to keep it separate from the existing reporting utility.
@@ -168,7 +189,7 @@ deploy/reporting/
 **v3.0 (22-Dec-2025)**
 - Added SLA breach detection and automated graph generation
 - User-selectable detailed analysis mode
-- Excel report with SLA breach graphs tab
+- Excel report with three tabs (Response Time, Journey Error Rate, HTTP Requests)
 
 **v2.0 (22-Dec-2025)**
 - Fixed P95/P99 calculation for transactions with >200K records

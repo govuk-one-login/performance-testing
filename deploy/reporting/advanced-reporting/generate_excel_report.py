@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate Excel report from performance test data
-Usage: python3 generate_excel_report.py <timestamp> <scenario1> <scenario2> ...
+Usage: python3 generate_excel_report.py <timestamp> <data_file>
 """
 
 import sys
@@ -11,8 +11,7 @@ from pathlib import Path
 
 try:
     from openpyxl import Workbook
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    from openpyxl.drawing.image import Image
+    from openpyxl.styles import Font, PatternFill
 except ImportError:
     print("Error: openpyxl not installed. Install with: pip3 install openpyxl")
     sys.exit(1)
@@ -31,7 +30,6 @@ def create_excel_report(timestamp, scenarios, data_file):
     create_response_time_tab(wb, scenarios, data)
     create_journey_error_tab(wb, data)
     create_http_requests_tab(wb, scenarios, data)
-    create_sla_breach_graphs_tab(wb)
 
     # Save workbook
     filename = f"Performance_Report_{timestamp}.xlsx"
@@ -221,44 +219,6 @@ def create_http_requests_tab(wb, scenarios, data):
     ws.column_dimensions['A'].width = 70
     ws.column_dimensions['B'].width = 15
     ws.column_dimensions['C'].width = 15
-
-
-def create_sla_breach_graphs_tab(wb):
-    """Create SLA Breach Graphs tab with embedded PNG images"""
-    ws = wb.create_sheet("SLA Breach Graphs")
-
-    # Find all PNG files matching breach pattern
-    png_files = list(Path('.').glob('__*.png'))
-
-    if not png_files:
-        ws.cell(1, 1, "No SLA breaches detected").font = Font(bold=True, size=14)
-        return
-
-    ws.cell(1, 1, "SLA BREACH ANALYSIS - RESPONSE TIME GRAPHS").font = Font(bold=True, size=14)
-    ws.cell(2, 1, "P95 SLA: 1000ms | P99 SLA: 2500ms").font = Font(size=11, color="FF0000")
-
-    row = 4
-    for png_file in sorted(png_files):
-        # Transaction name from filename
-        txn_name = png_file.stem.replace('_', ':')
-
-        ws.cell(row, 1, txn_name).font = Font(bold=True, size=12)
-        row += 1
-
-        # Embed image
-        try:
-            img = Image(str(png_file))
-            # Scale image to fit (width ~1000 pixels)
-            img.width = 1000
-            img.height = int(img.height * (1000 / img.width))
-            ws.add_image(img, f'A{row}')
-            # Move to next position (image height in rows ~35)
-            row += 35
-        except Exception as e:
-            ws.cell(row, 1, f"Error loading image: {e}")
-            row += 2
-
-    ws.column_dimensions['A'].width = 150
 
 
 if __name__ == "__main__":

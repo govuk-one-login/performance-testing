@@ -922,7 +922,7 @@ for txn in transactions:
         df['timestamp'] = pd.to_datetime(df['timestamp'])
 
         # Resample to 1-second intervals
-        df = df.set_index('timestamp').resample('1S')['duration'].mean().dropna().reset_index()
+        df = df.set_index('timestamp').resample('1s')['duration'].mean().dropna().reset_index()
 
         if len(df) == 0:
             continue

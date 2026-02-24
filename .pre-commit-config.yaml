@@ -55,4 +55,4 @@ repos:
     hooks:
       - id: beautysh
         language_version: "python3.11"
-        additional_dependencies: ["setuptools"]
+        additional_dependencies: ["setuptools>=65.0.0"]

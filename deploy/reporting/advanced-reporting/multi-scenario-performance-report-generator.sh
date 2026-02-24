@@ -107,7 +107,7 @@ elif .metric=="iterations_completed" and .data.value == 1 then
 elif .metric=="http_reqs" and .data.value == 1 then
     [(.data.time | split("T")[1] | split(".")[0]), "http_req", .data.tags.group, .data.tags.scenario, .data.tags.status] | @tsv
 else empty end' | \
-    awk -F'\t' -v mode="$MODE" -v scenario_times="$SCENARIO_TIMES" -v single_start="$START_TIME" -v single_end="$END_TIME" '
+awk -F'\t' -v mode="$MODE" -v scenario_times="$SCENARIO_TIMES" -v single_start="$START_TIME" -v single_end="$END_TIME" '
 # ============================================================================
 # AWK DATA PROCESSING SECTION
 # ============================================================================

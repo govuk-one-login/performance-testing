@@ -7,6 +7,7 @@ Usage: python3 generate_excel_report.py <timestamp> <data_file>
 import sys
 import csv
 import json
+import re
 from pathlib import Path
 
 try:
@@ -15,6 +16,12 @@ try:
 except ImportError:
     print("Error: openpyxl not installed. Install with: pip3 install openpyxl")
     sys.exit(1)
+
+
+def sanitize_filename(filename):
+    """Sanitize filename to prevent path traversal attacks"""
+    # Remove any path separators and parent directory references
+    return re.sub(r'[/\\]|\.\.|\0', '', str(filename))
 
 
 def create_excel_report(timestamp, scenarios, data_file):
@@ -94,7 +101,9 @@ def create_response_time_tab(wb, scenarios, data):
         row += 1
 
         # Read CSV file for this scenario
-        csv_file = f"SS_RT_{scenario}_{data['timestamp']}.csv"
+        # Sanitize timestamp from data to prevent path traversal
+        safe_timestamp = sanitize_filename(data['timestamp'])
+        csv_file = f"SS_RT_{scenario}_{safe_timestamp}.csv"
         if Path(csv_file).exists():
             with open(csv_file, 'r') as f:
                 reader = csv.DictReader(f)

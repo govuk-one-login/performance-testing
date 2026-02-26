@@ -88,7 +88,8 @@ export function transitGateway(): void {
 
   //  B01_TransitGateway_01_InvokeLambda
   timeGroup(groups[0], () => http.post(signedRequest.url, lambdaPayload, { headers: signedRequest.headers }), {
-    isStatusCode200
+    isStatusCode200,
+    ...pageContentCheck(env.targetUrl)
   })
 
   iterationsCompleted.add(1)

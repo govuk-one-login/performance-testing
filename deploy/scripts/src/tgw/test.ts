@@ -10,7 +10,7 @@ import { type Options } from 'k6/options'
 import http from 'k6/http'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
 import { timeGroup } from '../common/utils/request/timing'
-import { isStatusCode200, pageContentCheck } from '../common/utils/checks/assertions'
+import { isStatusCode200 } from '../common/utils/checks/assertions'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { AssumeRoleOutput } from '../common/utils/aws/types'
 import { getThresholds } from '../common/utils/config/thresholds'
@@ -63,14 +63,15 @@ const signer = new SignatureV4({
 })
 
 const env = {
-  lambdaUrl: getEnv('PLATFORM_TGW_LAMBDA_URL')
+  lambdaUrl: getEnv('PLATFORM_TGW_LAMBDA_URL'),
+  targetUrl: getEnv('PLATFORM_TGW_TARGET_URL')
 }
 
 export function transitGateway(): void {
   const groups = groupMap.transitGateway
   const lambdaPayload = JSON.stringify({
     iterations: 1,
-    url: 'https://signin.account.gov.uk/sign-in-or-create'
+    url: env.targetUrl
   })
 
   const request = {
@@ -87,8 +88,7 @@ export function transitGateway(): void {
 
   //  B01_TransitGateway_01_InvokeLambda
   timeGroup(groups[0], () => http.post(signedRequest.url, lambdaPayload, { headers: signedRequest.headers }), {
-    isStatusCode200,
-    ...pageContentCheck('sign-in-or-create')
+    isStatusCode200
   })
 
   iterationsCompleted.add(1)

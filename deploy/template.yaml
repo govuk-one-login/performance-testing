@@ -639,6 +639,7 @@ Resources:
               MOBILE_STS_DEV_STS_MOCK_CLIENT_BASE_URL: "/perfTest/mobile/sts/dev/mockClientBaseUrl"
               MOBILE_STS_DEV_SQS_QUEUE: "/perfTest/mobile/sts/dev/sqsQueueUrl"
               PLATFORM_TGW_LAMBDA_URL: "/perfTest/platform/transitGateway/dev/testLambdaUrl"
+              PLATFORM_TGW_TARGET_URL: "/perfTest/platform/transitGateway/dev/testTargetUrl"
               SLACK_OAUTH_TOKEN: "/perfTest/slack/OAuthToken"
               STATUS_LIST_CLIENT_ID_DEV: "/perfTest/statusList/dev/clientID"
               STATUS_LIST_MOCK_URL_DEV: "/perfTest/statusList/dev/mockURL"

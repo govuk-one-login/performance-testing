@@ -12,7 +12,7 @@
     "core-js": "^3.48.0",
     "esbuild": "^0.27.3",
     "esbuild-plugin-copy": "^2.1.1",
-    "eslint": "^10.0.0",
+    "eslint": "^10.0.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "glob": "^13.0.3",

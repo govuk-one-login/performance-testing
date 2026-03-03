@@ -120,7 +120,7 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration8SpikeTest: {
-    ...createI3SpikeSignUpScenario('getClientAttestation', 1280, 12, 1281),
+    ...createI3SpikeSignUpScenario('getClientAttestation', 1280, 12, 601),
     ...createI3SpikeSignInScenario('walletCredentialIssuance', 38, 27, 18)
   }
 }

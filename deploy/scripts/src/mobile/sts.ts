@@ -149,7 +149,13 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignUpScenario('authentication', 170, 27, 171),
     ...createI4PeakTestSignInScenario('reauthentication', 16, 27, 8),
     ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 39, 18)
-  }
+  },
+  perf006Iteration8SpikeTest: {
+  ...createI3SpikeSignUpScenario('authentication', 601, 30, 1),
+  ...createI3SpikeSignUpScenario('reauthentication', 4, 30, 13),
+  ...createI3SpikeSignUpScenario('walletCredentialIssuance', 18, 39, 1),
+  ...createI3SpikeSignUpScenario('accountIntervention', 37, 30, 13)
+}
 }
 
 const loadProfile = selectProfile(profiles)

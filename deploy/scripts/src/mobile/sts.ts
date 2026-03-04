@@ -151,10 +151,10 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 39, 18)
   },
   perf006Iteration8SpikeTest: {
-  ...createI3SpikeSignUpScenario('authentication', 601, 30, 1),
-  ...createI3SpikeSignUpScenario('reauthentication', 4, 30, 13),
-  ...createI3SpikeSignUpScenario('walletCredentialIssuance', 18, 39, 1),
-  ...createI3SpikeSignUpScenario('accountIntervention', 37, 30, 13)
+  ...createI3SpikeSignUpScenario('authentication', 60, 36, 601),
+  ...createI3SpikeSignUpScenario('reauthentication', 8, 27, 4),
+  ...createI3SpikeSignUpScenario('walletCredentialIssuance', 38, 39, 18),
+  ...createI3SpikeSignUpScenario('accountIntervention', 80, 15, 37)
 }
 }
 

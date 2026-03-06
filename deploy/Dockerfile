@@ -30,7 +30,7 @@ COPY otel-config-template.yaml /etc/otelcol/config-template.yaml
 # ---
 # Run
 # ---
-FROM grafana/k6:1.5.0
+FROM grafana/k6:1.6.1
 COPY --from=k6-build /k6 /usr/bin/k6
 COPY --from=otel / /otel
 ENV K6_STATSD_ENABLE_TAGS=true

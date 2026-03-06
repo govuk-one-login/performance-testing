@@ -63,14 +63,15 @@ const signer = new SignatureV4({
 })
 
 const env = {
-  lambdaUrl: getEnv('PLATFORM_TGW_LAMBDA_URL')
+  lambdaUrl: getEnv('PLATFORM_TGW_LAMBDA_URL'),
+  targetUrl: getEnv('PLATFORM_TGW_TARGET_URL')
 }
 
 export function transitGateway(): void {
   const groups = groupMap.transitGateway
   const lambdaPayload = JSON.stringify({
     iterations: 1,
-    url: 'https://signin.account.gov.uk/sign-in-or-create'
+    url: env.targetUrl
   })
 
   const request = {
@@ -88,7 +89,7 @@ export function transitGateway(): void {
   //  B01_TransitGateway_01_InvokeLambda
   timeGroup(groups[0], () => http.post(signedRequest.url, lambdaPayload, { headers: signedRequest.headers }), {
     isStatusCode200,
-    ...pageContentCheck('sign-in-or-create')
+    ...pageContentCheck(env.targetUrl)
   })
 
   iterationsCompleted.add(1)

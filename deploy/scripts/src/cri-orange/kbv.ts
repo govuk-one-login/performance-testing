@@ -10,9 +10,7 @@ import {
   createI3SpikeSignUpScenario,
   createI4PeakTestSignUpScenario,
   createStressTestSignUpScenario
-  
-} 
-from '../common/utils/config/load-profiles'
+} from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
@@ -227,7 +225,6 @@ export function kbv(): void {
         ...pageContentCheck('verificationScore&quot;: 2')
       }
     )
-  }
-)
+  })
   iterationsCompleted.add(1)
 }

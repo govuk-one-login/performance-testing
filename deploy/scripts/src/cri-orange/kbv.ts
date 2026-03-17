@@ -8,7 +8,8 @@ import {
   createScenario,
   LoadProfile,
   createI3SpikeSignUpScenario,
-  createI4PeakTestSignUpScenario
+  createI4PeakTestSignUpScenario,
+  createStressTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeGroup } from '../common/utils/request/timing'

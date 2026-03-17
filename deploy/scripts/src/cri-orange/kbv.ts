@@ -227,6 +227,7 @@ export function kbv(): void {
         ...pageContentCheck('verificationScore&quot;: 2')
       }
     )
-  })
+  }
+)
   iterationsCompleted.add(1)
 }

@@ -7,7 +7,9 @@ import {
   createI4PeakTestSignUpScenario,
   createI4PeakTestSignInScenario,
   createI3SpikeSignUpScenario,
-  createI3SpikeSignInScenario
+  createI3SpikeSignInScenario,
+  createStressTestSignUpScenario,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import http from 'k6/http'
 import { SharedArray } from 'k6/data'
@@ -72,6 +74,10 @@ const profiles: ProfileList = {
   perf006Iteration8PeakTest: {
     ...createI4PeakTestSignUpScenario('cimitIDProvingAPIs', 680, 19, 171),
     ...createI4PeakTestSignInScenario('cimitSignInAPI', 126, 6, 58)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestSignUpScenario('cimitIDProvingAPIs', 2520, 19, 631),
+    ...createStressTestSignInScenario('cimitSignInAPI', 250, 6, 115)
   }
 }
 

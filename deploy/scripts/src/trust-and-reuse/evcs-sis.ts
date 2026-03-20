@@ -91,9 +91,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignUpScenario('identity', 630, 11, 631),
-    ...createStressTestSignInScenario('invalidate', 250, 6, 115),
+    ...createStressTestSignInScenario('invalidate', 250, 6, 115, 172),
     ...createStressTestSignUpScenario('updateVC', 630, 7, 631),
-    ...createStressTestSignInScenario('summariseVC', 250, 6, 115)
+    ...createStressTestSignInScenario('summariseVC', 250, 6, 115, 172)
   }
 }
 

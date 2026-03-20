@@ -453,26 +453,34 @@ export function createI3RegressionScenario(
   return list
 }
 
-export function createStressTestSignUpScenario(
+interface StressTestConfig {
+  startRate: number
+  timeUnit: string
+  holdTarget: number
+  vuFactor: number
+}
+
+function createStressTestScenario(
   exec: string,
   target: number,
   iterationDuration: number,
   rampUpDuration: number,
-  phaseDelay: number = 0
+  phaseDelay: number,
+  config: StressTestConfig
 ): ScenarioList {
   const list: ScenarioList = {}
-  const preAllocatedVUs = Math.round(((target / 10) * iterationDuration) / 2)
-  const maxVUs = Math.round((target / 10) * iterationDuration)
+  const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
+  const maxVUs = Math.round(target * config.vuFactor * iterationDuration)
   const step = Math.round(target / 3)
   const phaseRampUp = Math.round(rampUpDuration / 3)
   list[exec] = {
     executor: 'ramping-arrival-rate',
-    startRate: 1,
-    timeUnit: '10s',
+    startRate: config.startRate,
+    timeUnit: config.timeUnit,
     preAllocatedVUs,
     maxVUs,
     stages: [
-      ...(phaseDelay > 0 ? [{ target: 1, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
+      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
       { target: step, duration: `${phaseRampUp}s` }, // Ramp up to 33% target throughput
       { target: step, duration: '10m' }, // Steady state at 33%
       ...(phaseDelay > 0 ? [{ target: step, duration: `${phaseDelay}s` }] : []), // Hold before second ramp
@@ -487,6 +495,21 @@ export function createStressTestSignUpScenario(
   return list
 }
 
+export function createStressTestSignUpScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number,
+  phaseDelay: number = 0
+): ScenarioList {
+  return createStressTestScenario(exec, target, iterationDuration, rampUpDuration, phaseDelay, {
+    startRate: 1,
+    timeUnit: '10s',
+    holdTarget: 1,
+    vuFactor: 0.1
+  })
+}
+
 export function createStressTestSignInScenario(
   exec: string,
   target: number,
@@ -494,31 +517,12 @@ export function createStressTestSignInScenario(
   rampUpDuration: number,
   phaseDelay: number = 0
 ): ScenarioList {
-  const list: ScenarioList = {}
-  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
-  const maxVUs = target * iterationDuration
-  const step = Math.round(target / 3)
-  const phaseRampUp = Math.round(rampUpDuration / 3)
-  list[exec] = {
-    executor: 'ramping-arrival-rate',
+  return createStressTestScenario(exec, target, iterationDuration, rampUpDuration, phaseDelay, {
     startRate: 2,
     timeUnit: '1s',
-    preAllocatedVUs,
-    maxVUs,
-    stages: [
-      ...(phaseDelay > 0 ? [{ target: 2, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
-      { target: step, duration: `${phaseRampUp}s` }, // Ramp up to 33% target throughput
-      { target: step, duration: '10m' }, // Steady state at 33%
-      ...(phaseDelay > 0 ? [{ target: step, duration: `${phaseDelay}s` }] : []), // Hold before second ramp
-      { target: step * 2, duration: `${phaseRampUp}s` }, // Ramp up to 66% target throughput
-      { target: step * 2, duration: '10m' }, // Steady state at 66%
-      ...(phaseDelay > 0 ? [{ target: step * 2, duration: `${phaseDelay}s` }] : []), // Hold before third ramp
-      { target, duration: `${phaseRampUp}s` }, // Ramp up to 100% target throughput
-      { target, duration: '10m' } // Steady state at 100%
-    ],
-    exec
-  }
-  return list
+    holdTarget: 2,
+    vuFactor: 1
+  })
 }
 
 export function createOLHPeakTestScenario(

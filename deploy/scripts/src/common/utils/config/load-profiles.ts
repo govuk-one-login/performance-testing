@@ -457,12 +457,14 @@ export function createStressTestSignUpScenario(
   exec: string,
   target: number,
   iterationDuration: number,
-  rampUpDuration: number
+  rampUpDuration: number,
+  phaseDelay: number = 0
 ): ScenarioList {
   const list: ScenarioList = {}
   const preAllocatedVUs = Math.round(((target / 10) * iterationDuration) / 2)
   const maxVUs = Math.round((target / 10) * iterationDuration)
   const step = Math.round(target / 3)
+  const phaseRampUp = Math.round(rampUpDuration / 3)
   list[exec] = {
     executor: 'ramping-arrival-rate',
     startRate: 1,
@@ -470,11 +472,14 @@ export function createStressTestSignUpScenario(
     preAllocatedVUs,
     maxVUs,
     stages: [
-      { target: step, duration: `${rampUpDuration}s` }, // Ramp up to 33% target throughput
+      ...(phaseDelay > 0 ? [{ target: 1, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
+      { target: step, duration: `${phaseRampUp}s` }, // Ramp up to 33% target throughput
       { target: step, duration: '10m' }, // Steady state at 33%
-      { target: step * 2, duration: `${rampUpDuration}s` }, // Ramp up to 66% target throughput
+      ...(phaseDelay > 0 ? [{ target: step, duration: `${phaseDelay}s` }] : []), // Hold before second ramp
+      { target: step * 2, duration: `${phaseRampUp}s` }, // Ramp up to 66% target throughput
       { target: step * 2, duration: '10m' }, // Steady state at 66%
-      { target, duration: `${rampUpDuration}s` }, // Ramp up to 100% target throughput
+      ...(phaseDelay > 0 ? [{ target: step * 2, duration: `${phaseDelay}s` }] : []), // Hold before third ramp
+      { target, duration: `${phaseRampUp}s` }, // Ramp up to 100% target throughput
       { target, duration: '10m' } // Steady state at 100%
     ],
     exec
@@ -486,12 +491,14 @@ export function createStressTestSignInScenario(
   exec: string,
   target: number,
   iterationDuration: number,
-  rampUpDuration: number
+  rampUpDuration: number,
+  phaseDelay: number = 0
 ): ScenarioList {
   const list: ScenarioList = {}
   const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
   const maxVUs = target * iterationDuration
   const step = Math.round(target / 3)
+  const phaseRampUp = Math.round(rampUpDuration / 3)
   list[exec] = {
     executor: 'ramping-arrival-rate',
     startRate: 2,
@@ -499,11 +506,14 @@ export function createStressTestSignInScenario(
     preAllocatedVUs,
     maxVUs,
     stages: [
-      { target: step, duration: `${rampUpDuration}s` }, // Ramp up to 33% target throughput
+      ...(phaseDelay > 0 ? [{ target: 2, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
+      { target: step, duration: `${phaseRampUp}s` }, // Ramp up to 33% target throughput
       { target: step, duration: '10m' }, // Steady state at 33%
-      { target: step * 2, duration: `${rampUpDuration}s` }, // Ramp up to 66% target throughput
+      ...(phaseDelay > 0 ? [{ target: step, duration: `${phaseDelay}s` }] : []), // Hold before second ramp
+      { target: step * 2, duration: `${phaseRampUp}s` }, // Ramp up to 66% target throughput
       { target: step * 2, duration: '10m' }, // Steady state at 66%
-      { target, duration: `${rampUpDuration}s` }, // Ramp up to 100% target throughput
+      ...(phaseDelay > 0 ? [{ target: step * 2, duration: `${phaseDelay}s` }] : []), // Hold before third ramp
+      { target, duration: `${phaseRampUp}s` }, // Ramp up to 100% target throughput
       { target, duration: '10m' } // Steady state at 100%
     ],
     exec

@@ -80,7 +80,7 @@ const profiles: ProfileList = {
   perf006Iteration8SpikeTest: {
     ...createI3SpikeSignInScenario('spot', 290, 3, 104)
   },
-  stressTest: {
+  perf006Iteration9StressTest: {
     ...createStressTestSignInScenario('spot', 313, 3, 115)
   }
 }

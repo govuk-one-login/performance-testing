@@ -548,3 +548,18 @@ export function createOLHPeakTestScenario(
   }
   return list
 }
+
+export function createStressTestOLHScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number,
+  phaseDelay: number = 0
+): ScenarioList {
+  return createStressTestScenario(exec, target, iterationDuration, rampUpDuration, phaseDelay, {
+    startRate: 2,
+    timeUnit: '120s',
+    holdTarget: 2,
+    vuFactor: 1
+  })
+}

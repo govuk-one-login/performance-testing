@@ -13,7 +13,9 @@ import {
   createI3SpikeOLHScenario,
   createI3SpikeSignInScenario,
   createOLHPeakTestScenario,
-  createI4PeakTestSignInScenario
+  createI4PeakTestSignInScenario,
+  createStressTestOLHScenario,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { timeGroup } from '../common/utils/request/timing'
@@ -419,6 +421,13 @@ const profiles: ProfileList = {
     ...createI3SpikeOLHScenario('changePhone', 12, 24, 1),
     ...createI3SpikeOLHScenario('deleteAccount', 12, 18, 1),
     ...createI3SpikeSignInScenario('landingPage', 22, 9, 11)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestOLHScenario('changeEmail', 3, 24, 1),
+    ...createStressTestOLHScenario('changePassword', 3, 21, 1),
+    ...createStressTestOLHScenario('changePhone', 3, 24, 1),
+    ...createStressTestOLHScenario('deleteAccount', 3, 18, 1),
+    ...createStressTestSignInScenario('landingPage', 24, 6, 12)
   }
 }
 
@@ -929,13 +938,12 @@ export function changePhone(): void {
       res.submitForm({
         formSelector: "form[action='/enter-password?from=security&edit=true&type=changePhoneNumber']",
         fields: {
-          requestType: 'changePhoneNumber',
           password: credentials.currPassword
         }
       }),
     {
       isStatusCode200,
-      ...pageContentCheck('Enter your new mobile phone number')
+      ...pageContentCheck('Enter your new UK mobile phone number')
     }
   )
 

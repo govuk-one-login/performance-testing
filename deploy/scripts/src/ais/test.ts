@@ -7,7 +7,8 @@ import {
   createScenario,
   LoadProfile,
   createI3SpikeSignInScenario,
-  createI4PeakTestSignInScenario
+  createI4PeakTestSignInScenario,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { generatePersistIVRequest, interventionCodes } from './requestGenerator/aisReqGen'
@@ -99,6 +100,10 @@ const profiles: ProfileList = {
   perf006Iteration8SpikeTest: {
     ...createI3SpikeSignInScenario('persistIV', 30, 3, 15),
     ...createI3SpikeSignInScenario('retrieveIV', 681, 3, 104)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestSignInScenario('persistIV', 30, 3, 15, 33),
+    ...createStressTestSignInScenario('retrieveIV', 750, 3, 115)
   }
 }
 

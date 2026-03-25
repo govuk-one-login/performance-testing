@@ -423,10 +423,10 @@ const profiles: ProfileList = {
     ...createI3SpikeSignInScenario('landingPage', 22, 9, 11)
   },
   perf006Iteration9StressTest: {
-    ...createStressTestOLHScenario('changeEmail', 3, 24, 1),
-    ...createStressTestOLHScenario('changePassword', 3, 21, 1),
-    ...createStressTestOLHScenario('changePhone', 3, 24, 1),
-    ...createStressTestOLHScenario('deleteAccount', 3, 18, 1),
+    ...createStressTestOLHScenario('changeEmail', 18, 24, 1),
+    ...createStressTestOLHScenario('changePassword', 18, 21, 1),
+    ...createStressTestOLHScenario('changePhone', 18, 24, 1),
+    ...createStressTestOLHScenario('deleteAccount', 18, 18, 1),
     ...createStressTestSignInScenario('landingPage', 24, 6, 12)
   }
 }

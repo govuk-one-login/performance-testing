@@ -558,7 +558,7 @@ export function createStressTestOLHScenario(
 ): ScenarioList {
   return createStressTestScenario(exec, target, iterationDuration, rampUpDuration, phaseDelay, {
     startRate: 2,
-    timeUnit: '120s',
+    timeUnit: '60s',
     holdTarget: 2,
     vuFactor: 1
   })

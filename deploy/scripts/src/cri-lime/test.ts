@@ -902,7 +902,7 @@ function getUserDetails(): User {
   return {
     firstName: `perfFirst${Math.floor(Math.random() * 99998) + 1}`,
     lastName: `perfLast${Math.floor(Math.random() * 99998) + 1}`,
-    day: Math.floor(Math.random() * 29) + 1,
+    day: Math.floor(Math.random() * 28) + 1,
     month: Math.floor(Math.random() * 12) + 1,
     year: Math.floor(Math.random() * 71) + 1950,
     buildNum: Math.floor(Math.random() * 999) + 1,

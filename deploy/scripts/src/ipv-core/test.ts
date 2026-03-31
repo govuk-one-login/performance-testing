@@ -11,7 +11,9 @@ import {
   createI3SpikeSignUpScenario,
   createI3SpikeSignInScenario,
   createI4PeakTestSignUpScenario,
-  createI4PeakTestSignInScenario
+  createI4PeakTestSignInScenario,
+  createStressTestSignUpScenario,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { timeGroup } from '../common/utils/request/timing'
 import { passportPayload, addressPayloadP, kbvPayloadP, fraudPayloadP } from './data/passportData'
@@ -408,6 +410,10 @@ const profiles: ProfileList = {
   perf006Iteration8SpikeTest: {
     ...createI3SpikeSignUpScenario('identity', 630, 42, 631),
     ...createI3SpikeSignInScenario('idReuse', 227, 6, 104)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestSignUpScenario('identity', 630, 42, 631),
+    ...createStressTestSignInScenario('idReuse', 250, 6, 115, 172)
   }
 }
 

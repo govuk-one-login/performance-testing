@@ -4,7 +4,8 @@ import {
   type ProfileList,
   createI3SpikeSignInScenario,
   createI4PeakTestSignInScenario,
-  describeProfile
+  describeProfile,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
@@ -72,6 +73,10 @@ const profiles: ProfileList = {
   perf006Iteration8PeakTest: {
     ...createI4PeakTestSignInScenario('ticf', 126, 66, 58),
     ...createI4PeakTestSignInScenario('silentLogin', 38, 63, 18)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestSignInScenario('ticf', 250, 66, 115),
+    ...createStressTestSignInScenario('silentLogin', 75, 63, 35, 26)
   }
 }
 

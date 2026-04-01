@@ -116,7 +116,7 @@ const profiles: ProfileList = {
     ...createI3SpikeSignUpScenario('CIC', 16, 21, 17)
   },
   perf006Iteration9StressTest: {
-    ...createStressTestSignUpScenario('FaceToFace', 16, 42, 17)
+    ...createStressTestSignUpScenario('FaceToFace', 16, 42, 17),
     ...createStressTestSignUpScenario('CIC', 16, 21, 17)
   }
 }

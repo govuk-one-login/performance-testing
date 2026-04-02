@@ -313,7 +313,7 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignUpScenario('signUp', 960, 33, 961),
-    ...createStressTestSignInScenario('signIn', 250, 18, 115, 282)
+    ...createStressTestSignInScenario('signIn', 250, 18, 115, 283)
   }
 }
 const loadProfile = selectProfile(profiles)

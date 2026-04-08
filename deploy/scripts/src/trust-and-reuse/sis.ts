@@ -5,7 +5,8 @@ import {
   createScenario,
   LoadProfile,
   createI4PeakTestSignInScenario,
-  createI3SpikeSignInScenario
+  createI3SpikeSignInScenario,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import http, { type Response } from 'k6/http'
 
@@ -36,6 +37,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration8SpikeTest: {
     ...createI3SpikeSignInScenario('useridentity', 227, 15, 104)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestSignInScenario('useridentity', 250, 15, 115)
   }
 }
 

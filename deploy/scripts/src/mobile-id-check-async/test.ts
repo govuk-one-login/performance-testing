@@ -8,7 +8,9 @@ import {
   createI4PeakTestSignUpScenario,
   createI3SpikeSignUpScenario,
   createI4PeakTestSignInScenario,
-  createI3SpikeSignInScenario
+  createI3SpikeSignInScenario,
+  createStressTestSignUpScenario,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
@@ -58,6 +60,10 @@ const profiles: ProfileList = {
   perf006Iteration8SpikeTest: {
     ...createI3SpikeSignUpScenario('idCheckAsyncSignUp', 600, 30, 601),
     ...createI3SpikeSignInScenario('idCheckAsyncSignIn', 227, 3, 104)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestSignUpScenario('idCheckAsyncSignUp', 600, 30, 600),
+    ...createStressTestSignInScenario('idCheckAsyncSignIn', 250, 3, 115,161)
   }
 }
 

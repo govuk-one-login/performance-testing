@@ -63,7 +63,7 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignUpScenario('idCheckAsyncSignUp', 600, 30, 600),
-    ...createStressTestSignInScenario('idCheckAsyncSignIn', 250, 3, 115, 161)
+    ...createStressTestSignInScenario('idCheckAsyncSignIn', 250, 3, 115, 162)
   }
 }
 

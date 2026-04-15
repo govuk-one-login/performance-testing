@@ -162,6 +162,54 @@ export function setupVendorResponse(biometricSessionId: string, opaqueId: string
   })
 }
 
+export function setupBiometricSessionByScenario(biometricSessionId: string, opaqueId: string) {
+  const requestBodyFromEnv = JSON.parse(config.requestBody)
+
+  group('POST /v2/setupBiometricSessionByScenario/', () => {
+    const url = `${config.dcaMockReadIdUrl}/v2/setupBiometricSessionByScenario`
+    const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
+    // Create a SignatureV4 signer for API Gateway
+    const apiGatewaySigner = new SignatureV4({
+      service: 'execute-api',
+      region: getEnv('AWS_REGION'),
+      credentials: {
+        accessKeyId: credentials.AccessKeyId,
+        secretAccessKey: credentials.SecretAccessKey,
+        sessionToken: credentials.SessionToken
+      },
+      uriEscapePath: false,
+      applyChecksum: false
+    })
+
+    // Create a new request body with the updated opaqueId
+    const updatedRequestBody = { ...requestBodyFromEnv, opaqueId }
+
+    // Create a new request body with the Updated creation date
+    updatedRequestBody.creationDate = new Date().toISOString()
+    updatedRequestBody.consolidatedIdentityData.creationDate = updatedRequestBody.creationDate
+
+    // Sign the request
+    const signedRequest = apiGatewaySigner.sign({
+      method: 'POST',
+      protocol: 'https',
+      hostname: new URL(url).hostname,
+      path: `/v2/setupBiometricSessionByScenario/${biometricSessionId}`,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedRequestBody)
+    })
+
+    timeRequest(
+      () => {
+        const res = http.post(signedRequest.url, JSON.stringify(updatedRequestBody), { headers: signedRequest.headers })
+        return res
+      },
+      { isStatusCode201 }
+    )
+  })
+}
+
 export function getAppInfo(): void {
   group('GET /appInfo', () => {
     const getAppInfoUrl = buildBackendUrl('appInfo', {})

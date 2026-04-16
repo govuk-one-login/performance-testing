@@ -186,7 +186,7 @@ export function setupBiometricSessionByScenario(biometricSessionId: string, opaq
 
     // Create a new request body with the Updated creation date
     updatedRequestBody.creationDate = new Date().toISOString()
-    updatedRequestBody.consolidatedIdentityData.creationDate = updatedRequestBody.creationDate
+    updatedRequestBody.overrides.creationDate = updatedRequestBody.creationDate
 
     // Sign the request
     const signedRequest = apiGatewaySigner.sign({

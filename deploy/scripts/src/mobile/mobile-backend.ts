@@ -7,7 +7,9 @@ import {
   selectProfile,
   createI3SpikeSignUpScenario,
   createI4PeakTestSignInScenario,
-  createI3SpikeSignInScenario
+  createI3SpikeSignInScenario,
+  createStressTestSignUpScenario,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { Options } from 'k6/options'
 import { getThresholds } from '../common/utils/config/thresholds'
@@ -122,6 +124,10 @@ const profiles: ProfileList = {
   perf006Iteration8SpikeTest: {
     ...createI3SpikeSignUpScenario('getClientAttestation', 1280, 12, 601),
     ...createI3SpikeSignInScenario('walletCredentialIssuance', 38, 27, 18)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestSignUpScenario('getClientAttestation', 150, 12, 600),
+    ...createStressTestSignInScenario('walletCredentialIssuance', 38, 27, 15, 195)
   }
 }
 

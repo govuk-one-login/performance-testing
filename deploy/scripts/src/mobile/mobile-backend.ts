@@ -126,7 +126,7 @@ const profiles: ProfileList = {
     ...createI3SpikeSignInScenario('walletCredentialIssuance', 38, 27, 18)
   },
   perf006Iteration9StressTest: {
-    ...createStressTestSignUpScenario('getClientAttestation', 150, 12, 600),
+    ...createStressTestSignUpScenario('getClientAttestation', 1500, 12, 600),
     ...createStressTestSignInScenario('walletCredentialIssuance', 38, 27, 15, 195)
   }
 }

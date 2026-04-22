@@ -9,7 +9,9 @@ import {
   createI3SpikeSignUpScenario,
   createI3SpikeSignInScenario,
   createI4PeakTestSignUpScenario,
-  createI4PeakTestSignInScenario
+  createI4PeakTestSignInScenario,
+  createStressTestSignUpScenario,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import {
@@ -115,6 +117,10 @@ const profiles: ProfileList = {
   perf006Iteration8SpikeTest: {
     ...createI3SpikeSignUpScenario('allEvents', 16, 20, 17),
     ...createI3SpikeSignInScenario('authEvent', 227, 5, 104)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestSignUpScenario('allEvents', 16, 20, 17, 33),
+    ...createStressTestSignInScenario('authEvent', 250, 5, 115)
   }
 }
 

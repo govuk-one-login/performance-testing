@@ -161,7 +161,7 @@ export function mamIphonePassport(): void {
   sleep(1)
   const accessToken = postToken(authorizationCode, redirectUri) // BE
   sleep(1)
-  setupBiometricSessionByScenario(biometricSessionId, opaqueId)
+  setupBiometricSessionByScenario({ biometricSessionId, opaqueId })
   sleep(1)
   postUserInfoV2(accessToken)
   iterationsCompleted.add(1)

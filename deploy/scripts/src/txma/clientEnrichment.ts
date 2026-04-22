@@ -7,7 +7,8 @@ import {
   createScenario,
   LoadProfile,
   createI3SpikeSignInScenario,
-  createI4PeakTestSignInScenario
+  createI4PeakTestSignInScenario,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
@@ -100,6 +101,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration8SpikeTest: {
     ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 7135, 3, 631)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestSignInScenario('sendRegularEventWithEnrichment', 2500, 3, 631)
   }
 }
 

@@ -24,10 +24,10 @@ import {
   postFinishBiometricSession,
   postTxmaEvent,
   postToken,
-  setupVendorResponse,
   getRedirect,
   getAppInfo,
-  postUserInfoV2
+  postUserInfoV2,
+  setupBiometricSessionByScenario
 } from './testSteps/backend'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getThresholds } from '../common/utils/config/thresholds'
@@ -119,7 +119,7 @@ const groupMap = {
     'POST /finishBiometricSession', //BE
     'GET /redirect', //BE
     'POST /token', //BE
-    'POST /v2/setupVendorResponse/', //BE
+    'POST /v2/setupBiometricSessionByScenario/', //BE
     'POST /userinfo/v2' //BE
   ]
 } as const
@@ -161,7 +161,7 @@ export function mamIphonePassport(): void {
   sleep(1)
   const accessToken = postToken(authorizationCode, redirectUri) // BE
   sleep(1)
-  setupVendorResponse(biometricSessionId, opaqueId)
+  setupBiometricSessionByScenario({ biometricSessionId, opaqueId })
   sleep(1)
   postUserInfoV2(accessToken)
   iterationsCompleted.add(1)

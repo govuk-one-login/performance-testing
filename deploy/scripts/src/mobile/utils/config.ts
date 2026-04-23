@@ -10,6 +10,5 @@ export const config = {
   testClientExecuteUrl: getEnv(`MOBILE_${environment}_TEST_CLIENT_URL`),
   backendUrl: getEnv(`MOBILE_${environment}_BACKEND_URL`),
   frontendUrl: getEnv(`MOBILE_${environment}_FRONTEND_URL`),
-  dcaMockReadIdUrl: getEnv(`MOBILE_${environment}_DCAMOCK_READID_URL`),
-  requestBody: getEnv(`MOBILE_${environment}_REQ_BODY`)
+  dcaMockReadIdUrl: getEnv(`MOBILE_${environment}_DCAMOCK_READID_URL`)
 }

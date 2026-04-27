@@ -88,7 +88,9 @@ describe("Tests against the OIDC Service with errors", () => {
     expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
     expect(spyConsole).toHaveBeenCalledTimes(1);
     expect(spyConsole).toHaveBeenCalledWith(
-      expect.stringContaining("Request to userinfo failed due to"),
+      expect.stringContaining(
+        "Request to userinfo failed due to ClientError: unexpected HTTP response status code",
+      ),
     );
     expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
     expect(response.data).toMatchSnapshot();
@@ -118,7 +120,9 @@ describe("Tests against the OIDC Service with errors", () => {
     expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
     expect(spyConsole).toHaveBeenCalledTimes(3);
     expect(spyConsole).toHaveBeenCalledWith(
-      expect.stringContaining("Request to userinfo failed due to"),
+      expect.stringContaining(
+        "Request to userinfo failed due to ClientError: unexpected HTTP response status code",
+      ),
     );
     expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
   });

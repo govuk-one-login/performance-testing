@@ -1,10 +1,7 @@
 const { GetItemCommand } = require("@aws-sdk/client-dynamodb");
-const { errorMonitor } = require("koa");
+const openidClient = require("openid-client");
 
-// Check the data we have aligns with this user.
 async function checkUserStateAgainstDB(ctx, nonce, state) {
-  // Read the data from the DB and check that the session matches.
-  // This isn't implemented in a way that works for testing purposes.
   const input = {
     TableName: process.env.SESSION_TABLE,
     Key: {
@@ -16,7 +13,6 @@ async function checkUserStateAgainstDB(ctx, nonce, state) {
   const command = new GetItemCommand(input);
   const dbresponse = await ctx.ddbClient.send(command);
   console.log(JSON.stringify(dbresponse));
-  // RP Check that the user is who they say they are.
   if (dbresponse.Item.state.S === state) {
     console.log("Yay! Correct state.");
   }
@@ -24,14 +20,15 @@ async function checkUserStateAgainstDB(ctx, nonce, state) {
 
 async function handleCallbackAndGetTokenSet(ctx, nonce, state) {
   console.log(`Processing the params ${nonce} and ${state}`);
-  const params = ctx.oneLogin.callbackParams(ctx.request);
-  // Checks existing tokens for
-  const tokenSet = await ctx.oneLogin.callback(
-    `${process.env.CALLBACK_URL}`,
-    params,
+  const currentUrl = new URL(
+    `${process.env.CALLBACK_URL}?${ctx.request.querystring}`
+  );
+  const tokenSet = await openidClient.authorizationCodeGrant(
+    ctx.oneLogin,
+    currentUrl,
     {
-      nonce: nonce,
-      state: state,
+      expectedNonce: nonce,
+      expectedState: state,
     }
   );
   return tokenSet;
@@ -40,14 +37,12 @@ async function handleCallbackAndGetTokenSet(ctx, nonce, state) {
 const processCallback = async (ctx) => {
   try {
     console.log("Handling callback.");
-    // Generate nonce and store in dynamodb
     const cookies = ctx.cookie;
     const nonce = cookies.nonce;
     const state = cookies.session;
 
     console.log(`Cookies are nonce: ${nonce} and state: ${state}`);
 
-    // This is ignored for testing purposes.
     await checkUserStateAgainstDB(ctx, nonce, state);
 
     const tokenSet = await handleCallbackAndGetTokenSet(ctx, nonce, state);
@@ -59,11 +54,9 @@ const processCallback = async (ctx) => {
       throw new Error(`TokenSet is empty object`);
     }
 
-    // Only doing this in perf to enable logout.
     const cookieOptions = { httpOnly: true, secure: false };
     ctx.cookies.set("id_token", tokenSet.id_token, cookieOptions);
 
-    // Call the userInfo endpoint with the accessToken
     let userinfo;
     if (tokenSet.access_token) {
       userinfo = await getUserInfo(ctx, tokenSet.access_token);
@@ -85,7 +78,11 @@ async function getUserInfo(ctx, access_token) {
   console.log("Getting the userinfo request");
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const response = await ctx.oneLogin.userinfo(access_token);
+      const response = await openidClient.fetchUserInfo(
+        ctx.oneLogin,
+        access_token,
+        openidClient.skipSubjectCheck
+      );
       console.log(response);
       return response;
     } catch (error) {

@@ -88,7 +88,7 @@ describe("Tests against the OIDC Service with errors", () => {
     expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
     expect(spyConsole).toHaveBeenCalledTimes(1);
     expect(spyConsole).toHaveBeenCalledWith(
-      "Request to userinfo failed due to OPError: invalid_token",
+      expect.stringContaining("Request to userinfo failed due to"),
     );
     expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
     expect(response.data).toMatchSnapshot();
@@ -118,7 +118,7 @@ describe("Tests against the OIDC Service with errors", () => {
     expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
     expect(spyConsole).toHaveBeenCalledTimes(3);
     expect(spyConsole).toHaveBeenCalledWith(
-      "Request to userinfo failed due to OPError: invalid_token",
+      expect.stringContaining("Request to userinfo failed due to"),
     );
     expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
   });

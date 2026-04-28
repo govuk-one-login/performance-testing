@@ -106,7 +106,7 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('sendRegularEventWithEnrichment', 2500, 3, 631)
   },
   perf006Iteration9StressTest: {
-    ...createStressTestSignInScenario('sendRegularEventWithEnrichment', 7135, 3, 631)
+    ...createStressTestSignInScenario('sendRegularEventWithEnrichment', 7706, 3, 631)
   }
 }
 

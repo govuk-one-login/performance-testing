@@ -563,3 +563,62 @@ export function createStressTestOLHScenario(
     vuFactor: 1
   })
 }
+
+interface SoakTestConfig {
+  startRate: number
+  timeUnit: string
+  vuFactor: number
+}
+
+function createSoakTestScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number,
+  config: SoakTestConfig
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
+  const maxVUs = Math.round(target * config.vuFactor * iterationDuration)
+
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: config.startRate,
+    timeUnit: config.timeUnit,
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: '6h' }
+    ],
+    exec
+  }
+
+  return list
+}
+
+export function createSoakTestSignUpScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number
+): ScenarioList {
+  return createSoakTestScenario(exec, target, iterationDuration, rampUpDuration, {
+    startRate: 1,
+    timeUnit: '10s',
+    vuFactor: 0.1
+  })
+}
+
+export function createSoakTestSignInScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number
+): ScenarioList {
+  return createSoakTestScenario(exec, target, iterationDuration, rampUpDuration, {
+    startRate: 2,
+    timeUnit: '1s',
+    vuFactor: 1
+  })
+}

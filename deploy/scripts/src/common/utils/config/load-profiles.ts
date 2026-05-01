@@ -344,30 +344,50 @@ export function createI3SpikeSignInScenario(
   return list
 }
 
+interface RampUpConfig {
+  startRate: number
+  timeUnit: string
+  vuFactor: number
+}
+
+const signUpConfig: RampUpConfig = { startRate: 1, timeUnit: '10s', vuFactor: 0.1 }
+const signInConfig: RampUpConfig = { startRate: 2, timeUnit: '1s', vuFactor: 1 }
+
+function createPerfTestScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number,
+  holdDuration: string,
+  config: RampUpConfig
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
+  const maxVUs = Math.round(target * config.vuFactor * iterationDuration)
+
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: config.startRate,
+    timeUnit: config.timeUnit,
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: holdDuration }
+    ],
+    exec
+  }
+
+  return list
+}
+
 export function createI4PeakTestSignUpScenario(
   exec: string,
   target: number,
   iterationDuration: number,
   rampUpDuration: number
 ): ScenarioList {
-  const list: ScenarioList = {}
-  const preAllocatedVUs = Math.round(((target / 10) * iterationDuration) / 2)
-  const maxVUs = Math.round((target / 10) * iterationDuration)
-
-  list[exec] = {
-    executor: 'ramping-arrival-rate',
-    startRate: 1,
-    timeUnit: '10s',
-    preAllocatedVUs,
-    maxVUs,
-    stages: [
-      { target, duration: `${rampUpDuration}s` },
-      { target, duration: `30m` }
-    ],
-    exec
-  }
-
-  return list
+  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signUpConfig)
 }
 
 export function createI4PeakTestSignInScenario(
@@ -376,24 +396,7 @@ export function createI4PeakTestSignInScenario(
   iterationDuration: number,
   rampUpDuration: number
 ): ScenarioList {
-  const list: ScenarioList = {}
-  const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
-  const maxVUs = target * iterationDuration
-
-  list[exec] = {
-    executor: 'ramping-arrival-rate',
-    startRate: 2,
-    timeUnit: '1s',
-    preAllocatedVUs,
-    maxVUs,
-    stages: [
-      { target, duration: `${rampUpDuration}s` },
-      { target, duration: `30m` }
-    ],
-    exec
-  }
-
-  return list
+  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signInConfig)
 }
 
 export function createI3SpikeOLHScenario(
@@ -564,50 +567,13 @@ export function createStressTestOLHScenario(
   })
 }
 
-interface SoakTestConfig {
-  startRate: number
-  timeUnit: string
-  vuFactor: number
-}
-
-function createSoakTestScenario(
-  exec: string,
-  target: number,
-  iterationDuration: number,
-  rampUpDuration: number,
-  config: SoakTestConfig
-): ScenarioList {
-  const list: ScenarioList = {}
-  const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
-  const maxVUs = Math.round(target * config.vuFactor * iterationDuration)
-
-  list[exec] = {
-    executor: 'ramping-arrival-rate',
-    startRate: config.startRate,
-    timeUnit: config.timeUnit,
-    preAllocatedVUs,
-    maxVUs,
-    stages: [
-      { target, duration: `${rampUpDuration}s` },
-      { target, duration: '6h' }
-    ],
-    exec
-  }
-
-  return list
-}
-
 export function createSoakTestSignUpScenario(
   exec: string,
   target: number,
   iterationDuration: number,
   rampUpDuration: number
 ): ScenarioList {
-  return createSoakTestScenario(exec, target, iterationDuration, rampUpDuration, {
-    startRate: 1,
-    timeUnit: '10s',
-    vuFactor: 0.1
-  })
+  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '6h', signUpConfig)
 }
 
 export function createSoakTestSignInScenario(
@@ -616,9 +582,5 @@ export function createSoakTestSignInScenario(
   iterationDuration: number,
   rampUpDuration: number
 ): ScenarioList {
-  return createSoakTestScenario(exec, target, iterationDuration, rampUpDuration, {
-    startRate: 2,
-    timeUnit: '1s',
-    vuFactor: 1
-  })
+  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '6h', signInConfig)
 }

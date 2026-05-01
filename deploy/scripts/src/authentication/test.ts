@@ -314,6 +314,10 @@ const profiles: ProfileList = {
   perf006Iteration9StressTest: {
     ...createStressTestSignUpScenario('signUp', 960, 33, 961),
     ...createStressTestSignInScenario('signIn', 250, 18, 115, 283)
+  },
+  redisFailoverTest: {
+    ...createI4PeakTestSignUpScenario('signUp', 100, 33, 101),
+    ...createI4PeakTestSignInScenario('signIn', 10, 18, 6)
   }
 }
 const loadProfile = selectProfile(profiles)

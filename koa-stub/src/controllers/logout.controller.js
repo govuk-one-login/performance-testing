@@ -1,23 +1,23 @@
+const { GetItemCommand } = require("@aws-sdk/client-dynamodb");
+
 const rpInitiateLogout = async (ctx) => {
   try {
-    const openidClient = require("openid-client");
+    // Generate nonce and store in dynamodb
     const cookies = ctx.cookie;
     const id_token = cookies.id_token;
     const state = cookies.session;
 
+    // Call the logout endpoint with the accessToken
     let logout;
     if (id_token) {
-      const logout_url =
-        process.env.LOGOUT_URL || process.env.CALLBACK_URL.replace("callback", "");
-      const logoutUrl = openidClient.buildEndSessionUrl(ctx.oneLogin, {
+      logout = await ctx.oneLogin.endSessionUrl({
         id_token_hint: id_token,
         state: state,
-        post_logout_redirect_uri: logout_url,
       });
-      logout = logoutUrl.href;
       console.log(`Logout url ${logout}`);
     }
 
+    // Clear the cookies on the domain.
     const cookieOptions = { httpOnly: false, secure: false };
     console.log("Trying to delete all our cookies");
     const cookieList = Object.keys(cookies);

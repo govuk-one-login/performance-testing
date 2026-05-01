@@ -424,6 +424,7 @@ export function generateAuthLogInSuccessEnrichment(
   journeyID: string
 ): AuthLogInSuccessEnrichment {
   return {
+    client_id: 'performanceTestClientId',
     event_id: eventID,
     event_name: 'AUTH_LOG_IN_SUCCESS',
     component_id: 'SharedSignalPerfTest',

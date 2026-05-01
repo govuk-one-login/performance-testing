@@ -360,6 +360,7 @@ export interface IPVKBVCRIEnd {
 }
 
 export interface AuthLogInSuccessEnrichment {
+  client_id: string
   event_id: string
   event_name: string
   component_id: string

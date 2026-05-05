@@ -21,7 +21,9 @@ import {
   createI4PeakTestSignUpScenario,
   createI4PeakTestSignInScenario,
   createStressTestSignInScenario,
-  createStressTestSignUpScenario
+  createStressTestSignUpScenario,
+  createSoakTestSignUpScenario,
+  createSoakTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { getThresholds } from '../common/utils/config/thresholds'
 import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_metric/counter'
@@ -318,6 +320,10 @@ const profiles: ProfileList = {
   redisFailoverTest: {
     ...createI4PeakTestSignUpScenario('signUp', 100, 33, 101),
     ...createI4PeakTestSignInScenario('signIn', 10, 18, 6)
+  },
+  perf006Iteration9SoakTest: {
+    ...createSoakTestSignUpScenario('signUp', 110, 33, 111),
+    ...createSoakTestSignInScenario('signIn', 15, 6, 8)
   }
 }
 const loadProfile = selectProfile(profiles)

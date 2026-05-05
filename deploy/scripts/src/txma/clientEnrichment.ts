@@ -133,7 +133,7 @@ const awsConfig = new AWSConfig({
 })
 
 const sqs = new SQSClient(awsConfig)
-
+const journeyID = `perfJourneyID_${Math.floor(Date.now() / 1000)}`
 export function setup(): string {
   describeProfile(loadProfile)
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
@@ -141,7 +141,6 @@ export function setup(): string {
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-  const journeyID = 'journeyID'
   const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
   const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID, testID))
 
@@ -160,7 +159,6 @@ export function sendRegularEventWithEnrichment(authCreateAccPayload: string): vo
   const authCreatePayload = JSON.parse(authCreateAccPayload)
   const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
   const eventID = `${testID}_${uuidv4()}`
-  const journeyID = 'journeyID'
   const authLogInSuccessPayloadEnrichment = JSON.stringify(
     generateAuthLogInSuccessEnrichment(
       eventID,

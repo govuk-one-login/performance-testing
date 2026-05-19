@@ -106,6 +106,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignUpScenario('ninoCheck', 6, 6, 7)
+  },
+  perf006AdhocPeakTest: {
+    ...createI4PeakTestSignUpScenario('ninoCheck', 200, 6, 201)
   }
 }
 

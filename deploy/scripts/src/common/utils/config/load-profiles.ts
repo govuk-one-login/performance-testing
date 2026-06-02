@@ -584,3 +584,12 @@ export function createSoakTestSignInScenario(
 ): ScenarioList {
   return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '6h', signInConfig)
 }
+
+export function createHighVolumeSignInScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number
+): ScenarioList {
+  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '1h', signInConfig)
+}

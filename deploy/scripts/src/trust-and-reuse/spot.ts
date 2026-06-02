@@ -8,7 +8,8 @@ import {
   LoadProfile,
   createI3SpikeSignInScenario,
   createI4PeakTestSignInScenario,
-  createStressTestSignInScenario
+  createStressTestSignInScenario,
+  createHighVolumeSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
@@ -82,6 +83,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignInScenario('spot', 313, 3, 115)
+  },
+  criblHighVolumeTest: {
+    ...createHighVolumeSignInScenario('spot', 3000, 3, 1350)
   }
 }
 

@@ -135,20 +135,20 @@ const loadProfile = selectProfile(profiles)
 export const groupMap = {
   getClientAttestation: [
     '01_GET_/appInfo',
-    '02_GET_/app-check-token',
+    '02_GET_/app-check-token_StubCall',
     '03_POST_/client-attestation',
     '04_GET_/.well-known/jwks.json'
   ],
   walletCredentialIssuance: [
-    '01 GET /authorize (STS)',
-    '02 GET /authorize (Orchestration)',
-    '03 GET /redirect',
-    '04 GET /app-check-token',
-    '05 POST /client-attestation',
-    '06 POST /token (authorization code exchange)',
-    '07 POST /token (access token exchange - TxMA event service token)',
-    '08 POST /txma-event (WALLET_CREDENTIAL_ADD_ATTEMPT event)',
-    '09 POST /txma-event (WALLET_CREDENTIAL_ADDED event)'
+    '01_GET_/authorize (STS)',
+    '02_GET_/authorize(Orchestration)_StubCall',
+    '03_GET_/redirect',
+    '04_GET_/app-check-token_StubCall',
+    '05_POST_/client-attestation',
+    '06_POST_/token(authorizationCodeExchange)',
+    '07_POST_/token(accessTokenExchange-TxMAeventServiceToken)',
+    '08_POST_/txma-event(WALLET_CREDENTIAL_ADD_ATTEMPTevent)',
+    '09_POST_/txma-event(WALLET_CREDENTIAL_ADDEDevent)'
   ]
 } as const
 

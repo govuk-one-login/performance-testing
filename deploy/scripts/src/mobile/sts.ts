@@ -170,58 +170,58 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 export const groupMap = {
   authentication: [
-    'B01_AUTHENTICATION_01 GET /authorize (STS)',
-    'B01_AUTHENTICATION_02 GET /.well-known/jwks.json (STS)',
-    'B01_AUTHENTICATION_03 GET /authorize (Orchestration)',
-    'B01_AUTHENTICATION_04 GET /redirect',
-    'B01_AUTHENTICATION_05 GET /.well-known/jwks.json (STS)',
-    'B01_AUTHENTICATION_06 POST /generate-client-attestation',
-    'B01_AUTHENTICATION_07 POST /token (authorization code exchange)',
-    'B01_AUTHENTICATION_08 POST /token (access token exchange)',
-    'B01_AUTHENTICATION_09 GET /.well-known/jwks.json (STS)',
-    'B01_EXCHANGE_REFRESH_TOKEN_10 POST /token (refresh token exchange)',
-    'B01_EXCHANGE_REFRESH_TOKEN_11 POST /token (access token exchange)',
-    'B01_EXCHANGE_REFRESH_TOKEN_12 GET /.well-known/jwks.json (STS)'
+    'B01_AUTHENTICATION_01_GET_/authorize(STS)',
+    'B01_AUTHENTICATION_02_GET_/.well-known/jwks.json(STS)',
+    'B01_AUTHENTICATION_03_GET_/authorize(Orchestration)_StubCall',
+    'B01_AUTHENTICATION_04_GET_/redirect',
+    'B01_AUTHENTICATION_05_GET_/.well-known/jwks.json(STS)',
+    'B01_AUTHENTICATION_06_POST_/generate-client-attestation_StubCall', //pragma: allowlist secret
+    'B01_AUTHENTICATION_07_POST_/token(authorizationCodeExchange)',
+    'B01_AUTHENTICATION_08_POST_/token(accessTokenExchange)',
+    'B01_AUTHENTICATION_09_GET_/.well-known/jwks.json(STS)',
+    'B01_EXCHANGE_REFRESH_TOKEN_10_POST_/token(refreshTokenExchange)',
+    'B01_EXCHANGE_REFRESH_TOKEN_11_POST_/token(accessTokenExchange)',
+    'B01_EXCHANGE_REFRESH_TOKEN_12_GET_/.well-known/jwks.json(STS)'
   ],
   reauthentication: [
-    'REAUTHENTICATION_01 GET /authorize (STS)',
-    'REAUTHENTICATION_02 GET /.well-known/jwks.json (STS)',
-    'REAUTHENTICATION_03 GET /authorize (Orchestration)',
-    'REAUTHENTICATION_04 GET /redirect',
-    'REAUTHENTICATION_05 GET /.well-known/jwks.json (STS)',
-    'REAUTHENTICATION_06 POST /generate-client-attestation',
-    'REAUTHENTICATION_07 POST /token (authorization code exchange)',
-    'REAUTHENTICATION_08 POST /token (access token exchange)',
-    'REAUTHENTICATION_09 GET /.well-known/jwks.json (STS)'
+    'REAUTHENTICATION_01_GET_/authorize(STS)',
+    'REAUTHENTICATION_02_GET_/.well-known/jwks.json(STS)',
+    'REAUTHENTICATION_03_GET_/authorize(Orchestration)_StubCall',
+    'REAUTHENTICATION_04_GET_/redirect',
+    'REAUTHENTICATION_05_GET_/.well-known/jwks.json(STS)',
+    'REAUTHENTICATION_06_POST_/generate-client-attestation_StubCall', //pragma: allowlist secret
+    'REAUTHENTICATION_07_POST_/token(authorizationCodeExchange)',
+    'REAUTHENTICATION_08_POST_/token(accessTokenExchange)',
+    'REAUTHENTICATION_09_GET_/.well-known/jwks.json(STS)'
   ],
   walletCredentialIssuance: [
-    'WALLET_CREDENTIAL_ISSUANCE_01 GET /authorize (STS)',
-    'WALLET_CREDENTIAL_ISSUANCE_02 GET /.well-known/jwks.json (STS)',
-    'WALLET_CREDENTIAL_ISSUANCE_03 GET /authorize (Orchestration)',
-    'WALLET_CREDENTIAL_ISSUANCE_04 GET /redirect',
-    'WALLET_CREDENTIAL_ISSUANCE_05 GET /.well-known/jwks.json (STS)',
-    'WALLET_CREDENTIAL_ISSUANCE_06 POST /generate-client-attestation',
-    'WALLET_CREDENTIAL_ISSUANCE_07 POST /token (authorization code exchange)',
-    'WALLET_CREDENTIAL_ISSUANCE_08 POST /token (access token exchange)',
-    'WALLET_CREDENTIAL_ISSUANCE_09 GET /.well-known/jwks.json (STS)',
-    'WALLET_CREDENTIAL_ISSUANCE_10 GET /generate-pre-auth-code',
-    'WALLET_CREDENTIAL_ISSUANCE_11 POST /token (access token exchange)',
-    'WALLET_CREDENTIAL_ISSUANCE_12 POST /token (pre-authorized code exchange)',
-    'WALLET_CREDENTIAL_ISSUANCE_13 GET /.well-known/jwks.json (STS)'
+    'WALLET_CREDENTIAL_ISSUANCE_01_GET_/authorize(STS)',
+    'WALLET_CREDENTIAL_ISSUANCE_02_GET_/.well-known/jwks.json(STS)',
+    'WALLET_CREDENTIAL_ISSUANCE_03_GET_/authorize(Orchestration)_StubCall',
+    'WALLET_CREDENTIAL_ISSUANCE_04_GET_/redirect',
+    'WALLET_CREDENTIAL_ISSUANCE_05_GET_/.well-known/jwks.json(STS)',
+    'WALLET_CREDENTIAL_ISSUANCE_06_POST_/generate-client-attestation_StubCall', //pragma: allowlist secret
+    'WALLET_CREDENTIAL_ISSUANCE_07_POST_/token (authorization code exchange)',
+    'WALLET_CREDENTIAL_ISSUANCE_08_POST_/token (access token exchange)',
+    'WALLET_CREDENTIAL_ISSUANCE_09_GET_/.well-known/jwks.json (STS)',
+    'WALLET_CREDENTIAL_ISSUANCE_10_GET_/generate-pre-auth-code_StubCall', //pragma: allowlist secret
+    'WALLET_CREDENTIAL_ISSUANCE_11_POST_/token(accessTokenExchange)',
+    'WALLET_CREDENTIAL_ISSUANCE_12_POST_/token(pre-authorizedCodeExchange)',
+    'WALLET_CREDENTIAL_ISSUANCE_13_GET_/.well-known/jwks.json(STS)'
   ],
   generateReauthenticationTestData: [
-    '01 GET /authorize (STS)',
-    '02 GET /authorize (Orchestration)',
-    '03 GET /redirect',
-    '04 POST /generate-client-attestation',
-    '05 POST /token (authorization code exchange)'
+    '01_GET_/authorize(STS)',
+    '02_GET_/authorize(Orchestration)_StubCall',
+    '03_GET_/redirect',
+    '04_POST_/generate-client-attestation_StubCall',
+    '05_POST_/token(authorizationCodeExchange)'
   ],
   accountIntervention: [
-    'B04_AIS_01 GET /authorize (STS)',
-    'B04_AIS_02 GET /authorize (Orchestration)',
-    'B04_AIS_03 GET /redirect',
-    'B04_AIS_04 POST /generate-client-attestation',
-    'B04_AIS_05 POST /token (authorization code exchange)'
+    'B04_AIS_01_GET_/authorize(STS)',
+    'B04_AIS_02_GET_/authorize(Orchestration)_StubCall',
+    'B04_AIS_03_GET_/redirect',
+    'B04_AIS_04_POST_/generate-client-attestation_StubCall',
+    'B04_AIS_05_POST_/token(authorizationCodeExchange)'
   ]
 } as const
 

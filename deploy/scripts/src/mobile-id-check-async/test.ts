@@ -72,17 +72,17 @@ export const groupMap = {
   idCheckAsyncSignUp: [
     'B01_IDCheckSignUpV2_00_POST_/async/token', //pragma: allowlist secret
     'B01_IDCheckSignUpV2_01_POST_/async/credential', //pragma: allowlist secret
-    'B01_IDCheckSignUpV2_02_POST_sts-mock /token',
+    'B01_IDCheckSignUpV2_02_POST_sts-mock/token_StubCall', //pragma: allowlist secret
     'B01_IDCheckSignUpV2_03_GET_/async/activeSession', //pragma: allowlist secret
     'B01_IDCheckSignUpV2_04_POST_/async/biometricToken', //pragma: allowlist secret
-    'B01_IDCheckSignUpV2_05_GET_/async/.well-known/jwks.json',
+    'B01_IDCheckSignUpV2_05_GET_/async/.well-known/jwks.json', //pragma: allowlist secret
     'B01_IDCheckSignUpV2_06_POST_/async/txmaEvent', //pragma: allowlist secret
-    'B01_IDCheckSignUpV2_07_POST_readid-mock /postSetupBiometricSessionByScenario',
+    'B01_IDCheckSignUpV2_07_POST_readid-mock/postSetupBiometricSessionByScenario', //pragma: allowlist secret
     'B01_IDCheckSignUpV2_08_POST_async/finishBiometricSession', //pragma: allowlist secret
-    'B01_IDCheckSignUpV2_09_POST async/abortSession'
+    'B01_IDCheckSignUpV2_09_POST_async/abortSession' //pragma: allowlist secret
   ],
   idCheckAsyncSignIn: [
-    'B02_IDCheckSignInV2_00_POST_sts-mock /token',
+    'B02_IDCheckSignInV2_00_POST_sts-mock/token_StubCall', //pragma: allowlist secret
     'B02_IDCheckSignInV2_01_GET_/async/activeSession' //pragma: allowlist secret
   ]
 } as const

@@ -106,21 +106,21 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 const groupMap = {
   mamIphonePassport: [
-    'POST test client /start',
-    'GET /authorize',
-    'POST /selectDevice',
-    'POST /selectSmartphone',
-    'POST /validPassport',
-    'POST /biometricChip',
-    'POST /idCheckApp',
-    'GET /appInfo', //BE
-    'GET /biometricToken/v2',
-    'POST /txmaEvent', //BE
-    'POST /finishBiometricSession', //BE
-    'GET /redirect', //BE
-    'POST /token', //BE
-    'POST /v2/setupBiometricSessionByScenario/', //BE
-    'POST /userinfo/v2' //BE
+    '01_POST_testclient_/start',
+    '02_GET_/authorize',
+    '03_POST_/selectDevice',
+    '04_POST_/selectSmartphone',
+    '05_POST_/validPassport',
+    '06_POST_/biometricChip',
+    '07_POST_/idCheckApp',
+    '08_GET_/appInfo', //BE
+    '09_GET_/biometricToken/v2',
+    '10_POST_/txmaEvent', //BE
+    '11_POST_/finishBiometricSession', //BE
+    '12_GET_/redirect', //BE
+    '13_POST_/token', //BE
+    '14_POST_/v2/setupBiometricSessionByScenario/', //BE
+    '15_POST_/userinfo/v2' //BE
   ]
 } as const
 

@@ -32,7 +32,8 @@ const profiles: ProfileList = {
     ...createScenario('deleteAccount', LoadProfile.smoke),
     ...createScenario('validateUser', LoadProfile.smoke),
     ...createScenario('contactsPage', LoadProfile.smoke),
-    ...createScenario('landingPage', LoadProfile.smoke)
+    ...createScenario('landingPage', LoadProfile.smoke),
+    ...createScenario('removePasskey', LoadProfile.smoke)
   },
   load: {
     ...createScenario('changeEmail', LoadProfile.full, 30, 32),
@@ -518,6 +519,19 @@ const groupMap = {
     'B07_03_SignOut::01_OLHCall',
     'B07_03_SignOut::02_OIDCStubCall',
     'B07_03_SignOut::03_OLHCall'
+  ],
+  removePasskey: [
+    'B08_RemovePasskey_01_LaunchAccountsHome',
+    'B08_RemovePasskey_01_LaunchAccountsHome::01_OLHCall',
+    'B08_RemovePasskey_01_LaunchAccountsHome::02_OIDCStubCall',
+    'B08_RemovePasskey_02_SelectStubScenario',
+    'B08_RemovePasskey_02_SelectStubScenario::01_OIDCStubCall',
+    'B08_RemovePasskey_02_SelectStubScenario::02_OLHCall',
+    'B08_RemovePasskey_03_ClickSecurityTab',
+    'B08_RemovePasskey_04_ClickSignInDetails',
+    'B08_RemovePasskey_05_ClickRemovePasskeyLink',
+    'B08_RemovePasskey_06_EnterPassword',
+    'B08_RemovePasskey_07_ConfirmRemovePasskey'
   ]
 } as const
 
@@ -1323,3 +1337,174 @@ export function landingPage(): void {
   })
   iterationsCompleted.add(1)
 }
+export function removePasskey(): void {
+  const groups = groupMap.removePasskey
+  let res: Response
+  iterationsStarted.add(1)
+
+  // B08_RemovePasskey_01_LaunchAccountsHome
+  timeGroup(groups[0], () => {
+    //01_OLHCall
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
+
+    //02_OIDCStubCall
+    res = timeGroup(
+      groups[2].split('::')[1],
+      () => {
+        const r = http.get(res.headers.Location)
+        if (!pageContentCheck('API Simulation Tool').validatePageContent(r)) {
+          console.log('Expected "API Simulation Tool", got: ', r.html('h1').first().text())
+        }
+        return r
+      },
+      {
+        isStatusCode200,
+        ...pageContentCheck('API Simulation Tool')
+      }
+    )
+  })
+
+  sleepBetween(1, 3)
+
+  // B08_RemovePasskey_02_SelectStubScenario
+  timeGroup(groups[3], () => {
+    //01_OIDCStubCall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () => res.submitForm({ fields: { scenario: 'fourPasskeys' }, params: { redirects: 0 } }),
+      { isStatusCode302 }
+    )
+
+    //02_OLHCall
+    res = timeGroup(
+      groups[5].split('::')[1],
+      () => {
+        const r = http.get(res.headers.Location)
+        if (!pageContentCheck('Services you can use with GOV.UK One Login').validatePageContent(r)) {
+          console.log(' Expected "Services you can use with GOV.UK One Login", got: ', r.html('h2').eq(1).text())
+        }
+        return r
+      },
+      {
+        isStatusCode200,
+        ...pageContentCheck('Services you can use with GOV.UK One Login')
+      }
+    )
+  })
+
+  sleepBetween(1, 3)
+
+  // B08_RemovePasskey_03_ClickSecurityTab
+  res = timeGroup(
+    groups[6],
+    () => {
+      const r = http.get(env.envURL + '/security')
+      if (!pageContentCheck('Security').validatePageContent(r)) {
+        console.log(' Expected "Security", got: ', r.html('h2').eq(3).text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Security')
+    }
+  )
+
+  sleepBetween(1, 3)
+
+  // B08_RemovePasskey_04_ClickSignInDetails
+  res = timeGroup(
+    groups[7],
+    () => {
+      const r = http.get(env.envURL + '/sign-in-details')
+      if (!pageContentCheck('Remove passkey').validatePageContent(r)) {
+        console.log(' Expected "Remove passkey", got: ', r.html('h2').eq(3).text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Remove passkey')
+    }
+  )
+
+  sleepBetween(1, 3)
+
+  // B08_RemovePasskey_05_ClickRemovePasskeyLink
+  const passkeyId = res.html('a[href*="passkeyId"]').attr('href')?.match(/passkeyId=([^&]+)/)?.[1] ?? ''
+
+  res = timeGroup(
+    groups[8],
+    () => {
+      const r = http.get(env.envURL + `/enter-password?from=sign-in-details&edit=true&type=removePasskey&passkeyId=${passkeyId}`)
+      if (!pageContentCheck('Enter your password').validatePageContent(r)) {
+        console.log(' Expected "Enter your password", got: ', r.html('h1').text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your password')
+    }
+  )
+
+  sleepBetween(1, 3)
+
+  // B08_RemovePasskey_06_EnterPassword
+  const csrfToken1 = res.html('input[name="_csrf"]').attr('value') ?? ''
+
+  res = timeGroup(
+    groups[9],
+    () => {
+      const r = res.submitForm({
+        formSelector: `form[action='/enter-password?from=sign-in-details&edit=true&type=removePasskey&passkeyId=${passkeyId}']`,
+        fields: {
+          _csrf: csrfToken1,
+          password: credentials.newPassword
+        }
+      })
+      if (!pageContentCheck('Remove your passkey').validatePageContent(r)) {
+        console.log(' Expected "Remove your passkey", got: ', r.html('h1').text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Remove your passkey')
+    }
+  )
+
+  sleepBetween(1, 3)
+
+  // B08_RemovePasskey_07_ConfirmRemovePasskey
+  const csrfToken2 = res.html('input[name="_csrf"]').attr('value') ?? ''
+
+  res = timeGroup(
+    groups[10],
+    () => {
+      const r = res.submitForm({
+        formSelector: `form[action='/remove-passkey']`,
+        fields: {
+          _csrf: csrfToken2,
+          passkeyId: passkeyId
+        }
+      })
+      if (!pageContentCheck('You’ve removed your paskey').validatePageContent(r)) {
+    console.log('Expected "You\'ve removed your paskey", got:', r.html('h1').text())
+}
+return r
+},
+{
+  isStatusCode200,
+  ...pageContentCheck('You’ve removed your paskey')
+}
+
+  )
+
+
+  iterationsCompleted.add(1)
+}
+
+
+  
+

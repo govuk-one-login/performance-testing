@@ -1343,81 +1343,81 @@ export function removePasskey(): void {
   iterationsStarted.add(1)
 
   // B08_RemovePasskey_01_LaunchAccountsHome
-  timeGroup(groups[0], () => {
-    //01_OLHCall
-    res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
+// B08_RemovePasskey_01_LaunchAccountsHome
+timeGroup(groups[0], () => {
+  //01_OLHCall
+  res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
 
-    //02_OIDCStubCall
-    res = timeGroup(
-      groups[2].split('::')[1],
-      () => {
-        // nosemgrep: typescript.lang.security.audit.ssrf
-        // SSRF warning suppressed - this is a legitimate k6 performance test making controlled HTTP requests
-        const r = http.get(res.headers.Location)
-        if (!pageContentCheck('API Simulation Tool').validatePageContent(r)) {
-          console.log('Expected "API Simulation Tool", got: ', r.html('h1').first().text())
-        }
-        return r
-      },
-      {
-        isStatusCode200,
-        ...pageContentCheck('API Simulation Tool')
-      }
-    )
-  })
-
-  sleepBetween(1, 3)
-
-  // B08_RemovePasskey_02_SelectStubScenario
-  timeGroup(groups[3], () => {
-    //01_OIDCStubCall
-    res = timeGroup(
-      groups[4].split('::')[1],
-      () => res.submitForm({ fields: { scenario: 'fourPasskeys' }, params: { redirects: 0 } }),
-      { isStatusCode302 }
-    )
-
-    //02_OLHCall
-    res = timeGroup(
-      groups[5].split('::')[1],
-      () => {
-        // nosemgrep: typescript.lang.security.audit.ssrf
-        // SSRF warning suppressed - this is a legitimate k6 performance test making controlled HTTP requests
-        // nosemgrep: typescript.lang.security.audit.ssrf
-        // SSRF warning suppressed - this is a legitimate k6 performance test making controlled HTTP requests
-
-        const r = http.get(res.headers.Location)
-        if (!pageContentCheck('Services you can use with GOV.UK One Login').validatePageContent(r)) {
-          console.log(' Expected "Services you can use with GOV.UK One Login", got: ', r.html('h2').eq(1).text())
-        }
-        return r
-      },
-      {
-        isStatusCode200,
-        ...pageContentCheck('Services you can use with GOV.UK One Login')
-      }
-    )
-  })
-
-  sleepBetween(1, 3)
-
-  // B08_RemovePasskey_03_ClickSecurityTab
+  //02_OIDCStubCall
   res = timeGroup(
-    groups[6],
+    groups[2].split('::')[1],
     () => {
-      const r = http.get(env.envURL + '/security')
-      if (!pageContentCheck('Security').validatePageContent(r)) {
-        console.log(' Expected "Security", got: ', r.html('h2').eq(3).text())
+      const r = http.get(res.headers.Location)
+      if (!pageContentCheck('API Simulation Tool').validatePageContent(r)) {
+        console.log('Expected "API Simulation Tool", got: ', r.html('h1').first().text())
       }
       return r
     },
     {
       isStatusCode200,
-      ...pageContentCheck('Security')
+      ...pageContentCheck('API Simulation Tool')
     }
   )
+})
 
-  sleepBetween(1, 3)
+
+  sleepBetween(1, 4)
+
+  // B08_RemovePasskey_02_SelectStubScenario
+  //B08_RemovePasskey_02_SelectStubScenario
+timeGroup(groups[3], () => {
+  //01_OIDCStubCall
+  res = timeGroup(
+    groups[4].split('::')[1],
+    () => res.submitForm({ fields: { scenario: 'fourPasskeys' }, params: { redirects: 0 } }),  // Only change the scenario value
+    { isStatusCode302 }
+  )
+
+  //02_OLHCall
+  res = timeGroup(
+    groups[5].split('::')[1],
+    () => {
+      const r = http.get(res.headers.Location)
+      if (!pageContentCheck('Services you can use with GOV.UK One Login').validatePageContent(r)) {
+        console.log(' Expected "Services you can use with GOV.UK One Login", got: ', r.html('h2').eq(1).text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Services you can use with GOV.UK One Login')
+    }
+  )
+})
+
+
+  sleepBetween(2, 4)
+
+  // B08_RemovePasskey_03_ClickSecurityTab
+ // B08_RemovePasskey_03_ClickSecurityTab
+res = timeGroup(
+  groups[6],
+  () => {
+    const r = http.get(env.envURL + '/security')
+    if (!pageContentCheck('Delete your GOV.UK One Login').validatePageContent(r)) {
+      console.log(' Expected "Delete your GOV.UK One Login", got: ', r.html('h2').eq(3).text())
+    }
+    return r
+  },
+  {
+    isStatusCode200,
+    ...pageContentCheck('Delete your GOV.UK One Login')
+  }
+)
+
+
+
+  sleepBetween(1, 4)
 
   // B08_RemovePasskey_04_ClickSignInDetails
   res = timeGroup(
@@ -1435,7 +1435,7 @@ export function removePasskey(): void {
     }
   )
 
-  sleepBetween(1, 3)
+  sleepBetween(1, 4)
 
   // B08_RemovePasskey_05_ClickRemovePasskeyLink
   const passkeyId =
@@ -1461,7 +1461,7 @@ export function removePasskey(): void {
     }
   )
 
-  sleepBetween(1, 3)
+  sleepBetween(2, 3)
 
   // B08_RemovePasskey_06_EnterPassword
   const csrfToken1 = res.html('input[name="_csrf"]').attr('value') ?? ''

@@ -1351,6 +1351,8 @@ export function removePasskey(): void {
     res = timeGroup(
       groups[2].split('::')[1],
       () => {
+        // nosemgrep: typescript.lang.security.audit.ssrf
+        // SSRF warning suppressed - this is a legitimate k6 performance test making controlled HTTP requests
         const r = http.get(res.headers.Location)
         if (!pageContentCheck('API Simulation Tool').validatePageContent(r)) {
           console.log('Expected "API Simulation Tool", got: ', r.html('h1').first().text())
@@ -1379,6 +1381,11 @@ export function removePasskey(): void {
     res = timeGroup(
       groups[5].split('::')[1],
       () => {
+        // nosemgrep: typescript.lang.security.audit.ssrf
+        // SSRF warning suppressed - this is a legitimate k6 performance test making controlled HTTP requests
+        // nosemgrep: typescript.lang.security.audit.ssrf
+        // SSRF warning suppressed - this is a legitimate k6 performance test making controlled HTTP requests
+
         const r = http.get(res.headers.Location)
         if (!pageContentCheck('Services you can use with GOV.UK One Login').validatePageContent(r)) {
           console.log(' Expected "Services you can use with GOV.UK One Login", got: ', r.html('h2').eq(1).text())
@@ -1431,12 +1438,18 @@ export function removePasskey(): void {
   sleepBetween(1, 3)
 
   // B08_RemovePasskey_05_ClickRemovePasskeyLink
-  const passkeyId = res.html('a[href*="passkeyId"]').attr('href')?.match(/passkeyId=([^&]+)/)?.[1] ?? ''
+  const passkeyId =
+    res
+      .html('a[href*="passkeyId"]')
+      .attr('href')
+      ?.match(/passkeyId=([^&]+)/)?.[1] ?? ''
 
   res = timeGroup(
     groups[8],
     () => {
-      const r = http.get(env.envURL + `/enter-password?from=sign-in-details&edit=true&type=removePasskey&passkeyId=${passkeyId}`)
+      const r = http.get(
+        env.envURL + `/enter-password?from=sign-in-details&edit=true&type=removePasskey&passkeyId=${passkeyId}`
+      )
       if (!pageContentCheck('Enter your password').validatePageContent(r)) {
         console.log(' Expected "Enter your password", got: ', r.html('h1').text())
       }
@@ -1490,21 +1503,15 @@ export function removePasskey(): void {
         }
       })
       if (!pageContentCheck('You’ve removed your paskey').validatePageContent(r)) {
-    console.log('Expected "You\'ve removed your paskey", got:', r.html('h1').text())
-}
-return r
-},
-{
-  isStatusCode200,
-  ...pageContentCheck('You’ve removed your paskey')
-}
-
+        console.log('Expected "You\'ve removed your paskey", got:', r.html('h1').text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('You’ve removed your paskey')
+    }
   )
-
 
   iterationsCompleted.add(1)
 }
-
-
-  
-

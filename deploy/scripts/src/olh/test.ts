@@ -1342,70 +1342,51 @@ export function removePasskey(): void {
   let res: Response
   iterationsStarted.add(1)
 
-// B08_RemovePasskey_01_LaunchAccountsHome
-timeGroup(groups[0], () => {
-  //01_OLHCall
-  res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
+  // B08_RemovePasskey_01_LaunchAccountsHome
+  timeGroup(groups[0], () => {
+    //01_OLHCall
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
 
-  //02_OIDCStubCall
-  res = timeGroup(
-    groups[2].split('::')[1],
-    () => http.get(res.headers.Location),
-    {
+    //02_OIDCStubCall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('API Simulation Tool')
-    }
-  )
-})
-
+    })
+  })
 
   sleepBetween(1, 4)
 
   //B08_RemovePasskey_02_SelectStubScenario
-timeGroup(groups[3], () => {
-  //01_OIDCStubCall
-  res = timeGroup(
-    groups[4].split('::')[1],
-    () => res.submitForm({ fields: { scenario: 'fourPasskeys' }, params: { redirects: 0 } }),  // Only change the scenario value
-    { isStatusCode302 }
-  )
+  timeGroup(groups[3], () => {
+    //01_OIDCStubCall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () => res.submitForm({ fields: { scenario: 'fourPasskeys' }, params: { redirects: 0 } }), // Only change the scenario value
+      { isStatusCode302 }
+    )
 
-  //02_OLHCall
-  res = timeGroup(
-    groups[5].split('::')[1],
-    () => http.get(res.headers.Location),
-    {
+    //02_OLHCall
+    res = timeGroup(groups[5].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('Services you can use with GOV.UK One Login')
-    }
-  )
-})
+    })
+  })
 
   sleepBetween(2, 4)
 
- // B08_RemovePasskey_03_ClickSecurityTab
-res = timeGroup(
-  groups[6],
-  () => http.get(env.envURL + '/security'),
-  {
+  // B08_RemovePasskey_03_ClickSecurityTab
+  res = timeGroup(groups[6], () => http.get(env.envURL + '/security'), {
     isStatusCode200,
     ...pageContentCheck('Delete your GOV.UK One Login')
-  }
-)
-
-
+  })
 
   sleepBetween(1, 4)
 
   // B08_RemovePasskey_04_ClickSignInDetails
-  res = timeGroup(
-    groups[7],
-    () => http.get(env.envURL + '/sign-in-details'),
-    {
-      isStatusCode200,
-      ...pageContentCheck('Remove passkey')
-    }
-  )
+  res = timeGroup(groups[7], () => http.get(env.envURL + '/sign-in-details'), {
+    isStatusCode200,
+    ...pageContentCheck('Remove passkey')
+  })
 
   sleepBetween(1, 4)
 
@@ -1418,9 +1399,8 @@ res = timeGroup(
 
   res = timeGroup(
     groups[8],
-    () => http.get(
-      env.envURL + `/enter-password?from=sign-in-details&edit=true&type=removePasskey&passkeyId=${passkeyId}`
-    ),
+    () =>
+      http.get(env.envURL + `/enter-password?from=sign-in-details&edit=true&type=removePasskey&passkeyId=${passkeyId}`),
     {
       isStatusCode200,
       ...pageContentCheck('Enter your password')
@@ -1434,13 +1414,14 @@ res = timeGroup(
 
   res = timeGroup(
     groups[9],
-    () => res.submitForm({
-      formSelector: `form[action='/enter-password?from=sign-in-details&edit=true&type=removePasskey&passkeyId=${passkeyId}']`,
-      fields: {
-        _csrf: csrfToken1,
-        password: credentials.newPassword
-      }
-    }),
+    () =>
+      res.submitForm({
+        formSelector: `form[action='/enter-password?from=sign-in-details&edit=true&type=removePasskey&passkeyId=${passkeyId}']`,
+        fields: {
+          _csrf: csrfToken1,
+          password: credentials.newPassword
+        }
+      }),
     {
       isStatusCode200,
       ...pageContentCheck('Remove your passkey')
@@ -1454,13 +1435,14 @@ res = timeGroup(
 
   res = timeGroup(
     groups[10],
-    () => res.submitForm({
-      formSelector: `form[action='/remove-passkey']`,
-      fields: {
-        _csrf: csrfToken2,
-        passkeyId: passkeyId
-      }
-    }),
+    () =>
+      res.submitForm({
+        formSelector: `form[action='/remove-passkey']`,
+        fields: {
+          _csrf: csrfToken2,
+          passkeyId: passkeyId
+        }
+      }),
     {
       isStatusCode200,
       ...pageContentCheck('You’ve removed your paskey')

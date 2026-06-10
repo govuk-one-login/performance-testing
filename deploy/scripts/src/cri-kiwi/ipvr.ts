@@ -156,7 +156,8 @@ const env = {
   sqs_queue: getEnv('IDENTITY_KIWI_STUB_SQS'),
   OIDC_STUB_URL: getEnv('IDENTITY_OIDC_STUB_URL'),
   CLIENT_ID: getEnv('IDENTITY_OIDC_STUB_CLIENT_ID'),
-  REDIRECT_URI: getEnv('IDENTITY_OIDC_STUB_REDIRECT_URI')
+  REDIRECT_URI: getEnv('IDENTITY_OIDC_STUB_REDIRECT_URI'),
+  OIDC_STUB_PASSWORD: getEnv('IDENTITY_OIDC_STUB_PASSWORD')
 }
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -221,7 +222,7 @@ export function IPVR_FE(): void {
       loginPage.submitForm({
         fields: {
           login: `${uuidv4()}@example.com`,
-          password: 'test-password' //pragma: allowlist secret
+          password: env.OIDC_STUB_PASSWORD
         },
         submitSelector: '[type="submit"]'
       }),

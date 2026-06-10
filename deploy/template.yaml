@@ -580,6 +580,7 @@ Resources:
               IDENTITY_OIDC_STUB_URL: "/perfTest/identity/oidcStubUrl"
               IDENTITY_OIDC_STUB_CLIENT_ID : "/perfTest/identity/oidcStubClientId"
               IDENTITY_OIDC_STUB_REDIRECT_URI: "/perfTest/identity/oidcStubRedirectUri"
+              IDENTITY_OIDC_STUB_PASSWORD: "/perfTest/identity/oidcStubPassword"
               IDENTITY_ORCH_STUB_PASSWORD: "/perfTest/identity/orchStubPassword"
               IDENTITY_ORCH_STUB_USERNAME: "/perfTest/identity/orchStubUsername"
               IDENTITY_PASSPORT_URL: "/perfTest/identity/lime/passportUrl"

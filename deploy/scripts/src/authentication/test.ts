@@ -1,4 +1,5 @@
 import { check, sleep } from 'k6'
+import encoding from 'k6/encoding'
 import passkeys from 'k6/x/passkeys'
 import { SharedArray } from 'k6/data'
 import execution from 'k6/execution'
@@ -379,7 +380,7 @@ const groupMap = {
     'B02_SignIn_06_AcceptTermsConditions::03_RPStub'
   ],
   uiSignIn: [],
-  passkeyCreation: [
+  passkeyCreationSignIn: [
     'B03_PasskeyCreation_01_OrchStubSubmit',
     'B03_PasskeyCreation_01_OrchStubSubmit::01_OrchStub',
     'B03_PasskeyCreation_01_OrchStubSubmit::02_AuthCall',
@@ -408,7 +409,28 @@ const groupMap = {
     'B03_PasskeyCreation_09_AcceptTermsConditions::01_AuthCall',
     'B03_PasskeyCreation_09_AcceptTermsConditions::02_OrchStubCall',
     'B03_PasskeyCreation_09_AcceptTermsConditions::02_OIDCCall',
-    'B03_PasskeyCreation_09_AcceptTermsConditions::03_RPStub'
+    'B03_PasskeyCreation_09_AcceptTermsConditions::03_RPStub',
+    'B04_SignInWithPasskey_01_OrchStubSubmit',
+    'B04_SignInWithPasskey_01_OrchStubSubmit::01_OrchStub',
+    'B04_SignInWithPasskey_01_OrchStubSubmit::02_AuthCall',
+    'B04_SignInWithPasskey_01_RPStubSubmit',
+    'B04_SignInWithPasskey_01_RPStubSubmit::01_RPStub',
+    'B04_SignInWithPasskey_01_RPStubSubmit::02_OIDCCall',
+    'B04_SignInWithPasskey_01_RPStubSubmit::03_AuthCall',
+    'B04_SignInWithPasskey_02_ClickSignIn',
+    'B04_SignInWithPasskey_03_EnterEmailAddress',
+    'B04_SignInWithPasskey_04_ClickContinuePasskey',
+    'B04_SignInWithPasskey_04_ClickContinuePasskey::01_AuthCall',
+    'B04_SignInWithPasskey_04_ClickContinuePasskey::02_AuthAcceptTerms',
+    'B04_SignInWithPasskey_04_ClickContinuePasskey::03_AuthCall',
+    'B04_SignInWithPasskey_04_ClickContinuePasskey::04_OrchStub',
+    'B04_SignInWithPasskey_04_ClickContinuePasskey::04_OIDCCall',
+    'B04_SignInWithPasskey_04_ClickContinuePasskey::05_RPStub',
+    'B04_SignInWithPasskey_05_AcceptTermsConditions', // pragma: allowlist secret
+    'B04_SignInWithPasskey_05_AcceptTermsConditions::01_AuthCall',
+    'B04_SignInWithPasskey_05_AcceptTermsConditions::02_OrchStubCall',
+    'B04_SignInWithPasskey_05_AcceptTermsConditions::02_OIDCCall',
+    'B04_SignInWithPasskey_05_AcceptTermsConditions::03_RPStub'
   ],
   signInWithPasskey: [
     'B04_SignInWithPasskey_01_OrchStubSubmit',
@@ -474,18 +496,8 @@ interface PasskeyData {
   email: string
 }
 
-const passkeyCreationCSV: PasskeyData[] = new SharedArray('Passkey Creation CSV', () => {
-  return open('./data/passkeyCreation.csv')
-    .split('\n')
-    .slice(1)
-    .map(email => {
-      return {
-        email
-      }
-    })
-})
-const passkeySignInCSV: PasskeyData[] = new SharedArray('Passkey Sign In CSV', () => {
-  return open('./data/passkeySignIn.csv')
+const passkeyCSV: PasskeyData[] = new SharedArray('Passkey Data CSV', () => {
+  return open('./data/passkeyData.csv')
     .split('\n')
     .slice(1)
     .map(email => {
@@ -515,7 +527,8 @@ const env = {
   amcID: getEnv('ACCOUNT_AMC_ID'),
   amcOrigin: getEnv('ACCOUNT_AMC_ORIGIN')
 }
-const rp = passkeys.newRelyingParty(env.amcName, env.amcID, env.amcOrigin)
+const rpPasskeyCreation = passkeys.newRelyingParty(env.amcName, env.amcID, env.amcOrigin)
+const rpPasskeySignIn = passkeys.newRelyingParty(env.amcName, env.amcID, env.authStagingURL)
 
 async function ClickButton(p: Page, selector: string = 'button[type="Submit"]'): Promise<[PageResponse | null, void]> {
   return Promise.all([p.waitForNavigation(), p.locator(selector).click()])
@@ -986,12 +999,18 @@ export function signIn(): void {
   iterationsCompleted.add(1)
 }
 
-export function passkeyCreation(): void {
-  // const mfaOption: mfaType = Math.random() <= 0.5 ? 'SMS' : 'AUTH_APP'
+export function passkeyCreationSignIn(): void {
   let res: Response
   let amcPage: Response
-  const groups = groupMap.passkeyCreation
-  const passkeyCreationUsers = passkeyCreationCSV[execution.scenario.iterationInTest % passkeyCreationCSV.length]
+  let userHandle: string
+  const groups = groupMap.passkeyCreationSignIn
+  const maxVUs = (loadProfile.scenarios.passkeyCreationSignIn as { maxVUs: number })?.maxVUs ?? 1
+  const passkeyIndex = execution.vu.idInTest - 1 + execution.vu.iterationInScenario * maxVUs
+  if (passkeyIndex >= passkeyCSV.length) {
+    execution.test.abort(`Insufficient passkey data: index ${passkeyIndex} exceeds available rows ${passkeyCSV.length}`)
+  }
+  const passkeyUsers = passkeyCSV[passkeyIndex]
+  const credential = passkeys.newCredential()
   iterationsStarted.add(1)
 
   // B03_PasskeyCreation_01_StubSubmit
@@ -1021,10 +1040,15 @@ export function passkeyCreation(): void {
   // B03_PasskeyCreation_03_EnterEmailAddress
   res = timeGroup(
     groups[8],
-    () =>
-      res.submitForm({
-        fields: { email: passkeyCreationUsers.email, browserSupportsWebAuthn: 'true' }
-      }),
+    () => {
+      const r = res.submitForm({
+        fields: { email: passkeyUsers.email, browserSupportsWebAuthn: 'true' }
+      })
+      if (pageContentCheck('Use your passkey to sign in to GOV.UK One Login').validatePageContent(r)) {
+        console.log('Passkey already set up for the user: - ' + passkeyUsers.email)
+      }
+      return r
+    },
     { isStatusCode200, ...pageContentCheck('Enter your password') }
   )
 
@@ -1087,7 +1111,6 @@ export function passkeyCreation(): void {
     )
 
     // 02_AMCRequest — store in dedicated variable
-
     amcPage = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck(
@@ -1098,60 +1121,58 @@ export function passkeyCreation(): void {
 
   // B03_PasskeyCreation_07_SetUpPasskey
   timeGroup(groups[14], () => {
-    console.log('Before starting match function')
-    console.log(`Debug Response Body ---- ${JSON.stringify(amcPage.body)}`)
-    const match = (amcPage.body as string).match(/data-registration-options="([^"]+)"/)
-    console.log('After completing match function')
-    if (!match) throw new Error('data-registration-options not found in response')
-    console.log('Printing MATCH ARRAY' + match)
+    const csrfTokenCreation = amcPage.html('input[name="_csrf"]').attr('value') ?? 'CSRF Token not found'
+    const matchDataRegOptions = (amcPage.body as string).match(/data-registration-options="([^"]+)"/)
+    if (!matchDataRegOptions) throw new Error('data-registration-options not found in response')
 
     // Step 1: decode \uXXXX sequences (e.g. \u0026 → &)
-    const unicodeDecoded = JSON.parse(`"${match[1].replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`) as string
+    const unicodeDecodedRegOptions = JSON.parse(
+      `"${matchDataRegOptions[1].replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+    ) as string
     // Step 2: decode HTML entities (&quot; → ", &amp; → &, etc.)
-    const attestationOptionsJSON = unicodeDecoded
+    const registrationOptionsJSON = unicodeDecodedRegOptions
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&amp;/g, '&')
-    console.log('AttestationJSON ORIGINAL' + attestationOptionsJSON)
 
-    // Override attestation to none — server requests "direct" but the
-    // extension cannot produce a verifiable attestation chain, so instruct
-    // @simplewebauthn/server to skip attestation verification
-    const attestationOptions = JSON.parse(attestationOptionsJSON)
-    attestationOptions.attestation = 'none'
-    console.log('attestationOptions:' + attestationOptionsJSON.substring(0, 100))
-    const credential = passkeys.newCredential()
-    const rawResponse = passkeys.createAttestationResponse(rp, credential, JSON.stringify(attestationOptions))
+    const registrationOptions = JSON.parse(registrationOptionsJSON)
+    userHandle = registrationOptions.user.id // extract userHandle here (base64url encoded)
+    const rawRegResponseCreation = passkeys.createAttestationResponse(
+      rpPasskeyCreation,
+      credential,
+      JSON.stringify(registrationOptions)
+    )
 
     // Augment with fields expected by @simplewebauthn/server
-    const augmented = JSON.parse(rawResponse)
-    augmented.authenticatorAttachment = 'platform'
-    augmented.clientExtensionResults = { credProps: { rk: true } }
-    augmented.response.transports = ['internal']
-    const registrationResponse = JSON.stringify(augmented)
-    console.log('RegResponsePayload:' + registrationResponse)
+    const augmentedRegResponseCreation = JSON.parse(rawRegResponseCreation)
+    augmentedRegResponseCreation.authenticatorAttachment = 'platform'
+    augmentedRegResponseCreation.clientExtensionResults = { credProps: { rk: true } }
+    augmentedRegResponseCreation.response.transports = ['internal']
+    const registrationResponseCreation = JSON.stringify(augmentedRegResponseCreation)
     //01_AMCRequest
     res = timeGroup(
       groups[15].split('::')[1],
       () =>
-        amcPage.submitForm({
-          fields: {
+        http.post(
+          env.amcURL + '/cannot-set-up-passkey',
+          {
             action: 'register',
-            registrationResponse: registrationResponse,
-            registrationError: '',
-            registrationErrorDetails: ''
+            _csrf: csrfTokenCreation,
+            registrationResponse: registrationResponseCreation
           },
-          params: { redirects: 0 }
-        }),
+          {
+            redirects: 0
+          }
+        ),
       { isStatusCode302 }
     )
 
     // 02_AuthCall
-    res = timeGroup(groups[16].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
+    res = timeGroup(groups[16].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck("You've set up a passkey")
+      ...pageContentCheck('You’ve set up a passkey')
     })
   })
 
@@ -1162,7 +1183,6 @@ export function passkeyCreation(): void {
       groups[18].split('::')[1],
       () =>
         res.submitForm({
-          fields: { code: getOTP() },
           params: { redirects: 0 }
         }),
       { isStatusCode302 }
@@ -1189,7 +1209,7 @@ export function passkeyCreation(): void {
         // 04_OrchStub
         res = timeGroup(groups[21].split('::')[1], () => http.get(res.headers.Location), {
           isStatusCode200,
-          ...pageContentCheck(passkeyCreationUsers.email.toLowerCase())
+          ...pageContentCheck(passkeyUsers.email.toLowerCase())
         })
       } else if (route === 'RP') {
         // 04_OIDCCall
@@ -1199,7 +1219,7 @@ export function passkeyCreation(): void {
         //05_RPStub
         res = timeGroup(groups[23].split('::')[1], () => http.get(res.headers.Location), {
           isStatusCode200,
-          ...pageContentCheck(passkeyCreationUsers.email.toLowerCase())
+          ...pageContentCheck(passkeyUsers.email.toLowerCase())
         })
       }
     }
@@ -1222,7 +1242,7 @@ export function passkeyCreation(): void {
           // 02_OrchStub
           res = timeGroup(groups[26].split('::')[1], () => http.get(res.headers.Location), {
             isStatusCode200,
-            ...pageContentCheck(passkeyCreationUsers.email.toLowerCase())
+            ...pageContentCheck(passkeyUsers.email.toLowerCase())
           })
         } else if (route === 'RP') {
           // 02_OIDCCall
@@ -1232,22 +1252,14 @@ export function passkeyCreation(): void {
           //03_RPStub
           res = timeGroup(groups[28].split('::')[1], () => http.get(res.headers.Location), {
             isStatusCode200,
-            ...pageContentCheck(passkeyCreationUsers.email.toLowerCase())
+            ...pageContentCheck(passkeyUsers.email.toLowerCase())
           })
         }
       })
     }
   })
-  iterationsCompleted.add(1)
-}
 
-export function signInWithPasskey(): void {
-  let res: Response
-  const groups = groupMap.signInWithPasskey
-  const passkeyCreationUsers = passkeySignInCSV[execution.scenario.iterationInTest % passkeySignInCSV.length]
-  iterationsStarted.add(1)
-
-  // B03_PasskeyCreation_01_StubSubmit
+  // B04_SignInWithPasskey_01_StubSubmit
   if (route === 'RP') {
     res = rpStubSubmit(groups)
   } else if (route === 'ORCH') {
@@ -1257,51 +1269,91 @@ export function signInWithPasskey(): void {
   sleep(1)
 
   // B04_SignInWithPasskey_02_ClickSignIn
-  res = timeGroup(groups[7], () => res.submitForm(), {
-    isStatusCode200,
-    ...pageContentCheck('Enter your email address')
-  })
+  res = timeGroup(
+    groups[36],
+    () =>
+      res.submitForm({
+        submitSelector: '#sign-in-button'
+      }),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
+    }
+  )
 
   sleep(1)
 
   // B04_SignInWithPasskey_03_EnterEmailAddress
   res = timeGroup(
-    groups[8],
+    groups[37],
     () =>
       res.submitForm({
-        fields: { email: passkeyCreationUsers.email }
+        fields: { email: passkeyUsers.email, browserSupportsWebAuthn: 'true' }
       }),
-    { isStatusCode200, ...pageContentCheck('Enter your password') }
+    { isStatusCode200, ...pageContentCheck('Use your passkey to sign in to GOV.UK One Login.') }
   )
 
-  sleep(1)
-
-  let acceptNewTerms = false
+  acceptNewTerms = false
 
   //B04_SignInWithPasskey_04_ClickContinuePasskey
-  timeGroup(groups[9], () => {
+  timeGroup(groups[38], () => {
+    const csrfTokenSignIn = res.html('input[name="_csrf"]').attr('value') ?? 'CSRF Token not found'
+    const matchDataAuthOptions = (res.body as string).match(/data-authentication-options="([^"]+)"/)
+    if (!matchDataAuthOptions) throw new Error('data-authentication-options not found in response')
+    // Step 1: decode \uXXXX sequences (e.g. \u0026 → &)
+    const unicodeDecodedAuthOptions = JSON.parse(
+      `"${matchDataAuthOptions[1].replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+    ) as string
+    // Step 2: decode HTML entities (&quot; → ", &amp; → &, etc.)
+    const authenticationOptionsJSON = unicodeDecodedAuthOptions
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+
+    const authenticationOptions = JSON.parse(authenticationOptionsJSON)
+    const userHandleDecoded = encoding.b64decode(userHandle, 'rawurl', 's')
+    const rawRegResponseSignIn = passkeys.createAssertionResponse(
+      rpPasskeySignIn,
+      credential,
+      userHandleDecoded,
+      JSON.stringify(authenticationOptions)
+    )
+
+    // Augment with fields expected by @simplewebauthn/server
+    const augmentedResResponseSignIn = JSON.parse(rawRegResponseSignIn)
+    augmentedResResponseSignIn.authenticatorAttachment = 'platform'
+    augmentedResResponseSignIn.clientExtensionResults = {}
+    const registrationResponseSignIn = JSON.stringify(augmentedResResponseSignIn)
     //01_AuthCall
     res = timeGroup(
-      groups[10].split('::')[1],
+      groups[39].split('::')[1],
       () =>
-        res.submitForm({
-          fields: { authenticationResponse: 'ToBeAddedFromExtensionFunctions' },
-          params: { redirects: 0 }
-        }),
+        http.post(
+          env.authStagingURL + '/sign-in-passkey',
+          {
+            _csrf: csrfTokenSignIn,
+            authenticationResponse: registrationResponseSignIn
+          },
+          {
+            redirects: 0
+          }
+        ),
       { isStatusCode302 }
     )
 
     acceptNewTerms = res.headers.Location.endsWith('updated-terms-and-conditions')
     if (acceptNewTerms) {
       // 02_AuthAcceptTerms
-      res = timeGroup(groups[11].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
+      res = timeGroup(groups[40].split('::')[1], () => http.get(env.authStagingURL + res.headers.Location), {
         isStatusCode200,
         ...pageContentCheck('We’ve updated our terms of use')
       })
     } else {
       // 03_AuthCall
       res = timeGroup(
-        groups[12].split('::')[1],
+        groups[41].split('::')[1],
         () => http.get(env.authStagingURL + res.headers.Location, { redirects: 0 }),
         {
           isStatusCode302
@@ -1310,29 +1362,29 @@ export function signInWithPasskey(): void {
 
       if (route === 'ORCH') {
         // 04_OrchStub
-        res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location), {
+        res = timeGroup(groups[42].split('::')[1], () => http.get(res.headers.Location), {
           isStatusCode200,
-          ...pageContentCheck(passkeyCreationUsers.email.toLowerCase())
+          ...pageContentCheck(passkeyUsers.email.toLowerCase())
         })
       } else if (route === 'RP') {
         // 04_OIDCCall
-        res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+        res = timeGroup(groups[43].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
           isStatusCode302
         })
         //05_RPStub
-        res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location), {
+        res = timeGroup(groups[44].split('::')[1], () => http.get(res.headers.Location), {
           isStatusCode200,
-          ...pageContentCheck(passkeyCreationUsers.email.toLowerCase())
+          ...pageContentCheck(passkeyUsers.email.toLowerCase())
         })
       }
     }
 
     if (acceptNewTerms) {
       // B04_SignInWithPasskey_05_AcceptTermsConditions
-      timeGroup(groups[16], () => {
+      timeGroup(groups[45], () => {
         // 01_AuthCall
         res = timeGroup(
-          groups[17].split('::')[1],
+          groups[46].split('::')[1],
           () =>
             res.submitForm({
               fields: { termsAndConditionsResult: 'accept' },
@@ -1343,23 +1395,24 @@ export function signInWithPasskey(): void {
 
         if (route === 'ORCH') {
           // 02_OrchStub
-          res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
+          res = timeGroup(groups[47].split('::')[1], () => http.get(res.headers.Location), {
             isStatusCode200,
-            ...pageContentCheck(passkeyCreationUsers.email.toLowerCase())
+            ...pageContentCheck(passkeyUsers.email.toLowerCase())
           })
         } else if (route === 'RP') {
           // 02_OIDCCall
-          res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+          res = timeGroup(groups[48].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
             isStatusCode302
           })
           //03_RPStub
-          res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location), {
+          res = timeGroup(groups[49].split('::')[1], () => http.get(res.headers.Location), {
             isStatusCode200,
-            ...pageContentCheck(passkeyCreationUsers.email.toLowerCase())
+            ...pageContentCheck(passkeyUsers.email.toLowerCase())
           })
         }
       })
     }
   })
+
   iterationsCompleted.add(1)
 }

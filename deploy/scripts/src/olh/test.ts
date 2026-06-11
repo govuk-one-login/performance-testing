@@ -1354,7 +1354,7 @@ export function removePasskey(): void {
     })
   })
 
-  sleepBetween(1, 4)
+  sleepBetween(1, 3)
 
   //B08_RemovePasskey_02_SelectStubScenario
   timeGroup(groups[3], () => {
@@ -1372,7 +1372,7 @@ export function removePasskey(): void {
     })
   })
 
-  sleepBetween(2, 4)
+  sleepBetween(1, 3)
 
   // B08_RemovePasskey_03_ClickSecurityTab
   res = timeGroup(groups[6], () => http.get(env.envURL + '/security'), {
@@ -1380,7 +1380,7 @@ export function removePasskey(): void {
     ...pageContentCheck('Delete your GOV.UK One Login')
   })
 
-  sleepBetween(1, 4)
+  sleepBetween(1, 3)
 
   // B08_RemovePasskey_04_ClickSignInDetails
   res = timeGroup(groups[7], () => http.get(env.envURL + '/sign-in-details'), {
@@ -1388,7 +1388,7 @@ export function removePasskey(): void {
     ...pageContentCheck('Remove passkey')
   })
 
-  sleepBetween(1, 4)
+  sleepBetween(1, 3)
 
   // B08_RemovePasskey_05_ClickRemovePasskeyLink
   const passkeyId =
@@ -1403,11 +1403,11 @@ export function removePasskey(): void {
       http.get(env.envURL + `/enter-password?from=sign-in-details&edit=true&type=removePasskey&passkeyId=${passkeyId}`),
     {
       isStatusCode200,
-      ...pageContentCheck('Enter your password')
+      ...pageContentCheck('We need to make sure it’s you before you can remove your passkey')
     }
   )
 
-  sleepBetween(2, 3)
+  sleepBetween(1, 3)
 
   // B08_RemovePasskey_06_EnterPassword
   const csrfToken1 = res.html('input[name="_csrf"]').attr('value') ?? ''
@@ -1424,7 +1424,7 @@ export function removePasskey(): void {
       }),
     {
       isStatusCode200,
-      ...pageContentCheck('Remove your passkey')
+      ...pageContentCheck('will be removed from your GOV.UK Login')
     }
   )
 

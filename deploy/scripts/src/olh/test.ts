@@ -33,7 +33,8 @@ const profiles: ProfileList = {
     ...createScenario('validateUser', LoadProfile.smoke),
     ...createScenario('contactsPage', LoadProfile.smoke),
     ...createScenario('landingPage', LoadProfile.smoke),
-    ...createScenario('removePasskey', LoadProfile.smoke)
+    ...createScenario('removePasskey', LoadProfile.smoke),
+    ...createScenario('setUpPasskey', LoadProfile.smoke)
   },
   load: {
     ...createScenario('changeEmail', LoadProfile.full, 30, 32),
@@ -532,6 +533,21 @@ const groupMap = {
     'B08_RemovePasskey_05_ClickRemovePasskeyLink',
     'B08_RemovePasskey_06_EnterPassword',
     'B08_RemovePasskey_07_ConfirmRemovePasskey'
+  ],
+  setUpPasskey: [
+    'B09_SetUpPasskey_01_LaunchAccountsHome',
+    'B09_SetUpPasskey_01_LaunchAccountsHome::01_OLHCall',
+    'B09_SetUpPasskey_01_LaunchAccountsHome::02_OIDCStubCall',
+    'B09_SetUpPasskey_02_SelectStubScenario',
+    'B09_SetUpPasskey_02_SelectStubScenario::01_OIDCStubCall',
+    'B09_SetUpPasskey_02_SelectStubScenario::02_OLHCall',
+    'B09_SetUpPasskey_03_ClickSecurityTab',
+    'B09_SetUpPasskey_04_ClickManageSignInDetails',
+    'B09_SetUpPasskey_05_ClickSetUpPasskey',
+    'B09_SetUpPasskey_06_EnterCurrentPassword',
+    'B09_SetUpPasskey_06_EnterCurrentPassword::01_OLHCall',
+    'B09_SetUpPasskey_06_EnterCurrentPassword::02_AMCStubCall',
+    'B09_SetUpPasskey_07_CreatePasskeyFromAMCStub'
   ]
 } as const
 
@@ -1449,5 +1465,103 @@ export function removePasskey(): void {
     }
   )
 
+  iterationsCompleted.add(1)
+}
+
+export function setUpPasskey(): void {
+  let res: Response
+  const groups = groupMap.setUpPasskey
+  iterationsStarted.add(1)
+
+  // B09_SetUpPasskey_01_LaunchAccountsHome
+  timeGroup(groups[0], () => {
+    //01_OLHCall
+    res = timeGroup(groups[1].split('::')[1], () => http.get(env.envURL, { redirects: 0 }), { isStatusCode302 })
+
+    //02_OIDCStubCall
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('API Simulation Tool')
+    })
+  })
+
+  sleepBetween(1, 3)
+
+  //B09_SetUpPasskey_02_SelectStubScenario
+  timeGroup(groups[3], () => {
+    //01_OIDCStubCall
+    res = timeGroup(
+      groups[4].split('::')[1],
+      () => res.submitForm({ fields: { scenario: 'noPasskeys' }, params: { redirects: 0 } }),
+      { isStatusCode302 }
+    )
+
+    //02_OLHCall
+    res = timeGroup(groups[5].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Services you can use with GOV.UK One Login')
+    })
+  })
+
+  sleepBetween(1, 3)
+
+  // B09_SetUpPasskey_03_ClickSecurityTab
+  res = timeGroup(groups[6], () => http.get(env.envURL + '/security'), {
+    isStatusCode200,
+    ...pageContentCheck('Delete your GOV.UK One Login')
+  })
+
+  sleepBetween(1, 3)
+
+  // B09_SetUpPasskey_04_ClickManageSignInDetails
+  res = timeGroup(groups[7], () => http.get(env.envURL + '/sign-in-details'), {
+    isStatusCode200,
+    ...pageContentCheck('Set up a passkey')
+  })
+
+  sleepBetween(1, 3)
+
+  // B09_SetUpPasskey_05_ClickSetUpPasskey
+  res = timeGroup(
+    groups[8],
+    () => http.get(env.envURL + '/enter-password?from=sign-in-details&edit=true&type=createPasskey'),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your password')
+    }
+  )
+
+  sleepBetween(1, 3)
+
+  // B09_SetUpPasskey_06_EnterCurrentPassword
+  timeGroup(groups[9], () => {
+    //01_OLHCall
+    res = timeGroup(
+      groups[10].split('::')[1],
+      () =>
+        res.submitForm({
+          formSelector: "form[action='/enter-password?from=sign-in-details&edit=true&type=createPasskey']",
+          fields: { password: credentials.currPassword },
+          params: { redirects: 1 }
+        }),
+      { isStatusCode302 }
+    )
+
+    //02_AMCStubCall
+    res = timeGroup(groups[11].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Journey outcome endpoint success responses')
+    })
+  })
+
+  sleepBetween(1, 3)
+
+  const callbackUrl = res.html('a:contains("passkey-create success")').attr('href') ?? ''
+
+  // B09_SetUpPasskey_07_CreatePasskeyFromAMCStub
+  res = timeGroup(groups[12], () => http.get(callbackUrl), {
+    isStatusCode200,
+    ...pageContentCheck('You’ve set up a passkey')
+  })
   iterationsCompleted.add(1)
 }

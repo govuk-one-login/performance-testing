@@ -417,7 +417,7 @@ const profiles: ProfileList = {
     ...createOLHPeakTestScenario('deleteAccount', 6, 18, 1),
     ...createI4PeakTestSignInScenario('landingPage', 12, 9, 6),
     // Passkey scenarios (accounting for their sleep patterns):
-    ...createOLHPeakTestScenario('setUpPasskey', 6, 28, 1),     // ~5 sleepBetween calls + AMC complexity
+    ...createOLHPeakTestScenario('setUpPasskey', 6, 28, 1), // ~5 sleepBetween calls + AMC complexity
     ...createOLHPeakTestScenario('removePasskey', 6, 28, 1)
   },
   perf006Iteration8SpikeTest: {

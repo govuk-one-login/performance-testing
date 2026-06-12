@@ -19,7 +19,10 @@ FROM golang:1.26-alpine AS k6-build
 WORKDIR $GOPATH/src/go.k6.io/k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
-  && xk6 build v1.7.1 --with github.com/LeonAdato/xk6-output-statsd@v0.2.1 --output /k6
+  && xk6 build v1.7.1 \
+    --with github.com/LeonAdato/xk6-output-statsd@v0.2.1 \
+    --with github.com/corbado/xk6-passkeys@v0.1.0 \
+    --output /k6
 
 # -----------------------
 # OpenTelemetry Collector

@@ -855,10 +855,17 @@ export function signIn(): void {
   sleep(1)
 
   // B02_SignIn_02_ClickSignIn
-  res = timeGroup(groups[7], () => res.submitForm(), {
-    isStatusCode200,
-    ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
-  })
+  res = timeGroup(
+    groups[7],
+    () =>
+      res.submitForm({
+        submitSelector: '#sign-in-button'
+      }),
+    {
+      isStatusCode200,
+      ...pageContentCheck('Enter your email address to sign in to your GOV.UK One Login')
+    }
+  )
 
   sleep(1)
 

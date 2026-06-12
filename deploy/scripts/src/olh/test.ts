@@ -415,7 +415,10 @@ const profiles: ProfileList = {
     ...createOLHPeakTestScenario('changePassword', 6, 21, 1),
     ...createOLHPeakTestScenario('changePhone', 6, 24, 1),
     ...createOLHPeakTestScenario('deleteAccount', 6, 18, 1),
-    ...createI4PeakTestSignInScenario('landingPage', 12, 9, 6)
+    ...createI4PeakTestSignInScenario('landingPage', 12, 9, 6),
+    // Passkey scenarios (accounting for their sleep patterns):
+    ...createOLHPeakTestScenario('setUpPasskey', 6, 28, 1), // ~5 sleepBetween calls + AMC complexity
+    ...createOLHPeakTestScenario('removePasskey', 6, 28, 1)
   },
   perf006Iteration8SpikeTest: {
     ...createI3SpikeOLHScenario('changeEmail', 12, 24, 1),

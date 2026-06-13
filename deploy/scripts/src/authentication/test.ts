@@ -499,26 +499,30 @@ const passkeyCSV: PasskeyData[] = new SharedArray('Passkey Data CSV', () => {
       }
     })
 })
+const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
+const validEnvironments = ['BUILD', 'STAGING']
+if (!validEnvironments.includes(environment))
+  throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 
 const credentials = {
-  authAppKey: getEnv('ACCOUNT_APP_KEY'),
-  password: getEnv('ACCOUNT_APP_PASSWORD'),
-  emailOTP: getEnv('ACCOUNT_EMAIL_OTP'),
-  phoneOTP: getEnv('ACCOUNT_PHONE_OTP')
+  authAppKey: getEnv(`ACCOUNT_AUTH_${environment}_APP_KEY`),
+  password: getEnv(`ACCOUNT_AUTH_${environment}_APP_PASSWORD`),
+  emailOTP: getEnv(`ACCOUNT_AUTH_${environment}_EMAIL_OTP`),
+  phoneOTP: getEnv(`ACCOUNT_AUTH_${environment}_PHONE_OTP`)
 }
 
-const route = getEnv('ROUTE').toLocaleUpperCase()
+const route = getEnv(`ACCOUNT_AUTH_${environment}_ROUTE`).toLocaleUpperCase()
 const validRoute = ['RP', 'ORCH']
 if (!validRoute.includes(route)) throw new Error(`Route '${route}' not in [${validRoute.toString()}]`)
 
 const env = {
-  stubEndpoint: getEnv(`ACCOUNT_${route}_STUB`),
+  stubEndpoint: getEnv(`ACCOUNT_AUTH_${environment}_${route}_STUB`),
   staticResources: __ENV.K6_NO_STATIC_RESOURCES == 'true',
-  authStagingURL: getEnv('ACCOUNT_STAGING_URL'),
-  amcURL: getEnv('ACCOUNT_AMC_STAGING_URL'),
-  amcName: getEnv('ACCOUNT_AMC_NAME'),
-  amcID: getEnv('ACCOUNT_AMC_ID'),
-  amcOrigin: getEnv('ACCOUNT_AMC_ORIGIN')
+  authStagingURL: getEnv(`ACCOUNT_AUTH_${environment}_URL`),
+  amcURL: getEnv(`ACCOUNT_AMC_${environment}_URL`),
+  amcName: getEnv(`ACCOUNT_AMC_${environment}_NAME`),
+  amcID: getEnv(`ACCOUNT_AMC_${environment}_ID`),
+  amcOrigin: getEnv(`ACCOUNT_AMC_${environment}_ORIGIN`)
 }
 const rpPasskeyCreation = passkeys.newRelyingParty(env.amcName, env.amcID, env.amcOrigin)
 const rpPasskeySignIn = passkeys.newRelyingParty(env.amcName, env.amcID, env.authStagingURL)

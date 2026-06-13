@@ -1536,32 +1536,5 @@ export function userCreationForPasskey(): void {
     }
   )
   console.log(testEmail)
-  /*
-  sleep(1)
-
-  // B01_SignUp_11_ContinueAccountCreated
-  timeGroup(groups[16], () => {
-    // 01_AuthCall (common for ORCH and RP route)
-    res = timeGroup(groups[17].split('::')[1], () => res.submitForm({ params: { redirects: 1 } }), {
-      isStatusCode302
-    })
-    if (route === 'ORCH') {
-      // 02_OrchStub
-      res = timeGroup(groups[18].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck(testEmail.toLowerCase())
-      })
-    } else if (route === 'RP') {
-      // 02_OIDCCall
-      res = timeGroup(groups[19].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
-        isStatusCode302
-      })
-      //03_RPStub
-      res = timeGroup(groups[20].split('::')[1], () => http.get(res.headers.Location), {
-        isStatusCode200,
-        ...pageContentCheck(testEmail.toLowerCase())
-      })
-    }
-  })*/
   iterationsCompleted.add(1)
 }

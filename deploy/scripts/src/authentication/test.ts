@@ -878,7 +878,7 @@ export function signIn(): void {
     groups[8],
     () =>
       res.submitForm({
-        fields: { email: userData.email }
+        fields: { email: userData.email, browserSupportsWebAuthn: 'false' }
       }),
     { isStatusCode200, ...pageContentCheck('Enter your password') }
   )

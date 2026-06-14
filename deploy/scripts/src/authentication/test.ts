@@ -339,9 +339,9 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration10PeakTest: {
-    ...createSoakTestSignUpScenario('signUp', 740, 33, 741),
-    ...createSoakTestSignInScenario('signIn', 129, 18, 60),
-    ...createSoakTestSignInScenario('passkeyCreationSignIn', 55, 42, 26)
+    ...createI4PeakTestSignUpScenario('signUp', 740, 33, 741),
+    ...createI4PeakTestSignInScenario('signIn', 129, 18, 60),
+    ...createI4PeakTestSignInScenario('passkeyCreationSignIn', 55, 42, 26)
   }
 }
 const loadProfile = selectProfile(profiles)
@@ -1084,10 +1084,8 @@ export function passkeyCreationSignIn(): void {
   let mfaOption: mfaType
   if ((res.body as string).includes('Check your phone')) {
     mfaOption = 'SMS'
-    console.log(`MFA option in the SMS condition is ${mfaOption}`)
   } else if ((res.body as string).includes('Enter the 6 digit security code shown in your authenticator app')) {
     mfaOption = 'AUTH_APP'
-    console.log(`MFA option in the APP condition is ${mfaOption}`)
   }
 
   function getOTP(): string {

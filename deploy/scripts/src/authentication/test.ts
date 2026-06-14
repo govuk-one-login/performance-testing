@@ -1084,10 +1084,8 @@ export function passkeyCreationSignIn(): void {
   let mfaOption: mfaType
   if ((res.body as string).includes('Check your phone')) {
     mfaOption = 'SMS'
-    console.log(`MFA option in the SMS condition is ${mfaOption}`)
   } else if ((res.body as string).includes('Enter the 6 digit security code shown in your authenticator app')) {
     mfaOption = 'AUTH_APP'
-    console.log(`MFA option in the APP condition is ${mfaOption}`)
   }
 
   function getOTP(): string {

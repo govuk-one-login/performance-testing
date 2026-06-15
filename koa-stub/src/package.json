@@ -30,7 +30,7 @@
     "globals": "^16.2.0",
     "jest": "^30.3.0",
     "node-fetch-cookies": "^2.1.1",
-    "oauth2-mock-server": "^7.2.1",
+    "oauth2-mock-server": "^8.2.3",
     "supertest": "^7.2.2",
     "supertest-session": "^5.0.1"
   },

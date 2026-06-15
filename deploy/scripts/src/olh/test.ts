@@ -588,20 +588,25 @@ const validateData: ValidateUserData[] = new SharedArray('data', () =>
   })
 )
 
+const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
+const validEnvironments = ['BUILD', 'STAGING']
+if (!validEnvironments.includes(environment))
+  throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
+
 const env = {
-  envURL: getEnv('ACCOUNT_HOME_URL')
+  envURL: getEnv(`ACCOUNT_OLH_${environment}_URL`)
 }
 
 const credentials = {
-  authAppKey: getEnv('ACCOUNT_APP_KEY'),
-  currPassword: getEnv('ACCOUNT_APP_PASSWORD'),
-  newPassword: getEnv('ACCOUNT_APP_PASSWORD_NEW'),
-  fixedPhoneOTP: getEnv('ACCOUNT_PHONE_OTP'),
-  fixedEmailOTP: getEnv('ACCOUNT_EMAIL_OTP')
+  authAppKey: getEnv(`ACCOUNT_OLH_${environment}_APP_KEY`),
+  currPassword: getEnv(`ACCOUNT_OLH_${environment}_APP_PASSWORD`),
+  newPassword: getEnv(`ACCOUNT_OLH_${environment}_APP_PASSWORD_NEW`),
+  fixedPhoneOTP: getEnv(`ACCOUNT_OLH_${environment}_PHONE_OTP`),
+  fixedEmailOTP: getEnv(`ACCOUNT_OLH_${environment}_EMAIL_OTP`)
 }
 
 const phoneData = {
-  newPhone: getEnv('ACCOUNT_NEW_PHONE')
+  newPhone: getEnv(`ACCOUNT_OLH_${environment}_NEW_PHONE`)
 }
 
 export function changeEmail(): void {

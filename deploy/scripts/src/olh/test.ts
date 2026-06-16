@@ -423,7 +423,7 @@ const profiles: ProfileList = {
     ...createOLHPeakTestScenario('changePassword', 12, 33, 1),
     ...createOLHPeakTestScenario('changePhone', 12, 38, 1),
     ...createOLHPeakTestScenario('deleteAccount', 12, 28, 1),
-    ...createI4PeakTestSignInScenario('landingPage', 1038, 13, 6),
+    ...createI4PeakTestSignInScenario('landingPage', 18, 13, 6),
     ...createOLHPeakTestScenario('setUpPasskey', 12, 33, 1),
     ...createOLHPeakTestScenario('removePasskey', 12, 33, 1)
   },

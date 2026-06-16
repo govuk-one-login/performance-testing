@@ -411,14 +411,13 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('landingPage', 7, 9, 4)
   },
   perf006Iteration8PeakTest: {
-    ...createOLHPeakTestScenario('changeEmail', 6, 24, 1),
-    ...createOLHPeakTestScenario('changePassword', 6, 21, 1),
-    ...createOLHPeakTestScenario('changePhone', 6, 24, 1),
-    ...createOLHPeakTestScenario('deleteAccount', 6, 18, 1),
-    ...createI4PeakTestSignInScenario('landingPage', 12, 9, 6),
-    // Passkey scenarios (accounting for their sleep patterns):
-    ...createOLHPeakTestScenario('setUpPasskey', 6, 28, 1), // ~5 sleepBetween calls + AMC complexity
-    ...createOLHPeakTestScenario('removePasskey', 6, 28, 1)
+    ...createOLHPeakTestScenario('changeEmail', 12, 38, 1),
+    ...createOLHPeakTestScenario('changePassword', 12, 33, 1),
+    ...createOLHPeakTestScenario('changePhone', 12, 38, 1),
+    ...createOLHPeakTestScenario('deleteAccount', 12, 28, 1),
+    ...createI4PeakTestSignInScenario('landingPage', 1038, 13, 6),
+    ...createOLHPeakTestScenario('setUpPasskey', 12, 33, 1),
+    ...createOLHPeakTestScenario('removePasskey', 12, 33, 1)
   },
   perf006Iteration8SpikeTest: {
     ...createI3SpikeOLHScenario('changeEmail', 12, 24, 1),
@@ -1338,6 +1337,8 @@ export function landingPage(): void {
       ...pageContentCheck('Your services')
     })
   })
+
+  sleepBetween(1, 3)
 
   //B07_03_SignOut
   timeGroup(groups[6], () => {

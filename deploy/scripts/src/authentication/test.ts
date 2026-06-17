@@ -340,10 +340,10 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration10PeakTest: {
-    ...createI4PeakTestSignUpScenario('signUp', 740, 33, 741),
-    ...createI4PeakTestSignInScenario('signIn', 129, 18, 60),
-    ...createI4PeakTestSignInScenario('passkeyCreationSignIn', 55, 42, 26),
-    ...createI4PeakTestSignInScenario('amcHealthCheck', 55, 3, 26)
+    ...createI4PeakTestSignUpScenario('signUp', 75, 43, 751),
+    ...createI4PeakTestSignInScenario('signIn', 187, 23, 86),
+    ...createI4PeakTestSignInScenario('passkeyCreationSignIn', 80, 55, 37),
+    ...createI4PeakTestSignInScenario('amcHealthCheck', 80, 3, 37)
   }
 }
 const loadProfile = selectProfile(profiles)

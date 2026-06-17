@@ -38,7 +38,8 @@ const profiles: ProfileList = {
     ...createScenario('signIn', LoadProfile.smoke),
     ...createScenario('signUp', LoadProfile.smoke),
     ...createScenario('passkeyCreationSignIn', LoadProfile.smoke),
-    ...createScenario('userCreationForPasskey', LoadProfile.smoke)
+    ...createScenario('userCreationForPasskey', LoadProfile.smoke),
+    ...createScenario('amcHealthCheck', LoadProfile.smoke)
   },
   lowVolume: {
     ...createScenario('signIn', LoadProfile.short, 30),
@@ -339,9 +340,10 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration10PeakTest: {
-    ...createI4PeakTestSignUpScenario('signUp', 740, 33, 741),
-    ...createI4PeakTestSignInScenario('signIn', 129, 18, 60),
-    ...createI4PeakTestSignInScenario('passkeyCreationSignIn', 55, 42, 26)
+    ...createI4PeakTestSignUpScenario('signUp', 75, 43, 751),
+    ...createI4PeakTestSignInScenario('signIn', 187, 23, 86),
+    ...createI4PeakTestSignInScenario('passkeyCreationSignIn', 80, 55, 37),
+    ...createI4PeakTestSignInScenario('amcHealthCheck', 80, 3, 37)
   }
 }
 const loadProfile = selectProfile(profiles)
@@ -454,7 +456,8 @@ const groupMap = {
     'B05_UserCreationForPasskey_06_MFA_SMS',
     'B05_UserCreationForPasskey_07_MFA_EnterPhoneNum',
     'B05_UserCreationForPasskey_08_MFA_EnterSMSOTP'
-  ]
+  ],
+  amcHealthCheck: ['B06_AMCHealthCheck_01_CallHealthCheckEndpoint']
 } as const
 
 export const options: Options = {
@@ -1545,5 +1548,17 @@ export function userCreationForPasskey(): void {
     }
   )
   console.log(testEmail)
+  iterationsCompleted.add(1)
+}
+
+export function amcHealthCheck(): void {
+  const groups = groupMap.amcHealthCheck
+  iterationsStarted.add(1)
+
+  // B06_AMCHealthCheck_01_CallHealthCheckEndpoint
+  timeGroup(groups[0], () => http.get(`${env.amcURL}/healthcheck`), {
+    isStatusCode200,
+    ...pageContentCheck('ok')
+  })
   iterationsCompleted.add(1)
 }

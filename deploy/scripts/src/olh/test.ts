@@ -417,16 +417,6 @@ const profiles: ProfileList = {
     ...createOLHPeakTestScenario('deleteAccount', 6, 18, 1),
     ...createI4PeakTestSignInScenario('landingPage', 12, 9, 6)
   },
-
-  perf006Iteration10PeakTest: {
-    ...createOLHPeakTestScenario('changeEmail', 17, 38, 1),
-    ...createOLHPeakTestScenario('changePassword', 17, 33, 1),
-    ...createOLHPeakTestScenario('changePhone', 17, 38, 1),
-    ...createOLHPeakTestScenario('deleteAccount', 17, 28, 1),
-    ...createI4PeakTestSignInScenario('landingPage', 26, 13, 6),
-    ...createOLHPeakTestScenario('setUpPasskey', 17, 33, 1),
-    ...createOLHPeakTestScenario('removePasskey', 17, 33, 1)
-  },
   perf006Iteration8SpikeTest: {
     ...createI3SpikeOLHScenario('changeEmail', 12, 24, 1),
     ...createI3SpikeOLHScenario('changePassword', 12, 21, 1),
@@ -440,6 +430,16 @@ const profiles: ProfileList = {
     ...createStressTestOLHScenario('changePhone', 18, 24, 1),
     ...createStressTestOLHScenario('deleteAccount', 18, 18, 1),
     ...createStressTestSignInScenario('landingPage', 24, 6, 12)
+  },
+
+  perf006Iteration10PeakTest: {
+    ...createOLHPeakTestScenario('changeEmail', 17, 38, 1),
+    ...createOLHPeakTestScenario('changePassword', 17, 33, 1),
+    ...createOLHPeakTestScenario('changePhone', 17, 38, 1),
+    ...createOLHPeakTestScenario('deleteAccount', 17, 28, 1),
+    ...createI4PeakTestSignInScenario('landingPage', 26, 13, 6),
+    ...createOLHPeakTestScenario('setUpPasskey', 17, 33, 1),
+    ...createOLHPeakTestScenario('removePasskey', 17, 33, 1)
   }
 }
 

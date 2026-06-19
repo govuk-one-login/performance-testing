@@ -24,11 +24,11 @@ import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 import { getEnv } from '../common/utils/config/environment-variables'
 import http from 'k6/http'
+import { type RefinedResponse, type ResponseType } from 'k6/http'
 import { sleep } from 'k6'
 import { timeGroup } from '../common/utils/request/timing'
-//import { isStatusCode302 } from '../common/utils/checks/assertions'
 import { URL } from '../common/utils/jslib/url'
-import { isStatusCode200, pageContentCheck, isStatusCode202 } from '../common/utils/checks/assertions'
+import { isStatusCode200, pageContentCheck, isStatusCode202, isStatusCode302 } from '../common/utils/checks/assertions'
 
 const profiles: ProfileList = {
   smoke: {
@@ -132,10 +132,13 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  IPVR_FE: [
-    'B01_IPVRFE_01_OIDCStubCall', //pragma: allowlist secret
+  allEvents: [
+    'B01_IPVRFE_01_LaunchOIDCStub',
     'B01_IPVRFE_02_SignIn',
-    'B01_IPVRFE_03_Authorize'
+    'B01_IPVRFE_03_Authorize',
+    'B01_IPVRFE_03_Authorize::01_OLHCall',
+    'B01_IPVRFE_03_Authorize::02_ORCHCall',
+    'B01_IPVRFE_03_Authorize::03_AuthCall'
   ]
 } as const
 
@@ -153,10 +156,10 @@ export function setup(): void {
 
 const env = {
   sqs_queue: getEnv('IDENTITY_KIWI_STUB_SQS'),
-  OIDC_STUB_URL: getEnv('IDENTITY_OIDC_STUB_URL'),
-  CLIENT_ID: getEnv('IDENTITY_OIDC_STUB_CLIENT_ID'),
-  REDIRECT_URI: getEnv('IDENTITY_OIDC_STUB_REDIRECT_URI'),
-  OIDC_STUB_PASSWORD: getEnv('IDENTITY_OIDC_STUB_PASSWORD')
+  oidcstub_Url: getEnv('IDENTITY_KIWI_OIDCSTUB_URL'),
+  oidcstub_clientid: getEnv('IDENTITY_KIWI_OIDCSTUB_CLIENT_ID'),
+  oidcstub_redirecturi: getEnv('IDENTITY_KIWI_OIDCSTUB_REDIRECT_URI'),
+  oidcstub_password: getEnv('IDENTITY_KIWI_OIDCSTUB_PASSWORD')
 }
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -195,62 +198,48 @@ export function allEvents(): void {
   sleep(5)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
   iterationsCompleted.add(1)
-}
 
-/* IPVR_FE() function to be executed after the 'allevents' scenario to validate the IPVR FE journey.
- It simulates a user going through the OIDC stub and being redirected to the GOV.UK sign in page.
- BE to FE journey validation for IPVR, simulating a user going through the OIDC stub and being redirected to the GOV.UK sign in page.
-*/
-export function IPVR_FE(): void {
-  // Step 1: Stub Login page GET request to get full URL with query parameters
-  const url = new URL(`${env.OIDC_STUB_URL}/authorize`)
-  url.searchParams.set('client_id', env.CLIENT_ID)
+  const groups = groupMap.allEvents
+  let res: RefinedResponse<ResponseType | undefined>
+  const url = new URL(`${env.oidcstub_Url}/authorize`)
+  url.searchParams.set('client_id', env.oidcstub_clientid)
   url.searchParams.set('response_type', 'code')
   url.searchParams.set('scope', 'openid profile')
-  url.searchParams.set('redirect_uri', env.REDIRECT_URI)
+  url.searchParams.set('redirect_uri', env.oidcstub_redirecturi)
   url.searchParams.set('nonce', uuidv4())
-  console.log(`Step 1 url: ${url.href}`)
-
-  const loginPage = timeGroup(groupMap.IPVR_FE[0], () => http.get(url.href), {
+  //B01_IPVRFE_01_LaunchOIDCStub
+  res = timeGroup(groups[0], () => http.get(url.href), {
     isStatusCode200,
     ...pageContentCheck('Sign-in')
   })
 
-  //Step 2: Submit Stub login form with userId and password
-  const submitPage = timeGroup(
-    groupMap.IPVR_FE[1],
+  //B01_IPVRFE_02_SignIn
+  res = timeGroup(
+    groups[1],
     () =>
-      loginPage.submitForm({
+      res.submitForm({
         fields: {
           login: `${uuidv4()}@example.com`,
-          password: env.OIDC_STUB_PASSWORD
+          password: env.oidcstub_password
         },
         submitSelector: '[type="submit"]'
       }),
     { isStatusCode200, ...pageContentCheck('Continue') }
   )
-
-  //Step 3: Click Continue or confirm to follow redirect to GOV.UK page
-  const govukPage = timeGroup(
-    groupMap.IPVR_FE[2],
+  //B01_IPVRFE_03_Authorize::01_OLHCall
+  res = timeGroup(
+    groups[2].split('::')[1],
     () =>
-      submitPage.submitForm({
-        submitSelector: '.login.login-submit'
+      res.submitForm({
+        submitSelector: '.login.login-submit',
+        params: { redirects: 2 }
       }),
-    { isStatusCode202 }
+    { isStatusCode302 }
   )
 
-  console.log(`Step 3 Status: ${govukPage.status}`)
-  console.log(`Step 3 URL: ${govukPage.url}`)
-  console.log(`Step 3 location: ${govukPage.headers.location}`)
-  console.log(`Step 3 body: ${govukPage.body}`)
+  //B01_IPVRFE_03_Authorize::02_ORCHCall'
 
-  /*/ Step 4: Follow redirect to GOV.UK page.
-  const govukRedirect = timeGroup(groupMap.IPVR_FE[3], () => http.get(govukPage.headers.location), {
-    isStatusCode200,
-    ...pageContentCheck('GOV.UK One Login or sign in')
-  })
-  console.log(`Step 4 status: ${govukRedirect.status}`)
-  console.log(`Step 4 URL: ${govukRedirect.url}`)
-  console.log(`Step 4 body: ${govukRedirect.body}`)*/
+  res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location, { redirects: 1 }), { isStatusCode202 })
+
+  //'B01_IPVRFE_03_Authorize::03_AuthCall'
 }

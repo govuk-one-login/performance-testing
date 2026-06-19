@@ -341,8 +341,8 @@ const profiles: ProfileList = {
   },
   perf006Iteration10PeakTest: {
     ...createI4PeakTestSignUpScenario('signUp', 75, 43, 751),
-    ...createI4PeakTestSignInScenario('signIn', 187, 23, 86),
-    ...createI4PeakTestSignInScenario('passkeyCreationSignIn', 80, 55, 37),
+    ...createI4PeakTestSignInScenario('signIn', 214, 23, 98, 653),
+    ...createI4PeakTestSignInScenario('passkeyCreationSignIn', 80, 55, 37, 714),
     ...createI4PeakTestSignInScenario('amcHealthCheck', 80, 3, 37)
   }
 }

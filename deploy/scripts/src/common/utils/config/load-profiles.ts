@@ -358,8 +358,9 @@ function createPerfTestScenario(
   target: number,
   iterationDuration: number,
   rampUpDuration: number,
-  holdDuration: string,
-  config: RampUpConfig
+  steadyStateDuration: string,
+  config: RampUpConfig,
+  phaseDelay: number = 0
 ): ScenarioList {
   const list: ScenarioList = {}
   const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
@@ -372,8 +373,9 @@ function createPerfTestScenario(
     preAllocatedVUs,
     maxVUs,
     stages: [
+      ...(phaseDelay > 0 ? [{ target: config.startRate, duration: `${phaseDelay}s` }] : []),
       { target, duration: `${rampUpDuration}s` },
-      { target, duration: holdDuration }
+      { target, duration: steadyStateDuration }
     ],
     exec
   }
@@ -385,18 +387,20 @@ export function createI4PeakTestSignUpScenario(
   exec: string,
   target: number,
   iterationDuration: number,
-  rampUpDuration: number
+  rampUpDuration: number,
+  phaseDelay: number = 0
 ): ScenarioList {
-  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signUpConfig)
+  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signUpConfig, phaseDelay)
 }
 
 export function createI4PeakTestSignInScenario(
   exec: string,
   target: number,
   iterationDuration: number,
-  rampUpDuration: number
+  rampUpDuration: number,
+  phaseDelay: number = 0
 ): ScenarioList {
-  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signInConfig)
+  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signInConfig, phaseDelay)
 }
 
 export function createI3SpikeOLHScenario(

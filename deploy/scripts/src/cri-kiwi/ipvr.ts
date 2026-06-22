@@ -23,12 +23,18 @@ import {
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 import { getEnv } from '../common/utils/config/environment-variables'
+import http from 'k6/http'
+import { type RefinedResponse, type ResponseType } from 'k6/http'
 import { sleep } from 'k6'
+import { timeGroup } from '../common/utils/request/timing'
+import { URL } from '../common/utils/jslib/url'
+import { isStatusCode200, pageContentCheck, isStatusCode202, isStatusCode302 } from '../common/utils/checks/assertions'
 
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('authEvent', LoadProfile.smoke),
-    ...createScenario('allEvents', LoadProfile.smoke)
+    ...createScenario('allEvents', LoadProfile.smoke),
+    ...createScenario('IPVR_FE', LoadProfile.smoke)
   },
   lowVolume: {
     ...createScenario('authEvent', LoadProfile.short, 30, 2),
@@ -125,6 +131,16 @@ const profiles: ProfileList = {
 }
 
 const loadProfile = selectProfile(profiles)
+const groupMap = {
+  allEvents: [
+    'B01_IPVRFE_01_LaunchOIDCStub',
+    'B01_IPVRFE_02_SignIn',
+    'B01_IPVRFE_03_Authorize',
+    'B01_IPVRFE_03_Authorize::01_OLHCall',
+    'B01_IPVRFE_03_Authorize::02_ORCHCall',
+    'B01_IPVRFE_03_Authorize::03_AuthCall'
+  ]
+} as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
@@ -139,7 +155,11 @@ export function setup(): void {
 }
 
 const env = {
-  sqs_queue: getEnv('IDENTITY_KIWI_STUB_SQS')
+  sqs_queue: getEnv('IDENTITY_KIWI_STUB_SQS'),
+  oidcstub_Url: getEnv('IDENTITY_KIWI_OIDCSTUB_URL'),
+  oidcstub_clientid: getEnv('IDENTITY_KIWI_OIDCSTUB_CLIENT_ID'),
+  oidcstub_redirecturi: getEnv('IDENTITY_KIWI_OIDCSTUB_REDIRECT_URI'),
+  oidcstub_password: getEnv('IDENTITY_KIWI_OIDCSTUB_PASSWORD')
 }
 
 const credentials = (JSON.parse(getEnv('EXECUTION_CREDENTIALS')) as AssumeRoleOutput).Credentials
@@ -149,6 +169,7 @@ const awsConfig = new AWSConfig({
   secretAccessKey: credentials.SecretAccessKey,
   sessionToken: credentials.SessionToken
 })
+
 const sqs = new SQSClient(awsConfig)
 
 export function authEvent(): void {
@@ -177,4 +198,48 @@ export function allEvents(): void {
   sleep(5)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
   iterationsCompleted.add(1)
+
+  const groups = groupMap.allEvents
+  let res: RefinedResponse<ResponseType | undefined>
+  const url = new URL(`${env.oidcstub_Url}/authorize`)
+  url.searchParams.set('client_id', env.oidcstub_clientid)
+  url.searchParams.set('response_type', 'code')
+  url.searchParams.set('scope', 'openid profile')
+  url.searchParams.set('redirect_uri', env.oidcstub_redirecturi)
+  url.searchParams.set('nonce', uuidv4())
+  //B01_IPVRFE_01_LaunchOIDCStub
+  res = timeGroup(groups[0], () => http.get(url.href), {
+    isStatusCode200,
+    ...pageContentCheck('Sign-in')
+  })
+
+  //B01_IPVRFE_02_SignIn
+  res = timeGroup(
+    groups[1],
+    () =>
+      res.submitForm({
+        fields: {
+          login: `${uuidv4()}@example.com`,
+          password: env.oidcstub_password
+        },
+        submitSelector: '[type="submit"]'
+      }),
+    { isStatusCode200, ...pageContentCheck('Continue') }
+  )
+  //B01_IPVRFE_03_Authorize::01_OLHCall
+  res = timeGroup(
+    groups[2].split('::')[1],
+    () =>
+      res.submitForm({
+        submitSelector: '.login.login-submit',
+        params: { redirects: 2 }
+      }),
+    { isStatusCode302 }
+  )
+
+  //B01_IPVRFE_03_Authorize::02_ORCHCall'
+
+  res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location, { redirects: 1 }), { isStatusCode202 })
+
+  //'B01_IPVRFE_03_Authorize::03_AuthCall'
 }

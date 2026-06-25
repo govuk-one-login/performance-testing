@@ -1271,9 +1271,9 @@ export function passkeyCreationSignIn(): void {
     }
   })
 
-  // 20% of users will sign in with a Passkey
+  // 67% of users who create a passkey will sign in with a Passkey which is 20% of the total Sign in volume.
 
-  if (Math.random() <= 0.2) {
+  if (Math.random() <= 0.67) {
     // B04_SignInWithPasskey_01_StubSubmit
     if (route === 'RP') {
       res = rpStubSubmit(groups)

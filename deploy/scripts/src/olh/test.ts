@@ -433,8 +433,8 @@ const profiles: ProfileList = {
   },
 
   perf006Iteration10PeakTest: {
-    ...createOLHPeakTestScenario('changeEmail', 17, 38, 1),
-    ...createOLHPeakTestScenario('changePassword', 17, 33, 1),
+    ...createOLHPeakTestScenario('changeEmail', 17, 34, 1),
+    ...createOLHPeakTestScenario('changePassword', 17, 38, 1),
     ...createOLHPeakTestScenario('changePhone', 17, 38, 1),
     ...createOLHPeakTestScenario('deleteAccount', 17, 28, 1),
     ...createI4PeakTestSignInScenario('landingPage', 26, 13, 6),
@@ -453,14 +453,15 @@ const groupMap = {
     'B01_ChangeEmail_02_SelectStubScenario::01_OIDCStubCall',
     'B01_ChangeEmail_02_SelectStubScenario::02_OLHCall',
     'B01_ChangeEmail_03_ClickSecurityTab',
-    'B01_ChangeEmail_04_ClickChangeEmailLink',
-    'B01_ChangeEmail_05_EnterCurrentPassword',
-    'B01_ChangeEmail_06_EnterNewEmailID',
-    'B01_ChangeEmail_07_EnterEmailOTP',
-    'B01_ChangeEmail_08_Logout',
-    'B01_ChangeEmail_08_Logout::01_OLHCall',
-    'B01_ChangeEmail_08_Logout::02_OIDCStubCall',
-    'B01_ChangeEmail_08_Logout::03_OLHCall'
+    'B01_ChangeEmail_04_ClickSignInDetails',
+    'B01_ChangeEmail_05_ClickChangeEmailLink',
+    'B01_ChangeEmail_06_EnterCurrentPassword',
+    'B01_ChangeEmail_07_EnterNewEmailID',
+    'B01_ChangeEmail_08_EnterEmailOTP',
+    'B01_ChangeEmail_09_Logout',
+    'B01_ChangeEmail_09_Logout::01_OLHCall',
+    'B01_ChangeEmail_09_Logout::02_OIDCStubCall',
+    'B01_ChangeEmail_09_Logout::03_OLHCall'
   ],
   changePassword: [
     'B02_ChangePassword_01_LaunchAccountsHome',
@@ -469,13 +470,14 @@ const groupMap = {
     'B02_ChangePassword_02_SelectStubScenario',
     'B02_ChangePassword_02_SelectStubScenario::01_OIDCStubCall',
     'B02_ChangePassword_02_SelectStubScenario::02_OLHCall',
-    'B02_ChangePassword_03_ClickSecurityTab', //pragma: allowlist secret
-    'B02_ChangePassword_04_ClickChangePasswordLink',
-    'B02_ChangePassword_05_EnterCurrentPassword',
-    'B02_ChangePassword_06_EnterNewPassword',
-    'B02_ChangePassword_07_SignOut',
-    'B02_ChangePassword_07_SignOut::01_OLHCall',
-    'B02_ChangePassword_07_SignOut::02_OIDCStubCall'
+    'B02_ChangePassword_03_ClickSecurityTab',
+    'B02_ChangePassword_04_ClickManageSignInDetails',
+    'B02_ChangePassword_05_ClickChangePasswordLink',
+    'B02_ChangePassword_06_EnterCurrentPassword',
+    'B02_ChangePassword_07_EnterNewPassword',
+    'B02_ChangePassword_08_SignOut',
+    'B02_ChangePassword_08_SignOut::01_OLHCall',
+    'B02_ChangePassword_08_SignOut::02_OIDCStubCall'
   ],
   changePhone: [
     'B03_ChangePhone_01_LaunchAccountsHome',
@@ -696,11 +698,29 @@ export function changeEmail(): void {
 
   sleepBetween(1, 3)
 
-  // B01_ChangeEmail_04_ClickChangeEmailLink
+  // B01_ChangeEmail_04_ClickSignInDetails
   res = timeGroup(
     groups[7],
     () => {
-      const r = http.get(env.envURL + '/enter-password?from=security&edit=true&type=changeEmail')
+      const r = http.get(env.envURL + '/sign-in-details')
+      if (!pageContentCheck('Sign in details').validatePageContent(r)) {
+        console.log(' Expected "Sign in details", got: ', r.html('h1').text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Sign in details')
+    }
+  )
+
+  sleepBetween(1, 3)
+
+  // B01_ChangeEmail_05_ClickChangeEmailLink
+  res = timeGroup(
+    groups[8],
+    () => {
+      const r = http.get(env.envURL + '/enter-password?from=sign-in-details&edit=true&type=changeEmail')
       if (!pageContentCheck('Enter your password').validatePageContent(r)) {
         console.log(' Expected "Enter your password", got: ', r.html('h1').text())
       }
@@ -714,12 +734,12 @@ export function changeEmail(): void {
 
   sleepBetween(1, 3)
 
-  // B01_ChangeEmail_05_EnterCurrentPassword
+  // B01_ChangeEmail_06_EnterCurrentPassword
   res = timeGroup(
-    groups[8],
+    groups[9],
     () => {
       const r = res.submitForm({
-        formSelector: "form[action='/enter-password?from=security&edit=true&type=changeEmail']",
+        formSelector: "form[action='/enter-password?from=sign-in-details&edit=true&type=changeEmail']",
         fields: {
           requestType: 'changeEmail',
           password: credentials.currPassword
@@ -738,9 +758,9 @@ export function changeEmail(): void {
 
   sleepBetween(1, 3)
 
-  // B01_ChangeEmail_06_EnterNewEmailID
+  // B01_ChangeEmail_07_EnterNewEmailID
   res = timeGroup(
-    groups[9],
+    groups[10],
     () => {
       const r = res.submitForm({
         formSelector: "form[action='/change-email']",
@@ -761,9 +781,9 @@ export function changeEmail(): void {
 
   sleepBetween(1, 3)
 
-  // B01_ChangeEmail_07_EnterEmailOTP
+  // B01_ChangeEmail_08_EnterEmailOTP
   res = timeGroup(
-    groups[10],
+    groups[11],
     () => {
       const r = res.submitForm({
         formSelector: "form[action='/check-your-email']",
@@ -785,22 +805,22 @@ export function changeEmail(): void {
 
   sleepBetween(1, 3)
 
-  //B01_ChangeEmail_08_Logout
-  timeGroup(groups[11], () => {
+  //B01_ChangeEmail_09_Logout
+  timeGroup(groups[12], () => {
     //01_OLHCall
     res = timeGroup(
-      groups[12].split('::')[1],
+      groups[13].split('::')[1],
       () => res.submitForm({ formSelector: "form[action='/sign-out']", params: { redirects: 0 } }),
       { isStatusCode302 }
     )
 
     //02_OIDCStubCall
-    res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
       isStatusCode302
     })
 
     //03_OLHCall
-    res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('You have signed out')
     })
@@ -854,24 +874,30 @@ export function changePassword(): void {
 
   sleepBetween(1, 3)
 
-  // B02_ChangePassword_04_ClickChangePasswordLink
+  // B02_ChangePassword_04_ClickManageSignInDetails
+  res = timeGroup(groups[7], () => http.get(env.envURL + '/sign-in-details'), {
+    isStatusCode200,
+    ...pageContentCheck('Sign in details')
+  })
+
+  sleepBetween(1, 3)
+
+  // B02_ChangePassword_05_ClickChangePasswordLink
   res = timeGroup(
-    groups[7],
-    () => http.get(env.envURL + '/enter-password?from=security&edit=true&type=changePassword'),
+    groups[8],
+    () => http.get(env.envURL + '/enter-password?from=sign-in-details&edit=true&type=changePassword'),
     {
       isStatusCode200,
       ...pageContentCheck('Enter your current password')
     }
   )
 
-  sleepBetween(1, 3)
-
-  // B02_ChangePassword_05_EnterCurrentPassword
+  // B02_ChangePassword_06_EnterCurrentPassword
   res = timeGroup(
-    groups[8],
+    groups[9],
     () =>
       res.submitForm({
-        formSelector: "form[action='/enter-password?from=security&edit=true&type=changePassword']",
+        formSelector: "form[action='/enter-password?from=sign-in-details&edit=true&type=changePassword']",
         fields: {
           requestType: 'changePassword',
           password: credentials.currPassword
@@ -882,34 +908,59 @@ export function changePassword(): void {
 
   sleepBetween(1, 3)
 
-  // B02_ChangePassword_06_EnterNewPassword
+  // B02_ChangePassword_07_EnterNewPassword
   res = timeGroup(
-    groups[9],
-    () =>
-      res.submitForm({
-        formSelector: "form[action='/change-password']",
+    groups[10],
+    () => {
+      console.log('=== DEBUG: Looking for change-password form ===')
+      console.log('Current URL:', res.url)
+      console.log('Response status:', res.status)
+      console.log('Response body length:', res.body ? res.body.length : 'no body')
+      console.log('Response content type:', res.headers['Content-Type'] || 'no content type')
+
+      // Log first 1000 chars to see page content
+      if (res.body) {
+        console.log('First 1000 chars:', res.body.substring(0, 1000))
+      }
+
+      const allForms = res.html('form')
+      console.log(`Found ${allForms.length} forms`)
+
+      // Check if page has any HTML content
+      const htmlElements = res.html('*')
+      console.log(`Total HTML elements found: ${htmlElements.length}`)
+
+      // Check for error indicators
+      const bodyText = res.html('body').text()
+      if (bodyText && (bodyText.includes('error') || bodyText.includes('problem') || bodyText.includes('sorry'))) {
+        console.log('ERROR PAGE DETECTED:', bodyText.substring(0, 200))
+      }
+
+      return res.submitForm({
+        formSelector: "form[action='/change-password?from=sign-in-details']",
         fields: {
           password: credentials.newPassword,
           'confirm-password': credentials.newPassword
         }
-      }),
+      })
+    },
     { isStatusCode200, ...pageContentCheck('You’ve changed your password') }
   )
 
   sleepBetween(1, 3)
 
-  // B02_ChangePassword_07_SignOut
+  // B02_ChangePassword_08_SignOut
 
-  timeGroup(groups[10], () => {
+  timeGroup(groups[11], () => {
     //01_OLHCall
     res = timeGroup(
-      groups[11].split('::')[1],
+      groups[12].split('::')[1],
       () => res.submitForm({ formSelector: "form[action='/sign-out']", params: { redirects: 1 } }),
       { isStatusCode302 }
     )
 
     //02_OIDCStubCall
-    res = timeGroup(groups[12].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('API Simulation Tool')
     })

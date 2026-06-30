@@ -455,7 +455,7 @@ const groupMap = {
     'B01_ChangeEmail_03_ClickSecurityTab',
     'B01_ChangeEmail_04_ClickSignInDetails',
     'B01_ChangeEmail_05_ClickChangeEmailLink',
-    'B01_ChangeEmail_06_EnterCurrentPassword',
+    'B01_ChangeEmail_06_EnterCurrentPassword', // pragma: allowlist secret
     'B01_ChangeEmail_07_EnterNewEmailID',
     'B01_ChangeEmail_08_EnterEmailOTP',
     'B01_ChangeEmail_09_Logout',
@@ -466,15 +466,15 @@ const groupMap = {
   changePassword: [
     'B02_ChangePassword_01_LaunchAccountsHome',
     'B02_ChangePassword_01_LaunchAccountsHome::01_OLHCall',
-    'B02_ChangePassword_01_LaunchAccountsHome::02_OIDCStubCall',
+    'B02_ChangePassword_01_LaunchAccountsHome::02_OIDCStubCall', // pragma: allowlist secret
     'B02_ChangePassword_02_SelectStubScenario',
     'B02_ChangePassword_02_SelectStubScenario::01_OIDCStubCall',
     'B02_ChangePassword_02_SelectStubScenario::02_OLHCall',
-    'B02_ChangePassword_03_ClickSecurityTab',
+    'B02_ChangePassword_03_ClickSecurityTab', // pragma: allowlist secret
     'B02_ChangePassword_04_ClickManageSignInDetails',
-    'B02_ChangePassword_05_ClickChangePasswordLink',
-    'B02_ChangePassword_06_EnterCurrentPassword',
-    'B02_ChangePassword_07_EnterNewPassword',
+    'B02_ChangePassword_05_ClickChangePasswordLink', // pragma: allowlist secret
+    'B02_ChangePassword_06_EnterCurrentPassword', // pragma: allowlist secret
+    'B02_ChangePassword_07_EnterNewPassword', // pragma: allowlist secret
     'B02_ChangePassword_08_SignOut',
     'B02_ChangePassword_08_SignOut::01_OLHCall',
     'B02_ChangePassword_08_SignOut::02_OIDCStubCall'
@@ -488,7 +488,7 @@ const groupMap = {
     'B03_ChangePhone_02_SelectStubScenario::02_OLHCall',
     'B03_ChangePhone_03_ClickSecurityTab',
     'B03_ChangePhone_04_ClickChangePhoneNumberLink',
-    'B03_ChangePhone_05_EnterCurrentPassword',
+    'B03_ChangePhone_05_EnterCurrentPassword', // pragma: allowlist secret
     'B03_ChangePhone_06_EnterNewPhoneID',
     'B03_ChangePhone_07_EnterSMSOTP',
     'B03_ChangePhone_08_SignOut',
@@ -505,16 +505,16 @@ const groupMap = {
     'B04_DeleteAccount_02_SelectStubScenario::02_OLHCall',
     'B04_DeleteAccount_03_ClickSecurityTab',
     'B04_DeleteAccount_04_ClickDeleteAccountLink',
-    'B04_DeleteAccount_05_EnterCurrentPassword',
+    'B04_DeleteAccount_05_EnterCurrentPassword', // pragma: allowlist secret
     'B04_DeleteAccount_06_DeleteAccountConfirm'
   ],
   validateUser: [
     'B05_ValidateUser_01_LaunchAccountsHome',
     'B05_ValidateUser_02_ClickSignIn',
     'B05_ValidateUser_03_EnterEmailAddress',
-    'B05_ValidateUser_04_AuthMFA_EnterPassword',
+    'B05_ValidateUser_04_AuthMFA_EnterPassword', // pragma: allowlist secret
     'B05_ValidateUser_05_AuthMFA_EnterTOTP',
-    'B05_ValidateUser_06_SMSMFA_EnterPassword',
+    'B05_ValidateUser_06_SMSMFA_EnterPassword', // pragma: allowlist secret
     'B05_ValidateUser_07_SMSMFA_EnterOTP',
     'B05_ValidateUser_08_AcceptTermsConditions',
     'B05_ValidateUser_09_ClickSecurityTab',
@@ -543,7 +543,7 @@ const groupMap = {
     'B08_RemovePasskey_03_ClickSecurityTab',
     'B08_RemovePasskey_04_ClickSignInDetails',
     'B08_RemovePasskey_05_ClickRemovePasskeyLink',
-    'B08_RemovePasskey_06_EnterPassword',
+    'B08_RemovePasskey_06_EnterPassword', // pragma: allowlist secret
     'B08_RemovePasskey_07_ConfirmRemovePasskey'
   ],
   setUpPasskey: [
@@ -556,7 +556,7 @@ const groupMap = {
     'B09_SetUpPasskey_03_ClickSecurityTab',
     'B09_SetUpPasskey_04_ClickManageSignInDetails',
     'B09_SetUpPasskey_05_ClickSetUpPasskey',
-    'B09_SetUpPasskey_06_EnterCurrentPassword',
+    'B09_SetUpPasskey_06_EnterCurrentPassword', // pragma: allowlist secret
     'B09_SetUpPasskey_06_EnterCurrentPassword::01_OLHCall',
     'B09_SetUpPasskey_06_EnterCurrentPassword::02_AMCStubCall',
     'B09_SetUpPasskey_07_CreatePasskeyFromAMCStub'
@@ -912,30 +912,6 @@ export function changePassword(): void {
   res = timeGroup(
     groups[10],
     () => {
-      console.log('=== DEBUG: Looking for change-password form ===')
-      console.log('Current URL:', res.url)
-      console.log('Response status:', res.status)
-      console.log('Response body length:', res.body ? res.body.length : 'no body')
-      console.log('Response content type:', res.headers['Content-Type'] || 'no content type')
-
-      // Log first 1000 chars to see page content
-      if (res.body) {
-        console.log('First 1000 chars:', res.body.substring(0, 1000))
-      }
-
-      const allForms = res.html('form')
-      console.log(`Found ${allForms.length} forms`)
-
-      // Check if page has any HTML content
-      const htmlElements = res.html('*')
-      console.log(`Total HTML elements found: ${htmlElements.length}`)
-
-      // Check for error indicators
-      const bodyText = res.html('body').text()
-      if (bodyText && (bodyText.includes('error') || bodyText.includes('problem') || bodyText.includes('sorry'))) {
-        console.log('ERROR PAGE DETECTED:', bodyText.substring(0, 200))
-      }
-
       return res.submitForm({
         formSelector: "form[action='/change-password?from=sign-in-details']",
         fields: {

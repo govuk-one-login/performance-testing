@@ -505,10 +505,9 @@ const groupMap = {
     'B04_DeleteAccount_02_SelectStubScenario::01_OIDCStubCall',
     'B04_DeleteAccount_02_SelectStubScenario::02_OLHCall',
     'B04_DeleteAccount_03_ClickSecurityTab',
-    'B04_DeleteAccount_04_ClickSignInDetails',
-    'B04_DeleteAccount_05_ClickDeleteAccountLink',
-    'B04_DeleteAccount_06_EnterCurrentPassword', // pragma: allowlist secret
-    'B04_DeleteAccount_07_DeleteAccountConfirm'
+    'B04_DeleteAccount_04_ClickDeleteAccountLink',
+    'B04_DeleteAccount_05_EnterCurrentPassword', // pragma: allowlist secret
+    'B04_DeleteAccount_06_DeleteAccountConfirm'
   ],
   validateUser: [
     'B05_ValidateUser_01_LaunchAccountsHome',
@@ -1154,34 +1153,10 @@ export function deleteAccount(): void {
 
   sleepBetween(1, 3)
 
-  // B04_DeleteAccount_04_ClickSignInDetails
+  // B04_DeleteAccount_04_ClickDeleteAccountLink
   res = timeGroup(
     groups[7],
-    () => {
-      const r = http.get(env.envURL + '/sign-in-details')
-      if (!pageContentCheck('Sign in details').validatePageContent(r)) {
-        console.log(' Expected "Sign in details", got: ', r.html('h1').text())
-      }
-      return r
-    },
-    {
-      isStatusCode200,
-      ...pageContentCheck('Sign in details')
-    }
-  )
-
-  sleepBetween(1, 3)
-
-  // B04_DeleteAccount_05_ClickDeleteAccountLink
-  res = timeGroup(
-    groups[8],
-    () => {
-      const r = http.get(env.envURL + '/enter-password?from=sign-in-details&edit=true&type=deleteAccount')
-      if (!pageContentCheck('Enter your password').validatePageContent(r)) {
-        console.log(' Expected "Enter your password", got: ', r.html('h1').text())
-      }
-      return r
-    },
+    () => http.get(env.envURL + '/enter-password?from=security&edit=true&type=deleteAccount'),
     {
       isStatusCode200,
       ...pageContentCheck('Enter your password')
@@ -1190,12 +1165,12 @@ export function deleteAccount(): void {
 
   sleepBetween(1, 3)
 
-  // B04_DeleteAccount_06_EnterCurrentPassword
+  // B04_DeleteAccount_05_EnterCurrentPassword
   res = timeGroup(
-    groups[9],
+    groups[8],
     () =>
       res.submitForm({
-        formSelector: "form[action='/enter-password?from=sign-in-details&edit=true&type=deleteAccount']",
+        formSelector: "form[action='/enter-password?from=security&edit=true&type=deleteAccount']",
         fields: {
           requestType: 'deleteAccount',
           password: credentials.currPassword
@@ -1209,9 +1184,9 @@ export function deleteAccount(): void {
 
   sleepBetween(1, 3)
 
-  // B04_DeleteAccount_07_DeleteAccountConfirm
+  // B04_DeleteAccount_06_DeleteAccountConfirm
   res = timeGroup(
-    groups[10],
+    groups[9],
     () =>
       res.submitForm({
         formSelector: "form[action='/delete-account']"

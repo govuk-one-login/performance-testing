@@ -487,14 +487,15 @@ const groupMap = {
     'B03_ChangePhone_02_SelectStubScenario::01_OIDCStubCall',
     'B03_ChangePhone_02_SelectStubScenario::02_OLHCall',
     'B03_ChangePhone_03_ClickSecurityTab',
-    'B03_ChangePhone_04_ClickChangePhoneNumberLink',
-    'B03_ChangePhone_05_EnterCurrentPassword', // pragma: allowlist secret
-    'B03_ChangePhone_06_EnterNewPhoneID',
-    'B03_ChangePhone_07_EnterSMSOTP',
-    'B03_ChangePhone_08_SignOut',
-    'B03_ChangePhone_08_SignOut::01_OLHCall',
-    'B03_ChangePhone_08_SignOut::02_OIDCStubCall',
-    'B03_ChangePhone_08_SignOut::03_OLHCall'
+    'B03_ChangePhone_04_ClickSignInDetails',
+    'B03_ChangePhone_05_ClickChangePhoneNumberLink',
+    'B03_ChangePhone_06_EnterCurrentPassword', // pragma: allowlist secret
+    'B03_ChangePhone_07_EnterNewPhoneID',
+    'B03_ChangePhone_08_EnterSMSOTP',
+    'B03_ChangePhone_09_SignOut',
+    'B03_ChangePhone_09_SignOut::01_OLHCall',
+    'B03_ChangePhone_09_SignOut::02_OIDCStubCall',
+    'B03_ChangePhone_09_SignOut::03_OLHCall'
   ],
   deleteAccount: [
     'B04_DeleteAccount_01_LaunchAccountsHome',
@@ -504,9 +505,10 @@ const groupMap = {
     'B04_DeleteAccount_02_SelectStubScenario::01_OIDCStubCall',
     'B04_DeleteAccount_02_SelectStubScenario::02_OLHCall',
     'B04_DeleteAccount_03_ClickSecurityTab',
-    'B04_DeleteAccount_04_ClickDeleteAccountLink',
-    'B04_DeleteAccount_05_EnterCurrentPassword', // pragma: allowlist secret
-    'B04_DeleteAccount_06_DeleteAccountConfirm'
+    'B04_DeleteAccount_04_ClickSignInDetails',
+    'B04_DeleteAccount_05_ClickDeleteAccountLink',
+    'B04_DeleteAccount_06_EnterCurrentPassword', // pragma: allowlist secret
+    'B04_DeleteAccount_07_DeleteAccountConfirm'
   ],
   validateUser: [
     'B05_ValidateUser_01_LaunchAccountsHome',
@@ -991,10 +993,34 @@ export function changePhone(): void {
 
   sleepBetween(1, 3)
 
-  // B03_ChangePhone_04_ClickChangePhoneNumberLink
+  // B03_ChangePhone_04_ClickSignInDetails
   res = timeGroup(
     groups[7],
-    () => http.get(env.envURL + '/enter-password?from=security&edit=true&type=changePhoneNumber'),
+    () => {
+      const r = http.get(env.envURL + '/sign-in-details')
+      if (!pageContentCheck('Sign in details').validatePageContent(r)) {
+        console.log(' Expected "Sign in details", got: ', r.html('h1').text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Sign in details')
+    }
+  )
+
+  sleepBetween(1, 3)
+
+  // B03_ChangePhone_05_ClickChangePhoneNumberLink
+  res = timeGroup(
+    groups[8],
+    () => {
+      const r = http.get(env.envURL + '/enter-password?from=sign-in-details&edit=true&type=changePhoneNumber')
+      if (!pageContentCheck('Enter your password').validatePageContent(r)) {
+        console.log(' Expected "Enter your password", got: ', r.html('h1').text())
+      }
+      return r
+    },
     {
       isStatusCode200,
       ...pageContentCheck('Enter your password')
@@ -1003,12 +1029,12 @@ export function changePhone(): void {
 
   sleepBetween(1, 3)
 
-  // B03_ChangePhone_05_EnterCurrentPassword
+  // B03_ChangePhone_06_EnterCurrentPassword
   res = timeGroup(
-    groups[8],
+    groups[9],
     () =>
       res.submitForm({
-        formSelector: "form[action='/enter-password?from=security&edit=true&type=changePhoneNumber']",
+        formSelector: "form[action='/enter-password?from=sign-in-details&edit=true&type=changePhoneNumber']",
         fields: {
           password: credentials.currPassword
         }
@@ -1021,9 +1047,9 @@ export function changePhone(): void {
 
   sleepBetween(1, 3)
 
-  // B03_ChangePhone_06_EnterNewPhoneID
+  // B03_ChangePhone_07_EnterNewPhoneID
   res = timeGroup(
-    groups[9],
+    groups[10],
     () =>
       res.submitForm({
         formSelector: "form[action='/change-phone-number']",
@@ -1037,9 +1063,9 @@ export function changePhone(): void {
 
   sleepBetween(1, 3)
 
-  // B03_ChangePhone_07_EnterSMSOTP
+  // B03_ChangePhone_08_EnterSMSOTP
   res = timeGroup(
-    groups[10],
+    groups[11],
     () =>
       res.submitForm({
         formSelector: "form[action='/check-your-phone']",
@@ -1058,22 +1084,22 @@ export function changePhone(): void {
 
   sleepBetween(1, 3)
 
-  //B03_ChangePhone_08_SignOut
-  timeGroup(groups[11], () => {
+  //B03_ChangePhone_09_SignOut
+  timeGroup(groups[12], () => {
     //01_OLHCall
     res = timeGroup(
-      groups[12].split('::')[1],
+      groups[13].split('::')[1],
       () => res.submitForm({ formSelector: "form[action='/sign-out']", params: { redirects: 0 } }),
       { isStatusCode302 }
     )
 
     //02_OIDCStubCall
-    res = timeGroup(groups[13].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
+    res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location, { redirects: 0 }), {
       isStatusCode302
     })
 
     //03_OLHCall
-    res = timeGroup(groups[14].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[15].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
       ...pageContentCheck('You have signed out')
     })
@@ -1128,10 +1154,34 @@ export function deleteAccount(): void {
 
   sleepBetween(1, 3)
 
-  // B04_DeleteAccount_04_ClickDeleteAccountLink
+  // B04_DeleteAccount_04_ClickSignInDetails
   res = timeGroup(
     groups[7],
-    () => http.get(env.envURL + '/enter-password?from=security&edit=true&type=deleteAccount'),
+    () => {
+      const r = http.get(env.envURL + '/sign-in-details')
+      if (!pageContentCheck('Sign in details').validatePageContent(r)) {
+        console.log(' Expected "Sign in details", got: ', r.html('h1').text())
+      }
+      return r
+    },
+    {
+      isStatusCode200,
+      ...pageContentCheck('Sign in details')
+    }
+  )
+
+  sleepBetween(1, 3)
+
+  // B04_DeleteAccount_05_ClickDeleteAccountLink
+  res = timeGroup(
+    groups[8],
+    () => {
+      const r = http.get(env.envURL + '/enter-password?from=sign-in-details&edit=true&type=deleteAccount')
+      if (!pageContentCheck('Enter your password').validatePageContent(r)) {
+        console.log(' Expected "Enter your password", got: ', r.html('h1').text())
+      }
+      return r
+    },
     {
       isStatusCode200,
       ...pageContentCheck('Enter your password')
@@ -1140,12 +1190,12 @@ export function deleteAccount(): void {
 
   sleepBetween(1, 3)
 
-  // B04_DeleteAccount_05_EnterCurrentPassword
+  // B04_DeleteAccount_06_EnterCurrentPassword
   res = timeGroup(
-    groups[8],
+    groups[9],
     () =>
       res.submitForm({
-        formSelector: "form[action='/enter-password?from=security&edit=true&type=deleteAccount']",
+        formSelector: "form[action='/enter-password?from=sign-in-details&edit=true&type=deleteAccount']",
         fields: {
           requestType: 'deleteAccount',
           password: credentials.currPassword
@@ -1159,9 +1209,9 @@ export function deleteAccount(): void {
 
   sleepBetween(1, 3)
 
-  // B04_DeleteAccount_06_DeleteAccountConfirm
+  // B04_DeleteAccount_07_DeleteAccountConfirm
   res = timeGroup(
-    groups[9],
+    groups[10],
     () =>
       res.submitForm({
         formSelector: "form[action='/delete-account']"

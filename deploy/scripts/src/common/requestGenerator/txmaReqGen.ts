@@ -22,7 +22,9 @@ export function generateAuthCreateAccount(
   userID: string,
   emailID: string,
   pairWiseID: string,
-  journeyID: string
+  journeyID: string,
+  randomIP: string,
+  randomPhoneNumber: string
 ): AuthCreateAccount {
   return {
     event_id: `perfTestID_${uuidv4()}`,
@@ -34,11 +36,11 @@ export function generateAuthCreateAccount(
     user: {
       user_id: userID, // `${testID}_performanceTestClientId_${userID}_performanceTestCommonSubjectId`
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       email: emailID,
       session_id: uuidv4(),
       persistent_session_id: uuidv4(),
-      phone: '07777777777'
+      phone: randomPhoneNumber
     },
     extensions: {
       phone_number_country_code: 44,
@@ -47,7 +49,7 @@ export function generateAuthCreateAccount(
     restricted: {
       device_information: {
         request_timestamp_ms: Math.floor(Date.now()),
-        ip_address: '1.2.3.4',
+        ip_address: randomIP,
         connection_port: 12345,
         country_code: 'GB',
         user_agent: 'k6/0.52.0 (https://k6.io/)',
@@ -58,7 +60,13 @@ export function generateAuthCreateAccount(
   }
 }
 
-export function generateAuthLogInSuccess(userID: string, emailID: string, journeyID: string): AuthLogInSuccess {
+export function generateAuthLogInSuccess(
+  userID: string,
+  emailID: string,
+  journeyID: string,
+  randomIP: string,
+  randomPhoneNumber: string
+): AuthLogInSuccess {
   return {
     event_id: `perfTestID_${uuidv4()}`,
     event_name: 'AUTH_LOG_IN_SUCCESS',
@@ -69,11 +77,11 @@ export function generateAuthLogInSuccess(userID: string, emailID: string, journe
     user: {
       user_id: userID, // `${testID}_performanceTestClientId_${userID}_performanceTestCommonSubjectId`,
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       session_id: uuidv4(),
       email: emailID,
       persistent_session_id: uuidv4(),
-      phone: '07777777777'
+      phone: randomPhoneNumber
     },
     extensions: {
       phone_number_country_code: 44
@@ -81,7 +89,7 @@ export function generateAuthLogInSuccess(userID: string, emailID: string, journe
     restricted: {
       device_information: {
         request_timestamp_ms: Math.floor(Date.now()),
-        ip_address: '1.2.3.4',
+        ip_address: randomIP,
         connection_port: 12345,
         country_code: 'GB',
         user_agent: 'k6/0.52.0 (https://k6.io/)',
@@ -139,7 +147,7 @@ export function generateDcmawAbortWeb(userID: string, journeyID: string, emailID
   }
 }
 
-export function generateAuthAuthorisationInitiated(journeyID: string): AuthAuthorisationInitiated {
+export function generateAuthAuthorisationInitiated(journeyID: string, randomIP: string): AuthAuthorisationInitiated {
   return {
     client_id: 'performanceTestClientId',
     event_id: `perfTestID_${uuidv4()}`,
@@ -153,14 +161,19 @@ export function generateAuthAuthorisationInitiated(journeyID: string): AuthAutho
     timestamp: Math.floor(Date.now() / 1000),
     user: {
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       persistent_session_id: uuidv4(),
       session_id: uuidv4()
     }
   }
 }
 
-export function generateAuthCodeVerified(emailID: string, journeyID: string, userID: string): AuthCodeVerified {
+export function generateAuthCodeVerified(
+  emailID: string,
+  journeyID: string,
+  userID: string,
+  randomIP: string
+): AuthCodeVerified {
   return {
     client_id: 'performanceTestClientId',
     event_id: `perfTestID_${uuidv4()}`,
@@ -179,7 +192,7 @@ export function generateAuthCodeVerified(emailID: string, journeyID: string, use
     user: {
       email: emailID,
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       persistent_session_id: uuidv4(),
       session_id: uuidv4(),
       user_id: userID
@@ -190,7 +203,9 @@ export function generateAuthCodeVerified(emailID: string, journeyID: string, use
 export function generateAuthUpdatePhone(
   emailID: string,
   journeyID: string,
-  userID: string
+  userID: string,
+  randomIP: string,
+  randomPhoneNumber: string
 ): AuthUpdateProfilePhoneNumber {
   return {
     client_id: 'performanceTestClientId',
@@ -207,16 +222,16 @@ export function generateAuthUpdatePhone(
     user: {
       email: emailID,
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       persistent_session_id: uuidv4(),
-      phone: '07123456789',
+      phone: randomPhoneNumber,
       session_id: uuidv4(),
       user_id: userID
     }
   }
 }
 
-export function generateIPVJourneyStart(journeyID: string, userID: string): IPVJourneyStart {
+export function generateIPVJourneyStart(journeyID: string, userID: string, randomIP: string): IPVJourneyStart {
   return {
     client_id: 'performanceTestClientId',
     event_id: `perfTestID_${uuidv4()}`,
@@ -235,14 +250,14 @@ export function generateIPVJourneyStart(journeyID: string, userID: string): IPVJ
     timestamp: Math.floor(Date.now() / 1000),
     user: {
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       session_id: uuidv4(),
       user_id: userID
     }
   }
 }
 
-export function generateIPVSubJourneyStart(journeyID: string, userID: string): IPVSubJourneyStart {
+export function generateIPVSubJourneyStart(journeyID: string, userID: string, randomIP: string): IPVSubJourneyStart {
   return {
     client_id: 'performanceTestClientId',
     event_id: `perfTestID_${uuidv4()}`,
@@ -260,14 +275,14 @@ export function generateIPVSubJourneyStart(journeyID: string, userID: string): I
     timestamp: Math.floor(Date.now() / 1000),
     user: {
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       session_id: uuidv4(),
       user_id: userID
     }
   }
 }
 
-export function generateIPVDLCRIVCIssued(userID: string, journeyID: string): IPVDLCRIVCIssued {
+export function generateIPVDLCRIVCIssued(userID: string, journeyID: string, randomIP: string): IPVDLCRIVCIssued {
   return {
     client_id: 'performanceTestClientId',
     event_id: `perfTestID_${uuidv4()}`,
@@ -331,7 +346,7 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string): IPV
     timestamp: Math.floor(Date.now() / 1000),
     user: {
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       persistent_session_id: uuidv4(),
       session_id: uuidv4(),
       user_id: userID
@@ -339,7 +354,11 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string): IPV
   }
 }
 
-export function generateIPVAddressCRIVCIssued(journeyID: string, userID: string): IPVAddressCRIVCIssued {
+export function generateIPVAddressCRIVCIssued(
+  journeyID: string,
+  userID: string,
+  randomIP: string
+): IPVAddressCRIVCIssued {
   return {
     client_id: 'performanceTestClientId',
     event_id: `perfTestID_${uuidv4()}`,
@@ -368,7 +387,7 @@ export function generateIPVAddressCRIVCIssued(journeyID: string, userID: string)
     timestamp: Math.floor(Date.now() / 1000),
     user: {
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       persistent_session_id: uuidv4(),
       session_id: uuidv4(),
       user_id: userID
@@ -376,7 +395,7 @@ export function generateIPVAddressCRIVCIssued(journeyID: string, userID: string)
   }
 }
 
-export function generateIPVKBVCRIStart(journeyID: string, userID: string): IPVKBVCRIStart {
+export function generateIPVKBVCRIStart(journeyID: string, userID: string, randomIP: string): IPVKBVCRIStart {
   return {
     client_id: 'performanceTestClientID',
     event_id: `perfTestID_${uuidv4()}`,
@@ -391,7 +410,7 @@ export function generateIPVKBVCRIStart(journeyID: string, userID: string): IPVKB
     timestamp: Math.floor(Date.now() / 1000),
     user: {
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       persistent_session_id: uuidv4(),
       session_id: uuidv4(),
       user_id: userID
@@ -399,7 +418,7 @@ export function generateIPVKBVCRIStart(journeyID: string, userID: string): IPVKB
   }
 }
 
-export function generateIPVKBVCRIEnd(journeyID: string, userID: string): IPVKBVCRIEnd {
+export function generateIPVKBVCRIEnd(journeyID: string, userID: string, randomIP: string): IPVKBVCRIEnd {
   return {
     client_id: 'performanceTestClientID',
     event_id: `perfTestID_${uuidv4()}`,
@@ -409,7 +428,7 @@ export function generateIPVKBVCRIEnd(journeyID: string, userID: string): IPVKBVC
     timestamp: Math.floor(Date.now() / 1000),
     user: {
       govuk_signin_journey_id: journeyID,
-      ip_address: '1.2.3.4',
+      ip_address: randomIP,
       persistent_session_id: uuidv4(),
       session_id: uuidv4(),
       user_id: userID

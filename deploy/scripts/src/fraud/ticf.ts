@@ -132,20 +132,26 @@ export function signUpSuccess(groupName: string, userID: string, emailID: string
   const testID = `perfTestID${timestamp}`
   const pairWiseID = `performanceTestRpPairwiseId${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
+  const randomIP = Array.from({ length: 4 }, () => Math.floor(Math.random() * 256)).join('.')
+  const randomPhoneNumber = '07' + Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('')
 
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, randomIP))
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(3)
 
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
+  const authCreateAccPayload = JSON.stringify(
+    generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, randomIP, randomPhoneNumber)
+  )
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
   sleep(3)
 
-  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
+  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
   sleep(3)
 
-  const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
+  const authUpdatePhonePayload = JSON.stringify(
+    generateAuthUpdatePhone(emailID, journeyID, userID, randomIP, randomPhoneNumber)
+  )
   sqs.sendMessage(env.sqs_queue, authUpdatePhonePayload)
   sleep(3)
 
@@ -166,11 +172,16 @@ export function signUpSuccess(groupName: string, userID: string, emailID: string
 
 export function signInSuccess(groupName: string, userID: string, emailID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
+  const randomIP = Array.from({ length: 4 }, () => Math.floor(Math.random() * 256)).join('.')
+  const randomPhoneNumber = '07' + Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('')
+
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, randomIP))
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(3)
 
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID, journeyID))
+  const authLogInSuccessPayload = JSON.stringify(
+    generateAuthLogInSuccess(userID, emailID, journeyID, randomIP, randomPhoneNumber)
+  )
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   sleep(3)
 
@@ -189,8 +200,9 @@ export function signInSuccess(groupName: string, userID: string, emailID: string
 
 export function signInSilent(groupName: string, userID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
+  const randomIP = Array.from({ length: 4 }, () => Math.floor(Math.random() * 256)).join('.')
 
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, randomIP))
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(3)
 
@@ -209,28 +221,29 @@ export function signInSilent(groupName: string, userID: string): void {
 
 export function identityProvingSuccess(groupName: string, userID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
+  const randomIP = Array.from({ length: 4 }, () => Math.floor(Math.random() * 256)).join('.')
 
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
   sleep(3)
 
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
   sleep(3)
 
-  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID))
+  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvDLCRIVCIssuedPayload)
   sleep(3)
 
-  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID))
+  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvAddressCRIVCIssuedPayload)
   sleep(3)
 
-  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID))
+  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvKBVCRIStartPayload)
   sleep(3)
 
-  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID))
+  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvKBVCRIEndPayload)
   sleep(3)
 
@@ -255,12 +268,13 @@ export function identityProvingSuccess(groupName: string, userID: string): void 
 
 export function identityReuseSuccess(groupName: string, userID: string): void {
   const journeyID = `perfJourney${uuidv4()}`
+  const randomIP = Array.from({ length: 4 }, () => Math.floor(Math.random() * 256)).join('.')
 
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
   sleep(3)
 
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
   sleep(3)
 

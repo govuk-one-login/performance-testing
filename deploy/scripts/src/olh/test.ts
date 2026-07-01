@@ -373,7 +373,7 @@ const profiles: ProfileList = {
     ...createI3SpikeOLHScenario('changePassword', 8, 21, 1),
     ...createI3SpikeOLHScenario('changePhone', 8, 24, 1),
     ...createI3SpikeOLHScenario('deleteAccount', 8, 18, 1),
-    ...createI3SpikeSignInScenario('landingPage', 12, 6, 7) // rounded the target to 12 from 12.4
+    ...createI3SpikeSignInScenario('landingPage', 12, 6, 7) //  rounded the target to 12 from 12.4
   },
   perf006Iteration5PeakTest: {
     ...createOLHPeakTestScenario('changeEmail', 4, 24, 1),

@@ -1,4 +1,5 @@
 import { uuidv4 } from '../utils/jslib/index'
+
 import {
   AuthLogInSuccess,
   AuthCreateAccount,
@@ -500,4 +501,12 @@ export function generateAuthReqParsedEnrichment(
       obfuscated: true
     }
   }
+}
+
+export function generateRandomIP(): string {
+  return Array.from({ length: 4 }, () => Math.floor(Math.random() * 256)).join('.')
+}
+
+export function generateRandomPhoneNumber(): string {
+  return '07' + Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('')
 }

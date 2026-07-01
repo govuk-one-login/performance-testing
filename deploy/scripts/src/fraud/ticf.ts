@@ -79,6 +79,20 @@ const profiles: ProfileList = {
   perf006Iteration9StressTest: {
     ...createStressTestSignInScenario('ticf', 250, 66, 115),
     ...createStressTestSignInScenario('silentLogin', 75, 63, 35, 26)
+  },
+  ticfSingleIteration: {
+    ticf: {
+      executor: 'per-vu-iterations',
+      vus: 1,
+      iterations: 1,
+      exec: 'ticf'
+    },
+    silentLogin: {
+      executor: 'per-vu-iterations',
+      vus: 1,
+      iterations: 1,
+      exec: 'silentLogin'
+    }
   }
 }
 

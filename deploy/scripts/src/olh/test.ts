@@ -431,11 +431,11 @@ const profiles: ProfileList = {
     ...createStressTestOLHScenario('deleteAccount', 18, 18, 1),
     ...createStressTestSignInScenario('landingPage', 24, 6, 12)
   },
-
+  //(steps×3) + (steps-1)×2 = iteration duration
   perf006Iteration10PeakTest: {
-    ...createOLHPeakTestScenario('changeEmail', 17, 34, 1),
+    ...createOLHPeakTestScenario('changeEmail', 17, 43, 1),
     ...createOLHPeakTestScenario('changePassword', 17, 38, 1),
-    ...createOLHPeakTestScenario('changePhone', 17, 38, 1),
+    ...createOLHPeakTestScenario('changePhone', 17, 43, 1),
     ...createOLHPeakTestScenario('deleteAccount', 17, 28, 1),
     ...createI4PeakTestSignInScenario('landingPage', 26, 13, 6),
     ...createOLHPeakTestScenario('setUpPasskey', 17, 33, 1),

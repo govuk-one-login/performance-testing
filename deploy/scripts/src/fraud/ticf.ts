@@ -22,7 +22,9 @@ import {
   generateIPVSubJourneyStart,
   generateIPVKBVCRIEnd,
   generateIPVKBVCRIStart,
-  generateAuthAuthorisationInitiated
+  generateAuthAuthorisationInitiated,
+  generateRandomIP,
+  generateRandomPhoneNumber
 } from '../common/requestGenerator/txmaReqGen'
 import { uuidv4 } from '../common/utils/jslib/index'
 import http from 'k6/http'
@@ -127,25 +129,35 @@ const awsConfig = new AWSConfig({
 
 const sqs = new SQSClient(awsConfig)
 
-export function signUpSuccess(groupName: string, userID: string, emailID: string): void {
+export function signUpSuccess(
+  groupName: string,
+  userID: string,
+  emailID: string,
+  randomIP: string,
+  randomPhoneNumber: string
+): void {
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
   const testID = `perfTestID${timestamp}`
   const pairWiseID = `performanceTestRpPairwiseId${uuidv4()}`
   const journeyID = `perfJourney${uuidv4()}`
 
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, randomIP))
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(3)
 
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
+  const authCreateAccPayload = JSON.stringify(
+    generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, randomIP, randomPhoneNumber)
+  )
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
   sleep(3)
 
-  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID))
+  const authCodeVerifiedPayload = JSON.stringify(generateAuthCodeVerified(emailID, journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, authCodeVerifiedPayload)
   sleep(3)
 
-  const authUpdatePhonePayload = JSON.stringify(generateAuthUpdatePhone(emailID, journeyID, userID))
+  const authUpdatePhonePayload = JSON.stringify(
+    generateAuthUpdatePhone(emailID, journeyID, userID, randomIP, randomPhoneNumber)
+  )
   sqs.sendMessage(env.sqs_queue, authUpdatePhonePayload)
   sleep(3)
 
@@ -164,13 +176,22 @@ export function signUpSuccess(groupName: string, userID: string, emailID: string
   })
 }
 
-export function signInSuccess(groupName: string, userID: string, emailID: string): void {
+export function signInSuccess(
+  groupName: string,
+  userID: string,
+  emailID: string,
+  randomIP: string,
+  randomPhoneNumber: string
+): void {
   const journeyID = `perfJourney${uuidv4()}`
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
+
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, randomIP))
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(3)
 
-  const authLogInSuccessPayload = JSON.stringify(generateAuthLogInSuccess(userID, emailID, journeyID))
+  const authLogInSuccessPayload = JSON.stringify(
+    generateAuthLogInSuccess(userID, emailID, journeyID, randomIP, randomPhoneNumber)
+  )
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   sleep(3)
 
@@ -187,10 +208,10 @@ export function signInSuccess(groupName: string, userID: string, emailID: string
   })
 }
 
-export function signInSilent(groupName: string, userID: string): void {
+export function signInSilent(groupName: string, userID: string, randomIP: string): void {
   const journeyID = `perfJourney${uuidv4()}`
 
-  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID))
+  const authAuthorisationInitiatedPayload = JSON.stringify(generateAuthAuthorisationInitiated(journeyID, randomIP))
   sqs.sendMessage(env.sqs_queue, authAuthorisationInitiatedPayload)
   sleep(3)
 
@@ -207,30 +228,30 @@ export function signInSilent(groupName: string, userID: string): void {
   })
 }
 
-export function identityProvingSuccess(groupName: string, userID: string): void {
+export function identityProvingSuccess(groupName: string, userID: string, randomIP: string): void {
   const journeyID = `perfJourney${uuidv4()}`
 
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
   sleep(3)
 
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
   sleep(3)
 
-  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID))
+  const ipvDLCRIVCIssuedPayload = JSON.stringify(generateIPVDLCRIVCIssued(userID, journeyID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvDLCRIVCIssuedPayload)
   sleep(3)
 
-  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID))
+  const ipvAddressCRIVCIssuedPayload = JSON.stringify(generateIPVAddressCRIVCIssued(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvAddressCRIVCIssuedPayload)
   sleep(3)
 
-  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID))
+  const ipvKBVCRIStartPayload = JSON.stringify(generateIPVKBVCRIStart(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvKBVCRIStartPayload)
   sleep(3)
 
-  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID))
+  const ipvKBVCRIEndPayload = JSON.stringify(generateIPVKBVCRIEnd(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvKBVCRIEndPayload)
   sleep(3)
 
@@ -253,14 +274,14 @@ export function identityProvingSuccess(groupName: string, userID: string): void 
   )
 }
 
-export function identityReuseSuccess(groupName: string, userID: string): void {
+export function identityReuseSuccess(groupName: string, userID: string, randomIP: string): void {
   const journeyID = `perfJourney${uuidv4()}`
 
-  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID))
+  const ipvJourneyStartPayload = JSON.stringify(generateIPVJourneyStart(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvJourneyStartPayload)
   sleep(3)
 
-  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID))
+  const ipvSubJourneyStartPayload = JSON.stringify(generateIPVSubJourneyStart(journeyID, userID, randomIP))
   sqs.sendMessage(env.sqs_queue, ipvSubJourneyStartPayload)
   sleep(3)
 
@@ -286,16 +307,18 @@ export function identityReuseSuccess(groupName: string, userID: string): void {
 export function ticf(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
 
   iterationsStarted.add(1)
 
-  signUpSuccess(groupMap.ticf[0], userID, emailID)
+  signUpSuccess(groupMap.ticf[0], userID, emailID, randomIP, randomPhoneNumber)
   sleep(3)
-  signInSuccess(groupMap.ticf[1], userID, emailID)
+  signInSuccess(groupMap.ticf[1], userID, emailID, randomIP, randomPhoneNumber)
   sleep(3)
-  identityProvingSuccess(groupMap.ticf[2], userID)
+  identityProvingSuccess(groupMap.ticf[2], userID, randomIP)
   sleep(3)
-  identityReuseSuccess(groupMap.ticf[3], userID)
+  identityReuseSuccess(groupMap.ticf[3], userID, randomIP)
 
   iterationsCompleted.add(1)
 }
@@ -303,14 +326,16 @@ export function ticf(): void {
 export function silentLogin(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const emailID = `perfSilentLogin${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
 
   iterationsStarted.add(1)
 
-  signUpSuccess(groupMap.silentLogin[0], userID, emailID)
+  signUpSuccess(groupMap.silentLogin[0], userID, emailID, randomIP, randomPhoneNumber)
   sleep(3)
-  signInSuccess(groupMap.silentLogin[1], userID, emailID)
+  signInSuccess(groupMap.silentLogin[1], userID, emailID, randomIP, randomPhoneNumber)
   sleep(3)
-  identityProvingSuccess(groupMap.silentLogin[2], userID)
+  identityProvingSuccess(groupMap.silentLogin[2], userID, randomIP)
 
   iterationsCompleted.add(1)
 }

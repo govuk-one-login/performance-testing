@@ -284,7 +284,7 @@ export function generateIPVSubJourneyStart(journeyID: string, userID: string, ra
 }
 
 export function generateIPVDLCRIVCIssued(userID: string, journeyID: string, randomIP: string): IPVDLCRIVCIssued {
-  const birthDate = `${1944 + Math.floor(Math.random() * 63)}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`
+  const birthDate = `${1944 + Math.floor(Math.random() * 63)}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}` // lgtm[js/insecure-randomness]
   return {
     client_id: 'performanceTestClientId',
     event_id: `perfTestID_${uuidv4()}`,

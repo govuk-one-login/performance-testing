@@ -317,7 +317,7 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string, rand
       ],
       birthDate: [
         {
-          value: '1990-01-01'
+          value: randomDOB()
         }
       ],
       drivingPermit: [
@@ -509,4 +509,11 @@ export function generateRandomIP(): string {
 
 export function generateRandomPhoneNumber(): string {
   return '07' + Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('')
+}
+
+function randomDOB(): string {
+  const start = new Date(1950, 0, 1)
+  const end = new Date(2000, 11, 31)
+  const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
+  return date.toISOString().split('T')[0]
 }

@@ -284,7 +284,6 @@ export function generateIPVSubJourneyStart(journeyID: string, userID: string, ra
 }
 
 export function generateIPVDLCRIVCIssued(userID: string, journeyID: string, randomIP: string): IPVDLCRIVCIssued {
-  const birthDate = `${1944 + Math.floor(Math.random() * 63)}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}` // lgtm[js/insecure-randomness]
   return {
     client_id: 'performanceTestClientId',
     event_id: `perfTestID_${uuidv4()}`,
@@ -318,7 +317,7 @@ export function generateIPVDLCRIVCIssued(userID: string, journeyID: string, rand
       ],
       birthDate: [
         {
-          value: birthDate
+          value: randomDOB()
         }
       ],
       drivingPermit: [
@@ -510,4 +509,11 @@ export function generateRandomIP(): string {
 
 export function generateRandomPhoneNumber(): string {
   return '07' + Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('')
+}
+
+function randomDOB(): string {
+  const start = new Date(1950, 0, 1)
+  const end = new Date(2000, 11, 31)
+  const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
+  return date.toISOString().split('T')[0]
 }

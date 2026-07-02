@@ -991,33 +991,17 @@ export function changePhone(): void {
   sleepBetween(1, 3)
 
   // B03_ChangePhone_04_ClickSignInDetails
-  res = timeGroup(
-    groups[7],
-    () => {
-      const r = http.get(env.envURL + '/sign-in-details')
-      if (!pageContentCheck('Sign in details').validatePageContent(r)) {
-        console.log(' Expected "Sign in details", got: ', r.html('h1').text())
-      }
-      return r
-    },
-    {
-      isStatusCode200,
-      ...pageContentCheck('Sign in details')
-    }
-  )
+  res = timeGroup(groups[7], () => http.get(env.envURL + '/sign-in-details'), {
+    isStatusCode200,
+    ...pageContentCheck('Sign in details')
+  })
 
   sleepBetween(1, 3)
 
   // B03_ChangePhone_05_ClickChangePhoneNumberLink
   res = timeGroup(
     groups[8],
-    () => {
-      const r = http.get(env.envURL + '/enter-password?from=sign-in-details&edit=true&type=changePhoneNumber')
-      if (!pageContentCheck('Enter your password').validatePageContent(r)) {
-        console.log(' Expected "Enter your password", got: ', r.html('h1').text())
-      }
-      return r
-    },
+    () => http.get(env.envURL + '/enter-password?from=sign-in-details&edit=true&type=changePhoneNumber'),
     {
       isStatusCode200,
       ...pageContentCheck('Enter your password')

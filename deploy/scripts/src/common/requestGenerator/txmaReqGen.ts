@@ -55,7 +55,7 @@ export function generateAuthCreateAccount(
         country_code: 'GB',
         user_agent: 'k6/0.52.0 (https://k6.io/)',
         accepted_language: 24234233,
-        ja3_fingerprint: uuidv4()
+        ja3_fingerprint: uuidv4().replace(/-/g, '')
       }
     }
   }
@@ -95,7 +95,7 @@ export function generateAuthLogInSuccess(
         country_code: 'GB',
         user_agent: 'k6/0.52.0 (https://k6.io/)',
         accepted_language: 24234233,
-        ja3_fingerprint: uuidv4()
+        ja3_fingerprint: uuidv4().replace(/-/g, '')
       }
     }
   }
@@ -470,7 +470,7 @@ export function generateAuthLogInSuccessEnrichment(
         country_code: 'GB',
         user_agent: 'k6/0.52.0 (https://k6.io/)',
         accepted_language: 24234233,
-        ja3_fingerprint: uuidv4()
+        ja3_fingerprint: uuidv4().replace(/-/g, '')
       }
     }
   }

@@ -28,7 +28,7 @@ import { type RefinedResponse, type ResponseType } from 'k6/http'
 import { sleep } from 'k6'
 import { timeGroup } from '../common/utils/request/timing'
 import { URL } from '../common/utils/jslib/url'
-import { isStatusCode200, pageContentCheck, isStatusCode202, isStatusCode302 } from '../common/utils/checks/assertions'
+import { isStatusCode200, pageContentCheck, isStatusCode302 } from '../common/utils/checks/assertions'
 
 const profiles: ProfileList = {
   smoke: {
@@ -133,12 +133,11 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 const groupMap = {
   allEvents: [
-    'B01_IPVRFE_01_LaunchOIDCStub',
+    'B01_IPVRFE_01_LaunchFrontEndURL',
     'B01_IPVRFE_02_SignIn',
     'B01_IPVRFE_03_Authorize',
-    'B01_IPVRFE_03_Authorize::01_OLHCall',
-    'B01_IPVRFE_03_Authorize::02_ORCHCall',
-    'B01_IPVRFE_03_Authorize::03_AuthCall'
+    'B01_IPVRFE_03_Authorize::01_CallBack',
+    'B01_IPVRFE_03_Authorize::02_RPLandingPage'
   ]
 } as const
 
@@ -201,14 +200,10 @@ export function allEvents(): void {
 
   const groups = groupMap.allEvents
   let res: RefinedResponse<ResponseType | undefined>
-  const url = new URL(`${env.oidcstub_Url}/authorize`)
-  url.searchParams.set('client_id', env.oidcstub_clientid)
-  url.searchParams.set('response_type', 'code')
-  url.searchParams.set('scope', 'openid profile')
-  url.searchParams.set('redirect_uri', env.oidcstub_redirecturi)
-  url.searchParams.set('nonce', uuidv4())
-  //B01_IPVRFE_01_LaunchOIDCStub
-  res = timeGroup(groups[0], () => http.get(url.href), {
+  const url = new URL(`https://return.build.account.gov.uk/resume`)
+
+  //B01_IPVRFE_01_LaunchFrontEndURL
+  res = timeGroup(groups[0], () => http.get(url.toString()), {
     isStatusCode200,
     ...pageContentCheck('Sign-in')
   })
@@ -219,14 +214,15 @@ export function allEvents(): void {
     () =>
       res.submitForm({
         fields: {
-          login: `${uuidv4()}@example.com`,
+          login: `${userID}@example.com`,
           password: env.oidcstub_password
         },
         submitSelector: '[type="submit"]'
       }),
     { isStatusCode200, ...pageContentCheck('Continue') }
   )
-  //B01_IPVRFE_03_Authorize::01_OLHCall
+
+  //B01_IPVRFE_03_Authorize::01_callback
   res = timeGroup(
     groups[2].split('::')[1],
     () =>
@@ -237,9 +233,9 @@ export function allEvents(): void {
     { isStatusCode302 }
   )
 
-  //B01_IPVRFE_03_Authorize::02_ORCHCall'
-
-  res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location, { redirects: 1 }), { isStatusCode202 })
-
-  //'B01_IPVRFE_03_Authorize::03_AuthCall'
+  //B01_IPVRFE_03_Authorize::02_RPLandingPage'
+  res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
+    isStatusCode200,
+    ...pageContentCheck('Request a basic DBS check - GOV.UK')
+  })
 }

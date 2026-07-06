@@ -93,6 +93,9 @@ const profiles: ProfileList = {
       iterations: 1,
       exec: 'silentLogin'
     }
+  },
+  ticfSIRA10ItersTest: {
+    ...createI4PeakTestSignInScenario('ticf', 10, 66, 6)
   }
 }
 

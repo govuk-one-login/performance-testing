@@ -13,8 +13,13 @@ async function checkUserStateAgainstDB(ctx, nonce, state) {
   const command = new GetItemCommand(input);
   const dbresponse = await ctx.ddbClient.send(command);
   console.log(JSON.stringify(dbresponse));
-  if (dbresponse.Item.state.S === state) {
-    console.log("Yay! Correct state.");
+  // FIX: No null check existed — if nonce not found in DynamoDB, this would throw an unhelpful TypeError
+  if (!dbresponse.Item) {
+    throw new Error("Session not found in database");
+  }
+  // FIX: Previously logged success but never rejected mismatched state — flow continued regardless
+  if (dbresponse.Item.state.S !== state) {
+    throw new Error("State mismatch between cookie and database");
   }
 }
 
@@ -46,30 +51,27 @@ const processCallback = async (ctx) => {
     await checkUserStateAgainstDB(ctx, nonce, state);
 
     const tokenSet = await handleCallbackAndGetTokenSet(ctx, nonce, state);
-    if (tokenSet.access_token) {
-      console.debug(
-        `Retrieved successful tokenSet: ${JSON.stringify(tokenSet, null, 2)}`
-      );
-    } else {
-      throw new Error(`TokenSet is empty object`);
+    if (!tokenSet.access_token) {
+      throw new Error("TokenSet is empty object");
     }
+    console.debug(
+      `Retrieved successful tokenSet: ${JSON.stringify(tokenSet, null, 2)}`
+    );
 
     const cookieOptions = { httpOnly: true, secure: false };
     ctx.cookies.set("id_token", tokenSet.id_token, cookieOptions);
 
-    let userinfo;
-    if (tokenSet.access_token) {
-      userinfo = await getUserInfo(ctx, tokenSet.access_token);
-    } else {
-      throw new Error(`TokenSet issue, access_token not present`);
-    }
+    // FIX: Removed redundant second access_token check — unreachable since we throw above
+    const userinfo = await getUserInfo(ctx, tokenSet.access_token);
     console.log(`Getting the ${JSON.stringify(userinfo)} object from the RP`);
 
     ctx.body = userinfo;
   } catch (e) {
+    // FIX: Don't re-throw after setting status — Koa's error handler would double-log the error.
+    // Set status and body to handle it cleanly.
     console.log(e);
     ctx.status = 500;
-    throw e;
+    ctx.body = { error: e.message };
   }
 };
 

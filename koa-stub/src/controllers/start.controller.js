@@ -4,8 +4,9 @@ const openidClient = require("openid-client");
 
 async function createSession(ctx) {
   const nonce = crypto.randomBytes(32).toString("hex");
-  const session = (Math.random() + 1).toString(36).substring(7);
-  const state = crypto.createHash("md5").update(session).digest("hex");
+  // FIX: Math.random() is not cryptographically secure and MD5 is deprecated.
+  // Use crypto.randomBytes for state generation, matching nonce approach.
+  const state = crypto.randomBytes(16).toString("hex");
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + 1);
   const input = {
@@ -54,9 +55,11 @@ const setNonceAndRedirect = async (ctx) => {
 
     ctx.redirect(redirectUrl.href);
   } catch (e) {
+    // FIX: Don't re-throw after setting status — Koa's error handler would double-log the error.
+    // Set status and body to handle it cleanly.
     console.log(e);
     ctx.status = 500;
-    throw e;
+    ctx.body = { error: e.message };
   }
 };
 

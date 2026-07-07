@@ -50,6 +50,9 @@
     "transformIgnorePatterns": [
       "node_modules/(?!(openid-client|oauth4webapi|jose)/)"
     ],
+    "setupFilesAfterEnv": [
+      "./tests/setup.js"
+    ],
     "verbose": true
   }
 }

@@ -1,6 +1,8 @@
+// FIX: require was inside function body — moved to top level for consistency and efficiency
+const openidClient = require("openid-client");
+
 const rpInitiateLogout = async (ctx) => {
   try {
-    const openidClient = require("openid-client");
     const cookies = ctx.cookie;
     const id_token = cookies.id_token;
     const state = cookies.session;
@@ -21,17 +23,20 @@ const rpInitiateLogout = async (ctx) => {
     const cookieOptions = { httpOnly: false, secure: false };
     console.log("Trying to delete all our cookies");
     const cookieList = Object.keys(cookies);
-    cookieList.forEach((cookie) => {
-      console.log(`Deleting cookie ${cookie}`);
-      ctx.cookies.set(cookie.name, "", cookieOptions);
-      console.log(`Deleted cookie ${cookie}`);
+    cookieList.forEach((cookieName) => {
+      // FIX: Object.keys returns strings, not objects — cookie.name was always undefined
+      console.log(`Deleting cookie ${cookieName}`);
+      ctx.cookies.set(cookieName, "", cookieOptions);
+      console.log(`Deleted cookie ${cookieName}`);
     });
     console.log(`Sending user to url ${logout}`);
     ctx.redirect(logout);
   } catch (e) {
+    // FIX: Don't re-throw after setting status — Koa's error handler would double-log the error.
+    // Set status and body to handle it cleanly.
     console.log(e);
     ctx.status = 500;
-    throw e;
+    ctx.body = { error: e.message };
   }
 };
 

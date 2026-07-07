@@ -420,6 +420,10 @@ const profiles: ProfileList = {
   perf006Iteration9SoakTest: {
     ...createSoakTestSignUpScenario('identity', 100, 42, 101),
     ...createSoakTestSignInScenario('idReuse', 15, 6, 8)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 200, 42, 751),
+    ...createI4PeakTestSignInScenario('idReuse', 267, 6, 122, 629)
   }
 }
 
@@ -883,7 +887,7 @@ export function idReuse(): void {
     // 02_CoreCall
     res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('You have already proved your identity')
+      ...pageContentCheck('Confirm your details')
     })
   })
 

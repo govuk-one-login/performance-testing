@@ -135,7 +135,7 @@ const groupMap = {
   allEvents: [
     'B01_IPVRFE_01_LaunchFrontEndURL',
     'B01_IPVRFE_02_SignIn_StubCall',
-    'B01_IPVRFE_03_Authorize_StubCall',
+    'B01_IPVRFE_03_Authorize',
     'B01_IPVRFE_03_Authorize::01_CallBack',
     'B01_IPVRFE_03_Authorize::02_RPLandingPage'
   ]

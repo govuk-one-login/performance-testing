@@ -422,8 +422,8 @@ const profiles: ProfileList = {
     ...createSoakTestSignInScenario('idReuse', 15, 6, 8)
   },
   perf006Iteration10PeakTest: {
-    ...createI4PeakTestSignUpScenario('identity', 200, 42, 751),
-    ...createI4PeakTestSignInScenario('idReuse', 267, 6, 122, 629)
+    ...createI4PeakTestSignUpScenario('identity', 200, 42, 201),
+    ...createI4PeakTestSignInScenario('idReuse', 267, 6, 122, 79)
   }
 }
 
@@ -887,7 +887,7 @@ export function idReuse(): void {
     // 02_CoreCall
     res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Confirm your details')
+      ...pageContentCheck('You completed your identity check online or at a Post Office using these details')
     })
   })
 

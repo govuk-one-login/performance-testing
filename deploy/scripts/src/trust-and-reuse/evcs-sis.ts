@@ -94,6 +94,12 @@ const profiles: ProfileList = {
     ...createStressTestSignInScenario('invalidate', 250, 6, 115, 172),
     ...createStressTestSignUpScenario('updateVC', 630, 7, 631),
     ...createStressTestSignInScenario('summariseVC', 250, 6, 115, 172)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 200, 11, 201),
+    ...createI4PeakTestSignInScenario('invalidate', 267, 6, 122, 79),
+    ...createI4PeakTestSignUpScenario('updateVC', 200, 7, 201),
+    ...createI4PeakTestSignInScenario('summariseVC', 267, 6, 122, 79)
   }
 }
 

@@ -65,7 +65,7 @@ const signer = new SignatureV4({
 })
 
 const env = {
-  buildHubAndSendRequestsLambdaUrl: getEnv('PLATFORM_TGW_BUILDLAMBDA_URL'),
+  buildHubAndSendRequestsLambdaUrl: getEnv('PLATFORM_TGW_BUILDHUB_LAMBDA_URL'),
   clientLambdaUrl: getEnv('PLATFORM_TGW_CLIENT_LAMBDA_URL'),
   targetUrl: getEnv('PLATFORM_TGW_TARGET_URL')
 }

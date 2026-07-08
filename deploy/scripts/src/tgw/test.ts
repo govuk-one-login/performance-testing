@@ -29,7 +29,7 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 
 const groupMap = {
-  tgwBuildHubAndSendRequests: ['B01_TransitGateway_01_InvokeLambda']
+  tgwBuildHubAndSendRequests: ['B01_TransitGateway_01_InvokeBuildHubAndSendRequestsLambda'] //pragma: allowlist secret
 }
 
 export const options: Options = {
@@ -63,7 +63,7 @@ const signer = new SignatureV4({
 })
 
 const env = {
-  lambdaUrl: getEnv('PLATFORM_TGW_LAMBDA_URL'),
+  buildHubAndSendRequestsLambdaUrl: getEnv('PLATFORM_TGW_BUILDLAMBDA_URL'),
   targetUrl: getEnv('PLATFORM_TGW_TARGET_URL')
 }
 
@@ -78,7 +78,7 @@ export function tgwBuildHubAndSendRequests(): void {
     method: 'POST',
     protocol: 'https' as const,
     hostname: `lambda.${awsConfig.region}.amazonaws.com`,
-    path: `/2015-03-31/functions/${env.lambdaUrl}/invocations`,
+    path: `/2015-03-31/functions/${env.buildHubAndSendRequestsLambdaUrl}/invocations`,
     headers: {},
     body: lambdaPayload
   }

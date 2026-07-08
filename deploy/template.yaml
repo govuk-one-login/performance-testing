@@ -61,6 +61,8 @@ Mappings:
   TGW:
     Dev:
       AccountID: "059951455195"
+    Sandpit:
+      AccountID: "992382788472"
 
 Resources:
   CodeBuildServiceRole:
@@ -352,6 +354,11 @@ Resources:
                   - ":"
                   - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
                     - !FindInMap [TGW, Dev, AccountID]
+                    - "function:*"
+              - Fn::Join:
+                  - ":"
+                  - - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}"
+                    - !FindInMap [TGW, Sandpit, AccountID]
                     - "function:*"
           - Effect: "Allow"
             Action:

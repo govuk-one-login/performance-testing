@@ -29,7 +29,8 @@ const profiles: ProfileList = {
 const loadProfile = selectProfile(profiles)
 
 const groupMap = {
-  tgwBuildHubAndSendRequests: ['B01_TransitGateway_01_InvokeBuildHubAndSendRequestsLambda'] //pragma: allowlist secret
+  tgwBuildHubAndSendRequests: ['B01_TransitGateway_01_InvokeBuildHubAndSendRequestsLambda'], //pragma: allowlist secret
+  tgwClientLambda: ['B01_TransitGateway_01_InvokeClientLambda']
 }
 
 export const options: Options = {
@@ -64,6 +65,7 @@ const signer = new SignatureV4({
 
 const env = {
   buildHubAndSendRequestsLambdaUrl: getEnv('PLATFORM_TGW_BUILDLAMBDA_URL'),
+  clientLambdaUrl: getEnv('PLATFORM_TGW_CLIENT_LAMBDA_URL'),
   targetUrl: getEnv('PLATFORM_TGW_TARGET_URL')
 }
 
@@ -79,6 +81,30 @@ export function tgwBuildHubAndSendRequests(): void {
     protocol: 'https' as const,
     hostname: `lambda.${awsConfig.region}.amazonaws.com`,
     path: `/2015-03-31/functions/${env.buildHubAndSendRequestsLambdaUrl}/invocations`,
+    headers: {},
+    body: lambdaPayload
+  }
+  const signedRequest = signer.sign(request)
+
+  iterationsStarted.add(1)
+
+  //  B01_TransitGateway_01_InvokeLambda
+  timeGroup(groups[0], () => http.post(signedRequest.url, lambdaPayload, { headers: signedRequest.headers }), {
+    isStatusCode200,
+    ...pageContentCheck(env.targetUrl)
+  })
+
+  iterationsCompleted.add(1)
+}
+
+export function tgwClientLambda(): void {
+  const groups = groupMap.tgwClientLambda
+  const lambdaPayload = ''
+  const request = {
+    method: 'POST',
+    protocol: 'https' as const,
+    hostname: `lambda.${awsConfig.region}.amazonaws.com`,
+    path: `/2015-03-31/functions/${env.clientLambdaUrl}/invocations`,
     headers: {},
     body: lambdaPayload
   }

@@ -86,6 +86,9 @@ const profiles: ProfileList = {
   },
   criblHighVolumeTest: {
     ...createHighVolumeSignInScenario('spot', 3000, 3, 1350)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignInScenario('spot', 287, 3, 122)
   }
 }
 

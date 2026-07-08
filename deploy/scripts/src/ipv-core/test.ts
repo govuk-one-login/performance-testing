@@ -420,6 +420,10 @@ const profiles: ProfileList = {
   perf006Iteration9SoakTest: {
     ...createSoakTestSignUpScenario('identity', 100, 42, 101),
     ...createSoakTestSignInScenario('idReuse', 15, 6, 8)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignUpScenario('identity', 200, 42, 201),
+    ...createI4PeakTestSignInScenario('idReuse', 267, 6, 122, 79)
   }
 }
 
@@ -872,7 +876,7 @@ export function idReuse(): void {
       () =>
         http.get(
           env.orchStubEndPoint +
-            `/authorize?journeyType=full&userIdText=${idReuseUserID.userID}&signInJourneyIdText=${signInJourneyId}&vtrText=${env.vtrText}&targetEnvironment=${environment}&reproveIdentity=NOT_PRESENT&emailAddress=${idReuseUserID.emailID}&votText=&jsonPayload=&evidenceJsonPayload=&error=recoverable`,
+            `/authorize?journeyType=full&userIdText=${idReuseUserID.userID}&signInJourneyIdText=${signInJourneyId}&vtrText=${env.vtrText}&targetEnvironment=${environment}&emailAddress=${idReuseUserID.emailID}&error=recoverable`,
           {
             headers: { Authorization: `Basic ${encodedCredentials}` },
             redirects: 0
@@ -883,7 +887,7 @@ export function idReuse(): void {
     // 02_CoreCall
     res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('You have already proved your identity')
+      ...pageContentCheck('You completed your identity check online or at a Post Office using these details')
     })
   })
 

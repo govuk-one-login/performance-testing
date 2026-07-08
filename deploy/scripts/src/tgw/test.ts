@@ -19,17 +19,17 @@ import { SignatureV4 } from '../common/utils/jslib/aws-signature'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('transitGateway', LoadProfile.smoke)
+    ...createScenario('tgwBuildHubAndSendRequests', LoadProfile.smoke)
   },
   loadTest: {
-    ...createI4PeakTestSignInScenario('transitGateway', 402, 3, 184)
+    ...createI4PeakTestSignInScenario('tgwBuildHubAndSendRequests', 402, 3, 184)
   }
 }
 
 const loadProfile = selectProfile(profiles)
 
 const groupMap = {
-  transitGateway: ['B01_TransitGateway_01_InvokeLambda']
+  tgwBuildHubAndSendRequests: ['B01_TransitGateway_01_InvokeLambda']
 }
 
 export const options: Options = {
@@ -67,8 +67,8 @@ const env = {
   targetUrl: getEnv('PLATFORM_TGW_TARGET_URL')
 }
 
-export function transitGateway(): void {
-  const groups = groupMap.transitGateway
+export function tgwBuildHubAndSendRequests(): void {
+  const groups = groupMap.tgwBuildHubAndSendRequests
   const lambdaPayload = JSON.stringify({
     iterations: 1,
     url: env.targetUrl

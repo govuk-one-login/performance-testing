@@ -19,7 +19,8 @@ import { SignatureV4 } from '../common/utils/jslib/aws-signature'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('tgwBuildHubAndSendRequests', LoadProfile.smoke)
+    ...createScenario('tgwBuildHubAndSendRequests', LoadProfile.smoke),
+    ...createScenario('tgwClientLambda', LoadProfile.smoke)
   },
   loadTest: {
     ...createI4PeakTestSignInScenario('tgwBuildHubAndSendRequests', 402, 3, 184)

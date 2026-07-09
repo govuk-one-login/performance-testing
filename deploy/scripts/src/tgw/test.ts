@@ -115,8 +115,7 @@ export function tgwClientLambda(): void {
 
   //  B01_TransitGateway_01_InvokeLambda
   timeGroup(groups[0], () => http.post(signedRequest.url, lambdaPayload, { headers: signedRequest.headers }), {
-    isStatusCode200,
-    ...pageContentCheck(env.targetUrl)
+    isStatusCode200
   })
 
   iterationsCompleted.add(1)

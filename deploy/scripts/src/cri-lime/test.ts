@@ -350,6 +350,12 @@ const profiles: ProfileList = {
     ...createStressTestSignUpScenario('drivingLicence', 79, 9, 80),
     ...createStressTestSignUpScenario('drivingLicenceAttestation', 132, 9, 133),
     ...createStressTestSignUpScenario('fraud', 630, 6, 631)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignUpScenario('passport', 20, 6, 21),
+    ...createI4PeakTestSignUpScenario('drivingLicence', 25, 9, 26),
+    ...createI4PeakTestSignUpScenario('drivingLicenceAttestation', 42, 9, 43),
+    ...createI4PeakTestSignUpScenario('fraud', 200, 6, 201)
   }
 }
 

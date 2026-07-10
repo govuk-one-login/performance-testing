@@ -5,33 +5,108 @@ import {
   type ProfileList,
   describeProfile,
   createScenario,
-  LoadProfile
+  LoadProfile,
+  createI3SpikeSignInScenario,
+  createI4PeakTestSignInScenario,
+  createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { getEnv } from '../common/utils/config/environment-variables'
 import {
-  generateAuthLogInSuccess,
   generateAuthCreateAccount,
-  generateAuthReqParsed
+  generateAuthReqParsedEnrichment,
+  generateAuthLogInSuccessEnrichment
 } from '../common/requestGenerator/txmaReqGen'
 
 const profiles: ProfileList = {
   smoke: {
-    ...createScenario('sendSingleEvent', LoadProfile.smoke),
-    ...createScenario('sendRegularEvent', LoadProfile.smoke)
-  },
-  lowVolume: {
-    ...createScenario('sendSingleEvent', LoadProfile.short, 30, 2),
-    ...createScenario('sendRegularEvent', LoadProfile.short, 30, 2)
+    ...createScenario('sendRegularEventWithEnrichment', LoadProfile.smoke)
   },
   load: {
-    ...createScenario('sendRegularEvent', LoadProfile.full, 2000, 2),
-    ...createScenario('sendSingleEvent', LoadProfile.full, 750, 2)
+    ...createScenario('sendRegularEventWithEnrichment', LoadProfile.full, 100, 3)
   },
-  stress: {
-    ...createScenario('sendSingleEvent', LoadProfile.full, 7500, 2)
+  spikeI2HighTraffic: {
+    ...createScenario('sendRegularEventWithEnrichment', LoadProfile.spikeI2HighTraffic, 1804, 3)
+  },
+  perf006Iteration2PeakTest: {
+    sendRegularEventWithEnrichment: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 1857,
+      stages: [
+        { target: 619, duration: '283s' },
+        { target: 619, duration: '30m' }
+      ],
+      exec: 'sendRegularEventWithEnrichment'
+    }
+  },
+  perf006I3PeakTest: {
+    sendRegularEventWithEnrichment: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 100,
+      maxVUs: 3408,
+      stages: [
+        { target: 1136, duration: '518s' },
+        { target: 1136, duration: '30m' }
+      ],
+      exec: 'sendRegularEventWithEnrichment'
+    }
+  },
+  perf006Iteration3SpikeTest: {
+    ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 3389, 3, 1542)
+  },
+  peakTest2000: {
+    sendRegularEventWithEnrichment: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 3000,
+      maxVUs: 6000,
+      stages: [
+        { target: 2000, duration: '911s' },
+        { target: 2000, duration: '30m' }
+      ],
+      exec: 'sendRegularEventWithEnrichment'
+    }
+  },
+  perf006Iteration4PeakTest: {
+    ...createI4PeakTestSignInScenario('sendRegularEventWithEnrichment', 2423, 3, 66)
+  },
+  perf006Iteration4SpikeTest: {
+    ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 6261, 3, 169)
+  },
+  perf006Iteration5PeakTest: {
+    ...createI4PeakTestSignInScenario('sendRegularEventWithEnrichment', 3309, 3, 89)
+  },
+  perf006Iteration5SpikeTest: {
+    ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 7753, 3, 208)
+  },
+  perf006Iteration6PeakTest: {
+    ...createI4PeakTestSignInScenario('sendRegularEventWithEnrichment', 3820, 3, 571)
+  },
+  perf006Iteration6SpikeTest: {
+    ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 6472, 3, 571)
+  },
+  perf006Iteration7PeakTest: {
+    ...createI4PeakTestSignInScenario('sendRegularEventWithEnrichment', 3367, 3, 181)
+  },
+  perf006Iteration8PeakTest: {
+    ...createI4PeakTestSignInScenario('sendRegularEventWithEnrichment', 3654, 3, 171)
+  },
+  perf006Iteration8SpikeTest: {
+    ...createI3SpikeSignInScenario('sendRegularEventWithEnrichment', 7135, 3, 631)
+  },
+  perf006Iteration9PeakTest: {
+    ...createI4PeakTestSignInScenario('sendRegularEventWithEnrichment', 2500, 3, 631)
+  },
+  perf006Iteration9StressTest: {
+    ...createStressTestSignInScenario('sendRegularEventWithEnrichment', 7706, 3, 631)
   }
 }
 
@@ -58,7 +133,7 @@ const awsConfig = new AWSConfig({
 })
 
 const sqs = new SQSClient(awsConfig)
-
+const journeyID = `perfJourneyID_${Math.floor(Date.now() / 1000)}`
 export function setup(): string {
   describeProfile(loadProfile)
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') // YYMMDDTHHmmss
@@ -66,30 +141,32 @@ export function setup(): string {
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-  const journeyID = uuidv4()
   const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
+  const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID, testID))
 
   console.log('Sending primer event 1')
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
-  console.log('Primer event sent')
+  console.log('Primer event 1 sent')
+
+  console.log('Sending primer event 2')
+  sqs.sendMessage(env.sqs_queue, authReqParsedPayloadEnrichment)
+  console.log('Primer event 2 sent')
   return authCreateAccPayload
 }
 
-export function sendRegularEvent(authCreateAccPayload: string): void {
+export function sendRegularEventWithEnrichment(authCreateAccPayload: string): void {
   iterationsStarted.add(1)
   const authCreatePayload = JSON.parse(authCreateAccPayload)
-  const journeyID = uuidv4()
-  const authLogInSuccessPayload = JSON.stringify(
-    generateAuthLogInSuccess(`${authCreatePayload.user.user_id}`, `${authCreatePayload.user.email}`, journeyID)
+  const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
+  const eventID = `${testID}_${uuidv4()}`
+  const authLogInSuccessPayloadEnrichment = JSON.stringify(
+    generateAuthLogInSuccessEnrichment(
+      eventID,
+      `${authCreatePayload.user.user_id}`,
+      `${authCreatePayload.user.email}`,
+      journeyID
+    )
   )
-  sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
-  iterationsCompleted.add(1)
-}
-
-export function sendSingleEvent(): void {
-  const journeyID = `perfJourney${uuidv4()}`
-  iterationsStarted.add(1)
-  const authReqParsedPayload = JSON.stringify(generateAuthReqParsed(journeyID))
-  sqs.sendMessage(env.sqs_queue, authReqParsedPayload)
+  sqs.sendMessage(env.sqs_queue, authLogInSuccessPayloadEnrichment)
   iterationsCompleted.add(1)
 }

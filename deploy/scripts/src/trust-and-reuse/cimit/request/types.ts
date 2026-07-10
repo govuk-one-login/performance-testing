@@ -12,19 +12,7 @@ type VerifiableCredentialType =
 type IdentityCheckPolicyType = 'none' | 'published' | 'money_laundering_regulations' | 'physical_or_biometric_official'
 
 type CheckMethodType =
-  | 'vpip'
-  | 'vpiruv'
-  | 'vri'
-  | 'vdig'
-  | 'vcrypt'
-  | 'data'
-  | 'auth'
-  | 'token'
-  | 'kbv'
-  | 'pvp'
-  | 'pvr'
-  | 'bvp'
-  | 'bvr'
+  'vpip' | 'vpiruv' | 'vri' | 'vdig' | 'vcrypt' | 'data' | 'auth' | 'token' | 'kbv' | 'pvp' | 'pvr' | 'bvp'
 
 interface PassportDetailsClass {
   documentNumber: string

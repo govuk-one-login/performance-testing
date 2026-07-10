@@ -104,6 +104,10 @@ const profiles: ProfileList = {
   perf006Iteration9StressTest: {
     ...createStressTestSignInScenario('persistIV', 30, 3, 15, 33),
     ...createStressTestSignInScenario('retrieveIV', 750, 3, 115)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignInScenario('persistIV', 30, 3, 900),
+    ...createI4PeakTestSignInScenario('retrieveIV', 801, 3, 122, 778)
   }
 }
 

@@ -107,7 +107,7 @@ const profiles: ProfileList = {
   },
   perf006Iteration10PeakTest: {
     ...createI4PeakTestSignInScenario('persistIV', 30, 3, 900),
-    ...createI4PeakTestSignInScenario('retrieveIV', 801, 3, 122)
+    ...createI4PeakTestSignInScenario('retrieveIV', 801, 3, 122, 778)
   }
 }
 

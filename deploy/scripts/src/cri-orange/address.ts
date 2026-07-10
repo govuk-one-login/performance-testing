@@ -237,7 +237,7 @@ const profiles: ProfileList = {
   },
   perf006Iteration10PeakTest: {
     ...createI4PeakTestSignUpScenario('address', 100, 15, 101),
-    ...createStressTestSignUpScenario('addressME', 98, 15, 99, 2),
+    ...createI4PeakTestSignUpScenario('addressME', 98, 15, 99, 2),
     ...createI4PeakTestSignUpScenario('internationalAddress', 2, 12, 3, 98)
   }
 }

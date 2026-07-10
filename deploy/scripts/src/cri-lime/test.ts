@@ -416,7 +416,7 @@ const env = {
   drivingUrl: getEnv('IDENTITY_DRIVING_URL'),
   passportURL: getEnv('IDENTITY_PASSPORT_URL'),
   envName: getEnv('ENVIRONMENT'),
-  staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true'
+  staticResources: __ENV.K6_NO_STATIC_RESOURCES === 'true'
 }
 
 const stubCreds = {

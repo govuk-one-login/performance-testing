@@ -164,6 +164,12 @@ const profiles: ProfileList = {
     ...createStressTestSignInScenario('reauthentication', 30, 27, 15, 195),
     ...createStressTestSignInScenario('walletCredentialIssuance', 38, 39, 18, 194),
     ...createStressTestSignInScenario('accountIntervention', 20, 15, 10, 197)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignUpScenario('authentication', 180, 36, 181),
+    ...createI4PeakTestSignInScenario('reauthentication', 9, 27, 5, 176),
+    ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 39, 18, 163),
+    ...createI4PeakTestSignInScenario('accountIntervention', 6, 15, 4, 177)
   }
 }
 

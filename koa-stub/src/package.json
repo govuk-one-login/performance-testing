@@ -1,6 +1,7 @@
 {
   "name": "koa-stub",
   "version": "0.0.1",
+  "type": "module",
   "description": "An example config for a RP stub",
   "main": "app.js",
   "dependencies": {
@@ -16,13 +17,12 @@
     "tough-cookie": "^6.0.1"
   },
   "scripts": {
-    "test": "jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "lint": "eslint"
   },
   "author": "Andy Loughran & Coral Smith",
   "license": "MIT",
   "devDependencies": {
-    "@babel/preset-env": "^7.29.2",
     "aws-sdk-client-mock": "^4.1.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
     "eslint": "^9.29.0",
@@ -35,6 +35,7 @@
     "supertest-session": "^5.0.1"
   },
   "jest": {
+    "transform": {},
     "moduleFileExtensions": [
       "js",
       "jsx",
@@ -46,9 +47,6 @@
       "/node_modules/",
       "/build/",
       "/coverage/"
-    ],
-    "transformIgnorePatterns": [
-      "node_modules/(?!(openid-client|oauth4webapi|jose)/)"
     ],
     "verbose": true
   }

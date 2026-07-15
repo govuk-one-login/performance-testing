@@ -1,6 +1,7 @@
-const rpInitiateLogout = async (ctx) => {
+import * as openidClient from "openid-client";
+
+export const rpInitiateLogout = async (ctx) => {
   try {
-    const openidClient = require("openid-client");
     const cookies = ctx.cookie;
     const id_token = cookies.id_token;
     const state = cookies.session;
@@ -8,7 +9,8 @@ const rpInitiateLogout = async (ctx) => {
     let logout;
     if (id_token) {
       const logout_url =
-        process.env.LOGOUT_URL || process.env.CALLBACK_URL.replace("callback", "");
+        process.env.LOGOUT_URL ||
+        process.env.CALLBACK_URL.replace("callback", "");
       const logoutUrl = openidClient.buildEndSessionUrl(ctx.oneLogin, {
         id_token_hint: id_token,
         state: state,
@@ -33,8 +35,4 @@ const rpInitiateLogout = async (ctx) => {
     ctx.status = 500;
     throw e;
   }
-};
-
-module.exports = {
-  rpInitiateLogout,
 };

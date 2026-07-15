@@ -100,6 +100,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignUpScenario('mamIphonePassport', 600, 48, 601)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignUpScenario('mamIphonePassport', 180, 48, 181)
   }
 }
 

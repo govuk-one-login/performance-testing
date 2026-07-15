@@ -17,14 +17,14 @@ import {
   postBiometricChip,
   postIdCheckApp,
   startJourney,
-  getSessionIdFromCookieJar
+  getSessionIdFromCookieJar,
+  getRedirect
 } from './testSteps/frontend'
 import {
   getBiometricTokenV2,
   postFinishBiometricSession,
   postTxmaEvent,
   postToken,
-  getRedirect,
   getAppInfo,
   postUserInfoV2,
   setupBiometricSessionByScenario
@@ -100,6 +100,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignUpScenario('mamIphonePassport', 600, 48, 601)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignUpScenario('mamIphonePassport', 180, 48, 181)
   }
 }
 
@@ -157,7 +160,7 @@ export function mamIphonePassport(): void {
   sleep(3)
   const biometricSessionId = postFinishBiometricSession(sessionId) // BE
   sleep(1)
-  const { authorizationCode, redirectUri } = getRedirect(sessionId) //BE
+  const { authorizationCode, redirectUri } = getRedirect() //FE
   sleep(1)
   const accessToken = postToken(authorizationCode, redirectUri) // BE
   sleep(1)

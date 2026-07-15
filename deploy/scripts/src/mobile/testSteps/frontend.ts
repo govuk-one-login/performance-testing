@@ -5,6 +5,7 @@ import { validatePageRedirect, validateLocationHeader, validateQueryParam } from
 import { parseTestClientResponse, postTestClientStart } from '../utils/test-client'
 import { timeRequest } from '../../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../../common/utils/checks/assertions'
+import { URL } from '../../common/utils/jslib/url'
 
 export function getSessionIdFromCookieJar(): string {
   const jar = http.cookieJar()
@@ -74,13 +75,13 @@ export function postIdCheckApp(): void {
   )
 }
 
-export function getRedirect(): void {
-  group('GET /redirect', () => {
+export function getRedirect(): { authorizationCode: string; redirectUri: string } {
+  return group('GET /redirect', () => {
     const redirectUrl = buildFrontendUrl('/redirect', {
       sessionId: getSessionIdFromCookieJar()
     })
 
-    timeRequest(
+    const res = timeRequest(
       () =>
         http.get(redirectUrl, {
           redirects: 0
@@ -91,6 +92,11 @@ export function getRedirect(): void {
         ...validateQueryParam('code')
       }
     )
+
+    const locationUrl = new URL(res.headers.Location)
+    const authorizationCode = locationUrl.searchParams.get('code') as string
+    const redirectUri = `${locationUrl.protocol}//${locationUrl.hostname}${locationUrl.pathname}`
+    return { authorizationCode, redirectUri }
   })
 }
 

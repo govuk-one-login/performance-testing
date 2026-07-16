@@ -128,6 +128,33 @@ const profiles: ProfileList = {
   perf006Iteration9StressTest: {
     ...createStressTestSignUpScenario('getClientAttestation', 1500, 12, 600),
     ...createStressTestSignInScenario('walletCredentialIssuance', 38, 27, 15, 195)
+  },
+  perf006Iteration10PeakTest: {
+    getClientAttestation: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 540,
+      maxVUs: 1080,
+      stages: [
+        { target: 450, duration: '181s' },
+        { target: 450, duration: '50m' }
+      ],
+      exec: 'getClientAttestation'
+    },
+    walletCredentialIssuance: {
+      executor: 'ramping-arrival-rate',
+      startRate: 2,
+      timeUnit: '1s',
+      preAllocatedVUs: 741,
+      maxVUs: 1482,
+      startTime: '166s',
+      stages: [
+        { target: 38, duration: '15s' },
+        { target: 38, duration: '50m' }
+      ],
+      exec: 'walletCredentialIssuance'
+    }
   }
 }
 

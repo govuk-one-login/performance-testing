@@ -26,7 +26,7 @@ import { getEnv } from '../common/utils/config/environment-variables'
 import http, { type Response } from 'k6/http'
 import { sleep } from 'k6'
 import { timeGroup } from '../common/utils/request/timing'
-
+import { getThresholds } from '../common/utils/config/thresholds'
 import { isStatusCode200, pageContentCheck, isStatusCode302 } from '../common/utils/checks/assertions'
 
 const profiles: ProfileList = {
@@ -130,20 +130,13 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
-  allEvents: [
-    'B01_IPVRFE_01_LaunchFrontEndURL',
-    'B01_IPVRFE_02_SignIn_StubCall',
-    'B01_IPVRFE_03_Authorize',
-    'B01_IPVRFE_03_Authorize::01_CallBack'
-  ]
+  allEvents: ['B01_IPVRFE_01_LaunchFrontEndURL', 'B01_IPVRFE_02_SignIn_StubCall', 'B01_IPVRFE_03_Authorize']
 } as const
 
 export const options: Options = {
   scenarios: loadProfile.scenarios,
-  thresholds: {
-    http_req_duration: ['p(95)<=1000', 'p(99)<=2500'], // 95th percentile response time <=1000ms, 99th percentile response time <=2500ms
-    http_req_failed: ['rate<0.05'] // Error rate <5%
-  }
+  thresholds: getThresholds(groupMap),
+  tags: { name: '' }
 }
 
 export function setup(): void {
@@ -191,7 +184,6 @@ export function allEvents(): void {
   sqs.sendMessage(env.sqs_queue, JSON.stringify(docUploadPayload))
   sleep(5)
   sqs.sendMessage(env.sqs_queue, JSON.stringify(ipvPayload))
-  iterationsCompleted.add(1)
 
   const groups = groupMap.allEvents
   let res: Response
@@ -217,16 +209,14 @@ export function allEvents(): void {
   )
 
   //B01_IPVRFE_03_Authorize
-  timeGroup(groups[2], () => {
-    //B01_IPVRFE_03_Authorize::01_CallBack
-    res = timeGroup(
-      groups[3].split('::')[1],
-      () =>
-        res.submitForm({
-          submitSelector: '.login.login-submit',
-          params: { redirects: 2 }
-        }),
-      { isStatusCode302 }
-    )
-  })
+  res = timeGroup(
+    groups[2],
+    () =>
+      res.submitForm({
+        submitSelector: '.login.login-submit',
+        params: { redirects: 2 }
+      }),
+    { isStatusCode302 }
+  )
+  iterationsCompleted.add(1)
 }

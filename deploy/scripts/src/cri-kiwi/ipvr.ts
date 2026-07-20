@@ -23,18 +23,16 @@ import {
 import { type AssumeRoleOutput } from '../common/utils/aws/types'
 import { uuidv4 } from '../common/utils/jslib/index'
 import { getEnv } from '../common/utils/config/environment-variables'
-import http from 'k6/http'
-import { type RefinedResponse, type ResponseType } from 'k6/http'
+import http, { type Response } from 'k6/http'
 import { sleep } from 'k6'
 import { timeGroup } from '../common/utils/request/timing'
-import { URL } from '../common/utils/jslib/url'
+
 import { isStatusCode200, pageContentCheck, isStatusCode302 } from '../common/utils/checks/assertions'
 
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('authEvent', LoadProfile.smoke),
-    ...createScenario('allEvents', LoadProfile.smoke),
-    ...createScenario('IPVR_FE', LoadProfile.smoke)
+    ...createScenario('allEvents', LoadProfile.smoke)
   },
   lowVolume: {
     ...createScenario('authEvent', LoadProfile.short, 30, 2),
@@ -136,8 +134,7 @@ const groupMap = {
     'B01_IPVRFE_01_LaunchFrontEndURL',
     'B01_IPVRFE_02_SignIn_StubCall',
     'B01_IPVRFE_03_Authorize',
-    'B01_IPVRFE_03_Authorize::01_CallBack',
-    'B01_IPVRFE_03_Authorize::02_RPLandingPage'
+    'B01_IPVRFE_03_Authorize::01_CallBack'
   ]
 } as const
 
@@ -155,9 +152,7 @@ export function setup(): void {
 
 const env = {
   sqs_queue: getEnv('IDENTITY_KIWI_STUB_SQS'),
-  oidcstub_Url: getEnv('IDENTITY_KIWI_OIDCSTUB_URL'),
-  oidcstub_clientid: getEnv('IDENTITY_KIWI_OIDCSTUB_CLIENT_ID'),
-  oidcstub_redirecturi: getEnv('IDENTITY_KIWI_OIDCSTUB_REDIRECT_URI'),
+  ipvrfe_Url: getEnv('IDENTITY_KIWI_IPVRFE_URL'),
   oidcstub_password: getEnv('IDENTITY_KIWI_OIDCSTUB_PASSWORD')
 }
 
@@ -199,11 +194,10 @@ export function allEvents(): void {
   iterationsCompleted.add(1)
 
   const groups = groupMap.allEvents
-  let res: RefinedResponse<ResponseType | undefined>
-  const url = new URL(`https://return.build.account.gov.uk/resume`)
+  let res: Response
 
   //B01_IPVRFE_01_LaunchFrontEndURL
-  res = timeGroup(groups[0], () => http.get(url.toString()), {
+  res = timeGroup(groups[0], () => http.get(env.ipvrfe_Url), {
     isStatusCode200,
     ...pageContentCheck('Sign-in')
   })
@@ -222,20 +216,17 @@ export function allEvents(): void {
     { isStatusCode200, ...pageContentCheck('Continue') }
   )
 
-  //B01_IPVRFE_03_Authorize::01_callback
-  res = timeGroup(
-    groups[2].split('::')[1],
-    () =>
-      res.submitForm({
-        submitSelector: '.login.login-submit',
-        params: { redirects: 2 }
-      }),
-    { isStatusCode302 }
-  )
-
-  //B01_IPVRFE_03_Authorize::02_RPLandingPage'
-  res = timeGroup(groups[3].split('::')[1], () => http.get(res.headers.Location), {
-    isStatusCode200,
-    ...pageContentCheck('Request a basic DBS check - GOV.UK')
+  //B01_IPVRFE_03_Authorize
+  timeGroup(groups[2], () => {
+    //B01_IPVRFE_03_Authorize::01_CallBack
+    res = timeGroup(
+      groups[3].split('::')[1],
+      () =>
+        res.submitForm({
+          submitSelector: '.login.login-submit',
+          params: { redirects: 2 }
+        }),
+      { isStatusCode302 }
+    )
   })
 }

@@ -589,6 +589,8 @@ Resources:
               IDENTITY_KIWI_CIC_TARGET: "/perfTest/identity/kiwi/cic/target"
               IDENTITY_KIWI_F2F_STUB_URL: "/perfTest/identity/kiwi/f2f/stubUrl"
               IDENTITY_KIWI_F2F_TARGET: "/perfTest/identity/kiwi/f2f/target"
+              IDENTITY_KIWI_IPVRFE_URL: "/perfTest/identity/kiwi/ipvrfeUrl"
+              IDENTITY_KIWI_OIDCSTUB_PASSWORD: "/perfTest/identity/kiwi/oidcStubPassword"
               IDENTITY_KIWI_STUB_SQS: "/perfTest/identity/kiwi/stubTxMAConsumer"
               IDENTITY_ORCH_STUB_PASSWORD: "/perfTest/identity/orchStubPassword"
               IDENTITY_ORCH_STUB_USERNAME: "/perfTest/identity/orchStubUsername"

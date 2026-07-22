@@ -99,7 +99,7 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: serverless.handler
-      Runtime: nodejs20.x
+      Runtime: nodejs22.x
       MemorySize: 512
       ReservedConcurrentExecutions: 800
       Environment:

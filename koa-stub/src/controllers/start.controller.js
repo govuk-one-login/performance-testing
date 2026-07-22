@@ -1,6 +1,6 @@
-const { PutItemCommand } = require("@aws-sdk/client-dynamodb");
-const crypto = require("crypto");
-const openidClient = require("openid-client");
+import { PutItemCommand } from "@aws-sdk/client-dynamodb";
+import crypto from "crypto";
+import * as openidClient from "openid-client";
 
 async function createSession(ctx) {
   const nonce = crypto.randomBytes(32).toString("hex");
@@ -33,7 +33,7 @@ async function createSession(ctx) {
   return sessionObject;
 }
 
-const setNonceAndRedirect = async (ctx) => {
+export const setNonceAndRedirect = async (ctx) => {
   try {
     const session = await createSession(ctx);
 
@@ -58,8 +58,4 @@ const setNonceAndRedirect = async (ctx) => {
     ctx.status = 500;
     throw e;
   }
-};
-
-module.exports = {
-  setNonceAndRedirect,
 };

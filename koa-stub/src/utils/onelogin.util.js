@@ -1,6 +1,6 @@
-const openidClient = require("openid-client");
+import * as openidClient from "openid-client";
 
-async function setupClient() {
+export async function setupClient() {
   const serverUrl = new URL(process.env.OIDC_ENDPOINT);
   const config = await openidClient.discovery(
     serverUrl,
@@ -12,11 +12,9 @@ async function setupClient() {
     openidClient.ClientSecretPost(),
     {
       timeout: 30,
-      execute: [openidClient.allowInsecureRequests], // NOSONAR: not truly deprecated, marked by library to flag security implications
-    }
+      execute: [openidClient.allowInsecureRequests],
+    },
   );
-  console.log(`Created openid-client configuration`);
+  console.log("Created openid-client configuration");
   return config;
 }
-
-module.exports = { setupClient };

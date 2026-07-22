@@ -1,5 +1,5 @@
-const { GetItemCommand } = require("@aws-sdk/client-dynamodb");
-const openidClient = require("openid-client");
+import { GetItemCommand } from "@aws-sdk/client-dynamodb";
+import * as openidClient from "openid-client";
 
 async function checkUserStateAgainstDB(ctx, nonce, state) {
   const input = {
@@ -21,7 +21,7 @@ async function checkUserStateAgainstDB(ctx, nonce, state) {
 async function handleCallbackAndGetTokenSet(ctx, nonce, state) {
   console.log(`Processing the params ${nonce} and ${state}`);
   const currentUrl = new URL(
-    `${process.env.CALLBACK_URL}?${ctx.request.querystring}`
+    `${process.env.CALLBACK_URL}?${ctx.request.querystring}`,
   );
   const tokenSet = await openidClient.authorizationCodeGrant(
     ctx.oneLogin,
@@ -29,12 +29,12 @@ async function handleCallbackAndGetTokenSet(ctx, nonce, state) {
     {
       expectedNonce: nonce,
       expectedState: state,
-    }
+    },
   );
   return tokenSet;
 }
 
-const processCallback = async (ctx) => {
+export const processCallback = async (ctx) => {
   try {
     console.log("Handling callback.");
     const cookies = ctx.cookie;
@@ -48,7 +48,7 @@ const processCallback = async (ctx) => {
     const tokenSet = await handleCallbackAndGetTokenSet(ctx, nonce, state);
     if (tokenSet.access_token) {
       console.debug(
-        `Retrieved successful tokenSet: ${JSON.stringify(tokenSet, null, 2)}`
+        `Retrieved successful tokenSet: ${JSON.stringify(tokenSet, null, 2)}`,
       );
     } else {
       throw new Error(`TokenSet is empty object`);
@@ -81,7 +81,7 @@ async function getUserInfo(ctx, access_token) {
       const response = await openidClient.fetchUserInfo(
         ctx.oneLogin,
         access_token,
-        openidClient.skipSubjectCheck
+        openidClient.skipSubjectCheck,
       );
       console.log(response);
       return response;
@@ -93,7 +93,3 @@ async function getUserInfo(ctx, access_token) {
   }
   throw new Error(`Userinfo endpoint not authorising`);
 }
-
-module.exports = {
-  processCallback,
-};

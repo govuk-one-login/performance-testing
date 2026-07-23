@@ -657,7 +657,6 @@ Resources:
               SLACK_OAUTH_TOKEN: "/perfTest/slack/OAuthToken"
               STATUS_LIST_CLIENT_ID_DEV: "/perfTest/statusList/dev/clientID"
               STATUS_LIST_MOCK_URL_DEV: "/perfTest/statusList/dev/mockURL"
-              STATUS_LIST_PROXY_API: "/perfTest/statusList/isProxy"
               STATUS_LIST_URL_DEV: "/perfTest/statusList/dev/statsListURL"
               STATUS_LIST_CLIENT_ID_BUILD: "/perfTest/statusList/build/clientID"
               STATUS_LIST_MOCK_URL_BUILD: "/perfTest/statusList/build/mockURL"

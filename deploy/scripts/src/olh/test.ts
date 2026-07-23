@@ -441,10 +441,10 @@ const profiles: ProfileList = {
     ...createOLHPeakTestScenario('removePasskey', 17, 33, 1)
   },
   perf006Iteration10SpikeTest: {
-    ...createI3SpikeOLHScenario('changeEmail', 36, 24, 1),
-    ...createI3SpikeOLHScenario('changePassword', 36, 21, 1),
-    ...createI3SpikeOLHScenario('changePhone', 36, 24, 1),
-    ...createI3SpikeOLHScenario('deleteAccount', 36, 18, 1),
+    ...createI3SpikeOLHScenario('changeEmail', 36, 43, 1),
+    ...createI3SpikeOLHScenario('changePassword', 36, 38, 1),
+    ...createI3SpikeOLHScenario('changePhone', 36, 43, 1),
+    ...createI3SpikeOLHScenario('deleteAccount', 36, 28, 1),
     ...createI3SpikeSignInScenario('landingPage', 57, 13, 27),
     ...createI3SpikeOLHScenario('setUpPasskey', 36, 33, 1),
     ...createI3SpikeOLHScenario('removePasskey', 36, 33, 1)

@@ -403,6 +403,80 @@ export function createI4PeakTestSignInScenario(
   return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signInConfig, phaseDelay)
 }
 
+interface SpikeTestConfig {
+  startRate: number
+  timeUnit: string
+  holdTarget: number
+  vuFactor: number
+}
+
+export function createSpikeTestScenario(
+  exec: string,
+  target: number = 1,
+  iterationDuration: number,
+  phaseDelay: number,
+  config: SpikeTestConfig,
+  rampUpNFR: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round(((target / 10) * iterationDuration) / 2)
+  const maxVUs = Math.round((target / 10) * iterationDuration)
+  const step = Math.round(target / 3)
+  const spikeRamp = Math.round(rampUpNFR / 5)
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: config.startRate,
+    timeUnit: config.timeUnit,
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
+      { target: step, duration: '4m' }, // Ramp up to 33% target throughput over 4 minutes
+      { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
+      { target, duration: `${spikeRamp}s` }, // Ramp up to 100% target throughput at 5 X PERF008 growth rate
+      { target, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
+      { target: step, duration: '1s' }, // Ramp down to 33% over 1 second
+      { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
+      { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
+      { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
+    ],
+    exec
+  }
+  return list
+}
+
+export function createSpikeTestSignUpScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpNFR: number,
+  phaseDelay: number = 0
+): ScenarioList {
+  return createStressTestScenario(exec, target, iterationDuration, rampUpNFR, phaseDelay, {
+    startRate: 1,
+    timeUnit: '10s',
+    holdTarget: 1,
+    vuFactor: 0.1
+  })
+}
+
+export function createSpikeTestSignInScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpNFR: number,
+  phaseDelay: number = 0
+): ScenarioList {
+  return createStressTestScenario(exec, target, iterationDuration, rampUpNFR, phaseDelay, {
+    startRate: 2,
+    timeUnit: '1s',
+    holdTarget: 2,
+    vuFactor: 1
+  })
+}
+
 export function createI3SpikeOLHScenario(
   exec: string,
   target: number = 1,

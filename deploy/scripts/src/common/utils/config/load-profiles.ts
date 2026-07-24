@@ -414,7 +414,7 @@ export function createSpikeTestScenario(
   exec: string,
   target: number = 1,
   iterationDuration: number,
-  phaseDelay: 0,
+  phaseDelay: number = 0,
   config: SpikeTestConfig,
   rampUpNFR: number
 ): ScenarioList {

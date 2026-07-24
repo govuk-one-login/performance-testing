@@ -403,24 +403,19 @@ export function createI4PeakTestSignInScenario(
   return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signInConfig, phaseDelay)
 }
 
-interface SpikeTestConfig {
-  startRate: number
-  timeUnit: string
-  holdTarget: number
-  vuFactor: number
-}
-
 export function createSpikeTestScenario(
   exec: string,
-  target: number = 1,
+  target: number,
   iterationDuration: number,
-  phaseDelay: number = 0,
+  phaseDelay: number,
   config: SpikeTestConfig,
-  rampUpNFR: number
+  rampUpNFR: number,
+  spikeDelay: number = 0,
+  nfrDelay: number = 0
 ): ScenarioList {
   const list: ScenarioList = {}
-  const preAllocatedVUs = Math.round(((target / 10) * iterationDuration) / 2)
-  const maxVUs = Math.round((target / 10) * iterationDuration)
+  const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
+  const maxVUs = Math.round(target * config.vuFactor * iterationDuration)
   const step = Math.round(target / 3)
   const spikeRamp = Math.round(rampUpNFR / 5)
   list[exec] = {
@@ -433,14 +428,14 @@ export function createSpikeTestScenario(
       ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
       { target: step, duration: '4m' }, // Ramp up to 33% target throughput over 4 minutes
       { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
-      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before seocong ramp
-      { target, duration: `${spikeRamp}s` }, // Ramp up to 100% target throughput at 5 X PERF008 growth rate
-      { target, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
+      ...(spikeDelay > 0 ? [{ target: step, duration: `${spikeDelay}s` }] : []), // Hold at 33% to sync spike ramp start
+      { target, duration: `${spikeRamp}s` }, // Ramp up to 100% at 5x PERF008 growth rate
+      { target, duration: '5m' }, // Maintain steady state at 100% for 5 minutes
       { target: step, duration: '1s' }, // Ramp down to 33% over 1 second
-      { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
-      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before third ramp
-      { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
-      { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
+      { target: step, duration: '5m' }, // Maintain steady state at 33% for 5 minutes
+      ...(nfrDelay > 0 ? [{ target: step, duration: `${nfrDelay}s` }] : []), // Hold at 33% to sync NFR ramp start
+      { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% at the rate defined in PERF008
+      { target, duration: '5m' } // Maintain steady state at 100% for 5 minutes
     ],
     exec
   }
@@ -452,14 +447,24 @@ export function createSpikeTestSignUpScenario(
   target: number,
   iterationDuration: number,
   rampUpNFR: number,
-  phaseDelay: number = 0
+  delays: { phaseDelay?: number; spikeDelay?: number; nfrDelay?: number } = {}
 ): ScenarioList {
-  return createStressTestScenario(exec, target, iterationDuration, rampUpNFR, phaseDelay, {
-    startRate: 1,
-    timeUnit: '10s',
-    holdTarget: 1,
-    vuFactor: 0.1
-  })
+  const { phaseDelay = 0, spikeDelay = 0, nfrDelay = 0 } = delays
+  return createSpikeTestScenario(
+    exec,
+    target,
+    iterationDuration,
+    phaseDelay,
+    {
+      startRate: 1,
+      timeUnit: '10s',
+      holdTarget: 1,
+      vuFactor: 0.1
+    },
+    rampUpNFR,
+    spikeDelay,
+    nfrDelay
+  )
 }
 
 export function createSpikeTestSignInScenario(
@@ -467,14 +472,31 @@ export function createSpikeTestSignInScenario(
   target: number,
   iterationDuration: number,
   rampUpNFR: number,
-  phaseDelay: number = 0
+  delays: { phaseDelay?: number; spikeDelay?: number; nfrDelay?: number } = {}
 ): ScenarioList {
-  return createStressTestScenario(exec, target, iterationDuration, rampUpNFR, phaseDelay, {
-    startRate: 2,
-    timeUnit: '1s',
-    holdTarget: 2,
-    vuFactor: 1
-  })
+  const { phaseDelay = 0, spikeDelay = 0, nfrDelay = 0 } = delays
+  return createSpikeTestScenario(
+    exec,
+    target,
+    iterationDuration,
+    phaseDelay,
+    {
+      startRate: 2,
+      timeUnit: '1s',
+      holdTarget: 2,
+      vuFactor: 1
+    },
+    rampUpNFR,
+    spikeDelay,
+    nfrDelay
+  )
+}
+
+interface SpikeTestConfig {
+  startRate: number
+  timeUnit: string
+  holdTarget: number
+  vuFactor: number
 }
 
 export function createI3SpikeOLHScenario(

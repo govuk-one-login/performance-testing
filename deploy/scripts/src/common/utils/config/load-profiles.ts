@@ -414,7 +414,7 @@ export function createSpikeTestScenario(
   exec: string,
   target: number = 1,
   iterationDuration: number,
-  phaseDelay: number,
+  phaseDelay: 0,
   config: SpikeTestConfig,
   rampUpNFR: number
 ): ScenarioList {
@@ -433,12 +433,12 @@ export function createSpikeTestScenario(
       ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
       { target: step, duration: '4m' }, // Ramp up to 33% target throughput over 4 minutes
       { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
-      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
+      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before seocong ramp
       { target, duration: `${spikeRamp}s` }, // Ramp up to 100% target throughput at 5 X PERF008 growth rate
       { target, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
       { target: step, duration: '1s' }, // Ramp down to 33% over 1 second
       { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
-      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
+      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before third ramp
       { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
       { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
     ],

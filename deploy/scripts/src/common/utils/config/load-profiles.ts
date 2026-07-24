@@ -407,11 +407,10 @@ export function createSpikeTestScenario(
   exec: string,
   target: number,
   iterationDuration: number,
-  phaseDelay: number,
   config: SpikeTestConfig,
   rampUpNFR: number,
-  spikeDelay: number = 0,
-  nfrDelay: number = 0
+  spike1Delay: number = 0,
+  spike2Delay: number = 0
 ): ScenarioList {
   const list: ScenarioList = {}
   const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
@@ -425,15 +424,14 @@ export function createSpikeTestScenario(
     preAllocatedVUs,
     maxVUs,
     stages: [
-      ...(phaseDelay > 0 ? [{ target: config.holdTarget, duration: `${phaseDelay}s` }] : []), // Hold before first ramp
       { target: step, duration: '4m' }, // Ramp up to 33% target throughput over 4 minutes
       { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
-      ...(spikeDelay > 0 ? [{ target: step, duration: `${spikeDelay}s` }] : []), // Hold at 33% to sync spike ramp start
+      ...(spike1Delay > 0 ? [{ target: step, duration: `${spike1Delay}s` }] : []), // Hold at 33% to sync spike ramp start
       { target, duration: `${spikeRamp}s` }, // Ramp up to 100% at 5x PERF008 growth rate
       { target, duration: '5m' }, // Maintain steady state at 100% for 5 minutes
       { target: step, duration: '1s' }, // Ramp down to 33% over 1 second
       { target: step, duration: '5m' }, // Maintain steady state at 33% for 5 minutes
-      ...(nfrDelay > 0 ? [{ target: step, duration: `${nfrDelay}s` }] : []), // Hold at 33% to sync NFR ramp start
+      ...(spike2Delay > 0 ? [{ target: step, duration: `${spike2Delay}s` }] : []), // Hold at 33% to sync NFR ramp start
       { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% at the rate defined in PERF008
       { target, duration: '5m' } // Maintain steady state at 100% for 5 minutes
     ],
@@ -447,14 +445,13 @@ export function createSpikeTestSignUpScenario(
   target: number,
   iterationDuration: number,
   rampUpNFR: number,
-  delays: { phaseDelay?: number; spikeDelay?: number; nfrDelay?: number } = {}
+  delays: { spike1Delay?: number; spike2Delay?: number } = {}
 ): ScenarioList {
-  const { phaseDelay = 0, spikeDelay = 0, nfrDelay = 0 } = delays
+  const { spike1Delay = 0, spike2Delay = 0 } = delays
   return createSpikeTestScenario(
     exec,
     target,
     iterationDuration,
-    phaseDelay,
     {
       startRate: 1,
       timeUnit: '10s',
@@ -462,8 +459,8 @@ export function createSpikeTestSignUpScenario(
       vuFactor: 0.1
     },
     rampUpNFR,
-    spikeDelay,
-    nfrDelay
+    spike1Delay,
+    spike2Delay
   )
 }
 
@@ -472,14 +469,13 @@ export function createSpikeTestSignInScenario(
   target: number,
   iterationDuration: number,
   rampUpNFR: number,
-  delays: { phaseDelay?: number; spikeDelay?: number; nfrDelay?: number } = {}
+  delays: { spike1Delay?: number; spike2Delay?: number } = {}
 ): ScenarioList {
-  const { phaseDelay = 0, spikeDelay = 0, nfrDelay = 0 } = delays
+  const { spike1Delay = 0, spike2Delay = 0 } = delays
   return createSpikeTestScenario(
     exec,
     target,
     iterationDuration,
-    phaseDelay,
     {
       startRate: 2,
       timeUnit: '1s',
@@ -487,8 +483,8 @@ export function createSpikeTestSignInScenario(
       vuFactor: 1
     },
     rampUpNFR,
-    spikeDelay,
-    nfrDelay
+    spike1Delay,
+    spike2Delay
   )
 }
 

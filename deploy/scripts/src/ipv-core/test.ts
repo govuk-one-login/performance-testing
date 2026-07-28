@@ -429,7 +429,7 @@ const profiles: ProfileList = {
   },
   perf006Iteration10SpikeTest: {
     ...createSpikeTestSignUpScenario('identity', 960, 42, 961),
-    ...createSpikeTestSignInScenario('idReuse', 601, 6, 274, { spike1Delay: 137, spike2Delay: 687 })
+    ...createSpikeTestSignInScenario('idReuse', 601, 6, 274, 687)
   }
 }
 

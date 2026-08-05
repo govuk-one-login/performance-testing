@@ -13,50 +13,36 @@ The application uses several AWS resources, including a Lambda function, an API 
 To use the SAM CLI, you need the following tools.
 
 * SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-* Node.js - [Install Node.js 20](https://nodejs.org/en/), including the NPM package management tool.
+* Node.js - [Install Node.js 24](https://nodejs.org/en/), including the NPM package management tool.
 * Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
 
-### Use the SAM CLI to build and test locally
-
-Build your application with the `sam build` command.
-
-```bash
-koa-stub$ sam build
-```
-The SAM CLI installs dependencies defined in `src/package.json`, compiles TypeScript with esbuild, creates a deployment package, and saves it in the `.aws-sam/build` folder.
-
-The SAM CLI can also emulate your application's API. Use the `sam local start-api` to run the API locally on port 3000.
-
-##### Local Service Dependencies
-
-There are two service dependencies before you can start the SAM service
+### Run locally
 
 ##### DynamoDB
 You need to have created a dynamodb sessions table locally before this will work, to do that:
 ```bash
 koa-stub$ docker run -p 8000:8000 amazon/dynamodb-local
 ```
-Then, in a separate terminal create your SessionTable:
+Then, in a separate terminal create your SessionTable (one-time):
 ```bash
 koa-stub$ aws dynamodb create-table --table-name SessionTable --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --billing-mode PAY_PER_REQUEST --endpoint-url http://localhost:8000
 ```
 
 ##### OIDC Server
 
-Then, in a separate terminal create your SessionTable:
+In a separate terminal:
 ```bash
-koa-stub$ npx oauth2-mock-server
-Generated new RSA key with kid "..."
-OAuth 2 server listening on http://[::]:8080
+koa-stub/src$ npm run mock-oidc
 OAuth 2 issuer is http://localhost:8080
 ```
 Press ctrl-c to exit this server when you've finished with it.
-##### Local API using SAM
 
-You can then start the local api, using the example.json setup.
+##### Local API
+
+Set the required environment variables and start the app:
 ```bash
-koa-stub$ sam local start-api --env-vars example.json
-koa-stub$ curl http://localhost:3000/start
+koa-stub/src$ CLIENT_ID=testclient CLIENT_SECRET=testsecret OIDC_ENDPOINT=http://localhost:8080 RESPONSE_ALG=RS256 SESSION_TABLE=SessionTable CALLBACK_URL=http://localhost:3000/callback npm start
+koa-stub$ curl -L -c cookies.txt http://localhost:3000/start
 ```
 
 ### Deploy to an env
@@ -75,8 +61,8 @@ Tests are defined in the `src/test` folder in this project.
 
 ```bash
 koa-stub$ cd src
-rp-stub$ npm install
-rp-stub$ npm run test
+koa-stub/src$ npm install
+koa-stub/src$ npm run test
 ```
 
 ## Bugs to resolve

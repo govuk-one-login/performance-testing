@@ -1,8 +1,10 @@
 {
   "KoaFunction": {
     "CLIENT_ID": "testclient",
-    "OIDC_ENDPOINT": "https://localhost:8000/.well-known/openid-configuration",
-    "RESPONSE_ALG": "ES256",
+    "CLIENT_SECRET": "testsecret",
+    "OIDC_ENDPOINT": "http://host.docker.internal:8080",
+    "CALLBACK_URL": "http://host.docker.internal:3000/callback",
+    "RESPONSE_ALG": "RS256",
     "SESSION_TABLE": "SessionTable"
   }
 }

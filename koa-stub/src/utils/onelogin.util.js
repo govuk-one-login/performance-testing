@@ -12,6 +12,7 @@ export async function setupClient() {
     openidClient.ClientSecretPost(),
     {
       timeout: 30,
+      // allowInsecureRequests is intentional for this performance stub - do not carry into a production RP implementation
       execute: [openidClient.allowInsecureRequests],
     },
   );

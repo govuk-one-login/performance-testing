@@ -1,4 +1,4 @@
-import { expect, describe, test, beforeAll, afterAll, vi } from "vitest";
+import { expect, describe, test, beforeAll, afterAll, afterEach, vi } from "vitest";
 import axios from "axios";
 import * as cookieJar from "tough-cookie";
 import { wrapper } from "axios-cookiejar-support";
@@ -33,6 +33,10 @@ let client;
 let server;
 let oidc_url = "http://localhost:8080";
 let app_url = "http://localhost:8081";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 beforeAll(async () => {
   await oidc_server.start(8080, "localhost");
@@ -100,7 +104,6 @@ describe("Tests against the OIDC Service with errors", () => {
     expect(logoutresponse.data).toBe("TestPage");
   });
   test("The OIDC flow fails, if all calls to userinfo is a 401", async () => {
-    vi.restoreAllMocks();
     const spyConsole = vi.spyOn(console, "warn");
     service.on("beforeUserinfo", (userInfoResponse, req) => {
       userInfoResponse.body = {

@@ -12,20 +12,19 @@ import {
 import { OAuth2Server } from "oauth2-mock-server";
 import { setupClient } from "../utils/onelogin.util.js";
 
-const expiry = new Date();
-expiry.setDate(expiry.getDate() + 1);
 const dynamoDB = new DynamoDBClient({});
 const dynamoDBMock = mockClient(dynamoDB);
 
-dynamoDBMock.on(PutItemCommand, {});
+let lastPutItem = {};
 
-dynamoDBMock.on(GetItemCommand).resolves({
-  Item: {
-    id: { S: "teststring" },
-    state: { S: "teststring" },
-    expiry: { S: `${expiry}` },
-  },
+dynamoDBMock.on(PutItemCommand).callsFake((input) => {
+  lastPutItem = input.Item;
+  return {};
 });
+
+dynamoDBMock.on(GetItemCommand).callsFake(() => ({
+  Item: lastPutItem,
+}));
 
 let oidc_server = new OAuth2Server();
 let service = oidc_server.service;

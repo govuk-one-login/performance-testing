@@ -12,7 +12,8 @@ async function checkUserStateAgainstDB(ctx, nonce, state) {
   };
   const command = new GetItemCommand(input);
   const dbresponse = await ctx.ddbClient.send(command);
-  if (dbresponse.Item.state.S === state) {
+  if (dbresponse.Item.state.S !== state) {
+    throw new Error(`State mismatch`);
   }
 }
 
@@ -41,9 +42,7 @@ export const processCallback = async (ctx) => {
     await checkUserStateAgainstDB(ctx, nonce, state);
 
     const tokenSet = await handleCallbackAndGetTokenSet(ctx, nonce, state);
-    if (tokenSet.access_token) {
-
-    } else {
+    if (!tokenSet.access_token) {
       throw new Error(`TokenSet is empty object`);
     }
 

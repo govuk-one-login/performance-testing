@@ -57,7 +57,8 @@ beforeAll(async () => {
 
   const jar = new cookieJar.CookieJar();
   client = wrapper(axios.create({ jar }));
-  /// Adding this delay seems to stop the intermittency of the test success.
+  /// Adding this delay allows the OIDC mock server and app server time to fully
+  /// initialise before tests run, preventing intermittent failures on first request.
   const delay = 1000;
   await new Promise((resolve) => setTimeout(resolve, delay));
 });

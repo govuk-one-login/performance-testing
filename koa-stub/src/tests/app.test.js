@@ -36,7 +36,6 @@ let app_url = "http://localhost:8081";
 
 beforeAll(async () => {
   await oidc_server.start(8080, "localhost");
-  console.log("Issuer URL:", oidc_server.issuer.url);
   process.env.OIDC_ENDPOINT = oidc_server.issuer.url;
   process.env.SESSION_TABLE = "SessionTable";
   process.env.RESPONSE_ALG = "RS256";

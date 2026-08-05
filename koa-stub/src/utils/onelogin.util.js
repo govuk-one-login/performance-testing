@@ -15,6 +15,5 @@ export async function setupClient() {
       execute: [openidClient.allowInsecureRequests],
     },
   );
-  console.log("Created openid-client configuration");
   return config;
 }

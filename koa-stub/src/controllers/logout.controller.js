@@ -17,21 +17,16 @@ export const rpInitiateLogout = async (ctx) => {
         post_logout_redirect_uri: logout_url,
       });
       logout = logoutUrl.href;
-      console.log(`Logout url ${logout}`);
     }
 
     const cookieOptions = { httpOnly: false, secure: false };
-    console.log("Trying to delete all our cookies");
     const cookieList = Object.keys(cookies);
     cookieList.forEach((cookie) => {
-      console.log(`Deleting cookie ${cookie}`);
       ctx.cookies.set(cookie.name, "", cookieOptions);
-      console.log(`Deleted cookie ${cookie}`);
     });
-    console.log(`Sending user to url ${logout}`);
     ctx.redirect(logout);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     ctx.status = 500;
     throw e;
   }

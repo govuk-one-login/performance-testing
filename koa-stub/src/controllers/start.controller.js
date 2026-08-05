@@ -29,7 +29,6 @@ async function createSession(ctx) {
     nonce: nonce,
     state: state,
   };
-  console.log(`Successfully created session: ${JSON.stringify(sessionObject)}`);
   return sessionObject;
 }
 
@@ -40,7 +39,6 @@ export const setNonceAndRedirect = async (ctx) => {
     const cookieOptions = { httpOnly: true, secure: false };
     ctx.cookies.set("nonce", session.nonce, cookieOptions);
     ctx.cookies.set("session", session.state, cookieOptions);
-    console.log("Successfully set session cookies.");
 
     const redirectUrl = openidClient.buildAuthorizationUrl(ctx.oneLogin, {
       scope: "openid email phone",
@@ -50,11 +48,9 @@ export const setNonceAndRedirect = async (ctx) => {
       ui_locales: "en",
       redirect_uri: process.env.CALLBACK_URL,
     });
-    console.log(`Sending user to ${redirectUrl}`);
-
     ctx.redirect(redirectUrl.href);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     ctx.status = 500;
     throw e;
   }

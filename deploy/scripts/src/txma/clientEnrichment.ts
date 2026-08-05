@@ -17,7 +17,9 @@ import { getEnv } from '../common/utils/config/environment-variables'
 import {
   generateAuthCreateAccount,
   generateAuthReqParsedEnrichment,
-  generateAuthLogInSuccessEnrichment
+  generateAuthLogInSuccessEnrichment,
+  generateRandomIP,
+  generateRandomPhoneNumber
 } from '../common/requestGenerator/txmaReqGen'
 
 const profiles: ProfileList = {
@@ -107,6 +109,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignInScenario('sendRegularEventWithEnrichment', 7706, 3, 631)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignInScenario('sendRegularEventWithEnrichment', 7239, 3, 751)
   }
 }
 
@@ -141,7 +146,11 @@ export function setup(): string {
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  const authCreateAccPayload = JSON.stringify(
+    generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, randomIP, randomPhoneNumber)
+  )
   const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID, testID))
 
   console.log('Sending primer event 1')

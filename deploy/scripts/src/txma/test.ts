@@ -14,7 +14,9 @@ import { getEnv } from '../common/utils/config/environment-variables'
 import {
   generateAuthLogInSuccess,
   generateAuthCreateAccount,
-  generateAuthReqParsed
+  generateAuthReqParsed,
+  generateRandomIP,
+  generateRandomPhoneNumber
 } from '../common/requestGenerator/txmaReqGen'
 
 const profiles: ProfileList = {
@@ -67,7 +69,11 @@ export function setup(): string {
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
   const journeyID = uuidv4()
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  const authCreateAccPayload = JSON.stringify(
+    generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, randomIP, randomPhoneNumber)
+  )
 
   console.log('Sending primer event 1')
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
@@ -79,8 +85,16 @@ export function sendRegularEvent(authCreateAccPayload: string): void {
   iterationsStarted.add(1)
   const authCreatePayload = JSON.parse(authCreateAccPayload)
   const journeyID = uuidv4()
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
   const authLogInSuccessPayload = JSON.stringify(
-    generateAuthLogInSuccess(`${authCreatePayload.user.user_id}`, `${authCreatePayload.user.email}`, journeyID)
+    generateAuthLogInSuccess(
+      `${authCreatePayload.user.user_id}`,
+      `${authCreatePayload.user.email}`,
+      journeyID,
+      randomIP,
+      randomPhoneNumber
+    )
   )
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayload)
   iterationsCompleted.add(1)

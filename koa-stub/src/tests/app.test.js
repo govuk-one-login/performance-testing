@@ -31,7 +31,6 @@ let oidc_server = new OAuth2Server();
 let service = oidc_server.service;
 let client;
 let server;
-let oidc_url = "http://localhost:8080";
 let app_url = "http://localhost:8081";
 
 afterEach(() => {

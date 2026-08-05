@@ -11,6 +11,11 @@ if (process.env.AWS_SAM_LOCAL) {
 }
 
 app.context.ddbClient = new DynamoDBClient(config);
+app.use(async (ctx, next) => {
+  const start = Date.now();
+  await next();
+  console.log(`${ctx.method} ${ctx.url} ${ctx.status} ${Date.now() - start}ms`);
+});
 app.use(cors()).use(router.routes());
 
 export default app;

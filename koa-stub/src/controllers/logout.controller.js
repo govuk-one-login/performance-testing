@@ -22,7 +22,7 @@ export const rpInitiateLogout = async (ctx) => {
     const cookieOptions = { httpOnly: false, secure: false };
     const cookieList = Object.keys(cookies);
     cookieList.forEach((cookie) => {
-      ctx.cookies.set(cookie.name, "", cookieOptions);
+      ctx.cookies.set(cookie, "", cookieOptions);
     });
     ctx.redirect(logout);
   } catch (e) {

@@ -41,7 +41,7 @@ Press ctrl-c to exit this server when you've finished with it.
 
 Set the required environment variables and start the app:
 ```bash
-koa-stub/src$ CLIENT_ID=testclient CLIENT_SECRET=testsecret OIDC_ENDPOINT=http://localhost:8080 RESPONSE_ALG=RS256 SESSION_TABLE=SessionTable CALLBACK_URL=http://localhost:3000/callback npm start
+koa-stub/src$ CLIENT_ID=testclient CLIENT_SECRET=testsecret OIDC_ENDPOINT=http://localhost:8080 RESPONSE_ALG=RS256 SESSION_TABLE=SessionTable CALLBACK_URL=http://localhost:3000/callback AWS_ENDPOINT_URL_DYNAMODB=http://localhost:8000 npm start
 koa-stub$ curl -L -c cookies.txt http://localhost:3000/start
 ```
 

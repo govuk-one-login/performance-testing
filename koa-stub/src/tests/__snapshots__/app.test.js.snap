@@ -1,14 +1,14 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Tests against the OIDC Service The OIDC flow works 1`] = `
+exports[`Tests against the OIDC Service > The OIDC flow works 1`] = `
 {
   "sub": "johndoe",
 }
 `;
 
-exports[`Tests against the OIDC Service with errors The OIDC flow fails, if all calls to userinfo is a 401 1`] = `[AxiosError: Request failed with status code 500]`;
+exports[`Tests against the OIDC Service with errors > The OIDC flow fails, if all calls to userinfo is a 401 1`] = `[AxiosError: Request failed with status code 500]`;
 
-exports[`Tests against the OIDC Service with errors The OIDC flow works, if the first call to userinfo is a 401 1`] = `
+exports[`Tests against the OIDC Service with errors > The OIDC flow works, if the first call to userinfo is a 401 1`] = `
 {
   "sub": "johndoe",
 }

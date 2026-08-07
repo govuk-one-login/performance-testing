@@ -1,11 +1,13 @@
-const Router = require("koa-router");
-const router = new Router();
-const { setNonceAndRedirect } = require("./controllers/start.controller");
-const { processCallback } = require("./controllers/callback.controller");
-const { rpInitiateLogout } = require("./controllers/logout.controller");
-const cookie = require("koa-cookie");
+import Router from "koa-router";
+import koaCookie from "koa-cookie";
+const cookie = koaCookie.default || koaCookie;
+import { setNonceAndRedirect } from "./controllers/start.controller.js";
+import { processCallback } from "./controllers/callback.controller.js";
+import { rpInitiateLogout } from "./controllers/logout.controller.js";
 
-router.use(cookie.default());
+const router = new Router();
+
+router.use(cookie());
 
 router.get("/start", setNonceAndRedirect);
 router.get("/callback", processCallback);
@@ -20,4 +22,4 @@ router.get("/", (ctx) => {
     "Welcome to the RP stub, please see the tests for instructions on how to use.";
 });
 
-module.exports = router;
+export default router;

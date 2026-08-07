@@ -1,21 +1,18 @@
-//require('source-map-support/register')
-const serverlessExpress = require('@codegenie/serverless-express')
-const app = require('./app')
-const { setupClient } = require('./utils/onelogin.util')
+import serverlessExpress from "@codegenie/serverless-express";
+import app from "./app.js";
+import { setupClient } from "./utils/onelogin.util.js";
 
 let serverlessExpressInstance;
 
-async function setup (event, context) {
-  const client = await setupClient(event)
+async function setup(event, context) {
+  const client = await setupClient();
   app.context.oneLogin = client;
-  serverlessExpressInstance = serverlessExpress({ app })
-  return serverlessExpressInstance(event, context)
+  serverlessExpressInstance = serverlessExpress({ app });
+  return serverlessExpressInstance(event, context);
 }
 
-function handler (event, context) {
-  if (serverlessExpressInstance) return serverlessExpressInstance(event, context)
-
-  return setup(event, context)
+export async function handler(event, context) {
+  if (serverlessExpressInstance)
+    return serverlessExpressInstance(event, context);
+  return setup(event, context);
 }
-
-exports.handler = handler

@@ -1,44 +1,43 @@
-const { expect } = require("expect");
-require("aws-sdk-client-mock-jest");
-const axios = require("axios");
-const cookieJar = require("tough-cookie");
-const wrapper = require("axios-cookiejar-support");
-const app = require("../app");
-const { mockClient } = require("aws-sdk-client-mock");
-const {
+import { expect, describe, test, beforeAll, afterAll, afterEach, vi } from "vitest";
+import axios from "axios";
+import * as cookieJar from "tough-cookie";
+import { wrapper } from "axios-cookiejar-support";
+import app from "../app.js";
+import { mockClient } from "aws-sdk-client-mock";
+import {
   PutItemCommand,
   DynamoDBClient,
   GetItemCommand,
-} = require("@aws-sdk/client-dynamodb");
+} from "@aws-sdk/client-dynamodb";
+import { OAuth2Server } from "oauth2-mock-server";
+import { setupClient } from "../utils/onelogin.util.js";
 
-const expiry = new Date();
-expiry.setDate(expiry.getDate() + 1);
 const dynamoDB = new DynamoDBClient({});
 const dynamoDBMock = mockClient(dynamoDB);
 
-dynamoDBMock.on(PutItemCommand, {});
+let lastPutItem = {};
 
-dynamoDBMock.on(GetItemCommand).resolves({
-  Item: {
-    id: { S: "teststring" },
-    state: { S: "teststring" },
-    expiry: { S: `${expiry}` },
-  },
+dynamoDBMock.on(PutItemCommand).callsFake((input) => {
+  lastPutItem = input.Item;
+  return {};
 });
 
-const { OAuth2Server } = require("oauth2-mock-server");
-const { setupClient } = require("../utils/onelogin.util");
+dynamoDBMock.on(GetItemCommand).callsFake(() => ({
+  Item: lastPutItem,
+}));
 
 let oidc_server = new OAuth2Server();
 let service = oidc_server.service;
 let client;
 let server;
-let oidc_url = "http://localhost:8080";
 let app_url = "http://localhost:8081";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 beforeAll(async () => {
   await oidc_server.start(8080, "localhost");
-  console.log("Issuer URL:", oidc_server.issuer.url);
   process.env.OIDC_ENDPOINT = oidc_server.issuer.url;
   process.env.SESSION_TABLE = "SessionTable";
   process.env.RESPONSE_ALG = "RS256";
@@ -56,8 +55,9 @@ beforeAll(async () => {
   server = app.listen(8081);
 
   const jar = new cookieJar.CookieJar();
-  client = wrapper.wrapper(axios.create({ jar }));
-  /// Adding this delay seems to stop the intermittency of the test success.
+  client = wrapper(axios.create({ jar }));
+  /// Adding this delay allows the OIDC mock server and app server time to fully
+  /// initialise before tests run, preventing intermittent failures on first request.
   const delay = 1000;
   await new Promise((resolve) => setTimeout(resolve, delay));
 });
@@ -67,14 +67,14 @@ describe("Tests against the OIDC Service", () => {
     const url = `${app_url}/start`;
     const response = await client.get(url, { withCredentials: true });
     expect(response.status).toBe(200);
-    expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
-    expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
+    expect(dynamoDBMock.commandCalls(PutItemCommand).length).toBeGreaterThan(0);
+    expect(dynamoDBMock.commandCalls(GetItemCommand).length).toBeGreaterThan(0);
     expect(response.data).toMatchSnapshot();
   });
 });
 describe("Tests against the OIDC Service with errors", () => {
   test("The OIDC flow works, if the first call to userinfo is a 401", async () => {
-    const spyConsole = jest.spyOn(console, "warn");
+    const spyConsole = vi.spyOn(console, "warn");
     service.once("beforeUserinfo", (userInfoResponse, req) => {
       userInfoResponse.body = {
         error: "invalid_token",
@@ -85,14 +85,14 @@ describe("Tests against the OIDC Service with errors", () => {
     const url = `${app_url}/start`;
     const response = await client.get(url, { withCredentials: true });
     expect(response.status).toBe(200);
-    expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
+    expect(dynamoDBMock.commandCalls(PutItemCommand).length).toBeGreaterThan(0);
     expect(spyConsole).toHaveBeenCalledTimes(1);
     expect(spyConsole).toHaveBeenCalledWith(
       expect.stringContaining(
         "Request to userinfo failed due to ClientError: unexpected HTTP response status code",
       ),
     );
-    expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
+    expect(dynamoDBMock.commandCalls(GetItemCommand).length).toBeGreaterThan(0);
     expect(response.data).toMatchSnapshot();
 
     const logouturl = "http://localhost:8081/logout";
@@ -103,8 +103,7 @@ describe("Tests against the OIDC Service with errors", () => {
     expect(logoutresponse.data).toBe("TestPage");
   });
   test("The OIDC flow fails, if all calls to userinfo is a 401", async () => {
-    console.warn.mockRestore();
-    const spyConsole = jest.spyOn(console, "warn");
+    const spyConsole = vi.spyOn(console, "warn");
     service.on("beforeUserinfo", (userInfoResponse, req) => {
       userInfoResponse.body = {
         error: "invalid_token",
@@ -117,14 +116,14 @@ describe("Tests against the OIDC Service with errors", () => {
       expect(error).toMatchSnapshot();
     });
 
-    expect(dynamoDBMock).toHaveReceivedCommand(PutItemCommand);
+    expect(dynamoDBMock.commandCalls(PutItemCommand).length).toBeGreaterThan(0);
     expect(spyConsole).toHaveBeenCalledTimes(3);
     expect(spyConsole).toHaveBeenCalledWith(
       expect.stringContaining(
         "Request to userinfo failed due to ClientError: unexpected HTTP response status code",
       ),
     );
-    expect(dynamoDBMock).toHaveReceivedCommand(GetItemCommand);
+    expect(dynamoDBMock.commandCalls(GetItemCommand).length).toBeGreaterThan(0);
   });
 });
 

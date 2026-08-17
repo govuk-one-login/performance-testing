@@ -599,7 +599,7 @@ export function signUp(): void {
   const phoneNumber = '07700900000'
   let secretKey: string
   let totp: TOTP
-  const mfaOption: mfaType = Math.random() <= 0.5 ? 'SMS' : 'AUTH_APP'
+  const mfaOption: mfaType = Math.random() <= 0.9 ? 'SMS' : 'AUTH_APP'
   iterationsStarted.add(1)
 
   // B01_SignUp_01_StubSubmit

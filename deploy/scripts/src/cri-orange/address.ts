@@ -20,6 +20,7 @@ import { timeGroup } from '../common/utils/request/timing'
 import { isStatusCode200, isStatusCode302, pageContentCheck } from '../common/utils/checks/assertions'
 import { sleepBetween } from '../common/utils/sleep/sleepBetween'
 import { getThresholds } from '../common/utils/config/thresholds'
+import { getStaticResources } from '../common/utils/request/static'
 
 const profiles: ProfileList = {
   smoke: {
@@ -344,28 +345,11 @@ export function address(): void {
       { isStatusCode302 }
     )
     // 02_AddCRICall
-    res = timeGroup(
-      groups[2].split('::')[1],
-      () => {
-        if (env.staticResources) {
-          const paths = [
-            '/public/stylesheets/application.css',
-            '/public/javascripts/all.js',
-            '/public/javascripts/analytics.js',
-            '/public/fonts/bold-b542beb274-v2.woff2',
-            '/public/fonts/light-94a07e06a1-v2.woff2',
-            '/public/images/govuk-crest-2x.png'
-          ]
-          const batchRequests = paths.map(path => env.addressEndPoint + path)
-          http.batch(batchRequests)
-        }
-        return http.get(res.headers.Location)
-      },
-      {
-        isStatusCode200,
-        ...pageContentCheck('Find your address')
-      }
-    )
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Find your address')
+    })
+    if (env.staticResources) getStaticResources(res)
   })
 
   sleep(1)
@@ -452,6 +436,7 @@ export function addressME(): void {
       isStatusCode200,
       ...pageContentCheck('Find your address')
     })
+    if (env.staticResources) getStaticResources(res)
   })
 
   sleep(1)

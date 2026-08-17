@@ -32,7 +32,7 @@ import { iterationsCompleted, iterationsStarted } from '../common/utils/custom_m
 import { timeGroup } from '../common/utils/request/timing'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { browser, type Page, type Response as PageResponse } from 'k6/browser'
-
+import { getStaticResources } from '../common/utils/request/static'
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('signIn', LoadProfile.smoke),
@@ -527,7 +527,7 @@ if (!validRoute.includes(route)) throw new Error(`Route '${route}' not in [${val
 
 const env = {
   stubEndpoint: getEnv(`ACCOUNT_AUTH_${environment}_${route}_STUB`),
-  staticResources: __ENV.K6_NO_STATIC_RESOURCES == 'true',
+  staticResources: __ENV.K6_NO_STATIC_RESOURCES !== 'true',
   authStagingURL: getEnv(`ACCOUNT_AUTH_${environment}_URL`),
   amcURL: getEnv(`ACCOUNT_AMC_${environment}_URL`),
   amcName: getEnv(`ACCOUNT_AMC_${environment}_NAME`),
@@ -800,30 +800,12 @@ export function orchStubSubmit(groups: readonly string[]): Response {
       }
     )
     // 02_AuthCall
-    return timeGroup(
-      groups[2].split('::')[1],
-      () => {
-        if (env.staticResources) {
-          const paths = [
-            '/public/style.css',
-            '/public/scripts/cookies.js',
-            '/public/scripts/application.js',
-            '/public/scripts/all.js',
-            '/assets/images/govuk-crest-2x.png',
-            '/assets/fonts/light-94a07e06a1-v2.woff2',
-            '/assets/fonts/bold-b542beb274-v2.woff2'
-          ]
-          const batchRequests = paths.map(path => env.authStagingURL + path)
-          http.batch(batchRequests)
-        }
-        return http.get(res.headers.Location)
-      },
-      {
-        isStatusCode200,
-        ...pageContentCheck('Create your GOV.UK One Login or sign in')
-      }
-    )
+    return timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+      isStatusCode200,
+      ...pageContentCheck('Create your GOV.UK One Login or sign in')
+    })
   })
+  if (env.staticResources) getStaticResources(res)
 }
 
 export function rpStubSubmit(groups: readonly string[]): Response {

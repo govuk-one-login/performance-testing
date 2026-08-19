@@ -40,6 +40,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignInScenario('useridentity', 250, 15, 115)
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignInScenario('useridentity', 267, 15, 122)
   }
 }
 

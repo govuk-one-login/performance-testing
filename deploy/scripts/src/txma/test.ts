@@ -17,7 +17,9 @@ import { getEnv } from '../common/utils/config/environment-variables'
 import {
   generateAuthCreateAccount,
   generateAuthReqParsedEnrichment,
-  generateAuthLogInSuccessEnrichment
+  generateAuthLogInSuccessEnrichment,
+  generateRandomIP,
+  generateRandomPhoneNumber
 } from '../common/requestGenerator/txmaReqGen'
 
 const profiles: ProfileList = {
@@ -141,7 +143,17 @@ export function setup(): string {
   const userID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestCommonSubjectId`
   const pairWiseID = `${testID}_performanceTestClientId_perfUserID${uuidv4()}_performanceTestRpPairwiseId`
   const emailID = `perfEmail${uuidv4()}@digital.cabinet-office.gov.uk`
-  const authCreateAccPayload = JSON.stringify(generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID))
+  const authCreateAccPayload = JSON.stringify(
+    generateAuthCreateAccount(
+      testID,
+      userID,
+      emailID,
+      pairWiseID,
+      journeyID,
+      generateRandomIP(),
+      generateRandomPhoneNumber()
+    )
+  )
   const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID, testID))
 
   console.log('Sending primer event 1')

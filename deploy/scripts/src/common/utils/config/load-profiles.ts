@@ -416,7 +416,7 @@ export function createSpikeTestScenario(
   const maxVUs = Math.round(target * config.vuFactor * iterationDuration)
   const step = Math.round(target / 3)
   const spikeRamp = Math.round(rampUpNFR / 5)
-  const spike1Delay = phaseDelay > 0 ? Math.round(phaseDelay / 5) : 0
+  const spikeDelay = phaseDelay > 0 ? Math.round(phaseDelay / 5) : 0
 
   list[exec] = {
     executor: 'ramping-arrival-rate',
@@ -427,7 +427,7 @@ export function createSpikeTestScenario(
     stages: [
       { target: step, duration: '4m' }, // Ramp up to 33% target throughput over 4 minutes
       { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
-      ...(spike1Delay > 0 ? [{ target: step, duration: `${spike1Delay}s` }] : []), // Hold at 33% to sync spike ramp start
+      ...(spikeDelay > 0 ? [{ target: step, duration: `${spikeDelay}s` }] : []), // Hold at 33% to sync spike ramp start
       { target, duration: `${spikeRamp}s` }, // Ramp up to 100% at 5x PERF008 growth rate
       { target, duration: '5m' }, // Maintain steady state at 100% for 5 minutes
       { target: step, duration: '1s' }, // Ramp down to 33% over 1 second

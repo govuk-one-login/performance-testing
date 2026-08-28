@@ -16,8 +16,8 @@ import {
   createI4PeakTestSignInScenario,
   createStressTestOLHScenario,
   createStressTestSignInScenario,
-  createSpikeTestSignUpScenario,
-  createSpikeTestSignInScenario
+  createSpikeTestSignInScenario,
+  createSpikeTestOLHScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import { timeGroup } from '../common/utils/request/timing'
@@ -443,13 +443,13 @@ const profiles: ProfileList = {
     ...createOLHPeakTestScenario('removePasskey', 17, 33, 1)
   },
   perf006Iteration10SpikeTest: {
-    ...createSpikeTestSignUpScenario('changeEmail', 36, 43, 1, 26),
-    ...createSpikeTestSignUpScenario('changePassword', 36, 38, 1, 26),
-    ...createSpikeTestSignUpScenario('changePhone', 36, 43, 1, 26),
-    ...createSpikeTestSignUpScenario('deleteAccount', 36, 28, 1, 26),
+    ...createSpikeTestOLHScenario('changeEmail', 36, 43, 1, 26),
+    ...createSpikeTestOLHScenario('changePassword', 36, 38, 1, 26),
+    ...createSpikeTestOLHScenario('changePhone', 36, 43, 1, 26),
+    ...createSpikeTestOLHScenario('deleteAccount', 36, 28, 1, 26),
     ...createSpikeTestSignInScenario('landingPage', 57, 13, 27),
-    ...createSpikeTestSignUpScenario('setUpPasskey', 36, 33, 1, 26),
-    ...createSpikeTestSignUpScenario('removePasskey', 36, 33, 1, 26)
+    ...createSpikeTestOLHScenario('setUpPasskey', 36, 33, 1, 26),
+    ...createSpikeTestOLHScenario('removePasskey', 36, 33, 1, 26)
   }
 }
 

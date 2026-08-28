@@ -651,6 +651,23 @@ export function createStressTestOLHScenario(
   })
 }
 
+export function createSpikeTestOLHScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpNFR: number,
+  phaseDelay: number = 0
+): ScenarioList {
+  return createSpikeTestScenario(
+    exec,
+    target,
+    iterationDuration,
+    { startRate: 4, timeUnit: '1m', holdTarget: 4, vuFactor: 1 },
+    rampUpNFR,
+    phaseDelay
+  )
+}
+
 export function createSoakTestSignUpScenario(
   exec: string,
   target: number,

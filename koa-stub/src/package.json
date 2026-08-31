@@ -27,7 +27,7 @@
   "devDependencies": {
     "aws-sdk-client-mock": "^4.1.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
-    "eslint": "^9.29.0",
+    "eslint": "^10.9.1",
     "fetch-cookie": "^3.2.0",
     "globals": "^16.2.0",
     "node-fetch-cookies": "^2.1.1",

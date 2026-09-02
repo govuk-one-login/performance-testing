@@ -487,13 +487,16 @@ export function createI3SpikeOLHScenario(
   exec: string,
   target: number = 1,
   iterationDuration: number = 30,
-  rampUpNFR: number
+  rampUpNFR: number,
+  phaseDelay: number = 0
 ): ScenarioList {
   const list: ScenarioList = {}
   const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
   const maxVUs = target * iterationDuration
   const step = Math.round(target / 3)
   const spikeRamp = Math.round(rampUpNFR / 5)
+  const firstSpikeDelay = phaseDelay > 0 ? Math.round(phaseDelay / 5) : 0
+  const secondSpikeDelay = phaseDelay > 0 ? Math.round(phaseDelay) : 0
   list[exec] = {
     executor: 'ramping-arrival-rate',
     startRate: 120,
@@ -504,10 +507,12 @@ export function createI3SpikeOLHScenario(
       { target: step, duration: '1s' }, // Ramp down from 120/m to step target in 1 sec
       { target: step, duration: '4m' }, // Ramp up to 33% target throughput over 4 minutes
       { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+      ...(firstSpikeDelay > 0 ? [{ target: step, duration: `${firstSpikeDelay}s` }] : []), // Hold at 33% to sync spike ramp start
       { target, duration: `${spikeRamp}s` }, // Ramp up to 100% target throughput at 5 X PERF008 growth rate
       { target, duration: '5m' }, // Maintain steady state at 100% target throughput for 5 minutes
       { target: step, duration: '1s' }, // Ramp down to 33% over 1 second
       { target: step, duration: '5m' }, // Maintain steady state at 33% target throughput for 5 minutes
+      ...(secondSpikeDelay > 0 ? [{ target: step, duration: `${secondSpikeDelay}s` }] : []), // Hold at 33% to sync NFR ramp start
       { target, duration: `${rampUpNFR}s` }, // Ramp up to 100% target throughput at the rate defined in PERF008
       { target, duration: '5m' } // Maintain steady state at 100% target throughput for 5 minutes
     ],
@@ -649,23 +654,6 @@ export function createStressTestOLHScenario(
     holdTarget: 2,
     vuFactor: 1
   })
-}
-
-export function createSpikeTestOLHScenario(
-  exec: string,
-  target: number,
-  iterationDuration: number,
-  rampUpNFR: number,
-  phaseDelay: number = 0
-): ScenarioList {
-  return createSpikeTestScenario(
-    exec,
-    target,
-    iterationDuration,
-    { startRate: 4, timeUnit: '1m', holdTarget: 4, vuFactor: 1 },
-    rampUpNFR,
-    phaseDelay
-  )
 }
 
 export function createSoakTestSignUpScenario(

@@ -499,7 +499,7 @@ export function createI3SpikeOLHScenario(
   const secondSpikeDelay = phaseDelay > 0 ? Math.round(phaseDelay) : 0
   list[exec] = {
     executor: 'ramping-arrival-rate',
-    startRate: 120,
+    startRate: 36,
     timeUnit: '1m',
     preAllocatedVUs,
     maxVUs,

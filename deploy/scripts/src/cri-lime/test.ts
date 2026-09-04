@@ -11,7 +11,8 @@ import {
   createI3SpikeSignUpScenario,
   createI3RegressionScenario,
   createI4PeakTestSignUpScenario,
-  createStressTestSignUpScenario
+  createStressTestSignUpScenario,
+  createSpikeTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { SharedArray } from 'k6/data'
 import exec from 'k6/execution'
@@ -356,6 +357,12 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignUpScenario('drivingLicence', 25, 9, 26),
     ...createI4PeakTestSignUpScenario('drivingLicenceAttestation', 42, 9, 43),
     ...createI4PeakTestSignUpScenario('fraud', 200, 6, 201)
+  },
+  perf006Iteration10SpikeTest: {
+    ...createSpikeTestSignUpScenario('passport', 96, 6, 97, 864),
+    ...createSpikeTestSignUpScenario('drivingLicence', 120, 9, 121, 840),
+    ...createSpikeTestSignUpScenario('drivingLicenceAttestation', 200, 9, 201, 760),
+    ...createSpikeTestSignUpScenario('fraud', 960, 6, 961)
   }
 }
 

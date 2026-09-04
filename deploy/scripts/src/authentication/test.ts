@@ -532,7 +532,8 @@ const env = {
   amcURL: getEnv(`ACCOUNT_AMC_${environment}_URL`),
   amcName: getEnv(`ACCOUNT_AMC_${environment}_NAME`),
   amcID: getEnv(`ACCOUNT_AMC_${environment}_ID`),
-  amcOrigin: getEnv(`ACCOUNT_AMC_${environment}_ORIGIN`)
+  amcOrigin: getEnv(`ACCOUNT_AMC_${environment}_ORIGIN`),
+  oidcURL: getEnv(`ACCOUNT_ORCH_${environment}_URL`)
 }
 const rpPasskeyCreation = passkeys.newRelyingParty(env.amcName, env.amcID, env.amcOrigin)
 const rpPasskeySignIn = passkeys.newRelyingParty(env.amcName, env.amcID, env.authStagingURL)
@@ -1270,6 +1271,9 @@ export function passkeyCreationSignIn(): void {
       })
     }
   })
+
+  const jar = http.cookieJar()
+  jar.clear(env.oidcURL)
 
   // 67% of users who create a passkey will sign in with a Passkey which is 20% of the total Sign in volume.
 

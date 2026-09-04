@@ -546,6 +546,7 @@ Resources:
               ACCOUNT_OLH_BUILD_EMAIL_OTP: "/perfTest/account/olh/build/fixedEmailOTP"
               ACCOUNT_OLH_BUILD_NEW_PHONE: "/perfTest/account/olh/build/newPhone"
               ACCOUNT_OLH_BUILD_PHONE_OTP: "/perfTest/account/olh/build/fixedPhoneOTP"
+              ACCOUNT_ORCH_STAGING_URL: "/perfTest/account/orch/staging/oidcURL"
               DATA_BTM_SQS: "/perfTest/data/btm/perfSQS"
               DATA_BTM_SQS_PAYLOAD_EVENTS: "/perfTest/data/txma/SQSPayloadEvents"
               DATA_TXMA_SQS: "/perfTest/data/txma/perfSQS"

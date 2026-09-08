@@ -111,6 +111,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignUpScenario('kbv', 63, 12, 64)
+  },
+  perf006Iteration10SpikeTest: {
+    ...createI3SpikeSignUpScenario('kbv', 96, 12, 97)
   }
 }
 

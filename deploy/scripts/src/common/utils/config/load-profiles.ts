@@ -89,6 +89,12 @@ export function describeProfile(profile: Profile): void {
   console.log(`Scenarios: <\x1b[34m${Object.keys(profile.scenarios).join('\x1b[0m|\x1b[34m')}\x1b[0m>`)
 }
 
+export function getSteadyStateDuration(rampUpNFR: number, rampUpDuration: number): string {
+  const spikeRamp = Math.round(rampUpNFR / 5)
+  const totalDuration = rampUpNFR + 240 + 240 + spikeRamp + 300 + 1 + 300 + rampUpNFR + 300
+  return `${totalDuration - rampUpDuration}s`
+}
+
 export enum LoadProfile {
   smoke,
   short,
@@ -388,9 +394,10 @@ export function createI4PeakTestSignUpScenario(
   target: number,
   iterationDuration: number,
   rampUpDuration: number,
-  phaseDelay: number = 0
+  phaseDelay: number = 0,
+  holdDuration: string = '30m'
 ): ScenarioList {
-  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signUpConfig, phaseDelay)
+  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, holdDuration, signUpConfig, phaseDelay)
 }
 
 export function createI4PeakTestSignInScenario(
@@ -681,4 +688,42 @@ export function createHighVolumeSignInScenario(
   rampUpDuration: number
 ): ScenarioList {
   return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '1h', signInConfig)
+}
+
+export function createAddressMESpikeTestScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpNFR: number,
+  totalTargetThroughput: number,
+  fixedScenarioTargetThroughput: number
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * 0.1 * iterationDuration) / 2)
+  const maxVUs = Math.round(target * 0.1 * iterationDuration)
+  const totalStep = Math.round(totalTargetThroughput / 3) // 33% of combined total (e.g., 96 -> 32)
+  const step = Math.round(totalStep - fixedScenarioTargetThroughput) // This scenario's 33% contribution (e.g., 32 - 11 = 21)
+  const stepRate = step * 10 // Convert to per 10s rate (e.g., 21 -> 210)
+  const spikeRamp = Math.round(rampUpNFR / 5) // Spike is 5x faster than NFR
+
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: 1,
+    timeUnit: '10s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target: 1, duration: `${rampUpNFR}s` }, // Wait for fixed scenarios to reach max iters/sec
+      { target: stepRate, duration: '4m' }, // Ramp up to bring combined total to 33%
+      { target: stepRate, duration: '4m' }, // Hold at 33% for 4 minutes before first spike
+      { target, duration: `${spikeRamp}s` }, // First spike: ramp to 100% at 5x NFR rate
+      { target, duration: '5m' }, // Hold at 100% for 5 minutes
+      { target: stepRate, duration: '1s' }, // Drop back to 33%
+      { target: stepRate, duration: '5m' }, // Hold at 33% for 5 minutes before second spike
+      { target, duration: `${rampUpNFR}s` }, // Second spike: NFR ramp to 100%
+      { target, duration: '5m' } // Hold at 100% for 5 minutes
+    ],
+    exec
+  }
+  return list
 }

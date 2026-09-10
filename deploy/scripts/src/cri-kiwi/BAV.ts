@@ -9,7 +9,8 @@ import {
   LoadProfile,
   createI3SpikeSignUpScenario,
   createI4PeakTestSignUpScenario,
-  createStressTestSignUpScenario
+  createStressTestSignUpScenario,
+  createSpikeTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import { b64encode } from 'k6/encoding'
 import { timeGroup } from '../common/utils/request/timing'
@@ -79,6 +80,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration9StressTest: {
     ...createStressTestSignUpScenario('BAV', 6, 24, 7)
+  },
+  perf006Iteration10SpikeTest: {
+    ...createSpikeTestSignUpScenario('BAV', 10, 24, 11)
   }
 }
 

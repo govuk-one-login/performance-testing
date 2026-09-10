@@ -34,7 +34,7 @@
     "oauth2-mock-server": "^7.2.1",
     "supertest": "^7.2.2",
     "supertest-session": "^5.0.1",
-    "vitest": "^3.2.4"
+    "vitest": "^5.0.0"
   },
   "engines": {
     "node": ">=22.0.0"

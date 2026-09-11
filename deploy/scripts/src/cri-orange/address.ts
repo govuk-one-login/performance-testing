@@ -13,7 +13,9 @@ import {
   createI3RegressionScenario,
   createI3SpikeSignUpScenario,
   createI4PeakTestSignUpScenario,
-  createStressTestSignUpScenario
+  createStressTestSignUpScenario,
+  getSteadyStateDuration,
+  createAddressMESpikeTestScenario
 } from '../common/utils/config/load-profiles'
 import { env, encodedCredentials } from './utils/config'
 import { timeGroup } from '../common/utils/request/timing'
@@ -239,6 +241,11 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignUpScenario('address', 100, 15, 101),
     ...createI4PeakTestSignUpScenario('addressME', 98, 15, 99, 2),
     ...createI4PeakTestSignUpScenario('internationalAddress', 2, 12, 3, 98)
+  },
+  perf006Iteration10SpikeTest: {
+    ...createI4PeakTestSignUpScenario('address', 100, 15, 101, 0, getSteadyStateDuration(851, 101)),
+    ...createI4PeakTestSignUpScenario('internationalAddress', 10, 12, 11, 0, getSteadyStateDuration(851, 11)),
+    ...createAddressMESpikeTestScenario('addressME', 850, 15, 851, 96, 11)
   }
 }
 

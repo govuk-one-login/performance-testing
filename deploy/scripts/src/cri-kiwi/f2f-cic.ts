@@ -10,7 +10,8 @@ import {
   LoadProfile,
   createI3SpikeSignUpScenario,
   createI4PeakTestSignUpScenario,
-  createStressTestSignUpScenario
+  createStressTestSignUpScenario,
+  createSpikeTestSignUpScenario
 } from '../common/utils/config/load-profiles'
 import execution from 'k6/execution'
 import { b64encode } from 'k6/encoding'
@@ -122,6 +123,10 @@ const profiles: ProfileList = {
   perf006Iteration10PeakTest: {
     ...createI4PeakTestSignUpScenario('FaceToFace', 5, 42, 6),
     ...createI4PeakTestSignUpScenario('CIC', 5, 21, 6)
+  },
+  perf006Iteration10SpikeTest: {
+    ...createSpikeTestSignUpScenario('FaceToFace', 24, 42, 25),
+    ...createSpikeTestSignUpScenario('CIC', 24, 21, 25)
   }
 }
 

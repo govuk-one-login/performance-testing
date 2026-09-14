@@ -11,7 +11,9 @@ import {
   createI4PeakTestSignUpScenario,
   createI4PeakTestSignInScenario,
   createStressTestSignUpScenario,
-  createStressTestSignInScenario
+  createStressTestSignInScenario,
+  createSpikeTestSignUpScenario,
+  createSpikeTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
 import {
@@ -129,11 +131,16 @@ const profiles: ProfileList = {
   perf006Iteration10PeakTest: {
     ...createI4PeakTestSignUpScenario('allEvents', 5, 20, 6, 116),
     ...createI4PeakTestSignInScenario('authEvent', 267, 5, 122)
+  },
+  perf006Iteration10SpikeTest: {
+    ...createSpikeTestSignUpScenario('allEvents', 24, 20, 25, 249),
+    ...createSpikeTestSignInScenario('authEvent', 601, 5, 274)
   }
 }
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
+  authEvent: [],
   allEvents: ['B01_IPVRFE_01_LaunchFrontEndURL', 'B01_IPVRFE_02_SignIn_StubCall', 'B01_IPVRFE_03_Authorize']
 } as const
 

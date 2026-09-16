@@ -252,7 +252,26 @@ export function exchangeAccessToken(groupName: string, accessToken: string, scop
   return res.json('access_token') as string
 }
 
-export function exchangePreAuthorizedCode(groupName: string, preAuthorizedCode: string, accessToken: string) {
+export async function exchangePreAuthorizedCode(
+  groupName: string,
+  preAuthorizedCode: string,
+  accessToken: string,
+  clientAttestation: string,
+  privateKey: CryptoKey
+) {
+  const nowInSeconds = Math.floor(Date.now() / 1000)
+  const proofOfPossession = await signJwt(
+    'ES256',
+    privateKey,
+    {
+      iss: config.mockClientId,
+      aud: config.stsBaseUrl,
+      exp: nowInSeconds + 180,
+      jti: crypto.randomUUID()
+    },
+    { typ: 'oauth-client-attestation-pop+jwt' }
+  )
+
   timeGroup(
     groupName,
     () => {
@@ -266,7 +285,9 @@ export function exchangePreAuthorizedCode(groupName: string, preAuthorizedCode: 
         {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: ` Bearer ${accessToken}`
+            Authorization: `Bearer ${accessToken}`,
+            'OAuth-Client-Attestation': clientAttestation,
+            'OAuth-Client-Attestation-PoP': proofOfPossession
           }
         }
       )

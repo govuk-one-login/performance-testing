@@ -9,7 +9,9 @@ import {
   ProfileList,
   selectProfile,
   createStressTestSignInScenario,
-  createStressTestSignUpScenario
+  createStressTestSignUpScenario,
+  createSpikeTestSignUpScenario,
+  createSpikeTestSignInScenario
 } from '../common/utils/config/load-profiles'
 import { Options } from 'k6/options'
 import { getThresholds } from '../common/utils/config/thresholds'
@@ -170,6 +172,12 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('reauthentication', 9, 27, 5, 176),
     ...createI4PeakTestSignInScenario('walletCredentialIssuance', 38, 39, 18, 163),
     ...createI4PeakTestSignInScenario('accountIntervention', 6, 15, 4, 177)
+  },
+  perf006Iteration10SpikeTest: {
+    ...createSpikeTestSignUpScenario('authentication', 910, 36, 911),
+    ...createSpikeTestSignInScenario('reauthentication', 45, 27, 21, 890),
+    ...createSpikeTestSignInScenario('walletCredentialIssuance', 38, 39, 18, 893),
+    ...createSpikeTestSignInScenario('accountIntervention', 30, 15, 15, 896)
   }
 }
 
@@ -422,7 +430,9 @@ export async function walletCredentialIssuance(): Promise<void> {
   exchangePreAuthorizedCode(
     groupMap.walletCredentialIssuance[11],
     preAuthorizedCode,
-    preAuthorizedCodeExchangeServiceToken
+    preAuthorizedCodeExchangeServiceToken,
+    clientAttestation,
+    keyPair.privateKey
   )
   simulateCallToStsJwks(groupMap.walletCredentialIssuance[12])
   iterationsCompleted.add(1)

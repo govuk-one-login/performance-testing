@@ -333,7 +333,7 @@ const profiles: ProfileList = {
   dataCreationForPasskey: {
     userCreationForPasskey: {
       executor: 'per-vu-iterations',
-      vus: 250,
+      vus: 500,
       iterations: 600,
       maxDuration: '240m',
       exec: 'userCreationForPasskey'
@@ -344,6 +344,11 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('signIn', 214, 23, 98, 653),
     ...createI4PeakTestSignInScenario('passkeyCreationSignIn', 80, 55, 37, 714),
     ...createI4PeakTestSignInScenario('amcHealthCheck', 80, 3, 37)
+  },
+  perf006Iteration10ExploratoryTest: {
+    ...createI4PeakTestSignUpScenario('signUp', 100, 43, 1001),
+    ...createI4PeakTestSignInScenario('signIn', 320, 23, 146, 855),
+    ...createI4PeakTestSignInScenario('passkeyCreationSignIn', 120, 55, 55, 946)
   }
 }
 const loadProfile = selectProfile(profiles)

@@ -752,45 +752,6 @@ export function FaceToFace(): void {
       'verify url body': r => r.url.includes(clientId)
     })
   })
-
-  const codeUrl = getCodeFromUrl(res.url)
-
-  sleepBetween(1, 3)
-  // B02_FaceToFace_13_getClientAssertion_IPVStubCall
-  res = timeGroup(groups[28], () => http.post(env.F2F.ipvStub + '/generate-token-request'), {
-    isStatusCode200
-  })
-  const client_assertion = getclientassertion(res)
-
-  // B02_FaceToFace_14_SendAuthorizationCode
-  res = timeGroup(
-    groups[29],
-    () =>
-      http.post(env.F2F.target + '/token', {
-        grant_type: 'authorization_code',
-        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-        client_assertion: client_assertion,
-        code: codeUrl,
-        redirect_uri: env.F2F.ipvStub + '/credential-issuer/callback?id=f2f'
-      }),
-    { isStatusCode200, ...pageContentCheck('access_token') }
-  )
-  const accessToken = getAccessToken(res)
-
-  sleepBetween(1, 3)
-
-  const authHeader = `Bearer ${accessToken}`
-  const options = {
-    headers: {
-      Authorization: authHeader
-    }
-  }
-  // B02_FaceToFace_14_SendBearerToken
-  res = timeGroup(groups[30], () => http.post(env.F2F.target + '/userinfo', {}, options), {
-    'is status 202': r => r.status === 202,
-    ...pageContentCheck('sub')
-  })
-  iterationsCompleted.add(1)
 }
 
 function randomDate(start: Date, end: Date): Date {

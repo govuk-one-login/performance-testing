@@ -5,7 +5,7 @@
   "description": "An example config for a RP stub",
   "main": "app.js",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1130.0",
+    "@aws-sdk/client-dynamodb": "^3.1135.0",
     "@codegenie/serverless-express": "^5.0.0",
     "@koa/cors": "^5.0.0",
     "axios": "^1.20.0",

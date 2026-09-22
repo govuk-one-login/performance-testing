@@ -8,6 +8,7 @@ import {
   createI3SpikeSignInScenario,
   createI4PeakTestSignInScenario,
   createScenario,
+  createSpikeTestSignInScenario,
   describeProfile,
   LoadProfile,
   selectProfile,
@@ -86,6 +87,10 @@ const profiles: ProfileList = {
       ],
       exec: 'getStatusList'
     }
+  },
+  perf006Iteration10SpikeTest: {
+    ...createSpikeTestSignInScenario('issueAndRevokeStatusList', 465, 12, 212, 421),
+    ...createSpikeTestSignInScenario('getStatusList', 1390, 3, 633)
   }
 }
 

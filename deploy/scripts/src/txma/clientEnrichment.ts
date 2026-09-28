@@ -155,7 +155,7 @@ export function setup(): string {
   const authCreateAccPayload = JSON.stringify(
     generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, randomIP, randomPhoneNumber)
   )
-  const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID, testID))
+  const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID))
 
   console.log('Sending primer event 1')
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
@@ -164,14 +164,16 @@ export function setup(): string {
   console.log('Sending primer event 2')
   sqs.sendMessage(env.sqs_queue, authReqParsedPayloadEnrichment)
   console.log('Primer event 2 sent')
+  console.log(authCreateAccPayload)
+  console.log(authReqParsedPayloadEnrichment)
   return authCreateAccPayload
 }
 
 export function sendRegularEventWithEnrichment(authCreateAccPayload: string): void {
   iterationsStarted.add(1)
   const authCreatePayload = JSON.parse(authCreateAccPayload)
-  const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
-  const eventID = `${testID}_${uuidv4()}`
+  // const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
+  const eventID = `perfALS_${uuidv4()}`
   const authLogInSuccessPayloadEnrichment = JSON.stringify(
     generateAuthLogInSuccessEnrichment(
       eventID,
@@ -181,5 +183,6 @@ export function sendRegularEventWithEnrichment(authCreateAccPayload: string): vo
     )
   )
   sqs.sendMessage(env.sqs_queue, authLogInSuccessPayloadEnrichment)
+  console.log(authLogInSuccessPayloadEnrichment)
   iterationsCompleted.add(1)
 }

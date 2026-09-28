@@ -28,7 +28,7 @@ export function generateAuthCreateAccount(
   randomPhoneNumber: string
 ): AuthCreateAccount {
   return {
-    event_id: `perfTestID_${uuidv4()}`,
+    event_id: `perfACA_${uuidv4()}`,
     event_name: 'AUTH_CREATE_ACCOUNT',
     client_id: 'performanceTestClientId',
     component_id: 'SharedSignalPerfTest',
@@ -69,7 +69,7 @@ export function generateAuthLogInSuccess(
   randomPhoneNumber: string
 ): AuthLogInSuccess {
   return {
-    event_id: `perfTestID_${uuidv4()}`,
+    event_id: `perfTestALS_${uuidv4()}`,
     event_name: 'AUTH_LOG_IN_SUCCESS',
     client_id: 'performanceTestClientId',
     component_id: 'SharedSignalPerfTest',
@@ -102,7 +102,7 @@ export function generateAuthLogInSuccess(
 }
 
 export function generateAuthReqParsed(journeyID: string): AuthAuthorisationReqParsed {
-  const eventID = `perfAuthReqParsed${uuidv4()}`
+  const eventID = `perfAARP${uuidv4()}`
   const eventTime = new Date().toISOString()
   return {
     client_id: 'e2eTestClientId',
@@ -476,12 +476,9 @@ export function generateAuthLogInSuccessEnrichment(
   }
 }
 
-export function generateAuthReqParsedEnrichment(
-  journeyID: string,
-  testID: string
-): AuthAuthorisationReqParsedEnrichment {
+export function generateAuthReqParsedEnrichment(journeyID: string): AuthAuthorisationReqParsedEnrichment {
   const eventTime = new Date().toISOString()
-  const eventID = `${testID}_${uuidv4()}`
+  const eventID = `perfAARP_${uuidv4()}`
   return {
     client_id: 'performanceTestClientId',
     component_id: 'https://oidc.account.gov.uk/',

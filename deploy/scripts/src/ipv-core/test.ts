@@ -36,6 +36,7 @@ import { uuidv4 } from '../common/utils/jslib/index'
 import execution from 'k6/execution'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { getThresholds } from '../common/utils/config/thresholds'
+import { getStaticResources } from '../common/utils/request/static'
 
 const profiles: ProfileList = {
   smoke: {
@@ -546,8 +547,8 @@ if (!validEnvironments.includes(environment))
 const env = {
   orchStubEndPoint: getEnv(`IDENTITY_${environment}_ORCH_STUB_URL`),
   ipvCoreURL: getEnv(`IDENTITY_${environment}_CORE_URL`),
-  vtrText: getEnv(`IDENTITY_${environment}_CORE_VTR_TEXT`)
-  // staticResources: getEnv('K6_NO_STATIC_RESOURCES') !== 'true'
+  vtrText: getEnv(`IDENTITY_${environment}_CORE_VTR_TEXT`),
+  staticResources: getEnv('K6_NO_STATIC_RESOURCES') !== 'true'
 }
 
 const stubCreds = {
@@ -603,6 +604,7 @@ export function identity(stubOnly: boolean = false): void {
       isStatusCode200,
       ...pageContentCheck('Where do you live?')
     })
+    if (env.staticResources) getStaticResources(res)
   })
   if (stubOnly) {
     iterationsCompleted.add(1)
@@ -895,6 +897,7 @@ export function idReuse(): void {
       isStatusCode200,
       ...pageContentCheck('You completed your identity check online or at a Post Office using these details')
     })
+    if (env.staticResources) getStaticResources(res)
   })
 
   sleepBetween(0.5, 1)
@@ -966,6 +969,7 @@ export function identityM1C(): void {
       isStatusCode200,
       ...pageContentCheck('Do you live in the UK, the Channel Islands or the Isle of Man') // Do you live in the UK, the Channel Islands or the Isle of Man
     })
+    if (env.staticResources) getStaticResources(res)
   })
 
   sleepBetween(0.5, 1)

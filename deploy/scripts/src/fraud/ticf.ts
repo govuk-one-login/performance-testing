@@ -4,6 +4,7 @@ import {
   type ProfileList,
   createI3SpikeSignInScenario,
   createI4PeakTestSignInScenario,
+  createI4PeakTestSignUpScenario,
   describeProfile,
   createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
@@ -96,6 +97,15 @@ const profiles: ProfileList = {
   },
   ticfSIRA2ItersTest: {
     ...createI4PeakTestSignInScenario('ticf', 2, 66, 2)
+  },
+  perf006Iteration10SplitPeakTest: {
+    ...createI4PeakTestSignUpScenario('ticfSignUp', 750, 13, 751),
+    ...createI4PeakTestSignInScenario('ticfSignIn', 214, 7, 98, 653),
+    ...createI4PeakTestSignUpScenario('ticfIdProve', 200, 19, 201, 550),
+    ...createI4PeakTestSignInScenario('ticfIdReuse', 267, 7, 122, 629),
+    ...createI4PeakTestSignUpScenario('silentLoginSignUp', 225, 13, 225, 526),
+    ...createI4PeakTestSignInScenario('silentLoginSignIn', 64, 7, 29, 722),
+    ...createI4PeakTestSignUpScenario('silentLoginIdProve', 60, 19, 60, 691)
   }
 }
 
@@ -321,6 +331,53 @@ export function identityReuseSuccess(groupName: string, userID: string, randomIP
   )
 }
 
+// Per-call exec functions for perf006Iteration10SplitPeakTest
+// Each function drives a single TICF risk assessment call independently at its own representative
+// volume, replacing the previous worst-case approach where all 4 calls ran at Sign In volumes.
+// A fresh userID is generated per iteration so there is no cross-call dependency.
+
+// Drives the Sign Up risk assessment call at Sign Up volume (750/10s peak)
+export function ticfSignUp(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  iterationsStarted.add(1)
+  signUpSuccess(groupMap.ticf[0], userID, emailID, randomIP, randomPhoneNumber)
+  iterationsCompleted.add(1)
+}
+
+// Drives the Sign In risk assessment call at Sign In volume (214/s peak)
+export function ticfSignIn(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  iterationsStarted.add(1)
+  signInSuccess(groupMap.ticf[1], userID, emailID, randomIP, randomPhoneNumber)
+  iterationsCompleted.add(1)
+}
+
+// Drives the Identity Proving risk assessment call at Sign Up volume (200/10s peak)
+export function ticfIdProve(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const randomIP = generateRandomIP()
+  iterationsStarted.add(1)
+  identityProvingSuccess(groupMap.ticf[2], userID, randomIP)
+  iterationsCompleted.add(1)
+}
+
+// Drives the Identity Reuse risk assessment call at Sign In volume (267/s peak)
+export function ticfIdReuse(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const randomIP = generateRandomIP()
+  iterationsStarted.add(1)
+  identityReuseSuccess(groupMap.ticf[3], userID, randomIP)
+  iterationsCompleted.add(1)
+}
+
+// Original combined journey exec - used by all profiles up to and including perf006Iteration10PeakTest
+// Runs all 4 risk assessment calls sequentially at worst-case Sign In volumes
 export function ticf(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
@@ -340,6 +397,39 @@ export function ticf(): void {
   iterationsCompleted.add(1)
 }
 
+// Drives the Silent Login Sign Up risk assessment call at Sign Up volume (750/10s peak)
+export function silentLoginSignUp(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfSilentLogin${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  iterationsStarted.add(1)
+  signUpSuccess(groupMap.silentLogin[0], userID, emailID, randomIP, randomPhoneNumber)
+  iterationsCompleted.add(1)
+}
+
+// Drives the Silent Login Sign In risk assessment call at Sign In volume (214/s peak)
+export function silentLoginSignIn(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfSilentLogin${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  iterationsStarted.add(1)
+  signInSuccess(groupMap.silentLogin[1], userID, emailID, randomIP, randomPhoneNumber)
+  iterationsCompleted.add(1)
+}
+
+// Drives the Silent Login Identity Proving risk assessment call at Sign Up volume (200/10s peak)
+export function silentLoginIdProve(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const randomIP = generateRandomIP()
+  iterationsStarted.add(1)
+  identityProvingSuccess(groupMap.silentLogin[2], userID, randomIP)
+  iterationsCompleted.add(1)
+}
+
+// Original combined silent login journey exec - used by all profiles up to and including perf006Iteration10PeakTest
+// Runs all 3 risk assessment calls sequentially at worst-case Sign In volumes
 export function silentLogin(): void {
   const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
   const emailID = `perfSilentLogin${uuidv4()}@digital.cabinet-office.gov.uk`

@@ -476,6 +476,7 @@ Resources:
         Image: "CONTAINER-IMAGE-PLACEHOLDER" # Replace this with the ECR repo for this SAM container pipeline.
         ImagePullCredentialsType: "SERVICE_ROLE"
         Type: "LINUX_CONTAINER"
+        HostKernal: "LINUX_KERNEL_6"
         EnvironmentVariables:
           - Name: AWS_ACCOUNT_ID
             Type: PLAINTEXT

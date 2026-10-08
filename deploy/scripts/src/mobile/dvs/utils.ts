@@ -115,7 +115,7 @@ interface MdocFields {
 export function decodeMdoc(credentialBase64url: string): MdocFields {
   const raw = b64decode(credentialBase64url, 'rawurl') as unknown as ArrayBuffer
   const bytes = new Uint8Array(raw)
-  const mdoc = cborDecode(bytes, { pos: 0 })
+  const mdoc = cborDecode(bytes, { pos: 0 }) as Record<string, unknown>
 
   // Credential is IssuerSigned directly: { nameSpaces, issuerAuth }
   const nameSpaces = mdoc['nameSpaces'] as Record<string, unknown[]>
@@ -131,7 +131,7 @@ export function decodeMdoc(credentialBase64url: string): MdocFields {
   // issuerAuth is COSE Sign1: [protected, unprotected, payload, signature]
   const issuerAuth = mdoc['issuerAuth'] as unknown[]
   const msoBytes = issuerAuth[2] as Uint8Array
-  const mso = cborDecode(msoBytes, { pos: 0 })
+  const mso = cborDecode(msoBytes, { pos: 0 }) as Record<string, unknown>
   const statusEntry = mso['status'] as Record<string, unknown>
   const statusList = statusEntry['status_list'] as Record<string, unknown>
 
@@ -142,108 +142,110 @@ export function decodeMdoc(credentialBase64url: string): MdocFields {
   }
 }
 
+type CborState = { pos: number }
+
+function cborReadLength(bytes: Uint8Array, state: CborState, info: number): number {
+  if (info <= 23) return info
+  if (info === 24) return bytes[state.pos++]
+  if (info === 25) {
+    const v = (bytes[state.pos] << 8) | bytes[state.pos + 1]
+    state.pos += 2
+    return v
+  }
+  if (info === 26) {
+    const v =
+      (bytes[state.pos] << 24) | (bytes[state.pos + 1] << 16) | (bytes[state.pos + 2] << 8) | bytes[state.pos + 3]
+    state.pos += 4
+    return v
+  }
+  throw new Error(`Unsupported CBOR length encoding: ${info}`)
+}
+
+function cborDecodeBytes(bytes: Uint8Array, state: CborState, len: number): Uint8Array {
+  const slice = bytes.slice(state.pos, state.pos + len)
+  state.pos += len
+  return slice
+}
+
+function cborDecodeArray(bytes: Uint8Array, state: CborState, additionalInfo: number): unknown[] {
+  const arr: unknown[] = []
+  if (additionalInfo === 31) {
+    while (bytes[state.pos] !== 0xff) arr.push(cborDecode(bytes, state))
+    state.pos++
+  } else {
+    const len = cborReadLength(bytes, state, additionalInfo)
+    for (let i = 0; i < len; i++) arr.push(cborDecode(bytes, state))
+  }
+  return arr
+}
+
+function cborDecodeMap(bytes: Uint8Array, state: CborState, additionalInfo: number): Record<string, unknown> {
+  const map: Record<string, unknown> = {}
+  if (additionalInfo === 31) {
+    while (bytes[state.pos] !== 0xff) {
+      const key = cborDecode(bytes, state) as string | number
+      map[String(key)] = cborDecode(bytes, state)
+    }
+    state.pos++
+  } else {
+    const len = cborReadLength(bytes, state, additionalInfo)
+    for (let i = 0; i < len; i++) {
+      const key = cborDecode(bytes, state) as string | number
+      map[String(key)] = cborDecode(bytes, state)
+    }
+  }
+  return map
+}
+
+function cborDecodeFloat16(bytes: Uint8Array, state: CborState): number {
+  const u16 = (bytes[state.pos] << 8) | bytes[state.pos + 1]
+  state.pos += 2
+  const exp = (u16 >> 10) & 0x1f
+  const mant = u16 & 0x3ff
+  let val: number
+  if (exp === 0) val = mant * (1 / (1 << 24))
+  else if (exp === 31) val = mant ? Number.NaN : Infinity
+  else val = (1 + mant / 1024) * (1 << (exp - 15))
+  return u16 & 0x8000 ? -val : val
+}
+
+function cborDecodeSimple(bytes: Uint8Array, state: CborState, additionalInfo: number): unknown {
+  if (additionalInfo === 20) return false
+  if (additionalInfo === 21) return true
+  if (additionalInfo === 22 || additionalInfo === 23) return null
+  if (additionalInfo === 25) return cborDecodeFloat16(bytes, state)
+  throw new Error(`Unsupported CBOR simple/float value: ${additionalInfo}`)
+}
+
 // Minimal CBOR decoder supporting the subset needed for mDoc parsing
 // Handles: unsigned int, byte string, text string, array, map, tag (24 = embedded CBOR)
-export function cborDecode(bytes: Uint8Array, state: { pos: number }): Record<string, unknown> & unknown {
+export function cborDecode(bytes: Uint8Array, state: CborState): unknown {
   const initialByte = bytes[state.pos++]
   const majorType = (initialByte >> 5) & 0x07
   const additionalInfo = initialByte & 0x1f
 
-  const readLength = (info: number): number => {
-    if (info <= 23) return info
-    if (info === 24) return bytes[state.pos++]
-    if (info === 25) {
-      const v = (bytes[state.pos] << 8) | bytes[state.pos + 1]
-      state.pos += 2
-      return v
-    }
-    if (info === 26) {
-      const v =
-        (bytes[state.pos] << 24) | (bytes[state.pos + 1] << 16) | (bytes[state.pos + 2] << 8) | bytes[state.pos + 3]
-      state.pos += 4
-      return v
-    }
-    throw new Error(`Unsupported CBOR length encoding: ${info}`)
-  }
-
   switch (majorType) {
-    case 0: // unsigned int
-      return readLength(additionalInfo) as unknown as Record<string, unknown>
-    case 1: // negative int: value is -1 - n
-      return (-1 - readLength(additionalInfo)) as unknown as Record<string, unknown>
-    case 2: {
-      // byte string
-      const len = readLength(additionalInfo)
-      const slice = bytes.slice(state.pos, state.pos + len)
-      state.pos += len
-      return slice as unknown as Record<string, unknown>
-    }
+    case 0:
+      return cborReadLength(bytes, state, additionalInfo)
+    case 1:
+      return -1 - cborReadLength(bytes, state, additionalInfo)
+    case 2:
+      return cborDecodeBytes(bytes, state, cborReadLength(bytes, state, additionalInfo))
     case 3: {
-      // text string
-      const len = readLength(additionalInfo)
-      const slice = bytes.slice(state.pos, state.pos + len)
-      state.pos += len
-      return bufToString(slice.buffer as ArrayBuffer) as unknown as Record<string, unknown>
+      const slice = cborDecodeBytes(bytes, state, cborReadLength(bytes, state, additionalInfo))
+      return bufToString(slice.buffer as ArrayBuffer)
     }
-    case 4: {
-      // array (definite or indefinite length)
-      const arr: unknown[] = []
-      if (additionalInfo === 31) {
-        while (bytes[state.pos] !== 0xff) arr.push(cborDecode(bytes, state))
-        state.pos++ // consume break byte
-      } else {
-        const len = readLength(additionalInfo)
-        for (let i = 0; i < len; i++) arr.push(cborDecode(bytes, state))
-      }
-      return arr as unknown as Record<string, unknown>
-    }
-    case 5: {
-      // map (definite or indefinite length)
-      const map: Record<string, unknown> = {}
-      if (additionalInfo === 31) {
-        while (bytes[state.pos] !== 0xff) {
-          const key = cborDecode(bytes, state) as unknown as string | number
-          map[String(key)] = cborDecode(bytes, state)
-        }
-        state.pos++ // consume break byte
-      } else {
-        const len = readLength(additionalInfo)
-        for (let i = 0; i < len; i++) {
-          const key = cborDecode(bytes, state) as unknown as string | number
-          map[String(key)] = cborDecode(bytes, state)
-        }
-      }
-      return map
-    }
+    case 4:
+      return cborDecodeArray(bytes, state, additionalInfo)
+    case 5:
+      return cborDecodeMap(bytes, state, additionalInfo)
     case 6: {
-      // tag
-      const tag = readLength(additionalInfo)
+      const tag = cborReadLength(bytes, state, additionalInfo)
       const value = cborDecode(bytes, state)
-      if (tag === 24) {
-        // Embedded CBOR: value is a byte string, decode it
-        return cborDecode(value as unknown as Uint8Array, { pos: 0 })
-      }
-      return value
+      return tag === 24 ? cborDecode(value as Uint8Array, { pos: 0 }) : value
     }
-    case 7: {
-      // simple values: false, true, null, undefined; also float16 (0xf9)
-      if (additionalInfo === 20) return false as unknown as Record<string, unknown>
-      if (additionalInfo === 21) return true as unknown as Record<string, unknown>
-      if (additionalInfo === 22 || additionalInfo === 23) return null as unknown as Record<string, unknown>
-      if (additionalInfo === 25) {
-        // float16 — decode to JS number
-        const u16 = (bytes[state.pos] << 8) | bytes[state.pos + 1]
-        state.pos += 2
-        const exp = (u16 >> 10) & 0x1f
-        const mant = u16 & 0x3ff
-        let val: number
-        if (exp === 0) val = mant * (1 / (1 << 24))
-        else if (exp === 31) val = mant ? NaN : Infinity
-        else val = (1 + mant / 1024) * (1 << (exp - 15))
-        return (u16 & 0x8000 ? -val : val) as unknown as Record<string, unknown>
-      }
-      throw new Error(`Unsupported CBOR simple/float value: ${additionalInfo}`)
-    }
+    case 7:
+      return cborDecodeSimple(bytes, state, additionalInfo)
     default:
       throw new Error(`Unsupported CBOR major type: ${majorType}`)
   }

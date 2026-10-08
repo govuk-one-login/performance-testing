@@ -83,7 +83,7 @@ export async function dvsJourney(data: SetupData): Promise<void> {
   res = timeGroup(groups[0], () => http.get(`${env.docBuilderURL}/dvs/build-driving-licence`, { redirects: 0 }))
 
   const locationHeader = res.headers['Location'] ?? ''
-  const itemIdMatch = locationHeader.match(/\/dvs\/view-credential-offer\/([^?]+)/)
+  const itemIdMatch = /\/dvs\/view-credential-offer\/([^?]+)/.exec(locationHeader)
   if (!itemIdMatch) throw new Error(`Could not extract itemId from Location: ${locationHeader}`)
   const itemId = itemIdMatch[1]
   console.log(`Item ID is ${itemId}`)

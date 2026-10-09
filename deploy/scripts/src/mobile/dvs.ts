@@ -21,6 +21,28 @@ import { buildAccessToken, buildDidKey, buildProofJwt, decodeMdoc, extractPreAut
 const profiles: ProfileList = {
   smoke: {
     ...createScenario('dvsJourney', LoadProfile.smoke)
+  },
+  load20DVS: {
+    persistIV: {
+      executor: 'constant-arrival-rate',
+      rate: 2,
+      timeUnit: '10s',
+      preAllocatedVUs: 20,
+      maxVUs: 20,
+      duration: '30m',
+      exec: 'dvsJourney'
+    }
+  },
+  load40DVS: {
+    persistIV: {
+      executor: 'constant-arrival-rate',
+      rate: 2,
+      timeUnit: '10s',
+      preAllocatedVUs: 40,
+      maxVUs: 40,
+      duration: '30m',
+      exec: 'dvsJourney'
+    }
   }
 }
 

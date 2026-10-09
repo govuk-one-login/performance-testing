@@ -108,7 +108,6 @@ export async function dvsJourney(data: SetupData): Promise<void> {
   const itemIdMatch = /\/dvs\/view-credential-offer\/([^?]+)/.exec(locationHeader)
   if (!itemIdMatch) throw new Error(`Could not extract itemId from Location: ${locationHeader}`)
   const itemId = itemIdMatch[1]
-  console.log(`Item ID is ${itemId}`)
 
   sleep(1)
 
@@ -124,11 +123,8 @@ export async function dvsJourney(data: SetupData): Promise<void> {
   )
 
   const universalLink = res.body as string
-  console.log(`Universal Link is ${universalLink}`)
   const preAuthCode = extractPreAuthCode(universalLink)
-  console.log(`Pre-Auth Code is ${preAuthCode}`)
   const preAuthClaims = decodeJwtPayload(preAuthCode)
-  console.log(`Pre-Auth Claims is ${JSON.stringify(preAuthClaims)}`)
 
   sleep(1)
 
@@ -142,16 +138,10 @@ export async function dvsJourney(data: SetupData): Promise<void> {
 
   sleep(1)
 
-  console.log(`Private Key is ${JSON.stringify(privateKey)}`)
-  console.log(`DID Key is ${data.didKey}`)
-
   // B01_DVS_04_PostCredential
   const cNonce = uuidv4()
   const accessToken = await buildAccessToken(privateKey, preAuthClaims, cNonce, data.didKey)
   const proofJwt = await buildProofJwt(privateKey, preAuthClaims, cNonce, data.didKey)
-
-  console.log(`Access Token is ${accessToken}`)
-  console.log(`Proof JWT is ${proofJwt}`)
 
   res = timeGroup(
     groups[3],
@@ -167,12 +157,8 @@ export async function dvsJourney(data: SetupData): Promise<void> {
 
   const credentialResponse = res.json() as { credentials: Array<{ credential: string }> }
   const credentialCbor = credentialResponse.credentials[0].credential
-  console.log(`Credential CBOR is ${credentialCbor}`)
   // Decode mDoc to extract document_number and status_list
   const { documentNumber, statusListUri } = decodeMdoc(credentialCbor)
-
-  console.log(`Document Number is ${documentNumber}`)
-  console.log(`Status List URI is ${statusListUri}`)
 
   sleep(1)
 

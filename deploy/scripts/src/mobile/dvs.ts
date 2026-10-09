@@ -23,9 +23,9 @@ const profiles: ProfileList = {
     ...createScenario('dvsJourney', LoadProfile.smoke)
   },
   load20DVS: {
-    persistIV: {
+    dvsJourney: {
       executor: 'constant-arrival-rate',
-      rate: 2,
+      rate: 40,
       timeUnit: '10s',
       preAllocatedVUs: 20,
       maxVUs: 20,
@@ -34,9 +34,9 @@ const profiles: ProfileList = {
     }
   },
   load40DVS: {
-    persistIV: {
+    dvsJourney: {
       executor: 'constant-arrival-rate',
-      rate: 2,
+      rate: 40,
       timeUnit: '10s',
       preAllocatedVUs: 40,
       maxVUs: 40,

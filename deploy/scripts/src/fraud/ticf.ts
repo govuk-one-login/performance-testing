@@ -4,6 +4,9 @@ import {
   type ProfileList,
   createI3SpikeSignInScenario,
   createI4PeakTestSignInScenario,
+  createI4PeakTestSignUpScenario,
+  createSpikeTestSignInScenario,
+  createSpikeTestSignUpScenario,
   describeProfile,
   createStressTestSignInScenario
 } from '../common/utils/config/load-profiles'
@@ -27,8 +30,10 @@ import {
   generateRandomPhoneNumber
 } from '../common/requestGenerator/txmaReqGen'
 import { uuidv4 } from '../common/utils/jslib/index'
+import { SharedArray } from 'k6/data'
 import http from 'k6/http'
 import { sleep } from 'k6'
+import exec from 'k6/execution'
 import { isStatusCode202 } from '../common/utils/checks/assertions'
 import { timeGroup } from '../common/utils/request/timing'
 
@@ -96,6 +101,36 @@ const profiles: ProfileList = {
   },
   ticfSIRA2ItersTest: {
     ...createI4PeakTestSignInScenario('ticf', 2, 66, 2)
+  },
+  dataCreationSignedUpUsers: {
+    dataCreationSignedUpUser: {
+      executor: 'per-vu-iterations',
+      vus: 100,
+      iterations: 500,
+      exec: 'dataCreationSignedUpUser'
+    }
+  },
+  dataCreationProvedUsers: {
+    dataCreationProvedUser: {
+      executor: 'per-vu-iterations',
+      vus: 100,
+      iterations: 500,
+      exec: 'dataCreationProvedUser'
+    }
+  },
+  perf006Iteration10PeakTest: {
+    ...createI4PeakTestSignUpScenario('ticfCase1', 20, 13, 21),
+    ...createI4PeakTestSignUpScenario('ticfCase2', 55, 13, 56),
+    ...createI4PeakTestSignInScenario('ticfCase3', 192, 7, 88, 653),
+    ...createI4PeakTestSignInScenario('ticfCase4', 267, 7, 122, 629),
+    ...createI4PeakTestSignInScenario('ticfCase5', 80, 7, 37, 722)
+  },
+  perf006Iteration10SpikeTest: {
+    ...createSpikeTestSignUpScenario('ticfCase1', 45, 13, 46),
+    ...createSpikeTestSignUpScenario('ticfCase2', 124, 13, 125),
+    ...createSpikeTestSignInScenario('ticfCase3', 432, 7, 198, 653),
+    ...createSpikeTestSignInScenario('ticfCase4', 601, 7, 275, 629),
+    ...createSpikeTestSignInScenario('ticfCase5', 180, 7, 82, 722)
   }
 }
 
@@ -111,7 +146,16 @@ const groupMap = {
     'B02_SilentLogin_01_SignUpAPICall',
     'B02_SilentLogin_02_SilentSignInAPICall',
     'B02_SilentLogin_03_IdProveAPICall' // pragma: allowlist secret
-  ]
+  ],
+  ticfCase1: [
+    'B01_HappyPath_01_SignUpAPICall',
+    'B01_HappyPath_02_SignInAPICall',
+    'B01_HappyPath_03_IdProveAPICall' // pragma: allowlist secret
+  ],
+  ticfCase2: ['B01_HappyPath_01_SignUpAPICall', 'B01_HappyPath_02_SignInAPICall'],
+  ticfCase3: ['B01_HappyPath_02_SignInAPICall'],
+  ticfCase4: ['B01_HappyPath_04_IdReuseAPICall'],
+  ticfCase5: ['B02_SilentLogin_02_SilentSignInAPICall']
 } as const
 
 export const options: Options = {
@@ -319,6 +363,105 @@ export function identityReuseSuccess(groupName: string, userID: string, randomIP
       isStatusCode202
     }
   )
+}
+
+const signedUpUsers = new SharedArray('signedUpUsers', () => {
+  return open('./data/signedUpUsers.csv')
+    .split('\n')
+    .slice(1)
+    .filter(line => line.trim() !== '')
+    .map(line => ({ userID: line.trim() }))
+})
+
+const provedUsers = new SharedArray('provedUsers', () => {
+  return open('./data/provedUsers.csv')
+    .split('\n')
+    .slice(1)
+    .filter(line => line.trim() !== '')
+    .map(line => ({ userID: line.trim() }))
+})
+
+// Case 1: New user — SignUp → SignIn → IdProve (self-seeding, fresh userID per iteration)
+export function ticfCase1(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  iterationsStarted.add(1)
+  signUpSuccess(groupMap.ticfCase1[0], userID, emailID, randomIP, randomPhoneNumber)
+  sleep(3)
+  signInSuccess(groupMap.ticfCase1[1], userID, emailID, randomIP, randomPhoneNumber)
+  sleep(3)
+  identityProvingSuccess(groupMap.ticfCase1[2], userID, randomIP)
+  iterationsCompleted.add(1)
+}
+
+// Case 2: New user — SignUp → SignIn (self-seeding, fresh userID per iteration)
+export function ticfCase2(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  iterationsStarted.add(1)
+  signUpSuccess(groupMap.ticfCase2[0], userID, emailID, randomIP, randomPhoneNumber)
+  sleep(3)
+  signInSuccess(groupMap.ticfCase2[1], userID, emailID, randomIP, randomPhoneNumber)
+  iterationsCompleted.add(1)
+}
+
+// Case 3: Known signed-up user — SignIn only, reuses userID from signedUpUsers pool
+export function ticfCase3(): void {
+  const { userID } = signedUpUsers[exec.scenario.iterationInTest % signedUpUsers.length]
+  const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  iterationsStarted.add(1)
+  signInSuccess(groupMap.ticfCase3[0], userID, emailID, randomIP, randomPhoneNumber)
+  iterationsCompleted.add(1)
+}
+
+// Case 4: Known proved user identity reuses — reuses userID from provedUsers pool
+export function ticfCase4(): void {
+  const { userID } = provedUsers[exec.scenario.iterationInTest % provedUsers.length]
+  const randomIP = generateRandomIP()
+  iterationsStarted.add(1)
+  identityReuseSuccess(groupMap.ticfCase4[0], userID, randomIP)
+  iterationsCompleted.add(1)
+}
+
+// Case 5: Known signed-up user silent sign in — reuses userID from signedUpUsers pool
+export function ticfCase5(): void {
+  const { userID } = signedUpUsers[exec.scenario.iterationInTest % signedUpUsers.length]
+  const randomIP = generateRandomIP()
+  iterationsStarted.add(1)
+  signInSilent(groupMap.ticfCase5[0], userID, randomIP)
+  iterationsCompleted.add(1)
+}
+
+// Data creation: SignUp → SignIn, logs userID to stdout for signedUpUsers.csv harvesting
+export function dataCreationSignedUpUser(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  signUpSuccess(groupMap.ticfCase2[0], userID, emailID, randomIP, randomPhoneNumber)
+  sleep(3)
+  signInSuccess(groupMap.ticfCase2[1], userID, emailID, randomIP, randomPhoneNumber)
+  console.log(userID)
+}
+
+// Data creation: SignUp → SignIn → IdProve, logs userID to stdout for provedUsers.csv harvesting
+export function dataCreationProvedUser(): void {
+  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
+  const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
+  const randomIP = generateRandomIP()
+  const randomPhoneNumber = generateRandomPhoneNumber()
+  signUpSuccess(groupMap.ticfCase1[0], userID, emailID, randomIP, randomPhoneNumber)
+  sleep(3)
+  signInSuccess(groupMap.ticfCase1[1], userID, emailID, randomIP, randomPhoneNumber)
+  sleep(3)
+  identityProvingSuccess(groupMap.ticfCase1[2], userID, randomIP)
+  console.log(userID)
 }
 
 export function ticf(): void {

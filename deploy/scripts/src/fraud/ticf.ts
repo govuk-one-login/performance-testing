@@ -119,18 +119,18 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration10PeakTest: {
-    ...createI4PeakTestSignUpScenario('ticfCase1', 20, 13, 21),
-    ...createI4PeakTestSignUpScenario('ticfCase2', 55, 13, 56),
-    ...createI4PeakTestSignInScenario('ticfCase3', 192, 7, 88, 653),
+    ...createI4PeakTestSignUpScenario('ticfCase1', 200, 45, 751),
+    ...createI4PeakTestSignUpScenario('ticfCase2', 550, 23, 751),
+    ...createI4PeakTestSignInScenario('ticfCase3', 192, 7, 122, 629),
     ...createI4PeakTestSignInScenario('ticfCase4', 267, 7, 122, 629),
-    ...createI4PeakTestSignInScenario('ticfCase5', 80, 7, 37, 722)
+    ...createI4PeakTestSignInScenario('ticfCase5', 80, 4, 37, 714)
   },
   perf006Iteration10SpikeTest: {
-    ...createSpikeTestSignUpScenario('ticfCase1', 45, 13, 46),
-    ...createSpikeTestSignUpScenario('ticfCase2', 124, 13, 125),
-    ...createSpikeTestSignInScenario('ticfCase3', 432, 7, 198, 653),
-    ...createSpikeTestSignInScenario('ticfCase4', 601, 7, 275, 629),
-    ...createSpikeTestSignInScenario('ticfCase5', 180, 7, 82, 722)
+    ...createSpikeTestSignUpScenario('ticfCase1', 960, 45, 961),
+    ...createSpikeTestSignUpScenario('ticfCase2', 40, 23, 961),
+    ...createSpikeTestSignInScenario('ticfCase3', 501, 7, 274, 687),
+    ...createSpikeTestSignInScenario('ticfCase4', 601, 7, 274, 687),
+    ...createSpikeTestSignInScenario('ticfCase5', 180, 4, 83, 878)
   }
 }
 
@@ -282,8 +282,7 @@ export function signInSilent(groupName: string, userID: string, randomIP: string
     govuk_signin_journey_id: journeyID,
     authenticated: 'Y'
   }
-
-  // B01_SignInSuccess_02_SignInAPICall
+  // B02_SilentLogin
   timeGroup(groupName, () => http.post(`${env.authAPIURL}/${env.envName}/auth`, JSON.stringify(authSignInPayload)), {
     isStatusCode202
   })

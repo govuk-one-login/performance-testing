@@ -4,9 +4,21 @@ This folder (`deploy/scripts`) contains the configuration, test scripts and test
 
 Test scripts are written in TypeScript, and transpiled into JavaScript via esbuild to run in k6. For deploying in environments these scripts are bundled into the Docker image which is used as the CodeBuild agent; when testing locally these can just be run directly from `deploy/scripts/dist`.
 
+See the [root README](../../README.md) for a full overview of the project.
+
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Local Installation](#local-installation)
+- [Local Testing](#local-testing)
+- [Unit Testing and Common Utilities](#unit-testing-and-common-utilities)
+- [Environment Variables and Secrets](#environment-variables-and-secrets)
+- [Running Performance Tests in CodeBuild](#running-performance-tests-in-codebuild)
+- [Querying the Test Result File](#querying-the-test-result-file)
+
 ## Prerequisites
 
-- [k6](https://k6.io/docs/getting-started/installation)
+- [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/)
 - [NodeJS](https://nodejs.org/en/download/)
 
 ## Local Installation
@@ -51,19 +63,19 @@ k6 run dist/common/test.js
 
 ## Unit Testing and Common Utilities
 
-Unit tests to validate the TypeScript utility files are contained in the [`src/common/unit-tests.js`](src/common/unit-tests.ts) file. They can be run to validate the utilities are working as intended by running
+Unit tests to validate the TypeScript utility files are contained in the [`src/common/unit-tests.ts`](src/common/unit-tests.ts) file. They can be run to validate the utilities are working as intended by running
 
 ```console
 npm test
 ```
 
-This unit test also runs when raising pull requests as a [github action](../../.github/workflows/pre-merge-checks.yml). If adding an additional utility in the `src/common/utils` folder, add another `group` to the test script with `checks` to validate the behaviour.
+This unit test also runs when raising pull requests as a [github action](../../.github/workflows/pre-merge-checks.yml). If adding an additional utility in the `src/common/utils` folder, add another `group` to the test script with `checks` to validate the behaviour. See [`src/common/utils/README.md`](src/common/utils/README.md) for utility documentation and TypeDoc generation instructions.
 
 ## Environment Variables and Secrets
 
 ### Local
 
-When running locally you can pass secrets and environment configuration variables via local environment variables or by passing them into k6 explicity (see [k6 docs](https://k6.io/docs/using-k6/environment-variables/)).
+When running locally you can pass secrets and environment configuration variables via local environment variables or by passing them into k6 explicitly (see [k6 docs](https://k6.io/docs/using-k6/environment-variables/)).
 
 For example
 
@@ -104,10 +116,10 @@ Parameter store locations must start with the prefix `/perfTest/` in order for t
 
     | Environment Variable | Example Values                                                                                                        | Description                                                                                                                                                                                                                              |
     | -------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `TEST_SCRIPT`        | `accounts/test.js`</br>`authentication/test.js`</br>`common/test.js`<sup>[_default_]</sup></br>`common/unit-tests.js` | Relative path of test script to use, including `.js` extension                                                                                                                                                                           |
+    | `TEST_SCRIPT`        | `authentication/test.js`</br>`common/test.js`<sup>[_default_]</sup></br>`common/unit-tests.js` | Relative path of test script to use, including `.js` extension                                                                                                                                                                           |
     | `PROFILE`            | `smoke`<sup>[_default_]</sup></br>`stress`</br>`load`                                                                 | Used to select a named load profile described in the test script. Values should match the keys of a [`ProfileList`](src/common/utils/config/load-profiles.ts#L4) object                                                                  |
-    | `SCENARIO`           | `all`<sup>[_default_]</sup></br>`sign_in`</br>`create_account,sign_in`                                                | Comma seperated list of scenarios to enable. Blank strings or `'all'` will default to enabling all scenarios in the selected load profile. Implementation in [`getScenarios`](src/common/utils/config/load-profiles.ts#L27-L36) function |
-    | `ENVIRONMENT`        | `build`<sup>[_default_]</sup></br>`staging`                                                                           | Name of the environment where the test is being conducted. Accepted Values are build/staging depending on the test scenario                                                                                                              |
+    | `SCENARIO`           | `all`<sup>[_default_]</sup></br>`sign_in`</br>`create_account,sign_in`                                                | Comma separated list of scenarios to enable. Blank strings or `'all'` will default to enabling all scenarios in the selected load profile. Implementation in [`getScenarios`](src/common/utils/config/load-profiles.ts#L27-L36) function |
+    | `ENVIRONMENT`        | `build`<sup>[_default_]</sup></br>`staging`                                                                           | Name of the environment where the test is being conducted. Accepted values: `build`, `staging`                                                                                                              |
 
 5.  Click 'Start Build'
 
@@ -128,7 +140,7 @@ After each pipeline run, the test results file is zipped and uploaded to S3.
     % gunzip -c path/to/results.gz > output/path/results.json
     ```
 
-3.  The results file contains one metric per line, eahc in the form of a JSON object. This file can now be queried using `jq`.
+3.  The results file contains one metric per line, each in the form of a JSON object. This file can now be queried using `jq`.
 
     > **Note**
     > The [k6 documentation](https://k6.io/docs/results-output/real-time/json/) has further information on this file format and querying
@@ -177,7 +189,7 @@ jq -r '(
 
 **Converting to CSV**
 
-The results file can also be coverted to CSV format (for example to easily calculate repsonse time percentiles in Excel, or for graphing purposes). The following command produces a CSV with columns: `timestamp`, `group name` and `duration in milliseconds`
+The results file can also be converted to CSV format (for example to easily calculate response time percentiles in Excel, or for graphing purposes). The following command produces a CSV with columns: `timestamp`, `group name` and `duration in milliseconds`
 
 ```console
 % jq -r 'select(

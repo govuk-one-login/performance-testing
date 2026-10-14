@@ -1,3 +1,8 @@
+# Deploy
+
+This folder contains the CloudFormation infrastructure template, Dockerfile, reporting scripts and test scripts that make up the performance testing platform. SAM deployment configuration is defined in [`samconfig.toml`](samconfig.toml).
+
+See the [root README](../README.md) for a full overview of the project.
 
 ## Testing Infrastructure Changes
 

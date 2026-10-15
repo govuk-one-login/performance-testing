@@ -334,7 +334,7 @@ const profiles: ProfileList = {
     userCreationForPasskey: {
       executor: 'per-vu-iterations',
       vus: 500,
-      iterations: 600,
+      iterations: 800,
       maxDuration: '240m',
       exec: 'userCreationForPasskey'
     }

@@ -1,7 +1,7 @@
 import { getEnv } from '../../common/utils/config/environment-variables'
 
 export const environment = getEnv('ENVIRONMENT').toLocaleUpperCase()
-const validEnvironments = ['INTEGRATION', 'DEV']
+const validEnvironments = ['BUILD', 'DEV', 'INTEGRATION']
 if (!validEnvironments.includes(environment))
   throw new Error(`Environment '${environment}' not in [${validEnvironments.toString()}]`)
 

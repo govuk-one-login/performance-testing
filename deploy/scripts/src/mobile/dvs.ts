@@ -162,10 +162,11 @@ export async function dvsJourney(data: SetupData): Promise<void> {
 
   sleep(1)
 
-  // B01_DVS_05_ShareCredential — read status list
-  timeGroup(groups[4], () => http.get(statusListUri), { isStatusCode200 })
-
-  sleep(1)
+  // B01_DVS_05_ShareCredential — read status list (executed 2.5x per iteration on average)
+  for (let i = 0; i < (Math.random() < 0.5 ? 3 : 2); i++) {
+    timeGroup(groups[4], () => http.get(statusListUri), { isStatusCode200 })
+    sleep(1)
+  }
 
   // B01_DVS_06_RevokeCredential
   timeGroup(groups[5], () => http.post(`${env.criURL}/revoke/${documentNumber}`, null), { isStatusCode202 })

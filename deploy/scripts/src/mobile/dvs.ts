@@ -28,7 +28,7 @@ const profiles: ProfileList = {
       rate: 40,
       timeUnit: '10s',
       preAllocatedVUs: 20,
-      maxVUs: 20,
+      maxVUs: 100,
       duration: '30m',
       exec: 'dvsJourney'
     }
@@ -39,7 +39,7 @@ const profiles: ProfileList = {
       rate: 40,
       timeUnit: '10s',
       preAllocatedVUs: 40,
-      maxVUs: 40,
+      maxVUs: 200,
       duration: '30m',
       exec: 'dvsJourney'
     }

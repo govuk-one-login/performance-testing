@@ -27,7 +27,7 @@ const profiles: ProfileList = {
       executor: 'constant-arrival-rate',
       rate: 40,
       timeUnit: '10s',
-      preAllocatedVUs: 100,
+      preAllocatedVUs: 20,
       maxVUs: 100,
       duration: '30m',
       exec: 'dvsJourney'
@@ -39,7 +39,7 @@ const profiles: ProfileList = {
       rate: 40,
       timeUnit: '10s',
       preAllocatedVUs: 40,
-      maxVUs: 40,
+      maxVUs: 200,
       duration: '30m',
       exec: 'dvsJourney'
     }

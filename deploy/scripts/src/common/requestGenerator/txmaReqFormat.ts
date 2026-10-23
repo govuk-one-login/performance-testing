@@ -410,3 +410,69 @@ export interface AuthAuthorisationReqParsedEnrichment {
     obfuscated: boolean
   }
 }
+
+export interface TicfWorkQueueAssigned {
+  client_id: string
+  component_id: string
+  event_id: string
+  event_name: string
+  event_timestamp_ms: number
+  timestamp: number
+  user: {
+    user_id: string
+  }
+  extensions: {
+    work_item: {
+      context: {
+        SET: {
+          aud: string
+          events: {
+            'https://vocab.account.gov.uk/secevent/v1/eventInformation': {
+              signal_batch: {
+                count_type: string
+                id: string
+                signal_count: number
+                unique_account_count: number
+                unique_subject_count: number
+              }
+              subject_groups: Array<{
+                uri: string
+                unique_account_count: number
+                unique_subject_count: number
+                count_type: string
+              }>
+            }
+            'https://vocab.account.gov.uk/secevent/v1/eventMetadata': {
+              event_timeframe_ms: Record<string, never>
+              signals_event_type: string
+            }
+            'https://vocab.account.gov.uk/secevent/v1/notification/accountConcern': {
+              event_timeframe: {
+                end_time: number
+              }
+              initiating_entity: string
+              rationale: {
+                code: string
+              }
+              reason_admin: {
+                en: string
+              }
+            }
+          }
+          iat: number
+          iss: string
+          jti: string
+        }
+        context_type: string
+      }
+      originator_status: string
+      sample: boolean
+      work_item_id: string
+    }
+    work_queue: {
+      work_queue_external_id: string
+      work_queue_id: string
+      work_queue_type: string
+    }
+  }
+}

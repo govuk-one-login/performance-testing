@@ -15,7 +15,8 @@ import {
   IPVKBVCRIEnd,
   AuthAuthorisationReqParsedEnrichment,
   AuthLogInSuccessEnrichment,
-  AuthAuthorisationInitiated
+  AuthAuthorisationInitiated,
+  TicfWorkQueueAssigned
 } from './txmaReqFormat'
 
 export function generateAuthCreateAccount(
@@ -513,4 +514,86 @@ function randomDOB(): string {
   const end = new Date(2000, 11, 31)
   const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
   return date.toISOString().split('T')[0]
+}
+
+export interface SubjectGroupCounts {
+  uniqueAccountCount: number
+  uniqueSubjectCount: number
+  countType: string
+}
+
+export function generateTicfWorkQueueAssigned(
+  userID: string,
+  groupUri: string,
+  batchId: string,
+  counts: SubjectGroupCounts
+): TicfWorkQueueAssigned {
+  const now = Date.now()
+  return {
+    client_id: 'https://MockRP1.account.gov.uk/',
+    component_id: 'TICF_FAI',
+    event_id: `perfTestWQA_${uuidv4()}`,
+    event_name: 'TICF_WORK_QUEUE_ASSIGNED',
+    event_timestamp_ms: now,
+    timestamp: Math.floor(now / 1000),
+    user: {
+      user_id: userID
+    },
+    extensions: {
+      work_item: {
+        context: {
+          SET: {
+            aud: 'https://service.othergovenmentdepartment.gov/',
+            events: {
+              'https://vocab.account.gov.uk/secevent/v1/eventInformation': {
+                signal_batch: {
+                  count_type: counts.countType,
+                  id: batchId,
+                  signal_count: counts.uniqueSubjectCount,
+                  unique_account_count: counts.uniqueAccountCount,
+                  unique_subject_count: counts.uniqueSubjectCount
+                },
+                subject_groups: [
+                  {
+                    uri: groupUri,
+                    unique_account_count: counts.uniqueAccountCount,
+                    unique_subject_count: counts.uniqueSubjectCount,
+                    count_type: counts.countType
+                  }
+                ]
+              },
+              'https://vocab.account.gov.uk/secevent/v1/eventMetadata': {
+                event_timeframe_ms: {},
+                signals_event_type: 'accountConcern'
+              },
+              'https://vocab.account.gov.uk/secevent/v1/notification/accountConcern': {
+                event_timeframe: {
+                  end_time: Math.floor(now / 1000)
+                },
+                initiating_entity: 'analyst',
+                rationale: {
+                  code: 'RA99'
+                },
+                reason_admin: {
+                  en: 'account-takeover'
+                }
+              }
+            },
+            iat: Math.floor(now / 1000),
+            iss: 'https://ssf.account.gov.uk/',
+            jti: uuidv4().replace(/-/g, '')
+          },
+          context_type: 'signal'
+        },
+        originator_status: 'inactive',
+        sample: true,
+        work_item_id: uuidv4().replace(/-/g, '')
+      },
+      work_queue: {
+        work_queue_external_id: groupUri,
+        work_queue_id: '2',
+        work_queue_type: 'Ended'
+      }
+    }
+  }
 }

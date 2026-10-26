@@ -621,18 +621,21 @@ export function createOLHPeakTestScenario(
   exec: string,
   target: number,
   iterationDuration: number,
-  rampUpDuration: number
+  rampUpDuration: number,
+  phaseDelay: number = 0
 ): ScenarioList {
   const list: ScenarioList = {}
+  const startRate = 4
   const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
   const maxVUs = target * iterationDuration
   list[exec] = {
     executor: 'ramping-arrival-rate',
-    startRate: 4,
+    startRate,
     timeUnit: '1m',
     preAllocatedVUs,
     maxVUs,
     stages: [
+      ...(phaseDelay > 0 ? [{ target: startRate, duration: `${phaseDelay}s` }] : []),
       { target, duration: `${rampUpDuration}s` },
       { target, duration: '30m' }
     ],

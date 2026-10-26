@@ -451,14 +451,14 @@ const profiles: ProfileList = {
     ...createI3SpikeOLHScenario('removePasskey', 36, 33, 1, 26)
   },
   perf006Iteration11PeakTest: {
-    ...createOLHPeakTestScenario('changeEmail', 24, 43, 1),
-    ...createOLHPeakTestScenario('changePassword', 24, 38, 1),
-    ...createOLHPeakTestScenario('changePhone', 24, 43, 1),
-    ...createOLHPeakTestScenario('deleteAccount', 24, 28, 1),
+    ...createOLHPeakTestScenario('changeEmail', 24, 43, 1, 17),
+    ...createOLHPeakTestScenario('changePassword', 24, 38, 1, 17),
+    ...createOLHPeakTestScenario('changePhone', 24, 43, 1, 17),
+    ...createOLHPeakTestScenario('deleteAccount', 24, 28, 1, 17),
     ...createI4PeakTestSignInScenario('landingPage', 38, 13, 18),
-    ...createOLHPeakTestScenario('setUpPasskey', 24, 33, 1),
-    ...createOLHPeakTestScenario('removePasskey', 24, 33, 1),
-    ...createI4PeakTestSignInScenario('contactsPage', 2, 3, 2)
+    ...createOLHPeakTestScenario('setUpPasskey', 24, 33, 1, 17),
+    ...createOLHPeakTestScenario('removePasskey', 24, 33, 1, 17),
+    ...createI4PeakTestSignInScenario('contactsPage', 2, 3, 2, 16)
   }
 }
 

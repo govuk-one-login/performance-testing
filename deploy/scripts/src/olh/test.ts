@@ -458,7 +458,7 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('landingPage', 38, 13, 18),
     ...createOLHPeakTestScenario('setUpPasskey', 24, 33, 1),
     ...createOLHPeakTestScenario('removePasskey', 24, 33, 1),
-    ...createI4PeakTestSignInScenario('contactPage', 2, 3, 2)
+    ...createI4PeakTestSignInScenario('contactsPage', 2, 3, 2)
   }
 }
 

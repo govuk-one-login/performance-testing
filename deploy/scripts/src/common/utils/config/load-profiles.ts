@@ -360,10 +360,11 @@ function createPerfTestScenario(
   rampUpDuration: number,
   steadyStateDuration: string,
   config: RampUpConfig,
-  phaseDelay: number = 0
+  phaseDelay: number = 0,
+  preAllocatedVUs: number = 200 //increase incase load(required throughput) drastically increases.
 ): ScenarioList {
   const list: ScenarioList = {}
-  const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
+  //const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
   const maxVUs = Math.round(target * config.vuFactor * iterationDuration)
 
   list[exec] = {

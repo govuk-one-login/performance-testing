@@ -407,11 +407,12 @@ export function createTxmaPeakTestScenario(
   exec: string,
   target: number,
   iterationDuration: number,
-  rampUpDuration: number
+  rampUpDuration: number,
+  vuFactor: number = 0.1
 ): ScenarioList {
   const list: ScenarioList = {}
   const startRate = 2
-  const maxVUs = 400
+  const maxVUs = Math.min(Math.round(target * vuFactor * iterationDuration), 400)
   const preAllocatedVUs = Math.min(200, maxVUs)
   list[exec] = {
     executor: 'ramping-arrival-rate',

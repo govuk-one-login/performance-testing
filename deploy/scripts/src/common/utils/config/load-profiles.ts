@@ -363,7 +363,7 @@ function createPerfTestScenario(
   phaseDelay: number = 0
 ): ScenarioList {
   const list: ScenarioList = {}
-  const preAllocatedVUs = 200
+  const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
   const maxVUs = Math.round(target * config.vuFactor * iterationDuration)
 
   list[exec] = {
@@ -401,6 +401,32 @@ export function createI4PeakTestSignInScenario(
   phaseDelay: number = 0
 ): ScenarioList {
   return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signInConfig, phaseDelay)
+}
+
+export function createTxmaPeakTestScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number,
+  vuFactor: number = 0.1
+): ScenarioList {
+  const list: ScenarioList = {}
+  const startRate = 2
+  const maxVUs = Math.round(target * vuFactor * iterationDuration)
+  const preAllocatedVUs = Math.min(200, maxVUs)
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate,
+    timeUnit: '1s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: '30m' }
+    ],
+    exec
+  }
+  return list
 }
 
 export function createSpikeTestScenario(

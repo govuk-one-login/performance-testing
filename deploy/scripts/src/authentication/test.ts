@@ -1280,8 +1280,6 @@ export function passkeyCreationSignIn(): void {
   const jar = http.cookieJar()
   jar.clear(env.oidcURL)
 
-  // 67% of users who create a passkey will sign in with a Passkey which is 20% of the total Sign in volume.
-
   // B04_SignInWithPasskey_01_StubSubmit
   if (route === 'RP') {
     res = rpStubSubmit(groups)

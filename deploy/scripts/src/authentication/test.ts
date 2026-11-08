@@ -1024,8 +1024,7 @@ export function passkeyCreationSignIn(): void {
   let amcPage: Response
   let userHandle: string
   const groups = groupMap.passkeyCreationSignIn
-  const maxVUs = (loadProfile.scenarios.passkeyCreationSignIn as { maxVUs: number })?.maxVUs ?? 5
-  const passkeyIndex = execution.vu.idInTest - 1 + execution.vu.iterationInScenario * maxVUs
+  const passkeyIndex = execution.scenario.iterationInTest
   if (passkeyIndex >= passkeyCSV.length) {
     execution.test.abort(`Insufficient passkey data: index ${passkeyIndex} exceeds available rows ${passkeyCSV.length}`)
   }

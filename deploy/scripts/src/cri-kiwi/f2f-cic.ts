@@ -89,44 +89,48 @@ const profiles: ProfileList = {
     }
   },
   perf006Iteration3SpikeTest: {
-    ...createI3SpikeSignUpScenario('FaceToFace', 12, 32, 13),
-    ...createI3SpikeSignUpScenario('CIC', 12, 21, 13)
+    ...createI3SpikeSignUpScenario('FaceToFace', 12, 63, 13),
+    ...createI3SpikeSignUpScenario('CIC', 12, 33, 13)
   },
   perf006Iteration4PeakTest: {
-    ...createI4PeakTestSignUpScenario('FaceToFace', 12, 32, 13),
-    ...createI4PeakTestSignUpScenario('CIC', 12, 21, 13)
+    ...createI4PeakTestSignUpScenario('FaceToFace', 12, 63, 13),
+    ...createI4PeakTestSignUpScenario('CIC', 12, 33, 13)
   },
   perf006Iteration4SpikeTest: {
-    ...createI3SpikeSignUpScenario('FaceToFace', 28, 32, 29),
-    ...createI3SpikeSignUpScenario('CIC', 28, 21, 29)
+    ...createI3SpikeSignUpScenario('FaceToFace', 28, 63, 29),
+    ...createI3SpikeSignUpScenario('CIC', 28, 33, 29)
   },
   perf006Iteration5PeakTest: {
-    ...createI4PeakTestSignUpScenario('FaceToFace', 14, 32, 15),
-    ...createI4PeakTestSignUpScenario('CIC', 14, 21, 15)
+    ...createI4PeakTestSignUpScenario('FaceToFace', 14, 63, 15),
+    ...createI4PeakTestSignUpScenario('CIC', 14, 33, 15)
   },
   perf006Iteration7PeakTest: {
-    ...createI4PeakTestSignUpScenario('FaceToFace', 5, 32, 6),
-    ...createI4PeakTestSignUpScenario('CIC', 5, 21, 6)
+    ...createI4PeakTestSignUpScenario('FaceToFace', 5, 63, 6),
+    ...createI4PeakTestSignUpScenario('CIC', 5, 33, 6)
   },
   perf006Iteration8PeakTest: {
-    ...createI4PeakTestSignUpScenario('FaceToFace', 4, 32, 5),
-    ...createI4PeakTestSignUpScenario('CIC', 4, 21, 5)
+    ...createI4PeakTestSignUpScenario('FaceToFace', 4, 63, 5),
+    ...createI4PeakTestSignUpScenario('CIC', 4, 33, 5)
   },
   perf006Iteration8SpikeTest: {
-    ...createI3SpikeSignUpScenario('FaceToFace', 16, 32, 17),
-    ...createI3SpikeSignUpScenario('CIC', 16, 21, 17)
+    ...createI3SpikeSignUpScenario('FaceToFace', 16, 63, 17),
+    ...createI3SpikeSignUpScenario('CIC', 16, 33, 17)
   },
   perf006Iteration9StressTest: {
-    ...createStressTestSignUpScenario('FaceToFace', 16, 32, 17),
-    ...createStressTestSignUpScenario('CIC', 16, 21, 17)
+    ...createStressTestSignUpScenario('FaceToFace', 16, 63, 17),
+    ...createStressTestSignUpScenario('CIC', 16, 33, 17)
   },
   perf006Iteration10PeakTest: {
-    ...createI4PeakTestSignUpScenario('FaceToFace', 5, 32, 6),
-    ...createI4PeakTestSignUpScenario('CIC', 5, 21, 6)
+    ...createI4PeakTestSignUpScenario('FaceToFace', 5, 63, 6),
+    ...createI4PeakTestSignUpScenario('CIC', 5, 33, 6)
   },
   perf006Iteration10SpikeTest: {
-    ...createSpikeTestSignUpScenario('FaceToFace', 24, 32, 25),
-    ...createSpikeTestSignUpScenario('CIC', 24, 21, 25)
+    ...createSpikeTestSignUpScenario('FaceToFace', 24, 63, 25),
+    ...createSpikeTestSignUpScenario('CIC', 24, 33, 25)
+  },
+  perf006Iteration11PeakTest: {
+    ...createI4PeakTestSignUpScenario('FaceToFace', 6, 63, 7),
+    ...createI4PeakTestSignUpScenario('CIC', 6, 33, 7)
   }
 }
 

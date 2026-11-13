@@ -207,7 +207,7 @@ export function issueAndRevokeStatusList(): void {
   if (Math.random() <= 0.9) {
     // B01_IssueAndRevokeStatusList_03_SignRevokePayload
     res = timeGroup(
-      groups[3],
+      groups[2],
       () => http.post(signedRequestMockRevoke.url, revokePayload, { headers: signedRequestMockRevoke.headers }),
       {
         isStatusCode200
@@ -229,7 +229,7 @@ export function issueAndRevokeStatusList(): void {
 
     // B01_IssueAndRevokeStatusList_04_RevokeCall
     res = timeGroup(
-      groups[4],
+      groups[3],
       () => http.post(signedRequestProxyRevoke.url, res.body, { headers: signedRequestProxyRevoke.headers }),
       {
         isStatusCode202,

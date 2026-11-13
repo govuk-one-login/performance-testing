@@ -403,6 +403,32 @@ export function createI4PeakTestSignInScenario(
   return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signInConfig, phaseDelay)
 }
 
+export function createTxmaPeakTestScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number,
+  vuFactor: number = 0.1
+): ScenarioList {
+  const list: ScenarioList = {}
+  const startRate = 2
+  const maxVUs = Math.min(Math.round(target * vuFactor * iterationDuration), 700)
+  const preAllocatedVUs = Math.min(200, maxVUs)
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate,
+    timeUnit: '1s',
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: '30m' }
+    ],
+    exec
+  }
+  return list
+}
+
 export function createSpikeTestScenario(
   exec: string,
   target: number,
@@ -621,18 +647,21 @@ export function createOLHPeakTestScenario(
   exec: string,
   target: number,
   iterationDuration: number,
-  rampUpDuration: number
+  rampUpDuration: number,
+  phaseDelay: number = 0
 ): ScenarioList {
   const list: ScenarioList = {}
+  const startRate = 4
   const preAllocatedVUs = Math.round((target * iterationDuration) / 2)
   const maxVUs = target * iterationDuration
   list[exec] = {
     executor: 'ramping-arrival-rate',
-    startRate: 4,
+    startRate,
     timeUnit: '1m',
     preAllocatedVUs,
     maxVUs,
     stages: [
+      ...(phaseDelay > 0 ? [{ target: startRate, duration: `${phaseDelay}s` }] : []),
       { target, duration: `${rampUpDuration}s` },
       { target, duration: '30m' }
     ],

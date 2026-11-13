@@ -9,7 +9,8 @@ import {
   createI3SpikeSignInScenario,
   createI4PeakTestSignInScenario,
   createStressTestSignInScenario,
-  createSpikeTestSignInScenario
+  createSpikeTestSignInScenario,
+  createTxmaPeakTestScenario
 } from '../common/utils/config/load-profiles'
 import { uuidv4 } from '../common/utils/jslib/index.js'
 import { AWSConfig, SQSClient } from '../common/utils/jslib/aws-sqs'
@@ -116,6 +117,9 @@ const profiles: ProfileList = {
   },
   perf006Iteration10SpikeTest: {
     ...createSpikeTestSignInScenario('sendRegularEventWithEnrichment', 13817, 3, 961)
+  },
+  perf006Iteration11PeakTest: {
+    ...createTxmaPeakTestScenario('sendRegularEventWithEnrichment', 9907, 3, 831)
   }
 }
 
@@ -155,7 +159,7 @@ export function setup(): string {
   const authCreateAccPayload = JSON.stringify(
     generateAuthCreateAccount(testID, userID, emailID, pairWiseID, journeyID, randomIP, randomPhoneNumber)
   )
-  const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID, testID))
+  const authReqParsedPayloadEnrichment = JSON.stringify(generateAuthReqParsedEnrichment(journeyID))
 
   console.log('Sending primer event 1')
   sqs.sendMessage(env.sqs_queue, authCreateAccPayload)
@@ -170,8 +174,7 @@ export function setup(): string {
 export function sendRegularEventWithEnrichment(authCreateAccPayload: string): void {
   iterationsStarted.add(1)
   const authCreatePayload = JSON.parse(authCreateAccPayload)
-  const testID = JSON.stringify(authCreatePayload.event_id).substring(1, 26)
-  const eventID = `${testID}_${uuidv4()}`
+  const eventID = `perfALS_${uuidv4()}`
   const authLogInSuccessPayloadEnrichment = JSON.stringify(
     generateAuthLogInSuccessEnrichment(
       eventID,

@@ -129,8 +129,8 @@ const profiles: ProfileList = {
     ...createSpikeTestSignUpScenario('CIC', 24, 21, 25)
   },
   perf006Iteration11PeakTest: {
-    ...createI4PeakTestSignUpScenario('FaceToFace', 6, 54, 7),
-    ...createI4PeakTestSignUpScenario('CIC', 6, 30, 7)
+    ...createI4PeakTestSignUpScenario('FaceToFace', 6, 42, 7),
+    ...createI4PeakTestSignUpScenario('CIC', 6, 21, 7)
   }
 }
 
@@ -756,6 +756,7 @@ export function FaceToFace(): void {
       'verify url body': r => r.url.includes(clientId)
     })
   })
+  iterationsCompleted.add(1)
 }
 
 function randomDate(start: Date, end: Date): Date {

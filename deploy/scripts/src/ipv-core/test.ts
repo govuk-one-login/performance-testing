@@ -91,7 +91,7 @@ const profiles: ProfileList = {
     ...createScenario('idReuse', LoadProfile.spikeSudden, 80, 8)
   },
   dataCreationForIDReuse: {
-    identity: {
+    identityDataCreation: {
       executor: 'per-vu-iterations',
       vus: 250,
       iterations: 200,

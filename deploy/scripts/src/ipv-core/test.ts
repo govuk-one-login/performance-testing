@@ -42,7 +42,8 @@ const profiles: ProfileList = {
     ...createScenario('identity', LoadProfile.smoke),
     ...createScenario('idReuse', LoadProfile.smoke),
     ...createScenario('orchStubIsolatedTest', LoadProfile.smoke),
-    ...createScenario('identityM1C', LoadProfile.smoke)
+    ...createScenario('identityM1C', LoadProfile.smoke),
+    ...createScenario('identityDataCreation', LoadProfile.smoke)
   },
   deployment: {
     ...createScenario('identity', LoadProfile.deployment, 2),
@@ -95,7 +96,7 @@ const profiles: ProfileList = {
       vus: 250,
       iterations: 200,
       maxDuration: '120m',
-      exec: 'identity'
+      exec: 'identityDataCreation'
     }
   },
   adhocLoadTest: {
@@ -435,6 +436,43 @@ const profiles: ProfileList = {
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
+  identityDataCreation: [
+    'B01_Identity_01_LaunchOrchestratorStub',
+    'B01_Identity_02_GoToFullJourneyRoute',
+    'B01_Identity_02_GoToFullJourneyRoute::01_OrchStubCall',
+    'B01_Identity_02_GoToFullJourneyRoute::02_CoreCall',
+    'B01_Identity_03_LiveInTheUK',
+    'B01_Identity_04_SelectPhotoIDChoice',
+    'B01_Identity_05_SelectDeviceOption',
+    'B01_Identity_06_SelectNoSmartphone',
+    'B01_Identity_07_SelectAnotherWayToProveIdentity',
+    'B01_Identity_08_SelectDocumentType',
+    'B01_Identity_08_SelectDocumentType::01_CoreCall',
+    'B01_Identity_08_SelectDocumentType::02_PassStub',
+    'B01_Identity_08_SelectDocumentType::02_DLStub',
+    'B01_Identity_09_DocumentDataContinue',
+    'B01_Identity_09_DocumentDataContinue::01_PassStub',
+    'B01_Identity_09_DocumentDataContinue::01_DLStub',
+    'B01_Identity_09_DocumentDataContinue::02_CoreCall',
+    'B01_Identity_09_DocumentDataContinue::03_AddStub',
+    'B01_Identity_10_AddrDataContinue',
+    'B01_Identity_10_AddrDataContinue::01_AddStub',
+    'B01_Identity_10_AddrDataContinue::02_CoreCall',
+    'B01_Identity_10_AddrDataContinue::03_FraudStub',
+    'B01_Identity_11_FraudDataContinue',
+    'B01_Identity_11_FraudDataContinue::01_FraudStub',
+    'B01_Identity_11_FraudDataContinue::02_CoreCall',
+    'B01_Identity_12_PersonalIndependencePayment',
+    'B01_Identity_13_PreKBVTransition',
+    'B01_Identity_13_PreKBVTransition::01_CoreCall',
+    'B01_Identity_13_PreKBVTransition::02_KBVStub',
+    'B01_Identity_14_KBVDataContinue',
+    'B01_Identity_14_KBVDataContinue::01_KBVStub',
+    'B01_Identity_14_KBVDataContinue::02_CoreCall',
+    'B01_Identity_15_ContinueSuccessPage',
+    'B01_Identity_15_ContinueSuccessPage::01_CoreCall',
+    'B01_Identity_15_ContinueSuccessPage::02_OrchStub'
+  ],
   identity: [
     'B01_Identity_01_LaunchOrchestratorStub',
     'B01_Identity_02_GoToFullJourneyRoute',
@@ -555,7 +593,11 @@ const stubCreds = {
   password: getEnv('IDENTITY_ORCH_STUB_PASSWORD')
 }
 
-export function identity(stubOnly: boolean = false): void {
+export function identityDataCreation(): void {
+  identity(false, true)
+}
+
+export function identity(stubOnly: boolean = false, logOutput: boolean = false): void {
   const groups = groupMap.identity
   let res: Response
   const credentials = `${stubCreds.userName}:${stubCreds.password}`
@@ -782,7 +824,7 @@ export function identity(stubOnly: boolean = false): void {
     // 02_CoreCall
     res = timeGroup(groups[24].split('::')[1], () => http.get(res.headers.Location), {
       isStatusCode200,
-      ...pageContentCheck('Tell us if you get Personal Independence Payment (PIP)')
+      ...pageContentCheck('Tell us if you get Universal Credit or Personal Independence Payment')
     })
   })
 
@@ -863,6 +905,7 @@ export function identity(stubOnly: boolean = false): void {
     )
   })
   iterationsCompleted.add(1)
+  if (logOutput) console.log(userId + ',' + testEmail)
 }
 
 export function idReuse(): void {

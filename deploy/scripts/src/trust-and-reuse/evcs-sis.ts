@@ -116,9 +116,9 @@ const profiles: ProfileList = {
     ...createI4PeakTestSignInScenario('summariseVC', 407, 6, 186, 35)
   },
   perf006Iteration11SpikeTest: {
-    ...createSpikeTestSignUpScenario('identity', 130, 11, 1301),
+    ...createSpikeTestSignUpScenario('identity', 1300, 11, 1301),
     ...createSpikeTestSignInScenario('invalidate', 1221, 6, 556, 745),
-    ...createSpikeTestSignUpScenario('updateVC', 1221, 7, 745),
+    ...createSpikeTestSignUpScenario('updateVC', 1300, 7, 1301),
     ...createSpikeTestSignInScenario('summariseVC', 1221, 6, 556, 745)
   }
 }

@@ -360,7 +360,8 @@ function createPerfTestScenario(
   rampUpDuration: number,
   steadyStateDuration: string,
   config: RampUpConfig,
-  phaseDelay: number = 0
+  phaseDelay: number = 0,
+  startTime?: string
 ): ScenarioList {
   const list: ScenarioList = {}
   const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
@@ -377,7 +378,8 @@ function createPerfTestScenario(
       { target, duration: `${rampUpDuration}s` },
       { target, duration: steadyStateDuration }
     ],
-    exec
+    exec,
+    ...(startTime ? { startTime } : {})
   }
 
   return list
@@ -388,9 +390,19 @@ export function createI4PeakTestSignUpScenario(
   target: number,
   iterationDuration: number,
   rampUpDuration: number,
-  phaseDelay: number = 0
+  phaseDelay: number = 0,
+  startTime?: string
 ): ScenarioList {
-  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signUpConfig, phaseDelay)
+  return createPerfTestScenario(
+    exec,
+    target,
+    iterationDuration,
+    rampUpDuration,
+    '30m',
+    signUpConfig,
+    phaseDelay,
+    startTime
+  )
 }
 
 export function createI4PeakTestSignInScenario(
@@ -398,9 +410,19 @@ export function createI4PeakTestSignInScenario(
   target: number,
   iterationDuration: number,
   rampUpDuration: number,
-  phaseDelay: number = 0
+  phaseDelay: number = 0,
+  startTime?: string
 ): ScenarioList {
-  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signInConfig, phaseDelay)
+  return createPerfTestScenario(
+    exec,
+    target,
+    iterationDuration,
+    rampUpDuration,
+    '30m',
+    signInConfig,
+    phaseDelay,
+    startTime
+  )
 }
 
 export function createTxmaPeakTestScenario(

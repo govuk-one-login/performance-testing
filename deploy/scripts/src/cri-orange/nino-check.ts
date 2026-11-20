@@ -143,6 +143,8 @@ const env = {
   envName: getEnv('ENVIRONMENT')
 }
 
+const stagingHeader = { 'aws-cf-cd-staging': 'true' }
+
 const stubCreds = {
   userName: getEnv('IDENTITY_CORE_STUB_USERNAME'),
   password: getEnv('IDENTITY_CORE_STUB_PASSWORD')
@@ -222,14 +224,14 @@ export function ninoCheck(): void {
             'SecondaryUKAddress.validUntilYear': ''
           },
           {
-            headers: { Authorization: `Basic ${encodedCredentials}` },
+            headers: { Authorization: `Basic ${encodedCredentials}`, ...stagingHeader },
             redirects: 0
           }
         ),
       { isStatusCode302 }
     )
     // 01_CRICall
-    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location), {
+    res = timeGroup(groups[2].split('::')[1], () => http.get(res.headers.Location, { headers: stagingHeader }), {
       isStatusCode200,
       ...pageContentCheck('Enter your National Insurance number')
     })
@@ -245,7 +247,7 @@ export function ninoCheck(): void {
       () =>
         res.submitForm({
           fields: { nationalInsuranceNumber: userNino.niNumber },
-          params: { redirects: 1 },
+          params: { headers: stagingHeader, redirects: 1 },
           submitSelector: '#continue'
         }),
       { isStatusCode302 }
@@ -255,7 +257,7 @@ export function ninoCheck(): void {
       groups[5].split('::')[1],
       () =>
         http.get(res.headers.Location, {
-          headers: { Authorization: `Basic ${encodedCredentials}` }
+          headers: { Authorization: `Basic ${encodedCredentials}`, ...stagingHeader }
         }),
       { isStatusCode200, ...pageContentCheck('Verifiable') }
     )

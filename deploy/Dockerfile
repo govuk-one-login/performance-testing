@@ -22,6 +22,7 @@ RUN go install go.k6.io/xk6/cmd/xk6@v0.13.0 \
   && xk6 build v1.7.1 \
     --with github.com/LeonAdato/xk6-output-statsd@v0.2.1 \
     --with github.com/corbado/xk6-passkeys@v0.1.0 \
+    --with github.com/oleiade/xk6-kv@v1.3.0 \
     --output /k6
 
 # -----------------------

@@ -1,9 +1,9 @@
 # Multi-Scenario Performance Report Generator
 
 **Created:** 03-Dec-2025
-**Last Updated:** 24-Feb-2026
+**Last Updated:** 21-Aug-2026
 
-**Version:** 4.1
+**Version:** 4.2
 
 ---
 
@@ -14,7 +14,7 @@ Advanced performance reporting tool for k6 test results with multi-scenario supp
 ### Key Features
 - Per-scenario steady-state time windows
 - SLA breach detection (P95: 1000ms, P99: 2500ms)
-- User-selectable detailed analysis (optional)
+- User-selectable response time graph generation (optional)
 - Automated graph generation for breached transactions
 - Excel report with multiple tabs
 - Organized timestamped output folders
@@ -22,6 +22,7 @@ Advanced performance reporting tool for k6 test results with multi-scenario supp
 ### Files
 - `multi-scenario-performance-report-generator.sh` - Main reporting script
 - `generate_excel_report.py` - Excel report generator
+- `INSTALLATION_GUIDE_MACOS.md` - Step-by-step macOS setup guide
 
 ---
 
@@ -61,14 +62,18 @@ Generate response time graphs? (yes/no) [no]: yes
 - `no` → Quick summary only (CSV, Excel, JSON)
 - `yes` → Full analysis with transaction CSVs and graphs
 
-**Prompt 3: Analysis Scope** (only if detailed analysis = yes)
+**Prompt 3: Analysis Scope** (only if response time graphs = yes)
 ```
-Analyze all transactions or only SLA breaches? (all/breach) [breach]: breach
+Generate graphs for all the transactions or only SLA breaches? (all/breach) [breach]: breach
 ```
 - `breach` → Only analyze SLA-breached transactions (recommended)
 - `all` → Analyze all transactions
 
+> **Note:** Prompts 2 and 3 are always interactive, even when scenario times are passed via command-line arguments.
+
 ### Command-Line Mode (Non-Interactive)
+
+Scenario times can be passed as a second argument to skip Prompt 1. Prompts 2 and 3 (graph generation) are still interactive.
 
 ```bash
 # Single scenario
@@ -94,7 +99,7 @@ All outputs saved in: `advanced-reporting/analysis_YYYY-MM-DD-HH-MM-SS/`
   - HTTP Requests by status
 - `perf_data_*.json` - JSON data for programmatic access
 
-### Generated Only if Detailed Analysis = Yes
+### Generated Only if Response Time Graphs = Yes
 - `*_transaction.csv` - Individual transaction data
 - `*.png` - Response time graphs with SLA lines
 
@@ -118,7 +123,7 @@ deploy/reporting/
     ├── generate_excel_report.py
     ├── INSTALLATION_GUIDE_MACOS.md
     ├── MULTI-SCENARIO-PERF-REPORT-GEN-README.md
-    └── analysis_YYYY-MM-DD-HH-MM-SS/  # Output folders
+    └── analysis_YYYY-MM-DD-HH-MM-SS/  # Output folders (created at runtime)
         ├── SS_RT_*.csv
         ├── Performance_Report_*.xlsx
         ├── perf_data_*.json
@@ -129,8 +134,8 @@ deploy/reporting/
 ### Key Capabilities
 - **Per-Scenario Steady-State**: Each scenario has its own time window for accurate analysis
 - **SLA Breach Detection**: Automatically identifies transactions exceeding P95 (1000ms) or P99 (2500ms)
-- **User Control**: Choose between quick summary or detailed analysis
-- **Self-Contained**: All files and outputs stay in advanced-reporting/
+- **User Control**: Choose between quick summary or detailed analysis with graphs
+- **Self-Contained**: All files and outputs stay in `advanced-reporting/`
 - **No Conflicts**: Outputs never mix with legacy tools
 
 ---
@@ -168,7 +173,7 @@ deploy/reporting/
 
 ## Tips
 
-1. **Quick Check**: Answer "no" to detailed analysis for fast summary reports
+1. **Quick Check**: Answer "no" to graph generation for fast summary reports
 2. **Investigation**: Answer "yes" + "breach" to focus on problematic transactions
 3. **Comprehensive**: Answer "yes" + "all" for complete analysis (slower)
 4. **Cleanup**: Old output folders can be deleted manually to save space
@@ -178,7 +183,11 @@ deploy/reporting/
 
 ## Version History
 
-**v4.1 (Current)**
+**v4.2 (21-Aug-2026) (Current)**
+- Renamed "User-selectable detailed analysis" to "User-selectable response time graph generation" throughout
+- Minor documentation corrections and clarifications
+
+**v4.1 (24-Feb-2025)**
 - Fixed pandas resample frequency from '1S' to '1s' for compatibility with pandas 2.0+
 - Updated installation guide with virtual environment troubleshooting
 - Added reference link to installation guide in README

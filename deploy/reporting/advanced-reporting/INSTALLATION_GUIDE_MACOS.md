@@ -119,13 +119,13 @@ pip3 install openpyxl pandas matplotlib
 **Verify installation:**
 ```bash
 python3 -c "import openpyxl; print('openpyxl:', openpyxl.__version__)"
-# Expected: openpyxl 3.1.5 or higher
+# Expected: openpyxl 3.x or higher
 
 python3 -c "import pandas; print('pandas:', pandas.__version__)"
-# Expected: pandas 2.3.3 or higher
+# Expected: pandas 2.x or higher
 
 python3 -c "import matplotlib; print('matplotlib:', matplotlib.__version__)"
-# Expected: matplotlib 3.10.8 or higher
+# Expected: matplotlib 3.x or higher
 ```
 
 **Troubleshooting: If you encounter "error: externally-managed-environment"**

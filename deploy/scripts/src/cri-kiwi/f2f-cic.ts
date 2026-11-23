@@ -756,6 +756,7 @@ export function FaceToFace(): void {
       'verify url body': r => r.url.includes(clientId)
     })
   })
+  iterationsCompleted.add(1)
 }
 
 function randomDate(start: Date, end: Date): Date {

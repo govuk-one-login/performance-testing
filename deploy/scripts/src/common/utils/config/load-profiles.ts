@@ -360,8 +360,7 @@ function createPerfTestScenario(
   rampUpDuration: number,
   steadyStateDuration: string,
   config: RampUpConfig,
-  phaseDelay: number = 0,
-  startTime?: string
+  phaseDelay: number = 0
 ): ScenarioList {
   const list: ScenarioList = {}
   const preAllocatedVUs = Math.round((target * config.vuFactor * iterationDuration) / 2)
@@ -378,8 +377,7 @@ function createPerfTestScenario(
       { target, duration: `${rampUpDuration}s` },
       { target, duration: steadyStateDuration }
     ],
-    exec,
-    ...(startTime ? { startTime } : {})
+    exec
   }
 
   return list
@@ -390,19 +388,9 @@ export function createI4PeakTestSignUpScenario(
   target: number,
   iterationDuration: number,
   rampUpDuration: number,
-  phaseDelay: number = 0,
-  startTime?: string
+  phaseDelay: number = 0
 ): ScenarioList {
-  return createPerfTestScenario(
-    exec,
-    target,
-    iterationDuration,
-    rampUpDuration,
-    '30m',
-    signUpConfig,
-    phaseDelay,
-    startTime
-  )
+  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signUpConfig, phaseDelay)
 }
 
 export function createI4PeakTestSignInScenario(
@@ -410,19 +398,37 @@ export function createI4PeakTestSignInScenario(
   target: number,
   iterationDuration: number,
   rampUpDuration: number,
-  phaseDelay: number = 0,
-  startTime?: string
+  phaseDelay: number = 0
 ): ScenarioList {
-  return createPerfTestScenario(
+  return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signInConfig, phaseDelay)
+}
+
+export function createTicfPeakTestScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number,
+  startTime: string
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * signInConfig.vuFactor * iterationDuration) / 2)
+  const maxVUs = Math.round(target * signInConfig.vuFactor * iterationDuration)
+
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: signInConfig.startRate,
+    timeUnit: signInConfig.timeUnit,
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: '30m' }
+    ],
     exec,
-    target,
-    iterationDuration,
-    rampUpDuration,
-    '30m',
-    signInConfig,
-    phaseDelay,
     startTime
-  )
+  }
+
+  return list
 }
 
 export function createTxmaPeakTestScenario(

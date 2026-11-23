@@ -6,7 +6,7 @@ import {
   createI4PeakTestSignInScenario,
   describeProfile,
   createStressTestSignInScenario,
-  createI4PeakTestSignUpScenario
+  createTicfPeakTestScenario
 } from '../common/utils/config/load-profiles'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
@@ -124,10 +124,10 @@ const profiles: ProfileList = {
       ],
       exec: 'ticfWarmUp'
     },
-    ...createI4PeakTestSignUpScenario('ticfSignUp', 830, 15, 831, 0, '401s'),
-    ...createI4PeakTestSignInScenario('ticfSignIn', 407, 9, 186, 645, '401s'),
-    ...createI4PeakTestSignUpScenario('ticfIdentityProving', 220, 21, 221, 610, '401s'),
-    ...createI4PeakTestSignInScenario('ticfIdentityReuse', 407, 9, 186, 645, '401s')
+    ...createTicfPeakTestScenario('ticfSignUp', 830, 15, 831, '401s'),
+    ...createTicfPeakTestScenario('ticfSignIn', 407, 9, 186, '1046s'),
+    ...createTicfPeakTestScenario('ticfIdentityProving', 220, 21, 221, '1011s'),
+    ...createTicfPeakTestScenario('ticfIdentityReuse', 407, 9, 186, '1046s')
   }
 }
 

@@ -468,7 +468,7 @@ const profiles: ProfileList = {
     ...createSpikeTestSignInScenario('landingPage', 115, 13, 53),
     ...createI3SpikeOLHScenario('setUpPasskey', 72, 33, 1, 52),
     ...createI3SpikeOLHScenario('removePasskey', 72, 33, 1, 52),
-    ...createI4PeakTestSignInScenario('contactsPage', 5, 3, 3, 50)
+    ...createSpikeTestSignInScenario('contactsPage', 5, 3, 3, 50)
   }
 }
 

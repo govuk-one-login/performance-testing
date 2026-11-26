@@ -53,6 +53,27 @@ const env = {
   auth_server_private_base_url: getEnv(`IDENTITY_SIS_${environment}_AUTHSERVER_PRIVATE_BASE_URL`)
 }
 
+function DataFormFields(createidentity: string): Record<string, string> {
+  const now = Math.floor(Date.now() / 1000)
+  return {
+    auth_server_public_base_url: env.auth_server_public_base_url,
+    auth_server_private_base_url: env.auth_server_private_base_url,
+    createidentity,
+    sub: `urn:uuid: ${uuidv4()}`,
+    govuk_signin_journey_id: uuidv4(),
+    response_type: 'code',
+    redirect_uri: env.orchStubEndPoint,
+    client_id: 'orchestrator-stub',
+    iss: 'orchestrator-stub',
+    aud: env.auth_server_public_base_url,
+    state: 'sample-state',
+    vtr: 'P3',
+    iat: String(now),
+    nbf: String(now),
+    exp: String(now + 360)
+  }
+}
+
 export function sisIDproving(): void {
   const groups = groupMap.sisIDproving
   let res: Response
@@ -66,27 +87,8 @@ export function sisIDproving(): void {
   res = timeGroup(
     groups[1],
     () => {
-      const now = Math.floor(Date.now() / 1000)
-      const sub = `urn:uuid: ${uuidv4()}`
-      const govuk_signin_journey_id = `${uuidv4()}`
       return res.submitForm({
-        fields: {
-          auth_server_public_base_url: env.auth_server_public_base_url,
-          auth_server_private_base_url: env.auth_server_private_base_url,
-          createidentity: 'false',
-          sub,
-          govuk_signin_journey_id,
-          response_type: 'code',
-          redirect_uri: env.orchStubEndPoint,
-          client_id: 'orchestrator-stub',
-          iss: 'orchestrator-stub',
-          aud: env.auth_server_public_base_url,
-          state: 'sample-state',
-          vtr: 'P3',
-          iat: String(now),
-          nbf: String(now),
-          exp: String(now + 360)
-        },
+        fields: DataFormFields('false'),
         submitSelector: '[type="submit"]'
       })
     },
@@ -112,27 +114,8 @@ export function sisIDreuse(): void {
   res = timeGroup(
     groups[1],
     () => {
-      const now = Math.floor(Date.now() / 1000)
-      const sub = `urn:uuid: ${uuidv4()}`
-      const govuk_signin_journey_id = `${uuidv4()}`
       return res.submitForm({
-        fields: {
-          auth_server_public_base_url: env.auth_server_public_base_url,
-          auth_server_private_base_url: env.auth_server_private_base_url,
-          createidentity: 'true',
-          sub,
-          govuk_signin_journey_id,
-          response_type: 'code',
-          redirect_uri: env.orchStubEndPoint,
-          client_id: 'orchestrator-stub',
-          iss: 'orchestrator-stub',
-          aud: env.auth_server_public_base_url,
-          state: 'sample-state',
-          vtr: 'P3',
-          iat: String(now),
-          nbf: String(now),
-          exp: String(now + 360)
-        },
+        fields: DataFormFields('true'),
         submitSelector: '[type="submit"]',
         params: {
           headers: {

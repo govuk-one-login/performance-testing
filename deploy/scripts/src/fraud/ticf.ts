@@ -5,7 +5,8 @@ import {
   createI3SpikeSignInScenario,
   createI4PeakTestSignInScenario,
   describeProfile,
-  createStressTestSignInScenario
+  createStressTestSignInScenario,
+  createTicfPeakTestScenario
 } from '../common/utils/config/load-profiles'
 import { getEnv } from '../common/utils/config/environment-variables'
 import { iterationsStarted, iterationsCompleted } from '../common/utils/custom_metric/counter'
@@ -31,6 +32,18 @@ import http from 'k6/http'
 import { sleep } from 'k6'
 import { isStatusCode202 } from '../common/utils/checks/assertions'
 import { timeGroup } from '../common/utils/request/timing'
+import { openKv } from 'k6/x/kv'
+
+interface TicfUserData {
+  userID: string
+  emailID: string
+  randomIP: string
+  randomPhoneNumber: string
+}
+
+const kv = openKv()
+const KV_KEY = 'ticfUsers'
+const KV_COUNTER = 'ticfCounter'
 
 const profiles: ProfileList = {
   ticfSmoke: {
@@ -96,12 +109,32 @@ const profiles: ProfileList = {
   },
   ticfSIRA2ItersTest: {
     ...createI4PeakTestSignInScenario('ticf', 2, 66, 2)
+  },
+  // New profile with independent scenarios
+  perf006Iteration11PeakTest: {
+    ticfWarmUp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 1,
+      timeUnit: '10s',
+      preAllocatedVUs: 75,
+      maxVUs: 150,
+      stages: [
+        { target: 100, duration: '101s' },
+        { target: 100, duration: '300s' }
+      ],
+      exec: 'ticfWarmUp'
+    },
+    ...createTicfPeakTestScenario('ticfSignUp', 830, 15, 831, '401s'),
+    ...createTicfPeakTestScenario('ticfSignIn', 407, 9, 186, '1046s'),
+    ...createTicfPeakTestScenario('ticfIdentityProving', 220, 21, 221, '1011s'),
+    ...createTicfPeakTestScenario('ticfIdentityReuse', 407, 9, 186, '1046s')
   }
 }
 
 const loadProfile = selectProfile(profiles)
 const groupMap = {
   ticf: [
+    'B01_WarmUp_00_DataSetup',
     'B01_HappyPath_01_SignUpAPICall',
     'B01_HappyPath_02_SignInAPICall',
     'B01_HappyPath_03_IdProveAPICall', // pragma: allowlist secret
@@ -122,8 +155,14 @@ export const options: Options = {
   }
 }
 
-export function setup(): void {
+export async function setup(): Promise<void> {
   describeProfile(loadProfile)
+  await kv.set(KV_COUNTER, 0)
+}
+// will be removed before merging
+export async function teardown(): Promise<void> {
+  const total = (await kv.get(KV_COUNTER)) ?? 0
+  console.log('KV Store total entries:', total)
 }
 
 const env = {
@@ -321,21 +360,108 @@ export function identityReuseSuccess(groupName: string, userID: string, randomIP
   )
 }
 
+function generateUserData(): TicfUserData {
+  return {
+    userID: `urn:fdc:gov.uk:2022:${uuidv4()}`,
+    emailID: `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`,
+    randomIP: generateRandomIP(),
+    randomPhoneNumber: generateRandomPhoneNumber()
+  }
+}
+
+export async function ticfWarmUp(): Promise<void> {
+  const userData = generateUserData()
+  signUpSuccess(groupMap.ticf[0], userData.userID, userData.emailID, userData.randomIP, userData.randomPhoneNumber)
+  let counter: number
+  try {
+    counter = ((await kv.get(KV_COUNTER)) ?? 0) as number
+  } catch {
+    counter = 0
+  }
+  const key = `${KV_KEY}_${counter}`
+  await kv.set(key, JSON.stringify(userData))
+  await kv.set(KV_COUNTER, counter + 1)
+}
+
+export async function ticfSignUp(): Promise<void> {
+  const userData = generateUserData()
+
+  iterationsStarted.add(1)
+  signUpSuccess(groupMap.ticf[1], userData.userID, userData.emailID, userData.randomIP, userData.randomPhoneNumber)
+  iterationsCompleted.add(1)
+
+  let counter: number
+  try {
+    counter = ((await kv.get(KV_COUNTER)) ?? 0) as number
+  } catch {
+    counter = 0
+  }
+  const key = `${KV_KEY}_${counter}`
+  await kv.set(key, JSON.stringify(userData))
+  await kv.set(KV_COUNTER, counter + 1)
+}
+
+export async function ticfSignIn(): Promise<void> {
+  let total: number
+  try {
+    total = ((await kv.get(KV_COUNTER)) ?? 0) as number
+  } catch {
+    return
+  }
+  if (total === 0) return
+  const index = Math.floor(Math.random() * total)
+  const userData: TicfUserData = JSON.parse((await kv.get(`${KV_KEY}_${index}`)) as string)
+
+  iterationsStarted.add(1)
+  signInSuccess(groupMap.ticf[2], userData.userID, userData.emailID, userData.randomIP, userData.randomPhoneNumber)
+  iterationsCompleted.add(1)
+}
+
+export async function ticfIdentityProving(): Promise<void> {
+  let total: number
+  try {
+    total = ((await kv.get(KV_COUNTER)) ?? 0) as number
+  } catch {
+    return
+  }
+  if (total === 0) return
+  const index = Math.floor(Math.random() * total)
+  const userData: TicfUserData = JSON.parse((await kv.get(`${KV_KEY}_${index}`)) as string)
+
+  iterationsStarted.add(1)
+  identityProvingSuccess(groupMap.ticf[3], userData.userID, userData.randomIP)
+  iterationsCompleted.add(1)
+}
+
+export async function ticfIdentityReuse(): Promise<void> {
+  let total: number
+  try {
+    total = ((await kv.get(KV_COUNTER)) ?? 0) as number
+  } catch {
+    return
+  }
+
+  if (total === 0) return
+  const index = Math.floor(Math.random() * total)
+  const userData: TicfUserData = JSON.parse((await kv.get(`${KV_KEY}_${index}`)) as string)
+
+  iterationsStarted.add(1)
+  identityReuseSuccess(groupMap.ticf[4], userData.userID, userData.randomIP)
+  iterationsCompleted.add(1)
+}
+// Legacy function for backward compatibility
 export function ticf(): void {
-  const userID = `urn:fdc:gov.uk:2022:${uuidv4()}`
-  const emailID = `perfHappyPath${uuidv4()}@digital.cabinet-office.gov.uk`
-  const randomIP = generateRandomIP()
-  const randomPhoneNumber = generateRandomPhoneNumber()
+  const userData = generateUserData()
 
   iterationsStarted.add(1)
 
-  signUpSuccess(groupMap.ticf[0], userID, emailID, randomIP, randomPhoneNumber)
+  signUpSuccess(groupMap.ticf[1], userData.userID, userData.emailID, userData.randomIP, userData.randomPhoneNumber)
   sleep(3)
-  signInSuccess(groupMap.ticf[1], userID, emailID, randomIP, randomPhoneNumber)
+  signInSuccess(groupMap.ticf[2], userData.userID, userData.emailID, userData.randomIP, userData.randomPhoneNumber)
   sleep(3)
-  identityProvingSuccess(groupMap.ticf[2], userID, randomIP)
+  identityProvingSuccess(groupMap.ticf[3], userData.userID, userData.randomIP)
   sleep(3)
-  identityReuseSuccess(groupMap.ticf[3], userID, randomIP)
+  identityReuseSuccess(groupMap.ticf[4], userData.userID, userData.randomIP)
 
   iterationsCompleted.add(1)
 }

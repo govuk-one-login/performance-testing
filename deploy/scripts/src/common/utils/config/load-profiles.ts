@@ -403,6 +403,34 @@ export function createI4PeakTestSignInScenario(
   return createPerfTestScenario(exec, target, iterationDuration, rampUpDuration, '30m', signInConfig, phaseDelay)
 }
 
+export function createTicfPeakTestScenario(
+  exec: string,
+  target: number,
+  iterationDuration: number,
+  rampUpDuration: number,
+  startTime: string
+): ScenarioList {
+  const list: ScenarioList = {}
+  const preAllocatedVUs = Math.round((target * signInConfig.vuFactor * iterationDuration) / 2)
+  const maxVUs = Math.round(target * signInConfig.vuFactor * iterationDuration)
+
+  list[exec] = {
+    executor: 'ramping-arrival-rate',
+    startRate: signInConfig.startRate,
+    timeUnit: signInConfig.timeUnit,
+    preAllocatedVUs,
+    maxVUs,
+    stages: [
+      { target, duration: `${rampUpDuration}s` },
+      { target, duration: '30m' }
+    ],
+    exec,
+    startTime
+  }
+
+  return list
+}
+
 export function createTxmaPeakTestScenario(
   exec: string,
   target: number,
